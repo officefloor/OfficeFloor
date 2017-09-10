@@ -419,7 +419,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 					// Ensure have all the data
 					InputStream inputStream = client.getInputStream();
 					for (int i = 0; i < size; i++) {
-						assertEquals("Inocrrect value for index " + i, (byte) indexValue.apply(i), inputStream.read());
+						assertEquals("Incorrect value for index " + i, (byte) indexValue.apply(i), inputStream.read());
 					}
 				} catch (IOException ex) {
 					throw fail(ex);

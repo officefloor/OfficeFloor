@@ -17,6 +17,10 @@
  */
 package net.officefloor.server;
 
+import java.nio.ByteBuffer;
+
+import net.officefloor.server.stream.StreamBuffer;
+
 /**
  * Handles requests.
  * 
@@ -33,15 +37,13 @@ public interface RequestHandler<R> {
 	void handleRequest(R request);
 
 	/**
-	 * <p>
-	 * Provides means to send immediate data.
-	 * <p>
-	 * An example use, is SSL handshakes that need to negotiate back and forth
-	 * before requests become available.
+	 * Sends data immediately.
 	 * 
-	 * @return {@link ResponseHandler}.
+	 * @param immediateHead
+	 *            Head {@link StreamBuffer} to linked list of
+	 *            {@link StreamBuffer} instances of data to send immediately.
 	 */
-	ResponseHandler getImmediateResponseHandler();
+	void sendImmediateData(StreamBuffer<ByteBuffer> immediateHead);
 
 	/**
 	 * Allows to close connection.

@@ -499,13 +499,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						Status status = sslEngineResult.getStatus();
 						switch (status) {
 						case BUFFER_UNDERFLOW:
-							// Not enough data, so group all read socket data
-							int packetBufferSize = session.getPacketBufferSize();
-
-							// TODO implement
-							throw new UnsupportedOperationException(
-									"TODO implement combining socket read data for underflow (" + readBuffer.remaining()
-											+ " - " + packetBufferSize + ")");
+							// Need further data
+							return;
 
 						case BUFFER_OVERFLOW:
 							// Not enough space for application data
@@ -671,7 +666,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 						} else {
 							// Send the handshake data immediately
-							this.requestHandler.getImmediateResponseHandler().sendResponse(responseHead);
+							this.requestHandler.sendImmediateData(responseHead);
 						}
 
 						// Determine if in close handshake

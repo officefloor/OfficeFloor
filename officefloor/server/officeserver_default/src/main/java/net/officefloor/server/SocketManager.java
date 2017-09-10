@@ -562,7 +562,7 @@ public class SocketManager {
 	/**
 	 * Accepted {@link Socket}.
 	 */
-	private static class AcceptedSocket<R> extends AbstractReadHandler implements RequestHandler<R>, ResponseHandler {
+	private static class AcceptedSocket<R> extends AbstractReadHandler implements RequestHandler<R> {
 
 		/**
 		 * {@link SocketChannel} for the accepted {@link Socket}.
@@ -836,10 +836,40 @@ public class SocketManager {
 				this.compactedResponseHead.pooledBuffer.flip();
 				this.compactedResponseHead = this.compactedResponseHead.next;
 			}
+			// compact response head should now be null
 
-			// Send the response (allowing socket servicer to translate)
-			this.compactedResponseHead = null; // as sending
-			this.sendResponse(response);
+			// Append response for writing
+			this.unsafeAppendWrite(response);
+
+			// Send the data
+			this.unsafeSendWrites();
+		}
+
+		/**
+		 * Undertakes appending {@link StreamBuffer} instances for writing to
+		 * the {@link SocketChannel}.
+		 * 
+		 * @param writeHead
+		 *            Head {@link StreamBuffer} to linked list of
+		 *            {@link StreamBuffer} instances to write to the
+		 *            {@link SocketChannel}.
+		 */
+		private void unsafeAppendWrite(StreamBuffer<ByteBuffer> writeHead) {
+
+			// Obtain the tail write buffer
+			StreamBuffer<ByteBuffer> tailWriteBuffer = this.writeResponseHead;
+			if (tailWriteBuffer != null) {
+				while (tailWriteBuffer.next != null) {
+					tailWriteBuffer = tailWriteBuffer.next;
+				}
+			}
+
+			// Join the send buffers for writing
+			if (tailWriteBuffer == null) {
+				this.writeResponseHead = writeHead;
+			} else {
+				tailWriteBuffer.next = writeHead;
+			}
 		}
 
 		/**
@@ -888,40 +918,6 @@ public class SocketManager {
 
 			// As here, all data written
 			return true;
-		}
-
-		/*
-		 * ================ ResponseHandler =========================
-		 */
-
-		@Override
-		public void sendResponse(StreamBuffer<ByteBuffer> headBuffer) {
-
-			// Determine if thread safe
-			SocketListener threadSocketListener = threadSocketLister.get();
-			boolean isThreadSafe = (this.socketListener == threadSocketListener);
-
-			// TODO ensure safe sending of response
-
-			// Obtain the tail write buffer
-			StreamBuffer<ByteBuffer> tailWriteBuffer = this.writeResponseHead;
-			if (tailWriteBuffer != null) {
-				while (tailWriteBuffer.next != null) {
-					tailWriteBuffer = tailWriteBuffer.next;
-				}
-			}
-
-			// Join the send buffers for writing
-			if (tailWriteBuffer == null) {
-				this.writeResponseHead = headBuffer;
-			} else {
-				tailWriteBuffer.next = headBuffer;
-			}
-
-			// Note: result at this point all buffers writing
-
-			// Send the data
-			this.unsafeSendWrites();
 		}
 
 		/*
@@ -989,8 +985,22 @@ public class SocketManager {
 		}
 
 		@Override
-		public ResponseHandler getImmediateResponseHandler() {
-			return this;
+		public void sendImmediateData(StreamBuffer<ByteBuffer> immediateHead) {
+
+			// Prepare the pooled response buffers
+			StreamBuffer<ByteBuffer> streamBuffer = immediateHead;
+			while (streamBuffer != null) {
+				if (streamBuffer.isPooled) {
+					streamBuffer.pooledBuffer.flip();
+				}
+				streamBuffer = streamBuffer.next;
+			}
+
+			// Append to write
+			this.unsafeAppendWrite(immediateHead);
+
+			// Immediately flush data
+			this.unsafeSendWrites();
 		}
 
 		@Override
