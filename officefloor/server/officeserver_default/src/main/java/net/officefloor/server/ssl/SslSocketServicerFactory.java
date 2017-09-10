@@ -319,10 +319,27 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						}
 
 						// Include header information
-						// TODO include header information
+						StreamBuffer<ByteBuffer> responseHead = null;
+						if (responseHeaderWriter != null) {
+							responseHead = SslSocketServicerFactory.this.bufferPool.getPooledStreamBuffer();
+							responseHeaderWriter.write(responseHead, SslSocketServicerFactory.this.bufferPool);
+						}
+
+						// Append the response buffers
+						if (responseHead == null) {
+							// Only response buffers (no header)
+							responseHead = completeRequest.headResponseBuffer;
+						} else {
+							// Append response buffers to header
+							StreamBuffer<ByteBuffer> responseTail = responseHead;
+							while (responseTail.next != null) {
+								responseTail = responseTail.next;
+							}
+							responseTail.next = completeRequest.headResponseBuffer;
+						}
 
 						// Prepare the response buffers for writing
-						StreamBuffer<ByteBuffer> buffer = completeRequest.headResponseBuffer;
+						StreamBuffer<ByteBuffer> buffer = responseHead;
 						while (buffer != null) {
 							if (buffer.isPooled) {
 								buffer.pooledBuffer.flip();
@@ -331,7 +348,17 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						}
 
 						// Include the response
-						this.currentAppToWrapBuffer = completeRequest.headResponseBuffer;
+						if (this.currentAppToWrapBuffer == null) {
+							// Only response to wrap
+							this.currentAppToWrapBuffer = responseHead;
+						} else {
+							// Add to existing responses
+							StreamBuffer<ByteBuffer> responseTail = this.currentAppToWrapBuffer;
+							while (responseTail.next != null) {
+								responseTail = responseTail.next;
+							}
+							responseTail.next = responseHead;
+						}
 
 						// Write the response
 						this.process(completeRequest.responseWriter);

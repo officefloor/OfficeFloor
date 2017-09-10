@@ -953,6 +953,10 @@ public class SocketManager {
 			super.releaseStreamBuffers();
 
 			// Release buffers for accepted sockets
+			if (this.previousRequestBuffer != null) {
+				this.previousRequestBuffer.release();
+				this.previousRequestBuffer = null;
+			}
 
 			// Allow socket servicer to release buffers
 			this.socketServicer.release();
