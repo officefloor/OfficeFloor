@@ -22,7 +22,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -322,6 +324,32 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Ensure raw secure request.
+	 */
+	public void testSecureRequest() throws Exception {
+		this.startHttpServer(Servicer.class);
+
+		// Create connection to server
+		try (Socket socket = OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
+				.createSocket(InetAddress.getLocalHost(), HTTPS_PORT)) {
+			socket.setSoTimeout(1000);
+
+			// Send the request
+			socket.getOutputStream().write(this.createPipelineRequestData());
+
+			// Obtain the response
+			byte[] expectedResponseData = this.createPipelineResponseData();
+			byte[] actualResponseData = new byte[expectedResponseData.length];
+			socket.getInputStream().read(actualResponseData);
+
+			// Ensure correct data
+			for (int i = 0; i < expectedResponseData.length; i++) {
+				assertEquals("Incorrect response byte " + i, expectedResponseData[i], actualResponseData[i]);
+			}
+		}
+	}
+
+	/**
 	 * Ensure can send a single HTTPS request.
 	 */
 	public void testSingleSecureRequest() throws Exception {
@@ -468,6 +496,46 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Creates the pipeline request data.
+	 * 
+	 * @return Pipeline request data.
+	 */
+	private byte[] createPipelineRequestData() {
+		StringBuilder request = new StringBuilder();
+		request.append("GET /test HTTP/1.1\n");
+		request.append("test: value\n");
+		request.append("\n");
+		return UsAsciiUtil.convertToHttp(request.toString());
+	}
+
+	/**
+	 * Creates the pipeline response data.
+	 * 
+	 * @return Pipeline response data.
+	 */
+	private byte[] createPipelineResponseData() {
+		HttpHeader[] responseHeaders = this.getServerResponseHeaderValues();
+		StringBuilder response = new StringBuilder();
+		response.append("HTTP/1.1 200 OK\n");
+		for (HttpHeader header : responseHeaders) {
+			switch (header.getName().toLowerCase()) {
+			case "content-length":
+				response.append(header.getName() + ": 11\n");
+				break;
+			case "content-type":
+				response.append(header.getName() + ": text/plain\n");
+				break;
+			default:
+				response.append(header.getName() + ": " + header.getValue() + "\n");
+				break;
+			}
+		}
+		response.append("\n");
+		response.append("hello world");
+		return UsAsciiUtil.convertToHttp(response.toString());
+	}
+
+	/**
 	 * Executes request in a pipeline for performance testing.
 	 */
 	private class PipelineExecutor implements Runnable {
@@ -541,35 +609,13 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 
 			// Create the request
-			StringBuilder request = new StringBuilder();
-			request.append("GET /test HTTP/1.1\n");
-			request.append("test: value\n");
-			request.append("\n");
-			byte[] requestData = UsAsciiUtil.convertToHttp(request.toString());
+			byte[] requestData = AbstractHttpServerImplementationTest.this.createPipelineRequestData();
 			ByteBuffer requestBuffer = ByteBuffer.allocateDirect(requestData.length);
 			requestBuffer.put(requestData);
 			requestBuffer.flip();
 
 			// Create the expected response
-			HttpHeader[] responseHeaders = AbstractHttpServerImplementationTest.this.getServerResponseHeaderValues();
-			StringBuilder response = new StringBuilder();
-			response.append("HTTP/1.1 200 OK\n");
-			for (HttpHeader header : responseHeaders) {
-				switch (header.getName().toLowerCase()) {
-				case "content-length":
-					response.append(header.getName() + ": 11\n");
-					break;
-				case "content-type":
-					response.append(header.getName() + ": text/plain\n");
-					break;
-				default:
-					response.append(header.getName() + ": " + header.getValue() + "\n");
-					break;
-				}
-			}
-			response.append("\n");
-			response.append("hello world");
-			byte[] responseData = UsAsciiUtil.convertToHttp(response.toString());
+			byte[] responseData = AbstractHttpServerImplementationTest.this.createPipelineResponseData();
 
 			// Initiate run variables
 			int requestDataSent = 0;

@@ -29,6 +29,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.AsciiString;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -110,24 +111,23 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		// Supply the method
 		Supplier<HttpMethod> methodSupplier = () -> {
 			io.netty.handler.codec.http.HttpMethod nettyHttpMethod = request.method();
-			String methodName = nettyHttpMethod.asciiName().toString();
-			switch (methodName) {
-			case "GET":
+			AsciiString methodName = nettyHttpMethod.asciiName();
+			if (methodName.contentEquals("GET")) {
 				return HttpMethod.GET;
-			case "POST":
+			} else if (methodName.contentEquals("POST")) {
 				return HttpMethod.POST;
-			case "PUT":
+			} else if (methodName.contentEquals("PUT")) {
 				return HttpMethod.PUT;
-			case "DELETE":
-				return HttpMethod.DELETE;
-			case "CONNECT":
-				return HttpMethod.CONNECT;
-			case "HEAD":
-				return HttpMethod.HEAD;
-			case "OPTIONS":
+			} else if (methodName.contentEquals("OPTIONS")) {
 				return HttpMethod.OPTIONS;
-			default:
-				return new HttpMethod(methodName);
+			} else if (methodName.contentEquals("DELETE")) {
+				return HttpMethod.DELETE;
+			} else if (methodName.contentEquals("CONNECT")) {
+				return HttpMethod.CONNECT;
+			} else if (methodName.contentEquals("HEAD")) {
+				return HttpMethod.HEAD;
+			} else {
+				return new HttpMethod(methodName.toString());
 			}
 		};
 

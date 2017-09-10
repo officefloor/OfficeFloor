@@ -29,6 +29,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -127,6 +128,7 @@ public class HttpClientTestUtil {
 		try {
 			// Provide SSL Context
 			builder.setSSLContext(OfficeFloorDefaultSslContextSource.createClientSslContext(null));
+			builder.setSSLHostnameVerifier(new NoopHostnameVerifier());
 		} catch (Exception ex) {
 			throw OfficeFrameTestCase.fail(ex);
 		}

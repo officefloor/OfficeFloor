@@ -224,10 +224,11 @@ public abstract class AbstractNettyHttpServer {
 
 			// Create the engine
 			SSLEngine engine = this.sslContext.createSSLEngine();
+			engine.setUseClientMode(false);
 
 			// Create the secure pipeline
 			ChannelPipeline pipeline = channel.pipeline();
-			pipeline.addLast("ssl", new SslHandler(engine));
+			pipeline.addLast("ssl", new SslHandler(engine, true));
 			pipeline.addLast("encoder", new HttpResponseEncoder());
 			pipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false));
 			pipeline.addLast("handler", new ServiceServerHandler());
