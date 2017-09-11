@@ -945,6 +945,10 @@ public class SocketManager {
 		@Override
 		public void releaseStreamBuffers() {
 
+			// Allow socket servicer to release buffers
+			// (ensures any synchronise is also undertaken)
+			this.socketServicer.release();
+
 			// Release the read buffer
 			super.releaseStreamBuffers();
 
@@ -953,9 +957,27 @@ public class SocketManager {
 				this.previousRequestBuffer.release();
 				this.previousRequestBuffer = null;
 			}
+			while (this.releaseRequestBuffers != null) {
+				StreamBuffer<ByteBuffer> release = this.releaseRequestBuffers;
+				this.releaseRequestBuffers = this.releaseRequestBuffers.next;
+				release.release();
+			}
 
-			// Allow socket servicer to release buffers
-			this.socketServicer.release();
+			// Release buffers for requests
+			while (this.head != null) {
+				StreamBuffer<ByteBuffer> headRequest = this.head.headRequestBuffer;
+				while (headRequest != null) {
+					StreamBuffer<ByteBuffer> release = headRequest;
+					headRequest = headRequest.next;
+					release.release();
+				}
+				while (this.head.headResponseBuffer != null) {
+					StreamBuffer<ByteBuffer> release = this.head.headResponseBuffer;
+					this.head.headResponseBuffer = this.head.headResponseBuffer.next;
+					release.release();
+				}
+				this.head = this.head.next;
+			}
 		}
 
 		/*

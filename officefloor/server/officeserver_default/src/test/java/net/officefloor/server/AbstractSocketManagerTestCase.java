@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 
@@ -362,23 +361,14 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		final Function<Integer, Byte> indexValue = (index) -> (byte) (index % Byte.MAX_VALUE);
 
 		// Bind to server socket
-		final int[] bufferSize = new int[] { -1 };
-		this.tester.bindServerSocket(null, (socket) -> {
-			synchronized (bufferSize) {
-				try {
-					bufferSize[0] = socket.getSendBufferSize() * 5;
-					bufferSize.notify();
-				} catch (SocketException ex) {
-					throw fail(ex);
-				}
-			}
-		}, (requestHandler) -> (buffer) -> {
+		final int responseSize = this.getBufferSize() * 5;
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest((byte) 1);
 		}, (socketServicer) -> (request, responseWriter) -> {
 			// Create very large response
 			StreamBuffer<ByteBuffer> buffers = this.tester.bufferPool.getPooledStreamBuffer();
 			StreamBuffer<ByteBuffer> buffer = buffers;
-			for (int i = 0; i < bufferSize[0]; i++) {
+			for (int i = 0; i < responseSize; i++) {
 				byte value = indexValue.apply(i);
 				if (!buffer.write(value)) {
 					// Buffer full so write use another
@@ -402,33 +392,11 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.write(1);
 			outputStream.flush();
 
-			// Ensure have buffer size
-			long startTime = System.currentTimeMillis();
-			long size;
-			synchronized (bufferSize) {
-				while (bufferSize[0] <= 0) {
-					this.timeout(startTime);
-					bufferSize.wait(10);
-				}
-				size = bufferSize[0];
+			// Ensure have all the data
+			InputStream inputStream = client.getInputStream();
+			for (int i = 0; i < responseSize; i++) {
+				assertEquals("Incorrect value for index " + i, (byte) indexValue.apply(i), inputStream.read());
 			}
-
-			// Read in contents (allowing timing out if too long)
-			TestThread reader = new TestThread(() -> {
-				try {
-					// Ensure have all the data
-					InputStream inputStream = client.getInputStream();
-					for (int i = 0; i < size; i++) {
-						assertEquals("Incorrect value for index " + i, (byte) indexValue.apply(i), inputStream.read());
-					}
-				} catch (IOException ex) {
-					throw fail(ex);
-				}
-			});
-			reader.start();
-
-			// Ensure read in all content (allowing time for response)
-			reader.waitForCompletion(startTime, 20);
 		}
 	}
 

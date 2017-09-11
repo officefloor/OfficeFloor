@@ -264,11 +264,12 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		}
 
 		@Override
-		public void release() {
+		public synchronized void release() {
 
 			// Release buffers
 			if (this.currentUnwrapToAppBuffer != null) {
 				this.currentUnwrapToAppBuffer.release();
+				this.currentUnwrapToAppBuffer = null;
 			}
 		}
 
@@ -461,33 +462,43 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						}
 
 						// Obtain the unwrap to application buffer
+						ByteBuffer unwrapBuffer;
 						if (this.currentUnwrapToAppBuffer == null) {
 							// Must have buffer
 							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
 									.getPooledStreamBuffer();
+							unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
 
-						} else if (this.currentUnwrapToAppBuffer.pooledBuffer.remaining() == 0) {
-							// Require new buffer, so track for releasing
-							if (this.previousRequestBuffers == null) {
-								// First previous for request
-								this.previousRequestBuffers = this.currentAppToWrapBuffer;
-							} else {
-								// Append previous for request
-								StreamBuffer<ByteBuffer> head = this.previousRequestBuffers;
-								while (head.next != null) {
-									head = head.next;
+						} else {
+							// Obtain the buffer (could be overflow upooled)
+							unwrapBuffer = this.currentUnwrapToAppBuffer.isPooled
+									? this.currentUnwrapToAppBuffer.pooledBuffer
+									: this.currentUnwrapToAppBuffer.unpooledByteBuffer;
+
+							// Determine if require new buffer
+							if (unwrapBuffer.remaining() == 0) {
+								// Require new buffer, so track for releasing
+								if (this.previousRequestBuffers == null) {
+									// First previous for request
+									this.previousRequestBuffers = this.currentAppToWrapBuffer;
+								} else {
+									// Append previous for request
+									StreamBuffer<ByteBuffer> head = this.previousRequestBuffers;
+									while (head.next != null) {
+										head = head.next;
+									}
+									head.next = this.currentAppToWrapBuffer;
 								}
-								head.next = this.currentAppToWrapBuffer;
-							}
 
-							// Create new buffer
-							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
-									.getPooledStreamBuffer();
+								// Create new buffer
+								this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
+										.getPooledStreamBuffer();
+								unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
+							}
 						}
 
 						// Unwrap the socket data for the application
-						SSLEngineResult sslEngineResult = this.engine.unwrap(readBuffer,
-								this.currentUnwrapToAppBuffer.pooledBuffer);
+						SSLEngineResult sslEngineResult = this.engine.unwrap(readBuffer, unwrapBuffer);
 
 						// Determine if consumed all data
 						if (readBuffer.remaining() != 0) {
@@ -504,13 +515,22 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 						case BUFFER_OVERFLOW:
 							// Not enough space for application data
-							int applicationBufferSize = session.getApplicationBufferSize();
+							this.currentUnwrapToAppBuffer.release();
+							this.currentUnwrapToAppBuffer = null;
 
-							// TODO implement
-							throw new UnsupportedOperationException(
-									"TODO implement increasing application unwrap buffer size ("
-											+ this.currentUnwrapToAppBuffer.pooledBuffer.remaining() + " - "
-											+ applicationBufferSize + ")");
+							// Create buffer with enough space
+							int applicationBufferSize = session.getApplicationBufferSize();
+							byte[] applicationData = new byte[applicationBufferSize];
+							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
+									.getUnpooledStreamBuffer(ByteBuffer.wrap(applicationData));
+							unwrapBuffer = this.currentUnwrapToAppBuffer.unpooledByteBuffer;
+
+							// Wrap the data
+							sslEngineResult = this.engine.unwrap(readBuffer, unwrapBuffer);
+							status = sslEngineResult.getStatus();
+							if (status == Status.BUFFER_UNDERFLOW) {
+								return; // need further data
+							}
 
 						default:
 							// No underflow / overflow, so carry on
@@ -521,9 +541,15 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						switch (status) {
 						case OK:
 							// Handle any unwrapped data
-							if (this.currentUnwrapToAppBuffer.pooledBuffer.position() > 0) {
+							if (unwrapBuffer.position() > 0) {
+
+								// Determine if unpooled (transform to pooled)
+								StreamBuffer<ByteBuffer> serviceStreamBuffer = this.currentUnwrapToAppBuffer.isPooled
+										? this.currentUnwrapToAppBuffer
+										: new ServiceUnpooledStreamBuffer(this.currentUnwrapToAppBuffer);
+
 								// Service the request
-								this.delegateSocketServicer.service(this.currentUnwrapToAppBuffer);
+								this.delegateSocketServicer.service(serviceStreamBuffer);
 
 							} else {
 								// Release the unused buffer
@@ -651,12 +677,16 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								throw new IllegalStateException("Unknown wrap status " + status);
 							}
 
-							// Move to next buffer to wrap
-							StreamBuffer<ByteBuffer> release = this.currentAppToWrapBuffer;
-							this.currentAppToWrapBuffer = this.currentAppToWrapBuffer.next;
+							// Move to next buffer, only if written all
+							if (appToWrapBuffer.remaining() == 0) {
 
-							// Release application data buffer (after move)
-							release.release();
+								// Move to next buffer to wrap
+								StreamBuffer<ByteBuffer> release = this.currentAppToWrapBuffer;
+								this.currentAppToWrapBuffer = this.currentAppToWrapBuffer.next;
+
+								// Release application data buffer (after move)
+								release.release();
+							}
 						}
 
 						// Send the response
@@ -690,13 +720,17 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 					}
 				}
 
-			} catch (IOException ex) {
+			} catch (Throwable ex) {
 				// Record failure of processing to fail further interaction
-				this.failure = ex;
+				if (ex instanceof IOException) {
+					this.failure = (IOException) ex;
+				} else {
+					this.failure = new IOException(ex);
+				}
 
 				// Log SSL failure
 				if (LOGGER.isLoggable(Level.INFO)) {
-					LOGGER.log(Level.INFO, "Failure in connection", ex);
+					LOGGER.log(Level.INFO, "Failure in SSL connection", ex);
 				}
 
 				// Failure, so close connection
@@ -801,6 +835,48 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 					this.sslSocketServicer.process(null);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Need to adapt unpooled {@link StreamBuffer} to pooled
+	 * {@link StreamBuffer} to service.
+	 */
+	private static class ServiceUnpooledStreamBuffer extends StreamBuffer<ByteBuffer> {
+
+		/**
+		 * Unpooled {@link StreamBuffer}.
+		 */
+		private final StreamBuffer<ByteBuffer> unpooledStreamBuffer;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param unpooledStreamBuffer
+		 *            Unpooled {@link StreamBuffer}.
+		 */
+		public ServiceUnpooledStreamBuffer(StreamBuffer<ByteBuffer> unpooledStreamBuffer) {
+			super(unpooledStreamBuffer.unpooledByteBuffer, null);
+			this.unpooledStreamBuffer = unpooledStreamBuffer;
+		}
+
+		/*
+		 * ===================== StreamBuffer ==============================
+		 */
+
+		@Override
+		public boolean write(byte datum) {
+			throw new IllegalStateException("Should only read from " + this.getClass().getSimpleName());
+		}
+
+		@Override
+		public int write(byte[] data, int offset, int length) {
+			throw new IllegalStateException("Should only read from " + this.getClass().getSimpleName());
+		}
+
+		@Override
+		public void release() {
+			this.unpooledStreamBuffer.release();
 		}
 	}
 
