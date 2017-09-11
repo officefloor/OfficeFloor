@@ -209,6 +209,41 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	}
 
 	/**
+	 * Ensure can handle requests on multiple connections.
+	 */
+	public void testMultipleConnections() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			requestHandler.handleRequest(buffer.pooledBuffer.get(0));
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write(null, this.tester.createStreamBuffer(10 + (byte) request));
+		});
+
+		this.tester.start();
+
+		// Undertake multiple connections
+		int connectionCount = 50;
+		Socket[] clients = new Socket[connectionCount];
+		for (int i = 0; i < connectionCount; i++) {
+			clients[i] = this.tester.getClient();
+		}
+		for (int i = 0; i < connectionCount; i++) {
+			OutputStream outputStream = clients[i].getOutputStream();
+			outputStream.write(i + 1);
+			outputStream.flush();
+		}
+		for (int i = 0; i < connectionCount; i++) {
+			InputStream inputStream = clients[i].getInputStream();
+			assertEquals("Incorrect response", 11 + i, inputStream.read());
+		}
+		for (int i = 0; i < connectionCount; i++) {
+			clients[i].close();
+		}
+	}
+
+	/**
 	 * Ensure can send header.
 	 */
 	public void testSendHeaderOnly() throws IOException {

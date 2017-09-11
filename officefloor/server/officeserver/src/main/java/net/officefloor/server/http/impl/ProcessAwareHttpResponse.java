@@ -259,7 +259,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		long contentLength = this.bufferPoolOutputStream.getContentLength();
 		HttpHeaderValue contentType = null;
 		if (contentLength > 0) {
+			// Have content so derive content type
 			contentType = this.deriveContentType();
+		} else if (this.status == HttpStatus.OK) {
+			// No content, so update to no content
+			this.status = HttpStatus.NO_CONTENT;
 		}
 
 		// Write the response (and consider written)

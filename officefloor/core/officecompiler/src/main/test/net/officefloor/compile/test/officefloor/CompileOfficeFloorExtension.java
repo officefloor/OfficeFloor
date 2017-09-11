@@ -31,7 +31,9 @@ public interface CompileOfficeFloorExtension {
 	 * 
 	 * @param context
 	 *            {@link CompileOfficeFloorContext}.
+	 * @throws Exception
+	 *             If fails to extend.
 	 */
-	void extend(CompileOfficeFloorContext context);
+	void extend(CompileOfficeFloorContext context) throws Exception;
 
 }

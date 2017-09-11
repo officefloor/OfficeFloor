@@ -4,9 +4,7 @@
 	<communication>
 		<request method="GET" path="/path" />
 		<process close="true"/>
-		<response status="204" message="No Content" closed="true">
-			<header name="Content-Length" value="0" />
-		</response>
+		<response status="204" message="No Content" closed="true" />
 	</communication>
 
 </test>

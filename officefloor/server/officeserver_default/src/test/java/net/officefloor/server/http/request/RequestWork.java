@@ -24,6 +24,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
@@ -57,6 +58,7 @@ public class RequestWork {
 	 * @param communication
 	 *            {@link CommunicationConfig}.
 	 */
+	@NonFunctionMethod
 	public static void setConfiguration(CommunicationConfig communication) {
 		synchronized (RequestWork.class) {
 			RequestWork.communication = communication;
@@ -71,6 +73,7 @@ public class RequestWork {
 	 * 
 	 * @return Exception thrown in failing to process request.
 	 */
+	@NonFunctionMethod
 	public static Throwable getException() {
 		synchronized (RequestWork.class) {
 			return RequestWork.exception;
@@ -83,7 +86,7 @@ public class RequestWork {
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 */
-	public void service(ServerHttpConnection connection) throws Throwable {
+	public static void service(ServerHttpConnection connection) throws Throwable {
 
 		// Obtain the configuration of how to process the request
 		CommunicationConfig communication;
@@ -94,9 +97,9 @@ public class RequestWork {
 		// Validate the request
 		RequestConfig req = communication.request;
 		HttpRequest request = connection.getHttpRequest();
-		TestCase.assertEquals("Incorrect method", req.method, request.getHttpMethod());
+		TestCase.assertEquals("Incorrect method", req.method, request.getHttpMethod().getName());
 		TestCase.assertEquals("Incorrect request URI", req.path, request.getRequestURI());
-		TestCase.assertEquals("Incorrect version", req.version, request.getHttpVersion());
+		TestCase.assertEquals("Incorrect version", req.version, request.getHttpVersion().getName());
 
 		// Validate request headers provided
 		for (int i = 0; i < req.headers.size(); i++) {

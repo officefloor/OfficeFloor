@@ -71,13 +71,4 @@ public class ResponseConfig {
 	public void setBody(String body) {
 		this.body = body;
 	}
-
-	/**
-	 * Flag indicating if the connection should have been closed.
-	 */
-	public boolean isClosed = false;
-
-	public void setClosed(boolean isClosed) {
-		this.isClosed = isClosed;
-	}
 }

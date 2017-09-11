@@ -25,15 +25,6 @@ package net.officefloor.server.http.request.config;
 public class ProcessConfig {
 
 	/**
-	 * Flag indicating if to close connection on sending response.
-	 */
-	public boolean isClose = false;
-
-	public void setClose(boolean isClose) {
-		this.isClose = isClose;
-	}
-
-	/**
 	 * Body to send back in the response message.
 	 */
 	public String body;

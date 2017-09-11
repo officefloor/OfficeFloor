@@ -28,6 +28,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -101,8 +102,16 @@ public class HttpClientTestUtil {
 	 */
 	public static CloseableHttpClient createHttpClient(boolean isSecure) {
 
+		// Provide timeout of requests
+		final int timeout = 1000; // 1 seconds
+		RequestConfig.Builder requestTimeout = RequestConfig.custom();
+		requestTimeout.setSocketTimeout(timeout);
+		requestTimeout.setConnectTimeout(timeout);
+		requestTimeout.setConnectionRequestTimeout(timeout);
+
 		// Create the HTTP client
 		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setDefaultRequestConfig(requestTimeout.build());
 
 		// Configure to be secure client
 		if (isSecure) {

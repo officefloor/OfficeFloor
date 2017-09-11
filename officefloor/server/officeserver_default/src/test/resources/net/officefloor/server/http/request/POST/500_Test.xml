@@ -9,9 +9,7 @@
 			<exception>FAILED</exception>
 		</process>
 		<response status="500" message="Internal Server Error"
-			closed="true">
-			<body>RuntimeException: FAILED</body>
-		</response>
+			closed="true" />
 	</communication>
 
 </test>
