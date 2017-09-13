@@ -36,6 +36,7 @@ import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLSession;
 
 import net.officefloor.server.RequestHandler;
+import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.RequestServicer;
 import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ResponseHeaderWriter;
@@ -142,7 +143,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	/**
 	 * SSL {@link SocketServicer}.
 	 */
-	private class SslSocketServicer implements SocketServicer<R>, RequestServicer<R> {
+	private class SslSocketServicer implements Execution, SocketServicer<R>, RequestServicer<R> {
 
 		/**
 		 * {@link SSLEngine}.
@@ -368,6 +369,15 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			});
 		}
 
+		/*
+		 * ================== Execution ========================
+		 */
+
+		@Override
+		public synchronized void run() throws Throwable {
+			this.process(null);
+		}
+
 		/**
 		 * Processes the data.
 		 * 
@@ -570,7 +580,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								break;
 							case NOT_HANDSHAKING:
 								// Close handshake complete, close connection
-								this.requestHandler.closeConnection();
+								this.requestHandler.closeConnection(null);
 								return; // closed, no further interaction
 							default:
 								throw new IllegalStateException("Unknown status " + status);
@@ -710,7 +720,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								break;
 							case NOT_HANDSHAKING:
 								// Close complete, close connection
-								this.requestHandler.closeConnection();
+								this.requestHandler.closeConnection(null);
 								return; // closed, no further processing
 							default:
 								throw new IllegalStateException("Unknown status " + status);
@@ -734,7 +744,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 				}
 
 				// Failure, so close connection
-				this.requestHandler.closeConnection();
+				this.requestHandler.closeConnection(ex);
 			}
 		}
 	}
@@ -829,11 +839,14 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 				}
 
 			} finally {
-				// Flag task complete and trigger further processing
+				
+				// Finished processing SSL task
 				synchronized (this.sslSocketServicer) {
 					this.sslSocketServicer.sslRunnable = null;
-					this.sslSocketServicer.process(null);
 				}
+				
+				// Continue processing request
+				this.sslSocketServicer.requestHandler.execute(this.sslSocketServicer);
 			}
 		}
 	}

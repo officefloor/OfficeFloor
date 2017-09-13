@@ -25,6 +25,9 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 
+import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.ThreadSafeClosure;
+import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -61,22 +64,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
-		ServerSocket[] serverSocket = new ServerSocket[] { null };
-		Socket[] acceptedSocket = new Socket[] { null };
+		Closure<ServerSocket> serverSocket = new Closure<>();
+		ThreadSafeClosure<Socket> acceptedSocket = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket((socket) -> {
-			serverSocket[0] = socket;
+			serverSocket.value = socket;
 			return 1000;
-		}, (socket) -> {
-			synchronized (acceptedSocket) {
-				acceptedSocket[0] = socket;
-				acceptedSocket.notify();
-			}
-		}, (requestHandler) -> (buffer) -> {
-			fail("Should not be invoked, as only accepting connection");
-		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Should not be invoked, as no requests");
-		});
-		assertNotNull("Should have bound server socket", serverSocket[0]);
+		}, (socket) -> acceptedSocket.set(socket),
+				(requestHandler) -> (buffer) -> fail("Should not be invoked, as only accepting connection"),
+				(socketServicer) -> (request, responseWriter) -> fail("Should not be invoked, as no requests"));
+		assertNotNull("Should have bound server socket", serverSocket.value);
 
 		this.tester.start();
 
@@ -85,13 +81,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			assertTrue("Should be connected", client.isConnected());
 
 			// Ensure connects (must wait for connection)
-			long startTime = System.currentTimeMillis();
-			synchronized (acceptedSocket) {
-				while (acceptedSocket[0] == null) {
-					this.timeout(startTime);
-					acceptedSocket.wait(10);
-				}
-			}
+			acceptedSocket.waitAndGet();
 		}
 	}
 
@@ -102,12 +92,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
-		byte[] data = new byte[] { 0 };
+		ThreadSafeClosure<Byte> data = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
-			synchronized (data) {
-				data[0] = buffer.pooledBuffer.get(0);
-				data.notify();
-			}
+			data.set(buffer.pooledBuffer.get(0));
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Should not be invoked, as no requests");
 		});
@@ -122,18 +109,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.write(1);
 			outputStream.flush();
 
-			// Confirm received the data
-			long startTime = System.currentTimeMillis();
-			synchronized (data) {
-				while (data[0] == 0) {
-					this.timeout(startTime);
-					data.wait(10);
-				}
-			}
+			// Ensure received the data
+			assertEquals("Should have received data", 1, (byte) data.waitAndGet());
 		}
-
-		// Ensure received the data
-		assertEquals("Should have received data", 1, data[0]);
 	}
 
 	/**
@@ -145,14 +123,11 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		final Object REQUEST = "TEST";
 
 		// Bind to server socket
-		Object[] receivedRequest = new Object[] { null };
+		ThreadSafeClosure<Object> receivedRequest = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest(REQUEST);
 		}, (socketServicer) -> (request, responseWriter) -> {
-			synchronized (receivedRequest) {
-				receivedRequest[0] = request;
-				receivedRequest.notify();
-			}
+			receivedRequest.set(request);
 		});
 
 		this.tester.start();
@@ -165,18 +140,80 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.write(1);
 			outputStream.flush();
 
-			// Confirm received the request
-			long startTime = System.currentTimeMillis();
-			synchronized (receivedRequest) {
-				while (receivedRequest[0] == null) {
-					this.timeout(startTime);
-					receivedRequest.wait(10);
-				}
-			}
+			// Ensure received the request
+			assertSame("Should have received request", REQUEST, receivedRequest.waitAndGet());
 		}
+	}
 
-		// Ensure received the request
-		assertSame("Should have received request", REQUEST, receivedRequest[0]);
+	/**
+	 * Ensure error if invoke request on another {@link Thread}.
+	 */
+	public void testIssueIfReceiveRequestOnAnotherThread() throws IOException, InterruptedException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		ThreadSafeClosure<Throwable> illegalState = new ThreadSafeClosure<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			this.delay(() -> {
+				try {
+					requestHandler.handleRequest("illegal");
+					illegalState.set(null);
+					fail("Should not be successful");
+				} catch (IllegalStateException ex) {
+					illegalState.set(ex);
+				}
+			});
+		}, (socketServicer) -> (request, responseWriter) -> {
+			fail("Should not receive request");
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Ensure illegal state
+			assertTrue("Should be illegal to handle request on another thread",
+					illegalState.waitAndGet() instanceof IllegalStateException);
+		}
+	}
+
+	/**
+	 * Ensure can delay receiving request on connection via {@link Execution}.
+	 */
+	public void testDelayReceiveRequestViaExecution() throws IOException, InterruptedException {
+		this.tester = new SocketManagerTester(1);
+
+		final Object REQUEST = "TEST";
+
+		// Bind to server socket
+		ThreadSafeClosure<Object> receivedRequest = new ThreadSafeClosure<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			this.delay(() -> {
+				requestHandler.execute(() -> requestHandler.handleRequest(REQUEST));
+			});
+		}, (socketServicer) -> (request, responseWriter) -> {
+			receivedRequest.set(request);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Ensure received the request
+			assertSame("Should have received request", REQUEST, receivedRequest.waitAndGet());
+		}
 	}
 
 	/**
@@ -343,7 +380,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
-		ResponseWriter[] writer = new ResponseWriter[] { null };
+		ThreadSafeClosure<ResponseWriter> writer = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest((byte) 1);
 			requestHandler.handleRequest((byte) 2);
@@ -351,7 +388,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			switch ((byte) request) {
 			case 1:
 				// First request, so capture writer for later
-				writer[0] = responseWriter;
+				writer.set(responseWriter);
 				break;
 
 			case 2:
@@ -361,7 +398,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 				// Now write the first request (out of order)
 				StreamBuffer<ByteBuffer> responseOne = this.tester.createStreamBuffer(1);
-				writer[0].write(null, responseOne);
+				writer.get().write(null, responseOne);
 				break;
 
 			default:
@@ -442,24 +479,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
-		Throwable[] failure = new Throwable[] { null };
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
-			// Delay sending the response
-			new Thread(() -> {
-				try {
-					// Delay writing response
-					Thread.sleep(1);
-
-					// Write the delayed response
-					responseWriter.write(null, this.tester.createStreamBuffer(1));
-				} catch (Throwable ex) {
-					synchronized (failure) {
-						failure[0] = ex;
-					}
-				}
-			}).start();
+			this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(1)));
 		});
 
 		this.tester.start();
@@ -475,13 +498,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
 			assertEquals("Incorrect response", 1, inputStream.read());
-		}
-
-		// Ensure no failures
-		synchronized (failure) {
-			if (failure[0] != null) {
-				throw fail(failure[0]);
-			}
 		}
 	}
 
@@ -503,20 +519,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Delay only the even responses
 			byte index = (byte) request;
 			if ((index % 2) == 0) {
-				// Delay the response
-				new Thread(() -> {
-					try {
-						// Delay writing response
-						Thread.sleep(1);
-
-						// Write the delayed response
-						responseWriter.write(null, this.tester.createStreamBuffer(index));
-					} catch (Throwable ex) {
-						synchronized (failure) {
-							failure[0] = ex;
-						}
-					}
-				}).start();
+				// Delay sending the response
+				this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(index)));
 			} else {
 				// Send the response immediately
 				responseWriter.write(null, this.tester.createStreamBuffer(index));
@@ -545,6 +549,134 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			if (failure[0] != null) {
 				throw fail(failure[0]);
 			}
+		}
+	}
+
+	/**
+	 * Ensure can send immediate data.
+	 */
+	public void testImmediateData() throws IOException {
+
+		// SSL itself sends immediate data
+		if (this.isSecure) {
+			return; // SSL connection tests this
+		}
+
+		// Create tester
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+			immediate.write((byte) 2);
+			requestHandler.sendImmediateData(immediate);
+		}, (socketServicer) -> (request, responseWriter) -> {
+			fail("Immediate response, so no request to service");
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect response", 2, inputStream.read());
+		}
+	}
+
+	/**
+	 * Ensure can delay sending immediate data.
+	 */
+	public void testIssueIfImmediateDataOnAnotherThread() throws Exception {
+
+		// SSL itself sends immediate data
+		if (this.isSecure) {
+			return; // SSL connection tests this
+		}
+
+		// Create tester
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		ThreadSafeClosure<Throwable> illegalState = new ThreadSafeClosure<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			this.delay(() -> {
+				StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+				immediate.write((byte) 2);
+				try {
+					requestHandler.sendImmediateData(immediate);
+					illegalState.set(null);
+					fail("Should not be successful");
+				} catch (IllegalStateException ex) {
+					immediate.release();
+					illegalState.set(ex);
+				}
+			});
+		}, (socketServicer) -> (request, responseWriter) -> {
+			fail("Immediate response, so no request to service");
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Ensure illegal state
+			assertTrue("Should be illegal to handle request on another thread",
+					illegalState.waitAndGet() instanceof IllegalStateException);
+		}
+	}
+
+	/**
+	 * Ensure can delay sending immediate data.
+	 */
+	public void testDelayImmediateDataViaExecution() throws IOException {
+
+		// SSL itself sends immediate data
+		if (this.isSecure) {
+			return; // SSL connection tests this
+		}
+
+		// Create tester
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			this.delay(() -> {
+				requestHandler.execute(() -> {
+					StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+					immediate.write((byte) 2);
+					requestHandler.sendImmediateData(immediate);
+				});
+			});
+		}, (socketServicer) -> (request, responseWriter) -> {
+			fail("Immediate response, so no request to service");
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect response", 2, inputStream.read());
 		}
 	}
 

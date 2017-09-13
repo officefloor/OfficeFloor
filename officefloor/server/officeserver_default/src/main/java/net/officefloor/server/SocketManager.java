@@ -33,13 +33,12 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -118,7 +117,7 @@ public class SocketManager {
 	 * 
 	 * @return {@link StreamBufferPool} used by this {@link SocketManager}.
 	 */
-	public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+	public final StreamBufferPool<ByteBuffer> getStreamBufferPool() {
 		return this.listeners[0].bufferPool;
 	}
 
@@ -128,7 +127,7 @@ public class SocketManager {
 	 * @param selectionKey
 	 *            {@link SelectionKey}.
 	 */
-	private static void terminteSelectionKey(SelectionKey selectionKey) {
+	private static final void terminteSelectionKey(SelectionKey selectionKey, SocketListener socketListener) {
 		try {
 			selectionKey.channel().close();
 		} catch (ClosedChannelException ex) {
@@ -136,14 +135,19 @@ public class SocketManager {
 		} catch (IOException ex) {
 			LOGGER.log(Level.WARNING, "Failed closing connection", ex);
 		} finally {
-			// Ensure cancel the key
-			selectionKey.cancel();
+			try {
+				// Ensure cancel the key
+				selectionKey.cancel();
+			} finally {
 
-			// Release buffer for read
-			Object attachment = selectionKey.attachment();
-			if (attachment instanceof AbstractReadHandler) {
-				AbstractReadHandler handler = (AbstractReadHandler) attachment;
-				handler.releaseStreamBuffers();
+				// Release the stream buffers (if safe, otherwise GC)
+				if (socketListener.isSocketListenerThread()) {
+					Object attachment = selectionKey.attachment();
+					if (attachment instanceof AbstractReadHandler) {
+						AbstractReadHandler handler = (AbstractReadHandler) attachment;
+						handler.releaseStreamBuffers();
+					}
+				}
 			}
 		}
 	}
@@ -155,7 +159,7 @@ public class SocketManager {
 	 * @return {@link Runnable} instances to be executed for this
 	 *         {@link SocketManager}.
 	 */
-	public Runnable[] getRunnables() {
+	public final Runnable[] getRunnables() {
 		return this.listeners;
 	}
 
@@ -178,7 +182,7 @@ public class SocketManager {
 	 * @throws IOException
 	 *             If fails to bind the {@link ServerSocket}.
 	 */
-	public synchronized <R> void bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
+	public synchronized final <R> void bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
 			AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
 			RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
@@ -200,7 +204,7 @@ public class SocketManager {
 	 * @throws IOException
 	 *             If fails to shutdown this {@link SocketManager}.
 	 */
-	public synchronized void shutdown() throws IOException {
+	public synchronized final void shutdown() throws IOException {
 
 		// Close the server sockets
 		for (ServerSocket socket : this.boundServerSockets) {
@@ -217,11 +221,11 @@ public class SocketManager {
 	 * Manages an accepted {@link Socket}.
 	 * 
 	 * @param acceptedSocket
-	 *            {@link AcceptedSocket}.
+	 *            {@link AcceptedSocketServicer}.
 	 * @throws IOException
-	 *             If fails to managed the {@link AcceptedSocket}.
+	 *             If fails to managed the {@link AcceptedSocketServicer}.
 	 */
-	private <R> void manageAcceptedSocket(AcceptedSocket<R> acceptedSocket) throws IOException {
+	private final <R> void manageAcceptedSocket(AcceptedSocket<R> acceptedSocket) throws IOException {
 
 		// Spread the connections across the listeners
 		int next = this.nextSocketListener.getAndAccumulate(1,
@@ -259,9 +263,19 @@ public class SocketManager {
 		private final AcceptSocketHandler acceptSocketHandler;
 
 		/**
+		 * {@link ExecutionHandler}.
+		 */
+		private final ExecutionHandler executionHandler;
+
+		/**
 		 * {@link SafeWriteSocketHandler}.
 		 */
 		private final SafeWriteSocketHandler safeWriteSocketHandler;
+
+		/**
+		 * {@link SafeCloseConnectionHandler}.
+		 */
+		private final SafeCloseConnectionHandler safeCloseConnectionHandler;
 
 		/**
 		 * {@link Pipe} to invoke to shutdown servicing.
@@ -297,11 +311,24 @@ public class SocketManager {
 			this.acceptSocketHandler = new AcceptSocketHandler(acceptedSocketPipe, this);
 			acceptedSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.acceptSocketHandler);
 
+			// Create pipe to lister for executions
+			Pipe executionPipe = Pipe.open();
+			executionPipe.source().configureBlocking(false);
+			this.executionHandler = new ExecutionHandler(executionPipe);
+			executionPipe.source().register(this.selector, SelectionKey.OP_READ, this.executionHandler);
+
 			// Create pipe to listen for safe socket writing
 			Pipe safeWriteSocketPipe = Pipe.open();
 			safeWriteSocketPipe.source().configureBlocking(false);
 			this.safeWriteSocketHandler = new SafeWriteSocketHandler(safeWriteSocketPipe);
 			safeWriteSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.safeWriteSocketHandler);
+
+			// Create pipe to listen for connection close
+			Pipe safeCloseConectionPipe = Pipe.open();
+			safeCloseConectionPipe.source().configureBlocking(false);
+			this.safeCloseConnectionHandler = new SafeCloseConnectionHandler(safeCloseConectionPipe);
+			safeCloseConectionPipe.source().register(this.selector, SelectionKey.OP_READ,
+					this.safeCloseConnectionHandler);
 
 			// Create pipe to listen for shutdown
 			this.shutdownPipe = Pipe.open();
@@ -329,7 +356,7 @@ public class SocketManager {
 		 * @throws IOException
 		 *             If fails to bind the {@link ServerSocket}.
 		 */
-		private <R> ServerSocket bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
+		private final <R> ServerSocket bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
 				AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
 				RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
@@ -365,12 +392,39 @@ public class SocketManager {
 		}
 
 		/**
+		 * Indicates if the current {@link Thread} is the {@link SocketListener}
+		 * {@link Thread}.
+		 * 
+		 * @return <code>true</code> if current {@link Thread} is
+		 *         {@link SocketListener} {@link Thread}.
+		 */
+		private final boolean isSocketListenerThread() {
+			SocketListener threadSafeSocketListener = threadSocketLister.get();
+			return (this == threadSafeSocketListener);
+		}
+
+		/**
+		 * Ensures execution by {@link SocketListener} {@link Thread}.
+		 * 
+		 * @throws IllegalStateException
+		 *             If different {@link Thread}.
+		 */
+		private final void ensureSocketListenerThread() throws IllegalStateException {
+
+			// Ensure only handle requests on socket listener thread
+			if (!this.isSocketListenerThread()) {
+				throw new IllegalStateException(
+						"Attempting to handle request via alternate thread " + Thread.currentThread().getName());
+			}
+		}
+
+		/**
 		 * Shuts down this {@link SocketListener}.
 		 * 
 		 * @throws IOException
 		 *             If fails to notify of shutdown.
 		 */
-		private void shutdown() throws IOException {
+		private final void shutdown() throws IOException {
 			// Send message to shutdown
 			this.shutdownPipe.sink().write(NOTIFY_BUFFER.duplicate());
 		}
@@ -380,7 +434,7 @@ public class SocketManager {
 		 */
 
 		@Override
-		public void run() {
+		public final void run() {
 
 			// Register this socket listener with the thread
 			threadSocketLister.set(this);
@@ -407,97 +461,104 @@ public class SocketManager {
 						SelectionKey selectedKey = iterator.next();
 						iterator.remove();
 
-						// Obtain the ready operations (and handle cancelled)
-						int readyOps;
 						try {
-							readyOps = selectedKey.readyOps();
-						} catch (CancelledKeyException ex) {
-							SocketManager.terminteSelectionKey(selectedKey);
-							continue NEXT_KEY;
-						}
 
-						// Determine if accept
-						if ((readyOps & SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) {
+							// Obtain ready operations
+							int readyOps = selectedKey.readyOps();
 
-							// Obtain the accept handler
-							@SuppressWarnings("unchecked")
-							AcceptHandler<Object> handler = (AcceptHandler<Object>) selectedKey.attachment();
+							// Determine if accept
+							if ((readyOps & SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) {
 
-							try {
-								// Accept the connection
-								SocketChannel socketChannel = handler.channel.accept();
+								// Obtain the accept handler
+								@SuppressWarnings("unchecked")
+								AcceptHandler<Object> handler = (AcceptHandler<Object>) selectedKey.attachment();
 
-								// Flag socket as unblocking
-								socketChannel.configureBlocking(false);
+								try {
+									// Accept the connection
+									SocketChannel socketChannel = handler.channel.accept();
 
-								// Configure the socket
-								Socket socket = socketChannel.socket();
-								socket.setTcpNoDelay(true);
-								socket.setReuseAddress(true);
-								socket.setReceiveBufferSize(this.socketBufferSize);
-								socket.setSendBufferSize(this.socketBufferSize);
-								handler.acceptedSocketDecorator.decorate(socket);
+									// Flag socket as unblocking
+									socketChannel.configureBlocking(false);
 
-								// Manage the accepted socket
-								AcceptedSocket<Object> acceptedSocket = new AcceptedSocket<>(socketChannel,
-										handler.socketServicerFactory, handler.requestServicerFactory);
-								SocketManager.this.manageAcceptedSocket(acceptedSocket);
+									// Configure the socket
+									Socket socket = socketChannel.socket();
+									socket.setTcpNoDelay(true);
+									socket.setReuseAddress(true);
+									socket.setReceiveBufferSize(this.socketBufferSize);
+									socket.setSendBufferSize(this.socketBufferSize);
+									handler.acceptedSocketDecorator.decorate(socket);
 
-							} catch (IOException ex) {
-								// Should not fail to accept connection
-								LOGGER.log(Level.WARNING, "Failed to accept socket connection", ex);
-							}
+									// Manage the accepted socket
+									AcceptedSocket<Object> acceptedSocket = new AcceptedSocket<>(handler,
+											socketChannel);
+									SocketManager.this.manageAcceptedSocket(acceptedSocket);
 
-							// Accepted the connection
-							continue NEXT_KEY;
-						}
+								} catch (IOException ex) {
+									// Should not fail to accept connection
+									LOGGER.log(Level.WARNING, "Failed to accept socket connection", ex);
+								}
 
-						// Determine if read content
-						if ((readyOps & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
-
-							// Obtain the read handler
-							AbstractReadHandler handler = (AbstractReadHandler) selectedKey.attachment();
-
-							// Ensure have buffer to handle read
-							if ((handler.readBuffer == null) || (handler.readBuffer.pooledBuffer.remaining() == 0)) {
-								// Require a new buffer
-								handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
-							}
-
-							// Obtain the byte buffer
-							ByteBuffer buffer = handler.readBuffer.pooledBuffer;
-
-							// Read content from channel
-							int bytesRead = 0;
-							IOException readFailure = null;
-							try {
-								bytesRead = handler.channel.read(buffer);
-							} catch (IOException ex) {
-								readFailure = ex;
-							}
-
-							// Determine if closed connection or in error
-							if ((bytesRead < 0) || (readFailure != null)) {
-								// Connection failed, so terminate
-								SocketManager.terminteSelectionKey(selectedKey);
+								// Accepted the connection
 								continue NEXT_KEY;
 							}
 
-							// Handle the read
-							handler.handleRead();
-						}
+							// Determine if read content
+							if ((readyOps & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
 
-						// Determine if write content
-						if ((readyOps & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
+								// Obtain the read handler
+								AbstractReadHandler handler = (AbstractReadHandler) selectedKey.attachment();
 
-							// Obtain accepted socket (write further content)
-							AcceptedSocket<?> acceptedSocket = (AcceptedSocket<?>) selectedKey.attachment();
+								// Ensure have buffer to handle read
+								if ((handler.readBuffer == null)
+										|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
+									// Require a new buffer
+									handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
+								}
 
-							// Write further data to the socket
-							if (acceptedSocket.unsafeSendWrites()) {
-								// All content written, no longer write interest
-								selectedKey.interestOps(SelectionKey.OP_READ);
+								// Obtain the byte buffer
+								ByteBuffer buffer = handler.readBuffer.pooledBuffer;
+
+								// Read content from channel
+								int bytesRead = 0;
+								IOException readFailure = null;
+								try {
+									bytesRead = handler.channel.read(buffer);
+								} catch (IOException ex) {
+									readFailure = ex;
+								}
+
+								// Determine if closed connection or in error
+								if ((bytesRead < 0) || (readFailure != null)) {
+									// Connection closed/failed, so terminate
+									SocketManager.terminteSelectionKey(selectedKey, this);
+									continue NEXT_KEY;
+								}
+
+								// Handle the read
+								handler.handleRead();
 							}
+
+							// Determine if write content
+							if ((readyOps & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
+
+								// Write further data to the socket
+								AcceptedSocketServicer<?> acceptedSocket = (AcceptedSocketServicer<?>) selectedKey
+										.attachment();
+								if (acceptedSocket.unsafeSendWrites()) {
+									// Content written, no longer write interest
+									selectedKey.interestOps(SelectionKey.OP_READ);
+								}
+							}
+
+						} catch (CancelledKeyException ex) {
+							// Already closed, so just continue on
+							SocketManager.terminteSelectionKey(selectedKey, this);
+							continue NEXT_KEY;
+
+						} catch (Throwable ex) {
+							LOGGER.log(Level.WARNING, "Failure with connection", ex);
+							SocketManager.terminteSelectionKey(selectedKey, this);
+							continue NEXT_KEY;
 						}
 					}
 				}
@@ -518,19 +579,65 @@ public class SocketManager {
 	}
 
 	/**
+	 * Accept handler.
+	 */
+	private static class AcceptHandler<R> {
+
+		/**
+		 * {@link ServerSocketChannel}.
+		 */
+		private final ServerSocketChannel channel;
+
+		/**
+		 * {@link AcceptedSocketDecorator}.
+		 */
+		private final AcceptedSocketDecorator acceptedSocketDecorator;
+
+		/**
+		 * {@link SocketServicerFactory}.
+		 */
+		private final SocketServicerFactory<R> socketServicerFactory;
+
+		/**
+		 * {@link RequestServicerFactory}.
+		 */
+		private final RequestServicerFactory<R> requestServicerFactory;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param channel
+		 *            {@link ServerSocketChannel}.
+		 * @param acceptedSocketDecorator
+		 *            {@link AcceptedSocketDecorator}.
+		 * @param socketServicerFactory
+		 *            {@link SocketServicer}.
+		 * @param requestServicerFactory
+		 *            {@link RequestServicer}.
+		 */
+		private AcceptHandler(ServerSocketChannel channel, AcceptedSocketDecorator acceptedSocketDecorator,
+				SocketServicerFactory<R> socketServicerFactory, RequestServicerFactory<R> requestServicerFactory) {
+			this.channel = channel;
+			this.acceptedSocketDecorator = acceptedSocketDecorator;
+			this.socketServicerFactory = socketServicerFactory;
+			this.requestServicerFactory = requestServicerFactory;
+		}
+	}
+
+	/**
 	 * Abstract functionality for handling reads.
 	 */
 	private static abstract class AbstractReadHandler {
 
 		/**
-		 * Current {@link StreamBuffer} for read content.
-		 */
-		protected StreamBuffer<ByteBuffer> readBuffer;
-
-		/**
 		 * {@link ReadableByteChannel}.
 		 */
 		private final ReadableByteChannel channel;
+
+		/**
+		 * Current {@link StreamBuffer} for read content.
+		 */
+		protected StreamBuffer<ByteBuffer> readBuffer = null;
 
 		/**
 		 * Instantiate.
@@ -544,8 +651,11 @@ public class SocketManager {
 
 		/**
 		 * Handles the read.
+		 * 
+		 * @throws Throwable
+		 *             If fails to handle read.
 		 */
-		public abstract void handleRead();
+		public abstract void handleRead() throws Throwable;
 
 		/**
 		 * Releases the {@link StreamBuffer} instances used by this
@@ -560,14 +670,137 @@ public class SocketManager {
 	}
 
 	/**
+	 * Accept {@link Socket} handler.
+	 */
+	private static class AcceptSocketHandler extends AbstractReadHandler {
+
+		/**
+		 * {@link AcceptedSocketServicer} {@link Pipe}.
+		 */
+		private final Pipe acceptedSocketPipe;
+
+		/**
+		 * {@link SocketListener}.
+		 */
+		private final SocketListener socketListener;
+
+		/**
+		 * {@link List} of {@link AcceptedSocket} instances.
+		 */
+		private final List<AcceptedSocket<?>> acceptedSockets = new ArrayList<>();
+
+		/**
+		 * Indicates if notified.
+		 */
+		private boolean isNotified = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param acceptedSocketPipe
+		 *            {@link AcceptedSocketServicer} {@link Pipe}.
+		 * @param listener
+		 *            {@link SocketListener}.
+		 */
+		private AcceptSocketHandler(Pipe acceptedSocketPipe, SocketListener listener) {
+			super(acceptedSocketPipe.source());
+			this.acceptedSocketPipe = acceptedSocketPipe;
+			this.socketListener = listener;
+		}
+
+		/**
+		 * Services an {@link AcceptedSocketServicer}.
+		 * 
+		 * @param accceptedSocket
+		 *            {@link AcceptedSocketServicer}.
+		 * @throws IOException
+		 *             If fails to service the {@link AcceptedSocketServicer}.
+		 */
+		private synchronized final <R> void serviceAcceptedSocket(AcceptedSocket<R> accceptedSocket)
+				throws IOException {
+
+			// Queue for adding
+			this.acceptedSockets.add(accceptedSocket);
+
+			// Notify queue accepted sockets
+			if (!this.isNotified) {
+				this.acceptedSocketPipe.sink().write(NOTIFY_BUFFER.duplicate());
+				this.isNotified = true;
+			}
+		}
+
+		/*
+		 * ============== AbstractReadHandler ================
+		 */
+
+		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public synchronized final void handleRead() {
+
+			// No longer notified
+			this.isNotified = false;
+
+			// Release buffer (as content not important, only notification)
+			this.readBuffer.release();
+			this.readBuffer = null;
+
+			// Register the accepted sockets
+			for (int i = 0; i < this.acceptedSockets.size(); i++) {
+				AcceptedSocket<?> acceptedSocket = this.acceptedSockets.get(i);
+
+				// Accept the socket (registers itself for servicing)
+				try {
+					new AcceptedSocketServicer(acceptedSocket, this.socketListener);
+				} catch (IOException ex) {
+					LOGGER.log(Level.WARNING, "Failed to register accepted socket", ex);
+				}
+			}
+
+			// All sockets accepted
+			this.acceptedSockets.clear();
+		}
+	}
+
+	/**
 	 * Accepted {@link Socket}.
 	 */
-	private static class AcceptedSocket<R> extends AbstractReadHandler implements RequestHandler<R> {
+	private static class AcceptedSocket<R> {
+
+		/**
+		 * {@link AcceptHandler}.
+		 */
+		private final AcceptHandler<R> acceptHandler;
 
 		/**
 		 * {@link SocketChannel} for the accepted {@link Socket}.
 		 */
 		protected final SocketChannel socketChannel;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param socketChannel
+		 *            {@link SocketChannel}.
+		 * @param socketServicerFactory
+		 *            {@link SocketServicerFactory}.
+		 * @param requestServicerFactory
+		 *            {@link RequestServicerFactory}.
+		 */
+		private AcceptedSocket(AcceptHandler<R> acceptHandler, SocketChannel socketChannel) {
+			this.acceptHandler = acceptHandler;
+			this.socketChannel = socketChannel;
+		}
+	}
+
+	/**
+	 * Accepted {@link Socket} servicer.
+	 */
+	private static class AcceptedSocketServicer<R> extends AbstractReadHandler implements RequestHandler<R> {
+
+		/**
+		 * {@link SocketChannel}.
+		 */
+		private final SocketChannel socketChannel;
 
 		/**
 		 * {@link SocketServicer}.
@@ -582,12 +815,12 @@ public class SocketManager {
 		/**
 		 * {@link SocketListener}.
 		 */
-		private SocketListener socketListener;
+		private final SocketListener socketListener;
 
 		/**
 		 * {@link SelectionKey}.
 		 */
-		private SelectionKey selectionKey;
+		private final SelectionKey selectionKey;
 
 		/**
 		 * Request {@link StreamBuffer} instances to be released with the
@@ -626,57 +859,43 @@ public class SocketManager {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param socketChannel
-		 *            {@link SocketChannel}.
-		 * @param socketServicerFactory
-		 *            {@link SocketServicerFactory}.
-		 * @param requestServicerFactory
-		 *            {@link RequestServicerFactory}.
+		 * @param acceptedSocket
+		 *            {@link AcceptedSocket}.
+		 * @param socketListener
+		 *            {@link SocketListener} servicing the
+		 *            {@link AcceptedSocket}.
+		 * @throws IOException
+		 *             If fails to set up servicing the {@link AcceptedSocket}.
 		 */
-		public AcceptedSocket(SocketChannel socketChannel, SocketServicerFactory<R> socketServicerFactory,
-				RequestServicerFactory<R> requestServicerFactory) {
-			super(socketChannel);
-			this.socketChannel = socketChannel;
+		private AcceptedSocketServicer(AcceptedSocket<R> acceptedSocket, SocketListener socketListener)
+				throws IOException {
+			super(acceptedSocket.socketChannel);
+			this.socketChannel = acceptedSocket.socketChannel;
+			this.socketListener = socketListener;
 
 			// Create the socket servicer
-			this.socketServicer = socketServicerFactory.createSocketServicer(this);
+			this.socketServicer = acceptedSocket.acceptHandler.socketServicerFactory.createSocketServicer(this);
 
 			// Create the request servicer
-			this.requestServicer = requestServicerFactory.createRequestServicer(this.socketServicer);
+			this.requestServicer = acceptedSocket.acceptHandler.requestServicerFactory
+					.createRequestServicer(this.socketServicer);
+
+			// Register for servicing
+			this.selectionKey = acceptedSocket.socketChannel.register(this.socketListener.selector,
+					SelectionKey.OP_READ, this);
 		}
 
 		/**
-		 * Checks the {@link Thread} safety and appropriately writes the
-		 * response.
+		 * Undertakes executing the {@link Execution}.
 		 * 
-		 * @param socketRequest
-		 *            {@link SocketRequest}.
-		 * @param responseHeaderWriter
-		 *            {@link ResponseHeaderWriter}.
-		 * @param headResponseBuffer
-		 *            Head response {@link StreamBuffer} of the linked list of
-		 *            {@link StreamBuffer} instances for the
-		 *            {@link SocketRequest}.
+		 * @param execution
+		 *            {@link Execution}.
 		 */
-		private void writeResponse(SocketRequest<R> socketRequest, ResponseHeaderWriter responseHeaderWriter,
-				StreamBuffer<ByteBuffer> headResponseBuffer) {
-
-			// Determine if thread safe for socket interaction
-			SocketListener threadSafeSocketListener = threadSocketLister.get();
-			boolean isThreadSafe = (this.socketListener == threadSafeSocketListener);
-
-			// Appropriately write the response based on thread safety
-			if (isThreadSafe) {
-				this.unsafeWriteResponse(socketRequest, responseHeaderWriter, headResponseBuffer);
-
-			} else {
-				try {
-					this.socketListener.safeWriteSocketHandler.safeWriteResponse(this, socketRequest,
-							responseHeaderWriter, headResponseBuffer);
-				} catch (IOException ex) {
-					// Failed, so terminate connection
-					SocketManager.terminteSelectionKey(this.selectionKey);
-				}
+		private final void unsafeExecute(Execution execution) {
+			try {
+				execution.run();
+			} catch (Throwable ex) {
+				this.closeConnection(ex);
 			}
 		}
 
@@ -692,12 +911,14 @@ public class SocketManager {
 		 *            {@link StreamBuffer} instances for the
 		 *            {@link SocketRequest}.
 		 */
-		private void unsafeWriteResponse(SocketRequest<R> socketRequest, ResponseHeaderWriter responseHeaderWriter,
-				StreamBuffer<ByteBuffer> headResponseBuffer) {
+		private final void unsafeWriteResponse(SocketRequest<R> socketRequest,
+				ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer) {
 
-			// Provide the response buffers for the request
-			socketRequest.responseHeaderWriter = responseHeaderWriter;
-			socketRequest.headResponseBuffer = headResponseBuffer;
+			// Provide the response for the request
+			synchronized (this.socketListener.safeWriteSocketHandler) {
+				socketRequest.responseHeaderWriter = responseHeaderWriter;
+				socketRequest.headResponseBuffer = headResponseBuffer;
+			}
 
 			// Response written (so release all request buffers)
 			StreamBuffer<ByteBuffer> requestBuffer = this.head.headRequestBuffer;
@@ -710,22 +931,13 @@ public class SocketManager {
 			}
 
 			// Prepare the pooled response buffers
-			StreamBuffer<ByteBuffer> streamBuffer = headResponseBuffer;
-			while (streamBuffer != null) {
-				if (streamBuffer.isPooled) {
-					streamBuffer.pooledBuffer.flip();
+			StreamBuffer<ByteBuffer> prepareBuffer = headResponseBuffer;
+			while (prepareBuffer != null) {
+				if (prepareBuffer.isPooled) {
+					prepareBuffer.pooledBuffer.flip();
 				}
-				streamBuffer = streamBuffer.next;
+				prepareBuffer = prepareBuffer.next;
 			}
-
-			// Compact the response
-			this.unsafeCompactResponse();
-		}
-
-		/**
-		 * Undertakes compacting the response for larger packet writes.
-		 */
-		private void unsafeCompactResponse() {
 
 			// Ensure have a compact response head
 			if (this.compactedResponseHead == null) {
@@ -821,7 +1033,7 @@ public class SocketManager {
 		/**
 		 * Undertakes flushing the response data to the {@link SocketChannel}.
 		 */
-		private void unsafeFlushWrites() {
+		private final void unsafeFlushWrites() {
 
 			// Do nothing if no compact responses to flush
 			if (this.compactedResponseHead == null) {
@@ -854,7 +1066,7 @@ public class SocketManager {
 		 *            {@link StreamBuffer} instances to write to the
 		 *            {@link SocketChannel}.
 		 */
-		private void unsafeAppendWrite(StreamBuffer<ByteBuffer> writeHead) {
+		private final void unsafeAppendWrite(StreamBuffer<ByteBuffer> writeHead) {
 
 			// Obtain the tail write buffer
 			StreamBuffer<ByteBuffer> tailWriteBuffer = this.writeResponseHead;
@@ -879,7 +1091,7 @@ public class SocketManager {
 		 *         <code>false</code> indicating the {@link Socket} buffer
 		 *         filled.
 		 */
-		private boolean unsafeSendWrites() {
+		private final boolean unsafeSendWrites() {
 
 			// Flush the compacted buffers to the socket
 			while (this.writeResponseHead != null) {
@@ -893,7 +1105,7 @@ public class SocketManager {
 					this.socketChannel.write(writeBuffer);
 				} catch (IOException ex) {
 					// Failed to write to channel, so close
-					SocketManager.terminteSelectionKey(this.selectionKey);
+					this.closeConnection(ex);
 					return false; // terminating
 				}
 
@@ -920,12 +1132,28 @@ public class SocketManager {
 			return true;
 		}
 
+		/**
+		 * Closes the connection.
+		 * 
+		 * @param exception
+		 *            Possible {@link Throwable} being the cause of the close of
+		 *            the connection. <code>null</code> if normal close.
+		 */
+		private final void unsafeCloseConnection(Throwable exception) {
+			SocketManager.terminteSelectionKey(this.selectionKey, this.socketListener);
+
+			// Release the stream buffers
+			this.releaseStreamBuffers();
+		}
+
 		/*
 		 * ============== AbstractReadHandler ================
 		 */
 
 		@Override
-		public void handleRead() {
+		public final void handleRead() {
+
+			// Only invoked by Socket Listener thread
 
 			// Keep track of buffers (to enable releasing)
 			if ((this.previousRequestBuffer != null) && (this.previousRequestBuffer != this.readBuffer)) {
@@ -943,11 +1171,9 @@ public class SocketManager {
 		}
 
 		@Override
-		public void releaseStreamBuffers() {
+		public final void releaseStreamBuffers() {
 
-			// Allow socket servicer to release buffers
-			// (ensures any synchronise is also undertaken)
-			this.socketServicer.release();
+			// Only invoked by Socket Listener thread
 
 			// Release the read buffer
 			super.releaseStreamBuffers();
@@ -978,6 +1204,9 @@ public class SocketManager {
 				}
 				this.head = this.head.next;
 			}
+
+			// Allow socket servicer to release buffers
+			this.socketServicer.release();
 		}
 
 		/*
@@ -985,7 +1214,27 @@ public class SocketManager {
 		 */
 
 		@Override
-		public void handleRequest(R request) {
+		public final void execute(Execution execution) {
+			// Appropriately execute based on thread safety
+			if (this.socketListener.isSocketListenerThread()) {
+				this.unsafeExecute(execution);
+
+			} else {
+				try {
+					// Trigger to undertake execution on socket thread
+					this.socketListener.executionHandler.safeExecute(this, execution);
+				} catch (IOException ex) {
+					// Failed, so close connection
+					this.closeConnection(ex);
+				}
+			}
+		}
+
+		@Override
+		public final void handleRequest(R request) {
+
+			// Ensure only handle requests on socket listener thread
+			this.socketListener.ensureSocketListenerThread();
 
 			// Create the socket request
 			SocketRequest<R> socketRequest = new SocketRequest<>(this, this.releaseRequestBuffers);
@@ -1007,7 +1256,10 @@ public class SocketManager {
 		}
 
 		@Override
-		public void sendImmediateData(StreamBuffer<ByteBuffer> immediateHead) {
+		public final void sendImmediateData(StreamBuffer<ByteBuffer> immediateHead) {
+
+			// Ensure only send data on socket listener thread
+			this.socketListener.ensureSocketListenerThread();
 
 			// Prepare the pooled response buffers
 			StreamBuffer<ByteBuffer> streamBuffer = immediateHead;
@@ -1026,8 +1278,137 @@ public class SocketManager {
 		}
 
 		@Override
-		public void closeConnection() {
-			SocketManager.terminteSelectionKey(this.selectionKey);
+		public final void closeConnection(Throwable exception) {
+			// Appropriately execute based on thread safety
+			if (this.socketListener.isSocketListenerThread()) {
+				this.unsafeCloseConnection(exception);
+
+			} else {
+				try {
+					// Trigger to close the connection
+					this.socketListener.safeCloseConnectionHandler.safeCloseConnection(this, exception);
+				} catch (IOException ex) {
+					// Failed, so forcefully terminate connection
+					SocketManager.terminteSelectionKey(this.selectionKey, this.socketListener);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Handles safely executing the {@link Execution}.
+	 */
+	private static class ExecutionHandler extends AbstractReadHandler {
+
+		/**
+		 * Notify execution {@link Pipe}.
+		 */
+		private final Pipe executionPipe;
+
+		/**
+		 * {@link Execution} instances.
+		 */
+		private final List<AcceptedSocketExecution> executions = new ArrayList<>();
+
+		/**
+		 * Indicates if notified.
+		 */
+		private boolean isNotified = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param executionPipe
+		 *            Notify execution {@link Pipe}.
+		 */
+		private ExecutionHandler(Pipe executionPipe) {
+			super(executionPipe.source());
+			this.executionPipe = executionPipe;
+		}
+
+		/**
+		 * <p>
+		 * Safely executes the {@link Execution}.
+		 * <p>
+		 * Method is synchronised to ensure data is safe across the
+		 * {@link Thread}, when {@link #handleRead()} is invoked by the
+		 * {@link SocketListener} {@link Thread}.
+		 * 
+		 * @param acceptedSocket
+		 *            {@link AcceptedSocketServicer}.
+		 * @param execution
+		 *            {@link Execution}.
+		 * @throws IOException
+		 *             If fails to execute the {@link Execution}.
+		 */
+		private synchronized final <R> void safeExecute(AcceptedSocketServicer<R> acceptedSocket, Execution execution)
+				throws IOException {
+
+			// Capture the execution
+			this.executions.add(new AcceptedSocketExecution(acceptedSocket, execution));
+
+			// Notify to execute
+			if (!this.isNotified) {
+				this.executionPipe.sink().write(NOTIFY_BUFFER.duplicate());
+				this.isNotified = true;
+			}
+		}
+
+		/*
+		 * ============== AbstractReadHandler ================
+		 */
+
+		@Override
+		public final void handleRead() {
+
+			// Safely within the SocketListener thread
+
+			// Take copy to minimise service threads blocking to send
+			AcceptedSocketExecution[] executions;
+			synchronized (this) {
+				this.isNotified = false; // no longer notified
+				executions = this.executions.toArray(new AcceptedSocketExecution[this.executions.size()]);
+				this.executions.clear();
+			}
+
+			// Release buffer (as content not important, only notification)
+			this.readBuffer.release();
+			this.readBuffer = null;
+
+			// Execute each execution
+			for (int i = 0; i < executions.length; i++) {
+				AcceptedSocketExecution execution = executions[i];
+				execution.acceptedSocket.unsafeExecute(execution.execution);
+			}
+		}
+	}
+
+	/**
+	 * {@link AcceptedSocketServicer} {@link Execution}.
+	 */
+	private static class AcceptedSocketExecution {
+
+		/**
+		 * {@link AcceptedSocketServicer}.
+		 */
+		private final AcceptedSocketServicer<?> acceptedSocket;
+
+		/**
+		 * {@link Execution}.
+		 */
+		private final Execution execution;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param acceptedSocket
+		 *            {@link AcceptedSocketServicer}.
+		 * @param execution
+		 *            {@link Execution}.
+		 */
+		public AcceptedSocketExecution(AcceptedSocketServicer<?> acceptedSocket, Execution execution) {
+			this.acceptedSocket = acceptedSocket;
+			this.execution = execution;
 		}
 	}
 
@@ -1045,11 +1426,10 @@ public class SocketManager {
 		/**
 		 * {@link SafeWriteResponse} instances.
 		 */
-		private List<SafeWriteResponse<?>> responses = new ArrayList<>();
+		private final List<SafeWriteResponse<?>> responses = new ArrayList<>();
 
 		/**
-		 * Avoid many {@link Thread} instances notifying for safe write
-		 * activation.
+		 * Indicates if notified.
 		 */
 		private boolean isNotified = false;
 
@@ -1058,10 +1438,8 @@ public class SocketManager {
 		 * 
 		 * @param writeSocketPipe
 		 *            Notify write {@link Pipe}.
-		 * @param listener
-		 *            {@link SocketListener}.
 		 */
-		public SafeWriteSocketHandler(Pipe writeSocketPipe) {
+		private SafeWriteSocketHandler(Pipe writeSocketPipe) {
 			super(writeSocketPipe.source());
 			this.writeSocketPipe = writeSocketPipe;
 		}
@@ -1075,7 +1453,7 @@ public class SocketManager {
 		 * {@link SocketListener} {@link Thread}.
 		 * 
 		 * @param acceptedSocket
-		 *            {@link AcceptedSocket}.
+		 *            {@link AcceptedSocketServicer}.
 		 * @param socketRequest
 		 *            {@link SocketRequest}.
 		 * @param responseHeaderWriter
@@ -1086,7 +1464,7 @@ public class SocketManager {
 		 * @throws IOException
 		 *             If fails to write the response.
 		 */
-		private synchronized <R> void safeWriteResponse(AcceptedSocket<R> acceptedSocket,
+		private synchronized final <R> void safeWriteResponse(AcceptedSocketServicer<R> acceptedSocket,
 				SocketRequest<R> socketRequest, ResponseHeaderWriter responseHeaderWriter,
 				StreamBuffer<ByteBuffer> headResponseBuffer) throws IOException {
 
@@ -1108,36 +1486,35 @@ public class SocketManager {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public synchronized void handleRead() {
+		public final void handleRead() {
 
 			// Safely within the SocketListener thread
 
-			// Notified
-			this.isNotified = false;
+			// Take copy to minimise service threads blocking to send
+			SafeWriteResponse<?>[] responses;
+			synchronized (this) {
+				this.isNotified = false; // no longer notified
+				responses = this.responses.toArray(new SafeWriteResponse[this.responses.size()]);
+				this.responses.clear();
+			}
 
 			// Release buffer (as content not important, only notification)
 			this.readBuffer.release();
 			this.readBuffer = null;
 
-			// Obtain the number of responses
-			int size = this.responses.size();
-
 			// Write the responses
 			// Separate to flush, to enable multiple response writing in packets
-			for (int i = 0; i < size; i++) {
+			for (int i = 0; i < responses.length; i++) {
 				@SuppressWarnings("rawtypes")
-				SafeWriteResponse response = this.responses.get(i);
-				response.acceptedSocket.writeResponse(response.socketRequest, response.responseHeaderWriter,
+				SafeWriteResponse response = responses[i];
+				response.acceptedSocket.unsafeWriteResponse(response.socketRequest, response.responseHeaderWriter,
 						response.headResponseBuffer);
 			}
 
 			// Flush the writes
-			for (int i = 0; i < size; i++) {
-				this.responses.get(i).acceptedSocket.unsafeFlushWrites();
+			for (int i = 0; i < responses.length; i++) {
+				responses[i].acceptedSocket.unsafeFlushWrites();
 			}
-
-			// Clear responses as written
-			this.responses.clear();
 		}
 	}
 
@@ -1147,9 +1524,9 @@ public class SocketManager {
 	private static class SafeWriteResponse<R> {
 
 		/**
-		 * {@link AcceptedSocket}.
+		 * {@link AcceptedSocketServicer}.
 		 */
-		private final AcceptedSocket<R> acceptedSocket;
+		private final AcceptedSocketServicer<R> acceptedSocket;
 
 		/**
 		 * {@link SocketRequest}.
@@ -1171,7 +1548,7 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param acceptedSocket
-		 *            {@link AcceptedSocket}.
+		 *            {@link AcceptedSocketServicer}.
 		 * @param socketRequest
 		 *            {@link SocketRequest}.
 		 * @param responseHeaderWriter
@@ -1180,7 +1557,7 @@ public class SocketManager {
 		 *            Head {@link StreamBuffer} to the linked list of
 		 *            {@link StreamBuffer} instances for the response.
 		 */
-		public SafeWriteResponse(AcceptedSocket<R> acceptedSocket, SocketRequest<R> socketRequest,
+		public SafeWriteResponse(AcceptedSocketServicer<R> acceptedSocket, SocketRequest<R> socketRequest,
 				ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer) {
 			this.acceptedSocket = acceptedSocket;
 			this.socketRequest = socketRequest;
@@ -1195,9 +1572,9 @@ public class SocketManager {
 	private static class SocketRequest<R> implements ResponseWriter {
 
 		/**
-		 * {@link AcceptedSocket}.
+		 * {@link AcceptedSocketServicer}.
 		 */
-		private final AcceptedSocket<R> acceptedSocket;
+		private final AcceptedSocketServicer<R> acceptedSocket;
 
 		/**
 		 * Head request {@link StreamBuffer} of the linked list of
@@ -1225,11 +1602,11 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param acceptedSocket
-		 *            {@link AcceptedSocket}.
+		 *            {@link AcceptedSocketServicer}.
 		 * @param headRequestBuffer
 		 *            Request {@link StreamBuffer} instances.
 		 */
-		private SocketRequest(AcceptedSocket<R> acceptedSocket, StreamBuffer<ByteBuffer> headRequestBuffer) {
+		private SocketRequest(AcceptedSocketServicer<R> acceptedSocket, StreamBuffer<ByteBuffer> headRequestBuffer) {
 			this.acceptedSocket = acceptedSocket;
 			this.headRequestBuffer = headRequestBuffer;
 		}
@@ -1239,60 +1616,79 @@ public class SocketManager {
 		 */
 
 		@Override
-		public void write(ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffers) {
-			this.acceptedSocket.writeResponse(this, responseHeaderWriter, headResponseBuffers);
+		public final void write(ResponseHeaderWriter responseHeaderWriter,
+				StreamBuffer<ByteBuffer> headResponseBuffers) {
+
+			// Appropriately write the response based on thread safety
+			if (this.acceptedSocket.socketListener.isSocketListenerThread()) {
+				this.acceptedSocket.unsafeWriteResponse(this, responseHeaderWriter, headResponseBuffers);
+
+			} else {
+				try {
+					// Writes to the request, so may happen in any order
+					this.acceptedSocket.socketListener.safeWriteSocketHandler.safeWriteResponse(this.acceptedSocket,
+							this, responseHeaderWriter, headResponseBuffers);
+				} catch (IOException ex) {
+					// Failed, so close connection
+					this.acceptedSocket.closeConnection(ex);
+				}
+			}
 		}
 	}
 
 	/**
-	 * Accept {@link Socket} handler.
+	 * Safely closes connection handler.
 	 */
-	private static class AcceptSocketHandler extends AbstractReadHandler {
+	private static class SafeCloseConnectionHandler extends AbstractReadHandler {
 
 		/**
-		 * {@link AcceptedSocket} {@link Pipe}.
+		 * Notify close connection {@link Pipe}.
 		 */
-		private final Pipe acceptedSocketPipe;
+		private final Pipe closeConnectionPipe;
 
 		/**
-		 * {@link SocketListener}.
+		 * {@link SafeCloseConnection} instances to close.
 		 */
-		private final SocketListener listener;
+		private final List<SafeCloseConnection> connectionsToClose = new ArrayList<>();
 
 		/**
-		 * {@link Queue} of {@link AcceptedSocket} instances.
+		 * Indicates if notified.
 		 */
-		private Queue<AcceptedSocket<?>> acceptedSockets = new ConcurrentLinkedQueue<>();
+		private boolean isNotified = false;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param acceptedSocketPipe
-		 *            {@link AcceptedSocket} {@link Pipe}.
-		 * @param listener
-		 *            {@link SocketListener}.
+		 * @param closeConnectionPipe
+		 *            Close connection {@link Pipe}.
 		 */
-		private AcceptSocketHandler(Pipe acceptedSocketPipe, SocketListener listener) {
-			super(acceptedSocketPipe.source());
-			this.acceptedSocketPipe = acceptedSocketPipe;
-			this.listener = listener;
+		private SafeCloseConnectionHandler(Pipe closeConnectionPipe) {
+			super(closeConnectionPipe.source());
+			this.closeConnectionPipe = closeConnectionPipe;
 		}
 
 		/**
-		 * Services an {@link AcceptedSocket}.
+		 * Safely closes the connection.
 		 * 
-		 * @param accceptedSocket
-		 *            {@link AcceptedSocket}.
+		 * @param acceptedSocket
+		 *            {@link AcceptedSocketServicer} to close.
+		 * @param exception
+		 *            Possible {@link Throwable} for cause of closing
+		 *            connection.
 		 * @throws IOException
-		 *             If fails to service the {@link AcceptedSocket}.
+		 *             If fails to close the connection.
 		 */
-		private <R> void serviceAcceptedSocket(AcceptedSocket<R> accceptedSocket) throws IOException {
+		private synchronized final void safeCloseConnection(AcceptedSocketServicer<?> acceptedSocket,
+				Throwable exception) throws IOException {
 
-			// Queue for adding
-			this.acceptedSockets.add(accceptedSocket);
+			// Add to sockets to close
+			this.connectionsToClose.add(new SafeCloseConnection(acceptedSocket, exception));
 
-			// Notify queue accepted sockets
-			this.acceptedSocketPipe.sink().write(NOTIFY_BUFFER.duplicate());
+			// Notify to close the socket
+			if (!this.isNotified) {
+				this.closeConnectionPipe.sink().write(NOTIFY_BUFFER.duplicate());
+				this.isNotified = true;
+			}
 		}
 
 		/*
@@ -1300,29 +1696,59 @@ public class SocketManager {
 		 */
 
 		@Override
-		public void handleRead() {
+		public final void handleRead() {
+
+			// Safely within the SocketListener thread
+
+			// Take copy to minimise service threads blocking to send
+			SafeCloseConnection[] connectionsToClose;
+			synchronized (this) {
+				this.isNotified = false; // no longer notified
+				connectionsToClose = this.connectionsToClose
+						.toArray(new SafeCloseConnection[this.connectionsToClose.size()]);
+				this.connectionsToClose.clear();
+			}
 
 			// Release buffer (as content not important, only notification)
 			this.readBuffer.release();
 			this.readBuffer = null;
 
-			// Register the accepted sockets
-			Iterator<AcceptedSocket<?>> iterator = this.acceptedSockets.iterator();
-			while (iterator.hasNext()) {
-
-				// Obtain the accepted socket and register
-				AcceptedSocket<?> acceptedSocket = iterator.next();
-				try {
-					acceptedSocket.socketListener = this.listener;
-					acceptedSocket.selectionKey = acceptedSocket.socketChannel.register(this.listener.selector,
-							SelectionKey.OP_READ, acceptedSocket);
-				} catch (IOException ex) {
-					LOGGER.log(Level.WARNING, "Failed to register accepted socket", ex);
-				}
-
-				// Socket registered, so remove
-				iterator.remove();
+			// Close the accepted sockets
+			for (int i = 0; i < connectionsToClose.length; i++) {
+				SafeCloseConnection connection = connectionsToClose[i];
+				connection.acceptedSocket.unsafeCloseConnection(connection.exception);
 			}
+		}
+	}
+
+	/**
+	 * Safe close connection.
+	 */
+	private static class SafeCloseConnection {
+
+		/**
+		 * {@link AcceptedSocketServicer} to close.
+		 */
+		private final AcceptedSocketServicer<?> acceptedSocket;
+
+		/**
+		 * Possible {@link Throwable} for cuase of closing the connection.
+		 * <code>null</code> if normal close.
+		 */
+		private final Throwable exception;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param acceptedSocket
+		 *            {@link AcceptedSocketServicer} to close.
+		 * @param exception
+		 *            Possible {@link Throwable} for cuase of closing the
+		 *            connection. <code>null</code> if normal close.
+		 */
+		public SafeCloseConnection(AcceptedSocketServicer<?> acceptedSocket, Throwable exception) {
+			this.acceptedSocket = acceptedSocket;
+			this.exception = exception;
 		}
 	}
 
@@ -1354,7 +1780,7 @@ public class SocketManager {
 		 */
 
 		@Override
-		public void handleRead() {
+		public final void handleRead() {
 
 			// Release buffer (as content not important, only notification)
 			this.readBuffer.release();
@@ -1362,57 +1788,11 @@ public class SocketManager {
 
 			// Terminate all keys
 			for (SelectionKey key : this.listener.selector.keys()) {
-				SocketManager.terminteSelectionKey(key);
+				SocketManager.terminteSelectionKey(key, this.listener);
 			}
 
 			// Flag to shutdown
 			this.listener.isShutdown = true;
-		}
-	}
-
-	/**
-	 * Accept handler.
-	 */
-	private static class AcceptHandler<R> {
-
-		/**
-		 * {@link ServerSocketChannel}.
-		 */
-		private final ServerSocketChannel channel;
-
-		/**
-		 * {@link AcceptedSocketDecorator}.
-		 */
-		private final AcceptedSocketDecorator acceptedSocketDecorator;
-
-		/**
-		 * {@link SocketServicerFactory}.
-		 */
-		private final SocketServicerFactory<R> socketServicerFactory;
-
-		/**
-		 * {@link RequestServicerFactory}.
-		 */
-		private final RequestServicerFactory<R> requestServicerFactory;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param channel
-		 *            {@link ServerSocketChannel}.
-		 * @param acceptedSocketDecorator
-		 *            {@link AcceptedSocketDecorator}.
-		 * @param socketServicerFactory
-		 *            {@link SocketServicer}.
-		 * @param requestServicerFactory
-		 *            {@link RequestServicer}.
-		 */
-		private AcceptHandler(ServerSocketChannel channel, AcceptedSocketDecorator acceptedSocketDecorator,
-				SocketServicerFactory<R> socketServicerFactory, RequestServicerFactory<R> requestServicerFactory) {
-			this.channel = channel;
-			this.acceptedSocketDecorator = acceptedSocketDecorator;
-			this.socketServicerFactory = socketServicerFactory;
-			this.requestServicerFactory = requestServicerFactory;
 		}
 	}
 

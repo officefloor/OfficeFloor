@@ -211,7 +211,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	@Override
 	protected void runTest() throws Throwable {
-
+		
 		// Validate the configuration
 		assertTrue("Must have at least 1 communication", this.configuration.communications.size() > 0);
 		for (CommunicationConfig communication : this.configuration.communications) {

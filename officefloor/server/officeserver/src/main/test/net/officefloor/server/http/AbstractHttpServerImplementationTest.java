@@ -63,11 +63,6 @@ import net.officefloor.server.stream.ServerWriter;
 public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFrameTestCase {
 
 	/**
-	 * Number of pipeline requests.
-	 */
-	private static final int PIPELINE_REQUEST_COUNT = 1000000;
-
-	/**
 	 * HTTP non-secure port.
 	 */
 	private static final int HTTP_PORT = 7878;
@@ -344,7 +339,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 			// Ensure correct data
 			for (int i = 0; i < expectedResponseData.length; i++) {
-				assertEquals("Incorrect response byte " + i, expectedResponseData[i], actualResponseData[i]);
+				assertEquals(
+						"Incorrect response byte " + i + " (of " + expectedResponseData.length + " bytes)\n\nExpected: "
+								+ new String(expectedResponseData) + "\n\nActual: " + new String(actualResponseData),
+						expectedResponseData[i], actualResponseData[i]);
 			}
 		}
 	}
@@ -415,7 +413,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		executor.doPipelineRun(100000).printResult(this.getName() + " WARMUP");
 
 		// Undertake performance run
-		PipelineResult result = executor.doPipelineRun(PIPELINE_REQUEST_COUNT);
+		PipelineResult result = executor.doPipelineRun(1000000);
 		result.printResult(this.getName() + " RUN");
 
 		// Load for comparison
@@ -437,15 +435,59 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Undertakes the heavy pipelining test.
+	 * Undertakes the heavy load test.
+	 * 
+	 * @param isOfficeFloor
+	 *            Indicates if {@link OfficeFloor}.
+	 */
+	private void doHeavyLoadTest(boolean isOfficeFloor) throws Exception {
+		// CPU for client and server
+		int clientCount = Runtime.getRuntime().availableProcessors() / 2;
+		if (clientCount == 0) {
+			clientCount = 1; // ensure at least one client
+		}
+		this.doMultiClientLoadTest(isOfficeFloor, clientCount, 1000000, "Heavy Load (" + clientCount + " clients)");
+	}
+
+	/**
+	 * Ensure can service overload requests pipelined.
+	 */
+	public void testOfficeFloorOverLoad() throws Exception {
+		this.doOverLoadTest(true);
+	}
+
+	/**
+	 * Ensure can service over requests pipelined.
+	 */
+	public void testRawOverLoad() throws Exception {
+		this.doOverLoadTest(false);
+	}
+
+	/**
+	 * Undertakes the over load test.
+	 * 
+	 * @param isOfficeFloor
+	 *            Indicates if {@link OfficeFloor}.
+	 */
+	private void doOverLoadTest(boolean isOfficeFloor) throws Exception {
+		int clientCount = Runtime.getRuntime().availableProcessors() * 4;
+		this.doMultiClientLoadTest(isOfficeFloor, clientCount, 100000, "Over Load (" + clientCount + " clients)");
+	}
+
+	/**
+	 * Undertakes the multi-client pipelining test.
 	 * 
 	 * @param isOfficeFloor
 	 *            IF is {@link OfficeFloor} HTTP server.
+	 * @param clientCount
+	 *            Number of simultaneous clients.
+	 * @param requestCount
+	 *            Number of requests per client.
+	 * @param resultName
+	 *            Name of result fo comparison.
 	 */
-	public void doHeavyLoadTest(boolean isOfficeFloor) throws Exception {
-
-		// Number of clients
-		final int CLIENT_COUNT = 2;
+	public void doMultiClientLoadTest(boolean isOfficeFloor, int clientCount, int requestCount, String resultName)
+			throws Exception {
 
 		// Start the HTTP server
 		if (isOfficeFloor) {
@@ -456,15 +498,18 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			this.momento = this.startRawHttpServer(HTTP_PORT);
 		}
 
+		// Indicate details of test
+		System.out.println("========= " + (isOfficeFloor ? "OfficeFloor" : "Raw") + " " + resultName + " =========");
+
 		// Create the pipeline executors
 		@SuppressWarnings("unchecked")
-		PipelineExecutor[] executors = new AbstractHttpServerImplementationTest.PipelineExecutor[CLIENT_COUNT];
-		for (int i = 0; i < CLIENT_COUNT; i++) {
-			executors[i] = new PipelineExecutor(HTTP_PORT, PIPELINE_REQUEST_COUNT);
+		PipelineExecutor[] executors = new AbstractHttpServerImplementationTest.PipelineExecutor[clientCount];
+		for (int i = 0; i < clientCount; i++) {
+			executors[i] = new PipelineExecutor(HTTP_PORT, requestCount);
 		}
 
 		// Do warm up
-		executors[0].doPipelineRun(100000).printResult(this.getName() + " WARMUP");
+		executors[0].doPipelineRun(requestCount).printResult(this.getName() + " WARMUP");
 
 		// Run the executors
 		for (PipelineExecutor executor : executors) {
@@ -472,8 +517,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 
 		// Wait for completion of run
-		PipelineResult[] results = new PipelineResult[CLIENT_COUNT];
-		for (int i = 0; i < CLIENT_COUNT; i++) {
+		PipelineResult[] results = new PipelineResult[clientCount];
+		for (int i = 0; i < clientCount; i++) {
 			results[i] = executors[i].waitForCompletion();
 		}
 
@@ -481,7 +526,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		long minStartTime = results[0].startTime;
 		long maxEndTime = results[0].endTime;
 		int totalRequests = 0;
-		for (int i = 0; i < CLIENT_COUNT; i++) {
+		for (int i = 0; i < clientCount; i++) {
 			PipelineResult result = results[i];
 			result.printResult(this.getName() + " CLIENT-" + i);
 			minStartTime = (result.startTime < minStartTime) ? result.startTime : minStartTime;
@@ -492,7 +537,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		result.printResult(this.getName() + " TOTAL");
 
 		// Provide results for comparison
-		CompareResult.setResult("Heavy Load", isOfficeFloor, result);
+		CompareResult.setResult(resultName, isOfficeFloor, result);
 	}
 
 	/**
@@ -621,7 +666,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			int requestDataSent = 0;
 			int requestSentCount = 0;
 			int responseReceivedCount = 0;
-			ByteBuffer responseBuffer = ByteBuffer.allocateDirect(1000);
+			ByteBuffer responseBuffer = ByteBuffer.allocateDirect(1024);
 			int responseDataPosition = 0;
 
 			// Record start time
@@ -637,7 +682,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 				}
 
 				// Wait for some data
-				this.selector.select(10);
+				this.selector.select(50);
 
 				// Send the request
 				if (selectionKey.isWritable()) {

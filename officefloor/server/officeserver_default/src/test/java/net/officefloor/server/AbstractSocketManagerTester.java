@@ -22,6 +22,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
@@ -69,6 +71,11 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * {@link SslSocketServicerFactory}.
 	 */
 	private SslSocketServicerFactory<?> sslSocketServicerFactory = null;
+
+	/**
+	 * {@link TestThread} instances used for testing.
+	 */
+	private Deque<TestThread> testThreads = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * Creates a client {@link Socket}.
@@ -175,6 +182,11 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		if (this.tester != null) {
 			this.tester.manager.shutdown();
 			this.tester.waitForCompletion();
+		}
+
+		// Ensure all test threads complete without issue
+		for (TestThread testThread : this.testThreads) {
+			testThread.waitForCompletion(System.currentTimeMillis());
 		}
 	}
 
@@ -311,9 +323,30 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Delays running.
+	 * 
+	 * @param runnable
+	 *            {@link Runnable}.
+	 */
+	protected void delay(Runnable runnable) {
+		Runnable delay = () -> {
+
+			// Sleep some time to mimic delay
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException ex) {
+			}
+
+			// Run delayed
+			runnable.run();
+		};
+		new TestThread(delay).start();
+	}
+
+	/**
 	 * {@link Thread} for testing.
 	 */
-	protected class TestThread extends Thread {
+	private class TestThread extends Thread {
 
 		private final Runnable runnable;
 
@@ -321,13 +354,16 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 		public TestThread(Runnable runnable) {
 			this.runnable = runnable;
+
+			// Register this test thread
+			AbstractSocketManagerTester.this.testThreads.add(this);
 		}
 
-		protected void waitForCompletion(long startTime) {
+		private void waitForCompletion(long startTime) {
 			this.waitForCompletion(startTime, 3);
 		}
 
-		protected synchronized void waitForCompletion(long startTime, int secondsToRun) {
+		private synchronized void waitForCompletion(long startTime, int secondsToRun) {
 			while (this.completion == null) {
 
 				// Determine if timed out
