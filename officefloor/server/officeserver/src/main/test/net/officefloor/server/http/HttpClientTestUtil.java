@@ -103,7 +103,7 @@ public class HttpClientTestUtil {
 	public static CloseableHttpClient createHttpClient(boolean isSecure) {
 
 		// Provide timeout of requests
-		final int timeout = 1000; // 1 seconds
+		final int timeout = 1000; // 1 second
 		RequestConfig.Builder requestTimeout = RequestConfig.custom();
 		requestTimeout.setSocketTimeout(timeout);
 		requestTimeout.setConnectTimeout(timeout);

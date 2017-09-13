@@ -215,7 +215,7 @@ public class StreamBufferScanner {
 		// Append to previous bytes
 		remaining = Math.min(remaining, 8 - this.bufferLongByteCount);
 		this.bufferLongByteCount += remaining; // will be appending bytes
-		while (remaining != 0) {
+		while (remaining > 0) {
 			switch (remaining) {
 			case 7:
 			case 6:

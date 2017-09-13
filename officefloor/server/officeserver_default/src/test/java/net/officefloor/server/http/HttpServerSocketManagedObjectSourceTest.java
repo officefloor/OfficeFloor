@@ -98,7 +98,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 		// Ensure can create a secure connection
 		try (Socket socket = OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
 				.createSocket(InetAddress.getLocalHost(), 7979)) {
-			socket.setSoTimeout(0);
+			socket.setSoTimeout(1000);
 
 			// Send the request
 			socket.getOutputStream().write(request);

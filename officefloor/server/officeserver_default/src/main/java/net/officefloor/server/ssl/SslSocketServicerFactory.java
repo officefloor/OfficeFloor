@@ -172,12 +172,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		private final Deque<ByteBuffer> socketToUnwrapBuffers = new LinkedList<>();
 
 		/**
-		 * {@link StreamBuffer} instance containing the {@link Socket} data to
-		 * unwrap.
-		 */
-		private StreamBuffer<ByteBuffer> currentSocketToUnwrapBuffer = null;
-
-		/**
 		 * Limit of the current {@link Socket} data to unwrap
 		 * {@link ByteBuffer}.
 		 */
@@ -241,12 +235,12 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 */
 
 		@Override
-		public synchronized void service(StreamBuffer<ByteBuffer> readBuffer) {
+		public synchronized void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer) {
 
 			// Include the read data
 			ByteBuffer buffer = readBuffer.pooledBuffer.duplicate();
 			buffer.flip();
-			if (this.currentSocketToUnwrapBuffer == readBuffer) {
+			if (!isNewBuffer) {
 				// Same buffer, so add just the new data
 				buffer.position(this.currentSocketToUnwrapLimit);
 			}
@@ -256,9 +250,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 			// Add to the data to be processed
 			this.socketToUnwrapBuffers.add(buffer);
-
-			// Now current buffer
-			this.currentSocketToUnwrapBuffer = readBuffer;
 
 			// Process (with handshake data written immediately)
 			this.process(null);
@@ -559,7 +550,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 										: new ServiceUnpooledStreamBuffer(this.currentUnwrapToAppBuffer);
 
 								// Service the request
-								this.delegateSocketServicer.service(serviceStreamBuffer);
+								this.delegateSocketServicer.service(serviceStreamBuffer, true);
 
 							} else {
 								// Release the unused buffer
@@ -839,12 +830,12 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 				}
 
 			} finally {
-				
+
 				// Finished processing SSL task
 				synchronized (this.sslSocketServicer) {
 					this.sslSocketServicer.sslRunnable = null;
 				}
-				
+
 				// Continue processing request
 				this.sslSocketServicer.requestHandler.execute(this.sslSocketServicer);
 			}

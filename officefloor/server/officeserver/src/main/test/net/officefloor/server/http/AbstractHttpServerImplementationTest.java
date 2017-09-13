@@ -332,10 +332,17 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Send the request
 			socket.getOutputStream().write(this.createPipelineRequestData());
 
-			// Obtain the response
+			// Obtain the response (may require multiple reads as data comes in)
 			byte[] expectedResponseData = this.createPipelineResponseData();
 			byte[] actualResponseData = new byte[expectedResponseData.length];
-			socket.getInputStream().read(actualResponseData);
+			int totalBytesRead = 0;
+			while (totalBytesRead != expectedResponseData.length) {
+				int bytesRead = socket.getInputStream().read(actualResponseData, totalBytesRead,
+						(expectedResponseData.length - totalBytesRead));
+				assertTrue("Must read bytes\n\nExpected: " + new String(expectedResponseData) + "\n\nActual: "
+						+ new String(actualResponseData, 0, totalBytesRead), bytesRead > 0);
+				totalBytesRead += bytesRead;
+			}
 
 			// Ensure correct data
 			for (int i = 0; i < expectedResponseData.length; i++) {

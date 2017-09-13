@@ -150,7 +150,7 @@ public abstract class AbstractHttpServicerFactory
 		 */
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer) {
 
 			// Add the buffer
 			this.appendStreamBuffer(readBuffer);

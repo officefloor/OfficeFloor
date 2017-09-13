@@ -509,10 +509,13 @@ public class SocketManager {
 								AbstractReadHandler handler = (AbstractReadHandler) selectedKey.attachment();
 
 								// Ensure have buffer to handle read
+								// Need to track if new (as pool buffers)
+								boolean isNewBuffer = false;
 								if ((handler.readBuffer == null)
 										|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
 									// Require a new buffer
 									handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
+									isNewBuffer = true;
 								}
 
 								// Obtain the byte buffer
@@ -535,7 +538,7 @@ public class SocketManager {
 								}
 
 								// Handle the read
-								handler.handleRead();
+								handler.handleRead(isNewBuffer);
 							}
 
 							// Determine if write content
@@ -652,10 +655,12 @@ public class SocketManager {
 		/**
 		 * Handles the read.
 		 * 
+		 * @param isNewBuffer
+		 *            Indicates if new {@link StreamBuffer}.
 		 * @throws Throwable
 		 *             If fails to handle read.
 		 */
-		public abstract void handleRead() throws Throwable;
+		public abstract void handleRead(boolean isNewBuffer) throws Throwable;
 
 		/**
 		 * Releases the {@link StreamBuffer} instances used by this
@@ -735,7 +740,7 @@ public class SocketManager {
 
 		@Override
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public synchronized final void handleRead() {
+		public synchronized final void handleRead(boolean isNewBuffer) {
 
 			// No longer notified
 			this.isNotified = false;
@@ -1151,12 +1156,12 @@ public class SocketManager {
 		 */
 
 		@Override
-		public final void handleRead() {
+		public final void handleRead(boolean isNewBuffer) {
 
 			// Only invoked by Socket Listener thread
 
 			// Keep track of buffers (to enable releasing)
-			if ((this.previousRequestBuffer != null) && (this.previousRequestBuffer != this.readBuffer)) {
+			if (isNewBuffer && (this.previousRequestBuffer != null)) {
 				// New buffer (release previous on servicing request)
 				this.previousRequestBuffer.next = this.releaseRequestBuffers;
 				this.releaseRequestBuffers = this.previousRequestBuffer;
@@ -1164,7 +1169,7 @@ public class SocketManager {
 			this.previousRequestBuffer = this.readBuffer;
 
 			// Service the socket
-			this.socketServicer.service(this.readBuffer);
+			this.socketServicer.service(this.readBuffer, isNewBuffer);
 
 			// Ensure flush writes
 			this.unsafeFlushWrites();
@@ -1359,7 +1364,7 @@ public class SocketManager {
 		 */
 
 		@Override
-		public final void handleRead() {
+		public final void handleRead(boolean isNewBuffer) {
 
 			// Safely within the SocketListener thread
 
@@ -1486,7 +1491,7 @@ public class SocketManager {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public final void handleRead() {
+		public final void handleRead(boolean isNewBuffer) {
 
 			// Safely within the SocketListener thread
 
@@ -1696,7 +1701,7 @@ public class SocketManager {
 		 */
 
 		@Override
-		public final void handleRead() {
+		public final void handleRead(boolean isNewBuffer) {
 
 			// Safely within the SocketListener thread
 
@@ -1780,7 +1785,7 @@ public class SocketManager {
 		 */
 
 		@Override
-		public final void handleRead() {
+		public final void handleRead(boolean isNewBuffer) {
 
 			// Release buffer (as content not important, only notification)
 			this.readBuffer.release();

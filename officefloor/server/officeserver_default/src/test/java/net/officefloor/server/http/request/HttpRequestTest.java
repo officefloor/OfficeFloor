@@ -91,7 +91,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 						DeployedOfficeInput serviceInput = extension.getDeployedOffice()
 								.getDeployedOfficeInput("SECTION", "service");
 						HttpServer.configureHttpServer(7878, 7979, new OfficeFloorHttpServerImplementation(),
-								OfficeFloorDefaultSslContextSource.createClientSslContext(null), serviceInput,
+								OfficeFloorDefaultSslContextSource.createServerSslContext(null), serviceInput,
 								extension.getOfficeFloorDeployer(), extension.getOfficeFloorSourceContext());
 					});
 					compile.office((extension) -> {
@@ -211,7 +211,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	@Override
 	protected void runTest() throws Throwable {
-		
+
 		// Validate the configuration
 		assertTrue("Must have at least 1 communication", this.configuration.communications.size() > 0);
 		for (CommunicationConfig communication : this.configuration.communications) {

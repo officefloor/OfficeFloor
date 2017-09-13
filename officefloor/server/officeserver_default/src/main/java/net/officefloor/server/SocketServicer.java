@@ -21,6 +21,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Services the {@link Socket}.
@@ -36,8 +37,14 @@ public interface SocketServicer<R> {
 	 *            {@link StreamBuffer} containing the just read bytes. Note that
 	 *            this could be the same {@link StreamBuffer} as previous, with
 	 *            just further bytes written.
+	 * @param isNewBuffer
+	 *            Indicates if the {@link StreamBuffer} is a new
+	 *            {@link StreamBuffer}. Due to {@link StreamBufferPool}, the
+	 *            same {@link StreamBuffer} may be re-used. This flag indicates
+	 *            if a new {@link StreamBuffer} with new data, even if same
+	 *            {@link StreamBuffer} instance.
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer);
+	void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer);
 
 	/**
 	 * Releases this {@link SocketServicer} from use.
