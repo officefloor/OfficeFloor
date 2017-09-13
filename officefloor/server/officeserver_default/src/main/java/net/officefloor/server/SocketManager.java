@@ -1161,7 +1161,7 @@ public class SocketManager {
 			// Only invoked by Socket Listener thread
 
 			// Keep track of buffers (to enable releasing)
-			if (isNewBuffer && (this.previousRequestBuffer != null)) {
+			if ((this.previousRequestBuffer != null) && (this.readBuffer != this.previousRequestBuffer)) {
 				// New buffer (release previous on servicing request)
 				this.previousRequestBuffer.next = this.releaseRequestBuffers;
 				this.releaseRequestBuffers = this.previousRequestBuffer;
@@ -1202,9 +1202,10 @@ public class SocketManager {
 					headRequest = headRequest.next;
 					release.release();
 				}
-				while (this.head.headResponseBuffer != null) {
-					StreamBuffer<ByteBuffer> release = this.head.headResponseBuffer;
-					this.head.headResponseBuffer = this.head.headResponseBuffer.next;
+				StreamBuffer<ByteBuffer> headResponse = this.head.headResponseBuffer;
+				while (headResponse != null) {
+					StreamBuffer<ByteBuffer> release = headResponse;
+					headResponse = headResponse.next;
 					release.release();
 				}
 				this.head = this.head.next;

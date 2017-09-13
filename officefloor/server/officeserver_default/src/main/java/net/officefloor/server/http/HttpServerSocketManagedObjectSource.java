@@ -18,11 +18,17 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -158,7 +164,12 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * {@link ExecutorService} for executing {@link SocketManager}.
 	 */
-	private static ExecutorService executor;
+	private static ExecutorService executorService;
+
+	/**
+	 * {@link ServiceExecutor}.
+	 */
+	private static ServiceExecutor executor;
 
 	/**
 	 * Registered {@link HttpServerSocketManagedObjectSource} instances.
@@ -224,7 +235,8 @@ public class HttpServerSocketManagedObjectSource
 			singletonSocketManager = new SocketManager(numberOfSocketListeners, bufferPool, bufferSize);
 
 			// Create the executor service
-			executor = Executors.newCachedThreadPool();
+			executorService = Executors.newCachedThreadPool();
+			executor = new ServiceExecutor();
 
 			// Run the socket listeners
 			Runnable[] runnables = singletonSocketManager.getRunnables();
@@ -238,6 +250,139 @@ public class HttpServerSocketManagedObjectSource
 
 		// Return the singleton connection manager
 		return singletonSocketManager;
+	}
+
+	/**
+	 * Keeps track of active {@link Thread} instances.
+	 */
+	private static class ServiceExecutor implements Executor {
+
+		/**
+		 * Active {@link Thread}.
+		 */
+		private List<Thread> activeThreads = new LinkedList<>();
+
+		/**
+		 * Indicates whether to dump the active {@link Thread} instances.
+		 */
+		private boolean isDump = true;
+
+		/**
+		 * Obtains the active {@link Thread} instances and their current
+		 * {@link StackTraceElement} instances.
+		 */
+		private Map<Thread, StackTraceElement[]> getActiveThreads() {
+			synchronized (this.activeThreads) {
+
+				// Obtain the stack traces of active threads
+				Map<Thread, StackTraceElement[]> threads = new HashMap<>();
+				for (Thread activeThread : this.activeThreads) {
+					threads.put(activeThread, activeThread.getStackTrace());
+				}
+
+				// Return the active threads
+				return threads;
+			}
+		}
+
+		/**
+		 * Dumps the active {@link Thread} instances after the specified time.
+		 * 
+		 * @param timeInMilliseconds
+		 *            Time in milliseconds to dump the active {@link Thread}
+		 *            instances.
+		 */
+		private void dumpActiveThreadsAfter(long timeInMilliseconds) {
+			long startTime = System.currentTimeMillis();
+			new Thread(() -> {
+				synchronized (this.activeThreads) {
+
+					// Determine if should dump
+					if (!this.isDump) {
+						return;
+					}
+
+					// Wait the specified period of time
+					try {
+						this.activeThreads.wait(timeInMilliseconds);
+					} catch (InterruptedException ex) {
+						// ignore, and carry on
+					}
+
+					// Determine if should dump
+					if (!this.isDump) {
+						return;
+					}
+
+					// Obtain the active threads
+					Map<Thread, StackTraceElement[]> activeThreads = this.getActiveThreads();
+
+					// Max stack trace depth
+					final int maxDepth = 15;
+
+					// Dump the active threads
+					PrintStream writer = System.err;
+					writer.println(SocketManager.class.getSimpleName() + " waited "
+							+ (System.currentTimeMillis() - startTime) + " milliseconds for shutdown");
+					writer.println();
+					writer.println("Waiting on active threads:");
+					for (Thread thread : activeThreads.keySet()) {
+						StackTraceElement[] stackTrace = activeThreads.get(thread);
+						writer.println();
+						writer.println("Thread: " + thread.getName());
+						for (int i = 0; i < Math.min(maxDepth, stackTrace.length); i++) {
+							StackTraceElement element = stackTrace[i];
+							writer.print("\t");
+							writer.println(element.toString());
+						}
+						if (stackTrace.length > maxDepth) {
+							writer.println("\t... (" + (stackTrace.length - maxDepth) + " more)");
+						}
+						writer.println();
+					}
+				}
+			}).start();
+		}
+
+		/**
+		 * Stops the dump.
+		 */
+		private void stopDump() {
+			synchronized (this.activeThreads) {
+
+				// Flag not to dump
+				this.isDump = false;
+
+				// Notify, so don't wait
+				this.activeThreads.notify();
+			}
+		}
+
+		/**
+		 * ================= Executor =======================
+		 */
+
+		@Override
+		public void execute(Runnable command) {
+			executorService.execute(() -> {
+				Thread currentThread = Thread.currentThread();
+				try {
+					// Register this thread
+					synchronized (this.activeThreads) {
+						this.activeThreads.add(currentThread);
+					}
+
+					// Undertake the functionality
+					command.run();
+
+				} finally {
+					// Unregister this thread
+					synchronized (this.activeThreads) {
+						this.activeThreads.remove(currentThread);
+					}
+				}
+			});
+		}
 	}
 
 	/**
@@ -260,16 +405,21 @@ public class HttpServerSocketManagedObjectSource
 			singletonSocketManager.shutdown();
 
 			// Wait on shut down
-			executor.shutdown();
+			executorService.shutdown();
 			try {
-				executor.awaitTermination(10, TimeUnit.SECONDS);
+				int waitTime = 10; // 10 seconds
+				executor.dumpActiveThreadsAfter((waitTime - 1) * 1000);
+				executorService.awaitTermination(10, TimeUnit.SECONDS);
 			} catch (InterruptedException ex) {
 				throw new IOException("Interrupted waiting on Socket Manager shut down", ex);
+			} finally {
+				executor.stopDump();
 			}
 		}
 
 		// Close (release) the socket manager to create again
 		singletonSocketManager = null;
+		executorService = null;
 		executor = null;
 	}
 

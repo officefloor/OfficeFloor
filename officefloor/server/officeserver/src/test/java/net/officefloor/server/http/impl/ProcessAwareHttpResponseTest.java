@@ -70,7 +70,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 		// Ensure correct defaults
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
-		assertEquals("Incorrect status", HttpStatus.OK, this.status);
+		assertEquals("Incorrect status", HttpStatus.NO_CONTENT, this.status);
 		assertNull("Should be no headers", this.httpHeader);
 		assertNull("Should be no entity data", this.contentHeadStreamBuffer);
 	}

@@ -43,7 +43,6 @@ import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockNonMaterialisedHttpHeaders;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
-import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
@@ -145,7 +144,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 
 		// Validate the default details
 		assertEquals("Incorrect version", this.requestVersion, this.responseVersion);
-		assertEquals("Incorect status", HttpStatus.OK, this.status);
+		assertEquals("Incorect status", HttpStatus.NO_CONTENT, this.status);
 		assertNull("Should be no headers", this.responseHeader);
 		assertEquals("Should be no entity", 0, this.contentLength);
 		assertNull("No Content-Type for no entity", this.contentType);
@@ -202,7 +201,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 
 		// Flush response
 		connection.getServiceFlowCallback().run(null);
-		assertSame("Should now write response", HttpStatus.OK, this.status);
+		assertSame("Should now write response", HttpStatus.NO_CONTENT, this.status);
 
 		// Ensure only flushes once
 		this.status = null;
