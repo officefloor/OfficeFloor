@@ -222,7 +222,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 		// Create the HTTP Client to send requests
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(this.isSecure)) {
-
+			
 			System.out.println("====== " + this.getName() + " ======");
 
 			// Run the communications

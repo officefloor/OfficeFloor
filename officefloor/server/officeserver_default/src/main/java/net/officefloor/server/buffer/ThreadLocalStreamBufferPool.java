@@ -211,6 +211,9 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 			pooledBuffer.pooledBuffer.clear();
 			pooledBuffer.next = null;
 		}
+		
+		// Flag as active
+		((PooledStreamBuffer) pooledBuffer).isActive = true;
 
 		// Return the pooled buffer
 		return pooledBuffer;
@@ -239,8 +242,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		StreamBuffer<ByteBuffer> buffer = pool.threadHead;
 		while (buffer != null) {
 
-			// Obtain the release buffer (must obtain next, as release sets
-			// next)
+			// Obtain release buffer (must obtain next, as release sets next)
 			StreamBuffer<ByteBuffer> release = buffer;
 			buffer = buffer.next;
 
@@ -253,6 +255,11 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	 * Pooled {@link StreamBuffer}.
 	 */
 	private class PooledStreamBuffer extends StreamBuffer<ByteBuffer> {
+
+		/**
+		 * Ensure only release back to pool once.
+		 */
+		private volatile boolean isActive = false;
 
 		/**
 		 * Instantiate.
@@ -296,6 +303,12 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 
 		@Override
 		public void release() {
+
+			// Ensure only release once
+			if (!this.isActive) {
+				return;
+			}
+			this.isActive = false; // released
 
 			// Easy access to pool
 			ThreadLocalStreamBufferPool bufferPool = ThreadLocalStreamBufferPool.this;

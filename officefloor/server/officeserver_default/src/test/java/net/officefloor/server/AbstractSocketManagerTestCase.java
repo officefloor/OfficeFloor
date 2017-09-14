@@ -69,9 +69,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester.bindServerSocket((socket) -> {
 			serverSocket.value = socket;
 			return 1000;
-		}, (socket) -> acceptedSocket.set(socket),
-				(requestHandler) -> (buffer,
-						isNewBuffer) -> fail("Should not be invoked, as only accepting connection"),
+		}, (socket) -> {
+			acceptedSocket.set(socket);
+		}, (requestHandler) -> (buffer, isNewBuffer) -> fail("Should not be invoked, as only accepting connection"),
 				(socketServicer) -> (request, responseWriter) -> fail("Should not be invoked, as no requests"));
 		assertNotNull("Should have bound server socket", serverSocket.value);
 
@@ -84,6 +84,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Ensure connects (must wait for connection)
 			acceptedSocket.waitAndGet();
 		}
+		
+		// Avoid shutting down too quickly
+		Thread.sleep(1000);
 	}
 
 	/**

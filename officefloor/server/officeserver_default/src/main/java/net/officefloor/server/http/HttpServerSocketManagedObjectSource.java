@@ -222,7 +222,7 @@ public class HttpServerSocketManagedObjectSource
 			// Obtain configuration of socket manager (with reasonable defaults)
 			int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
 					Runtime.getRuntime().availableProcessors());
-			int bufferSize = getSystemProperty(SYSTEM_PROPERTY_BUFFER_SIZE, 65536);
+			int bufferSize = getSystemProperty(SYSTEM_PROPERTY_BUFFER_SIZE, 4096);
 			int maxThreadLocalPoolSize = getSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
 					Integer.MAX_VALUE);
 			int maxCorePoolSize = getSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);

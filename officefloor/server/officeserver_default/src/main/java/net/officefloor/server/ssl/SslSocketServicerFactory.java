@@ -241,8 +241,15 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			ByteBuffer buffer = readBuffer.pooledBuffer.duplicate();
 			buffer.flip();
 			if (!isNewBuffer) {
+				
+				try {
+				
 				// Same buffer, so add just the new data
 				buffer.position(this.currentSocketToUnwrapLimit);
+				
+				} catch (IllegalArgumentException ex) {
+					ex.printStackTrace();
+				}
 			}
 
 			// Set the limit after the newly read data
@@ -463,15 +470,17 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						}
 
 						// Obtain the unwrap to application buffer
+						boolean isNewBuffer = false;
 						ByteBuffer unwrapBuffer;
 						if (this.currentUnwrapToAppBuffer == null) {
 							// Must have buffer
 							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
 									.getPooledStreamBuffer();
 							unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
+							isNewBuffer = true;
 
 						} else {
-							// Obtain the buffer (could be overflow upooled)
+							// Obtain the buffer (could be overflow unpooled)
 							unwrapBuffer = this.currentUnwrapToAppBuffer.isPooled
 									? this.currentUnwrapToAppBuffer.pooledBuffer
 									: this.currentUnwrapToAppBuffer.unpooledByteBuffer;
@@ -495,6 +504,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
 										.getPooledStreamBuffer();
 								unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
+								isNewBuffer = true;
 							}
 						}
 
@@ -525,6 +535,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
 									.getUnpooledStreamBuffer(ByteBuffer.wrap(applicationData));
 							unwrapBuffer = this.currentUnwrapToAppBuffer.unpooledByteBuffer;
+							isNewBuffer = true;
 
 							// Wrap the data
 							sslEngineResult = this.engine.unwrap(readBuffer, unwrapBuffer);
@@ -550,7 +561,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 										: new ServiceUnpooledStreamBuffer(this.currentUnwrapToAppBuffer);
 
 								// Service the request
-								this.delegateSocketServicer.service(serviceStreamBuffer, true);
+								this.delegateSocketServicer.service(serviceStreamBuffer, isNewBuffer);
 
 							} else {
 								// Release the unused buffer

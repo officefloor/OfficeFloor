@@ -44,11 +44,16 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
@@ -222,16 +227,28 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((context) -> {
 
+			// Obtain the deployer
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
 			// Obtain the input
 			DeployedOfficeInput serviceHandler = context.getOfficeFloorDeployer().getDeployedOffice("OFFICE")
 					.getDeployedOfficeInput("SERVICER", "service");
 
 			// Configure the HTTP Server
-			HttpServer.configureHttpServer(HTTP_PORT, HTTPS_PORT, implementation, sslContext, serviceHandler,
-					context.getOfficeFloorDeployer(), context.getOfficeFloorSourceContext());
+			HttpServer.configureHttpServer(HTTP_PORT, HTTPS_PORT, implementation, sslContext, serviceHandler, deployer,
+					context.getOfficeFloorSourceContext());
+
+			// Provide thread object
+			if (sectionServicer == ThreadedServicer.class) {
+				context.addManagedObject("ThreadedManagedObject", ThreadedManagedObject.class,
+						ManagedObjectScope.THREAD);
+				deployer.addTeam("Threaded", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
+						ThreadedManagedObject.class.getName());
+			}
 
 		});
 		compile.office((context) -> {
+			context.getOfficeArchitect().enableAutoWireTeams();
 			context.addSection("SERVICER", sectionServicer);
 		});
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
@@ -273,12 +290,79 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 	}
 
+	public static class ThreadedManagedObject {
+	}
+
+	public static class ThreadedServicer {
+
+		@FlowInterface
+		public static interface Flows {
+			void doFlow(Thread thread);
+		}
+
+		public void service(Flows flows) {
+			flows.doFlow(Thread.currentThread());
+		}
+
+		public void doFlow(ServerHttpConnection connection, @Parameter Thread thread,
+				ThreadedManagedObject managedObject) throws IOException {
+			assertEquals("Incorrect request URI", "/test", connection.getHttpRequest().getRequestURI());
+			assertNotSame("Should be different handling thread", thread, Thread.currentThread());
+			connection.getHttpResponse().getEntityWriter().write("hello world");
+		}
+	}
+
 	/**
 	 * Ensure can send a single HTTP request.
 	 */
 	public void testSingleRequest() throws Exception {
 		this.startHttpServer(Servicer.class);
 		this.doSingleRequest(false);
+	}
+
+	/**
+	 * Ensure can send a single HTTPS request.
+	 */
+	public void testSingleSecureRequest() throws Exception {
+		this.startHttpServer(Servicer.class);
+		this.doSingleRequest(true);
+	}
+
+	/**
+	 * Ensure can send multiple HTTP requests.
+	 */
+	public void testMultipleIndividualRequests() throws Exception {
+		this.startHttpServer(Servicer.class);
+		for (int i = 0; i < 1000; i++) {
+			this.doSingleRequest(false);
+		}
+	}
+
+	/**
+	 * Ensure can send multiple HTTPS requests.
+	 */
+	public void testMultipleIndividualSecureRequests() throws Exception {
+		this.startHttpServer(Servicer.class);
+		for (int i = 0; i < 1000; i++) {
+			this.doSingleRequest(true);
+		}
+	}
+
+	/**
+	 * Ensure can handle request with {@link ThreadedServicer}.
+	 */
+	public void testSingleThreadedHandlerRequest() throws Exception {
+		this.startHttpServer(ThreadedServicer.class);
+		this.doSingleRequest(false);
+	}
+
+	/**
+	 * Ensure can handle request with {@link ThreadedServicer} for a secure
+	 * connection.
+	 */
+	public void testSecureSingleThreadedHandlerRequest() throws Exception {
+		this.startHttpServer(ThreadedServicer.class);
+		this.doSingleRequest(true);
 	}
 
 	/**
@@ -294,34 +378,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Ensure can handle {@link Escalation}.
-	 */
-	public void testHandleError() throws Exception {
-		this.startHttpServer(FailServicer.class);
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:" + HTTP_PORT));
-
-			// Ensure flag as internal server error
-			assertEquals("Incorrect status", 500, response.getStatusLine().getStatusCode());
-
-			// Ensure exception in response
-			StringWriter content = new StringWriter();
-			TEST_EXCEPTION.printStackTrace(new PrintWriter(content));
-			String contentText = content.toString();
-			assertEquals("Incorrect response", contentText, HttpClientTestUtil.getEntityBody(response));
-
-			// Ensure correct header information
-			assertEquals("Incorrect error Content-Length", String.valueOf(contentText.length()),
-					response.getFirstHeader("Content-Length").getValue());
-			assertEquals("Incorrect error Content-Type", "text/plain",
-					response.getFirstHeader("Content-Type").getValue());
-		}
-	}
-
-	/**
 	 * Ensure raw secure request.
 	 */
-	public void testSecureRequest() throws Exception {
+	public void testSecureSocket() throws Exception {
 		this.startHttpServer(Servicer.class);
 
 		// Create connection to server
@@ -355,30 +414,27 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Ensure can send a single HTTPS request.
+	 * Ensure can handle {@link Escalation}.
 	 */
-	public void testSingleSecureRequest() throws Exception {
-		this.startHttpServer(Servicer.class);
-		this.doSingleRequest(true);
-	}
+	public void testHandleError() throws Exception {
+		this.startHttpServer(FailServicer.class);
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet("http://localhost:" + HTTP_PORT));
 
-	/**
-	 * Ensure can send multiple HTTP requests.
-	 */
-	public void testMultipleRequests() throws Exception {
-		this.startHttpServer(Servicer.class);
-		for (int i = 0; i < 1000; i++) {
-			this.doSingleRequest(false);
-		}
-	}
+			// Ensure flag as internal server error
+			assertEquals("Incorrect status", 500, response.getStatusLine().getStatusCode());
 
-	/**
-	 * Ensure can send multiple HTTPS requests.
-	 */
-	public void testMultipleSecureRequests() throws Exception {
-		this.startHttpServer(Servicer.class);
-		for (int i = 0; i < 1000; i++) {
-			this.doSingleRequest(true);
+			// Ensure exception in response
+			StringWriter content = new StringWriter();
+			TEST_EXCEPTION.printStackTrace(new PrintWriter(content));
+			String contentText = content.toString();
+			assertEquals("Incorrect response", contentText, HttpClientTestUtil.getEntityBody(response));
+
+			// Ensure correct header information
+			assertEquals("Incorrect error Content-Length", String.valueOf(contentText.length()),
+					response.getFirstHeader("Content-Length").getValue());
+			assertEquals("Incorrect error Content-Type", "text/plain",
+					response.getFirstHeader("Content-Type").getValue());
 		}
 	}
 
@@ -425,6 +481,51 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Load for comparison
 		CompareResult.setResult("pipelining", isOfficeFloor, result);
+	}
+
+	/**
+	 * Ensure can handle HTTP requests with threaded handler.
+	 */
+	public void testOfficeFloorThreadedHandler() throws Exception {
+		this.doThreadedHandlerTest(true);
+	}
+
+	/**
+	 * Ensure can handle HTTP requests with threaded handler.
+	 */
+	public void testRawThreadedHandler() throws Exception {
+		this.doThreadedHandlerTest(false);
+	}
+
+	/**
+	 * Undertakes the threaded handler test.
+	 * 
+	 * @param isOfficeFloor
+	 *            If is {@link OfficeFloor} HTTP server.
+	 */
+	private void doThreadedHandlerTest(boolean isOfficeFloor) throws Exception {
+
+		// Start the HTTP server
+		if (isOfficeFloor) {
+			// Start the OfficeFloor HTTP server
+			this.startHttpServer(ThreadedServicer.class);
+		} else {
+			// Start the Raw HTTP server
+			this.momento = this.startRawHttpServer(HTTP_PORT);
+		}
+
+		// Create pipeline executor
+		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT, 1000);
+
+		// Do warm up
+		executor.doPipelineRun(100).printResult(this.getName() + " WARMUP");
+
+		// Undertake performance run
+		PipelineResult result = executor.doPipelineRun(1000);
+		result.printResult(this.getName() + " RUN");
+
+		// Load for comparison
+		CompareResult.setResult("threaded-handler", isOfficeFloor, result);
 	}
 
 	/**

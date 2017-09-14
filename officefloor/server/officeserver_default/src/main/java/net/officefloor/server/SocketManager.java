@@ -147,6 +147,10 @@ public class SocketManager {
 						AbstractReadHandler handler = (AbstractReadHandler) attachment;
 						handler.releaseStreamBuffers();
 					}
+				} else {
+					// Log that unable to release buffers
+					LOGGER.log(Level.WARNING, "Unable to release buffers as not on socket thread ("
+							+ Thread.currentThread().getName() + ")");
 				}
 			}
 		}
@@ -745,9 +749,8 @@ public class SocketManager {
 			// No longer notified
 			this.isNotified = false;
 
-			// Release buffer (as content not important, only notification)
-			this.readBuffer.release();
-			this.readBuffer = null;
+			// Only notification, content not important
+			this.readBuffer.pooledBuffer.clear();
 
 			// Register the accepted sockets
 			for (int i = 0; i < this.acceptedSockets.size(); i++) {
@@ -1180,14 +1183,17 @@ public class SocketManager {
 
 			// Only invoked by Socket Listener thread
 
-			// Release the read buffer
-			super.releaseStreamBuffers();
-
-			// Release buffers for accepted sockets
+			// Release socket read buffer
 			if (this.previousRequestBuffer != null) {
+				if (this.readBuffer != this.previousRequestBuffer) {
+					// Fail on read, so no handle
+					this.readBuffer.release();
+				}
 				this.previousRequestBuffer.release();
 				this.previousRequestBuffer = null;
 			}
+
+			// Release the request buffers
 			while (this.releaseRequestBuffers != null) {
 				StreamBuffer<ByteBuffer> release = this.releaseRequestBuffers;
 				this.releaseRequestBuffers = this.releaseRequestBuffers.next;
@@ -1295,6 +1301,7 @@ public class SocketManager {
 					this.socketListener.safeCloseConnectionHandler.safeCloseConnection(this, exception);
 				} catch (IOException ex) {
 					// Failed, so forcefully terminate connection
+					LOGGER.log(Level.WARNING, "Failed to safely close connectin", ex);
 					SocketManager.terminteSelectionKey(this.selectionKey, this.socketListener);
 				}
 			}
@@ -1369,6 +1376,9 @@ public class SocketManager {
 
 			// Safely within the SocketListener thread
 
+			// Only notification, content not important
+			this.readBuffer.pooledBuffer.clear();
+
 			// Take copy to minimise service threads blocking to send
 			AcceptedSocketExecution[] executions;
 			synchronized (this) {
@@ -1376,10 +1386,6 @@ public class SocketManager {
 				executions = this.executions.toArray(new AcceptedSocketExecution[this.executions.size()]);
 				this.executions.clear();
 			}
-
-			// Release buffer (as content not important, only notification)
-			this.readBuffer.release();
-			this.readBuffer = null;
 
 			// Execute each execution
 			for (int i = 0; i < executions.length; i++) {
@@ -1496,6 +1502,9 @@ public class SocketManager {
 
 			// Safely within the SocketListener thread
 
+			// Only notification, content not important
+			this.readBuffer.pooledBuffer.clear();
+
 			// Take copy to minimise service threads blocking to send
 			SafeWriteResponse<?>[] responses;
 			synchronized (this) {
@@ -1503,10 +1512,6 @@ public class SocketManager {
 				responses = this.responses.toArray(new SafeWriteResponse[this.responses.size()]);
 				this.responses.clear();
 			}
-
-			// Release buffer (as content not important, only notification)
-			this.readBuffer.release();
-			this.readBuffer = null;
 
 			// Write the responses
 			// Separate to flush, to enable multiple response writing in packets
@@ -1706,6 +1711,9 @@ public class SocketManager {
 
 			// Safely within the SocketListener thread
 
+			// Only notification, content not important
+			this.readBuffer.pooledBuffer.clear();
+
 			// Take copy to minimise service threads blocking to send
 			SafeCloseConnection[] connectionsToClose;
 			synchronized (this) {
@@ -1714,10 +1722,6 @@ public class SocketManager {
 						.toArray(new SafeCloseConnection[this.connectionsToClose.size()]);
 				this.connectionsToClose.clear();
 			}
-
-			// Release buffer (as content not important, only notification)
-			this.readBuffer.release();
-			this.readBuffer = null;
 
 			// Close the accepted sockets
 			for (int i = 0; i < connectionsToClose.length; i++) {
@@ -1789,8 +1793,7 @@ public class SocketManager {
 		public final void handleRead(boolean isNewBuffer) {
 
 			// Release buffer (as content not important, only notification)
-			this.readBuffer.release();
-			this.readBuffer = null;
+			this.readBuffer.pooledBuffer.clear();
 
 			// Terminate all keys
 			for (SelectionKey key : this.listener.selector.keys()) {

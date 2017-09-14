@@ -151,8 +151,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	 */
 	public void assertAllBuffersReturned() {
 		for (AbstractMockStreamBuffer buffer : this.createdBuffers) {
-			Assert.assertTrue("Buffer " + buffer.id + " (of " + this.createdBuffers.size() + ") should be released",
-					buffer.isReleased);
+			Assert.assertTrue("Buffer " + buffer.id + " (of " + this.createdBuffers.size() + ") should be released"
+					+ buffer.getStackTrace(), buffer.isReleased);
 		}
 	}
 
@@ -185,6 +185,11 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		private int id;
 
 		/**
+		 * Stack trace of the creation of this {@link StreamBuffer}.
+		 */
+		private StackTraceElement[] stackTrace;
+
+		/**
 		 * Indicates if released.
 		 */
 		private volatile boolean isReleased = false;
@@ -200,10 +205,31 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		public AbstractMockStreamBuffer(ByteBuffer pooledBuffer, ByteBuffer unpooledByteBuffer) {
 			super(pooledBuffer, unpooledByteBuffer);
 			this.id = MockStreamBufferPool.this.nextBufferId.getAndIncrement();
+
+			// Obtain the stack trace to locate creation
+			this.stackTrace = new Exception().getStackTrace();
+		}
+
+		/**
+		 * Obtains the stack trace.
+		 * 
+		 * @return Stack trace.
+		 */
+		protected String getStackTrace() {
+			StringBuilder trace = new StringBuilder();
+			trace.append("\n\nStreamBuffer created at:\n");
+			for (int i = 0; i < this.stackTrace.length; i++) {
+				trace.append('\t');
+				trace.append(this.stackTrace[i].toString());
+				trace.append('\n');
+			}
+			return trace.toString();
 		}
 
 		@Override
 		public void release() {
+			Assert.assertFalse("StreamBuffer " + this.id + " should only be released once" + this.getStackTrace(),
+					this.isReleased);
 			this.isReleased = true;
 		}
 	}
@@ -275,13 +301,13 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 
 		@Override
 		public boolean write(byte datum) {
-			Assert.fail(this.getClass().getSimpleName() + " is unpooled");
+			Assert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
 			return false;
 		}
 
 		@Override
 		public int write(byte[] data, int offset, int length) {
-			Assert.fail(this.getClass().getSimpleName() + " is unpooled");
+			Assert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
 			return 0;
 		}
 	}
@@ -374,8 +400,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 				Assert.assertTrue("Should only be mock buffer " + streamBuffer.getClass().getName(),
 						streamBuffer instanceof AbstractMockStreamBuffer);
 				this.currentBuffer = (AbstractMockStreamBuffer) streamBuffer;
-				Assert.assertTrue("Mock buffer " + this.currentBuffer.id + " should be released",
-						this.currentBuffer.isReleased);
+				Assert.assertTrue("Mock buffer " + this.currentBuffer.id + " should be released"
+						+ this.currentBuffer.getStackTrace(), this.currentBuffer.isReleased);
 			}
 		}
 	}
