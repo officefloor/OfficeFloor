@@ -84,9 +84,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Ensure connects (must wait for connection)
 			acceptedSocket.waitAndGet();
 		}
-		
-		// Avoid shutting down too quickly
-		Thread.sleep(1000);
 	}
 
 	/**
@@ -514,20 +511,26 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		final byte RESPONSE_COUNT = 100;
 
 		// Bind to server socket
-		Throwable[] failure = new Throwable[] { null };
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
 				requestHandler.handleRequest(i);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			// Delay only the even responses
+
+			// Obtain the request
 			byte index = (byte) request;
+
+			// Create the response for the request
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(index);
+			response.next = this.tester.createStreamBuffer('*');
+
+			// Delay only the even responses
 			if ((index % 2) == 0) {
 				// Delay sending the response
-				this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(index)));
+				this.delay(() -> responseWriter.write(null, response));
 			} else {
 				// Send the response immediately
-				responseWriter.write(null, this.tester.createStreamBuffer(index));
+				responseWriter.write(null, response);
 			}
 		});
 
@@ -545,13 +548,92 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			InputStream inputStream = client.getInputStream();
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
 				assertEquals("Incorrect response", i, inputStream.read());
+				assertEquals("Incorrect additional response " + i, '*', inputStream.read());
 			}
 		}
+	}
 
-		// Ensure no failures
-		synchronized (failure) {
-			if (failure[0] != null) {
-				throw fail(failure[0]);
+	/**
+	 * Ensure can delay sending header information.
+	 */
+	public void testDelaySendHeader() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			this.delay(() -> responseWriter.write((buffer, pool) -> {
+				StreamBuffer.write(new byte[] { 1, 2, 3 }, 0, 3, buffer, pool);
+			}, null));
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			for (int i = 1; i <= 3; i++) {
+				assertEquals("Incorrect response", i, inputStream.read());
+			}
+		}
+	}
+
+	/**
+	 * Ensure can delay sending multiple headers.
+	 */
+	public void testDelaySendingMultipleHeaders() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		final byte RESPONSE_COUNT = 100;
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			for (byte i = 0; i < RESPONSE_COUNT; i++) {
+				requestHandler.handleRequest(i);
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+
+			// Obtain the request
+			byte index = (byte) request;
+
+			// Create the header response
+			ResponseHeaderWriter header = (buffer, pool) -> {
+				StreamBuffer.write(new byte[] { index, (byte) '*' }, 0, 2, buffer, pool);
+			};
+
+			// Delay only the even responses
+			if ((index % 2) == 0) {
+				// Delay sending the response
+				this.delay(() -> responseWriter.write(header, null));
+			} else {
+				// Send the response immediately
+				responseWriter.write(header, null);
+			}
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			for (byte i = 0; i < RESPONSE_COUNT; i++) {
+				assertEquals("Incorrect response", i, inputStream.read());
+				assertEquals("Incorrect additional response " + i, '*', inputStream.read());
 			}
 		}
 	}
@@ -683,7 +765,5 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			assertEquals("Incorrect response", 2, inputStream.read());
 		}
 	}
-
-	// TODO write multi-threaded
 
 }

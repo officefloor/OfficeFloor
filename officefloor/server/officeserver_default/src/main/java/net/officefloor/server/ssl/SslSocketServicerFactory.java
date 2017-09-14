@@ -241,15 +241,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			ByteBuffer buffer = readBuffer.pooledBuffer.duplicate();
 			buffer.flip();
 			if (!isNewBuffer) {
-				
-				try {
-				
 				// Same buffer, so add just the new data
 				buffer.position(this.currentSocketToUnwrapLimit);
-				
-				} catch (IllegalArgumentException ex) {
-					ex.printStackTrace();
-				}
 			}
 
 			// Set the limit after the newly read data
@@ -287,83 +280,96 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			// Application level request, so delegate
 			this.delegateRequestServicer.service(request, (responseHeaderWriter, headResponseBuffer) -> {
 
-				// Process the response
-				synchronized (SslSocketServicer.this) {
+				// Process request on socket thread
+				this.requestHandler.execute(() -> {
 
-					// Register the response for request
-					sslRequest.responseHeaderWriter = responseHeaderWriter;
-					sslRequest.headResponseBuffer = headResponseBuffer;
+					// Process the response
+					synchronized (SslSocketServicer.this) {
 
-					// Process SSL responses in order
-					Iterator<SslRequest> iterator = this.sslRequests.iterator();
-					while (iterator.hasNext()) {
-						SslRequest completeRequest = iterator.next();
+						// Register the response for request
+						sslRequest.responseHeaderWriter = responseHeaderWriter;
+						sslRequest.headResponseBuffer = headResponseBuffer;
 
-						// Determine if request is complete
-						if ((completeRequest.responseHeaderWriter == null)
-								&& (completeRequest.headResponseBuffer == null)) {
-							return; // request not complete
-						}
+						// Process SSL responses in order
+						Iterator<SslRequest> iterator = this.sslRequests.iterator();
+						while (iterator.hasNext()) {
+							SslRequest completeRequest = iterator.next();
 
-						// Remove the request, as complete
-						iterator.remove();
-
-						// Release the previous request buffers
-						StreamBuffer<ByteBuffer> releaseHead = completeRequest.releaseRequestBuffers;
-						while (releaseHead != null) {
-							StreamBuffer<ByteBuffer> release = releaseHead;
-							releaseHead = releaseHead.next;
-
-							// Release
-							release.release();
-						}
-
-						// Include header information
-						StreamBuffer<ByteBuffer> responseHead = null;
-						if (responseHeaderWriter != null) {
-							responseHead = SslSocketServicerFactory.this.bufferPool.getPooledStreamBuffer();
-							responseHeaderWriter.write(responseHead, SslSocketServicerFactory.this.bufferPool);
-						}
-
-						// Append the response buffers
-						if (responseHead == null) {
-							// Only response buffers (no header)
-							responseHead = completeRequest.headResponseBuffer;
-						} else {
-							// Append response buffers to header
-							StreamBuffer<ByteBuffer> responseTail = responseHead;
-							while (responseTail.next != null) {
-								responseTail = responseTail.next;
+							// Determine if request is complete
+							if ((completeRequest.responseHeaderWriter == null)
+									&& (completeRequest.headResponseBuffer == null)) {
+								return; // request not complete
 							}
-							responseTail.next = completeRequest.headResponseBuffer;
-						}
 
-						// Prepare the response buffers for writing
-						StreamBuffer<ByteBuffer> buffer = responseHead;
-						while (buffer != null) {
-							if (buffer.isPooled) {
-								buffer.pooledBuffer.flip();
+							// Remove the request, as complete
+							iterator.remove();
+
+							// Release the previous request buffers
+							StreamBuffer<ByteBuffer> releaseHead = completeRequest.releaseRequestBuffers;
+							while (releaseHead != null) {
+								StreamBuffer<ByteBuffer> release = releaseHead;
+								releaseHead = releaseHead.next;
+
+								// Release
+								release.release();
 							}
-							buffer = buffer.next;
-						}
 
-						// Include the response
-						if (this.currentAppToWrapBuffer == null) {
-							// Only response to wrap
-							this.currentAppToWrapBuffer = responseHead;
-						} else {
-							// Add to existing responses
-							StreamBuffer<ByteBuffer> responseTail = this.currentAppToWrapBuffer;
-							while (responseTail.next != null) {
-								responseTail = responseTail.next;
+							// Include header information
+							StreamBuffer<ByteBuffer> responseHead = null;
+							if (completeRequest.responseHeaderWriter != null) {
+								responseHead = SslSocketServicerFactory.this.bufferPool.getPooledStreamBuffer();
+								completeRequest.responseHeaderWriter.write(responseHead,
+										SslSocketServicerFactory.this.bufferPool);
 							}
-							responseTail.next = responseHead;
-						}
 
-						// Write the response
-						this.process(completeRequest.responseWriter);
+							// Append the response buffers
+							if (responseHead == null) {
+								// Only response buffers (no header)
+								responseHead = completeRequest.headResponseBuffer;
+							} else {
+								// Append response buffers to header
+								StreamBuffer<ByteBuffer> responseTail = responseHead;
+								while (responseTail.next != null) {
+									responseTail = responseTail.next;
+								}
+								responseTail.next = completeRequest.headResponseBuffer;
+							}
+
+							// Prepare the response buffers for writing
+							StreamBuffer<ByteBuffer> buffer = responseHead;
+							while (buffer != null) {
+								if (buffer.isPooled) {
+									buffer.pooledBuffer.flip();
+								}
+								buffer = buffer.next;
+							}
+
+							// Include the response
+							if (this.currentAppToWrapBuffer == null) {
+								// Only response to wrap
+								this.currentAppToWrapBuffer = responseHead;
+							} else {
+								// Add to existing responses
+								StreamBuffer<ByteBuffer> responseTail = this.currentAppToWrapBuffer;
+								while (responseTail.next != null) {
+									responseTail = responseTail.next;
+								}
+								responseTail.next = responseHead;
+							}
+
+							// Write the response
+							this.process(completeRequest.responseWriter);
+
+							// Flush the data
+							/*
+							 * The send may occur on another thread, therefore
+							 * requires flushing as normal request handling will
+							 * not flush it.
+							 */
+							this.requestHandler.flushData();
+						}
 					}
-				}
+				});
 			});
 		}
 

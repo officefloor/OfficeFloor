@@ -928,6 +928,11 @@ public class SocketManager {
 				socketRequest.headResponseBuffer = headResponseBuffer;
 			}
 
+			// Determine if have requests
+			if (this.head == null) {
+				return; // socket closed
+			}
+
 			// Response written (so release all request buffers)
 			StreamBuffer<ByteBuffer> requestBuffer = this.head.headRequestBuffer;
 			while (requestBuffer != null) {
@@ -1026,7 +1031,7 @@ public class SocketManager {
 						} while (bytesToWrite > 0);
 					}
 
-					// Buffer compacted, move to next (releasing written buffer)
+					// Buffer compacted, move next (releasing written)
 					this.head.headResponseBuffer = streamBuffer.next;
 
 					// Must release buffer (after released from chain)
@@ -1185,12 +1190,15 @@ public class SocketManager {
 
 			// Release socket read buffer
 			if (this.previousRequestBuffer != null) {
-				if (this.readBuffer != this.previousRequestBuffer) {
-					// Fail on read, so no handle
-					this.readBuffer.release();
+				if (this.readBuffer == this.previousRequestBuffer) {
+					this.readBuffer = null; // released as previous
 				}
 				this.previousRequestBuffer.release();
 				this.previousRequestBuffer = null;
+			}
+			if (this.readBuffer != null) {
+				this.readBuffer.release();
+				this.readBuffer = null;
 			}
 
 			// Release the request buffers
@@ -1287,6 +1295,16 @@ public class SocketManager {
 
 			// Immediately flush data
 			this.unsafeSendWrites();
+		}
+
+		@Override
+		public void flushData() throws IllegalArgumentException {
+
+			// Ensure only send data on socket listener thread
+			this.socketListener.ensureSocketListenerThread();
+
+			// Flush the data
+			this.unsafeFlushWrites();
 		}
 
 		@Override
@@ -1793,7 +1811,8 @@ public class SocketManager {
 		public final void handleRead(boolean isNewBuffer) {
 
 			// Release buffer (as content not important, only notification)
-			this.readBuffer.pooledBuffer.clear();
+			this.readBuffer.release();
+			this.readBuffer = null;
 
 			// Terminate all keys
 			for (SelectionKey key : this.listener.selector.keys()) {

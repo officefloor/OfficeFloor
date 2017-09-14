@@ -518,10 +518,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT, 1000);
 
 		// Do warm up
-		executor.doPipelineRun(100).printResult(this.getName() + " WARMUP");
+		executor.doPipelineRun(1000).printResult(this.getName() + " WARMUP");
 
 		// Undertake performance run
-		PipelineResult result = executor.doPipelineRun(1000);
+		PipelineResult result = executor.doPipelineRun(10000);
 		result.printResult(this.getName() + " RUN");
 
 		// Load for comparison
