@@ -387,9 +387,9 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 				}
 
 				// Obtain the next buffer to read
-				StreamBuffer<ByteBuffer> streamBuffer = this.currentBuffer.next;
+				this.currentBuffer = this.currentBuffer.next;
 				this.currentBufferPosition = 0;
-				if (streamBuffer == null) {
+				if (this.currentBuffer == null) {
 					this.currentBuffer = null;
 					return -1; // end of stream
 				}

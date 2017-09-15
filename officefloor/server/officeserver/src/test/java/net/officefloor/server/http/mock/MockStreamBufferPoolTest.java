@@ -208,13 +208,6 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		// Write a single byte
 		this.output.write((byte) 1);
 
-		// Mimic writing HTTP response by releasing buffers
-		StreamBuffer<ByteBuffer> streamBuffer = this.output.getBuffers();
-		while (streamBuffer != null) {
-			streamBuffer.release();
-			streamBuffer = streamBuffer.next;
-		}
-
 		// Create the input stream to read in content
 		InputStream input = MockStreamBufferPool.createInputStream(this.output.getBuffers());
 		assertEquals("Should read the single byte", 1, input.read());
@@ -239,13 +232,6 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		writer.write(largeString.toString());
 		writer.flush();
-
-		// Mimic writing HTTP response by releasing buffers
-		StreamBuffer<ByteBuffer> streamBuffer = this.output.getBuffers();
-		while (streamBuffer != null) {
-			streamBuffer.release();
-			streamBuffer = streamBuffer.next;
-		}
 
 		// Ensure can read in the large string
 		InputStream input = MockStreamBufferPool.createInputStream(this.output.getBuffers());
@@ -286,13 +272,6 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 			this.output.write(
 					ByteBuffer.wrap(String.valueOf(i).getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET)));
 			this.output.write(comma);
-		}
-
-		// Mimic writing HTTP response by releasing buffers
-		StreamBuffer<ByteBuffer> streamBuffer = this.output.getBuffers();
-		while (streamBuffer != null) {
-			streamBuffer.release();
-			streamBuffer = streamBuffer.next;
 		}
 
 		// Read in the text
