@@ -213,6 +213,14 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			// Consider now sent
 			this.isSent = true;
 
+			// Write the response
+			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+			this.contentType = TEXT_CONTENT;
+			long contentLength = this.bufferPoolOutputStream.getContentLength();
+			this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
+					contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
+			this.isWritten = true;
+
 			return null;
 		});
 	}

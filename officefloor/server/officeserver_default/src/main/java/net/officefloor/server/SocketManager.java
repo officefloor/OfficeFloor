@@ -831,6 +831,13 @@ public class SocketManager {
 		private final SelectionKey selectionKey;
 
 		/**
+		 * Indicates if within an active read, so that a flush will be triggered
+		 * at the end. If not going to flush, then must flush on send. This is
+		 * typically because another {@link Thread} has triggered the write.
+		 */
+		private boolean isGoingToFlush = false;
+
+		/**
 		 * Request {@link StreamBuffer} instances to be released with the
 		 * current request.
 		 */
@@ -1041,6 +1048,11 @@ public class SocketManager {
 				// Compacted head response, so move onto next request
 				this.head = this.head.next;
 			}
+
+			// If not going to flush, must flush immediately
+			if (!this.isGoingToFlush) {
+				this.unsafeFlushWrites();
+			}
 		}
 
 		/**
@@ -1168,19 +1180,26 @@ public class SocketManager {
 
 			// Only invoked by Socket Listener thread
 
-			// Keep track of buffers (to enable releasing)
-			if ((this.previousRequestBuffer != null) && (this.readBuffer != this.previousRequestBuffer)) {
-				// New buffer (release previous on servicing request)
-				this.previousRequestBuffer.next = this.releaseRequestBuffers;
-				this.releaseRequestBuffers = this.previousRequestBuffer;
+			try {
+				// Going to flush at end of read
+				this.isGoingToFlush = true;
+
+				// Keep track of buffers (to enable releasing)
+				if ((this.previousRequestBuffer != null) && (this.readBuffer != this.previousRequestBuffer)) {
+					// New buffer (release previous on servicing request)
+					this.previousRequestBuffer.next = this.releaseRequestBuffers;
+					this.releaseRequestBuffers = this.previousRequestBuffer;
+				}
+				this.previousRequestBuffer = this.readBuffer;
+
+				// Service the socket
+				this.socketServicer.service(this.readBuffer, isNewBuffer);
+
+			} finally {
+				// Ensure flush writes
+				this.isGoingToFlush = false;
+				this.unsafeFlushWrites();
 			}
-			this.previousRequestBuffer = this.readBuffer;
-
-			// Service the socket
-			this.socketServicer.service(this.readBuffer, isNewBuffer);
-
-			// Ensure flush writes
-			this.unsafeFlushWrites();
 		}
 
 		@Override
@@ -1295,16 +1314,6 @@ public class SocketManager {
 
 			// Immediately flush data
 			this.unsafeSendWrites();
-		}
-
-		@Override
-		public void flushData() throws IllegalArgumentException {
-
-			// Ensure only send data on socket listener thread
-			this.socketListener.ensureSocketListenerThread();
-
-			// Flush the data
-			this.unsafeFlushWrites();
 		}
 
 		@Override

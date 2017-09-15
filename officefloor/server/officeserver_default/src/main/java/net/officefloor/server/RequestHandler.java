@@ -81,17 +81,6 @@ public interface RequestHandler<R> {
 	void sendImmediateData(StreamBuffer<ByteBuffer> immediateHead) throws IllegalStateException;
 
 	/**
-	 * <p>
-	 * Flushes available data to the {@link Socket}.
-	 * <p>
-	 * This may only be invoked by the {@link Socket} {@link Thread}.
-	 * 
-	 * @throws IllegalArgumentException
-	 *             If invoked from another {@link Thread}.
-	 */
-	void flushData() throws IllegalArgumentException;
-
-	/**
 	 * Allows to close connection.
 	 * 
 	 * @param exception

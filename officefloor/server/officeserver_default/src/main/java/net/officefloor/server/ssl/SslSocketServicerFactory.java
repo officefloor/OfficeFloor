@@ -359,14 +359,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 							// Write the response
 							this.process(completeRequest.responseWriter);
-
-							// Flush the data
-							/*
-							 * The send may occur on another thread, therefore
-							 * requires flushing as normal request handling will
-							 * not flush it.
-							 */
-							this.requestHandler.flushData();
 						}
 					}
 				});
