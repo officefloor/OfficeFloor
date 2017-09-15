@@ -47,6 +47,7 @@
 							<sources>
 								<source>src/main/impl</source>
 								<source>src/main/test</source>
+								<source>src/main/stress</source>
 							</sources>
 						</configuration>
 					</execution>

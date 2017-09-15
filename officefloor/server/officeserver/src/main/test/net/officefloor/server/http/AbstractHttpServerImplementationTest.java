@@ -20,8 +20,6 @@ package net.officefloor.server.http;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -34,7 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.NotificationEmitter;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpResponse;
@@ -76,19 +73,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * HTTPS secure port.
 	 */
 	private static final int HTTPS_PORT = 7979;
-
-	static {
-		// Hook in for GC
-		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-			NotificationEmitter emitter = (NotificationEmitter) gcBean;
-			emitter.addNotificationListener((notification, handback) -> {
-
-				// Indicate Garbage collection
-				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
-						+ notification.getType());
-			}, null, null);
-		}
-	}
 
 	/**
 	 * Creates a new {@link HttpHeader}.
@@ -170,6 +154,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+
+		// Log GC
+		this.setLogGC();
 
 		// Reset the compare results
 		CompareResult.reset(this.getClass());
@@ -472,7 +459,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 
 		// Create pipeline executor
-		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT, 1000);
+		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT);
 
 		// Do warm up
 		executor.doPipelineRun(100000).printResult(this.getName() + " WARMUP");
@@ -517,7 +504,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 
 		// Create pipeline executor
-		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT, 1000);
+		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT);
 
 		// Do warm up
 		executor.doPipelineRun(1000).printResult(this.getName() + " WARMUP");
@@ -615,7 +602,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		@SuppressWarnings("unchecked")
 		PipelineExecutor[] executors = new AbstractHttpServerImplementationTest.PipelineExecutor[clientCount];
 		for (int i = 0; i < clientCount; i++) {
-			executors[i] = new PipelineExecutor(HTTP_PORT, requestCount);
+			executors[i] = new PipelineExecutor(HTTP_PORT);
 		}
 
 		// Do warm up
@@ -623,7 +610,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Run the executors
 		for (PipelineExecutor executor : executors) {
-			new Thread(executor).start();
+			new Thread(executor.getRunnable(requestCount)).start();
 		}
 
 		// Wait for completion of run
@@ -693,12 +680,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Executes request in a pipeline for performance testing.
 	 */
-	private class PipelineExecutor implements Runnable {
-
-		/**
-		 * Number of requests to make.
-		 */
-		private final int requestCount;
+	private class PipelineExecutor {
 
 		/**
 		 * {@link Selector}.
@@ -725,13 +707,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 * 
 		 * @param port
 		 *            Port for the {@link HttpServer}.
-		 * @param requestCount
-		 *            Number of requests to make.
 		 * @throws IOException
 		 *             If fails to connect to {@link HttpServer}.
 		 */
-		private PipelineExecutor(int port, int requestCount) throws IOException {
-			this.requestCount = requestCount;
+		private PipelineExecutor(int port) throws IOException {
 
 			// Pipeline requests to server
 			this.selector = Selector.open();
@@ -885,6 +864,33 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 
 		/**
+		 * Creates {@link Runnable} to run within another {@link Thread}.
+		 * 
+		 * @param requestCount
+		 *            Request count.
+		 * @return {@link Runnable}.
+		 */
+		private Runnable getRunnable(int requestCount) {
+			return new Runnable() {
+				@Override
+				public synchronized void run() {
+					try {
+						// Undertake run
+						PipelineExecutor.this.runResult = PipelineExecutor.this.doPipelineRun(requestCount);
+
+					} catch (Throwable ex) {
+						// Capture failure
+						PipelineExecutor.this.runResult = ex;
+
+					} finally {
+						// Notify complete
+						this.notify();
+					}
+				}
+			};
+		}
+
+		/**
 		 * Waits for completion.
 		 * 
 		 * @return {@link PipelineResult}.
@@ -921,27 +927,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 			// Propagate the failure
 			throw fail((Throwable) this.runResult);
-		}
-
-		/*
-		 * ============== Runnable =========================
-		 */
-
-		@Override
-		public synchronized void run() {
-
-			try {
-				// Undertake run
-				this.runResult = this.doPipelineRun(this.requestCount);
-
-			} catch (Throwable ex) {
-				// Capture failure
-				this.runResult = ex;
-
-			} finally {
-				// Notify complete
-				this.notify();
-			}
 		}
 	}
 

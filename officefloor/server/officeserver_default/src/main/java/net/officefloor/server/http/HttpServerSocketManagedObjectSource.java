@@ -56,7 +56,6 @@ import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ServerSocketDecorator;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.SocketServicerFactory;
-import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
@@ -64,6 +63,7 @@ import net.officefloor.server.ssl.SslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerHttpConnection}.

@@ -17,6 +17,7 @@
  */
 package net.officefloor.server.http.mock;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,8 +50,10 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
 import net.officefloor.server.stream.impl.ByteSequence;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * Mock {@link HttpServer}.
@@ -58,6 +61,12 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class MockHttpServer implements HttpServerImplementation {
+
+	/**
+	 * {@link ThreadLocalStreamBufferPool} to use for stress testing.
+	 */
+	private static ThreadLocalStreamBufferPool STRESS_STREAM_BUFFER_POOL = new ThreadLocalStreamBufferPool(
+			() -> ByteBuffer.allocate(1024), Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 	/**
 	 * Configures the {@link MockHttpServer} to be serviced by the
@@ -118,38 +127,58 @@ public class MockHttpServer implements HttpServerImplementation {
 		NonMaterialisedHttpHeaders requestHeaders = impl;
 		ByteSequence requestEntity = new ByteArrayByteSequence(impl.entity.toByteArray());
 
-		// Mock buffer pool
-		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
-
-		// Create the mock HTTP response
-		MockHttpResponseImpl response = new MockHttpResponseImpl();
+		// Provide the buffer pool (based on efficiency)
+		StreamBufferPool<ByteBuffer> bufferPool;
+		if (impl.isStress) {
+			bufferPool = STRESS_STREAM_BUFFER_POOL;
+		} else {
+			// Provide mock buffer pool (for checks)
+			bufferPool = new MockStreamBufferPool(() -> ByteBuffer.allocate(1024));
+		}
 
 		// Handle response
 		HttpResponseWriter<ByteBuffer> responseWriter = (responseVersion, status, responseHttpHeader,
 				httpEntityContentLength, httpEntityContentType, responseHttpEntity) -> {
+			try {
 
-			// Obtain the listing of response HTTP headers
-			List<WritableHttpHeader> headers = new ArrayList<>();
-			while (responseHttpHeader != null) {
-				headers.add(responseHttpHeader);
-				responseHttpHeader = responseHttpHeader.next;
+				// Obtain the listing of response HTTP headers
+				List<WritableHttpHeader> headers = new ArrayList<>();
+				while (responseHttpHeader != null) {
+					headers.add(responseHttpHeader);
+					responseHttpHeader = responseHttpHeader.next;
+				}
+
+				// Copy out the response entity
+				InputStream responseEntityInputStream = MockStreamBufferPool.createInputStream(responseHttpEntity);
+				byte[] responseEntity = new byte[(int) httpEntityContentLength];
+				for (int i = 0; i < httpEntityContentLength; i++) {
+					responseEntity[i] = (byte) responseEntityInputStream.read();
+				}
+
+				// Release all the buffers (as now considered written)
+				StreamBuffer<ByteBuffer> buffer = responseHttpEntity;
+				while (buffer != null) {
+					StreamBuffer<ByteBuffer> release = buffer;
+					buffer = buffer.next;
+					release.release();
+				}
+
+				// Ensure all buffers released (if not stress test)
+				if (!impl.isStress) {
+					((MockStreamBufferPool) bufferPool).assertAllBuffersReturned();
+				}
+
+				// Create the response
+				MockHttpResponseImpl response = new MockHttpResponseImpl(responseVersion, status, headers,
+						new ByteArrayInputStream(responseEntity));
+
+				// Response received
+				callback.response(response);
+
+			} catch (Throwable ex) {
+				// Provide failed HTTP response
+				callback.response(new MockHttpResponseImpl(ex));
 			}
-
-			// Release all the buffers (as now considered written)
-			StreamBuffer<ByteBuffer> buffer = responseHttpEntity;
-			while (buffer != null) {
-				buffer.release();
-				buffer = buffer.next;
-			}
-
-			// Create the input stream to the response HTTP entity
-			InputStream responseEntityInputStream = MockStreamBufferPool.createInputStream(responseHttpEntity);
-
-			// Load response
-			response.loadResponse(responseVersion, status, headers, responseEntityInputStream);
-
-			// Response received
-			callback.response(response);
 		};
 
 		// Create the server HTTP connection
@@ -226,6 +255,11 @@ public class MockHttpServer implements HttpServerImplementation {
 		 */
 		private final ByteArrayOutputStream entity = new ByteArrayOutputStream();
 
+		/**
+		 * Indicates if running stress test for request.
+		 */
+		private boolean isStress = false;
+
 		/*
 		 * ================== MockHttpRequestBuilder ========================
 		 */
@@ -258,6 +292,11 @@ public class MockHttpServer implements HttpServerImplementation {
 		@Override
 		public OutputStream getHttpEntity() {
 			return this.entity;
+		}
+
+		@Override
+		public void setEfficientForStressTests(boolean isStress) {
+			this.isStress = isStress;
 		}
 
 		/*
@@ -346,22 +385,27 @@ public class MockHttpServer implements HttpServerImplementation {
 		/**
 		 * {@link HttpVersion}.
 		 */
-		private HttpVersion version;
+		private final HttpVersion version;
 
 		/**
 		 * {@link HttpStatus}.
 		 */
-		private HttpStatus status;
+		private final HttpStatus status;
 
 		/**
 		 * {@link HttpHeader} instances.
 		 */
-		private List<WritableHttpHeader> headers;
+		private final List<WritableHttpHeader> headers;
 
 		/**
 		 * HTTP entity {@link InputStream}.
 		 */
-		private InputStream entityInputStream;
+		private final InputStream entityInputStream;
+
+		/**
+		 * Possible failure in writing the response.
+		 */
+		private final Throwable failure;
 
 		/**
 		 * Loads the response.
@@ -375,12 +419,42 @@ public class MockHttpServer implements HttpServerImplementation {
 		 * @param entityInputStream
 		 *            HTTP entity {@link InputStream}.
 		 */
-		private synchronized void loadResponse(HttpVersion version, HttpStatus status, List<WritableHttpHeader> headers,
+		private MockHttpResponseImpl(HttpVersion version, HttpStatus status, List<WritableHttpHeader> headers,
 				InputStream entityInputStream) {
 			this.version = version;
 			this.status = status;
 			this.headers = headers;
 			this.entityInputStream = entityInputStream;
+			this.failure = null;
+		}
+
+		/**
+		 * Loads with response failure.
+		 * 
+		 * @param version
+		 *            {@link HttpVersion}.
+		 * @param status
+		 *            {@link HttpStatus}.
+		 * @param headers
+		 *            {@link List} of {@link HttpHeader} instances.
+		 * @param entityInputStream
+		 *            HTTP entity {@link InputStream}.
+		 */
+		private MockHttpResponseImpl(Throwable failure) {
+			this.failure = failure;
+			this.version = null;
+			this.status = null;
+			this.headers = null;
+			this.entityInputStream = null;
+		}
+
+		/**
+		 * Ensures no failure in writing the response.
+		 */
+		private void ensureNoFailure() {
+			if (this.failure != null) {
+				throw OfficeFrameTestCase.fail(this.failure);
+			}
 		}
 
 		/*
@@ -388,27 +462,32 @@ public class MockHttpServer implements HttpServerImplementation {
 		 */
 
 		@Override
-		public synchronized HttpVersion getHttpVersion() {
+		public HttpVersion getHttpVersion() {
+			this.ensureNoFailure();
 			return this.version;
 		}
 
 		@Override
-		public synchronized HttpStatus getHttpStatus() {
+		public HttpStatus getHttpStatus() {
+			this.ensureNoFailure();
 			return this.status;
 		}
 
 		@Override
-		public synchronized List<WritableHttpHeader> getHttpHeaders() {
+		public List<WritableHttpHeader> getHttpHeaders() {
+			this.ensureNoFailure();
 			return this.headers;
 		}
 
 		@Override
-		public synchronized InputStream getHttpEntity() {
+		public InputStream getHttpEntity() {
+			this.ensureNoFailure();
 			return this.entityInputStream;
 		}
 
 		@Override
-		public synchronized String getHttpEntity(Charset charset) {
+		public String getHttpEntity(Charset charset) {
+			this.ensureNoFailure();
 
 			// Read in the contents
 			StringWriter writer = new StringWriter();

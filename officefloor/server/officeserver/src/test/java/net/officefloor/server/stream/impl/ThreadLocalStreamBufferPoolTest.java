@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.buffer;
+package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
 
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * Tests the {@link ThreadLocalStreamBufferPool}.

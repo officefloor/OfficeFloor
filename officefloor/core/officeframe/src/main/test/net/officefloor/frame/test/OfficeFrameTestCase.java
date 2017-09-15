@@ -37,6 +37,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -66,6 +67,9 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
+
+import javax.management.NotificationEmitter;
+import javax.management.NotificationListener;
 
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
@@ -139,6 +143,23 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			}
 		}
 
+		// Determine if set up GC logging
+		Map<NotificationEmitter, NotificationListener> gcLoggers = null;
+		if (this.isLogGC) {
+			gcLoggers = new HashMap<>();
+			for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+				NotificationEmitter emitter = (NotificationEmitter) gcBean;
+				NotificationListener gcLogger = (notification, handback) -> {
+
+					// Indicate Garbage collection
+					System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
+							+ notification.getType());
+				};
+				emitter.addNotificationListener(gcLogger, null, null);
+				gcLoggers.put(emitter, gcLogger);
+			}
+		}
+
 		try {
 			// Run the test
 			super.runBare();
@@ -150,6 +171,27 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			if (this.isVerbose) {
 				System.out.println("+++ END: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++\n");
 			}
+
+			// Remove GC logging
+			if (gcLoggers != null) {
+				for (NotificationEmitter emitter : gcLoggers.keySet()) {
+					NotificationListener gcLogger = gcLoggers.get(emitter);
+					emitter.removeNotificationListener(gcLogger);
+				}
+			}
+		}
+	}
+
+	static {
+		// Hook in for GC
+		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+			NotificationEmitter emitter = (NotificationEmitter) gcBean;
+			emitter.addNotificationListener((notification, handback) -> {
+
+				// Indicate Garbage collection
+				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
+						+ notification.getType());
+			}, null, null);
 		}
 	}
 
@@ -1104,6 +1146,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	private boolean isDebugVerbose = false;
 
 	/**
+	 * Indicates whether to log GC in test.
+	 */
+	private boolean isLogGC = false;
+
+	/**
 	 * Default constructor.
 	 */
 	public OfficeFrameTestCase() {
@@ -1150,6 +1197,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			OfficeFloorImpl.getFrameworkLogger().addHandler(handler);
 			this.isDebugVerbose = true;
 		}
+	}
+
+	/**
+	 * Turns on logging of GC as part of test.
+	 */
+	public void setLogGC() {
+		this.isLogGC = true;
 	}
 
 	/**

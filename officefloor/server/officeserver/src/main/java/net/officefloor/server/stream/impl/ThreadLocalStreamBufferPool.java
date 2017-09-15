@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.buffer;
+package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +26,6 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFact
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
-import net.officefloor.server.stream.impl.AbstractStreamBufferPool;
 
 /**
  * {@link StreamBufferPool} of {@link ByteBuffer} instances that utilises
@@ -211,9 +210,6 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 			pooledBuffer.pooledBuffer.clear();
 			pooledBuffer.next = null;
 		}
-		
-		// Flag as active
-		((PooledStreamBuffer) pooledBuffer).isActive = true;
 
 		// Return the pooled buffer
 		return pooledBuffer;
@@ -257,11 +253,6 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	private class PooledStreamBuffer extends StreamBuffer<ByteBuffer> {
 
 		/**
-		 * Ensure only release back to pool once.
-		 */
-		private volatile boolean isActive = false;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param byteBuffer
@@ -303,12 +294,6 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 
 		@Override
 		public void release() {
-
-			// Ensure only release once
-			if (!this.isActive) {
-				return;
-			}
-			this.isActive = false; // released
 
 			// Easy access to pool
 			ThreadLocalStreamBufferPool bufferPool = ThreadLocalStreamBufferPool.this;

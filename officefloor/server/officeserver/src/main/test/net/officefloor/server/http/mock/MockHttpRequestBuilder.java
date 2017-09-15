@@ -80,4 +80,14 @@ public interface MockHttpRequestBuilder {
 	 */
 	OutputStream getHttpEntity();
 
+	/**
+	 * Flags to turn of checks for {@link HttpRequest} and provide efficient
+	 * processing.
+	 * 
+	 * @param isStress
+	 *            <code>true</code> to turn off checks and process more
+	 *            efficiently.
+	 */
+	void setEfficientForStressTests(boolean isStress);
+
 }

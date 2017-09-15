@@ -332,7 +332,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		/**
 		 * Current {@link StreamBuffer} to read contents.
 		 */
-		private AbstractMockStreamBuffer currentBuffer = null;
+		private StreamBuffer<ByteBuffer> currentBuffer = null;
 
 		/**
 		 * Position to read next value from current pooled {@link StreamBuffer}
@@ -347,9 +347,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		 *            {@link StreamBuffer} instances.
 		 */
 		private MockBufferPoolInputStream(StreamBuffer<ByteBuffer> headBuffer) {
-			Assert.assertTrue("Should only be mock buffer " + headBuffer.getClass().getName(),
-					headBuffer instanceof AbstractMockStreamBuffer);
-			this.currentBuffer = (AbstractMockStreamBuffer) headBuffer;
+			this.currentBuffer = headBuffer;
 		}
 
 		/*
@@ -395,13 +393,6 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 					this.currentBuffer = null;
 					return -1; // end of stream
 				}
-
-				// Ensure the buffer is released (as written HTTP response)
-				Assert.assertTrue("Should only be mock buffer " + streamBuffer.getClass().getName(),
-						streamBuffer instanceof AbstractMockStreamBuffer);
-				this.currentBuffer = (AbstractMockStreamBuffer) streamBuffer;
-				Assert.assertTrue("Mock buffer " + this.currentBuffer.id + " should be released"
-						+ this.currentBuffer.getStackTrace(), this.currentBuffer.isReleased);
 			}
 		}
 	}

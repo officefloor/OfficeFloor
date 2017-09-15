@@ -25,10 +25,10 @@ import java.util.concurrent.Executors;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.SocketManager;
-import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * Tests the {@link OfficeFloorHttpServerImplementation}.

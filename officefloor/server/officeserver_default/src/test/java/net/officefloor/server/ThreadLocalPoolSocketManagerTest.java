@@ -19,8 +19,8 @@ package net.officefloor.server;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * Tests the {@link SocketManager} with {@link ThreadLocalStreamBufferPool}.
