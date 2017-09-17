@@ -277,6 +277,11 @@ public class SocketManager {
 		private final SafeWriteSocketHandler safeWriteSocketHandler;
 
 		/**
+		 * {@link BulkFlushWritesHandler}.
+		 */
+		private final BulkFlushWritesHandler bulkFlushWritesHandler;
+
+		/**
 		 * {@link SafeCloseConnectionHandler}.
 		 */
 		private final SafeCloseConnectionHandler safeCloseConnectionHandler;
@@ -326,6 +331,12 @@ public class SocketManager {
 			safeWriteSocketPipe.source().configureBlocking(false);
 			this.safeWriteSocketHandler = new SafeWriteSocketHandler(safeWriteSocketPipe);
 			safeWriteSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.safeWriteSocketHandler);
+
+			// Create pipe to bulk flush writes
+			Pipe bulkFlushWritesPipe = Pipe.open();
+			bulkFlushWritesPipe.source().configureBlocking(false);
+			this.bulkFlushWritesHandler = new BulkFlushWritesHandler(bulkFlushWritesPipe);
+			bulkFlushWritesPipe.source().register(this.selector, SelectionKey.OP_READ, this.bulkFlushWritesHandler);
 
 			// Create pipe to listen for connection close
 			Pipe safeCloseConectionPipe = Pipe.open();
@@ -514,31 +525,41 @@ public class SocketManager {
 
 								// Ensure have buffer to handle read
 								// Need to track if new (as pool buffers)
-								boolean isNewBuffer = false;
+								ByteBuffer buffer;
+								boolean isNewBuffer;
 								if ((handler.readBuffer == null)
 										|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
 									// Require a new buffer
 									handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
+									buffer = handler.readBuffer.pooledBuffer;
 									isNewBuffer = true;
+								} else {
+									/*
+									 * Tests are finding that re-using the
+									 * buffer with position != 0 causes invalid
+									 * data. To overcome this, need to create
+									 * duplicate with position 0. Note that for
+									 * direct buffers slicing takes a new memory
+									 * location (likely why has issue).
+									 */
+									buffer = handler.readBuffer.pooledBuffer.slice();
+									isNewBuffer = false;
 								}
-
-								// Obtain the byte buffer
-								ByteBuffer buffer = handler.readBuffer.pooledBuffer;
 
 								// Read content from channel
-								int bytesRead = 0;
-								IOException readFailure = null;
-								try {
-									bytesRead = handler.channel.read(buffer);
-								} catch (IOException ex) {
-									readFailure = ex;
-								}
+								int bytesRead = handler.channel.read(buffer);
 
 								// Determine if closed connection or in error
-								if ((bytesRead < 0) || (readFailure != null)) {
+								if (bytesRead < 0) {
 									// Connection closed/failed, so terminate
 									SocketManager.terminteSelectionKey(selectedKey, this);
 									continue NEXT_KEY;
+								}
+
+								// Must update position (if re-use buffer)
+								if (!isNewBuffer) {
+									handler.readBuffer.pooledBuffer
+											.position(handler.readBuffer.pooledBuffer.position() + bytesRead);
 								}
 
 								// Handle the read
@@ -930,18 +951,11 @@ public class SocketManager {
 				ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer) {
 
 			// Provide the response for the request
-			synchronized (this.socketListener.safeWriteSocketHandler) {
-				socketRequest.responseHeaderWriter = responseHeaderWriter;
-				socketRequest.headResponseBuffer = headResponseBuffer;
-			}
-
-			// Determine if have requests
-			if (this.head == null) {
-				return; // socket closed
-			}
+			socketRequest.responseHeaderWriter = responseHeaderWriter;
+			socketRequest.headResponseBuffer = headResponseBuffer;
 
 			// Response written (so release all request buffers)
-			StreamBuffer<ByteBuffer> requestBuffer = this.head.headRequestBuffer;
+			StreamBuffer<ByteBuffer> requestBuffer = socketRequest.headRequestBuffer;
 			while (requestBuffer != null) {
 				StreamBuffer<ByteBuffer> release = requestBuffer;
 				requestBuffer = requestBuffer.next;
@@ -1010,7 +1024,7 @@ public class SocketManager {
 					// Compact the data into the write buffer
 					int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
 					int bytesToWrite = buffer.remaining();
-					if (writeBufferRemaining > bytesToWrite) {
+					if (writeBufferRemaining >= bytesToWrite) {
 						// Space available to write the entire buffer
 						writeBuffer.pooledBuffer.put(buffer);
 
@@ -1051,7 +1065,14 @@ public class SocketManager {
 
 			// If not going to flush, must flush immediately
 			if (!this.isGoingToFlush) {
-				this.unsafeFlushWrites();
+				// Flush the writes in the future
+				// (allows multiple writes to be flush on same packets)
+				try {
+					this.socketListener.bulkFlushWritesHandler.bulkFlushWrites(this);
+				} catch (IOException ex) {
+					// Terminate the connection
+					this.closeConnection(ex);
+				}
 			}
 		}
 
@@ -1185,7 +1206,7 @@ public class SocketManager {
 				this.isGoingToFlush = true;
 
 				// Keep track of buffers (to enable releasing)
-				if ((this.previousRequestBuffer != null) && (this.readBuffer != this.previousRequestBuffer)) {
+				if (isNewBuffer && (this.previousRequestBuffer != null)) {
 					// New buffer (release previous on servicing request)
 					this.previousRequestBuffer.next = this.releaseRequestBuffers;
 					this.releaseRequestBuffers = this.previousRequestBuffer;
@@ -1541,17 +1562,11 @@ public class SocketManager {
 			}
 
 			// Write the responses
-			// Separate to flush, to enable multiple response writing in packets
 			for (int i = 0; i < responses.length; i++) {
 				@SuppressWarnings("rawtypes")
 				SafeWriteResponse response = responses[i];
 				response.acceptedSocket.unsafeWriteResponse(response.socketRequest, response.responseHeaderWriter,
 						response.headResponseBuffer);
-			}
-
-			// Flush the writes
-			for (int i = 0; i < responses.length; i++) {
-				responses[i].acceptedSocket.unsafeFlushWrites();
 			}
 		}
 	}
@@ -1670,6 +1685,93 @@ public class SocketManager {
 					// Failed, so close connection
 					this.acceptedSocket.closeConnection(ex);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Handles safely flushing the write {@link StreamBuffer} instances to the
+	 * {@link Socket}.
+	 */
+	private static class BulkFlushWritesHandler extends AbstractReadHandler {
+
+		/**
+		 * Notify flush writes {@link Pipe}.
+		 */
+		private final Pipe flushWritesPipe;
+
+		/**
+		 * {@link AcceptedSocketServicer} instances.
+		 */
+		private final List<AcceptedSocketServicer<?>> acceptedSocketServicers = new ArrayList<>();
+
+		/**
+		 * Indicates if notified.
+		 */
+		private boolean isNotified = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param flushWritesPipe
+		 *            Notify flush writes {@link Pipe}.
+		 */
+		private BulkFlushWritesHandler(Pipe flushWritesPipe) {
+			super(flushWritesPipe.source());
+			this.flushWritesPipe = flushWritesPipe;
+		}
+
+		/**
+		 * <p>
+		 * Safely writes the response.
+		 * <p>
+		 * Method is synchronised to ensure data is safe across the
+		 * {@link Thread}, when {@link #handleRead()} is invoked by the
+		 * {@link SocketListener} {@link Thread}.
+		 * 
+		 * @param acceptedSocket
+		 *            {@link AcceptedSocketServicer}.
+		 * @throws IOException
+		 *             If fails to write the response.
+		 */
+		private synchronized final <R> void bulkFlushWrites(AcceptedSocketServicer<R> acceptedSocket)
+				throws IOException {
+
+			// Capture the socket servicer to write
+			this.acceptedSocketServicers.add(acceptedSocket);
+
+			// Notify to flush writes
+			if (!this.isNotified) {
+				this.flushWritesPipe.sink().write(NOTIFY_BUFFER.duplicate());
+				this.isNotified = true;
+			}
+		}
+
+		/*
+		 * ============== AbstractReadHandler ================
+		 */
+
+		@Override
+		public final void handleRead(boolean isNewBuffer) {
+
+			// Safely within the SocketListener thread
+
+			// Only notification, content not important
+			this.readBuffer.pooledBuffer.clear();
+
+			// Take copy to minimise service threads blocking to send
+			AcceptedSocketServicer<?>[] acceptedSocketServicers;
+			synchronized (this) {
+				this.isNotified = false; // no longer notified
+				acceptedSocketServicers = this.acceptedSocketServicers
+						.toArray(new AcceptedSocketServicer[this.acceptedSocketServicers.size()]);
+				this.acceptedSocketServicers.clear();
+			}
+
+			// Flush writes
+			for (int i = 0; i < acceptedSocketServicers.length; i++) {
+				AcceptedSocketServicer<?> servicer = acceptedSocketServicers[i];
+				servicer.unsafeFlushWrites();
 			}
 		}
 	}

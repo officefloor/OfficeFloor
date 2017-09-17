@@ -340,7 +340,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle request with {@link ThreadedServicer}.
 	 */
-	public void _testSingleThreadedHandlerRequest() throws Exception {
+	public void testSingleThreadedHandlerRequest() throws Exception {
 		this.startHttpServer(ThreadedServicer.class);
 		this.doSingleRequest(false);
 	}
@@ -349,7 +349,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Ensure can handle request with {@link ThreadedServicer} for a secure
 	 * connection.
 	 */
-	public void _testSecureSingleThreadedHandlerRequest() throws Exception {
+	public void testSecureSingleThreadedHandlerRequest() throws Exception {
 		this.startHttpServer(ThreadedServicer.class);
 		this.doSingleRequest(true);
 	}
@@ -475,14 +475,14 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 */
-	public void _testOfficeFloorThreadedHandler() throws Exception {
+	public void testOfficeFloorThreadedHandler() throws Exception {
 		this.doThreadedHandlerTest(true);
 	}
 
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 */
-	public void _testRawThreadedHandler() throws Exception {
+	public void testRawThreadedHandler() throws Exception {
 		this.doThreadedHandlerTest(false);
 	}
 
@@ -769,7 +769,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 				if ((requestSentCount >= requestCount)
 						&& (this.selectionKey.interestOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
 					// All requests written
-					System.out.println("All requests written");
+					System.out.println(
+							"All requests written (awaiting " + (requestCount - responseReceivedCount) + " responses)");
 					this.selectionKey.interestOps(SelectionKey.OP_READ);
 				}
 
@@ -811,6 +812,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						if (bytesRead > 0) {
 							// Have bytes, so reset
 							noDataStart = -1;
+						} else if (bytesRead < 0) {
+							fail("Connection closed");
 						} else {
 							// No data
 							if (noDataStart == -1) {
@@ -836,7 +839,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 								StringBuilder responseText = new StringBuilder(
 										UsAsciiUtil.convertToString(responseBytes));
 
-								// Add in quotes to identify incorrect character
+								// Add in quotes to identify incorrect
+								// character
 								responseText.insert(i, "{");
 								responseText.insert(i + 2, "}");
 
@@ -873,18 +877,21 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		private Runnable getRunnable(int requestCount) {
 			return new Runnable() {
 				@Override
-				public synchronized void run() {
+				public void run() {
 					try {
 						// Undertake run
 						PipelineExecutor.this.runResult = PipelineExecutor.this.doPipelineRun(requestCount);
 
 					} catch (Throwable ex) {
 						// Capture failure
-						PipelineExecutor.this.runResult = ex;
+						synchronized (PipelineExecutor.this) {
+							PipelineExecutor.this.runResult = ex;
+						}
+					}
 
-					} finally {
-						// Notify complete
-						this.notify();
+					// Notify complete
+					synchronized (PipelineExecutor.this) {
+						PipelineExecutor.this.notify();
 					}
 				}
 			};
@@ -905,7 +912,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			}
 
 			// Wait for completion
-			this.wait();
+			this.wait(30 * 1000);
+			if (this.runResult == null) {
+				fail("Timed out waiting on pipeline completion");
+			}
 
 			// Return the result
 			return this.returnResult();

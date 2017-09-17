@@ -124,7 +124,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			SSLContext sslContext = OfficeFloorDefaultSslContextSource.createServerSslContext(null);
 
 			// Create the executor
-			Executor executor = (task) -> new TestThread(task).start();
+			Executor executor = (task) -> new TestThread(() -> task.run()).start();
 
 			// Create the SSL socket servicer
 			SslSocketServicerFactory<R> sslSocketServicerFactory = new SslSocketServicerFactory<>(sslContext,
@@ -231,7 +231,8 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			Runnable[] runnables = this.manager.getRunnables();
 			this.threads = new TestThread[runnables.length];
 			for (int i = 0; i < runnables.length; i++) {
-				this.threads[i] = new TestThread(runnables[i]);
+				final int index = i;
+				this.threads[i] = new TestThread(() -> runnables[index].run());
 			}
 		}
 
@@ -311,7 +312,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		/**
 		 * Waits on completion of the {@link TestThread} instances.
 		 */
-		protected void waitForCompletion() {
+		protected void waitForCompletion() throws Exception {
 			long startTime = System.currentTimeMillis();
 			for (int i = 0; i < this.threads.length; i++) {
 				this.threads[i].waitForCompletion(startTime);
@@ -323,13 +324,56 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * {@link Runnable} that can throw an {@link Exception}.
+	 */
+	protected static interface FailableRunnable<T extends Throwable> {
+
+		/**
+		 * Executes logic.
+		 * 
+		 * @throws T
+		 *             Possible {@link Throwable}.
+		 */
+		void run() throws T;
+	}
+
+	/**
+	 * Future on {@link Thread} completion.
+	 */
+	protected static interface Future {
+
+		/**
+		 * Waits for completion of the {@link Thread}.
+		 * 
+		 * @param startTime
+		 *            Start time.
+		 * @param secondsToRun
+		 *            Seconds to wait.
+		 * @throws Exception
+		 *             If failure in {@link Thread} logic.
+		 */
+		void waitForCompletion(long startTime, int secondsToRun) throws Exception;
+
+		/**
+		 * Waits for completion of the {@link Thread}.
+		 * 
+		 * @param startTime
+		 *            Start time.
+		 * @throws Exception
+		 *             If failure in {@link Thread} logic.
+		 */
+		void waitForCompletion(long startTime) throws Exception;
+	}
+
+	/**
 	 * Delays running.
 	 * 
+	 * @return {@link Future}.
 	 * @param runnable
-	 *            {@link Runnable}.
+	 *            {@link FailableRunnable}.
 	 */
-	protected void delay(Runnable runnable) {
-		Runnable delay = () -> {
+	protected <T extends Throwable> Future delay(FailableRunnable<T> runnable) {
+		return this.thread(() -> {
 
 			// Sleep some time to mimic delay
 			try {
@@ -339,31 +383,45 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 			// Run delayed
 			runnable.run();
-		};
-		new TestThread(delay).start();
+		});
+	}
+
+	/**
+	 * Runs in another {@link Thread}.
+	 * 
+	 * @return {@link Future}.
+	 * @param runnable
+	 *            {@link FailableRunnable}.
+	 */
+	protected <T extends Throwable> Future thread(FailableRunnable<Throwable> runnable) {
+		TestThread thread = new TestThread(runnable);
+		thread.start();
+		return thread;
 	}
 
 	/**
 	 * {@link Thread} for testing.
 	 */
-	private class TestThread extends Thread {
+	private class TestThread extends Thread implements Future {
 
-		private final Runnable runnable;
+		private final FailableRunnable<?> runnable;
 
 		private Object completion = null;
 
-		public TestThread(Runnable runnable) {
+		public TestThread(FailableRunnable<?> runnable) {
 			this.runnable = runnable;
 
 			// Register this test thread
 			AbstractSocketManagerTester.this.testThreads.add(this);
 		}
 
-		private void waitForCompletion(long startTime) {
+		@Override
+		public void waitForCompletion(long startTime) throws Exception {
 			this.waitForCompletion(startTime, 3);
 		}
 
-		private synchronized void waitForCompletion(long startTime, int secondsToRun) {
+		@Override
+		public synchronized void waitForCompletion(long startTime, int secondsToRun) throws Exception {
 			while (this.completion == null) {
 
 				// Determine if timed out

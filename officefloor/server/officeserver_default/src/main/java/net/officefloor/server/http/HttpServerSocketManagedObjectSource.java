@@ -157,6 +157,18 @@ public class HttpServerSocketManagedObjectSource
 	public static final String PROPERTY_SERVICE_BUFFER_SIZE = "service.buffer.size";
 
 	/**
+	 * Name of {@link Property} for the maximum number of {@link StreamBuffer}
+	 * instances cached in the {@link Thread}.
+	 */
+	public static final String PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE = "service.buffer.max.thread.pool.size";
+
+	/**
+	 * Name of {@link Property} for the maximum number of {@link StreamBuffer}
+	 * instances cached in a core pool.
+	 */
+	private static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
+
+	/**
 	 * Singleton {@link SocketManager} for all {@link Connection} instances.
 	 */
 	private static SocketManager singletonSocketManager;
@@ -464,6 +476,17 @@ public class HttpServerSocketManagedObjectSource
 	private int serviceBufferSize;
 
 	/**
+	 * Maximum pool size of {@link StreamBuffer} instances cached on the
+	 * {@link Thread}.
+	 */
+	private int serviceBufferMaxThreadPoolSize;
+
+	/**
+	 * Maximum pool size of {@link StreamBuffer} instances within the core pool.
+	 */
+	private int serviceBufferMaxCorePoolSize;
+
+	/**
 	 * Indicates if secure HTTP connection.
 	 */
 	private boolean isSecure;
@@ -564,9 +587,13 @@ public class HttpServerSocketManagedObjectSource
 		int maxHeaderCount = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_HEADER_COUNT, String.valueOf(50)));
 		int maxTextLength = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_TEXT_LENGTH, String.valueOf(2048)));
 		long maxEntityLength = Long
-				.parseLong(mosContext.getProperty(PROPERTY_MAX_ENTITY_LENGTH, String.valueOf(20 * 1024 * 1024)));
+				.parseLong(mosContext.getProperty(PROPERTY_MAX_ENTITY_LENGTH, String.valueOf(1 * 1024 * 1024)));
 		this.serviceBufferSize = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_BUFFER_SIZE, String.valueOf(4096)));
+				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_BUFFER_SIZE, String.valueOf(256)));
+		this.serviceBufferMaxThreadPoolSize = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE, String.valueOf(10000)));
+		this.serviceBufferMaxCorePoolSize = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_CORE_POOL_SIZE, String.valueOf(10000000)));
 
 		// Create the request parser meta-data
 		this.httpRequestParserMetaData = new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength);
@@ -620,7 +647,8 @@ public class HttpServerSocketManagedObjectSource
 
 		// Create the HTTP servicer factory
 		ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
-				() -> ByteBuffer.allocate(this.serviceBufferSize), 3, 1000);
+				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
+				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
 				this.isSecure, this.httpRequestParserMetaData, serviceBufferPool);
 

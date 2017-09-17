@@ -40,7 +40,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can shutdown the {@link SocketListener}.
 	 */
-	public void testShutdown() throws IOException {
+	public void testShutdown() throws Exception {
 		SocketManagerTester tester = new SocketManagerTester(1);
 		tester.start();
 		tester.shutdown();
@@ -50,7 +50,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can shutdown multiple {@link SocketListener} instances.
 	 */
-	public void testShutdownMultipleListeners() throws IOException {
+	public void testShutdownMultipleListeners() throws Exception {
 		SocketManagerTester tester = new SocketManagerTester(4);
 		tester.start();
 		tester.shutdown();

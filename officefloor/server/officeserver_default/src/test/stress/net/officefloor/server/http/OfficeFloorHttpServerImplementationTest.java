@@ -63,7 +63,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		SocketManager manager = new SocketManager(listenerCount, socketBufferPool, socketBufferSize);
 
 		// Create raw HTTP servicing
-		final int serviceBufferSize = 1024;
+		final int serviceBufferSize = 256;
 		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocate(serviceBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
 		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serviceBufferPool);
