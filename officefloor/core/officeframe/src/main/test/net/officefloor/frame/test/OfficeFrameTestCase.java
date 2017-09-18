@@ -182,19 +182,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 	}
 
-	static {
-		// Hook in for GC
-		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-			NotificationEmitter emitter = (NotificationEmitter) gcBean;
-			emitter.addNotificationListener((notification, handback) -> {
-
-				// Indicate Garbage collection
-				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
-						+ notification.getType());
-			}, null, null);
-		}
-	}
-
 	/**
 	 * <p>
 	 * Triggers failure due to exception.

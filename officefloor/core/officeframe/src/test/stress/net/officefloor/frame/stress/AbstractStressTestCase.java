@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.stress;
 
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -26,8 +24,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import javax.management.NotificationEmitter;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -427,11 +423,6 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	private static final Map<Class<? extends TeamSource>, TeamConstructor> teamConstructors = new HashMap<>();
 
 	/**
-	 * Currently running {@link AbstractStressTestCase}.
-	 */
-	private static volatile AbstractStressTestCase activeTestCase = null;
-
-	/**
 	 * Constructor for a {@link Team}.
 	 */
 	private static interface TeamConstructor {
@@ -469,24 +460,6 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		teamConstructors.put(LeaderFollowerTeamSource.class,
 				(name, test) -> test.constructTeam(name, LeaderFollowerTeamSource.class).addProperty(
 						LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME, String.valueOf(test.getTeamSize())));
-
-		// Hook in for GC
-		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-			NotificationEmitter emitter = (NotificationEmitter) gcBean;
-			emitter.addNotificationListener((notification, handback) -> {
-
-				// Indicate Garbage collection
-				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
-						+ notification.getType());
-
-				// Provide heap details for running test
-				AbstractStressTestCase test = activeTestCase;
-				if (test != null) {
-					test.printHeapMemoryDiagnostics();
-				}
-
-			}, null, null);
-		}
 	}
 
 	/**
@@ -589,12 +562,12 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 
 		// Sleep some time to allow previous test to complete
 		Thread.sleep(500);
-		
-		// Set as active test
-		activeTestCase = this;
 
 		// Provide verbose output
 		this.setVerbose(true);
+
+		// Provide GC details
+		this.setLogGC();
 
 		// Capture start time
 		long startTimestamp = System.currentTimeMillis();
