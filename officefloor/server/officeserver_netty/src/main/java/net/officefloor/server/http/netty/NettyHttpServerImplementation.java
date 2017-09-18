@@ -233,6 +233,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 			// Send the response
 			context.write(response);
+			context.flush();
 		};
 
 		// Create the Netty buffer pool

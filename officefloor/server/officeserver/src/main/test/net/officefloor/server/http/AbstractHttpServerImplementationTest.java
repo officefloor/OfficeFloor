@@ -332,7 +332,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	public void testMultipleIndividualSecureRequests() throws Exception {
 		this.startHttpServer(Servicer.class);
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			this.doSingleRequest(true);
 		}
 	}
