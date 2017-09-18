@@ -35,8 +35,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
@@ -46,6 +44,9 @@ import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpUrlContinuationSectionSource}.
@@ -120,7 +121,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE",
+			HttpServerTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE",
 					HttpRouteManagedFunctionSource.FUNCTION_NAME);
 		});
 		compiler.office((context) -> {
@@ -163,8 +164,8 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the client (without redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpTestUtil.configureHttps(builder);
-		HttpTestUtil.configureNoRedirects(builder);
+		HttpClientTestUtil.configureHttps(builder);
+		HttpClientTestUtil.configureNoRedirects(builder);
 		CloseableHttpClient client = builder.build();
 
 		// Obtain the host name
@@ -196,7 +197,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 			// Ensure servicing request
 			response = client.execute(new HttpGet(urlRedirect));
 			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect response", "SERVICED", HttpTestUtil.getEntityBody(response));
+			assertEquals("Incorrect response", "SERVICED", HttpClientTestUtil.getEntityBody(response));
 
 		} finally {
 			try {

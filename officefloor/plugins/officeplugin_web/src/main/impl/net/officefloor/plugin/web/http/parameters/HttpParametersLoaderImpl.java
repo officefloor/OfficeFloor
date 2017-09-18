@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.value.loader.ObjectInstantiator;
 import net.officefloor.plugin.value.loader.ValueLoader;
 import net.officefloor.plugin.value.loader.ValueLoaderFactory;
@@ -35,6 +34,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * {@link HttpParametersLoader} implementation.

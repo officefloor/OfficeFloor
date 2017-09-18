@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.parameters.source;
 
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Enum providing the dependency keys for the {@link HttpParametersLoader}.

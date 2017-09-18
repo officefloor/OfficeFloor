@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
+import net.officefloor.server.stream.ServerWriter;
 
 /**
  * {@link HttpTemplateWriter} to write a bean.

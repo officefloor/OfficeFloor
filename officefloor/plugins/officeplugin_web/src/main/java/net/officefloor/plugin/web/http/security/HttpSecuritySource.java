@@ -21,8 +21,8 @@ import java.io.IOException;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * <p>

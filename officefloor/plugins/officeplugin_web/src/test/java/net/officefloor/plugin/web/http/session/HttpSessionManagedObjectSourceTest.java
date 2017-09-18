@@ -30,11 +30,11 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServicerFunction;
+import net.officefloor.server.http.MockHttpServer;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.
@@ -79,14 +79,14 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	public void testHttpSessionStateAcrossCalls() throws Exception {
 
 		// Loop calling server (HttpClient should send back Session Id)
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			for (int i = 0; i < 10; i++) {
 
 				// Call the server
 				HttpGet request = new HttpGet(this.getServerUrl());
 				HttpResponse response = client.execute(request);
 				int status = response.getStatusLine().getStatusCode();
-				String callIndex = HttpTestUtil.getEntityBody(response);
+				String callIndex = HttpClientTestUtil.getEntityBody(response);
 
 				// Ensure results match and call index remembered by Session
 				assertEquals("Call should be successful", 200, status);

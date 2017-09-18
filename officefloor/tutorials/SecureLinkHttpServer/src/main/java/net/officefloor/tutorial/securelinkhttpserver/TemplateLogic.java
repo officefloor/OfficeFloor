@@ -19,9 +19,8 @@ package net.officefloor.tutorial.securelinkhttpserver;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpParameters;
-
+import net.officefloor.server.http.ServerHttpConnection;
 import lombok.Data;
 
 /**

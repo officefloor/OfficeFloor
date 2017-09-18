@@ -137,10 +137,13 @@ import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.ResourceSource;
@@ -592,8 +595,16 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 			builder.addOfficeFloorListener(officeFloorMBeanRegistrator);
 		}
 
-		// Add configured OfficeFloor listeners
+		// Register the external servicer OfficeFloor listener
+		builder.addOfficeFloorListener(new ExternalServicingOfficeFloorListener(node));
+
+		// Add compiler configured OfficeFloor listeners
 		for (OfficeFloorListener listener : this.officeFloorListeners) {
+			builder.addOfficeFloorListener(listener);
+		}
+
+		// Add deployer configured OfficeFloor listeners
+		for (OfficeFloorListener listener : node.getOfficeFloorListeners()) {
 			builder.addOfficeFloorListener(listener);
 		}
 
@@ -611,6 +622,45 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 		// Return the OfficeFloor
 		return officeFloor;
+	}
+
+	/**
+	 * External servicing {@link OfficeFloorListener}.
+	 */
+	private static class ExternalServicingOfficeFloorListener implements OfficeFloorListener {
+
+		/**
+		 * {@link OfficeFloorNode}.
+		 */
+		private OfficeFloorNode officeFloorNode;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param officeFloorNode
+		 *            {@link OfficeFloorNode}.
+		 */
+		public ExternalServicingOfficeFloorListener(OfficeFloorNode officeFloorNode) {
+			this.officeFloorNode = officeFloorNode;
+		}
+
+		/*
+		 * ================= OfficeFloorListener ========================
+		 */
+
+		@Override
+		public void officeFloorOpened(OfficeFloorEvent event) throws UnknownOfficeException, UnknownFunctionException {
+
+			// Load the external servicing
+			this.officeFloorNode.loadExternalServicing(event.getOfficeFloor());
+
+			// Release node for garbage collection
+			this.officeFloorNode = null;
+		}
+
+		@Override
+		public void officeFloorClosed(OfficeFloorEvent event) {
+		}
 	}
 
 	/*
@@ -868,8 +918,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, OfficeFloorNode officeFloor) {
-		return new InputManagedObjectNodeImpl(inputManagedObjectName, officeFloor, this);
+	public InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, String inputObjectType,
+			OfficeFloorNode officeFloor) {
+		return new InputManagedObjectNodeImpl(inputManagedObjectName, inputObjectType, officeFloor, this);
 	}
 
 	@Override

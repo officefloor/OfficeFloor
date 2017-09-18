@@ -41,8 +41,6 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContentImpl;
@@ -54,6 +52,8 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionImpl;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContentImpl;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.UsAsciiUtil;
 
 /**
  * Tests the {@link HttpTemplateManagedFunctionSource}.

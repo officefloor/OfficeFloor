@@ -26,7 +26,7 @@ import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the Secure Page.
@@ -39,7 +39,7 @@ public class SecurePageTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.client = HttpTestUtil.createHttpClient(true);
+		this.client = HttpClientTestUtil.createHttpClient(true);
 	}
 
 	@Override

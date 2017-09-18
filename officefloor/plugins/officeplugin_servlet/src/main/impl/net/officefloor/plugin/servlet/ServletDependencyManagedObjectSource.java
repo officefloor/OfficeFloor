@@ -20,12 +20,12 @@ package net.officefloor.plugin.servlet;
 import javax.servlet.Servlet;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.ServletBridge;
 
 /**
@@ -34,8 +34,7 @@ import net.officefloor.plugin.servlet.bridge.ServletBridge;
  * @author Daniel Sagenschneider
  */
 public class ServletDependencyManagedObjectSource
-		extends
-		AbstractManagedObjectSource<ServletDependencyManagedObjectSource.DependencyKeys, None> {
+		extends AbstractManagedObjectSource<ServletDependencyManagedObjectSource.DependencyKeys, None> {
 
 	/**
 	 * Dependency keys for the {@link ServletDependencyManagedObjectSource}.
@@ -64,10 +63,8 @@ public class ServletDependencyManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<DependencyKeys, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<DependencyKeys, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the dependency type
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
@@ -76,8 +73,7 @@ public class ServletDependencyManagedObjectSource
 		// Specify meta-data
 		context.setObjectClass(this.type);
 		context.setManagedObjectClass(ServletDependencyManagedObject.class);
-		context.addDependency(DependencyKeys.SERVLET_BRIDGE,
-				ServletBridge.class);
+		context.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class);
 	}
 
 	@Override
@@ -88,8 +84,7 @@ public class ServletDependencyManagedObjectSource
 	/**
 	 * {@link ManagedObject} for the {@link Servlet} dependency.
 	 */
-	public class ServletDependencyManagedObject implements
-			CoordinatingManagedObject<DependencyKeys> {
+	public class ServletDependencyManagedObject implements CoordinatingManagedObject<DependencyKeys> {
 
 		/**
 		 * Dependency.
@@ -101,16 +96,13 @@ public class ServletDependencyManagedObjectSource
 		 */
 
 		@Override
-		public void loadObjects(ObjectRegistry<DependencyKeys> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
 
 			// Obtain the Servlet bridge
-			ServletBridge bridge = (ServletBridge) registry
-					.getObject(DependencyKeys.SERVLET_BRIDGE);
+			ServletBridge bridge = (ServletBridge) registry.getObject(DependencyKeys.SERVLET_BRIDGE);
 
 			// Obtain the dependency
-			this.dependency = bridge
-					.getObject(ServletDependencyManagedObjectSource.this.type);
+			this.dependency = bridge.getObject(ServletDependencyManagedObjectSource.this.type);
 		}
 
 		@Override

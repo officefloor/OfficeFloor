@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.tokenise;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * Tokenises the {@link HttpRequest} for the path, parameters, fragment.

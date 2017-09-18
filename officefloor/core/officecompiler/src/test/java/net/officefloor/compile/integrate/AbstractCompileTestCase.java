@@ -48,6 +48,7 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -127,7 +128,15 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 *            {@link ResourceSource} instances.
 	 */
 	protected void record_init(ResourceSource... resourceSources) {
+
+		// Record adding listener for external service handling
+		this.officeFloorBuilder.addOfficeFloorListener(null);
+		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(OfficeFloorListener.class));
+
+		// Record setting the default class loader
 		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
+
+		// Record adding the resources
 		for (ResourceSource resourceSource : resourceSources) {
 			this.officeFloorBuilder.addResources(resourceSource);
 		}

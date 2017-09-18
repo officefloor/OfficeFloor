@@ -31,7 +31,9 @@ public interface CompileSectionExtension {
 	 * 
 	 * @param context
 	 *            {@link CompileSectionContext}.
+	 * @throws Exception
+	 *             If fails to extend.
 	 */
-	void extend(CompileSectionContext context);
+	void extend(CompileSectionContext context) throws Exception;
 
 }

@@ -29,9 +29,9 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchResult;
 
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
-
 import org.apache.commons.codec.binary.Base64;
+
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * {@link CredentialStore} for {@link DirContext}.

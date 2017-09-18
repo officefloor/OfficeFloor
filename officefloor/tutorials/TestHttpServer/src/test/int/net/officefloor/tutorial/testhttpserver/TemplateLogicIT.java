@@ -17,14 +17,14 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -37,11 +37,10 @@ public class TemplateLogicIT extends Assert {
 	@Test
 	public void integrationTest() throws Exception {
 
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Send request to add
-			HttpGet request = new HttpGet(
-					"http://localhost:7878/template-add.woof?a=1&b=2");
+			HttpGet request = new HttpGet("http://localhost:7878/template-add.woof?a=1&b=2");
 			HttpResponse response = client.execute(request);
 
 			// Ensure added the values

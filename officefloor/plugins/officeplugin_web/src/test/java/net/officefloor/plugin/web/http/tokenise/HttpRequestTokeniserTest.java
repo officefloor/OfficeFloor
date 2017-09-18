@@ -18,12 +18,12 @@
 package net.officefloor.plugin.web.http.tokenise;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.UsAsciiUtil;
 
 /**
  * Tests the {@link HttpRequestTokeniser}.
@@ -259,7 +259,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 				String fragment = "fragment" + escapedCharacter;
 				String entity = escapedCharacter + "=" + escapedCharacter
 						+ ";another=value";
-				HttpRequest request = HttpTestUtil.createHttpRequest("POST",
+				HttpRequest request = HttpServerTestUtil.createHttpRequest("POST",
 						path + "?" + queryString + "#" + fragment, entity);
 				HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
 				tokeniser.tokeniseHttpRequest(request, this.handler);
@@ -352,7 +352,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	private void doTest(String method, String requestUri, String body)
 			throws Exception {
 		this.replayMockObjects();
-		HttpRequest request = HttpTestUtil.createHttpRequest(method,
+		HttpRequest request = HttpServerTestUtil.createHttpRequest(method,
 				requestUri, body);
 		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
 		tokeniser.tokeniseHttpRequest(request, this.handler);

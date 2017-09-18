@@ -23,9 +23,9 @@ import java.io.Serializable;
 import lombok.Data;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Logic for the <code>template.woof.html</code>.

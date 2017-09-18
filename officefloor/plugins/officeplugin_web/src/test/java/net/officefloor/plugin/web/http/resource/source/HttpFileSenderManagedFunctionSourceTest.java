@@ -32,15 +32,16 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.stream.MockServerOutputStream;
 
 /**
  * Tests the {@link HttpFileSenderManagedFunctionSource}.
@@ -268,7 +269,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		Charset charset = Charset.defaultCharset();
 		this.response.setContentType("text/html", charset);
 		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
-		this.response.setStatus(status);
+		this.response.setHttpStatus(HttpStatus.getHttpStatus(status));
 		this.response.send();
 	}
 

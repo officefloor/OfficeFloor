@@ -24,7 +24,6 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
@@ -32,6 +31,7 @@ import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
 import net.officefloor.plugin.web.http.security.store.MockCredentialStoreManagedObjectSource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.

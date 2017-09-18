@@ -31,7 +31,9 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.team.Team;
 
 /**
@@ -262,5 +264,16 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 *            {@link CompileContext}.
 	 */
 	void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext);
+
+	/**
+	 * Loads the {@link FunctionManager} instances to externally trigger this
+	 * {@link SectionNode}.
+	 * 
+	 * @param office
+	 *            {@link Office} containing this {@link SectionNode}.
+	 * @throws UnknownFunctionException
+	 *             {@link UnknownFunctionException}.
+	 */
+	void loadExternalServicing(Office office) throws UnknownFunctionException;
 
 }

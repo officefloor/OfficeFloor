@@ -29,10 +29,6 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
@@ -44,6 +40,10 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenAdapter;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedFunction} for routing {@link HttpRequest} instances and
@@ -92,8 +92,8 @@ public class HttpRouteFunction extends
 
 		// Send redirect
 		HttpResponse response = connection.getHttpResponse();
-		response.setStatus(HttpStatus.SC_SEE_OTHER);
-		response.addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
+		response.setHttpStatus(HttpStatus.SEE_OTHER);
+		response.getHttpHeaders().addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
 	}
 
 	/**

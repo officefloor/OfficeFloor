@@ -19,18 +19,17 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.ServerOutputStream;
-import net.officefloor.plugin.stream.ServerWriter;
-import net.officefloor.plugin.stream.impl.MockServerOutputStream;
+import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.UsAsciiUtil;
+import net.officefloor.server.stream.MockServerOutputStream;
+import net.officefloor.server.stream.ServerOutputStream;
+import net.officefloor.server.stream.ServerWriter;
 
 /**
  * Mock {@link HttpResponse}.
@@ -40,19 +39,14 @@ import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 public class MockHttpResponse implements HttpResponse {
 
 	/**
-	 * Status.
+	 * {@link HttpStatus}.
 	 */
-	private int status = -1;
+	private HttpStatus status = null;
 
 	/**
-	 * Status message.
+	 * {@link HttpVersion}.
 	 */
-	private String statusMessage = null;
-
-	/**
-	 * Version.
-	 */
-	private String version = null;
+	private HttpVersion version = null;
 
 	/**
 	 * Headers.
@@ -62,8 +56,7 @@ public class MockHttpResponse implements HttpResponse {
 	/**
 	 * Entity.
 	 */
-	private MockServerOutputStream entity = new MockServerOutputStream(
-			UsAsciiUtil.US_ASCII);
+	private MockServerOutputStream entity = new MockServerOutputStream(UsAsciiUtil.US_ASCII);
 
 	/**
 	 * Flag indicating if sent.
@@ -104,46 +97,40 @@ public class MockHttpResponse implements HttpResponse {
 	 */
 
 	@Override
-	public void setVersion(String version) {
+	public void setHttpVersion(HttpVersion version) {
 		this.version = version;
 	}
 
 	@Override
-	public String getVersion() {
+	public HttpVersion getHttpVersion() {
 		return this.version;
 	}
 
 	@Override
-	public void setStatus(int status) {
+	public void setHttpStatus(HttpStatus status) {
 		this.status = status;
 	}
 
 	@Override
-	public int getStatus() {
+	public HttpStatus getHttpStatus() {
 		return this.status;
 	}
 
 	@Override
-	public void setStatus(int status, String statusMessage) {
-		this.status = status;
-		this.statusMessage = statusMessage;
-	}
-
-	@Override
-	public String getStatusMessage() {
-		return this.statusMessage;
-	}
-
-	@Override
 	public void reset() throws IOException {
-		throw new IllegalStateException("Can not reset "
-				+ MockHttpResponse.class.getSimpleName());
+		throw new IllegalStateException("Can not reset " + MockHttpResponse.class.getSimpleName());
 	}
-
+	
+	@Override
+	public HttpResponseHeaders getHttpHeaders() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+/*
 	@Override
 	public HttpHeader addHeader(String name, String value) {
-		TestCase.assertFalse("Response already contains header '" + name + "'",
-				this.headers.containsKey(name));
+		TestCase.assertFalse("Response already contains header '" + name + "'", this.headers.containsKey(name));
 		this.headers.setProperty(name, value);
 		return new HttpHeaderImpl(name, value);
 	}
@@ -176,17 +163,21 @@ public class MockHttpResponse implements HttpResponse {
 	public void removeHeaders(String name) {
 		this.headers.remove(name);
 	}
+*/
 
 	@Override
 	public ServerOutputStream getEntity() {
 		return this.entity.getServerOutputStream();
+	}	
+
+	@Override
+	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
+		throw new IllegalStateException("Can not change Content-Type for " + MockHttpResponse.class.getSimpleName());
 	}
 
 	@Override
-	public void setContentType(String contentType, Charset charset)
-			throws IOException {
-		throw new IllegalStateException("Can not change Content-Type for "
-				+ MockHttpResponse.class.getSimpleName());
+	public void setContentType(String contentType, Charset charset) throws IOException {
+		throw new IllegalStateException("Can not change Content-Type for " + MockHttpResponse.class.getSimpleName());
 	}
 
 	@Override

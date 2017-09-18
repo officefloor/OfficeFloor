@@ -40,7 +40,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -48,6 +47,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource.NoLogicClass;
 import net.officefloor.plugin.web.http.template.section.TemplateLogic.RowBean;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpTemplateSectionSource}.

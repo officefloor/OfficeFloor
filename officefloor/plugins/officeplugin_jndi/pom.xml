@@ -43,8 +43,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_socket</artifactId>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_default</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

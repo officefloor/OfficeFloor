@@ -26,8 +26,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * Tests the {@link MockCredentialStoreManagedObjectSource}.

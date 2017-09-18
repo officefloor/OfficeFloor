@@ -30,7 +30,7 @@ import org.hsqldb.jdbc.jdbcDataSource;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the {@link TeamHttpServer}.
@@ -52,7 +52,7 @@ public class TeamHttpServerTest extends TestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	@Override
 	protected void setUp() throws Exception {

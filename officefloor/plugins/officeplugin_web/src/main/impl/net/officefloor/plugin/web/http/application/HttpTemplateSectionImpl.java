@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link HttpTemplateSection} implementation.

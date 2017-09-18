@@ -25,12 +25,12 @@ import java.util.Set;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Initial {@link ManagedFunction} to ensure appropriate conditions for
@@ -158,7 +158,7 @@ public class HttpTemplateInitialFunction
 		// Determine if POST/redirect/GET pattern to be applied
 		if (!isRedirectRequired) {
 			// Request likely overridden to POST, so use client HTTP method
-			String method = connection.getHttpMethod();
+			String method = connection.getClientHttpMethod().getName();
 			if (this.renderRedirectHttpMethods.contains(method.toUpperCase())) {
 				// Flag redirect for POST/redirect/GET pattern
 				isRedirectRequired = true;

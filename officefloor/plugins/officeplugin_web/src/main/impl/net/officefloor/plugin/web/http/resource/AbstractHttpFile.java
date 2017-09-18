@@ -22,15 +22,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Abstract {@link HttpFile} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpFile extends AbstractHttpResource implements
-		HttpFile {
+public abstract class AbstractHttpFile extends AbstractHttpResource implements HttpFile {
 
 	/**
 	 * Writes the {@link HttpFile} to the {@link HttpResponse}.
@@ -42,8 +41,7 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 	 * @throws IOException
 	 *             If fails to write the {@link HttpFile}.
 	 */
-	public static void writeHttpFile(HttpFile file, HttpResponse response)
-			throws IOException {
+	public static void writeHttpFile(HttpFile file, HttpResponse response) throws IOException {
 
 		// Reset the HTTP response for writing the file
 		response.reset();
@@ -51,7 +49,7 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 		// Provide the details of the file
 		String contentEncoding = file.getContentEncoding();
 		if ((contentEncoding != null) && (contentEncoding.length() > 0)) {
-			response.addHeader("Content-Encoding", contentEncoding);
+			response.getHttpHeaders().addHeader("Content-Encoding", contentEncoding);
 		}
 		String contentType = file.getContentType();
 		Charset charset = file.getCharset();
@@ -84,8 +82,7 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 	 * @param description
 	 *            {@link AbstractHttpFileDescription}.
 	 */
-	public AbstractHttpFile(String resourcePath,
-			AbstractHttpFileDescription description) {
+	public AbstractHttpFile(String resourcePath, AbstractHttpFileDescription description) {
 		super(resourcePath);
 		String contentEncoding = description.getContentEncoding();
 		this.contentEncoding = (contentEncoding == null ? "" : contentEncoding);
@@ -138,10 +135,8 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 		AbstractHttpFile that = (AbstractHttpFile) obj;
 
 		// Return whether details same
-		return (this.getPath().equals(that.getPath()))
-				&& (this.contentEncoding.equals(that.getContentEncoding()))
-				&& (this.contentType.equals(that.getContentType()) && isCharsetMatch(
-						this.charset, that.getCharset()));
+		return (this.getPath().equals(that.getPath())) && (this.contentEncoding.equals(that.getContentEncoding()))
+				&& (this.contentType.equals(that.getContentType()) && isCharsetMatch(this.charset, that.getCharset()));
 	}
 
 	/**
@@ -208,16 +203,14 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 	 * @throws ClassNotFoundException
 	 *             {@link ClassNotFoundException}.
 	 */
-	private void readObject(ObjectInputStream stream) throws IOException,
-			ClassNotFoundException {
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 
 		// Obtain path and description of file
 		this.resourcePath = (String) stream.readObject();
 		this.contentEncoding = (String) stream.readObject();
 		this.contentType = (String) stream.readObject();
 		String charsetName = (String) stream.readObject();
-		this.charset = (charsetName == null ? null : Charset
-				.forName(charsetName));
+		this.charset = (charsetName == null ? null : Charset.forName(charsetName));
 	}
 
 }

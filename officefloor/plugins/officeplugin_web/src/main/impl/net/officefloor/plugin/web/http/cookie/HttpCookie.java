@@ -24,8 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * HTTP Cookie.

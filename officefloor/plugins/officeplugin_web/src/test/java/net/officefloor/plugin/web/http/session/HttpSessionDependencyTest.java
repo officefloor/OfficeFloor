@@ -27,15 +27,15 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests that {@link HttpSessionIdGenerator} and {@link HttpSessionStore} can be
@@ -92,7 +92,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record attempting to creating a new session.
 		// (Also ensures directly using the generator and store)
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(), new ArrayList<HttpHeader>(0));
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), new ArrayList<HttpHeader>(0));
 		this.generator.generateSessionId(null);
 		this.control(this.generator).setMatcher(new AbstractMatcher() {
 			@Override
@@ -103,9 +103,9 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			}
 		});
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.httpResponse);
-		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(), new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
 		this.recordReturn(this.httpResponse,
-				this.httpResponse.addHeader("set-cookie",
+				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
 						new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 		this.store.createHttpSession(null);
@@ -141,7 +141,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record attempting to creating a new session.
 		// (Also ensures using the dependency generator and store)
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(), new ArrayList<HttpHeader>(0));
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), new ArrayList<HttpHeader>(0));
 		this.generator.generateSessionId(null);
 		this.control(this.generator).setMatcher(new AbstractMatcher() {
 			@Override
@@ -152,9 +152,9 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			}
 		});
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.httpResponse);
-		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(), new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
 		this.recordReturn(this.httpResponse,
-				this.httpResponse.addHeader("set-cookie",
+				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
 						new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 		this.store.createHttpSession(null);

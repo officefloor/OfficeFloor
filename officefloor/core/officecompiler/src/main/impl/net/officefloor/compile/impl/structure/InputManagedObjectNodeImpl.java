@@ -53,6 +53,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	private final String inputManagedObjectName;
 
 	/**
+	 * Input object type.
+	 */
+	private final String inputObjectType;
+
+	/**
 	 * Parent {@link OfficeFloor}.
 	 */
 	private final OfficeFloorNode officeFloor;
@@ -94,13 +99,17 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * 
 	 * @param inputManagedObjectName
 	 *            Name of this {@link InputManagedObjectNode}.
+	 * @param inputObjectType
+	 *            Input object type.
 	 * @param officeFloor
 	 *            {@link OfficeFloorNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public InputManagedObjectNodeImpl(String inputManagedObjectName, OfficeFloorNode officeFloor, NodeContext context) {
+	public InputManagedObjectNodeImpl(String inputManagedObjectName, String inputObjectType,
+			OfficeFloorNode officeFloor, NodeContext context) {
 		this.inputManagedObjectName = inputManagedObjectName;
+		this.inputObjectType = inputObjectType;
 		this.officeFloor = officeFloor;
 		this.context = context;
 	}
@@ -147,6 +156,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	/*
 	 * ======================= InputManagedObjectNode =========================
 	 */
+
+	@Override
+	public String getInputObjectType() {
+		return this.inputObjectType;
+	}
 
 	@Override
 	public ManagedObjectSourceNode getBoundManagedObjectSourceNode() {

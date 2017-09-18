@@ -23,7 +23,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
 
@@ -53,7 +53,7 @@ public class SessionHttpServerTest extends TestCase {
 
 	// END SNIPPET: pojo
 
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	public void testSessionPage() throws Exception {
 

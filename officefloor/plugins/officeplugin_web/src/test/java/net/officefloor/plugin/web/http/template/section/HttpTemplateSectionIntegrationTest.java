@@ -45,10 +45,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
@@ -61,6 +57,11 @@ import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
@@ -141,13 +142,13 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Obtain the ports
-		this.httpPort = HttpTestUtil.getAvailablePort();
-		this.httpsPort = HttpTestUtil.getAvailablePort();
+		this.httpPort = HttpServerTestUtil.getAvailablePort();
+		this.httpsPort = HttpServerTestUtil.getAvailablePort();
 
 		// Create the client that will not automatically redirect
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpTestUtil.configureHttps(builder);
-		HttpTestUtil.configureNoRedirects(builder);
+		HttpClientTestUtil.configureHttps(builder);
+		HttpClientTestUtil.configureNoRedirects(builder);
 		this.client = builder.build();
 	}
 
@@ -463,7 +464,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure correct rendering of template
-		String rendering = HttpTestUtil.getEntityBody(response);
+		String rendering = HttpClientTestUtil.getEntityBody(response);
 		assertEquals("Incorrect rendering", expectedResponse, rendering);
 
 		// Return the response
@@ -1018,7 +1019,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		assertEquals("Ensure successful", 200, response.getStatusLine().getStatusCode());
 
 		// Obtain and return the response content
-		String content = HttpTestUtil.getEntityBody(response);
+		String content = HttpClientTestUtil.getEntityBody(response);
 		return content;
 	}
 
@@ -1126,7 +1127,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, this.httpPort, this.httpsPort, "ROUTE", "route");
+			HttpServerTestUtil.configureTestHttpServer(context, this.httpPort, this.httpsPort, "ROUTE", "route");
 		});
 
 		// Configure the application

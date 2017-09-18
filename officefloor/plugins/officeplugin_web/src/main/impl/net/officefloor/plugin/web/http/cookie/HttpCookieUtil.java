@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.cookie;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Utility methods for working with {@link HttpCookie} instances from the
@@ -52,7 +52,7 @@ public class HttpCookieUtil {
 	 */
 	public static List<HttpCookie> extractHttpCookies(HttpRequest request) {
 		List<HttpCookie> cookies = new LinkedList<HttpCookie>();
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if (HEADER_NAME_COOKIE.equalsIgnoreCase(header.getName())) {
 				cookies.addAll(HttpCookie.parse(header.getValue()));
 			}
@@ -72,10 +72,9 @@ public class HttpCookieUtil {
 	 *         <code>null</code> if no {@link HttpCookie} by the name on the
 	 *         {@link HttpRequest}.
 	 */
-	public static HttpCookie extractHttpCookie(String cookieName,
-			HttpRequest request) {
+	public static HttpCookie extractHttpCookie(String cookieName, HttpRequest request) {
 		// Search for the cookie by the name
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if (HEADER_NAME_COOKIE.equalsIgnoreCase(header.getName())) {
 				List<HttpCookie> cookies = HttpCookie.parse(header.getValue());
 				for (HttpCookie cookie : cookies) {
@@ -102,28 +101,25 @@ public class HttpCookieUtil {
 	 * @return {@link HttpHeader} added to the {@link HttpResponse} containing
 	 *         the {@link HttpCookie}.
 	 */
-	public static HttpHeader addHttpCookie(HttpCookie cookie,
-			HttpResponse response) {
+	public static HttpHeader addHttpCookie(HttpCookie cookie, HttpResponse response) {
 
 		// Obtain the value prefix of the cookie
 		String cookieValuePrefix = cookie.getName().toLowerCase() + "=";
 
 		// Remove any cookies by the name
-		for (HttpHeader header : response.getHeaders()) {
+		for (HttpHeader header : response.getHttpHeaders()) {
 			// Determine if header specifying a cookie
 			if (HEADER_NAME_SET_COOKIE.equalsIgnoreCase(header.getName())) {
 				// Determine if cookie by name
-				if (header.getValue().toLowerCase().startsWith(
-						cookieValuePrefix)) {
+				if (header.getValue().toLowerCase().startsWith(cookieValuePrefix)) {
 					// Remove the header containing cookie by same name
-					response.removeHeader(header);
+					response.getHttpHeaders().removeHeader(header);
 				}
 			}
 		}
 
 		// Add the header for the cookie
-		HttpHeader header = response.addHeader("set-cookie", cookie
-				.toHttpResponseHeaderValue());
+		HttpHeader header = response.getHttpHeaders().addHeader("set-cookie", cookie.toHttpResponseHeaderValue());
 
 		// Return the header
 		return header;

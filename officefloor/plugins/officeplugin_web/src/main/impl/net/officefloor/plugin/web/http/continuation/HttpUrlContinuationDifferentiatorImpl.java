@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.continuation;
 
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link HttpUrlContinuationDifferentiator} implementation.

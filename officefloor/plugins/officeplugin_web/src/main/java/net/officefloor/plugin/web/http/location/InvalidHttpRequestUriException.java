@@ -17,8 +17,9 @@
  */
 package net.officefloor.plugin.web.http.location;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.InvalidHttpRequestException;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.InvalidHttpRequestException;
 
 /**
  * Indicates the {@link HttpRequest} request URI is invalid.
@@ -31,11 +32,11 @@ public class InvalidHttpRequestUriException extends InvalidHttpRequestException 
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of exception.
+	 *            {@link HttpStatus} of exception.
 	 * @param message
 	 *            Message.
 	 */
-	public InvalidHttpRequestUriException(int httpStatus, String message) {
+	public InvalidHttpRequestUriException(HttpStatus httpStatus, String message) {
 		super(httpStatus, message);
 	}
 

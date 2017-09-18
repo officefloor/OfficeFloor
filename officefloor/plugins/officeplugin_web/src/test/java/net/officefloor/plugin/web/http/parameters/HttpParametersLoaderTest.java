@@ -24,10 +24,10 @@ import java.util.Map;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServerTestUtil;
 
 /**
  * Tests the {@link HttpParametersLoader}.
@@ -84,7 +84,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testOnlyTypeParametersLoaded() throws Exception {
 
 		// Load the parameters
-		HttpRequest request = HttpTestUtil
+		HttpRequest request = HttpServerTestUtil
 				.createHttpRequest(
 						"GET",
 						"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=NotLoaded",
@@ -369,7 +369,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 
 		// Run test to load values
 		this.replayMockObjects();
-		HttpRequest request = HttpTestUtil.createHttpRequest(method,
+		HttpRequest request = HttpServerTestUtil.createHttpRequest(method,
 				requestUri, body);
 		HttpParametersLoader<MockInterface> loader = this.createLoader(
 				isCaseSensitive, aliasProperties);

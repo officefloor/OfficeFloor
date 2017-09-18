@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.execution;
 
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
-import net.officefloor.frame.impl.execute.pool.ManagedObjectPoolContextImpl;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ManagedExecution;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
@@ -29,6 +28,38 @@ import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
  * @author Daniel Sagenschneider
  */
 public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
+
+	/**
+	 * Indicates if the current {@link Thread} is executing within a
+	 * {@link ManagedExecution}.
+	 * 
+	 * @return <code>true</code> if current {@link Thread} is executing within a
+	 *         {@link ManagedExecution}.
+	 */
+	public static boolean isCurrentThreadManaged() {
+		return threadManagedExecutionState.get().isManaged;
+	}
+
+	/**
+	 * {@link ThreadLocal} to indicate if the current {@link Thread} is managed.
+	 */
+	private static final ThreadLocal<ManagedExecutionState> threadManagedExecutionState = new ThreadLocal<ManagedExecutionState>() {
+		@Override
+		protected ManagedExecutionState initialValue() {
+			return new ManagedExecutionState();
+		}
+	};
+
+	/**
+	 * State of {@link ManagedExecution} for the {@link Thread}.
+	 */
+	private static class ManagedExecutionState {
+
+		/**
+		 * Indicates if {@link Thread} is within {@link ManagedExecution}.
+		 */
+		private boolean isManaged = false;
+	}
 
 	/**
 	 * {@link ThreadCompletionListener} instances.
@@ -80,17 +111,33 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 
 		@Override
 		public void execute() throws E {
+
+			// Determine if state of managed execution for thread
+			ManagedExecutionState state = ManagedExecutionFactoryImpl.threadManagedExecutionState.get();
+			boolean isAlreadyManagd = state.isManaged;
+
+			// Undertake (potentially managed)
 			try {
-				// Flag that a managed thread
-				ManagedObjectPoolContextImpl.flagCurrentThreadManaged();
+				// Ensure being managed
+				if (!isAlreadyManagd) {
+					state.isManaged = true;
+				}
 
 				// Undertake execution
 				this.execution.execute();
 
 			} finally {
-				// Notify that thread management is complete
-				for (int i = 0; i < ManagedExecutionFactoryImpl.this.threadCompletionListeners.length; i++) {
-					ManagedExecutionFactoryImpl.this.threadCompletionListeners[i].threadComplete();
+				// Only clean up if not previously managed (not internal call)
+				if (!isAlreadyManagd) {
+					try {
+						// Notify that thread management is complete
+						for (int i = 0; i < ManagedExecutionFactoryImpl.this.threadCompletionListeners.length; i++) {
+							ManagedExecutionFactoryImpl.this.threadCompletionListeners[i].threadComplete();
+						}
+					} finally {
+						// No longer managed
+						state.isManaged = false;
+					}
 				}
 			}
 		}

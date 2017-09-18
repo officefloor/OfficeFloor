@@ -29,13 +29,13 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterFunctionDependencies;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.UsAsciiUtil;
+import net.officefloor.server.stream.MockServerOutputStream;
 
 /**
  * Tests the {@link HttpFileWriterManagedFunctionSource}.
@@ -92,7 +92,7 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.reset();
 		this.recordReturn(httpFile, httpFile.getContentEncoding(), contentEncoding);
-		this.recordReturn(response, response.addHeader("Content-Encoding", contentEncoding), header);
+		this.recordReturn(response, response.getHttpHeaders().addHeader("Content-Encoding", contentEncoding), header);
 		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
 		this.recordReturn(httpFile, httpFile.getCharset(), charset);
 		response.setContentType(contentType, charset);

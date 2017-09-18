@@ -29,9 +29,9 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Ensure integration of {@link HttpTemplateManagedFunctionSource} and
@@ -44,7 +44,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	/**
 	 * {@link OfficeFloor}.

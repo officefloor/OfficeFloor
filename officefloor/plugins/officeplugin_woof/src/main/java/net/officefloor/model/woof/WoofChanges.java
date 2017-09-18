@@ -28,11 +28,11 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Changes that can be made to a {@link WoofModel}.

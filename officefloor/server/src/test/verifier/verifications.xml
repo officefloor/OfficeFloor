@@ -1,0 +1,17 @@
+<verifications>
+	<files>
+		<!-- Ensure all the modules inheriting latest -->
+		<file>
+			<location>officeserver/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>officeserver_default/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>officeserver_netty/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+	</files>
+</verifications>

@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -56,6 +57,7 @@ import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
@@ -78,8 +80,11 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -187,6 +192,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	private boolean isAutoWireTeams = false;
 
 	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final List<OfficeFloorListener> listeners = new LinkedList<>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorSourceClassName
@@ -286,6 +296,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
+	public void addOfficeFloorListener(OfficeFloorListener listener) {
+		this.listeners.add(listener);
+	}
+
+	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			String managedObjectSourceClassName) {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
@@ -303,9 +318,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName) {
+	public OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName, String inputObjectType) {
 		return NodeUtil.getInitialisedNode(inputManagedObjectName, this.inputManagedObjects, this.context,
-				() -> this.context.createInputManagedNode(inputManagedObjectName, this),
+				() -> this.context.createInputManagedNode(inputManagedObjectName, inputObjectType, this),
 				(inputManagedObject) -> inputManagedObject.initialise());
 	}
 
@@ -366,6 +381,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		return NodeUtil.getInitialisedNode(officeName, this.offices, this.context,
 				() -> this.context.createOfficeNode(officeName, this),
 				(office) -> office.initialise(officeSourceClassName, null, officeLocation));
+	}
+
+	@Override
+	public DeployedOffice getDeployedOffice(String officeName) {
+		return NodeUtil.getNode(officeName, this.offices, () -> this.context.createOfficeNode(officeName, this));
 	}
 
 	@Override
@@ -585,6 +605,17 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 						// Load the dependencies for the managed object
 						managedObject.autoWireDependencies(autoWirer, officeNode, compileContext);
 					});
+
+			// Iterate over mo sources (auto-wiring unlinked input dependencies)
+			this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
+					.sortCompare(a.getOfficeFloorManagedObjectSourceName(), b.getOfficeFloorManagedObjectSourceName()))
+					.forEachOrdered((managedObjectSource) -> {
+						// Obtain the managing office for the managed object
+						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
+
+						// Load input dependencies for managed object source
+						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
+					});
 		}
 
 		// Undertake auto-wire of teams
@@ -620,8 +651,20 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		this.inputManagedObjects.values().forEach((inputMo) -> {
 
 			// Create the auto-wires
-			AutoWire[] targetAutoWires = Arrays.stream(inputMo.getTypeQualifications(compileContext))
-					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+			AutoWire[] targetAutoWires;
+			TypeQualification[] typeQualifications = inputMo.getTypeQualifications(compileContext);
+			if (typeQualifications.length == 0) {
+				// Use the input type (if available)
+				String inputObjectType = inputMo.getInputObjectType();
+				if (inputObjectType == null) {
+					return; // no input type
+				}
+				targetAutoWires = new AutoWire[] { new AutoWire(inputObjectType) };
+			} else {
+				// Use the type qualifications
+				targetAutoWires = Arrays.stream(typeQualifications)
+						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+			}
 
 			// Add the target
 			autoWirer.addAutoWireTarget(inputMo, targetAutoWires);
@@ -733,6 +776,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
+	public OfficeFloorListener[] getOfficeFloorListeners() {
+		return this.listeners.toArray(new OfficeFloorListener[this.listeners.size()]);
+	}
+
+	@Override
 	public OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder builder,
 			CompileContext compileContext) {
 
@@ -824,6 +872,24 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
+	}
+
+	@Override
+	public void loadExternalServicing(OfficeFloor officeFloor) throws UnknownOfficeException, UnknownFunctionException {
+
+		// Load external servicing for each office
+		OfficeNode[] officeNodes = this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.toArray(OfficeNode[]::new);
+		for (OfficeNode officeNode : officeNodes) {
+
+			// Obtain the office
+			String officeName = officeNode.getDeployedOfficeName();
+			Office office = officeFloor.getOffice(officeName);
+
+			// Load external servicing
+			officeNode.loadExternalServicing(office);
+		}
 	}
 
 	/**

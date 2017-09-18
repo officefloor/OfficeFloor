@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * Wraps the {@link HttpRequest} to obtain the HTTP authentication scheme
@@ -42,7 +42,7 @@ public class HttpAuthenticationScheme {
 
 		// Obtain the authenticate header value
 		String authenticate = "";
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if ("Authorization".equalsIgnoreCase(header.getName())) {
 				authenticate = header.getValue();
 			}

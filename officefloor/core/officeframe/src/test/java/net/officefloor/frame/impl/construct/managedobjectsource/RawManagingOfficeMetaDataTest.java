@@ -41,9 +41,12 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMet
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
+import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecution;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
@@ -515,6 +518,13 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), Object.class);
 
 		// Record invoking the flow
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedExecutionFactory(),
+				new ManagedExecutionFactory() {
+					@Override
+					public <E extends Throwable> ManagedExecution<E> createManagedExecution(Execution<E> execution) {
+						return () -> execution.execute();
+					}
+				});
 		this.officeMetaData.invokeProcess(null, parameter, 0, null, null, managedObject, this.moMetaData, 0);
 		this.control(this.officeMetaData).setMatcher(new AbstractMatcher() {
 			@Override
@@ -580,6 +590,13 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(functionMetaData, functionMetaData.getParameterType(), Object.class);
 
 		// Record invoking the flow
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedExecutionFactory(),
+				new ManagedExecutionFactory() {
+					@Override
+					public <E extends Throwable> ManagedExecution<E> createManagedExecution(Execution<E> execution) {
+						return () -> execution.execute();
+					}
+				});
 		this.officeMetaData.invokeProcess(null, parameter, 0, null, null, managedObject, this.moMetaData,
 				processMoIndex);
 		this.control(this.officeMetaData).setMatcher(new AbstractMatcher() {

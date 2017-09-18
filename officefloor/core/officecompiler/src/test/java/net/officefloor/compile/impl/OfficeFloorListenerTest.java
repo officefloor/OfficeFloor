@@ -18,6 +18,8 @@
 package net.officefloor.compile.impl;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -61,12 +63,40 @@ public class OfficeFloorListenerTest extends OfficeFrameTestCase {
 	 */
 	public void testListenToOpenCloseOfOfficeFloor() throws Exception {
 
-		// Create the compiler with listener
+		// Compile the OfficeFloor
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.addOfficeFloorListener(this.listener);
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+
+		// Validate
+		this.validateOfficeFloorListener(officeFloor);
+	}
+
+	/**
+	 * Ensure can {@link OfficeFloorExtensionService} can add an
+	 * {@link OfficeFloorListener}.
+	 */
+	public void testOfficeFloorExtensionListenToOpenCloseOfficeFloor() throws Exception {
 
 		// Compile the OfficeFloor
-		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			context.getOfficeFloorDeployer().addOfficeFloorListener(this.listener);
+		});
+		OfficeFloor officeFloor = compile.compileOfficeFloor();
+
+		// Validate
+		this.validateOfficeFloorListener(officeFloor);
+	}
+
+	/**
+	 * Validates the {@link OfficeFloorListener}.
+	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloor} with configured
+	 *            {@link OfficeFloorListener}.
+	 */
+	private void validateOfficeFloorListener(OfficeFloor officeFloor) throws Exception {
 
 		// Ensure not open
 		assertNull("Initially should not be open", this.openEvent);

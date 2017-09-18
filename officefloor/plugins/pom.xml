@@ -20,7 +20,6 @@
 		<module>officeplugin_jndi</module>
 		<module>officeplugin_jpa</module>
 		<module>officeplugin_json</module>
-		<module>officeplugin_socket</module>
 		<module>officeplugin_web</module>
 		<module>officeplugin_woof</module>
 

@@ -28,10 +28,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -43,8 +43,8 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.bridge.ServletBridge;
@@ -54,8 +54,7 @@ import net.officefloor.plugin.servlet.bridge.ServletBridge;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletContainerResourceSectionSource extends
-		AbstractSectionSource {
+public class ServletContainerResourceSectionSource extends AbstractSectionSource {
 
 	/**
 	 * {@link HttpServletRequest} attribute name to indicate a {@link Servlet}
@@ -84,14 +83,13 @@ public class ServletContainerResourceSectionSource extends
 	 * @throws IOException
 	 *             As per {@link Servlet} API.
 	 */
-	public static boolean completeServletService(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	public static boolean completeServletService(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
 		// Obtain the request attribute
 		String path;
 		synchronized (request) {
-			path = (String) request
-					.getAttribute(ATTRIBUTE_SERVLET_RESOURCE_PATH);
+			path = (String) request.getAttribute(ATTRIBUTE_SERVLET_RESOURCE_PATH);
 		}
 
 		// Determine if requires handling
@@ -101,8 +99,7 @@ public class ServletContainerResourceSectionSource extends
 
 		// Override the request path
 		final String servletPath = (path.startsWith("/") ? path : "/" + path);
-		HttpServletRequestWrapper requestWithPath = new HttpServletRequestWrapper(
-				request) {
+		HttpServletRequestWrapper requestWithPath = new HttpServletRequestWrapper(request) {
 			@Override
 			public String getServletPath() {
 				return servletPath;
@@ -120,8 +117,7 @@ public class ServletContainerResourceSectionSource extends
 		}
 
 		// Dispatch request to Servlet container resource
-		RequestDispatcher dispatcher = request.getServletContext()
-				.getNamedDispatcher("default");
+		RequestDispatcher dispatcher = request.getServletContext().getNamedDispatcher("default");
 		if (dispatcher != null) {
 			// Allow Default Servlet to service with static resource
 			dispatcher.forward(requestWithPath, response);
@@ -142,17 +138,14 @@ public class ServletContainerResourceSectionSource extends
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Create the Servlet Bridge dependency
-		SectionObject servletBridge = designer.addSectionObject(
-				"SERVLET_BRIDGE", ServletBridge.class.getName());
+		SectionObject servletBridge = designer.addSectionObject("SERVLET_BRIDGE", ServletBridge.class.getName());
 
 		// Create the non-handled task
 		String nonHandledInputName = context.getSectionLocation();
-		this.addServletResource(nonHandledInputName, null, servletBridge,
-				designer);
+		this.addServletResource(nonHandledInputName, null, servletBridge, designer);
 
 		// Create the Servlet container resource tasks
 		Set<String> registeredResources = new HashSet<String>();
@@ -167,8 +160,7 @@ public class ServletContainerResourceSectionSource extends
 			}
 
 			// Add Servlet Resource
-			this.addServletResource(inputName, requestDispatcherPath,
-					servletBridge, designer);
+			this.addServletResource(inputName, requestDispatcherPath, servletBridge, designer);
 
 			// Resource registered
 			registeredResources.add(requestDispatcherPath);
@@ -187,19 +179,14 @@ public class ServletContainerResourceSectionSource extends
 	 * @param designer
 	 *            {@link SectionDesigner}.
 	 */
-	private void addServletResource(String inputName,
-			String requestDispatcherPath, SectionObject servletBridge,
+	private void addServletResource(String inputName, String requestDispatcherPath, SectionObject servletBridge,
 			SectionDesigner designer) {
 
 		// Create the task to indicate Servlet container resource
-		SectionWork work = designer.addSectionWork(inputName,
-				ServletContainerResourceWorkSource.class.getName());
-		work.addProperty(
-				ServletContainerResourceWorkSource.PROPERTY_SERVLET_CONTAINER_RESOURCE,
-				requestDispatcherPath);
+		SectionWork work = designer.addSectionWork(inputName, ServletContainerResourceWorkSource.class.getName());
+		work.addProperty(ServletContainerResourceWorkSource.PROPERTY_SERVLET_CONTAINER_RESOURCE, requestDispatcherPath);
 		SectionTask task = work.addSectionTask(inputName, "RESOURCE");
-		TaskObject dependency = task
-				.getTaskObject(DependencyKeys.SERVLET_BRIDGE.name());
+		TaskObject dependency = task.getTaskObject(DependencyKeys.SERVLET_BRIDGE.name());
 		designer.link(dependency, servletBridge);
 
 		// Link input for task
@@ -211,8 +198,7 @@ public class ServletContainerResourceSectionSource extends
 	 * {@link ManagedFunction} to link to {@link Servlet} container resource.
 	 */
 	public static class ServletContainerResourceTask
-			extends
-			AbstractSingleTask<ServletContainerResourceTask, DependencyKeys, None> {
+			extends AbstractSingleTask<ServletContainerResourceTask, DependencyKeys, None> {
 
 		/**
 		 * {@link RequestDispatcher} path.
@@ -234,17 +220,14 @@ public class ServletContainerResourceSectionSource extends
 		 */
 
 		@Override
-		public Object execute(
-				ManagedFunctionContext<ServletContainerResourceTask, DependencyKeys, None> context) {
+		public Object execute(ManagedFunctionContext<ServletContainerResourceTask, DependencyKeys, None> context) {
 
 			// Obtain the Servlet bridge
-			ServletBridge bridge = (ServletBridge) context
-					.getObject(DependencyKeys.SERVLET_BRIDGE);
+			ServletBridge bridge = (ServletBridge) context.getObject(DependencyKeys.SERVLET_BRIDGE);
 
 			// Determine the path
 			HttpServletRequest request = bridge.getRequest();
-			String path = (this.requestDispatcherPath != null ? this.requestDispatcherPath
-					: request.getServletPath());
+			String path = (this.requestDispatcherPath != null ? this.requestDispatcherPath : request.getServletPath());
 
 			// Indicate to use Servlet container resource
 			synchronized (request) {
@@ -257,10 +240,10 @@ public class ServletContainerResourceSectionSource extends
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} to link to {@link Servlet} container resource.
+	 * {@link ManagedFunctionSource} to link to {@link Servlet} container
+	 * resource.
 	 */
-	public static class ServletContainerResourceWorkSource extends
-			AbstractWorkSource<ServletContainerResourceTask> {
+	public static class ServletContainerResourceWorkSource extends AbstractWorkSource<ServletContainerResourceTask> {
 
 		/**
 		 * Name of the property for the {@link Servlet} container resource.
@@ -277,23 +260,18 @@ public class ServletContainerResourceSectionSource extends
 		}
 
 		@Override
-		public void sourceManagedFunctions(
-				FunctionNamespaceBuilder<ServletContainerResourceTask> workTypeBuilder,
+		public void sourceManagedFunctions(FunctionNamespaceBuilder<ServletContainerResourceTask> workTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Obtain the request dispatcher path
-			String requestDispatcherPath = context.getProperty(
-					PROPERTY_SERVLET_CONTAINER_RESOURCE, null);
+			String requestDispatcherPath = context.getProperty(PROPERTY_SERVLET_CONTAINER_RESOURCE, null);
 
 			// Add the task
-			ServletContainerResourceTask factory = new ServletContainerResourceTask(
-					requestDispatcherPath);
+			ServletContainerResourceTask factory = new ServletContainerResourceTask(requestDispatcherPath);
 			workTypeBuilder.setWorkFactory(factory);
-			ManagedFunctionTypeBuilder<DependencyKeys, None> task = workTypeBuilder
-					.addManagedFunctionType("RESOURCE", factory, DependencyKeys.class,
-							None.class);
-			task.addObject(ServletBridge.class).setKey(
-					DependencyKeys.SERVLET_BRIDGE);
+			ManagedFunctionTypeBuilder<DependencyKeys, None> task = workTypeBuilder.addManagedFunctionType("RESOURCE",
+					factory, DependencyKeys.class, None.class);
+			task.addObject(ServletBridge.class).setKey(DependencyKeys.SERVLET_BRIDGE);
 		}
 	}
 

@@ -185,9 +185,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure create {@link InputManagedObjectNode}.
 	 */
 	public void testCreateInputManagedObjectNode() {
-		InputManagedObjectNode node = this.doTest(() -> this.context.createInputManagedNode("INPUT", this.officeFloor));
+		InputManagedObjectNode node = this
+				.doTest(() -> this.context.createInputManagedNode("INPUT", String.class.getName(), this.officeFloor));
 		assertNode(node, "INPUT", "Input Managed Object", null, this.officeFloor);
 		assertEquals("Incorrect bound managed object name", "INPUT", node.getBoundManagedObjectName());
+		assertEquals("Incorrect input object type", String.class.getName(), node.getInputObjectType());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -570,7 +572,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 					"ExampleOfficeFloorSource(LOCATION)", null);
 			assertChildren(officeFloor, officeFloor.addTeam("TEAM", "net.example.ExampleTeamSource"),
 					officeFloor.addManagedObjectSource("MOS", "net.example.ExampleManagedObjectSource"),
-					officeFloor.addInputManagedObject("INPUT"),
+					officeFloor.addInputManagedObject("INPUT", "java.lang.String"),
 					officeFloor.addSupplier("SUPPLIER", "net.example.ExampleSupplierSource"),
 					officeFloor.getManagedObjectNode("MO_ONE"),
 					officeFloor.addManagedObjectNode("MO_TWO", ManagedObjectScope.THREAD, this.managedObjectSource),
@@ -667,8 +669,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link SectionInputNode}.
 	 */
 	public void testCreateSectionInputNode() {
+		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
 		SectionInputNode node = this.doTest(() -> {
 			SectionInputNode input = this.context.createSectionInputNode("INPUT", this.section);
+			assertEquals("Incorrect office", this.office, input.getDeployedOffice());
 			return input;
 		});
 		assertNode(node, "INPUT", "Section Input", null, this.section);

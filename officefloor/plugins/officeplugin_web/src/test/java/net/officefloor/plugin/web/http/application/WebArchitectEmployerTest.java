@@ -44,9 +44,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
@@ -56,6 +53,10 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.http.test.CompileWebExtension;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link WebArchitectEmployer}.
@@ -98,16 +99,16 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Configure the server
-		this.port = HttpTestUtil.getAvailablePort();
-		this.securePort = HttpTestUtil.getAvailablePort();
+		this.port = HttpServerTestUtil.getAvailablePort();
+		this.securePort = HttpServerTestUtil.getAvailablePort();
 		this.compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, this.port, this.securePort, "SECTION", "INPUT");
+			HttpServerTestUtil.configureTestHttpServer(context, this.port, this.securePort, "SECTION", "INPUT");
 		});
 
 		// Configure the client (to not redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpTestUtil.configureHttps(builder);
-		HttpTestUtil.configureNoRedirects(builder);
+		HttpClientTestUtil.configureHttps(builder);
+		HttpClientTestUtil.configureNoRedirects(builder);
 		this.client = builder.build();
 	}
 
@@ -1685,7 +1686,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 			}
 
 			// Ensure obtained as expected
-			String actualResponseBody = HttpTestUtil.getEntityBody(response);
+			String actualResponseBody = HttpClientTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response", expectedResponseEntity, actualResponseBody);
 
 			// Ensure correct response status

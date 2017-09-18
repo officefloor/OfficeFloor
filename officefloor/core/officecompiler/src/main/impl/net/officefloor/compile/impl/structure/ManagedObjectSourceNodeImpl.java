@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
@@ -548,6 +550,49 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public void autoWireInputDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this);
+		if (managedObjectType == null) {
+			return; // must have type
+		}
+
+		// Create the map of dependency types by names
+		Map<String, ManagedObjectDependencyType<?>> dependencyTypes = new HashMap<>();
+		Arrays.stream(managedObjectType.getDependencyTypes())
+				.forEach((dependencyType) -> dependencyTypes.put(dependencyType.getDependencyName(), dependencyType));
+
+		// Auto-wire input dependencies
+		this.inputDependencies.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getManagedObjectDependencyName(), b.getManagedObjectDependencyName()))
+				.forEachOrdered((dependency) -> {
+
+					// Ignore if already configured
+					if (dependency.getLinkedObjectNode() != null) {
+						return;
+					}
+
+					// Obtain the dependency type
+					ManagedObjectDependencyType<?> dependencyType = dependencyTypes
+							.get(dependency.getManagedObjectDependencyName());
+					if (dependencyType == null) {
+						return; // must have type
+					}
+
+					// Auto-wire the dependency
+					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(dependency,
+							new AutoWire(dependencyType.getTypeQualifier(), dependencyType.getDependencyType()));
+					if (links.length == 1) {
+						LinkUtil.linkAutoWireObjectNode(dependency, links[0].getTargetNode(office), office, autoWirer,
+								compileContext, this.context.getCompilerIssues(),
+								(link) -> dependency.linkObjectNode(link));
+					}
+				});
+	}
+
+	@Override
 	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Obtain the managed object type
@@ -644,10 +689,18 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 					.setManagingOffice(managingOffice.getDeployedOfficeName());
 
-			// Provide process bound name if input managed object
-			if (managedObjectType.isInput()) {
+			// Check if input managed object source
+			if (!managedObjectType.isInput()) {
+				// Not input, so ensure not configure as input
+				if (this.inputManagedObjectNode != null) {
+					// Provide issue as should be input
+					this.context.getCompilerIssues().addIssue(this,
+							"Attempting to configure managed object source " + this.managedObjectSourceName
+									+ " as input managed object, when does not input into the application");
+				}
 
-				// Ensure have Input ManagedObject name
+			} else {
+				// Input, so ensure have Input ManagedObject name
 				String inputBoundManagedObjectName = null;
 				if ((this.containingSectionNode != null) || (this.containingOfficeNode != null)) {
 					// Can not link to managed object initiating flow.
@@ -658,6 +711,27 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					// Must configure as Input Managed Object (as shared)
 					if (this.inputManagedObjectNode != null) {
 						inputBoundManagedObjectName = this.inputManagedObjectNode.getBoundManagedObjectName();
+
+						// Obtain the input object type
+						String inputObjectTypeName = this.inputManagedObjectNode.getInputObjectType();
+						if (inputObjectTypeName != null) {
+
+							// Obtain the input type
+							Class<?> inputObjectType = CompileUtil.obtainClass(inputObjectTypeName, Object.class, null,
+									this.context.getRootSourceContext(), this, this.context.getCompilerIssues());
+
+							// Ensure compatible type
+							Class<?> objectType = managedObjectType.getObjectClass();
+							if (!inputObjectType.isAssignableFrom(objectType)) {
+								// MOS object type not compatible to input type
+								this.context.getCompilerIssues().addIssue(this,
+										"Managed Object Source " + this.getManagedObjectSourceName() + " object "
+												+ objectType.getName() + " is not compatible with input managed object "
+												+ inputBoundManagedObjectName + " (input object type "
+												+ inputObjectType.getName() + ")");
+								return null; // invalid type for input
+							}
+						}
 					}
 				}
 
@@ -672,8 +746,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 							.setInputManagedObjectName(inputBoundManagedObjectName);
 
 					// Provide governance for office floor input managed object.
-					// For others, should be configured through Office (for
-					// flows).
+					// For others, should be configured through Office (flows)
 					if (this.inputManagedObjectNode != null) {
 						// Get governances for input managed object of office
 						GovernanceNode[] governances = this.inputManagedObjectNode.getGovernances(managingOffice);

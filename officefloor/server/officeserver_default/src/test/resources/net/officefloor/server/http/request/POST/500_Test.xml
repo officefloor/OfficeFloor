@@ -1,0 +1,15 @@
+<test xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../Test.xsd">
+
+	<communication>
+		<request method="POST" path="/path">
+			<body>abc</body>
+		</request>
+		<process close="true">
+			<exception>FAILED</exception>
+		</process>
+		<response status="500" message="Internal Server Error"
+			closed="true" />
+	</communication>
+
+</test>

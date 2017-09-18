@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 
 /**
  * Tests the {@link HttpAuthenticationScheme}.
@@ -114,7 +114,7 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 		}
 
 		// Record obtaining the HTTP headers from request
-		this.recordReturn(this.request, this.request.getHeaders(), headers);
+		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
 
 		// Return the HTTP headers
 		return headers;

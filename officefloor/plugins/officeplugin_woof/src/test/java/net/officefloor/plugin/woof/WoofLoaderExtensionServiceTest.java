@@ -40,10 +40,10 @@ import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link WoofLoaderExtensionService}.
@@ -55,7 +55,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -177,7 +177,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		this.officeFloor = null;
 
 		// Should not successfully connect
-		CloseableHttpClient refreshedClient = HttpTestUtil.createHttpClient();
+		CloseableHttpClient refreshedClient = HttpClientTestUtil.createHttpClient();
 		try {
 			refreshedClient.execute(new HttpGet("http://localhost:7878/test"));
 			fail("Should not be successful");
@@ -423,7 +423,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 			String content = "WOOF " + dependency.getMessage() + " " + thread.getName();
 
 			// Write response
-			net.officefloor.plugin.socket.server.http.HttpResponse response = connection.getHttpResponse();
+			net.officefloor.server.http.HttpResponse response = connection.getHttpResponse();
 			response.getEntity().write(content.getBytes());
 		}
 	}

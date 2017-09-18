@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.tokenise;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.parameters.HttpParametersException;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * Indicates a failure tokenising the {@link HttpRequest} parameters.

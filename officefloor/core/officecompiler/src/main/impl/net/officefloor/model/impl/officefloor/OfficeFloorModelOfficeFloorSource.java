@@ -248,7 +248,9 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Add the input managed object and also register it
 			String inputManagedObjectName = inputManagedObjectModel.getOfficeFloorInputManagedObjectName();
-			OfficeFloorInputManagedObject inputManagedObject = deployer.addInputManagedObject(inputManagedObjectName);
+			String inputObjectType = inputManagedObjectModel.getObjectType();
+			OfficeFloorInputManagedObject inputManagedObject = deployer.addInputManagedObject(inputManagedObjectName,
+					inputObjectType);
 			officeFloorInputManagedObjects.put(inputManagedObjectName, inputManagedObject);
 
 			// Load type qualifications

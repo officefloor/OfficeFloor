@@ -28,9 +28,6 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -42,6 +39,9 @@ import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * <p>
@@ -161,14 +161,14 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 					AbstractHttpFile.writeHttpFile(httpFile, response);
 
 					// Specify found status
-					response.setStatus(HttpStatus.SC_OK);
+					response.setHttpStatus(HttpStatus.OK);
 
 				} else {
 					// File not found so write file not found content
 					AbstractHttpFile.writeHttpFile(fileNotFoundContent, response);
 
 					// Specify not found status
-					response.setStatus(HttpStatus.SC_NOT_FOUND);
+					response.setHttpStatus(HttpStatus.NOT_FOUND);
 				}
 
 				// Send the response

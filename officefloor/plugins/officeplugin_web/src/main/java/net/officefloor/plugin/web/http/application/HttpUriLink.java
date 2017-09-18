@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Allows configuring the HTTP URI link for a {@link WebArchitect}.

@@ -4,13 +4,17 @@
 			<managed-object-source name="DEPENDENCY_SOURCE"
 				source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$DependencyManagedObject" />
+					<property name="class.name"
+						value="${testcase}$DependencyProcessManagedObject" />
 				</properties>
 				<managing-office name="OFFICE" />
 				<input-managed-object name="DEPENDENCY_OBJECT" />
+				<flow name="doFlow">
+					<office-input office="OFFICE" section="SECTION" input="INPUT" />
+				</flow>
 				<input-dependency name="dependency">
 					<!-- auto-wire the dependency -->
-					<managed-object name="SIMPLE_OBJECT" />
+					<!-- <managed-object name="SIMPLE_OBJECT" /> -->
 				</input-dependency>
 			</managed-object-source>
 			<managed-object-source name="SIMPLE_SOURCE"
@@ -22,9 +26,7 @@
 			</managed-object-source>
 		</managed-object-sources>
 		<input-managed-objects>
-			<input-managed-object name="DEPENDENCY_OBJECT">
-				<bound-managed-object-source name="DEPENDENCY_SOURCE" />
-			</input-managed-object>
+			<input-managed-object name="DEPENDENCY_OBJECT" />
 		</input-managed-objects>
 		<managed-objects>
 			<managed-object name="SIMPLE_OBJECT" scope="PROCESS">
@@ -36,6 +38,7 @@
 				<object name="OBJECT">
 					<input-managed-object name="DEPENDENCY_OBJECT" />
 				</object>
+				<input section="SECTION" input="INPUT" />
 			</office>
 		</offices>
 	</office-floor>

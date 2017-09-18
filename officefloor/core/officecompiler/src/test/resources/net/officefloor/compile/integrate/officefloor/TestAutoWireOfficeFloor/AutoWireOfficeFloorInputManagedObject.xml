@@ -4,25 +4,28 @@
 			<managed-object-source name="INPUT_SOURCE"
 				source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$CompileManagedObject" />
+					<property name="class.name" value="${testcase}$ProcessManagedObject" />
 				</properties>
 				<!-- Also auto-wire the office -->
 				<managing-office name="OFFICE" />
 				<input-managed-object name="INPUT_OBJECT" />
+				<flow name="doFlow">
+					<office-input office="OFFICE" section="SECTION" input="INPUT" />
+				</flow>
 			</managed-object-source>
 		</managed-object-sources>
 		<input-managed-objects>
 			<input-managed-object name="INPUT_OBJECT"
 				object-type="${testcase}$CompileManagedObject">
-				<bound-managed-object-source name="INPUT_SOURCE" />
 			</input-managed-object>
 		</input-managed-objects>
 		<offices>
 			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
 				<object name="OBJECT">
 					<!-- auto-wire object -->
-					<!-- <input-managed-object name="INPUT_OBJECT" /> -->
+					<!--<input-managed-object name="INPUT_OBJECT" /> -->
 				</object>
+				<input section="SECTION" input="INPUT" />
 			</office>
 		</offices>
 	</office-floor>

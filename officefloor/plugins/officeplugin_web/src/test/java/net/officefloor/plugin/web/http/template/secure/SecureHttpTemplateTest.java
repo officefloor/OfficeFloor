@@ -33,8 +33,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
@@ -44,6 +42,9 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
@@ -83,13 +84,13 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		// Configure the client (to not redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpTestUtil.configureHttps(builder);
-		HttpTestUtil.configureNoRedirects(builder);
+		HttpClientTestUtil.configureHttps(builder);
+		HttpClientTestUtil.configureNoRedirects(builder);
 		this.client = builder.build();
 
 		// Configure the HTTP server
 		this.compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE", "route");
+			HttpServerTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE", "route");
 		});
 	}
 

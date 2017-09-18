@@ -32,10 +32,11 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.Dependencies;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link JsonResponseWriterManagedObjectSource}.
@@ -97,7 +98,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends OfficeFrameTestCa
 		// Start the application
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, 7878, "ROUTE", "route");
+			HttpServerTestUtil.configureTestHttpServer(context, 7878, "ROUTE", "route");
 		});
 		compiler.web((context) -> {
 			OfficeSection servicer = context.addSection("SECTION", MockService.class);
@@ -108,7 +109,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends OfficeFrameTestCa
 					.addOfficeManagedObject("JSON_RESPONSE", ManagedObjectScope.PROCESS);
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Specify the JSON object
 			MockService.object = jsonObject;

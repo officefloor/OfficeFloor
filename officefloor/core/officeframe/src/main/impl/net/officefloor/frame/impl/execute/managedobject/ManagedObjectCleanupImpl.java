@@ -47,6 +47,11 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 
 	/**
+	 * Avoid array creation when no {@link CleanupEscalation} instances.
+	 */
+	private static final CleanupEscalation[] NO_CLEANUP_ESCALATIONS = new CleanupEscalation[0];
+
+	/**
 	 * {@link ProcessState} to be cleaned up.
 	 */
 	private final ProcessState processState;
@@ -57,9 +62,11 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	private final OfficeMetaData officeMetaData;
 
 	/**
-	 * {@link CleanupEscalation} instances.
+	 * {@link CleanupEscalation} instances. Typical case is no
+	 * {@link CleanupEscalation} instances, so only increase memory if have a
+	 * {@link CleanupEscalation}.
 	 */
-	private List<CleanupEscalation> cleanupEscalations = new ArrayList<>();
+	private List<CleanupEscalation> cleanupEscalations = new ArrayList<>(0);
 
 	/**
 	 * Instantiate.
@@ -248,8 +255,13 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 
 		@Override
 		public CleanupEscalation[] getCleanupEscalations() {
-			return ManagedObjectCleanupImpl.this.cleanupEscalations
-					.toArray(new CleanupEscalation[ManagedObjectCleanupImpl.this.cleanupEscalations.size()]);
+			ManagedObjectCleanupImpl cleanup = ManagedObjectCleanupImpl.this;
+			if (cleanup.cleanupEscalations.size() == 0) {
+				return NO_CLEANUP_ESCALATIONS;
+			} else {
+				return cleanup.cleanupEscalations
+						.toArray(new CleanupEscalation[ManagedObjectCleanupImpl.this.cleanupEscalations.size()]);
+			}
 		}
 
 		/*

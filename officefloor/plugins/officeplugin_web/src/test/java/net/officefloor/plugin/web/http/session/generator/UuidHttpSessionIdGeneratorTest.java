@@ -21,9 +21,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.generator.UuidHttpSessionIdGenerator;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link UuidHttpSessionIdGenerator}.

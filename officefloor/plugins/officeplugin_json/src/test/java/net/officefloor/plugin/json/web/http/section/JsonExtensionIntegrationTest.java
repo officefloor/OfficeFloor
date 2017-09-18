@@ -30,9 +30,10 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 
 /**
  * Validates the extension of {@link HttpTemplateSection} via JSON.
@@ -49,7 +50,7 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 		// Configure the HTTP server
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, 7878, "ROUTE", "route");
+			HttpServerTestUtil.configureTestHttpServer(context, 7878, "ROUTE", "route");
 		});
 		compiler.web((context) -> {
 
@@ -64,7 +65,7 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start application
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Ensure handles JSON object and JSON writer appropriately
 			HttpPost request = new HttpPost("http://localhost:7878/test-ajax");

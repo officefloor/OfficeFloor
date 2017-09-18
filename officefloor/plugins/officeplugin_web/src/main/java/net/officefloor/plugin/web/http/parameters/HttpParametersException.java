@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.parameters;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * Indicates a failure with the {@link HttpRequest} parameters.

@@ -21,15 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 
 /**
  * Mock {@link HttpRatifyContext} for testing {@link HttpSecuritySource}
@@ -133,7 +133,7 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 			headers.add(new HttpHeaderImpl("Authorization",
 					authorizationHeaderValue));
 		}
-		this.testCase.recordReturn(httpRequest, httpRequest.getHeaders(),
+		this.testCase.recordReturn(httpRequest, httpRequest.getHttpHeaders(),
 				headers);
 
 		// Return the HTTP request

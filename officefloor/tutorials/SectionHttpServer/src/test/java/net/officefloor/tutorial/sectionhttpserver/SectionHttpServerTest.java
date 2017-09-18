@@ -25,7 +25,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -48,7 +48,7 @@ public class SectionHttpServerTest extends TestCase {
 
 	public void testPageRendering() throws Exception {
 
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Send request for dynamic page
 			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/example.woof"));

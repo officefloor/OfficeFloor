@@ -20,8 +20,8 @@ package net.officefloor.plugin.web.http.parameters;
 import java.io.IOException;
 import java.util.Map;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.value.loader.ObjectInstantiator;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * <p>

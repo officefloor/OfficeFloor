@@ -35,9 +35,6 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSource;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSourceImpl;
@@ -49,6 +46,9 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContent;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.stream.ServerWriter;
 
 /**
  * {@link ManagedFunction} to write the {@link HttpTemplateSection}.

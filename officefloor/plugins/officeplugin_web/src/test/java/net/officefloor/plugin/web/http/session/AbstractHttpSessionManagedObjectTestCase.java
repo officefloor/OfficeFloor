@@ -29,11 +29,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
@@ -42,6 +37,11 @@ import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
 import net.officefloor.plugin.web.http.session.spi.InvalidateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.RetrieveHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.StoreHttpSessionOperation;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 
 /**
  * Tests the {@link HttpSessionManagedObject}.
@@ -164,7 +164,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 		if (sessionId != null) {
 			headers.add(new HttpHeaderImpl("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId));
 		}
-		this.recordReturn(this.request, this.request.getHeaders(), headers);
+		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
 	}
 
 	/**
@@ -375,18 +375,19 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 			// Record existing Session cookie
 			HttpHeader existingCookieHeader = new HttpHeaderImpl("set-cookie",
 					SESSION_ID_COOKIE_NAME + "=\"Existing Session Id\"");
-			this.recordReturn(this.response, this.response.getHeaders(), new HttpHeader[] { existingCookieHeader });
-			this.response.removeHeader(existingCookieHeader);
+			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[] { existingCookieHeader });
+			this.response.getHttpHeaders().removeHeader(existingCookieHeader);
 		} else {
 			// Record no existing Session cookie
-			this.recordReturn(this.response, this.response.getHeaders(), new HttpHeader[0]);
+			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[0]);
 		}
 
 		// Record adding the Session Id cookie
 		HttpCookie cookie = new HttpCookie(SESSION_ID_COOKIE_NAME, sessionId);
 		cookie.setExpires(expireTime);
 		cookie.setPath("/");
-		this.recordReturn(this.response, this.response.addHeader("set-cookie", cookie.toHttpResponseHeaderValue()),
+		this.recordReturn(this.response,
+				this.response.getHttpHeaders().addHeader("set-cookie", cookie.toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 	}
 

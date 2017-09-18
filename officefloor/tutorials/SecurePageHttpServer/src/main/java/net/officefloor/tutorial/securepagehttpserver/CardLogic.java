@@ -20,9 +20,8 @@ package net.officefloor.tutorial.securepagehttpserver;
 import java.io.Serializable;
 
 import lombok.Data;
-
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Logic for the card template.

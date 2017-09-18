@@ -29,11 +29,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserTest;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 
 /**
  * <p>
@@ -58,7 +59,7 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	/**
 	 * Actual value.
@@ -69,7 +70,7 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		this.compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, 7878, "SERVICE", "service");
+			HttpServerTestUtil.configureTestHttpServer(context, 7878, "SERVICE", "service");
 		});
 		this.compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();

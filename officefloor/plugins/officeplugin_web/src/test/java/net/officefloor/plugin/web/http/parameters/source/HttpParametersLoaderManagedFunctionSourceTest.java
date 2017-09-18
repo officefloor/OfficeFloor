@@ -27,11 +27,11 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.plugin.web.http.parameters.HttpParametersException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedFunctionSource.HttpParametersLoaderFunction;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
 
 /**
  * Tests the {@link HttpParametersLoaderManagedFunctionSource}.

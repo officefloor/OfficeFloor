@@ -54,6 +54,7 @@
 	</distributionManagement>
 	<modules>
 		<module>core</module>
+		<module>server</module>
 		<module>plugins</module>
 		<module>eclipse</module>
 		<module>maven</module>
@@ -77,6 +78,7 @@
 		<failsafe-version>2.19.1</failsafe-version>
 		<compiler-version>3.6.0</compiler-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
+		<netty-version>4.1.14.Final</netty-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -120,6 +122,27 @@
 				<artifactId>officebuilding</artifactId>
 				<classifier>release</classifier>
 				<type>zip</type>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- Server -->
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_default</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_netty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Plugins -->
@@ -182,11 +205,6 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_servlet</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_socket</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -374,6 +392,11 @@
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>4.5.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${netty-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.openejb</groupId>
