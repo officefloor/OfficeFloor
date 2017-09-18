@@ -254,8 +254,7 @@ public class HttpServerSocketManagedObjectSource
 		 * 
 		 * - 8192 to fill a Jumbo Ethernet frame (i.e. 9000)
 		 * 
-		 * - 8 * 8192 = 65536 to fill a TCP packet, with additional 4 packet TCP
-		 * buffer.
+		 * - 8 * 8192 = 65536 to fill a TCP packet, with 4 TCP packet buffer.
 		 */
 		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
 				Runtime.getRuntime().availableProcessors());
