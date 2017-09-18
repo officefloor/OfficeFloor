@@ -22,6 +22,7 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -99,7 +100,7 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 		FlowMetaData flowMetaData = this.processLinks[flowIndex];
 
 		// Ensure execution is managed
-		this.officeMetaData.getManagedExecutionFactory().createManagedExecution(() -> {
+		Execution<RuntimeException> execution = () -> {
 			try {
 
 				// Invoke the process
@@ -109,7 +110,8 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 				// Propagate (unlikely so no need for checked exception)
 				throw new IllegalArgumentException(ex);
 			}
-		}).execute();
+		};
+		this.officeMetaData.getManagedExecutionFactory().createManagedExecution(execution).execute();
 	}
 
 }
