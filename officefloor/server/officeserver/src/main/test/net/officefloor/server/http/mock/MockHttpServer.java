@@ -216,7 +216,9 @@ public class MockHttpServer implements HttpServerImplementation {
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
+		@SuppressWarnings("unchecked")
+		Class<ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> managedObjectType = (Class<ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>) (Object) ProcessAwareServerHttpConnectionManagedObject.class;
+		this.serviceInput = context.getExternalServiceInput(managedObjectType,
 				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 	}
 

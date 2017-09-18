@@ -79,7 +79,7 @@ public interface HttpServerImplementationContext {
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
-			Class<? extends M> managedObjectType, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
+			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
 
 	/**
 	 * Obtains the {@link OfficeFloorDeployer} to configure the

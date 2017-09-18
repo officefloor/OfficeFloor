@@ -97,7 +97,7 @@ public class HttpServer {
 
 			@Override
 			public <M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
-					Class<? extends M> managedObjectType,
+					Class<M> managedObjectType,
 					ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
 				return serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType,
 						cleanupEscalationHandler);
