@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +98,25 @@ public class HttpServerSocketManagedObjectSource
 	 * Name of {@link System} property to obtain the pooled {@link StreamBuffer}
 	 * size.
 	 */
-	public static final String SYSTEM_PROPERTY_BUFFER_SIZE = "officefloor.socket.buffer.size";
+	public static final String SYSTEM_PROPERTY_STREAM_BUFFER_SIZE = "officefloor.socket.stream.buffer.size";
+
+	/**
+	 * Name of {@link System} property to obtain the receive buffer size of the
+	 * {@link Socket}.
+	 */
+	public static final String SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE = "officefloor.socket.receive.buffer.size";
+
+	/**
+	 * Name of {@link System} property to obtain the maximum number of reads for
+	 * a {@link SocketChannel} per select.
+	 */
+	public static final String SYSTEM_PROPERTY_MAX_READS_ON_SELECT = "officefloor.socket.max.reads.on.select";
+
+	/**
+	 * Name of {@link System} property to obtain the send buffer size of the
+	 * {@link Socket}.
+	 */
+	public static final String SYSTEM_PROPERTY_SEND_BUFFER_SIZE = "officefloor.socket.send.buffer.size";
 
 	/**
 	 * Name of {@link System} property to obtain the maximum
@@ -216,7 +235,39 @@ public class HttpServerSocketManagedObjectSource
 	}
 
 	/**
-	 * Obtains the {@link SocketManager}.
+	 * Creates the {@link SocketManager} configured from {@link System}
+	 * properties.
+	 * 
+	 * @return {@link SocketManager} configured from {@link System} properties.
+	 * @throws IOException
+	 *             If fails to create the {@link SocketManager}.
+	 */
+	public static SocketManager createSocketManager() throws IOException {
+
+		// Obtain configuration of socket manager (with reasonable defaults)
+		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
+				Runtime.getRuntime().availableProcessors());
+		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 4096);
+		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 64);
+		int receiveBufferSize = getSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
+				streamBufferSize * maxReadsOnSelect);
+		int sendBufferSize = getSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
+		int maxThreadLocalPoolSize = getSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
+				Integer.MAX_VALUE);
+		int maxCorePoolSize = getSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+
+		// Create the stream buffer pool
+		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
+				() -> ByteBuffer.allocateDirect(streamBufferSize), maxThreadLocalPoolSize, maxCorePoolSize);
+
+		// Create and return the socket manager
+		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, bufferPool,
+				sendBufferSize);
+	}
+
+	/**
+	 * Obtains the {@link SocketManager} for use by
+	 * {@link HttpServerSocketManagedObjectSource} instances.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
@@ -231,20 +282,8 @@ public class HttpServerSocketManagedObjectSource
 		// Lazy create the singleton socket manager
 		if (singletonSocketManager == null) {
 
-			// Obtain configuration of socket manager (with reasonable defaults)
-			int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
-					Runtime.getRuntime().availableProcessors());
-			int bufferSize = getSystemProperty(SYSTEM_PROPERTY_BUFFER_SIZE, 4096);
-			int maxThreadLocalPoolSize = getSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
-					Integer.MAX_VALUE);
-			int maxCorePoolSize = getSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
-
-			// Create the stream buffer pool
-			StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
-					() -> ByteBuffer.allocateDirect(bufferSize), maxThreadLocalPoolSize, maxCorePoolSize);
-
 			// Create the singleton socket manager
-			singletonSocketManager = new SocketManager(numberOfSocketListeners, bufferPool, bufferSize);
+			singletonSocketManager = createSocketManager();
 
 			// Create the executor service
 			executorService = Executors.newCachedThreadPool();
@@ -406,7 +445,7 @@ public class HttpServerSocketManagedObjectSource
 	 * @throws IOException
 	 *             If fails to close the {@link Old_SocketManager}.
 	 */
-	public static synchronized void closeSocketManager() throws IOException {
+	private static synchronized void closeSocketManager() throws IOException {
 
 		// Clear all registered server sockets
 		registeredServerSocketManagedObjectSources.clear();

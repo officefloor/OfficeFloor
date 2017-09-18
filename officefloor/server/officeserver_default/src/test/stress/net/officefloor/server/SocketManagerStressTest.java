@@ -95,6 +95,31 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		this.doPipeline(10000);
 	}
 
+	/**
+	 * Ensure can threaded service pipeline requests by multiple clients.
+	 */
+	public void testMultiClientThreaded() throws Exception {
+
+		// Start the server
+		this.startServer(true);
+
+		// Metrics for tests
+		int clientCount = 10;
+		int requestCount = 10000;
+
+		// Start the clients
+		Future[] clients = new Future[clientCount];
+		for (int i = 0; i < clients.length; i++) {
+			clients[i] = this.thread(() -> this.doPipeline(requestCount));
+		}
+
+		// Wait for clients to finish
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < clients.length; i++) {
+			clients[i].waitForCompletion(startTime, 10);
+		}
+	}
+
 	private void startServer(boolean isThreaded) throws Exception {
 
 		// Start the socket manager

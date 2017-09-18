@@ -53,19 +53,13 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	@Override
 	protected SocketManager startRawHttpServer(int httpPort) throws Exception {
 
-		// Create the buffer pool
-		final int socketBufferSize = 65536;
-		StreamBufferPool<ByteBuffer> socketBufferPool = new ThreadLocalStreamBufferPool(
-				() -> ByteBuffer.allocateDirect(socketBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
-
 		// Create the socket manager
-		int listenerCount = Runtime.getRuntime().availableProcessors();
-		SocketManager manager = new SocketManager(listenerCount, socketBufferPool, socketBufferSize);
+		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager();
 
 		// Create raw HTTP servicing
 		final int serviceBufferSize = 256;
 		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
-				() -> ByteBuffer.allocate(serviceBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
+				() -> ByteBuffer.allocateDirect(serviceBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
 		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serviceBufferPool);
 		manager.bindServerSocket(httpPort, null, null, serviceFactory, serviceFactory);
 

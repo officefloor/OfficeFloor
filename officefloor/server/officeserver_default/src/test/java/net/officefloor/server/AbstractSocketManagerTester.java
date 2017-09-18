@@ -225,7 +225,8 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		protected SocketManagerTester(int listenerCount) throws IOException {
 
 			// Create the Socket Manager
-			this.manager = new SocketManager(1, this.bufferPool, AbstractSocketManagerTester.this.getBufferSize());
+			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
+			this.manager = new SocketManager(1, bufferSize * 4, 4, this.bufferPool, bufferSize);
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();

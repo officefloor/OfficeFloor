@@ -96,19 +96,29 @@ public class SocketManager {
 	 * 
 	 * @param listenerCount
 	 *            Number of {@link SocketListener} instances.
+	 * @param socketReceiveBufferSize
+	 *            Receive buffer size for the {@link Socket}.
+	 * @param maxReadsOnSelect
+	 *            Maximum number of reads per {@link SocketChannel} per select.
+	 *            The {@link Selector} has locking overheads that slow
+	 *            performance. By undertaking multiple reads on the
+	 *            {@link SocketChannel} it makes draining and servicing more
+	 *            efficient (and subsequently faster). This also allows the
+	 *            {@link StreamBuffer} sizes to be smaller than the receive
+	 *            {@link Socket} buffer size (but still maintain efficiency).
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
-	 * @param socketBufferSize
-	 *            Buffer size for the {@link Socket}. This should match the
-	 *            {@link StreamBuffer} size.
+	 * @param socketSendBufferSize
+	 *            Send buffer size for the {@link Socket}.
 	 * @throws IOException
 	 *             If fails to initialise {@link Socket} management.
 	 */
-	public SocketManager(int listenerCount, StreamBufferPool<ByteBuffer> bufferPool, int socketBufferSize)
-			throws IOException {
+	public SocketManager(int listenerCount, int socketReceiveBufferSize, int maxReadsOnSelect,
+			StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
-			listeners[i] = new SocketListener(bufferPool, socketBufferSize);
+			listeners[i] = new SocketListener(socketReceiveBufferSize, maxReadsOnSelect, bufferPool,
+					socketSendBufferSize);
 		}
 	}
 
@@ -252,9 +262,19 @@ public class SocketManager {
 		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
-		 * {@link Socket} buffer size.
+		 * {@link Socket} receive buffer size.
 		 */
-		private final int socketBufferSize;
+		private final int socketReceiveBufferSize;
+
+		/**
+		 * Maximum number of reads per {@link SocketChannel} per select.
+		 */
+		private final int maxReadsOnSelect;
+
+		/**
+		 * {@link Socket} send buffer size.
+		 */
+		private final int socketSendBufferSize;
 
 		/**
 		 * {@link Selector}.
@@ -299,17 +319,25 @@ public class SocketManager {
 		/**
 		 * Instantiate.
 		 * 
+		 * @param socketReceiveBufferSize
+		 *            Receive buffer size for the {@link Socket}.
+		 * @param maxReadsOnSelect
+		 *            Maximum number of reads per {@link SocketChannel} per
+		 *            select.
 		 * @param bufferPool
 		 *            {@link StreamBufferPool}.
-		 * @param socketBufferSize
-		 *            {@link Socket} buffer size.
+		 * @param socketSendBufferSize
+		 *            Send buffer size for the {@link Socket}.
 		 * @throws IOException
 		 *             If fails to establish necessary {@link Socket} and
 		 *             {@link Pipe} facilities.
 		 */
-		private SocketListener(StreamBufferPool<ByteBuffer> bufferPool, int socketBufferSize) throws IOException {
+		private SocketListener(int socketReceiveBufferSize, int maxReadsOnSelect,
+				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
+			this.socketReceiveBufferSize = socketReceiveBufferSize;
+			this.maxReadsOnSelect = maxReadsOnSelect;
 			this.bufferPool = bufferPool;
-			this.socketBufferSize = socketBufferSize;
+			this.socketSendBufferSize = socketReceiveBufferSize;
 
 			// Create the selector
 			this.selector = Selector.open();
@@ -383,6 +411,7 @@ public class SocketManager {
 			channel.configureBlocking(false);
 			ServerSocket socket = channel.socket();
 			socket.setReuseAddress(true);
+			socket.setReceiveBufferSize(this.socketReceiveBufferSize);
 			int serverSocketBackLogSize = DEFAULT_SERVER_SOCKET_BACKLOG_SIZE;
 			if (serverSocketDecorator != null) {
 				// Override the defaults
@@ -498,9 +527,8 @@ public class SocketManager {
 									// Configure the socket
 									Socket socket = socketChannel.socket();
 									socket.setTcpNoDelay(true);
-									socket.setReuseAddress(true);
-									socket.setReceiveBufferSize(this.socketBufferSize);
-									socket.setSendBufferSize(this.socketBufferSize);
+									socket.setReceiveBufferSize(this.socketReceiveBufferSize);
+									socket.setSendBufferSize(this.socketSendBufferSize);
 									handler.acceptedSocketDecorator.decorate(socket);
 
 									// Manage the accepted socket
@@ -523,47 +551,54 @@ public class SocketManager {
 								// Obtain the read handler
 								AbstractReadHandler handler = (AbstractReadHandler) selectedKey.attachment();
 
-								// Ensure have buffer to handle read
-								// Need to track if new (as pool buffers)
+								// Drain the socket of data
+								int readsOnSelect = 0;
 								ByteBuffer buffer;
-								boolean isNewBuffer;
-								if ((handler.readBuffer == null)
-										|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
-									// Require a new buffer
-									handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
-									buffer = handler.readBuffer.pooledBuffer;
-									isNewBuffer = true;
-								} else {
-									/*
-									 * Tests are finding that re-using the
-									 * buffer with position != 0 causes invalid
-									 * data. To overcome this, need to create
-									 * duplicate with position 0. Note that for
-									 * direct buffers slicing takes a new memory
-									 * location (likely why has issue).
-									 */
-									buffer = handler.readBuffer.pooledBuffer.slice();
-									isNewBuffer = false;
-								}
+								do {
+									// Ensure have buffer to handle read
+									// Need to track if new (as pool buffers)
+									boolean isNewBuffer;
+									if ((handler.readBuffer == null)
+											|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
+										// Require a new buffer
+										handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
+										buffer = handler.readBuffer.pooledBuffer;
+										isNewBuffer = true;
+									} else {
+										/*
+										 * Tests are finding that re-using the
+										 * buffer with position != 0 causes
+										 * invalid data. To overcome this, need
+										 * to create duplicate with position 0.
+										 * Note that for direct buffers slicing
+										 * takes a new memory location (likely
+										 * why has issue).
+										 */
+										buffer = handler.readBuffer.pooledBuffer.slice();
+										isNewBuffer = false;
+									}
 
-								// Read content from channel
-								int bytesRead = handler.channel.read(buffer);
+									// Read content from channel
+									int bytesRead = handler.channel.read(buffer);
+									readsOnSelect++;
 
-								// Determine if closed connection or in error
-								if (bytesRead < 0) {
-									// Connection closed/failed, so terminate
-									SocketManager.terminteSelectionKey(selectedKey, this);
-									continue NEXT_KEY;
-								}
+									// Determine if closed connection
+									if (bytesRead < 0) {
+										// Connection closed, so terminate
+										SocketManager.terminteSelectionKey(selectedKey, this);
+										continue NEXT_KEY;
+									}
 
-								// Must update position (if re-use buffer)
-								if (!isNewBuffer) {
-									handler.readBuffer.pooledBuffer
-											.position(handler.readBuffer.pooledBuffer.position() + bytesRead);
-								}
+									// Must update position (if re-use buffer)
+									if (!isNewBuffer) {
+										handler.readBuffer.pooledBuffer
+												.position(handler.readBuffer.pooledBuffer.position() + bytesRead);
+									}
 
-								// Handle the read
-								handler.handleRead(isNewBuffer);
+									// Handle the read
+									handler.handleRead(isNewBuffer);
+
+								} while ((buffer.remaining() == 0) && (readsOnSelect < this.maxReadsOnSelect));
 							}
 
 							// Determine if write content
@@ -579,10 +614,13 @@ public class SocketManager {
 							}
 
 						} catch (CancelledKeyException ex) {
-							// Already closed, so just continue on
+							// Already closed, clean up and continue
 							SocketManager.terminteSelectionKey(selectedKey, this);
 							continue NEXT_KEY;
-
+						} catch (ClosedChannelException ex) {
+							// Already closed, clean up and continue
+							SocketManager.terminteSelectionKey(selectedKey, this);
+							continue NEXT_KEY;
 						} catch (Throwable ex) {
 							LOGGER.log(Level.WARNING, "Failure with connection", ex);
 							SocketManager.terminteSelectionKey(selectedKey, this);

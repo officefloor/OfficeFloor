@@ -716,6 +716,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			this.selector = Selector.open();
 			this.channel = SocketChannel.open(new InetSocketAddress("localhost", port));
 			this.channel.configureBlocking(false);
+			Socket socket = this.channel.socket();
+			socket.setSendBufferSize(10 * 1024 * 1024);
+			socket.setReceiveBufferSize(10 * 1024 * 1024);
 			this.selectionKey = channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 
 			// Register
