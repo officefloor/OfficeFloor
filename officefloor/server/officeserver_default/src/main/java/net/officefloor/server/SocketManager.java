@@ -1021,11 +1021,6 @@ public class SocketManager {
 			while (writeBuffer.next != null) {
 				writeBuffer = writeBuffer.next;
 			}
-			if ((!writeBuffer.isPooled) || (writeBuffer.pooledBuffer.remaining() == 0)) {
-				// Require new write buffer
-				writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
-				writeBuffer = writeBuffer.next;
-			}
 
 			// Compact the stream buffers for writing
 			while (this.head != null) {
@@ -1033,6 +1028,13 @@ public class SocketManager {
 				// Ensure a response for request
 				if ((this.head.responseHeaderWriter == null) && (this.head.headResponseBuffer == null)) {
 					return; // no response yet
+				}
+
+				// Ensure have space to write content
+				if ((!writeBuffer.isPooled) || (writeBuffer.pooledBuffer.remaining() == 0)) {
+					// Require new write buffer
+					writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
+					writeBuffer = writeBuffer.next;
 				}
 
 				// Determine if write the header
@@ -1286,6 +1288,13 @@ public class SocketManager {
 				release.release();
 			}
 
+			// Release the compact buffers
+			while (this.compactedResponseHead != null) {
+				StreamBuffer<ByteBuffer> release = this.compactedResponseHead;
+				this.compactedResponseHead = this.compactedResponseHead.next;
+				release.release();
+			}
+
 			// Release buffers for requests
 			while (this.head != null) {
 				StreamBuffer<ByteBuffer> headRequest = this.head.headRequestBuffer;
@@ -1301,6 +1310,13 @@ public class SocketManager {
 					release.release();
 				}
 				this.head = this.head.next;
+			}
+
+			// Release the write buffers
+			while (this.writeResponseHead != null) {
+				StreamBuffer<ByteBuffer> release = this.writeResponseHead;
+				this.writeResponseHead = this.writeResponseHead.next;
+				release.release();
 			}
 
 			// Allow socket servicer to release buffers
