@@ -244,11 +244,23 @@ public class HttpServerSocketManagedObjectSource
 	 */
 	public static SocketManager createSocketManager() throws IOException {
 
-		// Obtain configuration of socket manager (with reasonable defaults)
+		/*
+		 * Obtain configuration of socket manager.
+		 * 
+		 * Defaults are based on following:
+		 * 
+		 * - thread per CPU (leaving non-used CPU utilisation for additional
+		 * threads servicing requests)
+		 * 
+		 * - 8192 to fill a Jumbo Ethernet frame (i.e. 9000)
+		 * 
+		 * - 8 * 8192 = 65536 to fill a TCP packet, with additional 4 packet TCP
+		 * buffer.
+		 */
 		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
 				Runtime.getRuntime().availableProcessors());
-		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 4096);
-		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 64);
+		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
+		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
 		int receiveBufferSize = getSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
 				streamBufferSize * maxReadsOnSelect);
 		int sendBufferSize = getSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
