@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.plugin</groupId>
-		<artifactId>plugins</artifactId>
+		<artifactId>web</artifactId>
 		<version>3.0.0</version>
 	</parent>
-	<artifactId>officeplugin_web</artifactId>
+	<artifactId>officeweb</artifactId>
 	<name>Web Plug-in</name>
 	<description>OfficeFloor plug-in for Web</description>
 	<properties>
@@ -52,7 +52,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_default</artifactId>
+			<artifactId>officeserver</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
