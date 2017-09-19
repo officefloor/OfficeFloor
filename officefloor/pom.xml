@@ -146,6 +146,22 @@
 				<artifactId>officeserver_netty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<!-- Web -->
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>web</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officewoof</artifactId>
+				<version>${project.version}</version>
+			</dependency>			
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
@@ -211,16 +227,6 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_war</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_web</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_woof</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
