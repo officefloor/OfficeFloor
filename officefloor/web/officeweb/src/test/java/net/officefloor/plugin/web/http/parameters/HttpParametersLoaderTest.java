@@ -24,10 +24,11 @@ import java.util.Map;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
-import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpParametersLoader}.
@@ -63,11 +64,8 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		this.object.setLastName("Sagenschneider");
 		this.object.setDescription("description");
 		// ignore should be ignored
-		this
-				.doTest(
-						"GET",
-						"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=ignore",
-						null, true);
+		this.doTest(HttpMethod.GET,
+				"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=ignore", null, true);
 	}
 
 	/**
@@ -75,7 +73,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testAliasMapping() throws Exception {
 		this.object.setFirstName("Dan");
-		this.doTest("GET", "/path?Alias=Dan", null, true, "Alias", "FirstName");
+		this.doTest(HttpMethod.GET, "/path?Alias=Dan", null, true, "Alias", "FirstName");
 	}
 
 	/**
@@ -84,21 +82,18 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testOnlyTypeParametersLoaded() throws Exception {
 
 		// Load the parameters
-		HttpRequest request = HttpServerTestUtil
-				.createHttpRequest(
-						"GET",
-						"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=NotLoaded",
-						null);
+		HttpRequest request = MockHttpServer
+				.mockRequest(
+						"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=NotLoaded")
+				.build();
 		HttpParametersLoader<MockInterface> loader = this.createLoader(true);
 		MockObject mockObject = new MockObject();
 		loader.loadParameters(request, mockObject);
 
 		// Ensure only the type parameters are loaded
 		assertEquals("Incorrect first name", "Daniel", mockObject.firstName);
-		assertEquals("Incorrect last name", "Sagenschneider",
-				mockObject.lastName);
-		assertEquals("Incorrect description", "description",
-				mockObject.description);
+		assertEquals("Incorrect last name", "Sagenschneider", mockObject.lastName);
+		assertEquals("Incorrect description", "description", mockObject.description);
 	}
 
 	/**
@@ -108,11 +103,8 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		this.object.setFirstName("Daniel");
 		this.object.setLastName("Sagenschneider");
 		this.object.setDescription("description");
-		this
-				.doTest(
-						"GET",
-						"/path?firstname=Daniel&lastname=Sagenschneider&description=description&ignore=ignore",
-						null, false);
+		this.doTest(HttpMethod.GET,
+				"/path?firstname=Daniel&lastname=Sagenschneider&description=description&ignore=ignore", null, false);
 	}
 
 	/**
@@ -120,9 +112,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testCaseInsensitiveAlias() throws Exception {
 		this.object.setFirstName("Dan");
-		this
-				.doTest("GET", "/path?alias=Dan", null, false, "ALIAS",
-						"firstname");
+		this.doTest(HttpMethod.GET, "/path?alias=Dan", null, false, "ALIAS", "firstname");
 	}
 
 	/**
@@ -130,7 +120,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testGetWithNoParameters() throws Exception {
 		// Nothing loaded
-		this.doTest("GET", "http://wwww.officefloor.net", null, true);
+		this.doTest(HttpMethod.GET, "http://wwww.officefloor.net", null, true);
 	}
 
 	/**
@@ -138,7 +128,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testGetWithUnknownParameter() throws Exception {
 		// Nothing loaded
-		this.doTest("GET", "/path?Unknown=NotLoad", null, true);
+		this.doTest(HttpMethod.GET, "/path?Unknown=NotLoad", null, true);
 	}
 
 	/**
@@ -146,7 +136,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testGetWithOneParameter() throws Exception {
 		this.object.setFirstName("Daniel");
-		this.doTest("GET", "/path?FirstName=Daniel", null, true);
+		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel", null, true);
 	}
 
 	/**
@@ -155,8 +145,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testGetWithMultipleParameters() throws Exception {
 		this.object.setFirstName("Daniel");
 		this.object.setLastName("Sagenschneider");
-		this.doTest("GET", "/path?FirstName=Daniel;LastName=Sagenschneider",
-				null, true);
+		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel;LastName=Sagenschneider", null, true);
 	}
 
 	/**
@@ -164,7 +153,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testGetWithFragment() throws Exception {
 		// Nothing loaded
-		this.doTest("GET", "/path#fragment", null, true);
+		this.doTest(HttpMethod.GET, "/path#fragment", null, true);
 	}
 
 	/**
@@ -173,9 +162,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testGetWithParametersAndFragments() throws Exception {
 		this.object.setFirstName("Daniel");
 		this.object.setLastName("Sagenschneider");
-		this.doTest("GET",
-				"/path?FirstName=Daniel&LastName=Sagenschneider#fragment",
-				null, true);
+		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel&LastName=Sagenschneider#fragment", null, true);
 	}
 
 	/**
@@ -183,7 +170,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testGetParameterWithSpace() throws Exception {
 		this.object.setFirstName("Daniel Aaron");
-		this.doTest("GET", "/path?FirstName=Daniel+Aaron", null, true);
+		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel+Aaron", null, true);
 	}
 
 	/**
@@ -191,7 +178,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testGetParameterWithEscape() throws Exception {
 		this.object.setFirstName("Daniel Aaron");
-		this.doTest("GET", "/path?FirstName=Daniel%20Aaron", null, true);
+		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel%20Aaron", null, true);
 	}
 
 	/**
@@ -199,7 +186,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testPostNoParameter() throws Exception {
 		// Nothing loaded
-		this.doTest("POST", "/path", "", true);
+		this.doTest(HttpMethod.POST, "/path", "", true);
 	}
 
 	/**
@@ -207,7 +194,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testPostWithOneParameter() throws Exception {
 		this.object.setFirstName("Daniel");
-		this.doTest("POST", "/path", "FirstName=Daniel", true);
+		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel", true);
 	}
 
 	/**
@@ -216,8 +203,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testPostWithMultipleParameters() throws Exception {
 		this.object.setFirstName("Daniel");
 		this.object.setLastName("Sagenschneider");
-		this.doTest("POST", "/path",
-				"FirstName=Daniel&LastName=Sagenschneider", true);
+		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel&LastName=Sagenschneider", true);
 	}
 
 	/**
@@ -226,8 +212,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testPostWithUriAndBodyParameters() throws Exception {
 		this.object.setFirstName("Daniel");
 		this.object.setLastName("Sagenschneider");
-		this.doTest("POST", "/path?FirstName=Daniel",
-				"LastName=Sagenschneider", true);
+		this.doTest(HttpMethod.POST, "/path?FirstName=Daniel", "LastName=Sagenschneider", true);
 	}
 
 	/*
@@ -242,8 +227,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testGetWithMultipleValues() throws Exception {
 		this.object.setMultipleValues("One", "1");
 		this.object.setMultipleValues("Two", "2");
-		this.doTest("GET", "/path?MultipleValues{One}=1&MultipleValues{Two}=2",
-				null, true);
+		this.doTest(HttpMethod.GET, "/path?MultipleValues{One}=1&MultipleValues{Two}=2", null, true);
 	}
 
 	/**
@@ -252,8 +236,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testPostWithMultipleValues() throws Exception {
 		this.object.setMultipleValues("One", "1");
 		this.object.setMultipleValues("Two", "2");
-		this.doTest("POST", "/path",
-				"MultipleValues{One}=1&MultipleValues{Two}=2", true);
+		this.doTest(HttpMethod.POST, "/path", "MultipleValues{One}=1&MultipleValues{Two}=2", true);
 	}
 
 	/*
@@ -265,7 +248,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testMapProperty() throws Exception {
 		this.expectRole("key", "VALUE", null);
-		this.doTest("GET", "/path?Roles{key}.RoleName=VALUE", null, true);
+		this.doTest(HttpMethod.GET, "/path?Roles{key}.RoleName=VALUE", null, true);
 	}
 
 	/**
@@ -273,11 +256,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testMapProperties() throws Exception {
 		this.expectRole("key", "ROLE", "DESCRIPTION");
-		this
-				.doTest(
-						"GET",
-						"/path?roles{key}.roleName=ROLE&roles{key}.description=DESCRIPTION",
-						null, false);
+		this.doTest(HttpMethod.GET, "/path?roles{key}.roleName=ROLE&roles{key}.description=DESCRIPTION", null, false);
 	}
 
 	/**
@@ -289,11 +268,9 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testMultipleMapEntries() throws Exception {
 		this.expectRole("1", "ROLE1", "DESCRIPTION1");
 		this.expectRole("2", "ROLE2", "DESCRIPTION2");
-		this
-				.doTest(
-						"GET",
-						"/path?roles{1}.roleName=ROLE1&roles{1}.description=DESCRIPTION1&roles{2}.roleName=ROLE2&roles{2}.description=DESCRIPTION2",
-						null, false);
+		this.doTest(HttpMethod.GET,
+				"/path?roles{1}.roleName=ROLE1&roles{1}.description=DESCRIPTION1&roles{2}.roleName=ROLE2&roles{2}.description=DESCRIPTION2",
+				null, false);
 	}
 
 	/**
@@ -302,11 +279,9 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testMultipleMaps() throws Exception {
 		this.expectRole("role", "ROLE", "ROLE_DESCRIPTION");
 		this.expectProduct("product", "PRODUCT", "PRODUCT_DESCRIPTION");
-		this
-				.doTest(
-						"GET",
-						"/path?roles{role}.roleName=ROLE&roles{role}.description=ROLE_DESCRIPTION&products{product}.productName=PRODUCT&products{product}.description=PRODUCT_DESCRIPTION",
-						null, false);
+		this.doTest(HttpMethod.GET,
+				"/path?roles{role}.roleName=ROLE&roles{role}.description=ROLE_DESCRIPTION&products{product}.productName=PRODUCT&products{product}.description=PRODUCT_DESCRIPTION",
+				null, false);
 	}
 
 	/*
@@ -320,16 +295,15 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 *            {@link HttpRequest} Method.
 	 * @param requestUri
 	 *            {@link HttpRequest} Request URI.
-	 * @param body
-	 *            Body of the {@link HttpRequest}.
+	 * @param requestEntity
+	 *            Entity of the {@link HttpRequest}.
 	 * @param isCaseSensitive
 	 *            Indicates if case sensitive.
 	 * @param aliasProperties
 	 *            Alias property name pairs.
 	 */
-	private void doTest(String method, String requestUri, String body,
-			boolean isCaseSensitive, String... aliasProperties)
-			throws Exception {
+	private void doTest(HttpMethod method, String requestUri, String requestEntity, boolean isCaseSensitive,
+			String... aliasProperties) throws Exception {
 
 		// Record obtaining the map values
 		final Map<String, MockRoleBean> roleMap = new HashMap<String, MockRoleBean>();
@@ -369,37 +343,35 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 
 		// Run test to load values
 		this.replayMockObjects();
-		HttpRequest request = HttpServerTestUtil.createHttpRequest(method,
-				requestUri, body);
-		HttpParametersLoader<MockInterface> loader = this.createLoader(
-				isCaseSensitive, aliasProperties);
+		MockHttpRequestBuilder requestBuilder = MockHttpServer.mockRequest().setHttpMethod(method)
+				.setRequestUri(requestUri);
+		if (requestEntity != null) {
+			requestBuilder.getHttpEntity()
+					.write(requestEntity.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		}
+		HttpRequest request = requestBuilder.build();
+		HttpParametersLoader<MockInterface> loader = this.createLoader(isCaseSensitive, aliasProperties);
 		loader.loadParameters(request, this.object);
 		this.verifyMockObjects();
 
 		// Verify the roles
-		assertEquals("Incorrect number of roles", this.roles.size(), roleMap
-				.size());
+		assertEquals("Incorrect number of roles", this.roles.size(), roleMap.size());
 		for (String key : this.roles.keySet()) {
 			MockRoleBean e = this.roles.get(key);
 			MockRoleBean a = roleMap.get(key);
 			assertNotNull("Expecting role for key '" + key + "'", a);
-			assertEquals("Incorrect role name for key '" + key + "'",
-					e.roleName, a.roleName);
-			assertEquals("Incorrect description for key '" + key + "'",
-					e.description, a.description);
+			assertEquals("Incorrect role name for key '" + key + "'", e.roleName, a.roleName);
+			assertEquals("Incorrect description for key '" + key + "'", e.description, a.description);
 		}
 
 		// Verify the products
-		assertEquals("Incorrect number of products", this.products.size(),
-				productMap.size());
+		assertEquals("Incorrect number of products", this.products.size(), productMap.size());
 		for (String key : this.products.keySet()) {
 			MockProductBean e = this.products.get(key);
 			MockProductBean a = productMap.get(key);
 			assertNotNull("Expecting product for key '" + key + "'", a);
-			assertEquals("Incorrect product name for key '" + key + "'",
-					e.productName, a.productName);
-			assertEquals("Incorrect description for key '" + key + "'",
-					e.description, a.description);
+			assertEquals("Incorrect product name for key '" + key + "'", e.productName, a.productName);
+			assertEquals("Incorrect description for key '" + key + "'", e.description, a.description);
 		}
 	}
 
@@ -412,8 +384,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 *            Alias mappings of alias to property name pairs.
 	 * @return Initialised {@link HttpParametersLoader}.
 	 */
-	private HttpParametersLoader<MockInterface> createLoader(
-			boolean isCaseSensitive, String... aliasProperties)
+	private HttpParametersLoader<MockInterface> createLoader(boolean isCaseSensitive, String... aliasProperties)
 			throws Exception {
 
 		// Create the loader
@@ -445,8 +416,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 *            Description.
 	 * @return Expected {@link MockRoleBean}.
 	 */
-	private MockRoleBean expectRole(String key, String roleName,
-			String description) {
+	private MockRoleBean expectRole(String key, String roleName, String description) {
 
 		// Create the expected role
 		MockRoleBean role = new MockRoleBean();
@@ -471,8 +441,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	 *            Description.
 	 * @return Expected {@link MockProductBean}.
 	 */
-	private MockProductBean expectProduct(String key, String productName,
-			String description) {
+	private MockProductBean expectProduct(String key, String productName, String description) {
 
 		// Create the expected product
 		MockProductBean product = new MockProductBean();

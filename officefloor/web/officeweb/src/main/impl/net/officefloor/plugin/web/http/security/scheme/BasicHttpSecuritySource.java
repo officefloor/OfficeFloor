@@ -18,7 +18,6 @@
 package net.officefloor.plugin.web.http.security.scheme;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -34,11 +33,9 @@ import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * {@link HttpSecuritySource} for <code>Basic</code> HTTP security.
@@ -57,11 +54,6 @@ public class BasicHttpSecuritySource
 	 * Name of property to retrieve the realm being secured.
 	 */
 	public static final String PROPERTY_REALM = "http.security.basic.realm";
-
-	/**
-	 * {@link Charset} for {@link HttpRequest} headers.
-	 */
-	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
 	 * Name of attribute to register the {@link HttpSecurity} within the
@@ -139,7 +131,7 @@ public class BasicHttpSecuritySource
 
 		// Decode Base64 credentials into userId:password text
 		byte[] userIdPasswordBytes = Base64.decodeBase64(scheme.getParameters());
-		String userIdPassword = new String(userIdPasswordBytes, US_ASCII);
+		String userIdPassword = new String(userIdPasswordBytes, UTF_8);
 
 		// Split out the userId and password
 		int separatorIndex = userIdPassword.indexOf(':');
@@ -153,7 +145,7 @@ public class BasicHttpSecuritySource
 		CredentialStore store = (CredentialStore) context.getObject(Dependencies.CREDENTIAL_STORE);
 
 		// Authenticate
-		HttpSecurity security = CredentialStoreUtil.authenticate(userId, this.realm, password.getBytes(US_ASCII),
+		HttpSecurity security = CredentialStoreUtil.authenticate(userId, this.realm, password.getBytes(UTF_8),
 				AUTHENTICATION_SCHEME_BASIC, store);
 		if (security == null) {
 			return; // not authenticated

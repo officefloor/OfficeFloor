@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -57,12 +57,12 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 * @param isLinkSecure
 	 *            Indicates if the link is to be submitted over a secure
 	 *            {@link ServerHttpConnection}.
-	 * @throws InvalidHttpRequestUriException
+	 * @throws InvalidRequestUriHttpException
 	 *             If the link URI path is invalid.
 	 */
 	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content,
 			String templateUriPath, String templateUriSuffix,
-			boolean isLinkSecure) throws InvalidHttpRequestUriException {
+			boolean isLinkSecure) throws InvalidRequestUriHttpException {
 		this.isLinkSecure = isLinkSecure;
 
 		// Create the link URI path

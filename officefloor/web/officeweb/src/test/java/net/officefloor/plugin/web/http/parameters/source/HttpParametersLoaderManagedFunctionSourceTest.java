@@ -31,7 +31,7 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedFunctionSource.HttpParametersLoaderFunction;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpParametersLoaderManagedFunctionSource}.
@@ -82,7 +82,7 @@ public class HttpParametersLoaderManagedFunctionSourceTest extends OfficeFrameTe
 				connection);
 		MockType object = this.createMock(MockType.class);
 		this.recordReturn(taskContext, taskContext.getObject(HttpParametersLoaderDependencies.OBJECT), object);
-		HttpRequest request = new HttpRequestImpl("GET", "/path?VALUE=value", "HTTP/1.1", null, null);
+		HttpRequest request = MockHttpServer.mockRequest("/path?VALUE=value").build();
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		object.setValue("value");
 

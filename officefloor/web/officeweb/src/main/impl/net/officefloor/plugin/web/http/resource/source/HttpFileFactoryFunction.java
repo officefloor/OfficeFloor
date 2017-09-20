@@ -22,9 +22,9 @@ import java.io.IOException;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
+import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -80,7 +80,7 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 
 	@Override
 	public Object execute(ManagedFunctionContext<DependencyKeys, F> context)
-			throws IOException, InvalidHttpRequestUriException {
+			throws IOException, InvalidRequestUriHttpException {
 
 		// Obtain the HTTP request
 		ServerHttpConnection connection = (ServerHttpConnection) context
@@ -111,7 +111,7 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 				resource = (defaultFile != null ? defaultFile : new NotExistHttpResource(resource.getPath()));
 			}
 
-		} catch (IncorrectHttpRequestContextPathException ex) {
+		} catch (UnknownContextPathHttpException ex) {
 			resource = new NotExistHttpResource(requestUriPath);
 		}
 

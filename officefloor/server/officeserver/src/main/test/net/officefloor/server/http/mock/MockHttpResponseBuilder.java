@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,30 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.location;
+package net.officefloor.server.http.mock;
 
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpStatus;
-import net.officefloor.server.http.InvalidHttpRequestException;
+import net.officefloor.server.http.HttpResponse;
 
 /**
- * Indicates the context path for the {@link HttpRequest} is incorrect for the
- * application.
+ * Builder for a mock {@link HttpResponse}.
  * 
  * @author Daniel Sagenschneider
  */
-public class IncorrectHttpRequestContextPathException extends InvalidHttpRequestException {
+public interface MockHttpResponseBuilder extends HttpResponse {
 
 	/**
-	 * Initiate.
+	 * Builds the {@link MockHttpResponse}.
 	 * 
-	 * @param httpStatus
-	 *            {@link HttpStatus} of exception.
-	 * @param message
-	 *            Message.
+	 * @return {@link MockHttpResponse}.
 	 */
-	public IncorrectHttpRequestContextPathException(HttpStatus httpStatus, String message) {
-		super(httpStatus, message);
-	}
+	MockHttpResponse build();
 
 }

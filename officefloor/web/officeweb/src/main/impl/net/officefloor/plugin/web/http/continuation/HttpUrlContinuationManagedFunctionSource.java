@@ -25,7 +25,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -58,16 +58,18 @@ public class HttpUrlContinuationManagedFunctionSource extends AbstractManagedFun
 	 * @param configuredUriPath
 	 *            Configured URI path.
 	 * @return Application URI path.
-	 * @throws InvalidHttpRequestUriException
-	 *             If configured URI path is invalid.
 	 */
-	public static String getApplicationUriPath(String configuredUriPath) throws InvalidHttpRequestUriException {
+	public static String getApplicationUriPath(String configuredUriPath) {
 
 		// Ensure the configure URI path is absolute
 		String applicationUriPath = (configuredUriPath.startsWith("/") ? configuredUriPath : "/" + configuredUriPath);
 
 		// Ensure is canonical
-		applicationUriPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(applicationUriPath);
+		try {
+			applicationUriPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(applicationUriPath);
+		} catch (HttpException ex) {
+			// Use path as is
+		}
 
 		// Return the Application URI path
 		return applicationUriPath;

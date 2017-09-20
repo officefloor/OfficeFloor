@@ -24,12 +24,10 @@ import java.util.List;
 import java.util.TimeZone;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.cookie.HttpCookie;
-import net.officefloor.plugin.web.http.cookie.HttpCookieUtil;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpCookieUtil}.
@@ -118,7 +116,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
 		HttpHeader one = this.createCookieHttpHeader("another", "value");
 		HttpHeader two = this.createCookieHttpHeader("test", "value");
-		HttpHeader header = new HttpHeaderImpl(one.getName(), one.getValue() + "," + two.getValue());
+		HttpHeader header = createHttpHeader(one.getName(), one.getValue() + "," + two.getValue());
 		headers.add(header);
 
 		// Record
@@ -143,7 +141,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		HttpHeader attributeSeparatorHeader = this.createCookieHttpHeader("attribute", "\";\"");
 		HttpHeader cookieSeparatorHeader = this.createCookieHttpHeader("cookie", "\",\"");
 		HttpHeader cookieHeader = this.createCookieHttpHeader("test", "value");
-		HttpHeader header = new HttpHeaderImpl(cookieHeader.getName(), attributeSeparatorHeader.getValue() + ","
+		HttpHeader header = createHttpHeader(cookieHeader.getName(), attributeSeparatorHeader.getValue() + ","
 				+ cookieSeparatorHeader.getValue() + "," + cookieHeader.getValue());
 		headers.add(header);
 
@@ -201,8 +199,8 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		existingCookie.setExpires(currentTime + 1000);
 		existingCookie.setPath("/existing");
 		existingCookie.setDomain(".existing.officefloor.net");
-		HttpHeader existingHeader = new HttpHeaderImpl("set-cookie", existingCookie.toHttpResponseHeaderValue());
-		HttpHeader anotherHeader = new HttpHeaderImpl("set-cookie", "another=cookie");
+		HttpHeader existingHeader = createHttpHeader("set-cookie", existingCookie.toHttpResponseHeaderValue());
+		HttpHeader anotherHeader = createHttpHeader("set-cookie", "another=cookie");
 
 		// Create the HTTP cookie
 		HttpCookie cookie = new HttpCookie("test", "replace");
@@ -241,7 +239,21 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 			String value = nameValuePairs[i + 1];
 			headerValue.append(name + "=" + value + ";");
 		}
-		return new HttpHeaderImpl("cookie", headerValue.toString());
+		return createHttpHeader("cookie", headerValue.toString());
+	}
+
+	/**
+	 * Creates a mock {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            {@link HttpHeader} name.
+	 * @param value
+	 *            {@link HttpHeader} value.
+	 * @return Mock {@link HttpHeader}.
+	 */
+	private static HttpHeader createHttpHeader(String name, String value) {
+		return MockHttpServer.mockRequest().addHttpHeader(name, value).build().getHttpHeaders()
+				.getHeader(name);
 	}
 
 	/**

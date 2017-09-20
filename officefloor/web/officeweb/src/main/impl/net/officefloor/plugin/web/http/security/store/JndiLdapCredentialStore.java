@@ -18,7 +18,6 @@
 package net.officefloor.plugin.web.http.security.store;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +30,7 @@ import javax.naming.directory.SearchResult;
 
 import org.apache.commons.codec.binary.Base64;
 
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 
 /**
  * {@link CredentialStore} for {@link DirContext}.
@@ -39,11 +38,6 @@ import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
  * @author Daniel Sagenschneider
  */
 public class JndiLdapCredentialStore implements CredentialStore {
-
-	/**
-	 * {@link Charset} for credentials.
-	 */
-	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
 	 * Algorithm.
@@ -82,10 +76,9 @@ public class JndiLdapCredentialStore implements CredentialStore {
 	 * @param rolesSearchBaseDn
 	 *            Base dn for searching for roles.
 	 */
-	public JndiLdapCredentialStore(String algorithm, DirContext context,
-			String entrySearchBaseDn, String rolesSearchBaseDn) {
-		this.algorithm = (algorithm == null ? null
-				: (algorithm.trim().length() == 0 ? null : algorithm.trim()));
+	public JndiLdapCredentialStore(String algorithm, DirContext context, String entrySearchBaseDn,
+			String rolesSearchBaseDn) {
+		this.algorithm = (algorithm == null ? null : (algorithm.trim().length() == 0 ? null : algorithm.trim()));
 		this.context = context;
 		this.entrySearchBaseDn = entrySearchBaseDn;
 		this.rolesSearchBaseDn = rolesSearchBaseDn;
@@ -108,14 +101,11 @@ public class JndiLdapCredentialStore implements CredentialStore {
 	}
 
 	@Override
-	public CredentialEntry retrieveCredentialEntry(String userId, String realm)
-			throws IOException {
+	public CredentialEntry retrieveCredentialEntry(String userId, String realm) throws IOException {
 		try {
 			// Search for the credential entry
-			NamingEnumeration<SearchResult> searchResults = this.context
-					.search(this.entrySearchBaseDn,
-							"(&(objectClass=inetOrgPerson)(uid=" + userId
-									+ "))", null);
+			NamingEnumeration<SearchResult> searchResults = this.context.search(this.entrySearchBaseDn,
+					"(&(objectClass=inetOrgPerson)(uid=" + userId + "))", null);
 			if (!searchResults.hasMore()) {
 				return null; // entry not found
 			}
@@ -160,34 +150,29 @@ public class JndiLdapCredentialStore implements CredentialStore {
 		public byte[] retrieveCredentials() throws IOException {
 			try {
 				// Obtain the entry's userPassword attribute
-				Attributes entry = JndiLdapCredentialStore.this.context
-						.getAttributes(this.entryDn);
+				Attributes entry = JndiLdapCredentialStore.this.context.getAttributes(this.entryDn);
 				Attribute userPasswordAttribute = entry.get("userPassword");
 
 				// Iterate over 'userPassword' values to match algorithm
-				NamingEnumeration<?> userPasswords = userPasswordAttribute
-						.getAll();
+				NamingEnumeration<?> userPasswords = userPasswordAttribute.getAll();
 				for (; userPasswords.hasMore();) {
 
 					// Obtain the userPassword value
 					byte[] userPasswordBytes = (byte[]) userPasswords.next();
-					String userPasswordText = new String(userPasswordBytes,
-							US_ASCII);
+					String userPasswordText = new String(userPasswordBytes, AbstractHttpSecuritySource.UTF_8);
 
 					// Determine if credential for algorithm
-					if (userPasswordText.toUpperCase().startsWith(
-							JndiLdapCredentialStore.this.credentialPrefix)) {
+					if (userPasswordText.toUpperCase().startsWith(JndiLdapCredentialStore.this.credentialPrefix)) {
 
 						// Found credentials, so strip out prefix
 						userPasswordText = userPasswordText
-								.substring(JndiLdapCredentialStore.this.credentialPrefix
-										.length());
+								.substring(JndiLdapCredentialStore.this.credentialPrefix.length());
 
 						// Decode credentials
 						byte[] credentials;
 						if (JndiLdapCredentialStore.this.algorithm == null) {
 							// Plain text password
-							credentials = userPasswordText.getBytes(US_ASCII);
+							credentials = userPasswordText.getBytes(AbstractHttpSecuritySource.UTF_8);
 						} else {
 							// Decode credentials (assume always Base64)
 							credentials = Base64.decodeBase64(userPasswordText);
@@ -199,8 +184,7 @@ public class JndiLdapCredentialStore implements CredentialStore {
 				}
 
 				// If here, no credentials
-				throw new IOException("No authentication credentials for "
-						+ this.entryDn);
+				throw new IOException("No authentication credentials for " + this.entryDn);
 
 			} catch (NamingException ex) {
 				throw new IOException(ex);
@@ -212,10 +196,9 @@ public class JndiLdapCredentialStore implements CredentialStore {
 			try {
 
 				// Search for the groups
-				NamingEnumeration<SearchResult> groupResults = JndiLdapCredentialStore.this.context
-						.search(JndiLdapCredentialStore.this.rolesSearchBaseDn,
-								"(&(objectClass=groupOfNames)(member="
-										+ this.entryDn + "))", null);
+				NamingEnumeration<SearchResult> groupResults = JndiLdapCredentialStore.this.context.search(
+						JndiLdapCredentialStore.this.rolesSearchBaseDn,
+						"(&(objectClass=groupOfNames)(member=" + this.entryDn + "))", null);
 
 				// Obtain the set of roles
 				Set<String> roles = new HashSet<String>();
@@ -223,8 +206,7 @@ public class JndiLdapCredentialStore implements CredentialStore {
 					SearchResult group = groupResults.next();
 
 					// Obtain the role from the group
-					String role = (String) group.getAttributes().get("ou")
-							.get();
+					String role = (String) group.getAttributes().get("ou").get();
 
 					// Add role to listing
 					roles.add(role);

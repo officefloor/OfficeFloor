@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
@@ -33,7 +34,6 @@ import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSourc
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
-import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -63,7 +63,7 @@ public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFun
 	/**
 	 * Property name for the {@link Charset} of the {@link HttpTemplate}.
 	 */
-	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
+	public static final String PROPERTY_CHARSET = "http.template.charset";
 
 	/**
 	 * Name of the {@link HttpTemplateInitialFunction}.
@@ -109,7 +109,11 @@ public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFun
 
 		// Obtain the content type and charset
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
-		Charset charset = AbstractServerSocketManagedObjectSource.getCharset(context);
+		Charset charset = null;
+		String charsetName = context.getProperty(PROPERTY_CHARSET);
+		if (!CompileUtil.isBlank(charsetName)) {
+			charset = Charset.forName(charsetName);
+		}
 
 		// Create the HTTP Template initial function
 		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(templateUriPath, isSecure,

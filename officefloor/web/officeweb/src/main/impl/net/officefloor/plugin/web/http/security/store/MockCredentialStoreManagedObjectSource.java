@@ -29,8 +29,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * <p>
@@ -106,7 +106,7 @@ public class MockCredentialStoreManagedObjectSource extends AbstractManagedObjec
 	public CredentialEntry retrieveCredentialEntry(String userId, String realm) throws IOException {
 
 		// Create the password
-		byte[] password = userId.getBytes(HttpRequestParserImpl.US_ASCII);
+		byte[] password = userId.getBytes(AbstractHttpSecuritySource.UTF_8);
 
 		// Encrypt password (if required)
 		MessageDigest digest = CredentialStoreUtil.createDigest(this.algorithm);

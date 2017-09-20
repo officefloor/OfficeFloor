@@ -30,11 +30,11 @@ import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -143,8 +143,8 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(), "/path");
 		this.location.transformToApplicationCanonicalPath("/path");
-		this.control(this.location).setThrowable(
-				new IncorrectHttpRequestContextPathException(HttpStatus.NOT_FOUND, "Must have context path"));
+		this.control(this.location)
+				.setThrowable(new UnknownContextPathHttpException("/context", "Must have context path"));
 		this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null, null);
 
 		// Test

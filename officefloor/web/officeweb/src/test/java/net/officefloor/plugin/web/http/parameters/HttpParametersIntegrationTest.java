@@ -21,11 +21,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -33,8 +28,8 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserTest;
-import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * <p>
@@ -52,14 +47,14 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 
 	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
-
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	/**
 	 * Actual value.
@@ -70,7 +65,8 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		this.compiler.officeFloor((context) -> {
-			HttpServerTestUtil.configureTestHttpServer(context, 7878, "SERVICE", "service");
+			this.server = MockHttpServer
+					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("SERVICE", "service"));
 		});
 		this.compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();
@@ -87,14 +83,9 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Stop the client
-			this.client.close();
-		} finally {
-			// Stop the server
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		// Stop the server
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -180,10 +171,9 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 				}
 
 				// Undertake the request
-				HttpUriRequest request = new HttpGet(
-						"http://localhost:7878/service?one=1&value=%" + high + low + ";two=2");
-				HttpResponse response = this.client.execute(request);
-				assertEquals("Should be successful (no entity)", 204, response.getStatusLine().getStatusCode());
+				MockHttpResponse response = this.server.send(this.server
+						.mockRequest("http://localhost:7878/service?one=1&value=%" + high + low + ";two=2"));
+				assertEquals("Should be successful (no entity)", 204, response.getHttpStatus().getStatusCode());
 
 				// Validate that obtained appropriate character value
 				synchronized (HttpParametersIntegrationTest.class) {

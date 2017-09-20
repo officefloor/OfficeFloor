@@ -19,6 +19,8 @@ package net.officefloor.plugin.web.http.location;
 
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
+import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
@@ -125,13 +127,13 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase exten
 			location.transformToApplicationCanonicalPath(requestUri);
 			fail("Should not be successful");
 
-		} catch (InvalidHttpRequestUriException ex) {
+		} catch (InvalidRequestUriHttpException ex) {
 			// Invalid request if no context path
 			assertEquals("Invalid only if no context path", "", contextPath);
 			assertEquals("Incorrect HTTP status", HttpStatus.BAD_REQUEST, ex.getHttpStatus());
 			assertEquals("Incorrect message", "Invalid request URI path [" + requestUri + "]", ex.getMessage());
 
-		} catch (IncorrectHttpRequestContextPathException ex) {
+		} catch (UnknownContextPathHttpException ex) {
 			// Incorrect as missing context path
 			assertTrue("Incorrect only if have context path", (contextPath.trim().length() > 0));
 			assertEquals("Incorrect HTTP status", HttpStatus.NOT_FOUND, ex.getHttpStatus());

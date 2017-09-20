@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.location;
 
+import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.server.http.HttpRequest;
 
 /**
@@ -97,15 +98,11 @@ public interface HttpApplicationLocation {
 	 * @param requestUri
 	 *            Request URI from the {@link HttpRequest}.
 	 * @return Canonical path relative to the application root.
-	 * @throws InvalidHttpRequestUriException
-	 *             Should the {@link HttpRequest} request URI be invalid.
-	 * @throws IncorrectHttpRequestContextPathException
+	 * @throws UnknownContextPathHttpException
 	 *             Should the {@link HttpRequest} request URI have the incorrect
 	 *             context path for the application.
 	 */
-	String transformToApplicationCanonicalPath(String requestUri)
-			throws InvalidHttpRequestUriException,
-			IncorrectHttpRequestContextPathException;
+	String transformToApplicationCanonicalPath(String requestUri) throws UnknownContextPathHttpException;
 
 	/**
 	 * Transforms the application path to a client path. It will prepend the

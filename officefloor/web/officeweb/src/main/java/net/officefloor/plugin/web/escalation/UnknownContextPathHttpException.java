@@ -15,29 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.location;
+package net.officefloor.plugin.web.escalation;
 
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpStatus;
-import net.officefloor.server.http.InvalidHttpRequestException;
 
 /**
- * Indicates the {@link HttpRequest} request URI is invalid.
- *
+ * Indicates the context path for the {@link HttpRequest} is incorrect for the
+ * application.
+ * 
  * @author Daniel Sagenschneider
  */
-public class InvalidHttpRequestUriException extends InvalidHttpRequestException {
+public class UnknownContextPathHttpException extends NotFoundHttpException {
 
 	/**
 	 * Initiate.
-	 *
-	 * @param httpStatus
-	 *            {@link HttpStatus} of exception.
-	 * @param message
-	 *            Message.
+	 * 
+	 * @param expectedContextPath
+	 *            Expected context path for the application.
+	 * @param requestUri
+	 *            Request URI.
 	 */
-	public InvalidHttpRequestUriException(HttpStatus httpStatus, String message) {
-		super(httpStatus, message);
+	public UnknownContextPathHttpException(String expectedContextPath, String requestUri) {
+		super("Incorrect context path for application [context=" + expectedContextPath + ", request=" + requestUri
+				+ "]");
 	}
 
 }

@@ -17,10 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
-import java.nio.charset.Charset;
-
 import net.officefloor.plugin.web.http.security.HttpCredentials;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 
 /**
  * {@link HttpCredentials} implementation.
@@ -28,11 +26,6 @@ import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
  * @author Daniel Sagenschneider
  */
 public class HttpCredentialsImpl implements HttpCredentials {
-
-	/**
-	 * {@link Charset} for converting {@link String} password to bytes.
-	 */
-	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
 	 * Username.
@@ -66,7 +59,7 @@ public class HttpCredentialsImpl implements HttpCredentials {
 	 *            Password.
 	 */
 	public HttpCredentialsImpl(String username, String password) {
-		this(username, (password == null ? null : password.getBytes(US_ASCII)));
+		this(username, (password == null ? null : password.getBytes(AbstractHttpSecuritySource.UTF_8)));
 	}
 
 	/*

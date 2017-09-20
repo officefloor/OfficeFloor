@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.web.http.continuation;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -31,6 +29,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -45,8 +44,9 @@ import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpUrlContinuationSectionSource}.
@@ -120,9 +120,10 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 	public void doServiceTest(boolean isSecure) throws Exception {
 
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		Closure<MockHttpServer> server = new Closure<>();
 		compiler.officeFloor((context) -> {
-			HttpServerTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE",
-					HttpRouteManagedFunctionSource.FUNCTION_NAME);
+			server.value = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+					.getDeployedOfficeInput("ROUTE", HttpRouteManagedFunctionSource.FUNCTION_NAME));
 		});
 		compiler.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
@@ -189,15 +190,14 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		try {
 
 			// Ensure redirect if not appropriately secure
-			HttpResponse response = client.execute(new HttpGet(urlInitial));
-			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			MockHttpResponse response = server.value.send(server.value.mockRequest(urlInitial));
+			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
 			assertEquals("Incorrect redirect location", urlRedirect, response.getFirstHeader("Location").getValue());
-			response.getEntity().getContent().close();
 
 			// Ensure servicing request
-			response = client.execute(new HttpGet(urlRedirect));
-			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect response", "SERVICED", HttpClientTestUtil.getEntityBody(response));
+			response = server.value.send(server.value.mockRequest(urlRedirect));
+			assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
+			assertEquals("Incorrect response", "SERVICED", response.getHttpEntity(null));
 
 		} finally {
 			try {

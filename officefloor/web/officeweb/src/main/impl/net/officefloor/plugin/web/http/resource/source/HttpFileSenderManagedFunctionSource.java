@@ -28,9 +28,9 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -186,7 +186,7 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 		functionTypeBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 		functionTypeBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
 		functionTypeBuilder.addEscalation(IOException.class);
-		functionTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
+		functionTypeBuilder.addEscalation(InvalidRequestUriHttpException.class);
 	}
 
 }

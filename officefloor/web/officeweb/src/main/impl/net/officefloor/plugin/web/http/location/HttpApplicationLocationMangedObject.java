@@ -23,8 +23,9 @@ import java.util.LinkedList;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
+import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -36,15 +37,69 @@ public class HttpApplicationLocationMangedObject
 		implements CoordinatingManagedObject<Dependencies>, HttpApplicationLocation {
 
 	/**
+	 * <p>
+	 * Transforms the path to canonical path for the application.
+	 * <p>
+	 * Available for routing to call directly to avoid {@link ManagedObject}
+	 * creation.
+	 * 
+	 * @param path
+	 *            Path to be transformed.
+	 * @param contextPath
+	 *            Context path of the application. May be <code>null</code> if
+	 *            context at root.
+	 * @return Canonical path for the application.
+	 * @throws InvalidRequestUriHttpException
+	 *             If path is invalid.
+	 * @throws UnknownContextPathHttpException
+	 *             If unknown context path.
+	 */
+	public static String transformToApplicationCanonicalPath(String path, String contextPath)
+			throws InvalidRequestUriHttpException, UnknownContextPathHttpException {
+
+		// Root if empty path
+		if (path == null) {
+			return "/"; // root path
+		}
+
+		// Trim path and ensure not empty/blank
+		path = path.trim();
+		if (path.length() == 0) {
+			return "/"; // root path
+		}
+
+		// Transform to a canonical path
+		String canonicalPath = transformToCanonicalPath(path);
+
+		// Determine if need to strip off context path
+		if (contextPath != null) {
+
+			// Ensure have context path
+			if (!(canonicalPath.startsWith(contextPath))) {
+				throw new UnknownContextPathHttpException(contextPath, path);
+			}
+
+			// Strip off the context path
+			canonicalPath = canonicalPath.substring(contextPath.length());
+			if (canonicalPath.length() == 0) {
+				canonicalPath = "/"; // root path
+			}
+		}
+
+		// Return the canonical path for the application
+		return canonicalPath;
+	}
+
+	/**
 	 * Transforms the input Request URI path to a canonical path.
 	 * 
 	 * @param path
 	 *            Path to transform.
 	 * @return Canonical path.
-	 * @throws InvalidHttpRequestUriException
+	 * @throws InvalidRequestUriHttpException
 	 *             Should the Request URI path be invalid.
 	 */
-	public static String transformToCanonicalPath(String path) throws InvalidHttpRequestUriException {
+	public static String transformToCanonicalPath(String path) throws InvalidRequestUriHttpException {
 
 		// Root if empty path
 		if (path == null) {
@@ -177,11 +232,11 @@ public class HttpApplicationLocationMangedObject
 	 *         segment. <code>false</code> indicates the path is not canonical
 	 *         and must be constructed from the resulting segments to be
 	 *         canonical.
-	 * @throws InvalidHttpRequestUriException
+	 * @throws InvalidRequestUriHttpException
 	 *             Should the segment result in an invalid path.
 	 */
 	private static boolean processSegment(String path, int beginIndex, int endIndex, Deque<String> canonicalSegments)
-			throws InvalidHttpRequestUriException {
+			throws InvalidRequestUriHttpException {
 
 		// Obtain the segment
 		String segment = path.substring(beginIndex, endIndex);
@@ -194,7 +249,7 @@ public class HttpApplicationLocationMangedObject
 		} else if ("..".equals(segment)) {
 			// Must have tail segment to remove
 			if (canonicalSegments.size() == 0) {
-				throw createInvalidHttpRequestUriException(path);
+				throw new InvalidRequestUriHttpException(path);
 			}
 
 			// Valid so equate result (remove tail segment)
@@ -210,17 +265,6 @@ public class HttpApplicationLocationMangedObject
 
 		// Path continues to be canonical for the segment
 		return true;
-	}
-
-	/**
-	 * Creates an {@link InvalidHttpRequestUriException}.
-	 * 
-	 * @param path
-	 *            Path that is invalid.
-	 * @return {@link InvalidHttpRequestUriException}.
-	 */
-	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(String path) {
-		return new InvalidHttpRequestUriException(HttpStatus.BAD_REQUEST, "Invalid request URI path [" + path + "]");
 	}
 
 	/**
@@ -366,41 +410,8 @@ public class HttpApplicationLocationMangedObject
 
 	@Override
 	public String transformToApplicationCanonicalPath(String requestUri)
-			throws InvalidHttpRequestUriException, IncorrectHttpRequestContextPathException {
-
-		// Root if empty path
-		if (requestUri == null) {
-			return "/"; // root path
-		}
-
-		// Trim path and ensure not empty/blank
-		requestUri = requestUri.trim();
-		if (requestUri.length() == 0) {
-			return "/"; // root path
-		}
-
-		// Transform to a canonical path
-		String canonicalPath = transformToCanonicalPath(requestUri);
-
-		// Determine if need to strip off context path
-		if (this.contextPath != null) {
-
-			// Ensure have context path
-			if (!(canonicalPath.startsWith(this.contextPath))) {
-				throw new IncorrectHttpRequestContextPathException(HttpStatus.NOT_FOUND,
-						"Incorrect context path for application [context=" + this.contextPath + ", request="
-								+ requestUri + "]");
-			}
-
-			// Strip off the context path
-			canonicalPath = canonicalPath.substring(this.contextPath.length());
-			if (canonicalPath.length() == 0) {
-				canonicalPath = "/"; // root path
-			}
-		}
-
-		// Return the canonical path for the application
-		return canonicalPath;
+			throws InvalidRequestUriHttpException, UnknownContextPathHttpException {
+		return transformToApplicationCanonicalPath(requestUri, this.contextPath);
 	}
 
 	@Override

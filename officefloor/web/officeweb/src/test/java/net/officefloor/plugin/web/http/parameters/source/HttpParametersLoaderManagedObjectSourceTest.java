@@ -25,7 +25,7 @@ import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpParametersLoaderManagedObjectSource}.
@@ -62,7 +62,7 @@ public class HttpParametersLoaderManagedObjectSourceTest extends OfficeFrameTest
 
 		// Record loading the object
 		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-		HttpRequest request = new HttpRequestImpl("GET", "/path?VALUE=value", "HTTP/1.1", null, null);
+		HttpRequest request = MockHttpServer.mockRequest("/path?VALUE=value").build();
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		MockType mockType = this.createMock(MockType.class);
 		mockType.setValue("value");

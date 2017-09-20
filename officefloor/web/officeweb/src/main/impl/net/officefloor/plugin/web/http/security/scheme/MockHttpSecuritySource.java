@@ -18,7 +18,6 @@
 package net.officefloor.plugin.web.http.security.scheme;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -33,11 +32,9 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * <p>
@@ -68,11 +65,6 @@ public class MockHttpSecuritySource extends AbstractHttpSecuritySource<HttpSecur
 	 * to the application as the trusted scheme of authentication.
 	 */
 	private static final String IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC = "Basic";
-
-	/**
-	 * {@link Charset} for {@link HttpRequest} headers.
-	 */
-	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
 	 * Always the test realm when mocking.
@@ -138,7 +130,7 @@ public class MockHttpSecuritySource extends AbstractHttpSecuritySource<HttpSecur
 
 		// Decode Base64 credentials into userId:password text
 		byte[] userIdPasswordBytes = Base64.decodeBase64(scheme.getParameters());
-		String userIdPassword = new String(userIdPasswordBytes, US_ASCII);
+		String userIdPassword = new String(userIdPasswordBytes, UTF_8);
 
 		// Split out the userId and password
 		int separatorIndex = userIdPassword.indexOf(':');

@@ -21,8 +21,8 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -31,7 +31,6 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -158,8 +157,7 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 
 		} else {
 			// Incorrect context
-			this.control(this.location)
-					.setThrowable(new IncorrectHttpRequestContextPathException(HttpStatus.getHttpStatus(404), "TEST"));
+			this.control(this.location).setThrowable(new UnknownContextPathHttpException("/context", "TEST"));
 		}
 		this.creationListener.httpResourceCreated(file, this.connection, this.functionContext);
 

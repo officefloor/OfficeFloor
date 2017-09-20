@@ -20,7 +20,6 @@ package net.officefloor.plugin.web.http.security.scheme;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Properties;
 import java.util.Set;
@@ -46,7 +45,6 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * {@link HttpSecuritySource} for <code>Digest</code> HTTP security.
@@ -70,11 +68,6 @@ public class DigestHttpSecuritySource
 	 * Name of property for the private key.
 	 */
 	public static final String PROPERTY_PRIVATE_KEY = "http.security.digest.private.key";
-
-	/**
-	 * US ASCII {@link Charset}.
-	 */
-	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
 	 * Name of attribute to register the {@link HttpSecurity} within the
@@ -456,7 +449,7 @@ public class DigestHttpSecuritySource
 
 		// Obtain required response
 		byte[] requiredDigest = digest.getDigest();
-		String requiredResponse = new String(requiredDigest, US_ASCII);
+		String requiredResponse = new String(requiredDigest, UTF_8);
 
 		// Ensure correct response
 		if (!requiredResponse.equals(response)) {
@@ -505,13 +498,13 @@ public class DigestHttpSecuritySource
 		nonceDigest.appendColon();
 		nonceDigest.append(this.privateKey);
 		byte[] nonceData = nonceDigest.getDigest();
-		String nonce = new String(nonceData, US_ASCII);
+		String nonce = new String(nonceData, UTF_8);
 
 		// Calculate the opaque
 		Digest opaqueDigest = new Digest(algorithm);
 		opaqueDigest.append(this.getOpaqueSeed());
 		byte[] opaqueData = opaqueDigest.getDigest();
-		String opaque = new String(opaqueData, US_ASCII);
+		String opaque = new String(opaqueData, UTF_8);
 
 		// Construct the authentication challenge
 		String challenge = AUTHENTICATION_SCHEME_DIGEST + " realm=\"" + this.realm
@@ -597,7 +590,7 @@ public class DigestHttpSecuritySource
 		/**
 		 * Colon for digest.
 		 */
-		private static final byte[] COLON = ":".getBytes(US_ASCII);
+		private static final byte[] COLON = ":".getBytes(UTF_8);
 
 		/**
 		 * {@link MessageDigest}.
@@ -640,7 +633,7 @@ public class DigestHttpSecuritySource
 			}
 
 			// Append the text
-			this.append(text.getBytes(US_ASCII));
+			this.append(text.getBytes(UTF_8));
 		}
 
 		/**
@@ -679,7 +672,7 @@ public class DigestHttpSecuritySource
 
 			// Obtain the Hex encoded digest
 			String digestText = new String(Hex.encodeHex(digest, true));
-			byte[] textDigest = digestText.getBytes(US_ASCII);
+			byte[] textDigest = digestText.getBytes(UTF_8);
 
 			// Return the text digest
 			return textDigest;

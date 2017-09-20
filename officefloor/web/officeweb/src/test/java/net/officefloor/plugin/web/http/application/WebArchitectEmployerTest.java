@@ -22,16 +22,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
@@ -53,10 +45,11 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.http.test.CompileWebExtension;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.server.AbstractServerSocketManagedObjectSource;
-import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link WebArchitectEmployer}.
@@ -76,52 +69,40 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	private WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 
 	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
 
 	/**
-	 * {@link CloseableHttpClient}.
+	 * Non-secure port.
 	 */
-	private CloseableHttpClient client;
+	private final int port = 7878;
 
 	/**
-	 * Port on which the web application is to run.
+	 * Secure port.
 	 */
-	private int port;
-
-	/**
-	 * Secure port on which the web application is to be run.
-	 */
-	private int securePort;
+	private final int securePort = 7979;
 
 	@Override
 	protected void setUp() throws Exception {
 
 		// Configure the server
-		this.port = HttpServerTestUtil.getAvailablePort();
-		this.securePort = HttpServerTestUtil.getAvailablePort();
 		this.compiler.officeFloor((context) -> {
-			HttpServerTestUtil.configureTestHttpServer(context, this.port, this.securePort, "SECTION", "INPUT");
+			this.server = MockHttpServer
+					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("SECTION", "INPUT"));
 		});
-
-		// Configure the client (to not redirect)
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpClientTestUtil.configureHttps(builder);
-		HttpClientTestUtil.configureNoRedirects(builder);
-		this.client = builder.build();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Stop the client
-			this.client.close();
-		} finally {
-			// Ensure close
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		// Ensure close
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -244,7 +225,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		// Obtain non-default charset
 		Charset charset = Charset.defaultCharset();
-		if (AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET.equalsIgnoreCase(charset.name())) {
+		if (ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET.name().equalsIgnoreCase(charset.name())) {
 			charset = Charset.forName("UTF-16");
 		}
 
@@ -258,7 +239,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure template correct (charset appended as handled specifically)
-		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
+		MockHttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
 		assertEquals("Incorrect Content-Type on response", "text/plain; one=1; another; charset=" + charset.name(),
 				response.getFirstHeader("Content-Type").getValue());
 	}
@@ -275,9 +256,8 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure template correct
-		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
-		assertEquals("Incorrect Content-Type on response",
-				"text/plain; charset=" + AbstractServerSocketManagedObjectSource.getCharset(null).name(),
+		MockHttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
+		assertEquals("Incorrect Content-Type on response", "text/plain",
 				response.getFirstHeader("Content-Type").getValue());
 	}
 
@@ -293,9 +273,8 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure template correct
-		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
-		assertEquals("Incorrect Content-Type on response",
-				"x-test/non-text; charset=" + AbstractServerSocketManagedObjectSource.getCharset(null).name(),
+		MockHttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
+		assertEquals("Incorrect Content-Type on response", "x-test/non-text",
 				response.getFirstHeader("Content-Type").getValue());
 
 	}
@@ -336,39 +315,9 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure appropriately redirects
-		String url = "http://" + HOST_NAME + ":" + this.port + "/uri";
-		HttpUriRequest request = new HttpConfiguredRequest(method, url);
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/uri");
 		String redirectUrl = "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		this.assertHttpRequest(request, redirectUrl, 200, "/uri-submit");
-	}
-
-	/**
-	 * {@link HttpUriRequest} for HTTP method <code>OTHER</code>.
-	 */
-	private static class HttpConfiguredRequest extends HttpEntityEnclosingRequestBase {
-
-		/**
-		 * HTTP method.
-		 */
-		private final String method;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param method
-		 *            HTTP method.
-		 * @param uri
-		 *            URI.
-		 */
-		public HttpConfiguredRequest(String method, String uri) {
-			this.setURI(URI.create(uri));
-			this.method = method;
-		}
-
-		@Override
-		public String getMethod() {
-			return this.method;
-		}
 	}
 
 	/**
@@ -531,7 +480,8 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		String redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + "/uri"
 				+ HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		String linkUrl = "http://" + HOST_NAME + ":" + this.port + SUBMIT_URI;
-		this.assertHttpRequest(new HttpGet(requestUrl), redirectUrl, 200, "submitted" + linkUrl);
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(requestUrl);
+		this.assertHttpRequest(request, redirectUrl, 200, "submitted" + linkUrl);
 	}
 
 	/**
@@ -1608,9 +1558,9 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 *            Expected response status.
 	 * @param expectedResponseEntity
 	 *            Expected response entity.
-	 * @return {@link HttpResponse}.
+	 * @return {@link MockHttpResponse}.
 	 */
-	private HttpResponse assertHttpRequest(String uri, int expectedResponseStatus, String expectedResponseEntity) {
+	private MockHttpResponse assertHttpRequest(String uri, int expectedResponseStatus, String expectedResponseEntity) {
 		return this.assertHttpRequest(uri, false, expectedResponseStatus, expectedResponseEntity);
 	}
 
@@ -1626,19 +1576,20 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 *            Expected response status.
 	 * @param expectedResponseEntity
 	 *            Expected response entity.
-	 * @return {@link HttpResponse}.
+	 * @return {@link MockHttpResponse}.
 	 */
-	private HttpResponse assertHttpRequest(String uri, boolean isRedirect, int expectedResponseStatus,
+	private MockHttpResponse assertHttpRequest(String uri, boolean isRedirect, int expectedResponseStatus,
 			String expectedResponseEntity) {
 
 		// Create the request
-		String url = "http://" + HOST_NAME + ":" + this.port + uri;
-		HttpGet request = new HttpGet(url);
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		request.setHttpMethod(HttpMethod.GET);
+		request.setRequestUri(uri);
 
 		// Provide redirect URL if expecting to redirect
 		String redirectUrl = null;
 		if (isRedirect) {
-			redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + uri + HttpRouteFunction.REDIRECT_URI_SUFFIX;
+			redirectUrl = uri + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		}
 
 		// Assert HTTP request
@@ -1649,7 +1600,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 * Asserts the HTTP Request returns expected result after a redirect.
 	 * 
 	 * @param request
-	 *            {@link HttpUriRequest}.
+	 *            {@link MockHttpRequestBuilder}.
 	 * @param redirectUrl
 	 *            Indicates if a redirect should occur and what is the expected
 	 *            redirect URL.
@@ -1657,40 +1608,33 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 *            Expected response status.
 	 * @param expectedResponseEntity
 	 *            Expected response entity.
-	 * @return {@link HttpResponse}.
+	 * @return {@link MockHttpResponse}.
 	 */
-	private HttpResponse assertHttpRequest(HttpUriRequest request, String redirectUrl, int expectedResponseStatus,
-			String expectedResponseEntity) {
+	private MockHttpResponse assertHttpRequest(MockHttpRequestBuilder request, String redirectUrl,
+			int expectedResponseStatus, String expectedResponseEntity) {
 		try {
 
 			// Send the request
-			HttpResponse response = this.client.execute(request);
+			MockHttpResponse response = this.server.send(request);
 
 			// Determine if redirect
 			if (redirectUrl != null) {
 
 				// Ensure appropriate redirect
-				assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+				assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
 				assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
 
-				// Consume response to allow sending next request
-				response.getEntity().getContent().close();
-
-				// Handle server relative redirect
-				if (redirectUrl.startsWith("/")) {
-					redirectUrl = "http://" + HOST_NAME + ":" + this.port + redirectUrl;
-				}
-
 				// Send the redirect for response
-				response = this.client.execute(new HttpGet(redirectUrl));
+				MockHttpRequestBuilder redirect = MockHttpServer.mockRequest().setRequestUri(redirectUrl);
+				response = this.server.send(redirect);
 			}
 
 			// Ensure obtained as expected
-			String actualResponseBody = HttpClientTestUtil.getEntityBody(response);
+			String actualResponseBody = response.getHttpEntity(null);
 			assertEquals("Incorrect response", expectedResponseEntity, actualResponseBody);
 
 			// Ensure correct response status
-			assertEquals("Should be successful", expectedResponseStatus, response.getStatusLine().getStatusCode());
+			assertEquals("Should be successful", expectedResponseStatus, response.getHttpStatus().getStatusCode());
 
 			// Return the response
 			return response;

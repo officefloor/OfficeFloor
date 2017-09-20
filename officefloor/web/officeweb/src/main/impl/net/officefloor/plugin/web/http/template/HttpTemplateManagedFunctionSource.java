@@ -27,14 +27,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.ManagedFunctionSourceService;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
@@ -42,7 +43,6 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
-import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -95,7 +95,7 @@ public class HttpTemplateManagedFunctionSource extends AbstractManagedFunctionSo
 	/**
 	 * Property to specify the {@link Charset} for outputting the template.
 	 */
-	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
+	public static final String PROPERTY_CHARSET = "http.template.charset";
 
 	/**
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
@@ -209,11 +209,11 @@ public class HttpTemplateManagedFunctionSource extends AbstractManagedFunctionSo
 	 * @param properties
 	 *            {@link SourceProperties}.
 	 * @return URL continuation path for the {@link HttpTemplate}.
-	 * @throws InvalidHttpRequestUriException
+	 * @throws InvalidRequestUriHttpException
 	 *             Should the configured {@link HttpTemplate} path be invalid.
 	 */
 	public static String getHttpTemplateUrlContinuationPath(SourceProperties properties)
-			throws InvalidHttpRequestUriException {
+			throws InvalidRequestUriHttpException {
 
 		// Obtain the URI path and URI suffix for the template
 		String templateUriPath = properties.getProperty(PROPERTY_TEMPLATE_URI);
@@ -239,11 +239,11 @@ public class HttpTemplateManagedFunctionSource extends AbstractManagedFunctionSo
 	 *            {@link HttpTemplate} URI suffix. May be <code>null</code> for
 	 *            no suffix.
 	 * @return {@link HttpTemplate} link URI path.
-	 * @throws InvalidHttpRequestUriException
+	 * @throws InvalidRequestUriHttpException
 	 *             Should the resulting URI be invalid.
 	 */
 	public static String getHttpTemplateLinkUrlContinuationPath(String templateUriPath, String linkName,
-			String templateUriSuffix) throws InvalidHttpRequestUriException {
+			String templateUriSuffix) throws InvalidRequestUriHttpException {
 
 		// Create the link URI path
 		String linkUriPath = templateUriPath + "-" + linkName + (templateUriSuffix == null ? "" : templateUriSuffix);
@@ -356,7 +356,11 @@ public class HttpTemplateManagedFunctionSource extends AbstractManagedFunctionSo
 		HttpTemplate template = getHttpTemplate(context);
 
 		// Obtain the details of the template
-		Charset charset = AbstractServerSocketManagedObjectSource.getCharset(context);
+		Charset charset = null;
+		String charsetName = context.getProperty(PROPERTY_CHARSET);
+		if (!CompileUtil.isBlank(charsetName)) {
+			charset = Charset.forName(charsetName);
+		}
 
 		// Obtain the URI path and URI suffix for the template
 		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);

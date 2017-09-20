@@ -48,6 +48,16 @@ public interface MockHttpResponse {
 	HttpStatus getHttpStatus();
 
 	/**
+	 * Obtains the first {@link WritableHttpHeader} by the name.
+	 * 
+	 * @param name
+	 *            Name of the {@link WritableHttpHeader}.
+	 * @return First {@link WritableHttpHeader} by the name, or
+	 *         <code>null</code> if no {@link WritableHttpHeader} by the name.
+	 */
+	WritableHttpHeader getFirstHeader(String name);
+
+	/**
 	 * Obtains the response {@link WritableHttpHeader} instances.
 	 * 
 	 * @return {@link WritableHttpHeader} instances.
@@ -65,7 +75,8 @@ public interface MockHttpResponse {
 	 * Obtains the HTTP entity as text.
 	 * 
 	 * @param charset
-	 *            {@link Charset} for HTTP entity.
+	 *            {@link Charset} for HTTP entity. May be <code>null</code> to
+	 *            use default {@link Charset}.
 	 * @return Text of the HTTP entity.
 	 */
 	String getHttpEntity(Charset charset);

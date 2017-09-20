@@ -71,7 +71,6 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
-import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -106,7 +105,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Property name for the {@link Charset} for the {@link HttpTemplate}.
 	 */
-	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
+	public static final String PROPERTY_CHARSET = HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET;
 
 	/**
 	 * Prefix on a {@link HttpTemplateSection} name to indicate it is an

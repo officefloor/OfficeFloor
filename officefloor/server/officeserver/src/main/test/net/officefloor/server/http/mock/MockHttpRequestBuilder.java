@@ -36,32 +36,36 @@ public interface MockHttpRequestBuilder {
 	 * 
 	 * @param isSecure
 	 *            <code>true</code> if secure {@link HttpRequest}.
+	 * @return <code>this</code>.
 	 */
-	void setSecure(boolean isSecure);
+	MockHttpRequestBuilder setSecure(boolean isSecure);
 
 	/**
 	 * Specifies the {@link HttpMethod}.
 	 * 
 	 * @param method
 	 *            {@link HttpMethod}.
+	 * @return <code>this</code>.
 	 */
-	void setHttpMethod(HttpMethod method);
+	MockHttpRequestBuilder setHttpMethod(HttpMethod method);
 
 	/**
 	 * Specifies the request URI.
 	 * 
 	 * @param requestUri
 	 *            Request URI.
+	 * @return <code>this</code>.
 	 */
-	void setRequestUri(String requestUri);
+	MockHttpRequestBuilder setRequestUri(String requestUri);
 
 	/**
 	 * Specifies the {@link HttpVersion}.
 	 * 
 	 * @param version
 	 *            {@link HttpVersion}.
+	 * @return <code>this</code>.
 	 */
-	void setHttpVersion(HttpVersion version);
+	MockHttpRequestBuilder setHttpVersion(HttpVersion version);
 
 	/**
 	 * Adds a {@link HttpHeader}.
@@ -70,8 +74,9 @@ public interface MockHttpRequestBuilder {
 	 *            {@link HttpHeader} name.
 	 * @param value
 	 *            {@link HttpHeader} value.
+	 * @return <code>this</code>.
 	 */
-	void addHttpHeader(String name, String value);
+	MockHttpRequestBuilder addHttpHeader(String name, String value);
 
 	/**
 	 * Obtains the {@link OutputStream} to write the HTTP entity.
@@ -81,13 +86,25 @@ public interface MockHttpRequestBuilder {
 	OutputStream getHttpEntity();
 
 	/**
-	 * Flags to turn of checks for {@link HttpRequest} and provide efficient
+	 * Flags to turn off checks for {@link HttpRequest} and provide efficient
 	 * processing.
 	 * 
 	 * @param isStress
 	 *            <code>true</code> to turn off checks and process more
 	 *            efficiently.
+	 * @return <code>this</code>.
 	 */
-	void setEfficientForStressTests(boolean isStress);
+	MockHttpRequestBuilder setEfficientForStressTests(boolean isStress);
+
+	/**
+	 * <p>
+	 * Builds a mock {@link HttpRequest} from this
+	 * {@link MockHttpRequestBuilder} configuration.
+	 * <p>
+	 * This is useful for testing to create a mock {@link HttpRequest}.
+	 * 
+	 * @return Mock {@link HttpRequest}.
+	 */
+	HttpRequest build();
 
 }

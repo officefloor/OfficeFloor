@@ -30,13 +30,12 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
-import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.source.HttpFileSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Provides sending {@link HttpFile} instances for the HTTP server.
@@ -76,15 +75,13 @@ public class HttpFileSenderSectionSource extends AbstractSectionSource {
 		SectionFunctionNamespace sendFileNamespace = designer.addSectionFunctionNamespace("FILE",
 				HttpFileSenderManagedFunctionSource.class.getName());
 		SourceHttpResourceFactory.copyProperties(context, sendFileNamespace);
-		SectionFunction sendFileFunction = sendFileNamespace.addSectionFunction(HttpFileSenderManagedFunctionSource.FUNCTION_NAME,
-				HttpFileSenderManagedFunctionSource.FUNCTION_NAME);
+		SectionFunction sendFileFunction = sendFileNamespace.addSectionFunction(
+				HttpFileSenderManagedFunctionSource.FUNCTION_NAME, HttpFileSenderManagedFunctionSource.FUNCTION_NAME);
 		WebApplicationSectionSource.linkObject(sendFileFunction, DependencyKeys.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
 		WebApplicationSectionSource.linkObject(sendFileFunction, DependencyKeys.HTTP_APPLICATION_LOCATION.name(),
 				HttpApplicationLocation.class, designer, objects);
 		WebApplicationSectionSource.linkEscalation(sendFileFunction, IOException.class, designer, escalations);
-		WebApplicationSectionSource.linkEscalation(sendFileFunction, InvalidHttpRequestUriException.class, designer,
-				escalations);
 
 		// Provide input to service
 		SectionInput input = designer.addSectionInput(SERVICE_INPUT_NAME, null);

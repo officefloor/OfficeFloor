@@ -27,8 +27,8 @@ import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestCase;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -78,7 +78,7 @@ public class HttpFileFactoryManagedFunctionSourceTest extends OfficeFrameTestCas
 		flowBuilder.setArgumentType(HttpFile.class);
 		functionBuilder.setReturnType(HttpFile.class);
 		functionBuilder.addEscalation(IOException.class);
-		functionBuilder.addEscalation(InvalidHttpRequestUriException.class);
+		functionBuilder.addEscalation(InvalidRequestUriHttpException.class);
 
 		// Validate
 		ManagedFunctionLoaderUtil.validateManagedFunctionType(namespaceBuilder,

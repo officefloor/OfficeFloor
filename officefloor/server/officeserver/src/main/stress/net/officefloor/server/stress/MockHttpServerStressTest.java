@@ -252,7 +252,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 	private void doPipelineRun(String prefix, int requestCount) throws InterruptedException {
 
 		// Create the request
-		MockHttpRequestBuilder request = this.server.createMockHttpRequest();
+		MockHttpRequestBuilder request = this.server.mockRequest();
 		request.setEfficientForStressTests(true);
 
 		// Undertake the run

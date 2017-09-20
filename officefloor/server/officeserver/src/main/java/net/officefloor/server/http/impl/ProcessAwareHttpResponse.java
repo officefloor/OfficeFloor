@@ -155,7 +155,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 *             If fails to flush {@link HttpResponse} to the
 	 *             {@link HttpResponseWriter}.
 	 */
-	void flushResponseToHttpResponseWriter(Throwable escalation) throws IOException {
+	public void flushResponseToHttpResponseWriter(Throwable escalation) throws IOException {
 		this.safe(() -> {
 			this.unsafeFlushResponseToHttpResponseWriter(escalation);
 			return null;

@@ -39,11 +39,11 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationSectionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.security.AnonymousHttpAuthenticationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource;
@@ -234,11 +234,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			final Class<?> templateLogicClass) {
 
 		// Obtain canonical template URI path
-		try {
-			templateUri = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(templateUri);
-		} catch (InvalidHttpRequestUriException ex) {
-			// Use the template URI as is
-		}
+		templateUri = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(templateUri);
 
 		// Ensure URI is not already registered
 		for (HttpTemplateSectionImpl template : this.httpTemplates) {
@@ -485,7 +481,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			// Obtain the URI path
 			try {
 				uri = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uri);
-			} catch (InvalidHttpRequestUriException ex) {
+			} catch (InvalidRequestUriHttpException ex) {
 				// Do nothing and keep URI path as is
 			}
 

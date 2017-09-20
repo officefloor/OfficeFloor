@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.impl;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +40,11 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
  */
 public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>>
 		implements HttpSecuritySource<S, C, D, F> {
+
+	/**
+	 * UTF-8 {@link Charset}.
+	 */
+	public static final Charset UTF_8 = Charset.forName("UTF-8");
 
 	/*
 	 * ====================== HttpSecuritySource =============================

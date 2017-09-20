@@ -26,8 +26,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -99,7 +99,7 @@ public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctio
 		flowTypeBuilder.setArgumentType(HttpFile.class);
 		functionTypeBuilder.setReturnType(HttpFile.class);
 		functionTypeBuilder.addEscalation(IOException.class);
-		functionTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
+		functionTypeBuilder.addEscalation(InvalidRequestUriHttpException.class);
 	}
 
 }
