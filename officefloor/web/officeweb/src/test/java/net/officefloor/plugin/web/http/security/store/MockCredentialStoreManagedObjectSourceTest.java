@@ -26,8 +26,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * Tests the {@link MockCredentialStoreManagedObjectSource}.
@@ -79,7 +79,7 @@ public class MockCredentialStoreManagedObjectSourceTest extends OfficeFrameTestC
 		// Ensure handle single role
 		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);
 		assertEquals("Incorrect credentials", "daniel",
-				new String(entry.retrieveCredentials(), HttpRequestParserImpl.US_ASCII));
+				new String(entry.retrieveCredentials(), AbstractHttpSecuritySource.UTF_8));
 		Set<String> roles = entry.retrieveRoles();
 		assertEquals("Incorrect number of roles", 1, roles.size());
 		assertTrue("Incorrect role", roles.contains("daniel"));
@@ -87,7 +87,7 @@ public class MockCredentialStoreManagedObjectSourceTest extends OfficeFrameTestC
 		// Ensure handle multiple roles
 		entry = store.retrieveCredentialEntry("daniel, founder", null);
 		assertEquals("Incorrect credentials", "daniel, founder",
-				new String(entry.retrieveCredentials(), HttpRequestParserImpl.US_ASCII));
+				new String(entry.retrieveCredentials(), AbstractHttpSecuritySource.UTF_8));
 		roles = entry.retrieveRoles();
 		assertEquals("Incorrect number of roles", 2, roles.size());
 		assertTrue("Must have role daniel", roles.contains("daniel"));
@@ -118,7 +118,7 @@ public class MockCredentialStoreManagedObjectSourceTest extends OfficeFrameTestC
 
 		// Determine the encrypted password
 		MessageDigest digest = CredentialStoreUtil.createDigest("MD5");
-		byte[] expectedPassword = digest.digest("daniel".getBytes(HttpRequestParserImpl.US_ASCII));
+		byte[] expectedPassword = digest.digest("daniel".getBytes(AbstractHttpSecuritySource.UTF_8));
 
 		// Ensure provide password encrypted with algorithm
 		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);

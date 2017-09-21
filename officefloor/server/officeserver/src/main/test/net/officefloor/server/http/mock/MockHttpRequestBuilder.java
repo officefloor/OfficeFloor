@@ -38,7 +38,7 @@ public interface MockHttpRequestBuilder {
 	 *            <code>true</code> if secure {@link HttpRequest}.
 	 * @return <code>this</code>.
 	 */
-	MockHttpRequestBuilder setSecure(boolean isSecure);
+	MockHttpRequestBuilder secure(boolean isSecure);
 
 	/**
 	 * Specifies the {@link HttpMethod}.
@@ -47,7 +47,7 @@ public interface MockHttpRequestBuilder {
 	 *            {@link HttpMethod}.
 	 * @return <code>this</code>.
 	 */
-	MockHttpRequestBuilder setHttpMethod(HttpMethod method);
+	MockHttpRequestBuilder method(HttpMethod method);
 
 	/**
 	 * Specifies the request URI.
@@ -56,7 +56,7 @@ public interface MockHttpRequestBuilder {
 	 *            Request URI.
 	 * @return <code>this</code>.
 	 */
-	MockHttpRequestBuilder setRequestUri(String requestUri);
+	MockHttpRequestBuilder uri(String requestUri);
 
 	/**
 	 * Specifies the {@link HttpVersion}.
@@ -65,7 +65,7 @@ public interface MockHttpRequestBuilder {
 	 *            {@link HttpVersion}.
 	 * @return <code>this</code>.
 	 */
-	MockHttpRequestBuilder setHttpVersion(HttpVersion version);
+	MockHttpRequestBuilder version(HttpVersion version);
 
 	/**
 	 * Adds a {@link HttpHeader}.
@@ -76,7 +76,16 @@ public interface MockHttpRequestBuilder {
 	 *            {@link HttpHeader} value.
 	 * @return <code>this</code>.
 	 */
-	MockHttpRequestBuilder addHttpHeader(String name, String value);
+	MockHttpRequestBuilder header(String name, String value);
+
+	/**
+	 * Sets the HTTP entity.
+	 * 
+	 * @param entity
+	 *            Entity content.
+	 * @return <code>this</code>.
+	 */
+	MockHttpRequestBuilder entity(String entity);
 
 	/**
 	 * Obtains the {@link OutputStream} to write the HTTP entity.

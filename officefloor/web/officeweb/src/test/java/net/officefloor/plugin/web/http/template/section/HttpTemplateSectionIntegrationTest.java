@@ -19,19 +19,11 @@ package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -57,11 +49,13 @@ import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
@@ -92,6 +86,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * {@link WebCompileOfficeFloor}.
 	 */
 	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+
+	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
 
 	/**
 	 * Mock {@link Connection}.
@@ -133,36 +132,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloor officeFloor;
 
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private CloseableHttpClient client;
-
-	@Override
-	protected void setUp() throws Exception {
-
-		// Obtain the ports
-		this.httpPort = HttpServerTestUtil.getAvailablePort();
-		this.httpsPort = HttpServerTestUtil.getAvailablePort();
-
-		// Create the client that will not automatically redirect
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpClientTestUtil.configureHttps(builder);
-		HttpClientTestUtil.configureNoRedirects(builder);
-		this.client = builder.build();
-	}
-
 	@Override
 	protected void tearDown() throws Exception {
-
-		try {
-			// Disconnect client
-			this.client.close();
-		} finally {
-			// Close the OfficeFloor
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -196,9 +169,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		String expectedContentType = this.contentType + "; charset=" + this.charset.name();
 
 		// Ensure correct rendering (with headers)
-		HttpResponse response = this.doRawHttpRequest("/uri", false);
-		Header header = response.getFirstHeader("Content-Type");
-		assertEquals("Incorrect Content-Type", expectedContentType, header.getValue());
+		MockHttpResponse response = this.doRawHttpRequest("/uri", false);
+		assertEquals("Incorrect Content-Type", expectedContentType, response.getFirstHeader("Content-Type").getValue());
 	}
 
 	/**
@@ -218,9 +190,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		String expectedContentType = this.contentType + "; charset=" + this.charset.name();
 
 		// Ensure correct rendering (with headers)
-		HttpResponse response = this.doRawHttpRequest("/uri", false);
-		Header header = response.getFirstHeader("Content-Type");
-		assertEquals("Incorrect Content-Type", expectedContentType, header.getValue());
+		MockHttpResponse response = this.doRawHttpRequest("/uri", false);
+		assertEquals("Incorrect Content-Type", expectedContentType, response.getFirstHeader("Content-Type").getValue());
 	}
 
 	/**
@@ -252,8 +223,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(false));
 
 		// Ensure correct rendering of template
-		HttpResponse response = this.doRawHttpRequest("/uri-submit", false);
-		assertEquals("Should trigger redirect", 303, response.getStatusLine().getStatusCode());
+		MockHttpResponse response = this.doRawHttpRequest("/uri-submit", false);
+		assertEquals("Should trigger redirect", 303, response.getHttpStatus().getStatusCode());
 		assertEquals("Incorrect redirect URL",
 				"https://" + HOST_NAME + ":" + this.httpsPort + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX,
 				response.getFirstHeader("Location").getValue());
@@ -329,7 +300,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure maintain HTTP request parameters across redirect.
 	 */
 	public void testPostRedirectGet_HttpRequestParameters() throws Exception {
-		HttpPost post = this.createHttpPost("?text=TEST");
+		MockHttpRequestBuilder post = this.createHttpPost("?text=TEST");
 		this.doPostRedirectGetPatternTest(post, "TEST /uri-post");
 	}
 
@@ -337,7 +308,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure continue to service GET method without redirect.
 	 */
 	public void testPostRedirectGet_NoRedirectAsGet() throws Exception {
-		HttpGet request = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort + "/uri-post?text=TEST");
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/uri-post?text=TEST");
 		this.doPostRedirectGetPatternTest(request, "TEST /uri-post");
 	}
 
@@ -345,38 +316,18 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure maintain {@link HttpRequestState} across redirect.
 	 */
 	public void testPostRedirectGet_AlternateMethod() throws Exception {
-		HttpUriRequest request = new HttpOther("http://" + HOST_NAME + ":" + this.httpPort + "/uri-post?text=TEST");
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/uri-post?text=TEST")
+				.method(new HttpMethod("OTHER"));
 		this.doPostRedirectGetPatternTest(request, "TEST /uri-post",
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, request.getMethod());
-	}
-
-	/**
-	 * {@link HttpUriRequest} for HTTP method <code>OTHER</code>.
-	 */
-	private static class HttpOther extends HttpEntityEnclosingRequestBase {
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param uri
-		 *            URI.
-		 */
-		public HttpOther(String uri) {
-			this.setURI(URI.create(uri));
-		}
-
-		@Override
-		public String getMethod() {
-			return "OTHER";
-		}
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, "OTHER");
 	}
 
 	/**
 	 * Ensure maintain HTTP entity across redirect.
 	 */
 	public void testPostRedirectGet_HttpRequestEntity() throws Exception {
-		HttpPost post = this.createHttpPost(null);
-		post.setEntity(new StringEntity("text=TEST", "ISO-8859-1"));
+		MockHttpRequestBuilder post = this.createHttpPost(null);
+		post.getHttpEntity().write("text=TEST".getBytes(Charset.forName("ISO-8859-1")));
 		this.doPostRedirectGetPatternTest(post, "TEST /uri-post");
 	}
 
@@ -384,9 +335,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure maintain HTTP response {@link HttpHeader} across redirect.
 	 */
 	public void testPostRedirectGet_HttpResponseHeader() throws Exception {
-		HttpPost post = this.createHttpPost("?operation=HEADER");
-		HttpResponse response = this.doPostRedirectGetPatternTest(post, " /uri-post");
-		Header header = response.getFirstHeader("NAME");
+		MockHttpRequestBuilder post = this.createHttpPost("?operation=HEADER");
+		MockHttpResponse response = this.doPostRedirectGetPatternTest(post, " /uri-post");
+		HttpHeader header = response.getFirstHeader("NAME");
 		assertNotNull("Should have HTTP header", header);
 		assertEquals("Incorrect HTTP header value", "VALUE", header.getValue());
 	}
@@ -395,7 +346,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure maintain HTTP response entity across redirect.
 	 */
 	public void testPostRedirectGet_HttpResponseEntity() throws Exception {
-		HttpPost post = this.createHttpPost("?operation=ENTITY");
+		MockHttpRequestBuilder post = this.createHttpPost("?operation=ENTITY");
 		this.doPostRedirectGetPatternTest(post, "entity /uri-post");
 	}
 
@@ -403,34 +354,34 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure maintain {@link HttpRequestState} across redirect.
 	 */
 	public void testPostRedirectGet_RequestState() throws Exception {
-		HttpPost post = this.createHttpPost("?operation=REQUEST_STATE");
+		MockHttpRequestBuilder post = this.createHttpPost("?operation=REQUEST_STATE");
 		this.doPostRedirectGetPatternTest(post, "RequestState /uri-post");
 	}
 
 	/**
-	 * Creates the {@link HttpPost} for the POST/Redirect/GET tests.
+	 * Creates the {@link MockHttpRequestBuilder} for the POST/Redirect/GET
+	 * tests.
 	 * 
 	 * @param requestUriSuffix
 	 *            Optional suffix to request URI. May be <code>null</code>.
-	 * @return {@link HttpPost}.
+	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	private HttpPost createHttpPost(String requestUriSuffix) {
-		return new HttpPost("http://" + HOST_NAME + ":" + this.httpPort + "/uri-post"
-				+ (requestUriSuffix == null ? "" : requestUriSuffix));
+	private MockHttpRequestBuilder createHttpPost(String requestUriSuffix) {
+		return MockHttpServer.mockRequest("/uri-post" + (requestUriSuffix == null ? "" : requestUriSuffix));
 	}
 
 	/**
 	 * Undertakes the POST/redirect/GET pattern tests.
 	 * 
 	 * @param request
-	 *            {@link HttpUriRequest}.
+	 *            {@link MockHttpRequestBuilder}.
 	 * @param expectedResponse
 	 *            Expected rendered response after redirect.
 	 * @param templateProperties
 	 *            Template name/value property pairs.
-	 * @return {@link HttpResponse}.
+	 * @return {@link MockHttpResponse}.
 	 */
-	private HttpResponse doPostRedirectGetPatternTest(HttpUriRequest request, String expectedResponse,
+	private MockHttpResponse doPostRedirectGetPatternTest(MockHttpRequestBuilder request, String expectedResponse,
 			String... templatePropertyPairs) throws Exception {
 
 		// Start the server
@@ -446,25 +397,24 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class, templatePropertyPairs);
 
 		// Execute the HTTP request
-		HttpResponse response = this.client.execute(request);
+		MockHttpResponse response = this.server.send(request);
 
 		// No redirect if get
 		if (!(request instanceof HttpGet)) {
 
 			// Ensure is a redirect
-			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
 			String redirectUrl = response.getFirstHeader("Location").getValue();
 			assertEquals("Incorrect redirect URL", "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX, redirectUrl);
-			response.getEntity().getContent().close();
+			assertEquals("Should be no content", -1, response.getHttpEntity().read());
 
 			// Undertake the GET (as triggered by redirect)
-			HttpGet get = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort + redirectUrl);
-			response = this.client.execute(get);
-			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+			response = this.server.send(MockHttpServer.mockRequest(redirectUrl));
+			assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
 		}
 
 		// Ensure correct rendering of template
-		String rendering = HttpClientTestUtil.getEntityBody(response);
+		String rendering = response.getHttpEntity(null);
 		assertEquals("Incorrect rendering", expectedResponse, rendering);
 
 		// Return the response
@@ -984,21 +934,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 *            URI.
 	 * @param isSecure
 	 *            Flags whether a secure connection is used.
-	 * @return {@link HttpResponse}.
+	 * @return {@link MockHttpResponse}.
 	 */
-	private HttpResponse doRawHttpRequest(String uri, boolean isSecure) throws Exception {
-
-		// Execute the HTTP request
-		HttpGet request;
-		if (isSecure) {
-			request = new HttpGet("https://" + HOST_NAME + ":" + this.httpsPort + uri);
-		} else {
-			request = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort + uri);
-		}
-		HttpResponse response = this.client.execute(request);
-
-		// Return the response
-		return response;
+	private MockHttpResponse doRawHttpRequest(String uri, boolean isSecure) throws Exception {
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(uri);
+		request.secure(isSecure);
+		return this.server.send(request);
 	}
 
 	/**
@@ -1013,13 +954,13 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private String doHttpRequest(String uri, boolean isSecure) throws Exception {
 
 		// Send the request to obtain results of rending template
-		HttpResponse response = this.doRawHttpRequest(uri, isSecure);
+		MockHttpResponse response = this.doRawHttpRequest(uri, isSecure);
 
 		// Ensure successful
-		assertEquals("Ensure successful", 200, response.getStatusLine().getStatusCode());
+		assertEquals("Ensure successful", 200, response.getHttpStatus().getStatusCode());
 
 		// Obtain and return the response content
-		String content = HttpClientTestUtil.getEntityBody(response);
+		String content = response.getHttpEntity(null);
 		return content;
 	}
 
@@ -1127,7 +1068,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compiler.officeFloor((context) -> {
-			HttpServerTestUtil.configureTestHttpServer(context, this.httpPort, this.httpsPort, "ROUTE", "route");
+			this.server = MockHttpServer
+					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("ROUTE", "route"));
 		});
 
 		// Configure the application

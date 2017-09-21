@@ -41,7 +41,6 @@ import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
@@ -56,7 +55,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	/**
 	 * Port to use for testing.
 	 */
-	private final int PORT = HttpServerTestUtil.getAvailablePort();
+	private final int PORT = 7878;
 
 	/**
 	 * {@link CloseableHttpClient} to use for testing.
@@ -86,7 +85,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		// Configure the application
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			HttpServerTestUtil.configureTestHttpServer(context, PORT, "SERVICE", "service");
+			// TODO extract security into own project to test
+			// HttpServerTestUtil.configureTestHttpServer(context, PORT, "SERVICE", "service");
 		});
 		compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();

@@ -19,7 +19,6 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +40,9 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.MockServerOutputStream;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpResponseBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpFileSenderManagedFunctionSource}.
@@ -75,12 +76,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	/**
 	 * Mock {@link HttpResponse}.
 	 */
-	private final HttpResponse response = this.createMock(HttpResponse.class);
-
-	/**
-	 * {@link MockServerOutputStream}.
-	 */
-	private final MockServerOutputStream entity = new MockServerOutputStream();
+	private final MockHttpResponseBuilder response = MockHttpServer.mockResponse();
 
 	/**
 	 * Validates the specification.
@@ -265,12 +261,6 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 				this.functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION), this.location);
 		this.recordReturn(this.location, this.location.transformToApplicationCanonicalPath(uri), uri);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
-		this.response.reset();
-		Charset charset = Charset.defaultCharset();
-		this.response.setContentType("text/html", charset);
-		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
-		this.response.setHttpStatus(HttpStatus.getHttpStatus(status));
-		this.response.send();
 	}
 
 	/**
@@ -279,13 +269,12 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	private void verifyFileSent(String fileName) throws IOException {
 		this.verifyMockObjects();
 
-		// Flush contents, that otherwise would happen on response send
-		this.entity.flush();
-
 		// Validate the file content
 		File file = this.findFile(this.getClass(), fileName);
 		String fileContents = this.getFileContents(file);
-		assertEquals("Incorrect file content", fileContents, new String(this.entity.getWrittenBytes()));
+		MockHttpResponse mockResponse = this.response.build();
+		assertEquals("Incorrect status", HttpStatus.OK, mockResponse.getHttpStatus());
+		assertEquals("Incorrect file content", fileContents, mockResponse.getHttpEntity(null));
 	}
 
 }

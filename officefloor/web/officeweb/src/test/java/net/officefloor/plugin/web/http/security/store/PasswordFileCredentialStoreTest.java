@@ -21,15 +21,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.security.store.CredentialEntry;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
-import net.officefloor.plugin.web.http.security.store.PasswordEntry;
-import net.officefloor.plugin.web.http.security.store.PasswordFile;
-import net.officefloor.plugin.web.http.security.store.PasswordFileCredentialStore;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
-
 import org.apache.commons.codec.binary.Base64;
+
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 
 /**
  * Tests the {@link PasswordFileCredentialStore}.
@@ -53,7 +48,7 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 */
 	public void testShowCredentials() {
 		assertEquals("Incorrect credentials", "Y3JlZGVudGlhbHM=",
-				Base64.encodeBase64String("credentials".getBytes(HttpRequestParserImpl.US_ASCII)).trim());
+				Base64.encodeBase64String("credentials".getBytes(AbstractHttpSecuritySource.UTF_8)).trim());
 	}
 
 	/**
@@ -207,7 +202,7 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 *            Actual credentials.
 	 */
 	private static void assertCredentials(String expectedCredentials, byte[] actualCredentials) {
-		String actualCredentialsText = new String(actualCredentials, HttpRequestParserImpl.US_ASCII);
+		String actualCredentialsText = new String(actualCredentials, AbstractHttpSecuritySource.UTF_8);
 		assertEquals("Incorrect credentials", expectedCredentials, actualCredentialsText);
 	}
 

@@ -31,11 +31,11 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterFunctionDependencies;
-import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.UsAsciiUtil;
-import net.officefloor.server.stream.MockServerOutputStream;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpResponseBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpFileWriterManagedFunctionSource}.
@@ -71,18 +71,14 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWriteHttpFile() throws Throwable {
 
-		final String contentEncoding = "gzip";
-		final String contentType = "text/plain";
-		final Charset charset = UsAsciiUtil.US_ASCII;
-
 		ManagedFunctionContext<HttpFileWriterFunctionDependencies, None> functionContext = this
 				.createMock(ManagedFunctionContext.class);
 		HttpFile httpFile = this.createMock(HttpFile.class);
 		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-		HttpResponse response = this.createMock(HttpResponse.class);
-		HttpHeader header = this.createMock(HttpHeader.class);
+		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
+		final String contentType = "text/plain";
+		final Charset charset = UsAsciiUtil.US_ASCII;
 		ByteBuffer contents = ByteBuffer.wrap("TEST".getBytes());
-		MockServerOutputStream entity = new MockServerOutputStream();
 
 		// Record
 		this.recordReturn(functionContext, functionContext.getObject(HttpFileWriterFunctionDependencies.HTTP_FILE),
@@ -90,14 +86,9 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 		this.recordReturn(functionContext,
 				functionContext.getObject(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION), connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
-		response.reset();
-		this.recordReturn(httpFile, httpFile.getContentEncoding(), contentEncoding);
-		this.recordReturn(response, response.getHttpHeaders().addHeader("Content-Encoding", contentEncoding), header);
 		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
 		this.recordReturn(httpFile, httpFile.getCharset(), charset);
-		response.setContentType(contentType, charset);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
-		this.recordReturn(response, response.getEntityWriter(), entity.getServerWriter());
 
 		// Test
 		this.replayMockObjects();
@@ -114,8 +105,9 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 		this.verifyMockObjects();
 
 		// Validate the entity content
-		entity.flush();
-		assertEquals("Incorrect entity content", "TEST", new String(entity.getWrittenBytes()));
+		MockHttpResponse mockResponse = response.build();
+		assertEquals("Incorrect content-type", "text/plain", mockResponse.getFirstHeader("Content-Type").getValue());
+		assertEquals("Incorrect entity content", "TEST", mockResponse.getHttpEntity(null));
 	}
 
 }

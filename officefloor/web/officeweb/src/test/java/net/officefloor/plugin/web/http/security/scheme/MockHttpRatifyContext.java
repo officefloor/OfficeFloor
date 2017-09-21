@@ -17,9 +17,6 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
@@ -29,7 +26,8 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Mock {@link HttpRatifyContext} for testing {@link HttpSecuritySource}
@@ -60,9 +58,9 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	private final HttpSession session;
 
 	/**
-	 * {@link HttpRequest}.
+	 * {@link MockHttpRequestBuilder}.
 	 */
-	private HttpRequest request;
+	private MockHttpRequestBuilder request;
 
 	/**
 	 * {@link HttpResponse}.
@@ -94,12 +92,11 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	/**
 	 * Records obtaining the {@link HttpRequest}.
 	 * 
-	 * @return {@link HttpRequest}.
+	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	public HttpRequest recordGetHttpRequest() {
-		this.request = this.testCase.createMock(HttpRequest.class);
-		this.testCase.recordReturn(this.connection,
-				this.connection.getHttpRequest(), this.request);
+	public MockHttpRequestBuilder recordGetHttpRequest() {
+		this.request = MockHttpServer.mockRequest();
+		this.testCase.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
 		return this.request;
 	}
 
@@ -110,8 +107,7 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	 */
 	public HttpResponse recordGetHttpResponse() {
 		this.response = this.testCase.createMock(HttpResponse.class);
-		this.testCase.recordReturn(this.connection,
-				this.connection.getHttpResponse(), this.response);
+		this.testCase.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
 		return this.response;
 	}
 
@@ -120,21 +116,15 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	 * 
 	 * @param authorizationHeaderValue
 	 *            Authorization {@link HttpHeader} value.
-	 * @return {@link HttpRequest}.
+	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	public HttpRequest recordAuthorizationHeader(String authorizationHeaderValue) {
+	public MockHttpRequestBuilder recordAuthorizationHeader(String authorizationHeaderValue) {
 
 		// Record obtaining the HTTP request
-		HttpRequest httpRequest = this.recordGetHttpRequest();
+		MockHttpRequestBuilder httpRequest = this.recordGetHttpRequest();
 
 		// Record providing the HTTP headers
-		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
-		if (authorizationHeaderValue != null) {
-			headers.add(new HttpHeaderImpl("Authorization",
-					authorizationHeaderValue));
-		}
-		this.testCase.recordReturn(httpRequest, httpRequest.getHttpHeaders(),
-				headers);
+		httpRequest.header("Authorization", authorizationHeaderValue);
 
 		// Return the HTTP request
 		return httpRequest;

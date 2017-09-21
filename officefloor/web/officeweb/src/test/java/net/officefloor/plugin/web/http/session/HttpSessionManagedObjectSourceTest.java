@@ -20,57 +20,60 @@ package net.officefloor.plugin.web.http.session;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpServicerFunction;
-import net.officefloor.server.http.MockHttpServer;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
+public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 
-	/*
-	 * =================== HttpServicerBuilder ==========================
+	/**
+	 * {@link MockHttpServer}.
 	 */
+	private MockHttpServer server;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	private OfficeFloor officeFloor;
 
 	@Override
-	public HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server) throws Exception {
+	protected void setUp() throws Exception {
+		WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			this.server = MockHttpServer
+					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("Servicer", "service"));
+		});
+		compile.office((context) -> {
 
-		// Register the Http Session
-		ManagedObjectBuilder<Indexed> session = server.constructManagedObject("HTTP_SESSION",
-				HttpSessionManagedObjectSource.class, this.getOfficeName());
-		session.setTimeout(1000);
+			// Register the HTTP Session
+			OfficeManagedObjectSource session = context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("HTTP_SESSION", HttpSessionManagedObjectSource.class.getName());
+			session.setTimeout(1000);
+			session.addOfficeManagedObject("HTTP_SESSION", ManagedObjectScope.PROCESS);
 
-		// Register the servicer
-		ReflectiveFunctionBuilder function = server.constructFunction(new Servicer(), "Servicer");
-		function.buildObject(managedObjectName);
-		DependencyMappingBuilder sessionDependencies = function.buildObject("HTTP_SESSION", ManagedObjectScope.PROCESS);
-		sessionDependencies.mapDependency(0, managedObjectName);
-
-		// Register team for servicer
-		server.constructTeam("SERVICER", OnePersonTeamSource.class);
-
-		// Return the servicer function
-		return new HttpServicerFunction("service");
+			// Register the servicer
+			context.addSection("Servicer", Servicer.class);
+		});
+		this.officeFloor = compile.compileAndOpenOfficeFloor();
 	}
 
-	/*
-	 * ======================== Tests ==================================
-	 */
+	@Override
+	protected void tearDown() throws Exception {
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+	}
 
 	/**
 	 * Ensure state is maintained by the {@link HttpSession} across multiple
@@ -79,19 +82,16 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	public void testHttpSessionStateAcrossCalls() throws Exception {
 
 		// Loop calling server (HttpClient should send back Session Id)
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 
-				// Call the server
-				HttpGet request = new HttpGet(this.getServerUrl());
-				HttpResponse response = client.execute(request);
-				int status = response.getStatusLine().getStatusCode();
-				String callIndex = HttpClientTestUtil.getEntityBody(response);
+			// Call the server
+			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest());
+			int status = response.getHttpStatus().getStatusCode();
+			String callIndex = response.getHttpEntity(null);
 
-				// Ensure results match and call index remembered by Session
-				assertEquals("Call should be successful", 200, status);
-				assertEquals("Incorrect call index", String.valueOf(i), callIndex);
-			}
+			// Ensure results match and call index remembered by Session
+			assertEquals("Call should be successful", 200, status);
+			assertEquals("Incorrect call index", String.valueOf(i), callIndex);
 		}
 	}
 

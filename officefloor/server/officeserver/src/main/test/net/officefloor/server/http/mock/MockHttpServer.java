@@ -119,7 +119,7 @@ public class MockHttpServer implements HttpServerImplementation {
 	 */
 	public static MockHttpRequestBuilder mockRequest(String requestUri) {
 		MockHttpRequestBuilderImpl request = new MockHttpRequestBuilderImpl();
-		request.setRequestUri(requestUri);
+		request.uri(requestUri);
 		return request;
 	}
 
@@ -337,32 +337,42 @@ public class MockHttpServer implements HttpServerImplementation {
 		 */
 
 		@Override
-		public MockHttpRequestBuilder setSecure(boolean isSecure) {
+		public MockHttpRequestBuilder secure(boolean isSecure) {
 			this.isSecure = isSecure;
 			return this;
 		}
 
 		@Override
-		public MockHttpRequestBuilder setHttpMethod(HttpMethod method) {
+		public MockHttpRequestBuilder method(HttpMethod method) {
 			this.method = method;
 			return this;
 		}
 
 		@Override
-		public MockHttpRequestBuilder setRequestUri(String requestUri) {
+		public MockHttpRequestBuilder uri(String requestUri) {
 			this.requestUri = requestUri;
 			return this;
 		}
 
 		@Override
-		public MockHttpRequestBuilder setHttpVersion(HttpVersion version) {
+		public MockHttpRequestBuilder version(HttpVersion version) {
 			this.version = version;
 			return this;
 		}
 
 		@Override
-		public MockHttpRequestBuilder addHttpHeader(String name, String value) {
+		public MockHttpRequestBuilder header(String name, String value) {
 			this.headers.add(new MockNonMaterialisedHttpHeader(name, value));
+			return this;
+		}
+
+		@Override
+		public MockHttpRequestBuilder entity(String entity) {
+			try {
+				this.entity.write(entity.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+			} catch (IOException ex) {
+				throw OfficeFrameTestCase.fail(ex);
+			}
 			return this;
 		}
 

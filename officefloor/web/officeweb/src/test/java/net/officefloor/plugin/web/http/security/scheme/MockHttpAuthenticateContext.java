@@ -17,9 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.easymock.AbstractMatcher;
@@ -34,7 +32,8 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Mock {@link HttpAuthenticateContext} for testing {@link HttpSecuritySource}
@@ -42,8 +41,7 @@ import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
-		HttpAuthenticateContext<S, C, D> {
+public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements HttpAuthenticateContext<S, C, D> {
 
 	/**
 	 * Credentials.
@@ -73,12 +71,12 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	/**
 	 * {@link HttpRequest}.
 	 */
-	private HttpRequest request;
+	private MockHttpRequestBuilder request = MockHttpServer.mockRequest();
 
 	/**
 	 * {@link HttpResponse}.
 	 */
-	private HttpResponse response;
+	private HttpResponse response = MockHttpServer.mockResponse();
 
 	/**
 	 * HTTP security.
@@ -98,8 +96,7 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	 * @param testCase
 	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 */
-	public MockHttpAuthenticateContext(C credentials,
-			OfficeFrameTestCase testCase) {
+	public MockHttpAuthenticateContext(C credentials, OfficeFrameTestCase testCase) {
 		this.credentials = credentials;
 		this.testCase = testCase;
 
@@ -141,12 +138,11 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	/**
 	 * Records obtaining the {@link HttpRequest}.
 	 * 
-	 * @return {@link HttpRequest}.
+	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	public HttpRequest recordGetHttpRequest() {
-		this.request = this.testCase.createMock(HttpRequest.class);
-		this.testCase.recordReturn(this.connection,
-				this.connection.getHttpRequest(), this.request);
+	public MockHttpRequestBuilder recordGetHttpRequest() {
+		this.request = MockHttpServer.mockRequest();
+		this.testCase.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
 		return this.request;
 	}
 
@@ -157,8 +153,7 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	 */
 	public HttpResponse recordGetHttpResponse() {
 		this.response = this.testCase.createMock(HttpResponse.class);
-		this.testCase.recordReturn(this.connection,
-				this.connection.getHttpResponse(), this.response);
+		this.testCase.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
 		return this.response;
 	}
 
@@ -167,21 +162,15 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	 * 
 	 * @param authorizationHeaderValue
 	 *            Authorization {@link HttpHeader} value.
-	 * @return {@link HttpRequest}.
+	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	public HttpRequest recordAuthorizationHeader(String authorizationHeaderValue) {
+	public MockHttpRequestBuilder recordAuthorizationHeader(String authorizationHeaderValue) {
 
 		// Record obtaining the HTTP request
-		HttpRequest httpRequest = this.recordGetHttpRequest();
+		MockHttpRequestBuilder httpRequest = this.recordGetHttpRequest();
 
-		// Record providing the HTTP headers
-		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
-		if (authorizationHeaderValue != null) {
-			headers.add(new HttpHeaderImpl("Authorization",
-					authorizationHeaderValue));
-		}
-		this.testCase.recordReturn(httpRequest, httpRequest.getHttpHeaders(),
-				headers);
+		// Providing the HTTP headers
+		httpRequest.header("Authorization", authorizationHeaderValue);
 
 		// Return the HTTP request
 		return httpRequest;
@@ -200,12 +189,8 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 			@Override
 			@SuppressWarnings("unchecked")
 			public boolean matches(Object[] expected, Object[] actual) {
-				Assert.assertEquals(
-						"Incorrect HTTP Security session attribute name",
-						expected[0], actual[0]);
-				Assert.assertNotNull(
-						"Must have HTTP Security if registering with HTTP Session",
-						actual[0]);
+				Assert.assertEquals("Incorrect HTTP Security session attribute name", expected[0], actual[0]);
+				Assert.assertNotNull("Must have HTTP Security if registering with HTTP Session", actual[0]);
 				MockHttpAuthenticateContext.this.sessionHttpSecurity = (S) actual[1];
 				return true;
 			}

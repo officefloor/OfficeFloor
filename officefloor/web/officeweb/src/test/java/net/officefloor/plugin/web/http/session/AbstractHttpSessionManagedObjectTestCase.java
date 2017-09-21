@@ -41,7 +41,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpSessionManagedObject}.
@@ -162,7 +162,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 		// Record obtaining the Session Id
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
 		if (sessionId != null) {
-			headers.add(new HttpHeaderImpl("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId));
+			headers.add(createHttpHeader("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId));
 		}
 		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
 	}
@@ -373,7 +373,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
 		if (isExistingSessionCookie) {
 			// Record existing Session cookie
-			HttpHeader existingCookieHeader = new HttpHeaderImpl("set-cookie",
+			HttpHeader existingCookieHeader = createHttpHeader("set-cookie",
 					SESSION_ID_COOKIE_NAME + "=\"Existing Session Id\"");
 			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[] { existingCookieHeader });
 			this.response.getHttpHeaders().removeHeader(existingCookieHeader);
@@ -426,6 +426,19 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	protected void verifyOperations() {
 		this.verifyMockObjects();
 		assertEquals("Operations still outstanding", 0, this.mockOperations.size());
+	}
+
+	/**
+	 * Creates a mock {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            {@link HttpHeader} name.
+	 * @param value
+	 *            {@link HttpHeader} value.
+	 * @return Mock {@link HttpHeader}.
+	 */
+	private static HttpHeader createHttpHeader(String name, String value) {
+		return MockHttpServer.mockRequest().header(name, value).build().getHttpHeaders().getHeader(name);
 	}
 
 	/**

@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.security.scheme;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 
 /**
  * Tests the {@link HttpCredentialsImpl}.
@@ -55,16 +55,14 @@ public class HttpCredentialsTest extends OfficeFrameTestCase {
 	public void doTest(String username, String password) {
 
 		// Create the HTTP credentials
-		HttpCredentials credentials = new HttpCredentialsImpl(username,
-				password);
+		HttpCredentials credentials = new HttpCredentialsImpl(username, password);
 
 		// Validate the credentials
 		assertEquals("Incorrect username", username, credentials.getUsername());
 		if (password == null) {
 			assertNull("Should not have password", credentials.getPassword());
 		} else {
-			String actualPassword = new String(credentials.getPassword(),
-					HttpRequestParserImpl.US_ASCII);
+			String actualPassword = new String(credentials.getPassword(), AbstractHttpSecuritySource.UTF_8);
 			assertEquals("Incorrect password", password, actualPassword);
 		}
 	}

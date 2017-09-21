@@ -19,7 +19,6 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -34,7 +33,9 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSo
 import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource.SendHttpFileFunction;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.MockServerOutputStream;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpResponseBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpFileManagedFunctionSource}.
@@ -58,12 +59,7 @@ public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link HttpResponse}.
 	 */
-	private final HttpResponse response = this.createMock(HttpResponse.class);
-
-	/**
-	 * {@link MockServerOutputStream}.
-	 */
-	private final MockServerOutputStream entity = new MockServerOutputStream();
+	private final MockHttpResponseBuilder response = MockHttpServer.mockResponse();
 
 	/**
 	 * Validate specification.
@@ -120,10 +116,6 @@ public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
-		this.response.reset();
-		Charset charset = Charset.defaultCharset();
-		this.response.setContentType("text/html", charset);
-		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
 
 		// Test
 		this.replayMockObjects();
@@ -146,8 +138,8 @@ public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify the file contents
-		this.entity.getServerOutputStream().flush();
-		assertEquals("Incorrect file content", fileContents, new String(this.entity.getWrittenBytes()));
+		MockHttpResponse mockResponse = this.response.build();
+		assertEquals("Incorrect file content", fileContents, mockResponse.getHttpEntity(null));
 	}
 
 }

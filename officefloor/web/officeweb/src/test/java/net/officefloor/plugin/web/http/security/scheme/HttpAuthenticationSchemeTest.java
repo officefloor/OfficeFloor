@@ -17,13 +17,11 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpAuthenticationScheme}.
@@ -35,14 +33,13 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpRequest}.
 	 */
-	private final HttpRequest request = this.createMock(HttpRequest.class);
+	private final MockHttpRequestBuilder request = MockHttpServer.mockRequest();
 
 	/**
 	 * Ensure not authenticate if missing <code>Authenticate</code>
 	 * {@link HttpHeader}.
 	 */
 	public void testMissingAuthenticateHttpHeader() throws Exception {
-		this.record_getHeaders(null);
 		this.assertAuthenticationScheme(null, null);
 	}
 
@@ -50,7 +47,7 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 	 * Ensure can obtain authenticate scheme without parameters.
 	 */
 	public void testAuthenticateSchemeOnly() throws Exception {
-		this.record_getHeaders("Basic");
+		this.request.header("Authorization", "Basic");
 		this.assertAuthenticationScheme("Basic", null);
 	}
 
@@ -58,7 +55,7 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 	 * Ensure can obtain authenticate scheme with parameters.
 	 */
 	public void testAuthenticateSchemeWithParameters() throws Exception {
-		this.record_getHeaders("Basic Base64UsernamePassword");
+		this.request.header("Authorization", "Basic Base64UsernamePassword");
 		this.assertAuthenticationScheme("Basic", "Base64UsernamePassword");
 	}
 
@@ -66,7 +63,7 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 	 * Ensure can authenticate with extra spacing.
 	 */
 	public void testExtraSpacing() throws Exception {
-		this.record_getHeaders(" Basic  Base64UsernamePassword");
+		this.request.header("Authorization", " Basic  Base64UsernamePassword");
 		this.assertAuthenticationScheme("Basic", " Base64UsernamePassword");
 	}
 
@@ -78,46 +75,14 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 	 * @param parameters
 	 *            Expected parameters.
 	 */
-	private void assertAuthenticationScheme(String authenticationScheme,
-			String parameters) {
-		this.replayMockObjects();
-		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-				.getHttpAuthenticationScheme(this.request);
+	private void assertAuthenticationScheme(String authenticationScheme, String parameters) {
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme.getHttpAuthenticationScheme(this.request.build());
 		if (scheme == null) {
 			assertNull("Should not have authentication scheme", scheme);
 		} else {
-			assertEquals("Incorrect scheme", authenticationScheme,
-					scheme.getAuthentiationScheme());
-			assertEquals("Incorrect parameters", parameters,
-					scheme.getParameters());
+			assertEquals("Incorrect scheme", authenticationScheme, scheme.getAuthentiationScheme());
+			assertEquals("Incorrect parameters", parameters, scheme.getParameters());
 		}
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records retrieving the {@link HttpHeader} instances from the
-	 * {@link HttpRequest}.
-	 * 
-	 * @param authenticateValue
-	 *            Value for the <code>Authenticate</code> {@link HttpHeader}.
-	 *            <code>null</code> means to not add the {@link HttpHeader}.
-	 * @return Listing of the {@link HttpHeader} instances being returned.
-	 */
-	private List<HttpHeader> record_getHeaders(String authenticateValue) {
-
-		// Create the listing of the HTTP headers
-		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
-
-		// Add the HTTP header (if have value)
-		if (authenticateValue != null) {
-			headers.add(new HttpHeaderImpl("Authorization", authenticateValue));
-		}
-
-		// Record obtaining the HTTP headers from request
-		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
-
-		// Return the HTTP headers
-		return headers;
 	}
 
 }

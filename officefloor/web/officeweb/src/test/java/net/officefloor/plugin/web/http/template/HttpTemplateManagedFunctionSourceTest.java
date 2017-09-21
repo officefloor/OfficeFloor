@@ -53,7 +53,9 @@ import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionCon
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContentImpl;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.UsAsciiUtil;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpResponseBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Tests the {@link HttpTemplateManagedFunctionSource}.
@@ -249,7 +251,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
-		MockHttpResponse httpResponse = new MockHttpResponse();
+		MockHttpResponseBuilder httpResponse = MockHttpServer.mockResponse();
 
 		// Create the additional properties
 		List<String> additionalProperties = new LinkedList<String>();
@@ -356,14 +358,14 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Obtain the output template
-		String actualOutput = UsAsciiUtil.convertToString(httpResponse.getEntityContent());
+		MockHttpResponse mockResponse = httpResponse.build();
 
 		// Expected output
 		String expectedOutput = this.getFileContents(this.findFile(this.getClass(), "Template.expected"));
 		expectedOutput = expectedOutput.replace("${URI_SUFFIX}", templateUriSuffix);
 
 		// Validate output
-		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
+		assertTextEquals("Incorrect output", expectedOutput, mockResponse.getHttpEntity(null));
 	}
 
 	/**
@@ -376,8 +378,10 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Create the mock objects
 		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
-		MockHttpResponse httpResponse = new MockHttpResponse();
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
+
+		// Create the HTTP response to record output
+		MockHttpResponseBuilder httpResponse = MockHttpServer.mockResponse();
 
 		// Template Content
 		final String templateContent = "RAW TEMPLATE";
@@ -421,7 +425,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure raw HTTP template content
-		String output = UsAsciiUtil.convertToString(httpResponse.getEntityContent());
+		String output = httpResponse.build().getHttpEntity(null);
 		assertTextEquals("Incorrect output", templateContent, output);
 	}
 
@@ -437,7 +441,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
-		MockHttpResponse httpResponse = new MockHttpResponse();
+		MockHttpResponseBuilder httpResponse = MockHttpServer.mockResponse();
 
 		// Load the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
@@ -460,7 +464,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Obtain the output template
-		String actualOutput = UsAsciiUtil.convertToString(httpResponse.getEntityContent());
+		String actualOutput = httpResponse.build().getHttpEntity(null);
 
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(this.getClass(), "RootTemplate.expected"));

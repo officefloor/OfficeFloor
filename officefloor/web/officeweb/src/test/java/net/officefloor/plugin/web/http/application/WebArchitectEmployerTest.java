@@ -1583,8 +1583,8 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		// Create the request
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		request.setHttpMethod(HttpMethod.GET);
-		request.setRequestUri(uri);
+		request.method(HttpMethod.GET);
+		request.uri(uri);
 
 		// Provide redirect URL if expecting to redirect
 		String redirectUrl = null;
@@ -1625,7 +1625,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
 
 				// Send the redirect for response
-				MockHttpRequestBuilder redirect = MockHttpServer.mockRequest().setRequestUri(redirectUrl);
+				MockHttpRequestBuilder redirect = MockHttpServer.mockRequest().uri(redirectUrl);
 				response = this.server.send(redirect);
 			}
 

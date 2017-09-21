@@ -17,16 +17,9 @@
  */
 package net.officefloor.plugin.web.http.template.secure;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import java.nio.charset.Charset;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -42,9 +35,10 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
@@ -54,59 +48,46 @@ import net.officefloor.server.http.ServerHttpConnection;
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link WebCompileOfficeFloor}.
-	 */
-	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
-
-	/**
 	 * Non-secure URL prefix.
 	 */
-	private final String NON_SECURE_URL_PREFIX = "http://"
+	private static final String NON_SECURE_URL_PREFIX = "http://"
 			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":7878";
 
 	/**
 	 * Secure URL prefix.
 	 */
-	private final String SECURE_URL_PREFIX = "https://"
+	private static final String SECURE_URL_PREFIX = "https://"
 			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":7979";
+
+	/**
+	 * {@link WebCompileOfficeFloor}.
+	 */
+	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+
+	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
 
 	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
 
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private CloseableHttpClient client;
-
 	@Override
 	protected void setUp() throws Exception {
-		// Configure the client (to not redirect)
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpClientTestUtil.configureHttps(builder);
-		HttpClientTestUtil.configureNoRedirects(builder);
-		this.client = builder.build();
-
 		// Configure the HTTP server
 		this.compiler.officeFloor((context) -> {
-			HttpServerTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE", "route");
+			MockHttpServer
+					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("ROUTE", "route"));
 		});
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Stop the client
-			if (this.client != null) {
-				this.client.close();
-			}
-
-		} finally {
-			// Stop the server
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		// Stop the server
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -224,7 +205,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 
 		// Test
-		HttpResponse response = this.client.execute(new HttpGet(requestUrl + "?name=Daniel&id=1"));
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(requestUrl + "?name=Daniel&id=1"));
 
 		// Determine the expected entity of serviced request
 		String linkUri = "/template-LINK";
@@ -244,23 +225,18 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 			redirectUrl = redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 
 			// Ensure redirect to appropriately secure URL
-			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
 			assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
 
-			// Complete request to do next request
-			response.getEntity().getContent().close();
-
 			// Undertake redirect to ensure parameters and entity are maintained
-			response = this.client.execute(new HttpGet(redirectUrl));
+			response = this.server.send(MockHttpServer.mockRequest(redirectUrl));
 		}
 
 		// Ensure service request as appropriately secure
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
 
 		// Ensure correct content
-		ByteArrayOutputStream actualEntity = new ByteArrayOutputStream();
-		response.getEntity().writeTo(actualEntity);
-		assertEquals("Incorrect template response", expectedEntity, new String(actualEntity.toByteArray()));
+		assertEquals("Incorrect template response", expectedEntity, response.getHttpEntity(null));
 	}
 
 	/**
@@ -356,28 +332,25 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 
 		// Test (with parameters and entity)
-		HttpPost post = new HttpPost(requestUrl + "?name=Daniel");
-		post.setEntity(new StringEntity("id=1", "ISO-8859-1"));
-		HttpResponse response = this.client.execute(post);
+		MockHttpRequestBuilder post = MockHttpServer.mockRequest(requestUrl + "?name=Daniel");
+		post.getHttpEntity().write("id=1".getBytes(Charset.forName("ISO-8859-1")));
+		MockHttpResponse response = this.server.send(post);
 
 		// Determine if redirecting
 		if (redirectUrl != null) {
 			// Ensure redirect to appropriately secure connection
-			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
 			assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
-			response.getEntity().getContent().close();
 
 			// Undertake redirect to ensure parameters and entity are maintained
-			response = this.client.execute(new HttpGet(redirectUrl));
+			response = this.server.send(MockHttpServer.mockRequest(redirectUrl));
 		}
 
 		// Ensure service request as appropriately secure
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
 
 		// Ensure correct content
-		ByteArrayOutputStream actualEntity = new ByteArrayOutputStream();
-		response.getEntity().writeTo(actualEntity);
-		assertEquals("Incorrect template response", "SECURE - Daniel(1)", new String(actualEntity.toByteArray()));
+		assertEquals("Incorrect template response", "SECURE - Daniel(1)", response.getHttpEntity(null));
 	}
 
 	/**

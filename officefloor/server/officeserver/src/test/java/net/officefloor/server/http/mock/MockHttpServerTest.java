@@ -83,7 +83,7 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 		// Create and configure the request
 		MockHttpRequestBuilder builder = MockHttpServer.mockRequest();
-		builder.addHttpHeader("TEST", "value");
+		builder.header("TEST", "value");
 		builder.getHttpEntity().write(1);
 
 		// Obtain the mock HTTP request

@@ -343,8 +343,8 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 
 		// Run test to load values
 		this.replayMockObjects();
-		MockHttpRequestBuilder requestBuilder = MockHttpServer.mockRequest().setHttpMethod(method)
-				.setRequestUri(requestUri);
+		MockHttpRequestBuilder requestBuilder = MockHttpServer.mockRequest().method(method)
+				.uri(requestUri);
 		if (requestEntity != null) {
 			requestBuilder.getHttpEntity()
 					.write(requestEntity.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));

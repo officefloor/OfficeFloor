@@ -252,7 +252,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	 * @return Mock {@link HttpHeader}.
 	 */
 	private static HttpHeader createHttpHeader(String name, String value) {
-		return MockHttpServer.mockRequest().addHttpHeader(name, value).build().getHttpHeaders()
+		return MockHttpServer.mockRequest().header(name, value).build().getHttpHeaders()
 				.getHeader(name);
 	}
 

@@ -26,6 +26,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource.Dependencies;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource.Flows;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
@@ -33,7 +34,6 @@ import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityTypeBuilder;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * Tests the {@link FormHttpSecuritySource}.
@@ -250,7 +250,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSimpleAuthenticate() throws Exception {
 
-		byte[] password = "open sesame".getBytes(HttpRequestParserImpl.US_ASCII);
+		byte[] password = "open sesame".getBytes(AbstractHttpSecuritySource.UTF_8);
 
 		// Record simple authenticate
 		this.recordReturn(this.credentials, this.credentials.getUsername(), "Aladdin");
@@ -270,7 +270,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testAlgorithmAuthenticate() throws Exception {
 
-		byte[] password = "open sesame".getBytes(HttpRequestParserImpl.US_ASCII);
+		byte[] password = "open sesame".getBytes(AbstractHttpSecuritySource.UTF_8);
 
 		// Determine credentials
 		MessageDigest digest = MessageDigest.getInstance("MD5");
