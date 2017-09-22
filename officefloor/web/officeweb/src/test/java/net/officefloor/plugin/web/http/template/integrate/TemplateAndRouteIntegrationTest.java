@@ -19,19 +19,18 @@ package net.officefloor.plugin.web.http.template.integrate;
 
 import java.util.Properties;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.web.http.application.WebApplicationSectionSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
  * Ensure integration of {@link HttpTemplateManagedFunctionSource} and
@@ -42,9 +41,9 @@ import net.officefloor.server.http.HttpClientTestUtil;
 public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	/**
-	 * {@link CloseableHttpClient}.
+	 * {@link MockHttpServer}.
 	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	private MockHttpServer server;
 
 	/**
 	 * {@link OfficeFloor}.
@@ -59,10 +58,15 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 				+ "/Configuration.officefloor";
 
 		// Compile the OfficeFloor
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		compiler.addSourceAliases();
-		compiler.setCompilerIssues(new FailTestCompilerIssues());
-		this.officeFloor = compiler.compile(officeFloorConfiguration);
+		WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			this.server = MockHttpServer
+					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("ROUTE", "route"));
+		});
+		compile.web((context) -> {
+			
+		});
+		this.officeFloor = compile.compileAndOpenOfficeFloor();
 
 		// Open the OfficeFloor
 		this.officeFloor.openOfficeFloor();
@@ -70,14 +74,9 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Stop client
-			this.client.close();
-		} finally {
-			// Stop server
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		// Stop server
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -88,17 +87,17 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRoute() throws Exception {
 
 		// Request the initial page (PageOne)
-		Properties initialPage = this.doRequest("/PageTwo-link", this.client);
+		Properties initialPage = this.doRequest("/PageTwo-link");
 		assertEquals("Incorrect initial page", "One", initialPage.getProperty("page"));
 
 		// Follow link to get second page
 		String secondPageLink = initialPage.getProperty("link");
-		Properties secondPage = this.doRequest(secondPageLink, this.client);
+		Properties secondPage = this.doRequest(secondPageLink);
 		assertEquals("Incorrect second page", "Two", secondPage.getProperty("page"));
 
 		// Follow link to get first page
 		String firstPageLink = secondPage.getProperty("link");
-		Properties firstPage = this.doRequest(firstPageLink, this.client);
+		Properties firstPage = this.doRequest(firstPageLink);
 		assertEquals("Incorrect first page", "One", firstPage.getProperty("page"));
 	}
 
@@ -109,7 +108,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRouteRoot() throws Exception {
 
 		// Root page link
-		Properties linkedPage = this.doRequest("/-link", this.client);
+		Properties linkedPage = this.doRequest("/-link");
 		assertEquals("Incorrect root page link", "One", linkedPage.getProperty("page"));
 	}
 
@@ -119,7 +118,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRouteCanonicalPath() throws Exception {
 
 		// Request the initial page with non-canonical path
-		Properties initialPage = this.doRequest("/non-canonical-path/../PageTwo-link/", this.client);
+		Properties initialPage = this.doRequest("/non-canonical-path/../PageTwo-link/");
 		assertEquals("Incorrect page", "One", initialPage.getProperty("page"));
 	}
 
@@ -132,17 +131,17 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	 *            {@link HttpClient}.
 	 * @return Properties of the returned page.
 	 */
-	private Properties doRequest(String uriPath, HttpClient client) throws Exception {
+	private Properties doRequest(String uriPath) throws Exception {
 
 		// Do the request
-		HttpGet method = new HttpGet("http://localhost:10101" + uriPath);
-		HttpResponse response = client.execute(method);
-		int status = response.getStatusLine().getStatusCode();
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(uriPath);
+		MockHttpResponse response = this.server.send(request);
+		int status = response.getHttpStatus().getStatusCode();
 		assertEquals("Must be successful", 200, status);
 
 		// Load properties from response
 		Properties properties = new Properties();
-		properties.load(response.getEntity().getContent());
+		properties.load(response.getHttpEntity());
 
 		// Return the properties
 		return properties;

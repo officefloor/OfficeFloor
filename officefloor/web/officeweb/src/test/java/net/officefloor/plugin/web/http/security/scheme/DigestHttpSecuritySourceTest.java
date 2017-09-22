@@ -147,7 +147,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
 		this.recordReturn(session, session.getAttribute("http.security.source.digest.http.security"), null);
-		ratifyContext.recordAuthorizationHeader("Digest credentials");
+		ratifyContext.recordHttpRequestWithAuthorizationHeader("Digest credentials");
 
 		// Test
 		this.replayMockObjects();
@@ -176,7 +176,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
 		this.recordReturn(session, session.getAttribute("http.security.source.digest.http.security"), null);
-		ratifyContext.recordAuthorizationHeader(null);
+		ratifyContext.recordHttpRequestWithAuthorizationHeader(null);
 
 		// Test
 		this.replayMockObjects();
@@ -257,7 +257,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testNoAuthorizationHeader() throws Exception {
 
 		// Record no authorization header
-		this.authenticationContext.recordAuthorizationHeader(null);
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader(null);
 
 		// Test
 		this.doAuthenticate(null);
@@ -269,7 +269,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testIncorrectAuthenticationScheme() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordAuthorizationHeader("Incorrect parameters=\"should no be used\"");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Incorrect parameters=\"should no be used\"");
 
 		// Test
 		this.doAuthenticate(null);
@@ -281,7 +281,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testInvalidAuthorizationHeader() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordAuthorizationHeader("Basic wrong");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic wrong");
 
 		// Test
 		this.doAuthenticate(null);
@@ -297,7 +297,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		final HttpSession session = this.authenticationContext.getSession();
 
 		// Record authentication
-		this.authenticationContext.recordAuthorizationHeader("Digest username=\"Mufasa\", realm=\"" + REALM
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Digest username=\"Mufasa\", realm=\"" + REALM
 				+ "\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\"," + " uri=\"/dir/index.html\","
 				+ " qop=auth, nc=00000001, cnonce=\"0a4f113b\"," + " response=\"6629fae49393a05397450978507c4ef1\","
 				+ " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"");

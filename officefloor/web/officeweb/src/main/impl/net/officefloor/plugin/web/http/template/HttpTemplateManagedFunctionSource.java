@@ -357,7 +357,7 @@ public class HttpTemplateManagedFunctionSource extends AbstractManagedFunctionSo
 
 		// Obtain the details of the template
 		Charset charset = null;
-		String charsetName = context.getProperty(PROPERTY_CHARSET);
+		String charsetName = context.getProperty(PROPERTY_CHARSET, null);
 		if (!CompileUtil.isBlank(charsetName)) {
 			charset = Charset.forName(charsetName);
 		}

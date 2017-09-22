@@ -106,9 +106,10 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 			}
 
 			// Add properties for the link
-			properties.addProperty(PROPERTY_URL_LINK_PREFIX + link.applicationUriPath,
-					link.sectionInput.getOfficeSectionInputName());
-			properties.addProperty(PROPERTY_URL_SECURE_PREFIX + link.applicationUriPath, String.valueOf(link.isSecure));
+			properties.addProperty(PROPERTY_URL_LINK_PREFIX + link.applicationUriPath)
+					.setValue(link.sectionInput.getOfficeSectionInputName());
+			properties.addProperty(PROPERTY_URL_SECURE_PREFIX + link.applicationUriPath)
+					.setValue(String.valueOf(link.isSecure));
 		}
 	}
 

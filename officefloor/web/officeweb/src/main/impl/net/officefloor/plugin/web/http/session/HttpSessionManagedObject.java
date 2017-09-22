@@ -30,7 +30,6 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
-import net.officefloor.plugin.web.http.cookie.HttpCookieUtil;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
@@ -408,7 +407,7 @@ public class HttpSessionManagedObject
 	 */
 	private void addSessionIdCookieToHttpResponse(String sessionId, long expireTime) {
 		HttpCookie sessionIdCookie = new HttpCookie(this.sessionIdCookieName, sessionId, expireTime, null, "/");
-		HttpCookieUtil.addHttpCookie(sessionIdCookie, this.connection.getHttpResponse());
+		HttpCookie.addHttpCookie(sessionIdCookie, this.connection.getHttpResponse());
 	}
 
 	/*
@@ -451,7 +450,7 @@ public class HttpSessionManagedObject
 		}
 
 		// Obtain the Session Id from the Session cookie
-		HttpCookie sessionIdCookie = HttpCookieUtil.extractHttpCookie(this.sessionIdCookieName, request);
+		HttpCookie sessionIdCookie = HttpCookie.extractHttpCookie(this.sessionIdCookieName, request);
 		String sessionId = (sessionIdCookie == null ? null : sessionIdCookie.getValue());
 
 		// Handle based on Session Id being available

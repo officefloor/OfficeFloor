@@ -46,7 +46,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
- * Provides server functionality for the HTTP Server.
+ * Provides server functionality for the Web Server.
  * 
  * @author Daniel Sagenschneider
  */

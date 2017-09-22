@@ -110,7 +110,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 				session,
 				session.getAttribute("http.security.source.mock.http.security"),
 				null);
-		ratifyContext.recordAuthorizationHeader("Basic ZGFuaWVsOmRhbmllbA");
+		ratifyContext.recordHttpRequestWithAuthorizationHeader("Basic ZGFuaWVsOmRhbmllbA");
 
 		// Test
 		this.replayMockObjects();
@@ -143,7 +143,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 				session,
 				session.getAttribute("http.security.source.mock.http.security"),
 				null);
-		ratifyContext.recordAuthorizationHeader(null);
+		ratifyContext.recordHttpRequestWithAuthorizationHeader(null);
 
 		// Test
 		this.replayMockObjects();
@@ -193,7 +193,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testNoAuthorizationHeader() throws Exception {
 
 		// Record no authorization header
-		this.authenticationContext.recordAuthorizationHeader(null);
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader(null);
 
 		// Test
 		this.doAuthenticate(null);
@@ -206,7 +206,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Record authenticate
 		this.authenticationContext
-				.recordAuthorizationHeader("Incorrect ZGFuaWVsOmRhbmllbA");
+				.recordHttpRequestWithAuthorizationHeader("Incorrect ZGFuaWVsOmRhbmllbA");
 
 		// Test
 		this.doAuthenticate(null);
@@ -218,7 +218,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testInvalidAuthorizationHeader() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordAuthorizationHeader("Basic wrong");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic wrong");
 
 		// Test
 		this.doAuthenticate(null);
@@ -231,7 +231,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Record simple authenticate
 		this.authenticationContext
-				.recordAuthorizationHeader("Basic ZGFuaWVsOmRhbmllbA");
+				.recordHttpRequestWithAuthorizationHeader("Basic ZGFuaWVsOmRhbmllbA");
 		this.authenticationContext
 				.recordRegisterHttpSecurityWithHttpSession("http.security.source.mock.http.security");
 
@@ -246,7 +246,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Record simple authenticate
 		this.authenticationContext
-				.recordAuthorizationHeader("Basic ZGFuaWVsLCBmb3VuZGVyOmRhbmllbCwgZm91bmRlcg==");
+				.recordHttpRequestWithAuthorizationHeader("Basic ZGFuaWVsLCBmb3VuZGVyOmRhbmllbCwgZm91bmRlcg==");
 		this.authenticationContext
 				.recordRegisterHttpSecurityWithHttpSession("http.security.source.mock.http.security");
 
@@ -261,7 +261,7 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Record authenticate
 		this.authenticationContext
-				.recordAuthorizationHeader("  Basic    ZGFuaWVsOmRhbmllbA  ");
+				.recordHttpRequestWithAuthorizationHeader("  Basic    ZGFuaWVsOmRhbmllbA  ");
 		this.authenticationContext
 				.recordRegisterHttpSecurityWithHttpSession("http.security.source.mock.http.security");
 

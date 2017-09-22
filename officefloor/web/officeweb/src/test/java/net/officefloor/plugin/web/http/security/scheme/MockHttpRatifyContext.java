@@ -23,7 +23,6 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -58,11 +57,6 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	private final HttpSession session;
 
 	/**
-	 * {@link MockHttpRequestBuilder}.
-	 */
-	private MockHttpRequestBuilder request;
-
-	/**
 	 * {@link HttpResponse}.
 	 */
 	private HttpResponse response;
@@ -90,17 +84,6 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	}
 
 	/**
-	 * Records obtaining the {@link HttpRequest}.
-	 * 
-	 * @return {@link MockHttpRequestBuilder}.
-	 */
-	public MockHttpRequestBuilder recordGetHttpRequest() {
-		this.request = MockHttpServer.mockRequest();
-		this.testCase.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
-		return this.request;
-	}
-
-	/**
 	 * Records obtaining the {@link HttpResponse}.
 	 * 
 	 * @return {@link HttpResponse}.
@@ -118,16 +101,16 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	 *            Authorization {@link HttpHeader} value.
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	public MockHttpRequestBuilder recordAuthorizationHeader(String authorizationHeaderValue) {
+	public void recordHttpRequestWithAuthorizationHeader(String authorizationHeaderValue) {
 
-		// Record obtaining the HTTP request
-		MockHttpRequestBuilder httpRequest = this.recordGetHttpRequest();
+		// Create the request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		if (authorizationHeaderValue != null) {
+			request.header("Authorization", authorizationHeaderValue);
+		}
 
-		// Record providing the HTTP headers
-		httpRequest.header("Authorization", authorizationHeaderValue);
-
-		// Return the HTTP request
-		return httpRequest;
+		// Record obtaining the request
+		this.testCase.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
 	}
 
 	/**

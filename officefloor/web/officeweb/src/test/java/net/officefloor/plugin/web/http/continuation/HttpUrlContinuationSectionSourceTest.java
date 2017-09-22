@@ -169,33 +169,26 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		HttpClientTestUtil.configureNoRedirects(builder);
 		CloseableHttpClient client = builder.build();
 
-		// Obtain the host name
-		String hostName = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
-
-		// Obtain the URLs
-		final String SECURE_URL = "https://" + hostName + ":7979/uri";
-		final String NON_SECURE_URL = "http://" + hostName + ":7878/uri";
-		String urlInitial;
-		String urlRedirect;
-		if (isSecure) {
-			urlInitial = NON_SECURE_URL;
-			urlRedirect = SECURE_URL + HttpRouteFunction.REDIRECT_URI_SUFFIX;
-		} else {
-			urlInitial = SECURE_URL;
-			urlRedirect = NON_SECURE_URL + HttpRouteFunction.REDIRECT_URI_SUFFIX;
-		}
-
 		// Start application
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		try {
 
-			// Ensure redirect if not appropriately secure
-			MockHttpResponse response = server.value.send(server.value.mockRequest(urlInitial));
-			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
-			assertEquals("Incorrect redirect location", urlRedirect, response.getFirstHeader("Location").getValue());
+			final String securePathRedirect = "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX;
+			final String secureUrlRedirect = "https://"
+					+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":"
+					+ HttpApplicationLocationManagedObjectSource.DEFAULT_HTTPS_PORT + securePathRedirect;
 
-			// Ensure servicing request
-			response = server.value.send(server.value.mockRequest(urlRedirect));
+			// Ensure redirect if not appropriately secure
+			MockHttpResponse response = server.value.send(MockHttpServer.mockRequest("/uri"));
+			if (isSecure) {
+				// Secure so will redirect to secure port
+				assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
+				assertEquals("Incorrect redirect location", secureUrlRedirect,
+						response.getFirstHeader("Location").getValue());
+
+				// Ensure servicing request
+				response = server.value.send(MockHttpServer.mockRequest(securePathRedirect).secure(true));
+			}
 			assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
 			assertEquals("Incorrect response", "SERVICED", response.getHttpEntity(null));
 

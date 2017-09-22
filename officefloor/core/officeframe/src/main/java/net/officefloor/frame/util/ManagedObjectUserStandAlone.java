@@ -28,6 +28,9 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 
@@ -38,7 +41,8 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ManagedObjectUserStandAlone implements ManagedObjectUser, AsynchronousContext, ObjectRegistry {
+public class ManagedObjectUserStandAlone
+		implements ManagedObjectUser, ProcessAwareContext, AsynchronousContext, ObjectRegistry {
 
 	/**
 	 * Object to synchronise sourcing the {@link ManagedObject}.
@@ -60,6 +64,11 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser, Asynchron
 	 * retrieve immediately.
 	 */
 	private long sourceTimeout = -1;
+
+	/**
+	 * {@link ProcessAwareContext}.
+	 */
+	private ProcessAwareContext processAwareContext = this;
 
 	/**
 	 * Bound name for a {@link NameAwareManagedObject}.
@@ -89,6 +98,17 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser, Asynchron
 	 */
 	public void setSourceTimeout(long sourceTimeout) {
 		this.sourceTimeout = sourceTimeout;
+	}
+
+	/**
+	 * Allows overriding the {@link ProcessAwareContext}. to initialise a
+	 * {@link ProcessAwareManagedObject}.
+	 * 
+	 * @param processAwareContext
+	 *            {@link ProcessAwareContext}.
+	 */
+	public void setProcessAwareContext(ProcessAwareContext processAwareContext) {
+		this.processAwareContext = processAwareContext;
 	}
 
 	/**
@@ -219,6 +239,11 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser, Asynchron
 				return null; // no managed object sourced
 			}
 
+			// Have managed object so determine if process aware
+			if (mo instanceof ProcessAwareManagedObject) {
+				((ProcessAwareManagedObject) mo).setProcessAwareContext(this.processAwareContext);
+			}
+
 			// Have managed object so determine if name aware
 			if (mo instanceof NameAwareManagedObject) {
 				// Provide the bound name
@@ -261,6 +286,15 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser, Asynchron
 		synchronized (this.lock) {
 			this.failure = cause;
 		}
+	}
+
+	/*
+	 * ==================== ProcessAwareContext ==========================
+	 */
+
+	@Override
+	public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
+		return operation.run();
 	}
 
 	/*

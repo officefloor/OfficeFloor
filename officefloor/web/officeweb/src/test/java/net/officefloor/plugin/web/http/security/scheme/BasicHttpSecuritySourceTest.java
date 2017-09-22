@@ -129,7 +129,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
 		this.recordReturn(session, session.getAttribute("http.security.source.basic.http.security"), null);
-		ratifyContext.recordAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+		ratifyContext.recordHttpRequestWithAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 
 		// Test
 		this.replayMockObjects();
@@ -157,7 +157,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
 		this.recordReturn(session, session.getAttribute("http.security.source.basic.http.security"), null);
-		ratifyContext.recordAuthorizationHeader(null);
+		ratifyContext.recordHttpRequestWithAuthorizationHeader(null);
 
 		// Test
 		this.replayMockObjects();
@@ -206,7 +206,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testNoAuthorizationHeader() throws Exception {
 
 		// Record no authorization header
-		this.authenticationContext.recordAuthorizationHeader(null);
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader(null);
 
 		// Test
 		this.doAuthenticate(null);
@@ -218,7 +218,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testIncorrectAuthenticationScheme() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordAuthorizationHeader("Incorrect QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Incorrect QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 
 		// Test
 		this.doAuthenticate(null);
@@ -230,7 +230,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testInvalidAuthorizationHeader() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordAuthorizationHeader("Basic wrong");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic wrong");
 
 		// Test
 		this.doAuthenticate(null);
@@ -242,7 +242,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testSimpleAuthenticate() throws Exception {
 
 		// Record simple authenticate
-		this.authenticationContext.recordAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		this.recordReturn(this.store, this.store.retrieveCredentialEntry("Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
 				"open sesame".getBytes(AbstractHttpSecuritySource.UTF_8));
@@ -266,7 +266,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		byte[] credentials = digest.digest();
 
 		// Record authentication with algorithm
-		this.authenticationContext.recordAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		this.recordReturn(this.store, this.store.retrieveCredentialEntry("Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(), credentials);
 		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
@@ -284,7 +284,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testExtraSpacing() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordAuthorizationHeader("  Basic    QWxhZGRpbjpvcGVuIHNlc2FtZQ==  ");
+		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("  Basic    QWxhZGRpbjpvcGVuIHNlc2FtZQ==  ");
 		this.recordReturn(this.store, this.store.retrieveCredentialEntry("Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
 				"open sesame".getBytes(AbstractHttpSecuritySource.UTF_8));

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.TimeZone;
 
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderName;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 
 /**
@@ -35,6 +37,16 @@ import net.officefloor.server.http.HttpResponse;
 public class HttpCookie {
 
 	/**
+	 * {@link HttpHeaderName} for loading a cookie.
+	 */
+	public static final String COOKIE = "cookie";
+
+	/**
+	 * Header name specifying a {@link HttpCookie} on the {@link HttpResponse}.
+	 */
+	public static final HttpHeaderName SET_COOKIE = new HttpHeaderName("set-cookie");
+
+	/**
 	 * Format of the expire time for the {@link HttpHeader}.
 	 */
 	private final static String EXPIRE_FORMAT = "EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'";
@@ -42,28 +54,94 @@ public class HttpCookie {
 	/**
 	 * {@link DateFormat} to format the expire time for the {@link HttpHeader}.
 	 */
-	private volatile static DateFormat expireFormatter;
+	private final static DateFormat expireFormatter;
 
 	/**
-	 * Obtains the {@link DateFormat} to format the expire time for the
-	 * {@link HttpHeader}.
-	 *
-	 * @return {@link DateFormat} to format the expire time for the
-	 *         {@link HttpHeader}.
+	 * Initialise the formatter.
 	 */
-	private static DateFormat getExpireFormatter() {
-		DateFormat formatter = expireFormatter;
-		if (formatter == null) {
-			// Create the formatter
-			formatter = new SimpleDateFormat(EXPIRE_FORMAT);
-			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+	static {
+		// Create the formatter
+		expireFormatter = new SimpleDateFormat(EXPIRE_FORMAT);
+		expireFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
 
-			// Make formatter available for further use
-			expireFormatter = formatter;
+	/**
+	 * Extracts all the {@link HttpCookie} instances from the
+	 * {@link HttpRequest}.
+	 *
+	 * @param request
+	 *            {@link HttpRequest}.
+	 * @return {@link HttpCookie} instances on the {@link HttpRequest}.
+	 */
+	public static List<HttpCookie> extractHttpCookies(HttpRequest request) {
+		List<HttpCookie> cookies = new LinkedList<HttpCookie>();
+		for (HttpHeader header : request.getHttpHeaders().getHeaders(COOKIE)) {
+			cookies.addAll(HttpCookie.parse(header.getValue()));
+		}
+		return cookies;
+	}
+
+	/**
+	 * Extracts a specific {@link HttpCookie} from the {@link HttpRequest}.
+	 *
+	 * @param cookieName
+	 *            Name of the {@link HttpCookie} to retrieve from the
+	 *            {@link HttpRequest}.
+	 * @param request
+	 *            {@link HttpRequest}.
+	 * @return {@link HttpCookie} extracted from the {@link HttpRequest} or
+	 *         <code>null</code> if no {@link HttpCookie} by the name on the
+	 *         {@link HttpRequest}.
+	 */
+	public static HttpCookie extractHttpCookie(String cookieName, HttpRequest request) {
+		// Search for the cookie by the name
+		for (HttpHeader header : request.getHttpHeaders().getHeaders(COOKIE)) {
+			List<HttpCookie> cookies = HttpCookie.parse(header.getValue());
+			for (HttpCookie cookie : cookies) {
+				if (cookieName.equalsIgnoreCase(cookie.getName())) {
+					// Found the cookie
+					return cookie;
+				}
+			}
 		}
 
-		// Return the formatter
-		return formatter;
+		// As here, cookie not found
+		return null;
+	}
+
+	/**
+	 * Adds the {@link HttpCookie} to the {@link HttpResponse}.
+	 *
+	 * @param cookie
+	 *            {@link HttpCookie} to be added.
+	 * @param response
+	 *            {@link HttpResponse} to have the {@link HttpCookie} added to
+	 *            it as a {@link HttpHeader}.
+	 * @return {@link HttpHeader} added to the {@link HttpResponse} containing
+	 *         the {@link HttpCookie}.
+	 */
+	public static HttpHeader addHttpCookie(HttpCookie cookie, HttpResponse response) {
+
+		// Obtain the value prefix of the cookie
+		String cookieValuePrefix = cookie.getName().toLowerCase() + "=";
+
+		// Remove any cookies by the name
+		for (HttpHeader header : response.getHttpHeaders()) {
+			// Determine if header specifying a cookie
+			if (SET_COOKIE.getName().equalsIgnoreCase(header.getName())) {
+				// Determine if cookie by name
+				if (header.getValue().toLowerCase().startsWith(cookieValuePrefix)) {
+					// Remove the header containing cookie by same name
+					response.getHttpHeaders().removeHeader(header);
+				}
+			}
+		}
+
+		// Add the header for the cookie
+		HttpHeader header = response.getHttpHeaders().addHeader(SET_COOKIE, cookie.toHttpResponseHeaderValue());
+
+		// Return the header
+		return header;
 	}
 
 	/**
@@ -74,7 +152,7 @@ public class HttpCookie {
 	 *            Value of the {@link HttpHeader}.
 	 * @return Listing of {@link HttpCookie} instances.
 	 */
-	public static List<HttpCookie> parse(String httpHeaderValue) {
+	private static List<HttpCookie> parse(String httpHeaderValue) {
 
 		// Split to possible obtain multiple cookies
 		List<String> cookieTexts = splitQuotedText(httpHeaderValue, '"', ',');
@@ -136,8 +214,7 @@ public class HttpCookie {
 	 *            Split character.
 	 * @return Listing of split text.
 	 */
-	private static List<String> splitQuotedText(String quotedText,
-			char quoteCharacter, char splitCharacter) {
+	private static List<String> splitQuotedText(String quotedText, char quoteCharacter, char splitCharacter) {
 
 		// Create listing of cookies in header value
 		List<String> cookies = new LinkedList<String>();
@@ -227,8 +304,7 @@ public class HttpCookie {
 	 * @param path
 	 *            Path.
 	 */
-	public HttpCookie(String name, String value, long expireTime,
-			String domain, String path) {
+	public HttpCookie(String name, String value, long expireTime, String domain, String path) {
 		this(name, value);
 		this.expireTime = expireTime;
 		this.domain = domain;
@@ -300,8 +376,7 @@ public class HttpCookie {
 		headerValue.append("\"");
 		if (this.expireTime >= 0) {
 			headerValue.append("; expires=");
-			String expireText = getExpireFormatter().format(
-					new Date(this.expireTime));
+			String expireText = expireFormatter.format(new Date(this.expireTime));
 			headerValue.append(expireText);
 		}
 		if (this.path != null) {

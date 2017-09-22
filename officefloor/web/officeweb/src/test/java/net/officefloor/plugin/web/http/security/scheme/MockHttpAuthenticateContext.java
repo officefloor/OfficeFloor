@@ -29,8 +29,6 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -67,16 +65,6 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements Htt
 	 * Dependencies.
 	 */
 	private final Map<D, Object> dependencies = new HashMap<D, Object>();
-
-	/**
-	 * {@link HttpRequest}.
-	 */
-	private MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-
-	/**
-	 * {@link HttpResponse}.
-	 */
-	private HttpResponse response = MockHttpServer.mockResponse();
 
 	/**
 	 * HTTP security.
@@ -136,44 +124,21 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements Htt
 	}
 
 	/**
-	 * Records obtaining the {@link HttpRequest}.
-	 * 
-	 * @return {@link MockHttpRequestBuilder}.
-	 */
-	public MockHttpRequestBuilder recordGetHttpRequest() {
-		this.request = MockHttpServer.mockRequest();
-		this.testCase.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
-		return this.request;
-	}
-
-	/**
-	 * Records obtaining the {@link HttpResponse}.
-	 * 
-	 * @return {@link HttpResponse}.
-	 */
-	public HttpResponse recordGetHttpResponse() {
-		this.response = this.testCase.createMock(HttpResponse.class);
-		this.testCase.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
-		return this.response;
-	}
-
-	/**
 	 * Records the Authorization {@link HttpHeader} value.
 	 * 
 	 * @param authorizationHeaderValue
 	 *            Authorization {@link HttpHeader} value.
-	 * @return {@link MockHttpRequestBuilder}.
 	 */
-	public MockHttpRequestBuilder recordAuthorizationHeader(String authorizationHeaderValue) {
+	public void recordHttpRequestWithAuthorizationHeader(String authorizationHeaderValue) {
+		
+		// Create the HTTP request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		if (authorizationHeaderValue != null) {
+			request.header("Authorization", authorizationHeaderValue);
+		}
 
-		// Record obtaining the HTTP request
-		MockHttpRequestBuilder httpRequest = this.recordGetHttpRequest();
-
-		// Providing the HTTP headers
-		httpRequest.header("Authorization", authorizationHeaderValue);
-
-		// Return the HTTP request
-		return httpRequest;
+		// Record return the HTTP request
+		this.testCase.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
 	}
 
 	/**

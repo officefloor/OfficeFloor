@@ -27,6 +27,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
@@ -69,11 +70,6 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	private HttpRequest request;
 
 	/**
-	 * {@link HttpResponse}.
-	 */
-	private HttpResponse response;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param testCase
@@ -113,17 +109,6 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	}
 
 	/**
-	 * Records obtaining the {@link HttpResponse}.
-	 * 
-	 * @return {@link HttpResponse}.
-	 */
-	public HttpResponse recordGetHttpResponse() {
-		this.response = this.testCase.createMock(HttpResponse.class);
-		this.testCase.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
-		return this.response;
-	}
-
-	/**
 	 * Records the authenticate challenge.
 	 * 
 	 * @param authenticateHeaderValue
@@ -134,12 +119,14 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 		HttpHeader header = this.testCase.createMock(HttpHeader.class);
 
 		// Record obtaining the HTTP response
-		HttpResponse httpResponse = this.recordGetHttpResponse();
+		HttpResponse response = this.testCase.createMock(HttpResponse.class);
+		this.testCase.recordReturn(this.connection, this.connection.getHttpResponse(), response);
 
 		// Record the challenge
-		httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
-		this.testCase.recordReturn(httpResponse,
-				httpResponse.getHttpHeaders().addHeader("WWW-Authenticate", authenticateHeaderValue), header);
+		response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+		HttpResponseHeaders headers = this.testCase.createMock(HttpResponseHeaders.class);
+		this.testCase.recordReturn(response, response.getHttpHeaders(), headers);
+		this.testCase.recordReturn(headers, headers.addHeader("WWW-Authenticate", authenticateHeaderValue), header);
 	}
 
 	/**

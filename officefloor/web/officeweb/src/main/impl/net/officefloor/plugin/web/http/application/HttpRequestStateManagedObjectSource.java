@@ -51,6 +51,7 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		context.setObjectClass(HttpRequestState.class);
+		context.setManagedObjectClass(HttpRequestStateManagedObject.class);
 	}
 
 	@Override

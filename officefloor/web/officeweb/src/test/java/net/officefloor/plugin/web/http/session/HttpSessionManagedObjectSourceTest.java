@@ -27,6 +27,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 
@@ -81,13 +82,23 @@ public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpSessionStateAcrossCalls() throws Exception {
 
-		// Loop calling server (HttpClient should send back Session Id)
+		// Loop calling server
+		String cookie = null;
 		for (int i = 0; i < 10; i++) {
 
+			// Create the request
+			MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+			if (cookie != null) {
+				request.header("cookie", cookie);
+			}
+
 			// Call the server
-			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest());
+			MockHttpResponse response = this.server.send(request);
 			int status = response.getHttpStatus().getStatusCode();
 			String callIndex = response.getHttpEntity(null);
+
+			// Obtain the cookie
+			cookie = response.getFirstHeader("set-cookie").getValue();
 
 			// Ensure results match and call index remembered by Session
 			assertEquals("Call should be successful", 200, status);
