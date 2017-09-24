@@ -138,6 +138,14 @@ public interface OfficeArchitect {
 	void addOfficeSectionTransformer(OfficeSectionTransformer transformer);
 
 	/**
+	 * Adds a {@link ManagedFunctionAugmentor}.
+	 * 
+	 * @param managedFunctionAugmentor
+	 *            {@link ManagedFunctionAugmentor}.
+	 */
+	void addManagedFunctionAugmentor(ManagedFunctionAugmentor managedFunctionAugmentor);
+
+	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
 	 * 
 	 * @param managedObjectSourceName

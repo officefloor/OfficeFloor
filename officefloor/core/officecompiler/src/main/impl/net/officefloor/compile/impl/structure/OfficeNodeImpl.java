@@ -76,6 +76,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.ManagedFunctionAugmentor;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -1033,6 +1034,12 @@ public class OfficeNodeImpl implements OfficeNode {
 	@Override
 	public void addOfficeSectionTransformer(OfficeSectionTransformer transformer) {
 		this.officeSectionTransformers.add(transformer);
+	}
+
+	@Override
+	public void addManagedFunctionAugmentor(ManagedFunctionAugmentor managedFunctionAugmentor) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("addManagedFunctionAugmentor");
 	}
 
 	@Override

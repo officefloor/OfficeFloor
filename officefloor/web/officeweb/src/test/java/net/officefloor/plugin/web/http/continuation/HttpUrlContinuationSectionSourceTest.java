@@ -17,9 +17,6 @@
  */
 package net.officefloor.plugin.web.http.continuation;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -43,7 +40,6 @@ import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
-import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -163,12 +159,6 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 			assertSame("Incorrect URI link", "uri", registeredUris[0]);
 		});
 
-		// Create the client (without redirect)
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpClientTestUtil.configureHttps(builder);
-		HttpClientTestUtil.configureNoRedirects(builder);
-		CloseableHttpClient client = builder.build();
-
 		// Start application
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		try {
@@ -193,13 +183,8 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect response", "SERVICED", response.getHttpEntity(null));
 
 		} finally {
-			try {
-				// Ensure stop client
-				client.close();
-			} finally {
-				// Ensure stop application
-				officeFloor.closeOfficeFloor();
-			}
+			// Ensure stop application
+			officeFloor.closeOfficeFloor();
 		}
 	}
 

@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -50,7 +50,7 @@ public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((context) -> {
 			this.server = MockHttpServer
 					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("Servicer", "service"));
