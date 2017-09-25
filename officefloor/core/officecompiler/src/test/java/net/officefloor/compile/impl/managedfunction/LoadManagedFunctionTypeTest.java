@@ -295,51 +295,51 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure Differentiator not required.
+	 * Ensure annotation not required.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testNoDifferentiator() {
+	public void testNoAnnotation() {
 
 		final ManagedFunctionFactory<None, None> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
-		// Attempt to load differentiator
+		// Attempt to load annotation
 		FunctionNamespaceType namespace = this.loadManagedFunctionType(true, new Loader() {
 			@Override
 			public void sourceManagedFunction(FunctionNamespaceBuilder namespace, ManagedFunctionSourceContext context)
 					throws Exception {
 				namespace.addManagedFunctionType("FUNCTION", functionFactory, None.class, None.class);
-				// Do not specify differentiator
+				// Do not specify annotation
 			}
 		});
 
-		// Ensure differentiator available
-		Object differentiator = namespace.getManagedFunctionTypes()[0].getDifferentiator();
-		assertNull("Should not have differentiator", differentiator);
+		// Ensure annotation available
+		Object[] annotations = namespace.getManagedFunctionTypes()[0].getAnnotations();
+		assertEquals("Should not have annotation", 0, annotations.length);
 	}
 
 	/**
-	 * Ensure able to load the Differentiator.
+	 * Ensure able to load the annotation.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testDifferentiator() {
+	public void testAnnotation() {
 
 		final ManagedFunctionFactory<None, None> functionFactory = this.createMock(ManagedFunctionFactory.class);
-		final Object DIFFERENTIATOR = "Differentiator";
+		final Object ANNOTATION = "Annotation";
 
-		// Attempt to load differentiator
+		// Attempt to load annotation
 		FunctionNamespaceType namespace = this.loadManagedFunctionType(true, new Loader() {
 			@Override
 			public void sourceManagedFunction(FunctionNamespaceBuilder namespace, ManagedFunctionSourceContext context)
 					throws Exception {
 				ManagedFunctionTypeBuilder<None, None> function = namespace.addManagedFunctionType("FUNCTION",
 						functionFactory, None.class, None.class);
-				function.setDifferentiator(DIFFERENTIATOR);
+				function.addAnnotation(ANNOTATION);
 			}
 		});
 
-		// Ensure differentiator available
-		Object differentiator = namespace.getManagedFunctionTypes()[0].getDifferentiator();
-		assertEquals("Incorrect differentiator", DIFFERENTIATOR, differentiator);
+		// Ensure annotation available
+		Object annotation = namespace.getManagedFunctionTypes()[0].getAnnotations()[0];
+		assertEquals("Incorrect annotation", ANNOTATION, annotation);
 	}
 
 	/**

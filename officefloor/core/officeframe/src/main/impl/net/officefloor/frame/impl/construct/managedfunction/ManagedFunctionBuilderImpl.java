@@ -74,9 +74,9 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	private final List<ManagedFunctionGovernanceConfiguration> governances = new LinkedList<ManagedFunctionGovernanceConfiguration>();
 
 	/**
-	 * Differentiator.
+	 * Annotations.
 	 */
-	private Object differentiator = null;
+	private List<Object> annotations = new LinkedList<>();
 
 	/**
 	 * Listing of {@link ManagedFunction} bound {@link ManagedObject}
@@ -119,8 +119,8 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	 */
 
 	@Override
-	public void setDifferentiator(Object differentiator) {
-		this.differentiator = differentiator;
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
 	}
 
 	@Override
@@ -217,8 +217,8 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	}
 
 	@Override
-	public Object getDifferentiator() {
-		return this.differentiator;
+	public Object[] getAnnotations() {
+		return this.annotations.toArray(new Object[this.annotations.size()]);
 	}
 
 	@Override

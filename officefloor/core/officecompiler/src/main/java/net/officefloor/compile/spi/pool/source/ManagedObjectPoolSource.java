@@ -48,14 +48,6 @@ public interface ManagedObjectPoolSource {
 	 * @throws Exception
 	 *             If fails to configure the {@link ManagedObjectPoolSource}.
 	 */
-	void init(ManagedObjectPoolSourceContext context) throws Exception;
-
-	/**
-	 * Obtains the {@link ManagedObjectPoolSourceMetaData}.
-	 * 
-	 * @return {@link ManagedObjectPoolSourceMetaData}.
-	 */
-	@Deprecated // make return of init
-	ManagedObjectPoolSourceMetaData getMetaData();
+	ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception;
 
 }

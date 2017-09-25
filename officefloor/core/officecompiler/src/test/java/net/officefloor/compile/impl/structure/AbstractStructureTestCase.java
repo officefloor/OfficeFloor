@@ -27,7 +27,6 @@ import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -177,23 +176,6 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static void assertFlowLink(String msg, Object linkSource, Object linkTarget) {
 		assertTrue(msg + ": source must be " + LinkFlowNode.class.getSimpleName(), linkSource instanceof LinkFlowNode);
 		assertEquals(msg, linkTarget, ((LinkFlowNode) linkSource).getLinkedFlowNode());
-	}
-
-	/**
-	 * Asserts the {@link LinkSynchronousNode} source is linked to the target
-	 * {@link LinkSynchronousNode}.
-	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkSynchronousNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkSynchronousNode}.
-	 */
-	protected static void assertSynchronousLink(String msg, Object linkSource, Object linkTarget) {
-		assertTrue(msg + ": source must be " + LinkSynchronousNode.class.getSimpleName(),
-				linkSource instanceof LinkSynchronousNode);
-		assertEquals(msg, linkTarget, ((LinkSynchronousNode) linkSource).getLinkedSynchronousNode());
 	}
 
 	/**

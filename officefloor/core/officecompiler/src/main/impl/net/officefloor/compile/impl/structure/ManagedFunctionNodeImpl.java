@@ -368,10 +368,12 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			functionBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());
 		}
 
-		// Add differentiator (if available)
-		Object differentiator = functionType.getDifferentiator();
-		if (differentiator != null) {
-			functionBuilder.setDifferentiator(differentiator);
+		// Add annotations (if available)
+		Object[] annotations = functionType.getAnnotations();
+		if (annotations != null) {
+			for (Object annotation : annotations) {
+				functionBuilder.addAnnotation(annotation);
+			}
 		}
 
 		// Build the flows

@@ -655,13 +655,13 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	}
 
 	/**
-	 * Specifies the Differentiator for the {@link ManagedFunction}.
+	 * Add an annotation for the {@link ManagedFunction}.
 	 * 
-	 * @param differentiator
-	 *            Differentiator.
+	 * @param annotation
+	 *            Annotation.
 	 */
-	protected void record_functionBuilder_setDifferentiator(Object differentiator) {
-		this.functionBuilder.setDifferentiator(differentiator);
+	protected void record_functionBuilder_addAnnotation(Object annotation) {
+		this.functionBuilder.addAnnotation(annotation);
 	}
 
 	/**

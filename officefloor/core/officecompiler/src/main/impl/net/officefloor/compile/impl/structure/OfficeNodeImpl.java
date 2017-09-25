@@ -43,7 +43,6 @@ import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -677,53 +676,22 @@ public class OfficeNodeImpl implements OfficeNode {
 		OfficeInputNode[] inputs = this.inputs.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeInputName(), b.getOfficeInputName()))
 				.toArray(OfficeInputNode[]::new);
-		OfficeInputNode[] originalInputs = new OfficeInputNode[inputs.length];
-		System.arraycopy(inputs, 0, originalInputs, 0, inputs.length);
 
 		// Copy the outputs into an array (in deterministic order)
 		OfficeOutputNode[] outputs = this.outputs.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeOutputName(), b.getOfficeOutputName()))
 				.toArray(OfficeOutputNode[]::new);
-		OfficeOutputNode[] originalOutputs = new OfficeOutputNode[outputs.length];
-		System.arraycopy(outputs, 0, originalOutputs, 0, outputs.length);
-
-		// Remove inputs used to handle response
-		for (int o = 0; o < outputs.length; o++) {
-			OfficeOutputNode output = originalOutputs[o];
-			LinkSynchronousNode possibleInput = output.getLinkedSynchronousNode();
-			if (possibleInput != null) {
-				for (int i = 0; i < inputs.length; i++) {
-					if (inputs[i] == possibleInput) {
-						inputs[i] = null; // not include in input types
-					}
-				}
-			}
-		}
-
-		// Remove outputs used to send responses
-		for (int i = 0; i < inputs.length; i++) {
-			OfficeInputNode input = originalInputs[i];
-			LinkSynchronousNode possibleOuput = input.getLinkedSynchronousNode();
-			if (possibleOuput != null) {
-				for (int o = 0; o < outputs.length; o++) {
-					if (outputs[o] == possibleOuput) {
-						outputs[o] = null; // not include in output types
-					}
-				}
-			}
-		}
 
 		// Create the listing of input types
-		OfficeInputType[] inputTypes = CompileUtil.loadTypes(
-				Arrays.asList(inputs).stream().filter((input) -> input != null), (input) -> input.getOfficeInputName(),
-				(input) -> input.loadOfficeInputType(compileContext), OfficeInputType[]::new);
+		OfficeInputType[] inputTypes = CompileUtil.loadTypes(Arrays.asList(inputs).stream(),
+				(input) -> input.getOfficeInputName(), (input) -> input.loadOfficeInputType(compileContext),
+				OfficeInputType[]::new);
 		if (inputTypes == null) {
 			return null;
 		}
 
 		// Create the listing of output types
-		OfficeOutputType[] outputTypes = CompileUtil.loadTypes(
-				Arrays.asList(outputs).stream().filter((output) -> output != null),
+		OfficeOutputType[] outputTypes = CompileUtil.loadTypes(Arrays.asList(outputs).stream(),
 				(output) -> output.getOfficeOutputName(), (output) -> output.loadOfficeOutputType(compileContext),
 				OfficeOutputType[]::new);
 		if (outputTypes == null) {
@@ -1133,18 +1101,8 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public void link(OfficeInput input, OfficeOutput output) {
-		LinkUtil.linkSynchronous(input, output, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
 	public void link(OfficeInput input, OfficeSectionInput sectionInput) {
 		LinkUtil.linkFlow(input, sectionInput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(OfficeOutput output, OfficeInput input) {
-		LinkUtil.linkSynchronous(output, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

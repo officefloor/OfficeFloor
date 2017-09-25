@@ -190,16 +190,16 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	}
 
 	/**
-	 * Ensure able to have a differentiator.
+	 * Ensure able to have an annotation.
 	 */
-	public void testDifferentiator() {
+	public void testAnnotation() {
 
-		final Object DIFFERENTIATOR = "Differentiator";
+		final Object[] ANNOTATIONS = new Object[] { "Annotation" };
 
 		// Record with differentiator
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
-		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), DIFFERENTIATOR);
+		this.recordReturn(this.configuration, this.configuration.getAnnotations(), ANNOTATIONS);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.responsibleTeam);
@@ -213,18 +213,17 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
-		// Verify differentiator
-		assertEquals("Incorrect differentiator", DIFFERENTIATOR,
-				metaData.getManagedFunctionMetaData().getDifferentiator());
+		// Verify annotation
+		assertEquals("Incorrect annotation", ANNOTATIONS[0], metaData.getManagedFunctionMetaData().getAnnotations()[0]);
 	}
 
 	/**
-	 * Ensure able to have no differentiator.
+	 * Ensure able to have no annotation.
 	 */
-	public void testNoDifferentiator() {
+	public void testNoAnnotation() {
 
 		// Record with differentiator
-		this.record_nameFactoryTeam(); // no differentiator loaded
+		this.record_nameFactoryTeam(); // no annotation loaded
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
@@ -234,8 +233,8 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
-		// Verify no differentiator
-		assertNull("Should have no differentiator", metaData.getManagedFunctionMetaData().getDifferentiator());
+		// Verify no annotation
+		assertEquals("Should have no annotation", 0, metaData.getManagedFunctionMetaData().getAnnotations().length);
 	}
 
 	/**
@@ -246,7 +245,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		// Record no team name
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
-		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
+		this.recordReturn(this.configuration, this.configuration.getAnnotations(), new Object[0]);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
@@ -268,7 +267,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		// Record unknown team
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
-		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
+		this.recordReturn(this.configuration, this.configuration.getAnnotations(), new Object[0]);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), new HashMap<String, Team>());
 		this.record_functionIssue("Unknown Team 'TEAM' responsible for ManagedFunction");
@@ -303,7 +302,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		ManagedFunctionMetaData<?, ?> taskMetaData = metaData.getManagedFunctionMetaData();
 		assertEquals("Incorrect function name", FUNCTION_NAME, taskMetaData.getFunctionName());
 		assertEquals("Incorect function factory", this.functionFactory, taskMetaData.getManagedFunctionFactory());
-		assertNull("No differentiator", taskMetaData.getDifferentiator());
+		assertEquals("No differentiator", 0, taskMetaData.getAnnotations().length);
 		assertEquals("Incorrect team", this.responsibleTeam, taskMetaData.getResponsibleTeam());
 	}
 
@@ -1371,7 +1370,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	private void record_nameFactoryTeam() {
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
-		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
+		this.recordReturn(this.configuration, this.configuration.getAnnotations(), new Object[0]);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.responsibleTeam);

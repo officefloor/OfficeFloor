@@ -25,7 +25,7 @@ import net.officefloor.compile.spi.office.OfficeInput;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode, OfficeInput {
+public interface OfficeInputNode extends LinkFlowNode, OfficeInput {
 
 	/**
 	 * {@link Node} type.

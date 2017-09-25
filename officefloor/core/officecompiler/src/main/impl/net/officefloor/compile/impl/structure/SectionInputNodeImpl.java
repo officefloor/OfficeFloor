@@ -335,8 +335,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		private FunctionManager delegate = null;
 
 		@Override
-		public Object getDifferentiator() {
-			return this.delegate.getDifferentiator();
+		public Object[] getAnnotations() {
+			return this.delegate.getAnnotations();
 		}
 
 		@Override

@@ -17,10 +17,6 @@
  */
 package net.officefloor.compile.impl.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -50,64 +46,6 @@ public class CompileUtil {
 	 */
 	public static boolean isBlank(String value) {
 		return ((value == null) || (value.trim().length() == 0));
-	}
-
-	/**
-	 * Convenience method for {@link List#toArray(Object[])} to pass compiler
-	 * warnings for generic typed array.
-	 * 
-	 * @param <T>
-	 *            Element type.
-	 * @param list
-	 *            List to transform into an array.
-	 * @param type
-	 *            Type of the array.
-	 * @return List as an array.
-	 */
-	@Deprecated
-	@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(Collection<T> list, Object[] type) {
-		Object[] array = list.toArray(type);
-		return (T[]) array;
-	}
-
-	/**
-	 * Convenience method to create a sorted array from a {@link Collection}
-	 * that passes compiler warnings for generic typed array along with handling
-	 * <code>null</code> <code>compareTo</code> values.
-	 * 
-	 * @param <T>
-	 *            Collection element type.
-	 * @param collection
-	 *            Collection to transform into a sorted array.
-	 * @param type
-	 *            Type of the array.
-	 * @param extractor
-	 *            {@link StringExtractor} to obtain compare key to sort.
-	 * @return Collection as a sorted array.
-	 */
-	@Deprecated
-	public static <T> T[] toSortedArray(Collection<T> collection, Object[] type,
-			final StringExtractor<? super T> extractor) {
-
-		// Create the array
-		T[] array = toArray(collection, type);
-
-		// Sort the array
-		Arrays.sort(array, new Comparator<T>() {
-			@Override
-			public int compare(T a, T b) {
-				// Obtain the string keys for comparing
-				String aKey = extractor.toString(a);
-				String bKey = extractor.toString(b);
-
-				// Return the comparison (handling possible null key)
-				return CompileUtil.sortCompare(aKey, bKey);
-			}
-		});
-
-		// Return the sorted array
-		return array;
 	}
 
 	/**

@@ -280,18 +280,6 @@ public interface OfficeArchitect {
 	OfficeStart addOfficeStart(String startName);
 
 	/**
-	 * Links the {@link OfficeOutput} for synchronous response to an
-	 * {@link OfficeInput}.
-	 * 
-	 * @param input
-	 *            {@link OfficeInput} to receive request.
-	 * @param output
-	 *            {@link OfficeOutput} to provide response.
-	 */
-	@Deprecated // integration via queues so no synchronous communication
-	void link(OfficeInput input, OfficeOutput output);
-
-	/**
 	 * Links the {@link OfficeInput} to be handled by the
 	 * {@link OfficeSectionInput}.
 	 * 
@@ -301,18 +289,6 @@ public interface OfficeArchitect {
 	 *            {@link OfficeSectionInput}.
 	 */
 	void link(OfficeInput input, OfficeSectionInput sectionInput);
-
-	/**
-	 * Links the {@link OfficeInput} for synchronous request to an
-	 * {@link OfficeOutput}.
-	 * 
-	 * @param output
-	 *            {@link OfficeOutput} to make request.
-	 * @param input
-	 *            {@link OfficeInput} to handle response.
-	 */
-	@Deprecated // integration via queues so no synchronous communication
-	void link(OfficeOutput output, OfficeInput input);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to be handled by the

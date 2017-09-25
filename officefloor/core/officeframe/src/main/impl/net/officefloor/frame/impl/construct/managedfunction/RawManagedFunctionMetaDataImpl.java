@@ -174,8 +174,8 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			return null; // no function factory
 		}
 
-		// Obtain the differentiator
-		Object differentiator = configuration.getDifferentiator();
+		// Obtain the annotations
+		Object[] annotations = configuration.getAnnotations();
 
 		// Obtain the team responsible for the function
 		TeamManagement responsibleTeam = null;
@@ -380,7 +380,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
-				functionFactory, differentiator, parameterType, responsibleTeam, functionIndexedManagedObjects,
+				functionFactory, annotations, parameterType, responsibleTeam, functionIndexedManagedObjects,
 				functionBoundMoMetaData, requiredGovernance);
 
 		// Return the raw function meta-data

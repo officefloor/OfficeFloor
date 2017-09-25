@@ -17,8 +17,19 @@
  */
 package net.officefloor.compile.integrate.office;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.AugmentedManagedObject;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
  * Ensure able to augment {@link ManagedFunction} instances.
@@ -28,10 +39,68 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link MockObject}.
+	 */
+	private static MockObject object = null;
+
+	/**
 	 * Ensure can augment the {@link ManagedFunction}.
 	 */
-	public void testAugmentManagedFunction() {
-		fail("TODO implement");
+	public void testAugmentManagedFunction() throws Exception {
+
+		// Create the managed object
+		MockObject mockObject = new MockObject();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			context.addSection("SECTION", MockSection.class);
+
+			// Augment the object
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
+					Class<?> objectType = type.getObjectType();
+					if (objectType.isAnnotationPresent(MockAnnotation.class)) {
+
+						// Add the managed object
+						AugmentedManagedObject managedObject = augment
+								.addManagedObjectSource("OBJECT", new Singleton(mockObject))
+								.addAugmentedManagedObject("OBJECT", ManagedObjectScope.PROCESS);
+
+						// Obtain the function object
+						AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
+
+						// Link managed object
+						augment.link(object, managedObject);
+					}
+				}
+			});
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Reset for test
+		object = null;
+
+		// Execute the method (with augmented object)
+		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+		function.invokeProcess(null, null);
+
+		// Should have loaded the augmented object
+		assertSame("Should load augmented object", mockObject, object);
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MockAnnotation {
+	}
+
+	@MockAnnotation
+	public static class MockObject {
+	}
+
+	public static class MockSection {
+		public void function(MockObject object) {
+			AugmentManagedFunctionTest.object = object;
+		}
 	}
 
 }

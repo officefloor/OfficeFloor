@@ -43,14 +43,4 @@ public interface OfficeInputType {
 	 */
 	String getParameterType();
 
-	/**
-	 * Obtains the possible {@link OfficeOutputType} responsible for sending the
-	 * response for this {@link OfficeInput}.
-	 * 
-	 * @return Possible {@link OfficeOutputType} responsible for sending the
-	 *         response for this {@link OfficeInput}. May be <code>null</code>
-	 *         to indicate no response is sent.
-	 */
-	OfficeOutputType getResponseOfficeOutputType();
-
 }

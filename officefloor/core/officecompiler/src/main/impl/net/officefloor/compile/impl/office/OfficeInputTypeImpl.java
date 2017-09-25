@@ -18,7 +18,6 @@
 package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.office.OfficeInputType;
-import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.spi.office.OfficeInput;
 
 /**
@@ -39,25 +38,16 @@ public class OfficeInputTypeImpl implements OfficeInputType {
 	private final String parameterType;
 
 	/**
-	 * Response {@link OfficeOutputType}.
-	 */
-	private final OfficeOutputType outputType;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link OfficeInput}.
 	 * @param parameterType
 	 *            {@link Class} name of the parameter.
-	 * @param outputType
-	 *            Response {@link OfficeOutputType}. May be <code>null</code>.
 	 */
-	public OfficeInputTypeImpl(String inputName, String parameterType,
-			OfficeOutputType outputType) {
+	public OfficeInputTypeImpl(String inputName, String parameterType) {
 		this.inputName = inputName;
 		this.parameterType = parameterType;
-		this.outputType = outputType;
 	}
 
 	/*
@@ -72,11 +62,6 @@ public class OfficeInputTypeImpl implements OfficeInputType {
 	@Override
 	public String getParameterType() {
 		return this.parameterType;
-	}
-
-	@Override
-	public OfficeOutputType getResponseOfficeOutputType() {
-		return this.outputType;
 	}
 
 }

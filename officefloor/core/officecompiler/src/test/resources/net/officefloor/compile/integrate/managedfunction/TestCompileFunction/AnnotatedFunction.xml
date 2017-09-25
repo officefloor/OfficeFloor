@@ -12,7 +12,7 @@
 	<section>
 		<function-namespaces>
 			<function-namespace name="NAMESPACE"
-				source="${testcase}$DifferentiatorManagedFunctionSource">
+				source="${testcase}$AnnotatedManagedFunctionSource">
 				<managed-function name="function" />
 			</function-namespace>
 		</function-namespaces>

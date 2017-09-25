@@ -184,9 +184,10 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(true,
 				new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext());
 
+		// Initialise the managed object pool source
+		ManagedObjectPoolSourceMetaData metaData;
 		try {
-			// Initialise the managed object pool source
-			managedObjectPoolSource.init(sourceContext);
+			metaData = managedObjectPoolSource.init(sourceContext);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "'");
@@ -205,14 +206,7 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 			return null; // must initialise
 		}
 
-		// Obtain the meta-data
-		ManagedObjectPoolSourceMetaData metaData;
-		try {
-			metaData = managedObjectPoolSource.getMetaData();
-		} catch (Throwable ex) {
-			this.addIssue("Failed to get " + ManagedObjectPoolSourceMetaData.class.getSimpleName(), ex);
-			return null; // must have meta-data
-		}
+		// Ensure have meta-data
 		if (metaData == null) {
 			this.addIssue("Returned null " + ManagedObjectPoolSourceMetaData.class.getSimpleName());
 			return null; // must have meta-data

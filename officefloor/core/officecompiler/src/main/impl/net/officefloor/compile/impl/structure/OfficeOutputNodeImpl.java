@@ -19,14 +19,12 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.office.OfficeOutputTypeImpl;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.spi.office.OfficeOutput;
 
@@ -148,43 +146,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 
 	@Override
 	public OfficeOutputType loadOfficeOutputType(CompileContext compileContext) {
-		return new OfficeOutputTypeImpl(this.name, this.state.argumentType, (this.linkedSynchronousNode == null ? null
-				: this.linkedSynchronousNode.loadOfficeInputType(compileContext)));
-	}
-
-	/*
-	 * =============== LinkSynchronousNode ===========================
-	 */
-
-	/**
-	 * {@link LinkSynchronousNode} being the {@link OfficeInputNode}.
-	 */
-	private OfficeInputNode linkedSynchronousNode = null;
-
-	@Override
-	public boolean linkSynchronousNode(LinkSynchronousNode node) {
-
-		// Ensure not already linked
-		if (this.linkedSynchronousNode != null) {
-			this.context.getCompilerIssues().addIssue(this, "Output " + this.name + " linked more than once");
-			return false; // already linked
-		}
-
-		// Ensure is an input
-		if (!(node instanceof OfficeInputNode)) {
-			this.context.getCompilerIssues().addIssue(this, "Output " + this.name
-					+ " may only be synchronously linked to an " + OfficeInputNode.class.getSimpleName());
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedSynchronousNode = (OfficeInputNode) node;
-		return true;
-	}
-
-	@Override
-	public LinkSynchronousNode getLinkedSynchronousNode() {
-		return this.linkedSynchronousNode;
+		return new OfficeOutputTypeImpl(this.name, this.state.argumentType);
 	}
 
 	/*

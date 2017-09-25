@@ -707,54 +707,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can link {@link OfficeInput} to {@link OfficeOutput} for
-	 * synchronous response.
-	 */
-	public void testLinkInputToOutput() {
-
-		// Record already being linked
-		this.issues.recordIssue("INPUT", OfficeInputNodeImpl.class, "Input INPUT linked more than once");
-
-		this.replayMockObjects();
-
-		// Link
-		OfficeInput input = this.node.addOfficeInput("INPUT", Integer.class.getName());
-		OfficeOutput output = this.node.addOfficeOutput("OUTPUT", Long.class.getName());
-		this.node.link(input, output);
-		assertSynchronousLink("input -> output", input, output);
-
-		// Ensure only can link once
-		this.node.link(input, this.node.addOfficeOutput("ANOHTER", Character.class.getName()));
-		assertSynchronousLink("input -> output", input, output);
-
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can link {@link OfficeOutput} to {@link OfficeInput} for
-	 * synchronous request.
-	 */
-	public void testLinkOutputToInput() {
-
-		// Record already being linked
-		this.issues.recordIssue("OUTPUT", OfficeOutputNodeImpl.class, "Output OUTPUT linked more than once");
-
-		this.replayMockObjects();
-
-		// Link
-		OfficeOutput output = this.node.addOfficeOutput("OUTPUT", Long.class.getName());
-		OfficeInput input = this.node.addOfficeInput("INPUT", Integer.class.getName());
-		this.node.link(output, input);
-		assertSynchronousLink("output -> input", output, input);
-
-		// Ensure only can link once
-		this.node.link(output, this.node.addOfficeInput("ANOTHER", Character.class.getName()));
-		assertSynchronousLink("output -> input", output, input);
-
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensure can link the {@link ResponsibleTeam} to an {@link OfficeTeam}.
 	 */
 	public void testLinkFunctionTeamToOfficeTeam() {

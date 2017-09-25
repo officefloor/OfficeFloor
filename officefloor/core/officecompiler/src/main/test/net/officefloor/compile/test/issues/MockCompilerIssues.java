@@ -19,7 +19,6 @@ package net.officefloor.compile.test.issues;
 
 import java.util.function.Supplier;
 
-import junit.framework.AssertionFailedError;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.internal.structure.Node;

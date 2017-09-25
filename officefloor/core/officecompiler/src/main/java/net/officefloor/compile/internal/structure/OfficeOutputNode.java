@@ -25,8 +25,7 @@ import net.officefloor.compile.spi.office.OfficeOutput;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeOutputNode extends LinkFlowNode, LinkSynchronousNode,
-		OfficeOutput {
+public interface OfficeOutputNode extends LinkFlowNode, OfficeOutput {
 
 	/**
 	 * {@link Node} type.

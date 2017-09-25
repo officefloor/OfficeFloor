@@ -18,7 +18,6 @@
 package net.officefloor.compile.managedobject;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 

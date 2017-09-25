@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.impl.managedfunction;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -62,15 +60,9 @@ public class FunctionNamespaceTypeImpl implements FunctionNamespaceType, Functio
 
 	@Override
 	public ManagedFunctionType<?, ?>[] getManagedFunctionTypes() {
-		// Create and return the sorted listing of task types
-		ManagedFunctionType<?, ?>[] taskTypes = CompileUtil.toArray(this.functions, new ManagedFunctionType[0]);
-		Arrays.sort(taskTypes, new Comparator<ManagedFunctionType<?, ?>>() {
-			@Override
-			public int compare(ManagedFunctionType<?, ?> a, ManagedFunctionType<?, ?> b) {
-				return a.getFunctionName().compareTo(b.getFunctionName());
-			}
-		});
-		return taskTypes;
+		return this.functions.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getFunctionName(), b.getFunctionName()))
+				.toArray(ManagedFunctionType[]::new);
 	}
 
 }

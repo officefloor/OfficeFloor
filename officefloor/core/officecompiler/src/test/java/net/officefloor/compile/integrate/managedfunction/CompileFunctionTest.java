@@ -97,9 +97,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedFunction} with a differentiator.
+	 * Tests compiling a {@link ManagedFunction} with an annotation.
 	 */
-	public void testDifferentiatorFunction() {
+	public void testAnnotatedFunction() {
 
 		// Record loading section type
 		this.issues.recordCaptureIssues(false);
@@ -108,7 +108,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		this.record_functionBuilder_setDifferentiator(DifferentiatorManagedFunctionSource.DIFFERENTIATOR);
+		this.record_functionBuilder_addAnnotation(AnnotatedManagedFunctionSource.ANNOTATION);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -621,12 +621,12 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} to load differentiator for
+	 * {@link ManagedFunctionSource} to load annotation for
 	 * {@link ManagedFunction}.
 	 */
-	public static class DifferentiatorManagedFunctionSource extends AbstractManagedFunctionSource {
+	public static class AnnotatedManagedFunctionSource extends AbstractManagedFunctionSource {
 
-		public static final String DIFFERENTIATOR = "DIFFERENTIATOR";
+		public static final String ANNOTATION = "ANNOTATION";
 
 		/*
 		 * ================== ManagedFunctionSource ==================
@@ -645,7 +645,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 							CompileFunctionClass.class.getMethod("simpleFunction"),
 							new ManagedFunctionParameterFactory[0]),
 					Indexed.class, Indexed.class);
-			function.setDifferentiator(DIFFERENTIATOR);
+			function.addAnnotation(ANNOTATION);
 		}
 	}
 

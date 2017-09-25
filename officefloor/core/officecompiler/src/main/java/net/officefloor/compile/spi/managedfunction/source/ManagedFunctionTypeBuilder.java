@@ -18,7 +18,6 @@
 package net.officefloor.compile.spi.managedfunction.source;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -33,14 +32,12 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface ManagedFunctionTypeBuilder<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
-	 * Specifies the differentiator.
+	 * Adds an annotation.
 	 * 
-	 * @param differentiator
-	 *            Differentiator.
-	 * 
-	 * @see ManagedFunctionBuilder#setDifferentiator(Object)
+	 * @param annotation
+	 *            Annotation.
 	 */
-	void setDifferentiator(Object differentiator);
+	void addAnnotation(Object annotation);
 
 	/**
 	 * Specifies the type of {@link Object} returned from the

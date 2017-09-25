@@ -40,11 +40,11 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	ManagedFunctionFactory<O, F> getManagedFunctionFactory();
 
 	/**
-	 * Obtains the differentiator for the {@link ManagedFunction}.
+	 * Obtains the annotations for the {@link ManagedFunction}.
 	 * 
-	 * @return Differentiator or <code>null</code> if no differentiator.
+	 * @return Annotations.
 	 */
-	Object getDifferentiator();
+	Object[] getAnnotations();
 
 	/**
 	 * Obtains the parameter type for the {@link ManagedFunction}.

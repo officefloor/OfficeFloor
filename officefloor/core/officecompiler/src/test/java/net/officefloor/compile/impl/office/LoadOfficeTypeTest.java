@@ -35,13 +35,11 @@ import net.officefloor.compile.impl.governance.MockLoadGovernance;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
-import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeInputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeTeamNodeImpl;
-import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -425,7 +423,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		OfficeInputType input = inputs[0];
 		assertEquals("Incorrect input name", "INPUT", input.getOfficeInputName());
 		assertEquals("Incorrect input parameter type", Integer.class.getName(), input.getParameterType());
-		assertNull("Should be no corresponding output", input.getResponseOfficeOutputType());
 	}
 
 	/**
@@ -470,7 +467,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		OfficeOutputType output = outputs[0];
 		assertEquals("Incorrect output name", "OUTPUT", output.getOfficeOutputName());
 		assertEquals("Incorrect output argument type", Long.class.getName(), output.getArgumentType());
-		assertNull("Should be no corresponding input", output.getHandlingOfficeInputType());
 	}
 
 	/**
@@ -494,62 +490,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect number of outputs", 1, outputs.length);
 		OfficeOutputType output = outputs[0];
 		assertEquals("Incorrect output name", "TEST", output.getOfficeOutputName());
-	}
-
-	/**
-	 * Ensure obtain synchronous {@link OfficeOutputType}.
-	 */
-	public void testInputOutput_Synchronous() {
-
-		// Load the type
-		OfficeType type = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				OfficeInput input = office.addOfficeInput("INPUT", Integer.class.getName());
-				OfficeOutput output = office.addOfficeOutput("OUTPUT", Long.class.getName());
-				office.link(input, output);
-			}
-		});
-
-		// Validate synchronous input
-		OfficeInputType[] inputs = type.getOfficeInputTypes();
-		assertEquals("Incorrect number of inputs", 1, inputs.length);
-		OfficeInputType input = inputs[0];
-		assertEquals("Incorrect input name", "INPUT", input.getOfficeInputName());
-		OfficeOutputType output = input.getResponseOfficeOutputType();
-		assertNotNull("Should have response output", output);
-		assertEquals("Incorrect output name", "OUTPUT", output.getOfficeOutputName());
-
-		// Ensure synchronous output not included in outputs
-		assertEquals("Should be no outputs", 0, type.getOfficeOutputTypes().length);
-	}
-
-	/**
-	 * Ensure obtain synchronous {@link OfficeInputType}.
-	 */
-	public void testOutputInput_Synchronous() {
-
-		// Load the type
-		OfficeType type = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				OfficeOutput output = office.addOfficeOutput("OUTPUT", Long.class.getName());
-				OfficeInput input = office.addOfficeInput("INPUT", Integer.class.getName());
-				office.link(output, input);
-			}
-		});
-
-		// Validate synchronous output
-		OfficeOutputType[] outputs = type.getOfficeOutputTypes();
-		assertEquals("Incorrect number of outputs", 1, outputs.length);
-		OfficeOutputType output = outputs[0];
-		assertEquals("Incorrect output name", "OUTPUT", output.getOfficeOutputName());
-		OfficeInputType input = output.getHandlingOfficeInputType();
-		assertNotNull("Should have handling input", input);
-		assertEquals("Incorrect input name", "INPUT", input.getOfficeInputName());
-
-		// Ensure synchronous input not included in inputs
-		assertEquals("Should be no inputs", 0, type.getOfficeInputTypes().length);
 	}
 
 	/**

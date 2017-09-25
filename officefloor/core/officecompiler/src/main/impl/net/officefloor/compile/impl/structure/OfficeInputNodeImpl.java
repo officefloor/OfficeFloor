@@ -19,14 +19,12 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.office.OfficeInputTypeImpl;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.internal.structure.OfficeOutputNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.spi.office.OfficeInput;
 
@@ -139,40 +137,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	@Override
 	public OfficeInputType loadOfficeInputType(CompileContext compileContext) {
-		return new OfficeInputTypeImpl(this.name, this.state.parameterType, (this.linkedSynchronousNode == null ? null
-				: this.linkedSynchronousNode.loadOfficeOutputType(compileContext)));
-	}
-
-	/*
-	 * ===================== LinkSynchronousNode =========================
-	 */
-
-	private OfficeOutputNode linkedSynchronousNode = null;
-
-	@Override
-	public boolean linkSynchronousNode(LinkSynchronousNode node) {
-
-		// Ensure not already linked
-		if (this.linkedSynchronousNode != null) {
-			this.context.getCompilerIssues().addIssue(this, "Input " + this.name + " linked more than once");
-			return false; // already linked
-		}
-
-		// Ensure is an output
-		if (!(node instanceof OfficeOutputNode)) {
-			this.context.getCompilerIssues().addIssue(this, "Input " + this.name
-					+ " may only be synchronously linked to an " + OfficeOutputNode.class.getSimpleName());
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedSynchronousNode = (OfficeOutputNode) node;
-		return true;
-	}
-
-	@Override
-	public LinkSynchronousNode getLinkedSynchronousNode() {
-		return this.linkedSynchronousNode;
+		return new OfficeInputTypeImpl(this.name, this.state.parameterType);
 	}
 
 	/*

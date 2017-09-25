@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -390,6 +389,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            {@link OfficeConfiguration}.
 	 * @return Filtered {@link ManagedObjectFlowType}.
 	 */
+	@SuppressWarnings("unchecked")
 	private <F extends Enum<F>> ManagedObjectFlowType<F>[] filterLinkedProcesses(
 			ManagedObjectFlowType<F>[] metaDataFlows, ManagingOfficeConfiguration<F> managingOffice,
 			OfficeConfiguration office) {
@@ -484,7 +484,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		}
 
 		// Return the filtered list of flows
-		return CompileUtil.toArray(filteredFlows, new ManagedObjectFlowType[0]);
+		return filteredFlows.stream().toArray(ManagedObjectFlowType[]::new);
 	}
 
 	/**
@@ -500,7 +500,6 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	private boolean ensureFunctionFlowsLinked(OfficeConfiguration office) {
 
 		// Obtain the flows instigated by the functions
-		List<ManagedObjectFlowType<?>> functionFlows = new LinkedList<ManagedObjectFlowType<?>>();
 		for (ManagedFunctionConfiguration<?, ?> function : office.getManagedFunctionConfiguration()) {
 			FlowConfiguration<?>[] flows = function.getFlowConfiguration();
 			for (int i = 0; i < flows.length; i++) {

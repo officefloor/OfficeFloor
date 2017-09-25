@@ -232,17 +232,16 @@ public class ManagedFunctionLoaderUtil {
 			Assert.assertNotNull("Must have managed function factory (function=" + eFunction.getFunctionName() + ")",
 					aFunction.getManagedFunctionFactory());
 
-			// Verify differentiator
-			Object expectedDifferentiator = eFunction.getDifferentiator();
-			Object actualDifferentiator = aFunction.getDifferentiator();
-			if (expectedDifferentiator == null) {
-				Assert.assertNull("Should not have differentiator (function=" + eFunction.getFunctionName() + ")",
-						actualDifferentiator);
-			} else {
-				// Match differentiator on type
-				Assert.assertEquals("Incorrect differentiator type (function=" + eFunction.getFunctionName() + ")",
-						expectedDifferentiator.getClass(),
-						(actualDifferentiator == null ? null : actualDifferentiator.getClass()));
+			// Verify annotations
+			Object[] eAnnotations = eFunction.getAnnotations();
+			Object[] aAnnotations = aFunction.getAnnotations();
+			Assert.assertEquals("Incorrect number of annotations (function=" + eFunction.getFunctionName() + ")",
+					eAnnotations.length, aAnnotations.length);
+			for (int d = 0; d < eAnnotations.length; d++) {
+				// Match annotation on type
+				Assert.assertEquals("Incorrect annotation type (function=" + eFunction.getFunctionName() + ")",
+						eAnnotations[d].getClass(), (aAnnotations[d] == null ? null : aAnnotations[d].getClass()));
+
 			}
 
 			// Verify the dependencies

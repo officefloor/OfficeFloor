@@ -197,22 +197,6 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if fails to obtain the
-	 * {@link ManagedObjectPoolSourceMetaData}.
-	 */
-	public void testFailGetManagedObjectPoolSourceMetaData() {
-
-		final Error failure = new Error("Obtain meta-data failure");
-
-		// Record failure to obtain the meta-data
-		this.issues.recordIssue("Failed to get ManagedObjectPoolSourceMetaData", failure);
-
-		// Attempt to load
-		MockManagedObjectPoolSource.metaDataFailure = failure;
-		this.loadManagedObjectPoolType(false, null);
-	}
-
-	/**
 	 * Ensure issue if no pooled object type from meta-data.
 	 */
 	public void testNoPooledObjectType() {
@@ -371,11 +355,6 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		public static Init init = null;
 
 		/**
-		 * Failure to obtain the {@link ManagedObjectPoolMetaData}.
-		 */
-		public static Error metaDataFailure = null;
-
-		/**
 		 * {@link ManagedObjectPoolSourceSpecification}.
 		 */
 		public static ManagedObjectPoolSourceMetaData metaData;
@@ -389,7 +368,6 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		public static void reset(ManagedObjectPoolSourceMetaData metaData) {
 			instantiateFailure = null;
 			init = null;
-			metaDataFailure = null;
 			MockManagedObjectPoolSource.metaData = metaData;
 		}
 
@@ -414,19 +392,11 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(ManagedObjectPoolSourceContext context) throws Exception {
+		public ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception {
+
 			// Run the init if available
 			if (init != null) {
 				init.init(context);
-			}
-		}
-
-		@Override
-		public ManagedObjectPoolSourceMetaData getMetaData() {
-
-			// Throw meta-data failure
-			if (metaDataFailure != null) {
-				throw metaDataFailure;
 			}
 
 			// Return the meta-data

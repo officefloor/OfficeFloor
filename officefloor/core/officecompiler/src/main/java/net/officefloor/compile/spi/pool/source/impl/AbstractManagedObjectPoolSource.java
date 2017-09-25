@@ -130,21 +130,12 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 		}
 	}
 
-	/**
-	 * {@link MetaData}.
-	 */
-	private MetaData metaData;
-
 	@Override
-	public void init(ManagedObjectPoolSourceContext context) throws Exception {
+	public ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception {
 		// Create and populate the meta-data
-		this.metaData = new MetaData(context);
-		this.loadMetaData(this.metaData);
-	}
-
-	@Override
-	public ManagedObjectPoolSourceMetaData getMetaData() {
-		return this.metaData;
+		MetaData metaData = new MetaData(context);
+		this.loadMetaData(metaData);
+		return metaData;
 	}
 
 	/**

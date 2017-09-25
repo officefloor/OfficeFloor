@@ -17,12 +17,9 @@
  */
 package net.officefloor.compile.impl.managedfunction;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
@@ -79,9 +76,9 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	private final List<ManagedFunctionEscalationType> escalations = new LinkedList<ManagedFunctionEscalationType>();
 
 	/**
-	 * Differentiator.
+	 * Annotations.
 	 */
-	private Object differentiator = null;
+	private final List<Object> annotations = new LinkedList<>();
 
 	/**
 	 * Return type.
@@ -111,12 +108,12 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	/*
-	 * ==================== TaskTypeBuilder ===================================
+	 * ==================== ManagedFunctionTypeBuilder =========================
 	 */
 
 	@Override
-	public void setDifferentiator(Object differentiator) {
-		this.differentiator = differentiator;
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
 	}
 
 	@Override
@@ -146,7 +143,7 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	/*
-	 * ========================== FunctionType ================================
+	 * ======================= ManagedFunctionType ==========================
 	 */
 
 	@Override
@@ -160,8 +157,8 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public Object getDifferentiator() {
-		return this.differentiator;
+	public Object[] getAnnotations() {
+		return this.annotations.toArray(new Object[this.annotations.size()]);
 	}
 
 	@Override
@@ -170,16 +167,10 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public ManagedFunctionObjectType<M>[] getObjectTypes() {
-		ManagedFunctionObjectType<M>[] objectTypes = CompileUtil.toArray(this.objects,
-				new ManagedFunctionObjectType[0]);
-		Arrays.sort(objectTypes, new Comparator<ManagedFunctionObjectType<M>>() {
-			@Override
-			public int compare(ManagedFunctionObjectType<M> a, ManagedFunctionObjectType<M> b) {
-				return a.getIndex() - b.getIndex();
-			}
-		});
-		return objectTypes;
+		return this.objects.stream().sorted((a, b) -> a.getIndex() - b.getIndex())
+				.toArray(ManagedFunctionObjectType[]::new);
 	}
 
 	@Override
@@ -188,15 +179,10 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public ManagedFunctionFlowType<F>[] getFlowTypes() {
-		ManagedFunctionFlowType<F>[] flowTypes = CompileUtil.toArray(this.flows, new ManagedFunctionFlowType[0]);
-		Arrays.sort(flowTypes, new Comparator<ManagedFunctionFlowType<F>>() {
-			@Override
-			public int compare(ManagedFunctionFlowType<F> a, ManagedFunctionFlowType<F> b) {
-				return a.getIndex() - b.getIndex();
-			}
-		});
-		return flowTypes;
+		return this.flows.stream().sorted((a, b) -> a.getIndex() - b.getIndex())
+				.toArray(ManagedFunctionFlowType[]::new);
 	}
 
 	@Override

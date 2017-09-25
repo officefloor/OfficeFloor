@@ -156,10 +156,8 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		 *            Name of {@link OfficeInput}.
 		 * @param parameterType
 		 *            Parameter type.
-		 * @param response
-		 *            {@link OfficeOutputType}.
 		 */
-		void addOfficeInput(String inputName, Class<?> parameterType, OfficeOutputType response);
+		void addOfficeInput(String inputName, Class<?> parameterType);
 
 		/**
 		 * Add {@link OfficeOutputType}.
@@ -168,10 +166,8 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		 *            Name of {@link OfficeOutput}.
 		 * @param argumentType
 		 *            Argument type.
-		 * @param handler
-		 *            {@link OfficeInputType}.
 		 */
-		void addOfficeOutput(String outputName, Class<?> argumentType, OfficeInputType handler);
+		void addOfficeOutput(String outputName, Class<?> argumentType);
 	}
 
 	/**
@@ -209,13 +205,13 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		 */
 
 		@Override
-		public void addOfficeInput(String inputName, Class<?> parameterType, OfficeOutputType response) {
-			this.inputs.add(new OfficeTypeItem(inputName, parameterType.getName(), response));
+		public void addOfficeInput(String inputName, Class<?> parameterType) {
+			this.inputs.add(new OfficeTypeItem(inputName, parameterType.getName()));
 		}
 
 		@Override
-		public void addOfficeOutput(String outputName, Class<?> argumentType, OfficeInputType handler) {
-			this.outputs.add(new OfficeTypeItem(outputName, argumentType.getName(), handler));
+		public void addOfficeOutput(String outputName, Class<?> argumentType) {
+			this.outputs.add(new OfficeTypeItem(outputName, argumentType.getName()));
 		}
 
 		@Override
@@ -255,14 +251,12 @@ public abstract class AbstractOfficeFloorChangesTestCase
 
 		@Override
 		public OfficeInputType[] getOfficeInputTypes() {
-			// TODO Auto-generated method stub
-			return null;
+			return this.inputs.toArray(new OfficeInputType[0]);
 		}
 
 		@Override
 		public OfficeOutputType[] getOfficeOutputTypes() {
-			// TODO Auto-generated method stub
-			return null;
+			return this.outputs.toArray(new OfficeOutputType[0]);
 		}
 	}
 
@@ -298,16 +292,6 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		private final String[] extensionInterfaces;
 
 		/**
-		 * {@link OfficeInputType}.
-		 */
-		private final OfficeInputType inputType;
-
-		/**
-		 * {@link OfficeOutputType}.
-		 */
-		private final OfficeOutputType outputType;
-
-		/**
 		 * Initialise for {@link OfficeAvailableSectionInputType}.
 		 * 
 		 * @param name
@@ -323,8 +307,6 @@ public abstract class AbstractOfficeFloorChangesTestCase
 			this.type = parameterType;
 			this.typeQualifier = null;
 			this.extensionInterfaces = null;
-			this.inputType = null;
-			this.outputType = null;
 		}
 
 		/**
@@ -334,37 +316,13 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		 *            Name.
 		 * @param parameterType
 		 *            Parameter type.
-		 * @param response
-		 *            {@link OfficeOutputType}.
 		 */
-		public OfficeTypeItem(String name, String parameterType, OfficeOutputType response) {
+		public OfficeTypeItem(String name, String parameterType) {
 			this.name = name;
 			this.inputName = null;
 			this.type = parameterType;
 			this.typeQualifier = null;
 			this.extensionInterfaces = null;
-			this.inputType = null;
-			this.outputType = response;
-		}
-
-		/**
-		 * Initialise for {@link OfficeOutputType}.
-		 * 
-		 * @param name
-		 *            Name.
-		 * @param argumentType
-		 *            Argument type.
-		 * @param handler
-		 *            {@link OfficeInputType}.
-		 */
-		public OfficeTypeItem(String name, String argumentType, OfficeInputType handler) {
-			this.name = name;
-			this.inputName = null;
-			this.type = argumentType;
-			this.typeQualifier = null;
-			this.extensionInterfaces = null;
-			this.inputType = handler;
-			this.outputType = null;
 		}
 
 		/**
@@ -388,8 +346,6 @@ public abstract class AbstractOfficeFloorChangesTestCase
 			for (int i = 0; i < this.extensionInterfaces.length; i++) {
 				this.extensionInterfaces[i] = extensionInterfaces[i].getName();
 			}
-			this.inputType = null;
-			this.outputType = null;
 		}
 
 		/**
@@ -404,8 +360,6 @@ public abstract class AbstractOfficeFloorChangesTestCase
 			this.type = null;
 			this.typeQualifier = null;
 			this.extensionInterfaces = null;
-			this.inputType = null;
-			this.outputType = null;
 		}
 
 		/*
@@ -430,11 +384,6 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		@Override
 		public String getOfficeInputName() {
 			return this.name;
-		}
-
-		@Override
-		public OfficeOutputType getResponseOfficeOutputType() {
-			return this.outputType;
 		}
 
 		/*
@@ -487,11 +436,6 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		@Override
 		public String getArgumentType() {
 			return this.type;
-		}
-
-		@Override
-		public OfficeInputType getHandlingOfficeInputType() {
-			return this.inputType;
 		}
 	}
 
