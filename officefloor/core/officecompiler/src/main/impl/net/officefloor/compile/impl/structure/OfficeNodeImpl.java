@@ -45,6 +45,7 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -63,6 +64,7 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNod
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -75,7 +77,11 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.AugmentedManagedObject;
+import net.officefloor.compile.spi.office.AugmentedManagedObjectSource;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentor;
+import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -120,7 +126,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeNodeImpl implements OfficeNode {
+public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 	/**
 	 * Name of this {@link DeployedOffice}.
@@ -261,6 +267,11 @@ public class OfficeNodeImpl implements OfficeNode {
 	private final List<OfficeSectionTransformer> officeSectionTransformers = new LinkedList<>();
 
 	/**
+	 * {@link ManagedFunctionAugmentor} instances.
+	 */
+	private final List<ManagedFunctionAugmentor> managedFunctionAugmentors = new LinkedList<>();
+
+	/**
 	 * Indicates whether to {@link AutoWire} the objects.
 	 */
 	private boolean isAutoWireObjects = false;
@@ -292,6 +303,39 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Create additional objects
 		this.properties = this.context.createPropertyList();
+	}
+
+	/**
+	 * Adds a {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName
+	 *            {@link Class} name of the {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectSourceNode}.
+	 */
+	private ManagedObjectSourceNode addManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName) {
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
+				(managedObjectSource) -> managedObjectSource.initialise(managedObjectSourceClassName, null));
+	}
+
+	/**
+	 * Adds a {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectSourceNode}.
+	 */
+	private ManagedObjectSourceNode addManagedObjectSource(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
+				(managedObjectSourceNode) -> managedObjectSourceNode
+						.initialise(managedObjectSource.getClass().getName(), managedObjectSource));
 	}
 
 	/*
@@ -379,6 +423,53 @@ public class OfficeNodeImpl implements OfficeNode {
 		final String newOfficeTeamName = uniqueOfficeTeamName;
 		return NodeUtil.getInitialisedNode(newOfficeTeamName, this.teams, this.context,
 				() -> this.context.createOfficeTeamNode(newOfficeTeamName, this), (team) -> team.initialise());
+	}
+
+	/*
+	 * ============= ManagedFunctionVisitor ============================
+	 */
+
+	@Override
+	public void visit(ManagedFunctionType<?, ?> managedFunctionType, ManagedFunctionNode managedFunctionNode,
+			CompileContext compileContext) {
+
+		// Create the managed function augmentor context
+		ManagedFunctionAugmentorContext context = new ManagedFunctionAugmentorContext() {
+
+			@Override
+			public ManagedFunctionType<?, ?> getManagedFunctionType() {
+				return managedFunctionType;
+			}
+
+			@Override
+			public AugmentedFunctionObject getFunctionObject(String objectName) {
+				return managedFunctionNode.getAugmentedFunctionObject(objectName);
+			}
+
+			@Override
+			public AugmentedManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+					String managedObjectSourceClassName) {
+				return OfficeNodeImpl.this.addManagedObjectSource(managedObjectSourceName,
+						managedObjectSourceClassName);
+			}
+
+			@Override
+			public AugmentedManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+					ManagedObjectSource<?, ?> managedObjectSource) {
+				return OfficeNodeImpl.this.addManagedObjectSource(managedObjectSourceName, managedObjectSource);
+			}
+
+			@Override
+			public void link(AugmentedFunctionObject object, AugmentedManagedObject managedObject) {
+				LinkUtil.linkObject(object, managedObject, OfficeNodeImpl.this.context.getCompilerIssues(),
+						managedFunctionNode);
+			}
+		};
+
+		// Augment the managed function
+		for (ManagedFunctionAugmentor augmentor : this.managedFunctionAugmentors) {
+			augmentor.augmentManagedFunction(context);
+		}
 	}
 
 	/*
@@ -526,7 +617,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Source the top level sections
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSection(compileContext));
+				(section) -> section.sourceSection(this, compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -549,7 +640,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Source the all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSectionTree(compileContext));
+				(section) -> section.sourceSectionTree(this, compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -1006,25 +1097,19 @@ public class OfficeNodeImpl implements OfficeNode {
 
 	@Override
 	public void addManagedFunctionAugmentor(ManagedFunctionAugmentor managedFunctionAugmentor) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("addManagedFunctionAugmentor");
+		this.managedFunctionAugmentors.add(managedFunctionAugmentor);
 	}
 
 	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
 			String managedObjectSourceClassName) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
-				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
-				(managedObjectSource) -> managedObjectSource.initialise(managedObjectSourceClassName, null));
+		return this.addManagedObjectSource(managedObjectSourceName, managedObjectSourceClassName);
 	}
 
 	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
-				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
-				(managedObjectSourceNode) -> managedObjectSourceNode
-						.initialise(managedObjectSource.getClass().getName(), managedObjectSource));
+		return this.addManagedObjectSource(managedObjectSourceName, managedObjectSource);
 	}
 
 	@Override

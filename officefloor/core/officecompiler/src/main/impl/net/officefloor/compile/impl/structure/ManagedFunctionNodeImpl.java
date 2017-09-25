@@ -40,6 +40,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -55,6 +56,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
@@ -179,6 +181,18 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		this.teamResponsible = this.context.createResponsibleTeamNode("Team for function " + this.functionName, this);
 	}
 
+	/**
+	 * Obtains the {@link FunctionObjectNode}.
+	 * 
+	 * @param functionObjectName
+	 *            Name of the {@link FunctionObjectNode}.
+	 * @return {@link FunctionObjectNode}.
+	 */
+	private FunctionObjectNode getFunctionObjectNode(String functionObjectName) {
+		return NodeUtil.getNode(functionObjectName, this.functionObjects,
+				() -> this.context.createFunctionObjectNode(functionObjectName, this));
+	}
+
 	/*
 	 * ========================== Node ===================================
 	 */
@@ -234,6 +248,11 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
+	public AugmentedFunctionObject getAugmentedFunctionObject(String objectName) {
+		return this.getFunctionObjectNode(objectName);
+	}
+
+	@Override
 	public ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext) {
 
 		// Ensure initialised
@@ -285,7 +304,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public boolean souceManagedFunction(CompileContext compileContext) {
+	public boolean souceManagedFunction(ManagedFunctionVisitor visitor, CompileContext compileContext) {
 
 		// Obtain the type for this function
 		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
@@ -313,6 +332,11 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			NodeUtil.getInitialisedNode(escalationName, this.functionEscalations, this.context,
 					() -> this.context.createFunctionFlowNode(escalationName, true, this),
 					(escalation) -> escalation.initialise());
+		}
+
+		// Visit this managed function
+		if (visitor != null) {
+			visitor.visit(functionType, this, compileContext);
 		}
 
 		// Successfully sourced
@@ -555,8 +579,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public FunctionObject getFunctionObject(String functionObjectName) {
-		return NodeUtil.getNode(functionObjectName, this.functionObjects,
-				() -> this.context.createFunctionObjectNode(functionObjectName, this));
+		return this.getFunctionObjectNode(functionObjectName);
 	}
 
 	@Override

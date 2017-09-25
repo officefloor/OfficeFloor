@@ -68,25 +68,29 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
+	 * @param managedFunctionVisitor
+	 *            {@link ManagedFunctionVisitor}.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceSection(CompileContext compileContext);
+	boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
 
 	/**
 	 * Sources this {@link SectionNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
+	 * @param managedFunctionVisitor
+	 *            {@link ManagedFunctionVisitor}.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceSectionTree(CompileContext compileContext);
+	boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
 
 	/**
 	 * Sources the inheritance of the {@link SectionNode}.

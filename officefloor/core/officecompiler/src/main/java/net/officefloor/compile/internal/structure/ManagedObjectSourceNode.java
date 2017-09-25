@@ -21,6 +21,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.spi.office.AugmentedManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
@@ -39,8 +40,8 @@ import net.officefloor.frame.api.team.Team;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObjectSource, OfficeManagedObjectSource,
-		OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
+public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObjectSource, AugmentedManagedObjectSource,
+		OfficeManagedObjectSource, OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
 
 	/**
 	 * {@link Node} type.

@@ -205,6 +205,15 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 	}
 
 	/*
+	 * ================= AugmentedFunctionObject ===========================
+	 */
+
+	@Override
+	public boolean isLinked() {
+		return (this.linkedObjectNode != null);
+	}
+
+	/*
 	 * ===================== LinkObjectNode ===========================
 	 */
 

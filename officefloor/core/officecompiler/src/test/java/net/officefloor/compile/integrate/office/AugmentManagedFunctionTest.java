@@ -23,12 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.office.AugmentedManagedObject;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
@@ -54,9 +56,8 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		// Compile the OfficeFloor with augmented managed function
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.office((context) -> {
-			context.addSection("SECTION", MockSection.class);
 
-			// Augment the object
+			// Augment the function object
 			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
 					Class<?> objectType = type.getObjectType();
@@ -69,12 +70,19 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 						// Obtain the function object
 						AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
+						assertFalse("Should not be linked", object.isLinked());
 
 						// Link managed object
 						augment.link(object, managedObject);
 					}
 				}
 			});
+		});
+		compile.section((context) -> {
+			SectionFunctionNamespace namespace = context.getSectionDesigner().addSectionFunctionNamespace("NAMESPACE",
+					ClassManagedFunctionSource.class.getName());
+			namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockFunction.class.getName());
+			namespace.addSectionFunction("function", "function");
 		});
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 
@@ -97,7 +105,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	public static class MockObject {
 	}
 
-	public static class MockSection {
+	public static class MockFunction {
 		public void function(MockObject object) {
 			AugmentManagedFunctionTest.object = object;
 		}

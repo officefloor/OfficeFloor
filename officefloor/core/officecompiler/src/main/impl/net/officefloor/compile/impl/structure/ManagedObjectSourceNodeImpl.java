@@ -65,6 +65,7 @@ import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.AugmentedManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -952,6 +953,21 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public OfficeManagedObject addOfficeManagedObject(String managedObjectName, ManagedObjectScope managedObjectScope) {
+		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
+	}
+
+	/*
+	 * =================== AugmentedManagedObjectSource ======================
+	 */
+
+	@Override
+	public String getAugmentedManagedObjectSourceName() {
+		return this.getOfficeManagedObjectSourceName();
+	}
+
+	@Override
+	public AugmentedManagedObject addAugmentedManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope) {
 		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
 	}
 
