@@ -26,8 +26,8 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Loads the extension from the {@link WoofTemplateExtensionSource}.

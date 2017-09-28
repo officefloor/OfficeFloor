@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -40,6 +41,12 @@ public class HttpUrlContinuationManagedFunctionSource extends AbstractManagedFun
 	 * continuation.
 	 */
 	public static final String PROPERTY_URI_PATH = "http.continuation.uri.path";
+
+	/**
+	 * Name of {@link Property} specifying the {@link HttpMethod} for the HTTP
+	 * URL continuation.
+	 */
+	public static final String PROPERTY_HTTP_METHOD = "http.continutation.method";
 
 	/**
 	 * Name of {@link Property} specifying whether the HTTP URL continuation
@@ -82,6 +89,7 @@ public class HttpUrlContinuationManagedFunctionSource extends AbstractManagedFun
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_URI_PATH, "URI Path");
+		context.addProperty(PROPERTY_HTTP_METHOD, "Method");
 	}
 
 	@Override
@@ -92,12 +100,16 @@ public class HttpUrlContinuationManagedFunctionSource extends AbstractManagedFun
 		String applicationUriPath = context.getProperty(PROPERTY_URI_PATH);
 		applicationUriPath = getApplicationUriPath(applicationUriPath);
 
+		// Obtain the HTTP method
+		String methodName = context.getProperty(PROPERTY_HTTP_METHOD);
+		HttpMethod method = HttpMethod.getHttpMethod(methodName);
+
 		// Determine if secure
 		String isSecureText = context.getProperty(PROPERTY_SECURE, null);
 		Boolean isSecure = (isSecureText == null ? null : Boolean.valueOf(isSecureText));
 
-		// Create the differentiator
-		HttpUrlContinuationDifferentiator differentiator = new HttpUrlContinuationDifferentiatorImpl(applicationUriPath,
+		// Create the annotation
+		HttpUrlContinuationAnnotation annotation = new HttpUrlContinuationAnnotationImpl(method, applicationUriPath,
 				isSecure);
 
 		// Create the factory
@@ -105,6 +117,6 @@ public class HttpUrlContinuationManagedFunctionSource extends AbstractManagedFun
 
 		// Configure the function
 		namespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, factory, None.class, None.class)
-				.setDifferentiator(differentiator);
+				.addAnnotation(annotation);
 	}
 }

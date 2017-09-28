@@ -23,11 +23,11 @@ import java.util.LinkedList;
 
 import org.junit.Assert;
 
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Mock implicit {@link WoofTemplateExtensionSourceService}.

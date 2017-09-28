@@ -50,9 +50,16 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.HttpApplicationStateful;
+import net.officefloor.web.HttpParameters;
+import net.officefloor.web.HttpRequestStateful;
+import net.officefloor.web.HttpSessionStateful;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpApplicationState;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
- * Tests the {@link WebArchitectEmployer}.
+ * Tests the {@link WebApplicationArchitectEmployer}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -29,14 +29,14 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * <p>
@@ -44,7 +44,7 @@ import net.officefloor.server.http.ServerHttpConnection;
  * {@link ServerHttpConnection}.
  * <p>
  * Configuration of what to secure is determined by
- * {@link HttpUrlContinuationDifferentiator} on the {@link Office}
+ * {@link HttpUrlContinuationAnnotation} on the {@link Office}
  * {@link FunctionManager} instances.
  * 
  * @author Daniel Sagenschneider

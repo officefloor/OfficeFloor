@@ -22,9 +22,9 @@ import java.io.Serializable;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * HTTP URL continuation.

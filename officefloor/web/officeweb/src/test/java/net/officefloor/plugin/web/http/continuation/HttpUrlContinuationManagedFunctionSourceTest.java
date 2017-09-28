@@ -30,6 +30,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpMethod;
 
 /**
  * Tests the {@link HttpUrlContinuationManagedFunctionSource}.
@@ -50,55 +51,55 @@ public class HttpUrlContinuationManagedFunctionSourceTest extends OfficeFrameTes
 	 * Ensure secure URL continuation.
 	 */
 	public void testSecureType() {
-		this.doTypeTest("/path", "/path", Boolean.TRUE);
+		this.doTypeTest(HttpMethod.GET, "/path", "/path", Boolean.TRUE);
 	}
 
 	/**
 	 * Ensure non-secure URL continuation.
 	 */
 	public void testNonSecureType() {
-		this.doTypeTest("/path", "/path", Boolean.FALSE);
+		this.doTypeTest(HttpMethod.GET, "/path", "/path", Boolean.FALSE);
 	}
 
 	/**
 	 * Ensure always service URL continuation.
 	 */
 	public void testAlwaysServiceType() {
-		this.doTypeTest("/path", "/path", null);
+		this.doTypeTest(HttpMethod.GET, "/path", "/path", null);
 	}
 
 	/**
 	 * Ensure URL continuation URI path is always absolute.
 	 */
 	public void testAbsolutePathType() {
-		this.doTypeTest("path", "/path", null);
+		this.doTypeTest(HttpMethod.GET, "path", "/path", null);
 	}
 
 	/**
 	 * Ensure URL continuation URI path is always canonical.
 	 */
 	public void testCanonicalPathType() {
-		this.doTypeTest("ignore/../path/", "/path", null);
+		this.doTypeTest(HttpMethod.GET, "ignore/../path/", "/path", null);
 	}
 
 	/**
 	 * Ensure URL continuation root URI path.
 	 */
 	public void testRootPathType() {
-		this.doTypeTest("/", "/", null);
+		this.doTypeTest(HttpMethod.GET, "/", "/", null);
 	}
 
 	/**
 	 * Validate type.
 	 */
-	public void doTypeTest(String configuredUriPath, String expectedUriPath, Boolean isSecure) {
+	public void doTypeTest(HttpMethod httpMethod, String configuredUriPath, String expectedUriPath, Boolean isSecure) {
 
 		// Create the expected type
 		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 		HttpUrlContinuationFunction factory = new HttpUrlContinuationFunction();
 		ManagedFunctionTypeBuilder<None, None> functionType = type.addManagedFunctionType(
 				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME, factory, None.class, None.class);
-		functionType.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(expectedUriPath, isSecure));
+		functionType.addAnnotation(new HttpUrlContinuationAnnotationImpl(httpMethod, expectedUriPath, isSecure));
 
 		// Create the properties
 		List<String> properties = new ArrayList<String>(4);
@@ -114,8 +115,8 @@ public class HttpUrlContinuationManagedFunctionSourceTest extends OfficeFrameTes
 
 		// Validate the URL continuation
 		ManagedFunctionType<?, ?> function = namespace.getManagedFunctionTypes()[0];
-		HttpUrlContinuationDifferentiator urlContinuation = (HttpUrlContinuationDifferentiator) function
-				.getDifferentiator();
+		HttpUrlContinuationAnnotation urlContinuation = (HttpUrlContinuationAnnotation) function.getAnnotations()[0];
+		assertSame("Incorrect HTTP method on URL continuation", httpMethod, urlContinuation.getHttpMethod());
 		assertEquals("Incorrect URI path on URL continuation", expectedUriPath,
 				urlContinuation.getApplicationUriPath());
 		assertEquals("Incorrect secure flag for URL continuation", isSecure, urlContinuation.isSecure());

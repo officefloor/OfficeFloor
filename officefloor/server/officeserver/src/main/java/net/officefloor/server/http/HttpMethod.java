@@ -28,6 +28,34 @@ import java.util.jar.Attributes.Name;
 public class HttpMethod implements Serializable {
 
 	/**
+	 * Obtains the {@link HttpMethod}.
+	 * 
+	 * @param methodName
+	 *            Name of the {@link HttpMethod}.
+	 * @return {@link HttpMethod}.
+	 */
+	public static HttpMethod getHttpMethod(String methodName) {
+		switch (methodName) {
+		case "CONNECT":
+			return CONNECT;
+		case "DELETE":
+			return DELETE;
+		case "GET":
+			return GET;
+		case "HEAD":
+			return HEAD;
+		case "OPTIONS":
+			return OPTIONS;
+		case "PUT":
+			return PUT;
+		case "POST":
+			return POST;
+		default:
+			return new HttpMethod(methodName);
+		}
+	}
+
+	/**
 	 * {@link HttpMethod} {@link Enum} for common HTTP methods.
 	 */
 	public enum HttpMethodEnum {

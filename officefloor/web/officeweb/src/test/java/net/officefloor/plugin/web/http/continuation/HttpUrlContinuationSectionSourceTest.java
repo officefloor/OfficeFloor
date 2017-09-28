@@ -31,18 +31,19 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.HttpUrlContinuation;
+import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
 /**
  * Tests the {@link HttpUrlContinuationSectionSource}.
@@ -147,7 +148,8 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 			office.addOfficeSectionTransformer(transformer);
 
 			// Map in the URI
-			HttpUriLink link = transformer.linkUri("uri", section.getOfficeSectionInput("service"));
+			HttpUrlContinuation link = transformer.linkUri(HttpMethod.GET.getName(), "uri",
+					section.getOfficeSectionInput("service"));
 			if (isSecure) {
 				// Flag to be secure (default is non-secure)
 				link.setUriSecure(isSecure);

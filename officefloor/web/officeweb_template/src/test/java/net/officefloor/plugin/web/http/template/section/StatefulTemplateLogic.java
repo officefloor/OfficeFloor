@@ -22,8 +22,8 @@ import java.io.Serializable;
 import java.io.Writer;
 
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpSessionStateful;
 
 /**
  * Provides stateful logic for the template.

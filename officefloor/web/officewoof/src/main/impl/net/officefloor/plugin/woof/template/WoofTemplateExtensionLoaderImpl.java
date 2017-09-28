@@ -35,8 +35,8 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtensionChangeContextImpl;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * {@link WoofTemplateExtensionLoader} implementation.

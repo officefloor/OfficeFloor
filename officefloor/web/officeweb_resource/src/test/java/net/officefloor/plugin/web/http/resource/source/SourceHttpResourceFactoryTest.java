@@ -27,7 +27,6 @@ import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
@@ -35,6 +34,7 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
+import net.officefloor.web.WebArchitect;
 
 /**
  * Tests the {@link SourceHttpResourceFactory}.

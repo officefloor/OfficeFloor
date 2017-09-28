@@ -34,19 +34,11 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public interface HttpServerImplementationContext {
 
 	/**
-	 * Obtains the HTTP port.
+	 * Obtains the {@link HttpServerLocation}.
 	 * 
-	 * @return HTTP port.
+	 * @return {@link HttpServerLocation}.
 	 */
-	int getHttpPort();
-
-	/**
-	 * Obtains the HTTPS port.
-	 * 
-	 * @return HTTPS port. May be <code>-1</code> if separate HTTPS port is not
-	 *         required.
-	 */
-	int getHttpsPort();
+	HttpServerLocation getHttpServerLocation();
 
 	/**
 	 * <p>
@@ -57,8 +49,8 @@ public interface HttpServerImplementationContext {
 	 * via non-secure HTTP.
 	 * 
 	 * @return {@link SSLContext} to use for HTTPS. May be <code>null</code> if
-	 *         behind Reverse Proxy handling SSL (with communication to Reverse
-	 *         Proxy over non-secure HTTP).
+	 *         behind Reverse Proxy handling SSL (with communication from
+	 *         Reverse Proxy over non-secure HTTP).
 	 */
 	SSLContext getSslContext();
 

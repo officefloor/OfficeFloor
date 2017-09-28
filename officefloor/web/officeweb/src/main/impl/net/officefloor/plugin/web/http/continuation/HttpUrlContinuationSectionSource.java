@@ -33,8 +33,9 @@ import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.plugin.section.transform.TransformSectionDesigner;
 import net.officefloor.plugin.section.transform.TransformSectionSource;
-import net.officefloor.plugin.web.http.application.HttpUriLink;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpUrlContinuation;
 
 /**
  * {@link OfficeSectionTransformer} to provide the HTTP URL continuations.
@@ -62,16 +63,18 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	/**
 	 * Links a URI to an {@link OfficeSectionInput}.
 	 * 
+	 * @param httpMethod
+	 *            Name of the {@link HttpMethod}.
 	 * @param uri
 	 *            URI to be linked.
 	 * @param sectionInput
 	 *            {@link OfficeSectionInput} servicing the URI.
-	 * @return {@link HttpUriLink} to configure handling the URI.
+	 * @return {@link HttpUrlContinuation} to configure handling the URI.
 	 */
-	public HttpUriLink linkUri(String uri, OfficeSectionInput sectionInput) {
+	public HttpUrlContinuation linkUri(String httpMethod, String uri, OfficeSectionInput sectionInput) {
 
 		// Create and register the link
-		UriLink link = new UriLink(uri, sectionInput);
+		UriLink link = new UriLink(httpMethod, uri, sectionInput);
 		this.uriLinks.add(link);
 
 		// Return the link
@@ -173,7 +176,12 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	/**
 	 * URI link.
 	 */
-	private static class UriLink implements HttpUriLink {
+	private static class UriLink implements HttpUrlContinuation {
+
+		/**
+		 * Name of the {@link HttpMethod}.
+		 */
+		private final String httpMethod;
 
 		/**
 		 * Application URI path.
@@ -193,12 +201,15 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 		/**
 		 * Initiate.
 		 * 
+		 * @param httpMethod
+		 *            Name of the {@link HttpMethod}.
 		 * @param applicationUriPath
 		 *            Application URI path.
 		 * @param sectionInput
 		 *            {@link OfficeSectionInput} to handle the URI.
 		 */
-		public UriLink(String applicationUriPath, OfficeSectionInput sectionInput) {
+		public UriLink(String httpMethod, String applicationUriPath, OfficeSectionInput sectionInput) {
+			this.httpMethod = httpMethod;
 			this.applicationUriPath = applicationUriPath;
 			this.sectionInput = sectionInput;
 		}

@@ -23,9 +23,9 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Tests the {@link WoofTemplateExtensionLoader} extending the

@@ -41,10 +41,6 @@ import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.HttpUriLink;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionException;
@@ -52,6 +48,10 @@ import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
+import net.officefloor.web.HttpUrlContinuation;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpSecuritySection;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Tests the {@link WoofLoader}.
@@ -119,7 +119,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateSection templateB = this.createMock(HttpTemplateSection.class);
 		final OfficeSection sectionA = this.createMock(OfficeSection.class);
 		final OfficeSectionInput sectionAInput = this.createMock(OfficeSectionInput.class);
-		final HttpUriLink link = this.createMock(HttpUriLink.class);
+		final HttpUrlContinuation link = this.createMock(HttpUrlContinuation.class);
 		final OfficeSection sectionB = this.createMock(OfficeSection.class);
 		final HttpSecuritySection security = this.createMock(HttpSecuritySection.class);
 		final OfficeGovernance governanceA = this.createMock(OfficeGovernance.class);

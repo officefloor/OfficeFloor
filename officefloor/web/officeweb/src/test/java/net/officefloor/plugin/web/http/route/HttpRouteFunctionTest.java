@@ -31,9 +31,8 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
@@ -43,6 +42,7 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Tests the {@link HttpRouteFunction}.
@@ -201,15 +201,15 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure convert {@link HttpUrlContinuationDifferentiator} URI path to
-	 * absolute path.
+	 * Ensure convert {@link HttpUrlContinuationAnnotation} URI path to absolute
+	 * path.
 	 */
 	public void testAbsolutePath() throws Throwable {
 		this.doRouteTest("/path", "task", false, "task", "path", null);
 	}
 
 	/**
-	 * Ensure convert {@link HttpUrlContinuationDifferentiator} URI path to
+	 * Ensure convert {@link HttpUrlContinuationAnnotation} URI path to
 	 * canonical path.
 	 */
 	public void testCanonicalPath() throws Throwable {
@@ -477,20 +477,19 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 			FunctionManager taskManager = this.createMock(FunctionManager.class);
 			this.recordReturn(functionManager, this.office.getFunctionManager(NON_URL_CONTINUATION_FUNCTION_NAME),
 					taskManager);
-			this.recordReturn(taskManager, taskManager.getDifferentiator(), null);
+			this.recordReturn(taskManager, taskManager.getAnnotations(), null);
 
 			// Record the other differentiator task
 			this.recordReturn(functionManager, this.office.getFunctionManager(OTHER_DIFFERENTIATOR_FUNCTION_NAME),
 					taskManager);
-			this.recordReturn(taskManager, taskManager.getDifferentiator(), "NotUrlContinuation");
+			this.recordReturn(taskManager, taskManager.getAnnotations(), new Object[] { "NotUrlContinuation" });
 
 			// Record the URL continuation
-			HttpUrlContinuationDifferentiator urlContinuation = this
-					.createMock(HttpUrlContinuationDifferentiator.class);
+			HttpUrlContinuationAnnotation urlContinuation = this.createMock(HttpUrlContinuationAnnotation.class);
 			this.recordReturn(functionManager, this.office.getFunctionManager(functionName),
 					urlServicer.functionManager);
-			this.recordReturn(urlServicer.functionManager, urlServicer.functionManager.getDifferentiator(),
-					urlContinuation);
+			this.recordReturn(urlServicer.functionManager, urlServicer.functionManager.getAnnotations(),
+					new Object[] { urlContinuation });
 			this.recordReturn(urlContinuation, urlContinuation.getApplicationUriPath(), urlServicer.applicationUriPath);
 			urlContinuation.isSecure();
 			this.control(urlContinuation).setReturnValue(urlServicer.isSecure);

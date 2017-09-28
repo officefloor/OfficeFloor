@@ -31,9 +31,8 @@ import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteFunctionTest;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -42,6 +41,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunct
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Tests the {@link HttpTemplateInitialManagedFunctionSource}.
@@ -132,7 +132,7 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 		initial.addFlow().setKey(Flows.RENDER);
 		initial.addEscalation(IOException.class);
 		initial.setDifferentiator(
-				new HttpUrlContinuationDifferentiatorImpl(expectedUrlContinuationPath, isUrlContinuationSecure));
+				new HttpUrlContinuationAnnotationImpl(expectedUrlContinuationPath, isUrlContinuationSecure));
 
 		// Create the listing of properties
 		List<String> properties = new ArrayList<String>(6);
@@ -152,7 +152,7 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 
 		// Ensure correct URI path
 		ManagedFunctionType<?, ?> function = namespace.getManagedFunctionTypes()[0];
-		HttpUrlContinuationDifferentiator differentiator = (HttpUrlContinuationDifferentiator) function
+		HttpUrlContinuationAnnotation differentiator = (HttpUrlContinuationAnnotation) function
 				.getDifferentiator();
 		assertEquals("Incorrect URI path", expectedUrlContinuationPath, differentiator.getApplicationUriPath());
 		assertEquals("Incorrectly indentified as secure", isUrlContinuationSecure, differentiator.isSecure());

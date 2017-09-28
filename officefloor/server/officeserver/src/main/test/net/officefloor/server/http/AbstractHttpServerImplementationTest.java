@@ -32,8 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.SSLContext;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
@@ -47,10 +45,12 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
@@ -65,14 +65,9 @@ import net.officefloor.server.stream.ServerWriter;
 public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFrameTestCase {
 
 	/**
-	 * HTTP non-secure port.
+	 * {@link HttpServerLocation}.
 	 */
-	private static final int HTTP_PORT = 7878;
-
-	/**
-	 * HTTPS secure port.
-	 */
-	private static final int HTTPS_PORT = 7979;
+	private final HttpServerLocation serverLocation = new HttpServerLocationImpl();
 
 	/**
 	 * Creates a new {@link HttpHeader}.
@@ -94,11 +89,12 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	private static final Exception TEST_EXCEPTION = new Exception("Test Failure");
 
 	/**
-	 * Creates the {@link HttpServerImplementation} to test.
+	 * Obtains the expected {@link HttpServerImplementation} {@link Class} being
+	 * tested.
 	 * 
-	 * @return {@link HttpServerImplementation} to test.
+	 * @return Expected {@link HttpServerImplementation} {@link Class}.
 	 */
-	protected abstract HttpServerImplementation createHttpServerImplementation();
+	protected abstract Class<? extends HttpServerImplementation> getHttpServerImplementationClass();
 
 	/**
 	 * <p>
@@ -109,13 +105,13 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * The raw implementation is to return &quote;hello world&quot; in UTF-8
 	 * encoding for the response entity.
 	 * 
-	 * @param httpPort
-	 *            Port to serve requests on.
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
 	 * @return Momento to provide to stopping the server.
 	 * @throws Exception
 	 *             If fails to start the raw HTTP server.
 	 */
-	protected abstract M startRawHttpServer(int httpPort) throws Exception;
+	protected abstract M startRawHttpServer(HttpServerLocation serverLocation) throws Exception;
 
 	/**
 	 * Stops the raw implementation.
@@ -182,11 +178,13 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Ensure the server has stopped serving requests
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			client.execute(new HttpGet("http://localhost:" + HTTP_PORT + "/test"));
+			client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
 			fail("Server should have stopped listening");
 		} catch (HttpHostConnectException ex) {
-			assertTrue("Incorrect connection error", ex.getMessage().startsWith("Connect to localhost:7878")
-					&& ex.getMessage().endsWith("failed: Connection refused"));
+			assertTrue("Incorrect connection error",
+					ex.getMessage().startsWith(
+							"Connect to " + this.serverLocation.getDomain() + ":" + this.serverLocation.getHttpPort())
+							&& ex.getMessage().endsWith("failed: Connection refused"));
 		}
 
 		// Remaining tear down
@@ -204,13 +202,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	protected void startHttpServer(Class<?> sectionServicer) throws Exception {
 
-		// Create the HTTP server implementation
-		HttpServerImplementation implementation = this.createHttpServerImplementation();
-
-		// Obtain the default SSL context
-		SSLContext sslContext = OfficeFloorDefaultSslContextSource.createServerSslContext(null);
-
 		// Compile the OfficeFloor
+		Closure<HttpServer> httpServer = new Closure<>();
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((context) -> {
 
@@ -222,8 +215,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 					.getDeployedOfficeInput("SERVICER", "service");
 
 			// Configure the HTTP Server
-			HttpServer.configureHttpServer(HTTP_PORT, HTTPS_PORT, implementation, sslContext, serviceHandler, deployer,
-					context.getOfficeFloorSourceContext());
+			httpServer.value = new HttpServer(serviceHandler, deployer, context.getOfficeFloorSourceContext());
 
 			// Provide thread object
 			if (sectionServicer == ThreadedServicer.class) {
@@ -232,13 +224,17 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 				deployer.addTeam("Threaded", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
 						ThreadedManagedObject.class.getName());
 			}
-
 		});
 		compile.office((context) -> {
 			context.getOfficeArchitect().enableAutoWireTeams();
 			context.addSection("SERVICER", sectionServicer);
 		});
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Ensure correct HTTP server implementation
+		Class<? extends HttpServerImplementation> expectedImplementation = this.getHttpServerImplementationClass();
+		assertEquals("Incorrect HTTP Server implementation", expectedImplementation,
+				httpServer.value.getHttpServerImplementation().getClass());
 	}
 
 	public static class Servicer {
@@ -359,8 +355,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	private void doSingleRequest(boolean isSecure) throws IOException {
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
-			HttpResponse response = client.execute(new HttpGet(
-					(isSecure ? "https" : "http") + "://localhost:" + (isSecure ? HTTPS_PORT : HTTP_PORT) + "/test"));
+			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(isSecure, "/test")));
 			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
 			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.getEntityBody(response));
 		}
@@ -374,7 +369,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Create connection to server
 		try (Socket socket = OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-				.createSocket(InetAddress.getLocalHost(), HTTPS_PORT)) {
+				.createSocket(InetAddress.getLocalHost(), this.serverLocation.getHttpsPort())) {
 			socket.setSoTimeout(1000);
 
 			// Send the request
@@ -408,7 +403,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	public void testHandleError() throws Exception {
 		this.startHttpServer(FailServicer.class);
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:" + HTTP_PORT + "/test"));
+			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
 
 			// Ensure flag as internal server error
 			assertEquals("Incorrect status", 500, response.getStatusLine().getStatusCode());
@@ -455,11 +450,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			this.startHttpServer(FastServicer.class);
 		} else {
 			// Start the Raw HTTP server
-			this.momento = this.startRawHttpServer(HTTP_PORT);
+			this.momento = this.startRawHttpServer(this.serverLocation);
 		}
 
 		// Create pipeline executor
-		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT);
+		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
 
 		// Do warm up
 		executor.doPipelineRun(100000).printResult(this.getName() + " WARMUP");
@@ -500,11 +495,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			this.startHttpServer(ThreadedServicer.class);
 		} else {
 			// Start the Raw HTTP server
-			this.momento = this.startRawHttpServer(HTTP_PORT);
+			this.momento = this.startRawHttpServer(this.serverLocation);
 		}
 
 		// Create pipeline executor
-		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT);
+		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
 
 		// Do warm up
 		executor.doPipelineRun(1000).printResult(this.getName() + " WARMUP");
@@ -592,7 +587,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			this.startHttpServer(FastServicer.class);
 		} else {
 			// Start the Raw HTTP server
-			this.momento = this.startRawHttpServer(HTTP_PORT);
+			this.momento = this.startRawHttpServer(this.serverLocation);
 		}
 
 		// Indicate details of test
@@ -602,7 +597,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		@SuppressWarnings("unchecked")
 		PipelineExecutor[] executors = new AbstractHttpServerImplementationTest.PipelineExecutor[clientCount];
 		for (int i = 0; i < clientCount; i++) {
-			executors[i] = new PipelineExecutor(HTTP_PORT);
+			executors[i] = new PipelineExecutor(this.serverLocation.getHttpPort());
 		}
 
 		// Do warm up

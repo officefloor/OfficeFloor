@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.template.section;
 import java.lang.reflect.Field;
 
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
-import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObject.Dependencies;
+import net.officefloor.web.HttpSessionStateful;
 
 /**
  * {@link DependencyMetaData} for {@link HttpSessionStateful}.

@@ -37,6 +37,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.HttpResponseWriter;
@@ -87,7 +88,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 	@Override
 	public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-		this.startHttpServer(this.context.getHttpPort(), this.context.getHttpsPort(), this.context.getSslContext());
+		HttpServerLocation serverLocation = this.context.getHttpServerLocation();
+		this.startHttpServer(serverLocation.getHttpPort(), serverLocation.getHttpsPort(), this.context.getSslContext());
 	}
 
 	@Override
@@ -107,6 +109,9 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	 */
 	@Override
 	protected void service(ChannelHandlerContext context, HttpRequest request) throws Exception {
+
+		// Obtain the server location
+		HttpServerLocation serverLocation = this.context.getHttpServerLocation();
 
 		// Supply the method
 		Supplier<HttpMethod> methodSupplier = () -> {
@@ -241,8 +246,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, responseWriter,
-				bufferPool);
+				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
+				responseWriter, bufferPool);
 
 		// Service the request
 		NettyHttpServerImplementation.this.serviceInput.service(connection, connection.getServiceFlowCallback());

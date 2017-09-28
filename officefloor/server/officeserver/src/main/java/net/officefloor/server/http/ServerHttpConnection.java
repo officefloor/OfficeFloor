@@ -46,16 +46,16 @@ public interface ServerHttpConnection {
 	static Charset DEFAULT_HTTP_ENTITY_CHARSET = Charset.forName("UTF-8");
 
 	/**
-	 * Obtains the {@link HttpRequest} for this {@link ServerHttpConnection}.
+	 * Obtains the {@link HttpRequest} to be serviced.
 	 * 
-	 * @return {@link HttpRequest} for this {@link ServerHttpConnection}.
+	 * @return {@link HttpRequest} to be serviced.
 	 */
 	HttpRequest getHttpRequest();
 
 	/**
-	 * Obtains the {@link HttpResponse} for this {@link ServerHttpConnection}.
+	 * Obtains the {@link HttpResponse}.
 	 * 
-	 * @return {@link HttpResponse} for this {@link ServerHttpConnection}.
+	 * @return {@link HttpResponse}.
 	 */
 	HttpResponse getHttpResponse();
 
@@ -66,6 +66,13 @@ public interface ServerHttpConnection {
 	 * @return <code>true</code> if connection is over a secure channel.
 	 */
 	boolean isSecure();
+
+	/**
+	 * Obtains the {@link HttpServerLocation}.
+	 * 
+	 * @return {@link HttpServerLocation}.
+	 */
+	HttpServerLocation getHttpServerLocation();
 
 	/**
 	 * <p>

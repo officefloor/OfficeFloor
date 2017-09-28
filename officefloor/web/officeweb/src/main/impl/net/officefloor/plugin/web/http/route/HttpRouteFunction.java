@@ -31,19 +31,20 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenAdapter;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunction} for routing {@link HttpRequest} instances and
@@ -62,7 +63,7 @@ public class HttpRouteFunction extends
 	 * Undertakes a redirect.
 	 * <p>
 	 * This may be utilised by any {@link ManagedFunction} with a
-	 * {@link HttpUrlContinuationDifferentiator} to trigger a redirect that will
+	 * {@link HttpUrlContinuationAnnotation} to trigger a redirect that will
 	 * have the {@link HttpRequest} state appropriately managed across the
 	 * redirect by the {@link HttpRouteFunction}.
 	 * 
@@ -141,33 +142,37 @@ public class HttpRouteFunction extends
 		for (String functionName : office.getFunctionNames()) {
 			FunctionManager function = office.getFunctionManager(functionName);
 
-			// Determine if secure URI differentiator
-			Object differentiator = function.getDifferentiator();
-			if (differentiator instanceof HttpUrlContinuationDifferentiator) {
-				HttpUrlContinuationDifferentiator urlContinuationDifferentiator = (HttpUrlContinuationDifferentiator) differentiator;
+			// Determine if secure URI annotation
+			Object[] annotations = function.getAnnotations();
+			for (Object annotation : annotations) {
+				if (annotation instanceof HttpUrlContinuationAnnotation) {
+					HttpUrlContinuationAnnotation urlContinuation = (HttpUrlContinuationAnnotation) annotation;
 
-				// Obtain the details of the continuation
-				String applicationUriPath = urlContinuationDifferentiator.getApplicationUriPath();
-				Boolean isSecure = urlContinuationDifferentiator.isSecure();
+					// Obtain the details of the continuation
+					HttpMethod httpMethod = urlContinuation.getHttpMethod();
+					String applicationUriPath = urlContinuation.getApplicationUriPath();
+					Boolean isSecure = urlContinuation.isSecure();
 
-				// Must have application URI path
-				if (applicationUriPath == null) {
-					continue;
+					// Must have application URI path
+					if (applicationUriPath == null) {
+						continue;
+					}
+
+					// Transform to absolute canoncial path
+					applicationUriPath = (applicationUriPath.startsWith("/") ? applicationUriPath
+							: "/" + applicationUriPath);
+					applicationUriPath = HttpApplicationLocationMangedObject
+							.transformToCanonicalPath(applicationUriPath);
+
+					// Ensure only one application URI path registered
+					if (continuations.containsKey(applicationUriPath)) {
+						throw new DuplicateHttpUrlContinuationException(
+								"HTTP URL continuation path '" + applicationUriPath + "' used for more than one Task");
+					}
+
+					// Register the URL continuation
+					continuations.put(applicationUriPath, new HttpUrlContinuation(functionName, isSecure));
 				}
-
-				// Transform to absoluate canoncial path
-				applicationUriPath = (applicationUriPath.startsWith("/") ? applicationUriPath
-						: "/" + applicationUriPath);
-				applicationUriPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(applicationUriPath);
-
-				// Ensure only one application URI path registered
-				if (continuations.containsKey(applicationUriPath)) {
-					throw new DuplicateHttpUrlContinuationException(
-							"HTTP URL continuation path '" + applicationUriPath + "' used for more than one Task");
-				}
-
-				// Register the URL continuation
-				continuations.put(applicationUriPath, new HttpUrlContinuation(functionName, isSecure));
 			}
 		}
 

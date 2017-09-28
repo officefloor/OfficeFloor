@@ -55,6 +55,11 @@ public abstract class AbstractHttpServicerFactory
 	private static final HttpHeaderName CONTENT_TYPE_NAME = new HttpHeaderName("Content-Type");
 
 	/**
+	 * {@link HttpServerLocation}.
+	 */
+	private final HttpServerLocation serverLocation;
+
+	/**
 	 * Indicates if over secure {@link Socket}.
 	 */
 	private final boolean isSecure;
@@ -104,6 +109,8 @@ public abstract class AbstractHttpServicerFactory
 	/**
 	 * Instantiate.
 	 * 
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
 	 * @param isSecure
 	 *            Indicates if over secure {@link Socket}.
 	 * @param serviceBufferPool
@@ -111,8 +118,9 @@ public abstract class AbstractHttpServicerFactory
 	 * @param metaData
 	 *            {@link HttpRequestParserMetaData}.
 	 */
-	public AbstractHttpServicerFactory(boolean isSecure, HttpRequestParserMetaData metaData,
-			StreamBufferPool<ByteBuffer> serviceBufferPool) {
+	public AbstractHttpServicerFactory(HttpServerLocation serverLocation, boolean isSecure,
+			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool) {
+		this.serverLocation = serverLocation;
 		this.isSecure = isSecure;
 		this.metaData = metaData;
 		this.serviceBufferPool = serviceBufferPool;
@@ -230,8 +238,9 @@ public abstract class AbstractHttpServicerFactory
 
 			// Create the connection
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
-					AbstractHttpServicerFactory.this.isSecure, methodSupplier, requestUriSupplier, version,
-					requestHeaders, requestEntity, writer, AbstractHttpServicerFactory.this.serviceBufferPool);
+					AbstractHttpServicerFactory.this.serverLocation, AbstractHttpServicerFactory.this.isSecure,
+					methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, writer,
+					AbstractHttpServicerFactory.this.serviceBufferPool);
 
 			try {
 				try {

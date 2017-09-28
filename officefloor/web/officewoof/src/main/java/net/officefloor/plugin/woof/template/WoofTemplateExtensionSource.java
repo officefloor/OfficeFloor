@@ -20,8 +20,8 @@ package net.officefloor.plugin.woof.template;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.web.state.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Source that allows extending behaviour of a

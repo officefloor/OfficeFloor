@@ -36,6 +36,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -55,6 +56,11 @@ import net.officefloor.server.stream.impl.ByteSequence;
  */
 public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTestCase
 		implements HttpResponseWriter<ByteBuffer> {
+
+	/**
+	 * {@link HttpServerLocation}.
+	 */
+	private final HttpServerLocation serverLocation = new HttpServerLocationImpl();
 
 	/**
 	 * {@link HttpMethod}.
@@ -99,8 +105,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		ByteSequence requestEntity = new ByteArrayByteSequence(
 				requestEntityContent.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				true, () -> this.method, () -> this.requestUri, this.requestVersion, this.requestHeaders, requestEntity,
-				this, this.bufferPool);
+				this.serverLocation, true, () -> this.method, () -> this.requestUri, this.requestVersion,
+				this.requestHeaders, requestEntity, this, this.bufferPool);
 		connection.setProcessAwareContext(new MockProcessAwareContext());
 		return connection;
 	}

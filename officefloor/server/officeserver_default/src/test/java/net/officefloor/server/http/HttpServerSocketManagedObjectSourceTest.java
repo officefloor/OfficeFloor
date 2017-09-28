@@ -66,7 +66,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start non-secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7878));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(7878));
 		});
 
 		// Ensure can get response
@@ -85,7 +85,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 		});
 
@@ -119,7 +119,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 		});
 
@@ -136,7 +136,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 		});
 

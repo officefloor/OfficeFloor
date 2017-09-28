@@ -18,12 +18,12 @@
 package net.officefloor.plugin.web.http.security.integrate;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * <p>

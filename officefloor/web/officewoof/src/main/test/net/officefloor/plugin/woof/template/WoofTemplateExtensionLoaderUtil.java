@@ -41,8 +41,8 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChangeIssues;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Utility functions for testing a {@link WoofTemplateExtensionSource}

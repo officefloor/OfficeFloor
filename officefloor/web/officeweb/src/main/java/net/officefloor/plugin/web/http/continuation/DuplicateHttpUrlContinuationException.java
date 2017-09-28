@@ -18,7 +18,7 @@
 package net.officefloor.plugin.web.http.continuation;
 
 /**
- * Indicates two or more {@link HttpUrlContinuationDifferentiator} instances
+ * Indicates two or more {@link HttpUrlContinuationAnnotation} instances
  * exist with the same application URI path.
  * 
  * @author Daniel Sagenschneider

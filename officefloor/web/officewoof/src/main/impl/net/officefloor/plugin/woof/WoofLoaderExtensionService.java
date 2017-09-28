@@ -47,9 +47,9 @@ import net.officefloor.plugin.objects.WoofObjectsLoaderImpl;
 import net.officefloor.plugin.teams.WoofTeamsLoader;
 import net.officefloor.plugin.teams.WoofTeamsLoaderContext;
 import net.officefloor.plugin.teams.WoofTeamsLoaderImpl;
-import net.officefloor.plugin.web.http.application.WebArchitect;
-import net.officefloor.plugin.web.http.application.WebArchitectEmployer;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.WebArchitectEmployer;
 
 /**
  * {@link OfficeFloorExtensionService} / {@link OfficeExtensionService} to

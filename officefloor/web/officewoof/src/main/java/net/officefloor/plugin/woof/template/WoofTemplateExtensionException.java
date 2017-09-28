@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.woof.template;
 
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.web.state.HttpTemplateAutoWireSectionExtension;
 
 /**
  * Flags that the {@link HttpTemplateAutoWireSectionExtension} is unknown or

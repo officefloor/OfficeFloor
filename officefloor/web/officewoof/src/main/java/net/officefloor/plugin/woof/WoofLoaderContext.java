@@ -21,7 +21,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.plugin.objects.WoofObjectsLoader;
-import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.web.WebArchitect;
 
 /**
  * Context for the {@link WoofObjectsLoader}.

@@ -19,7 +19,7 @@ package net.officefloor.plugin.woof;
 
 import java.util.ServiceLoader;
 
-import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.web.WebArchitect;
 
 /**
  * {@link ServiceLoader} service that enables extending functionality over and

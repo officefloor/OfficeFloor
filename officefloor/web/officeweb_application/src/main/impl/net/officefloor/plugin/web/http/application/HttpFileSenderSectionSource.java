@@ -36,6 +36,7 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileSenderManagedFunc
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.WebApplicationSectionSource;
 
 /**
  * Provides sending {@link HttpFile} instances for the HTTP server.

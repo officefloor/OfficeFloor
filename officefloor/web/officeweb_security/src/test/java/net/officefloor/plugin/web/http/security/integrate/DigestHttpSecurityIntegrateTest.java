@@ -21,10 +21,10 @@ import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate the {@link DigestHttpSecuritySource}.

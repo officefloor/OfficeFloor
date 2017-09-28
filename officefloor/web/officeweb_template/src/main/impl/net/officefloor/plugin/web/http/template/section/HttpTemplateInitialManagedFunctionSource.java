@@ -26,8 +26,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
@@ -35,6 +34,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunctionSource} to provide the
@@ -128,7 +128,7 @@ public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFun
 		function.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
 		function.addFlow().setKey(Flows.RENDER);
 		function.addEscalation(IOException.class);
-		function.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(templateUriPath, isRequireSecure));
+		function.setDifferentiator(new HttpUrlContinuationAnnotationImpl(templateUriPath, isRequireSecure));
 	}
 
 }

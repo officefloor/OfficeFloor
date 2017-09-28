@@ -20,7 +20,7 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.Serializable;
 
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.web.HttpSessionStateful;
 
 /**
  * Provides logic for using stateful object.

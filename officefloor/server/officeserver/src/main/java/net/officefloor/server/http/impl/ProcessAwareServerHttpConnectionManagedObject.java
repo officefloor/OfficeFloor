@@ -31,6 +31,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -59,6 +60,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 			inputManagedObject.setCleanupEscalations(cleanupEscalations);
 		};
 	}
+
+	/**
+	 * {@link HttpServerLocation}.
+	 */
+	private final HttpServerLocation serverLocation;
 
 	/**
 	 * Indicates if secure.
@@ -113,6 +119,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	/**
 	 * Instantiate.
 	 * 
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
 	 * @param isSecure
 	 *            Indicates if secure.
 	 * @param methodSupplier
@@ -132,9 +140,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 */
-	public ProcessAwareServerHttpConnectionManagedObject(boolean isSecure, Supplier<HttpMethod> methodSupplier,
-			Supplier<String> requestUriSupplier, HttpVersion version, NonMaterialisedHttpHeaders requestHeaders,
-			ByteSequence requestEntity, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
+	public ProcessAwareServerHttpConnectionManagedObject(HttpServerLocation serverLocation, boolean isSecure,
+			Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier, HttpVersion version,
+			NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity, HttpResponseWriter<B> writer,
+			StreamBufferPool<B> bufferPool) {
+		this.serverLocation = serverLocation;
 
 		// Indicate if secure
 		this.isSecure = isSecure;
@@ -194,6 +204,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	/*
 	 * ================== ServerHttpConnection =======================
 	 */
+
+	@Override
+	public HttpServerLocation getHttpServerLocation() {
+		return this.serverLocation;
+	}
 
 	@Override
 	public boolean isSecure() {

@@ -44,6 +44,7 @@ import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -68,7 +69,7 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpServer implements HttpServerImplementation {
+public class MockHttpServer implements HttpServerLocation, HttpServerImplementation {
 
 	/**
 	 * {@link ThreadLocalStreamBufferPool} to use for stress testing.
@@ -86,7 +87,7 @@ public class MockHttpServer implements HttpServerImplementation {
 	 */
 	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) {
 		MockHttpServer httpServer = new MockHttpServer();
-		HttpServer.configureHttpServer(-1, -1, httpServer, null, input, null, null);
+		new HttpServer(httpServer, httpServer, null, input, null, null);
 		return httpServer;
 	}
 
@@ -174,7 +175,7 @@ public class MockHttpServer implements HttpServerImplementation {
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
+				this, isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
 				responseWriter, bufferPool);
 
 		// Service the request
@@ -278,6 +279,45 @@ public class MockHttpServer implements HttpServerImplementation {
 
 		// Block waiting for response
 		return callback.waitForResponse(1000);
+	}
+
+	/*
+	 * ===================== HttpServerLocation ================================
+	 */
+
+	@Override
+	public String getDomain() {
+		return "mock.officefloor.net";
+	}
+
+	@Override
+	public int getHttpPort() {
+		return 80;
+	}
+
+	@Override
+	public int getHttpsPort() {
+		return 443;
+	}
+
+	@Override
+	public String getClusterHostName() {
+		return "testnode.officefloor.net";
+	}
+
+	@Override
+	public int getClusterHttpPort() {
+		return 7878;
+	}
+
+	@Override
+	public int getClusterHttpsPort() {
+		return 7979;
+	}
+
+	@Override
+	public String createClientUrl(boolean isSecure, String path) {
+		return (isSecure ? "https" : "http") + "://" + this.getDomain();
 	}
 
 	/*

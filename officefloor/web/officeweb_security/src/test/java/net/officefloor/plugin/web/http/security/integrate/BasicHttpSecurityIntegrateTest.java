@@ -21,12 +21,12 @@ import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate tests the {@link BasicHttpSecuritySource}.

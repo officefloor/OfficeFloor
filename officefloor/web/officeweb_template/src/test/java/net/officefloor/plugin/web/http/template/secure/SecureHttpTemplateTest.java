@@ -26,11 +26,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.HttpUriLink;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -39,6 +34,11 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.HttpParameters;
+import net.officefloor.web.HttpUrlContinuation;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
@@ -305,7 +305,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertakes test for secure settings of a {@link HttpUriLink}.
+	 * Undertakes test for secure settings of a {@link HttpUrlContinuation}.
 	 */
 	private void doSecureUriTest(boolean isUriSecure, String requestUrl, String redirectUrl) throws Exception {
 
@@ -315,7 +315,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 			// Configure the section for URI
 			OfficeSection section = context.addSection("TEST", UriLogic.class);
-			HttpUriLink uriLink = web.linkUri("uri", section.getOfficeSectionInput("service"));
+			HttpUrlContinuation uriLink = web.linkUri("uri", section.getOfficeSectionInput("service"));
 			uriLink.setUriSecure(isUriSecure);
 
 			// Add HTTP parameters (as not loaded by template)

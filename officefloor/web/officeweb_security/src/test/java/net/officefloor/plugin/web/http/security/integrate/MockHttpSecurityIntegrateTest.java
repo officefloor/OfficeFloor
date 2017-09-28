@@ -19,9 +19,9 @@ package net.officefloor.plugin.web.http.security.integrate;
 
 import org.apache.http.client.CredentialsProvider;
 
-import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate tests the {@link MockHttpSecuritySource}.

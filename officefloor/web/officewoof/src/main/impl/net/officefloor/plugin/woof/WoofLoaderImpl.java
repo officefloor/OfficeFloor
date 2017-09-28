@@ -69,15 +69,15 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateRedirectModel;
-import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
-import net.officefloor.plugin.web.http.application.WebArchitectEmployer;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.WebArchitectEmployer;
+import net.officefloor.web.state.HttpSecuritySection;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * {@link WoofLoader} implementation.

@@ -34,10 +34,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -54,6 +50,10 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.WebArchitect;
+import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
+import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
