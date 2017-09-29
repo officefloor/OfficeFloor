@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.http.test;
 
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.HttpInput;
 import net.officefloor.web.HttpUrlContinuation;
 import net.officefloor.web.WebArchitect;
 
@@ -48,21 +49,22 @@ public interface CompileWebContext extends CompileOfficeContext {
 	 *            {@link Class} containing a <code>service</code> method.
 	 * @return {@link HttpUrlContinuation}.
 	 */
-	HttpUrlContinuation linkUrl(String applicationPath, boolean isSecure, Class<?> sectionClass);
+	HttpUrlContinuation link(boolean isSecure, String applicationPath, Class<?> sectionClass);
 
 	/**
 	 * Convenience method to link a URL to the <code>service</code> method of
 	 * the {@link Class}.
 	 * 
+	 * @param isSecure
+	 *            Indicates if secure.
 	 * @param httpMethod
 	 *            {@link HttpMethod}.
 	 * @param applicationPath
 	 *            Application path.
-	 * @param isSecure
-	 *            Indicates if secure.
 	 * @param sectionClass
 	 *            {@link Class} containing a <code>service</code> method.
+	 * @return {@link HttpInput}.
 	 */
-	void linkUrl(HttpMethod httpMethod, String applicationPath, boolean isSecure, Class<?> sectionClass);
+	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass);
 
 }

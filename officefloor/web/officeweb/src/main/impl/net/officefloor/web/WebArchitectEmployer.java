@@ -51,7 +51,7 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebArchitectEmployer extends WebArchitect {
+public class WebArchitectEmployer implements WebArchitect {
 
 	/**
 	 * Employs a {@link WebArchitect}.

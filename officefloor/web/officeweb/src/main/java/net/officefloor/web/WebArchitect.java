@@ -138,13 +138,14 @@ public abstract interface WebArchitect {
 	OfficeManagedObject addHttpRequestObject(Class<?> objectClass, boolean isLoadParameters);
 
 	/**
-	 * Links a URL to an {@link OfficeSectionInput}. This will always be a GET
-	 * {@link HttpMethod} due to redirection.
+	 * Links a URL to an {@link OfficeSectionInput}. This will always be a
+	 * {@link HttpMethod#GET} due to redirection required for the
+	 * {@link HttpUrlContinuation}.
 	 * 
 	 * @param isSecure
 	 *            Indicates if secure connection required.
 	 * @param applicationPath
-	 *            URI path of the application to be linked.
+	 *            URL path of the application to be linked.
 	 * @param sectionInput
 	 *            {@link OfficeSectionInput} servicing the URI.
 	 * @return {@link HttpUrlContinuation}.
@@ -159,13 +160,12 @@ public abstract interface WebArchitect {
 	 * @param httpMethod
 	 *            {@link HttpMethod}.
 	 * @param applicationPath
-	 *            URI path of the application to be linked.
+	 *            URL path of the application to be linked.
 	 * @param sectionInput
 	 *            {@link OfficeSectionInput} servicing the URI.
-	 * @return {@link HttpUrlContinuation} if URI provides redirect
-	 *         continuation.
+	 * @return {@link HttpInput}.
 	 */
-	void link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
+	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to the {@link HttpUrlContinuation}.
@@ -174,8 +174,12 @@ public abstract interface WebArchitect {
 	 *            {@link OfficeSectionOutput}.
 	 * @param continuation
 	 *            {@link HttpUrlContinuation}.
+	 * @param parameterType
+	 *            {@link Class} providing the possible parameters for the
+	 *            {@link HttpUrlContinuation} path. May be <code>null</code> if
+	 *            {@link HttpUrlContinuation} path contains no parameters.
 	 */
-	void link(OfficeSectionOutput output, HttpUrlContinuation continuation);
+	void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType);
 
 	/**
 	 * Obtains the configured {@link HttpInput} instances for the application.
@@ -186,11 +190,30 @@ public abstract interface WebArchitect {
 
 	/**
 	 * <p>
+	 * Intercepts all {@link HttpRequest} instances before servicing. Multiple
+	 * intercepts may be configured, with them executed in the order they are
+	 * added.
+	 * <p>
+	 * This allows, for example, logging all requests to the web application.
+	 * 
+	 * @param sectionInput
+	 *            {@link OfficeSectionInput} to handle intercepting the
+	 *            {@link HttpRequest}.
+	 * @param sectionOutput
+	 *            {@link OfficeSectionOutput} to continue servicing the
+	 *            {@link HttpRequest}.
+	 */
+	void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput);
+
+	/**
+	 * <p>
 	 * Chains a {@link OfficeSectionInput} to the end of the servicing chain to
-	 * handle a {@link HttpRequest}.
+	 * handle a {@link HttpRequest}. Multiple chained services may be added,
+	 * with them executed in the order they are added.
 	 * <p>
 	 * The {@link WebArchitect} functionality is always the first in the chain
-	 * to attempt to service the {@link HttpRequest}.
+	 * to attempt to service the {@link HttpRequest}. This allows, for example,
+	 * adding a chained servicer for serving resources from a file system.
 	 * 
 	 * @param sectionInput
 	 *            {@link OfficeSectionInput} to handle the {@link HttpRequest}.

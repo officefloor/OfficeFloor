@@ -24,6 +24,7 @@ import java.util.Iterator;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.ObjectResponder;
 import net.officefloor.web.WebArchitect;
 
 /**
@@ -34,12 +35,29 @@ import net.officefloor.web.WebArchitect;
  * bound object, however only objects registered with this
  * {@link HttpRequestState} will be available across redirects.
  * <p>
- * Also this interface is used within the {@link WebArchitect} to
- * allow integration with a JEE Servlet container.
+ * Also this interface is used within the {@link WebArchitect} to allow
+ * integration with a JEE Servlet container.
  * 
  * @author Daniel Sagenschneider
  */
 public interface HttpRequestState {
+
+	/**
+	 * Specifies the {@link ObjectResponder} instances for the
+	 * {@link HttpRequest}.
+	 * 
+	 * @param objectResponses
+	 *            {@link ObjectResponder} instances for the {@link HttpRequest}.
+	 */
+	void setObjectResponses(ObjectResponder<?>[] objectResponses);
+
+	/**
+	 * Obtains the {@link ObjectResponder} instances.
+	 * 
+	 * @return {@link ObjectResponder} instances. May be <code>null</code> if no
+	 *         {@link ObjectResponder} instances.
+	 */
+	ObjectResponder<?>[] getObjectResponses();
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.
@@ -99,7 +117,6 @@ public interface HttpRequestState {
 	 * @throws IllegalArgumentException
 	 *             If invalid momento.
 	 */
-	void importState(Serializable momento) throws IOException,
-			IllegalArgumentException;
+	void importState(Serializable momento) throws IOException, IllegalArgumentException;
 
 }

@@ -48,10 +48,11 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		// Wrap web extension into office extension
 		this.office((context) -> {
 			CompileWebContextImpl web = new CompileWebContextImpl(context);
-			extension.extend(web);
-			if (web.webArchitect != null) {
-				web.webArchitect.informOfficeArchitect();
+			if (extension != null) {
+				// Allow no configuration except default web
+				extension.extend(web);
 			}
+			web.webArchitect.informOfficeArchitect();
 		});
 	}
 
@@ -68,7 +69,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		/**
 		 * {@link WebArchitect}.
 		 */
-		private WebArchitect webArchitect = null;
+		private final WebArchitect webArchitect;
 
 		/**
 		 * Instantiate.
@@ -78,6 +79,10 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		 */
 		public CompileWebContextImpl(CompileOfficeContext officeContext) {
 			this.officeContext = officeContext;
+
+			// Always employ the web architect
+			this.webArchitect = WebArchitectEmployer.employWebArchitect(this.officeContext.getOfficeArchitect(),
+					this.officeContext.getOfficeSourceContext());
 		}
 
 		/*
@@ -86,14 +91,6 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 
 		@Override
 		public WebArchitect getWebArchitect() {
-
-			// Lazy create the web architect
-			if (this.webArchitect == null) {
-				this.webArchitect = WebArchitectEmployer.employWebArchitect(this.officeContext.getOfficeArchitect(),
-						this.officeContext.getOfficeSourceContext());
-			}
-
-			// Return the web architect
 			return this.webArchitect;
 		}
 
@@ -134,24 +131,23 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		}
 
 		@Override
-		public void linkUrl(HttpMethod httpMethod, String applicationPath, boolean isSecure, Class<?> sectionClass) {
+		public void link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass) {
 
 			// Add the section
 			OfficeSection section = this.addSection(httpMethod.getName() + "_" + applicationPath, sectionClass);
 
 			// Create the link to the section service method
-			this.getWebArchitect().linkUrl(httpMethod, applicationPath, isSecure,
-					section.getOfficeSectionInput("service"));
+			this.webArchitect.link(isSecure, httpMethod, applicationPath, section.getOfficeSectionInput("service"));
 		}
 
 		@Override
-		public HttpUrlContinuation linkUrl(String applicationPath, boolean isSecure, Class<?> sectionClass) {
+		public HttpUrlContinuation link(boolean isSecure, String applicationPath, Class<?> sectionClass) {
 
 			// Add the section
 			OfficeSection section = this.addSection("GET_" + applicationPath, sectionClass);
 
 			// Return the link to the section service method
-			return this.getWebArchitect().linkUrl(applicationPath, isSecure, section.getOfficeSectionInput("service"));
+			return this.webArchitect.link(isSecure, applicationPath, section.getOfficeSectionInput("service"));
 		}
 	}
 

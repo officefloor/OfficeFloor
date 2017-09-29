@@ -47,4 +47,38 @@ public interface HttpInput {
 	 */
 	String getApplicationPath();
 
+	/**
+	 * Adds an {@link ObjectResponder} for the {@link HttpInput}.
+	 * 
+	 * @param objectResponder
+	 *            {@link ObjectResponder} for the {@link HttpInput}.
+	 */
+	void addObjectResponder(ObjectResponder<?> objectResponder);
+
+	/**
+	 * Obtains the configured {@link ObjectResponder} instances.
+	 * 
+	 * @return Configured {@link ObjectResponder} instances.
+	 */
+	ObjectResponder<?>[] getObjectResponders();
+
+	/**
+	 * <p>
+	 * Loads an annotation for the {@link HttpInput}.
+	 * <p>
+	 * This, for example, allows providing REST API definition information for
+	 * the {@link HttpInput}.
+	 * 
+	 * @param annotation
+	 *            Annotation for the {@link HttpInput}.
+	 */
+	void addAnnotation(Object annotation);
+
+	/**
+	 * Obtains the annotations for this {@link HttpInput}.
+	 * 
+	 * @return Annotations for this {@link HttpInput}.
+	 */
+	Object[] getAnnotations();
+
 }
