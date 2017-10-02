@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.web.ObjectResponder;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
@@ -70,6 +71,11 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		private ProcessAwareContext context;
 
 		/**
+		 * {@link ObjectResponder} instances.
+		 */
+		private ObjectResponder<?>[] objectResponses;
+
+		/**
 		 * Attributes.
 		 */
 		private Map<String, Serializable> attributes = new HashMap<String, Serializable>();
@@ -91,6 +97,19 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		/*
 		 * ==================== HttpRequestState ==========================
 		 */
+
+		@Override
+		public void setObjectResponses(ObjectResponder<?>[] objectResponses) {
+			this.context.run(() -> {
+				this.objectResponses = objectResponses;
+				return null;
+			});
+		}
+
+		@Override
+		public ObjectResponder<?>[] getObjectResponses() {
+			return this.context.run(() -> this.objectResponses);
+		}
 
 		@Override
 		public Serializable getAttribute(String name) {

@@ -27,9 +27,9 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 
 /**

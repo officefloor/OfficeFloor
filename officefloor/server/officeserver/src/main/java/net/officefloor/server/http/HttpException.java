@@ -94,6 +94,21 @@ public class HttpException extends RuntimeException {
 	 * 
 	 * @param status
 	 *            {@link HttpStatus}.
+	 * @param cause
+	 *            {@link Throwable} cause.
+	 */
+	public HttpException(HttpStatus status, Throwable cause) {
+		super(cause);
+		this.status = status;
+		this.headers = NO_HEADERS;
+		this.entity = null;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param status
+	 *            {@link HttpStatus}.
 	 * @param headers
 	 *            {@link HttpHeader} instances. May be <code>null</code>.
 	 * @param entity

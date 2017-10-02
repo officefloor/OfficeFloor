@@ -30,8 +30,8 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 
 /**

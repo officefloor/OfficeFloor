@@ -27,7 +27,6 @@ import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestCase;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
@@ -37,6 +36,7 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.D
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryManagedFunctionSource.HttpFileFactoryFunctionFlows;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 
 /**
  * Tests the {@link ClasspathHttpFileFactoryWorkSource}.

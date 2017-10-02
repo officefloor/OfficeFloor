@@ -33,8 +33,8 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Dependencies;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Flows;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
 
 /**
  * Tests the {@link HttpAuthenticationManagedObjectSource}.

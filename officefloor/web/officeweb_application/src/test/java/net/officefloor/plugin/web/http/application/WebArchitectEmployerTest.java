@@ -39,7 +39,6 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
@@ -55,6 +54,7 @@ import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpRequestStateful;
 import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.WebArchitect;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;
 

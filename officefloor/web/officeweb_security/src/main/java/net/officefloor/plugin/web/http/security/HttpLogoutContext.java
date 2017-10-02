@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
 
 /**
  * Context for logging out.

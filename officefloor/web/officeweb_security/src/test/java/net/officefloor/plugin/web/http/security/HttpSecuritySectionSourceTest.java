@@ -26,8 +26,8 @@ import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 
 /**

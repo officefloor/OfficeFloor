@@ -22,9 +22,9 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;
 

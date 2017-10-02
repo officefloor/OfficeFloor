@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.location;
 
-import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.escalation.UnknownContextPathHttpException;
 
 /**
  * Location details of the HTTP application.

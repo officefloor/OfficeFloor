@@ -19,12 +19,12 @@ package net.officefloor.plugin.web.http.location;
 
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.escalation.InvalidRequestUriHttpException;
-import net.officefloor.plugin.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.escalation.InvalidRequestUriHttpException;
+import net.officefloor.web.escalation.UnknownContextPathHttpException;
 
 /**
  * Provides listing of common tests for the various states of the

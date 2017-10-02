@@ -30,10 +30,9 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
-import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.parameter.HttpParametersLoader;
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the
@@ -97,7 +96,6 @@ public class HttpRequestObjectManagedObjectSource extends AbstractManagedObjectS
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
@@ -149,8 +147,7 @@ public class HttpRequestObjectManagedObjectSource extends AbstractManagedObjectS
 			}
 
 			// Initialise the HTTP parameters loader
-			this.loader = new HttpParametersLoaderImpl<Object>();
-			this.loader.init(this.objectClass, aliasMappings, isCaseInsensitive, null);
+			this.loader = new HttpParametersLoader<>(this.objectClass, aliasMappings, isCaseInsensitive, null);
 		}
 
 	}

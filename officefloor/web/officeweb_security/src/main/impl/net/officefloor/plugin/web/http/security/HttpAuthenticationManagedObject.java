@@ -27,8 +27,8 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Dependencies;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Flows;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
 
 /**
  * {@link HttpAuthentication} {@link ManagedObject}.

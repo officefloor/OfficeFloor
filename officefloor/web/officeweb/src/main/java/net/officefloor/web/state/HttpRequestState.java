@@ -22,10 +22,10 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.ObjectResponder;
 import net.officefloor.web.WebArchitect;
+import net.officefloor.web.session.HttpSession;
 
 /**
  * <p>
