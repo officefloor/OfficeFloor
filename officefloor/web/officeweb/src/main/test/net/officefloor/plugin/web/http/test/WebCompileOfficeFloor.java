@@ -26,6 +26,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.HttpInput;
 import net.officefloor.web.HttpUrlContinuation;
 import net.officefloor.web.WebArchitect;
 import net.officefloor.web.WebArchitectEmployer;
@@ -131,13 +132,14 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		}
 
 		@Override
-		public void link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass) {
+		public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass) {
 
 			// Add the section
 			OfficeSection section = this.addSection(httpMethod.getName() + "_" + applicationPath, sectionClass);
 
 			// Create the link to the section service method
-			this.webArchitect.link(isSecure, httpMethod, applicationPath, section.getOfficeSectionInput("service"));
+			return this.webArchitect.link(isSecure, httpMethod, applicationPath,
+					section.getOfficeSectionInput("service"));
 		}
 
 		@Override
