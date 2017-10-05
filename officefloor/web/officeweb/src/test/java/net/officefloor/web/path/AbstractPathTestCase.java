@@ -23,8 +23,8 @@ import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
-import net.officefloor.web.escalation.UnknownContextPathHttpException;
+import net.officefloor.web.escalation.BadRequestHttpException;
+import net.officefloor.web.route.InvalidContextPathException;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
@@ -120,16 +120,15 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 			WebRouter.transformToApplicationCanonicalPath(requestUri, contextPath);
 			fail("Should not be successful");
 
-		} catch (InvalidRequestUriHttpException ex) {
+		} catch (BadRequestHttpException ex) {
 			// Invalid request if no context path
 			assertEquals("Invalid only if no context path", "", contextPath);
 			assertEquals("Incorrect HTTP status", HttpStatus.BAD_REQUEST, ex.getHttpStatus());
-			assertEquals("Incorrect message", "Invalid request URI path [" + requestUri + "]", ex.getMessage());
+			assertEquals("Incorrect message", "Invalid request URI path " + requestUri, ex.getEntity());
 
-		} catch (UnknownContextPathHttpException ex) {
+		} catch (InvalidContextPathException ex) {
 			// Incorrect as missing context path
 			assertTrue("Incorrect only if have context path", (contextPath.trim().length() > 0));
-			assertEquals("Incorrect HTTP status", HttpStatus.NOT_FOUND, ex.getHttpStatus());
 			assertEquals("Incorrect message",
 					"Incorrect context path for application [context=" + contextPath + ", request=" + requestUri + "]",
 					ex.getMessage());
@@ -350,14 +349,17 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 			expectedPath = expectedPath.replace("/CONTEXT", contextPath);
 
 			// Record creating the path
-			HttpServerLocation location = new HttpServerLocationImpl(domain, httpPort, httpsPort);
 			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 			this.recordReturn(connection, connection.isSecure(), isSecureConnection);
-			this.recordReturn(connection, connection.getHttpServerLocation(), location);
+			if (isSecureConnection != isSecureLink) {
+				// Must obtain full path
+				HttpServerLocation location = new HttpServerLocationImpl(domain, httpPort, httpsPort);
+				this.recordReturn(connection, connection.getHttpServerLocation(), location);
+			}
 
 			// Test
 			this.replayMockObjects();
-			HttpApplicationState application = new HttpApplicationStateManagedObjectSource();
+			HttpApplicationState application = new HttpApplicationStateManagedObjectSource(contextPath);
 			String clientPath = application.createApplicationClientUrl(isSecureLink, applicationPath, connection);
 			this.verifyMockObjects();
 

@@ -33,8 +33,8 @@ import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * {@link ManagedFunctionSource} to locate a {@link HttpFile} on the class path.

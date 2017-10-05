@@ -163,9 +163,9 @@ public abstract interface WebArchitect {
 	 *            URL path of the application to be linked.
 	 * @param sectionInput
 	 *            {@link OfficeSectionInput} servicing the URI.
-	 * @return {@link HttpInput}.
+	 * @return {@link HttpInputBuilder}.
 	 */
-	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
+	HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to the {@link HttpUrlContinuation}.
@@ -182,11 +182,11 @@ public abstract interface WebArchitect {
 	void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType);
 
 	/**
-	 * Obtains the configured {@link HttpInput} instances for the application.
+	 * Obtains the configured {@link HttpInputBuilder} instances for the application.
 	 * 
-	 * @return Configured {@link HttpInput} instances.
+	 * @return Configured {@link HttpInputBuilder} instances.
 	 */
-	HttpInput[] getHttpInputs();
+	HttpInputBuilder[] getHttpInputs();
 
 	/**
 	 * <p>

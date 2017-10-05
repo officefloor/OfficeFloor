@@ -35,8 +35,8 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.D
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryManagedFunctionSource.HttpFileFactoryFunctionFlows;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * Tests the {@link ClasspathHttpFileFactoryWorkSource}.

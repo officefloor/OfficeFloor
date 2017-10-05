@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.escalation;
+package net.officefloor.web;
 
-import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
- * Indicates the {@link HttpRequest} request URI is invalid.
- *
+ * Parses arguments from the {@link ServerHttpConnection}.
+ * 
  * @author Daniel Sagenschneider
  */
-public class InvalidRequestUriHttpException extends BadRequestHttpException {
+public interface HttpEntityArgumentParser extends HttpEntityParser {
 
 	/**
-	 * Initiate.
-	 *
-	 * @param requestUri
-	 *            Invalid request URI.
+	 * Parses the HTTP entity.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @param context
+	 *            {@link HttpEntityArgumentParserContext}.
+	 * @throws Exception
+	 *             If fails to parse the {@link ServerHttpConnection}.
 	 */
-	public InvalidRequestUriHttpException(String requestUri) {
-		super(null, "Invalid request URI " + requestUri);
-	}
+	void parse(ServerHttpConnection connection, HttpEntityArgumentParserContext context) throws Exception;
 
 }

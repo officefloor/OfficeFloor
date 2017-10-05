@@ -449,7 +449,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			HttpInput input = context.link(false, HttpMethod.GET, "/path/{param}", MockObjectSection.class);
+			HttpInputBuilder input = context.link(false, HttpMethod.GET, "/path/{param}", MockObjectSection.class);
 			input.addObjectResponder(new StringObjectResponder());
 		});
 
@@ -488,7 +488,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			HttpInput input = context.link(false, HttpMethod.GET, "/path", MockEscalate.class);
+			HttpInputBuilder input = context.link(false, HttpMethod.GET, "/path", MockEscalate.class);
 			input.addObjectResponder(new EscalationObjectResponder());
 		});
 

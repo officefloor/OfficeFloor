@@ -87,6 +87,24 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * ====================== HttpRequestTokeniser ============================
 	 */
 
+	/**
+	 * <p>
+	 * Tokenises the {@link HttpRequest} for the path, parameters and fragment
+	 * providing them to the {@link HttpRequestTokenHandler} to handle.
+	 * <p>
+	 * This encompasses the whole {@link HttpRequest} (e.g. on <code>POST</code>
+	 * will also tokenise the body for parameters).
+	 * 
+	 * @param request
+	 *            {@link HttpRequest} to be tokenised.
+	 * @param handler
+	 *            {@link HttpRequestTokenHandler} to handle the
+	 *            {@link HttpRequest} tokens.
+	 * @throws IOException
+	 *             If fails to read data from {@link HttpRequest}.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to tokenise the {@link HttpRequest}.
+	 */
 	@Override
 	public void tokeniseHttpRequest(HttpRequest request, HttpRequestTokenHandler handler)
 			throws IOException, HttpRequestTokeniseException {

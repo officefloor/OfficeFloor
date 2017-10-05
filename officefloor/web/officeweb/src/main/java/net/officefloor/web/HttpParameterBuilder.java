@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,13 @@
 package net.officefloor.web;
 
 /**
- * Allows configuring the HTTP URI link for a {@link WebArchitect}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
-public interface HttpUrlContinuation {
+public interface HttpParameterBuilder {
 
-	/**
-	 * Obtains the {@link HttpInputBuilder} for this {@link HttpUrlContinuation}.
-	 * 
-	 * @return {@link HttpInputBuilder}.
-	 */
-	HttpInputBuilder getHttpInput();
+	void setRequired(boolean isRequired);
+	
+	void setAlias(String aliasName);
 
 }

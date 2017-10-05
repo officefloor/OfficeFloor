@@ -351,7 +351,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
+	public HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
 			OfficeSectionInput sectionInput) {
 		// TODO Auto-generated method stub
 		return null;
@@ -364,7 +364,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpInput[] getHttpInputs() {
+	public HttpInputBuilder[] getHttpInputs() {
 		// TODO Auto-generated method stub
 		return null;
 	}

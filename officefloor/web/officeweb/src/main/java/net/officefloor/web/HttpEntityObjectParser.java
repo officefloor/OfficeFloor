@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,32 @@
  */
 package net.officefloor.web;
 
+import net.officefloor.server.http.ServerHttpConnection;
+
 /**
- * Allows configuring the HTTP URI link for a {@link WebArchitect}.
+ * Parses an object from the {@link ServerHttpConnection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpUrlContinuation {
+public interface HttpEntityObjectParser<T> extends HttpEntityParser {
 
 	/**
-	 * Obtains the {@link HttpInputBuilder} for this {@link HttpUrlContinuation}.
+	 * Obtains the type of object parsed from the {@link ServerHttpConnection}.
 	 * 
-	 * @return {@link HttpInputBuilder}.
+	 * @return Object type.
 	 */
-	HttpInputBuilder getHttpInput();
+	Class<T> getObjectType();
+
+	/**
+	 * Parses the object from the {@link ServerHttpConnection}.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return Parsed object.
+	 * @throws Exception
+	 *             If fails to parse the object from the
+	 *             {@link ServerHttpConnection}.
+	 */
+	T parse(ServerHttpConnection connection) throws Exception;
 
 }

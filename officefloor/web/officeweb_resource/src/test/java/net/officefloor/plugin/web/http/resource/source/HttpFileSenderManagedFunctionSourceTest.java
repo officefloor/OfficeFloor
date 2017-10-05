@@ -41,8 +41,8 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * Tests the {@link HttpFileSenderManagedFunctionSource}.

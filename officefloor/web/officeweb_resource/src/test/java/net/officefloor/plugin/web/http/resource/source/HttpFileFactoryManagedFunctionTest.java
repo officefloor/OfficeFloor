@@ -30,8 +30,8 @@ import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.route.InvalidContextPathException;
 
 /**
  * Tests the {@link HttpFileFactoryFunction}.
@@ -157,7 +157,7 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 
 		} else {
 			// Incorrect context
-			this.control(this.location).setThrowable(new UnknownContextPathHttpException("/context", "TEST"));
+			this.control(this.location).setThrowable(new InvalidContextPathException("/context", "TEST"));
 		}
 		this.creationListener.httpResourceCreated(file, this.connection, this.functionContext);
 

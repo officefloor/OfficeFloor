@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.escalation;
-
-import net.officefloor.server.http.HttpRequest;
+package net.officefloor.web;
 
 /**
- * Indicates the context path for the {@link HttpRequest} is incorrect for the
- * application.
+ * Parameter within the HTTP entity.
  * 
  * @author Daniel Sagenschneider
  */
-public class UnknownContextPathHttpException extends NotFoundHttpException {
+public interface HttpEntityParametersBuilder {
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param expectedContextPath
-	 *            Expected context path for the application.
-	 * @param requestUri
-	 *            Request URI.
-	 */
-	public UnknownContextPathHttpException(String expectedContextPath, String requestUri) {
-		super("Incorrect context path for application [context=" + expectedContextPath + ", request=" + requestUri
-				+ "]");
-	}
+	HttpParameterBuilder addParameter(String name);
 
 }

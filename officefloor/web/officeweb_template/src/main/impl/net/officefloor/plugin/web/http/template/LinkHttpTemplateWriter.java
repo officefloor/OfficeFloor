@@ -23,8 +23,8 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * {@link HttpTemplateWriter} to write the link.

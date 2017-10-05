@@ -30,9 +30,9 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
-import net.officefloor.web.escalation.UnknownContextPathHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
+import net.officefloor.web.route.InvalidContextPathException;
 
 /**
  * {@link ManagedFunction} to locate a {@link HttpFile} via a
@@ -111,7 +111,7 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 				resource = (defaultFile != null ? defaultFile : new NotExistHttpResource(resource.getPath()));
 			}
 
-		} catch (UnknownContextPathHttpException ex) {
+		} catch (InvalidContextPathException ex) {
 			resource = new NotExistHttpResource(requestUriPath);
 		}
 

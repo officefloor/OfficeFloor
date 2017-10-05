@@ -39,9 +39,9 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.D
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.path.HttpApplicationLocationMangedObject;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * <p>

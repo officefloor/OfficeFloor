@@ -21,35 +21,32 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.HttpEntityObjectParser;
 import net.officefloor.web.ObjectResponder;
-import net.officefloor.web.WebArchitect;
 import net.officefloor.web.session.HttpSession;
 
 /**
- * <p>
  * State for the {@link HttpRequest}.
- * <p>
- * A {@link ClassManagedObjectSource} provides similar functionality for each
- * bound object, however only objects registered with this
- * {@link HttpRequestState} will be available across redirects.
- * <p>
- * Also this interface is used within the {@link WebArchitect} to allow
- * integration with a JEE Servlet container.
  * 
  * @author Daniel Sagenschneider
  */
 public interface HttpRequestState {
 
 	/**
-	 * Specifies the {@link ObjectResponder} instances for the
-	 * {@link HttpRequest}.
+	 * Obtains the {@link HttpArgument} instances.
 	 * 
-	 * @param objectResponses
-	 *            {@link ObjectResponder} instances for the {@link HttpRequest}.
+	 * @return {@link HttpArgument} instances.
 	 */
-	void setObjectResponses(ObjectResponder<?>[] objectResponses);
+	HttpArgument getHttpArguments();
+
+	/**
+	 * Obtains the {@link HttpEntityObjectParser} instances.
+	 * 
+	 * @return {@link HttpEntityObjectParser} instances. May be
+	 *         <code>null</code> if no {@link HttpEntityObjectParser} instances.
+	 */
+	HttpEntityObjectParser<?>[] getObjectParsers();
 
 	/**
 	 * Obtains the {@link ObjectResponder} instances.
@@ -57,7 +54,7 @@ public interface HttpRequestState {
 	 * @return {@link ObjectResponder} instances. May be <code>null</code> if no
 	 *         {@link ObjectResponder} instances.
 	 */
-	ObjectResponder<?>[] getObjectResponses();
+	ObjectResponder<?>[] getObjectResponders();
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.

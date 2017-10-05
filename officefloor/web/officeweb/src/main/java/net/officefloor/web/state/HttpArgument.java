@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
+package net.officefloor.web.state;
 
 /**
- * Allows configuring the HTTP URI link for a {@link WebArchitect}.
+ * HTTP argument.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpUrlContinuation {
+public class HttpArgument {
 
 	/**
-	 * Obtains the {@link HttpInputBuilder} for this {@link HttpUrlContinuation}.
-	 * 
-	 * @return {@link HttpInputBuilder}.
+	 * Argument name.
 	 */
-	HttpInputBuilder getHttpInput();
+	public final String name;
+
+	/**
+	 * Argument value.
+	 */
+	public final String value;
+
+	/**
+	 * Next {@link HttpArgument}.
+	 */
+	public HttpArgument next = null;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param name
+	 *            Argument name.
+	 * @param value
+	 *            Argument value.
+	 */
+	public HttpArgument(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
 
 }

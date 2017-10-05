@@ -43,7 +43,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
+import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * {@link ManagedFunctionSource} for the HTTP template.

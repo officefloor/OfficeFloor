@@ -23,10 +23,7 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.web.state.HttpApplicationState;
-import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
 
 /**
  * Tests the {@link HttpApplicationStateManagedObjectSource}.
@@ -40,7 +37,7 @@ public class HttpApplicationStateManagedObjectSourceTest extends OfficeFrameTest
 	 */
 	public void testSpecification() {
 		// Should require no properties
-		ManagedObjectLoaderUtil.validateSpecification(HttpApplicationStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(new HttpApplicationStateManagedObjectSource(null));
 	}
 
 	/**
@@ -53,7 +50,7 @@ public class HttpApplicationStateManagedObjectSourceTest extends OfficeFrameTest
 		type.setObjectClass(HttpApplicationState.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpApplicationStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, new HttpApplicationStateManagedObjectSource(null));
 	}
 
 	/**
@@ -62,9 +59,7 @@ public class HttpApplicationStateManagedObjectSourceTest extends OfficeFrameTest
 	public void testLoadAndUse() throws Throwable {
 
 		// Load the source
-		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		HttpApplicationStateManagedObjectSource source = loader
-				.loadManagedObjectSource(HttpApplicationStateManagedObjectSource.class);
+		HttpApplicationStateManagedObjectSource source = new HttpApplicationStateManagedObjectSource(null);
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

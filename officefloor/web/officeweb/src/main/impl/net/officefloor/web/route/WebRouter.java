@@ -23,8 +23,7 @@ import java.util.LinkedList;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.escalation.InvalidRequestUriHttpException;
-import net.officefloor.web.escalation.UnknownContextPathHttpException;
+import net.officefloor.web.escalation.BadRequestHttpException;
 
 /**
  * Routes {@link ServerHttpConnection} instances to their respective handling
@@ -47,13 +46,13 @@ public class WebRouter {
 	 *            Context path of the application. May be <code>null</code> if
 	 *            context at root.
 	 * @return Canonical path for the application.
-	 * @throws InvalidRequestUriHttpException
+	 * @throws BadRequestHttpException
 	 *             If path is invalid.
-	 * @throws UnknownContextPathHttpException
+	 * @throws InvalidContextPathException
 	 *             If unknown context path.
 	 */
 	public static String transformToApplicationCanonicalPath(String path, String contextPath)
-			throws InvalidRequestUriHttpException, UnknownContextPathHttpException {
+			throws BadRequestHttpException, InvalidContextPathException {
 
 		// Root if empty path
 		if (path == null) {
@@ -74,7 +73,7 @@ public class WebRouter {
 
 			// Ensure have context path
 			if (!(canonicalPath.startsWith(contextPath))) {
-				throw new UnknownContextPathHttpException(contextPath, path);
+				throw new InvalidContextPathException(contextPath, path);
 			}
 
 			// Strip off the context path
@@ -94,10 +93,10 @@ public class WebRouter {
 	 * @param path
 	 *            Path to transform.
 	 * @return Canonical path.
-	 * @throws InvalidRequestUriHttpException
+	 * @throws BadRequestHttpException
 	 *             Should the Request URI path be invalid.
 	 */
-	public static String transformToCanonicalPath(String path) throws InvalidRequestUriHttpException {
+	public static String transformToCanonicalPath(String path) throws BadRequestHttpException {
 
 		// Root if empty path
 		if (path == null) {
@@ -230,11 +229,11 @@ public class WebRouter {
 	 *         segment. <code>false</code> indicates the path is not canonical
 	 *         and must be constructed from the resulting segments to be
 	 *         canonical.
-	 * @throws InvalidRequestUriHttpException
+	 * @throws BadRequestHttpException
 	 *             Should the segment result in an invalid path.
 	 */
 	private static boolean processSegment(String path, int beginIndex, int endIndex, Deque<String> canonicalSegments)
-			throws InvalidRequestUriHttpException {
+			throws BadRequestHttpException {
 
 		// Obtain the segment
 		String segment = path.substring(beginIndex, endIndex);
@@ -247,7 +246,7 @@ public class WebRouter {
 		} else if ("..".equals(segment)) {
 			// Must have tail segment to remove
 			if (canonicalSegments.size() == 0) {
-				throw new InvalidRequestUriHttpException(path);
+				throw new BadRequestHttpException(null, "Invalid request URI path " + path);
 			}
 
 			// Valid so equate result (remove tail segment)

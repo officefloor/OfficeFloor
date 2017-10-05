@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,20 @@
 package net.officefloor.web;
 
 /**
- * Allows configuring the HTTP URI link for a {@link WebArchitect}.
+ * Context the {@link HttpEntityArgumentParser}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpUrlContinuation {
+public interface HttpEntityArgumentParserContext {
 
 	/**
-	 * Obtains the {@link HttpInputBuilder} for this {@link HttpUrlContinuation}.
+	 * Adds an argument.
 	 * 
-	 * @return {@link HttpInputBuilder}.
+	 * @param name
+	 *            Name of the argument.
+	 * @param value
+	 *            Value of the argument.
 	 */
-	HttpInputBuilder getHttpInput();
+	void addArgument(String name, String value);
 
 }

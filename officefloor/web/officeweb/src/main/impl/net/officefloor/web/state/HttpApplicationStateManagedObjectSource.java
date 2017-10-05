@@ -38,9 +38,24 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 		implements ManagedObject, HttpApplicationState {
 
 	/**
+	 * Context path.
+	 */
+	private final String contextPath;
+
+	/**
 	 * Attributes.
 	 */
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 */
+	public HttpApplicationStateManagedObjectSource(String contextPath) {
+		this.contextPath = contextPath;
+	}
 
 	/*
 	 * =================== ManagedObjectSource ==========================
@@ -76,14 +91,25 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 
 	@Override
 	public String getContextPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.contextPath;
 	}
 
 	@Override
 	public String createApplicationClientUrl(boolean isSecure, String path, ServerHttpConnection connection) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the application path
+		if (this.contextPath != null) {
+			path = this.contextPath + path;
+		}
+
+		// Determine if appropriately secure
+		if (connection.isSecure() == isSecure) {
+			// Relative path
+			return path;
+		} else {
+			// Full path back to server
+			return connection.getHttpServerLocation().createClientUrl(isSecure, path);
+		}
 	}
 
 	@Override

@@ -15,20 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
+package net.officefloor.web.route;
+
+import net.officefloor.server.http.HttpRequest;
 
 /**
- * Allows configuring the HTTP URI link for a {@link WebArchitect}.
+ * Indicates the context path for the {@link HttpRequest} is incorrect for the
+ * application.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpUrlContinuation {
+public class InvalidContextPathException extends Exception {
 
 	/**
-	 * Obtains the {@link HttpInputBuilder} for this {@link HttpUrlContinuation}.
+	 * Initiate.
 	 * 
-	 * @return {@link HttpInputBuilder}.
+	 * @param expectedContextPath
+	 *            Expected context path for the application.
+	 * @param requestUri
+	 *            Request URI.
 	 */
-	HttpInputBuilder getHttpInput();
+	public InvalidContextPathException(String expectedContextPath, String requestUri) {
+		super("Incorrect context path for application [context=" + expectedContextPath + ", request=" + requestUri
+				+ "]");
+	}
 
 }
