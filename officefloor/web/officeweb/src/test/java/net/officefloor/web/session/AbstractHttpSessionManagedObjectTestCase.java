@@ -18,11 +18,10 @@
 package net.officefloor.web.session;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -32,11 +31,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.web.cookie.HttpCookie;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionManagedObject;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.FreshHttpSession;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
@@ -77,16 +77,6 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	 * Mock {@link ServerHttpConnection}.
 	 */
 	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-
-	/**
-	 * Mock {@link HttpRequest}.
-	 */
-	private final HttpRequest request = this.createMock(HttpRequest.class);
-
-	/**
-	 * Mock {@link HttpResponse}.
-	 */
-	private final HttpResponse response = this.createMock(HttpResponse.class);
 
 	/**
 	 * Mock operations for the {@link MockHttpSessionIdGenerator} and
@@ -156,17 +146,17 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	 *            while a value will have the {@link HttpCookie} available.
 	 */
 	protected void record_sessionIdCookie(String sessionId) {
-		// Record obtaining the Http Request
+
+		// Create the request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		if (sessionId != null) {
+			request.header("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId);
+		}
+
+		// Record obtaining the request
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(this.serverHttpConnectionIndex),
 				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
-
-		// Record obtaining the Session Id
-		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
-		if (sessionId != null) {
-			headers.add(createHttpHeader("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId));
-		}
-		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
 	}
 
 	/**
@@ -362,34 +352,37 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records adding a {@link HttpCookie} to the {@link HttpResponse}.
 	 * 
-	 * @param isExistingSessionCookie
-	 *            Is the {@link HttpCookie} already on the response.
 	 * @param sessionId
 	 *            Session Id.
 	 * @param expireTime
 	 *            Time to expire the added {@link HttpCookie}.
 	 */
-	protected void record_cookie_addSessionId(boolean isExistingSessionCookie, String sessionId, long expireTime) {
+	protected void record_cookie_addSessionId(String sessionId, long expireTime) {
 
-		// Record checking for existing Session Id cookie
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
-		if (isExistingSessionCookie) {
-			// Record existing Session cookie
-			HttpHeader existingCookieHeader = createHttpHeader("set-cookie",
-					SESSION_ID_COOKIE_NAME + "=\"Existing Session Id\"");
-			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[] { existingCookieHeader });
-			this.response.getHttpHeaders().removeHeader(existingCookieHeader);
-		} else {
-			// Record no existing Session cookie
-			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[0]);
-		}
+		final HttpResponse response = this.createMock(HttpResponse.class);
+		final HttpResponseHeaders headers = this.createMock(HttpResponseHeaders.class);
+
+		// Record obtaining the headers
+		this.recordReturn(this.connection, this.connection.getHttpResponse(), response);
+		this.recordReturn(response, response.getHttpHeaders(), headers);
+
+		// Record removing existing cookie
+		final HttpHeader header = this.createMock(HttpHeader.class);
+		final Iterable<?> iterable = this.createMock(Iterable.class);
+		final Iterator<?> iterator = this.createMock(Iterator.class);
+		this.recordReturn(headers, headers.getHeaders(HttpCookie.SET_COOKIE.getName()), iterable);
+		this.recordReturn(iterable, iterable.iterator(), iterator);
+		this.recordReturn(iterator, iterator.hasNext(), true);
+		this.recordReturn(iterator, iterator.next(), header);
+		this.recordReturn(header, header.getValue(), SESSION_ID_COOKIE_NAME + "=remove");
+		iterator.remove();
+		this.recordReturn(iterator, iterator.hasNext(), false);
 
 		// Record adding the Session Id cookie
 		HttpCookie cookie = new HttpCookie(SESSION_ID_COOKIE_NAME, sessionId);
 		cookie.setExpires(expireTime);
 		cookie.setPath("/");
-		this.recordReturn(this.response,
-				this.response.getHttpHeaders().addHeader("set-cookie", cookie.toHttpResponseHeaderValue()),
+		this.recordReturn(headers, headers.addHeader(HttpCookie.SET_COOKIE, cookie.toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 	}
 
@@ -403,8 +396,10 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	 * @return New {@link HttpSessionManagedObject}.
 	 */
 	protected HttpSessionManagedObject createHttpSessionManagedObject() {
-		return new HttpSessionManagedObject(SESSION_ID_COOKIE_NAME, this.serverHttpConnectionIndex, -1,
-				new MockHttpSessionIdGenerator(), -1, new MockHttpSessionStore());
+		HttpSessionManagedObject mo = new HttpSessionManagedObject(SESSION_ID_COOKIE_NAME,
+				this.serverHttpConnectionIndex, -1, new MockHttpSessionIdGenerator(), -1, new MockHttpSessionStore());
+		mo.setProcessAwareContext(new MockProcessAwareContext());
+		return mo;
 	}
 
 	/**
@@ -428,19 +423,6 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	protected void verifyOperations() {
 		this.verifyMockObjects();
 		assertEquals("Operations still outstanding", 0, this.mockOperations.size());
-	}
-
-	/**
-	 * Creates a mock {@link HttpHeader}.
-	 * 
-	 * @param name
-	 *            {@link HttpHeader} name.
-	 * @param value
-	 *            {@link HttpHeader} value.
-	 * @return Mock {@link HttpHeader}.
-	 */
-	private static HttpHeader createHttpHeader(String name, String value) {
-		return MockHttpServer.mockRequest().header(name, value).build().getHttpHeaders().getHeader(name);
 	}
 
 	/**

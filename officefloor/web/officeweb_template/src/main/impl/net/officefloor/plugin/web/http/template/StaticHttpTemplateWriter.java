@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.template;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContent;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.web.path.HttpApplicationLocation;
 
 /**
  * {@link HttpTemplateWriter} to write static content.

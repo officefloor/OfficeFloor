@@ -67,7 +67,7 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		// Record
 		this.record_instantiate();
 		this.record_invalidate_sessionInvalidated();
-		this.record_cookie_addSessionId(true, "", 0);
+		this.record_cookie_addSessionId("", 0);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -87,7 +87,7 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		this.record_invalidate_sessionInvalidated();
 		this.record_generate_setSessionId(NEW_SESSION_ID);
 		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(true, NEW_SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(NEW_SESSION_ID, EXPIRE_TIME);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -107,7 +107,7 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(NEW_SESSION_ID);
 		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(true, NEW_SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(NEW_SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Invalidate
@@ -171,7 +171,7 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 	private void record_instantiate() {
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 	}
 
 	/**

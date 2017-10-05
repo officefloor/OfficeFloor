@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.location;
+package net.officefloor.web.route;
 
 import java.util.Deque;
 import java.util.LinkedList;
 
-import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.escalation.UnknownContextPathHttpException;
 
 /**
- * {@link HttpApplicationLocation} {@link ManagedObject}.
+ * Routes {@link ServerHttpConnection} instances to their respective handling
+ * {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationLocationMangedObject
-		implements CoordinatingManagedObject<Dependencies>, HttpApplicationLocation {
+public class WebRouter {
 
 	/**
 	 * <p>
@@ -265,194 +263,6 @@ public class HttpApplicationLocationMangedObject
 
 		// Path continues to be canonical for the segment
 		return true;
-	}
-
-	/**
-	 * Domain.
-	 */
-	private final String domain;
-
-	/**
-	 * HTTP port.
-	 */
-	private final int httpPort;
-
-	/**
-	 * HTTPS port.
-	 */
-	private final int httpsPort;
-
-	/**
-	 * Context path.
-	 */
-	private final String contextPath;
-
-	/**
-	 * Cluster host name.
-	 */
-	private final String clusterHostName;
-
-	/**
-	 * Cluster HTTP port.
-	 */
-	private final int clusterHttpPort;
-
-	/**
-	 * Cluster HTTPS port.
-	 */
-	private final int clusterHttpsPort;
-
-	/**
-	 * Unsecured prefix.
-	 */
-	private final String unsecuredPrefix;
-
-	/**
-	 * Secured prefix.
-	 */
-	private final String securedPrefix;
-
-	/**
-	 * {@link ServerHttpConnection}.
-	 */
-	private ServerHttpConnection connection;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param domain
-	 *            Domain.
-	 * @param httpPort
-	 *            HTTP port.
-	 * @param httpsPort
-	 *            HTTPS port.
-	 * @param contextPath
-	 *            Context path.
-	 * @param clusterHostName
-	 *            Cluster host name.
-	 * @param clusterHttpPort
-	 *            Cluster HTTP port.
-	 * @param clusterHttpsPort
-	 *            Cluster HTTPS port.
-	 */
-	public HttpApplicationLocationMangedObject(String domain, int httpPort, int httpsPort, String contextPath,
-			String clusterHostName, int clusterHttpPort, int clusterHttpsPort) {
-		this.domain = domain;
-		this.httpPort = httpPort;
-		this.httpsPort = httpsPort;
-		this.contextPath = contextPath;
-		this.clusterHostName = clusterHostName;
-		this.clusterHttpPort = clusterHttpPort;
-		this.clusterHttpsPort = clusterHttpsPort;
-
-		// Determine the unsecured prefix for a client link
-		this.unsecuredPrefix = "http://" + this.domain + (this.httpPort == 80 ? "" : ":" + this.httpPort)
-				+ (this.contextPath == null ? "" : this.contextPath);
-
-		// Determine the secured prefix for a client link
-		this.securedPrefix = "https://" + this.domain + (this.httpsPort == 443 ? "" : ":" + this.httpsPort)
-				+ (this.contextPath == null ? "" : this.contextPath);
-	}
-
-	/*
-	 * =================== ManagedObject ========================
-	 */
-
-	@Override
-	public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
-		// Obtain the server HTTP connection
-		this.connection = (ServerHttpConnection) registry.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-	}
-
-	@Override
-	public Object getObject() throws Throwable {
-		return this;
-	}
-
-	/*
-	 * ================ HttpApplicationLocation =================
-	 */
-
-	@Override
-	public String getDomain() {
-		return this.domain;
-	}
-
-	@Override
-	public int getHttpPort() {
-		return this.httpPort;
-	}
-
-	@Override
-	public int getHttpsPort() {
-		return this.httpsPort;
-	}
-
-	@Override
-	public String getContextPath() {
-		return this.contextPath;
-	}
-
-	@Override
-	public String getClusterHostName() {
-		return this.clusterHostName;
-	}
-
-	@Override
-	public int getClusterHttpPort() {
-		return this.clusterHttpPort;
-	}
-
-	@Override
-	public int getClusterHttpsPort() {
-		return this.clusterHttpsPort;
-	}
-
-	@Override
-	public String transformToApplicationCanonicalPath(String requestUri)
-			throws InvalidRequestUriHttpException, UnknownContextPathHttpException {
-		return transformToApplicationCanonicalPath(requestUri, this.contextPath);
-	}
-
-	@Override
-	public String transformToClientPath(String applicationPath, boolean isSecure) {
-
-		// Handle based on whether over secure connection
-		if (this.connection.isSecure()) {
-			// Over secure connection
-			if (isSecure) {
-				// Both secure so provide context prefix
-				return this.prefixWithContextPath(applicationPath);
-			} else {
-				// Require unsecuring link
-				return this.unsecuredPrefix + applicationPath;
-			}
-
-		} else {
-			// Over unsecured connection
-			if (!isSecure) {
-				// Both unsecure so provide context prefix
-				return this.prefixWithContextPath(applicationPath);
-			} else {
-				// Require securing link
-				return this.securedPrefix + applicationPath;
-			}
-		}
-	}
-
-	/**
-	 * Prefixes the application path with the context path.
-	 * 
-	 * @param applicationPath
-	 *            Application path.
-	 * @return Application path prefixed with the context path.
-	 */
-	private String prefixWithContextPath(String applicationPath) {
-		if (this.contextPath == null) {
-			return applicationPath;
-		} else {
-			return this.contextPath + applicationPath;
-		}
 	}
 
 }

@@ -20,6 +20,7 @@ package net.officefloor.web.cookie;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -28,6 +29,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 
 /**
  * HTTP Cookie.
@@ -125,20 +127,23 @@ public class HttpCookie {
 		// Obtain the value prefix of the cookie
 		String cookieValuePrefix = cookie.getName().toLowerCase() + "=";
 
+		// Obtain the headers
+		HttpResponseHeaders headers = response.getHttpHeaders();
+
 		// Remove any cookies by the name
-		for (HttpHeader header : response.getHttpHeaders()) {
-			// Determine if header specifying a cookie
-			if (SET_COOKIE.getName().equalsIgnoreCase(header.getName())) {
-				// Determine if cookie by name
-				if (header.getValue().toLowerCase().startsWith(cookieValuePrefix)) {
-					// Remove the header containing cookie by same name
-					response.getHttpHeaders().removeHeader(header);
-				}
+		Iterator<HttpHeader> iterator = headers.getHeaders(SET_COOKIE.getName()).iterator();
+		while (iterator.hasNext()) {
+			HttpHeader header = iterator.next();
+			
+			// Determine if cookie by name
+			if (header.getValue().toLowerCase().startsWith(cookieValuePrefix)) {
+				// Remove the header containing cookie by same name
+				iterator.remove();
 			}
 		}
 
 		// Add the header for the cookie
-		HttpHeader header = response.getHttpHeaders().addHeader(SET_COOKIE, cookie.toHttpResponseHeaderValue());
+		HttpHeader header = headers.addHeader(SET_COOKIE, cookie.toHttpResponseHeaderValue());
 
 		// Return the header
 		return header;

@@ -51,7 +51,7 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 		// Record retrieving HTTP session
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -70,7 +70,7 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_delay(); // retrieving from store
 		this.asynchronousContext.start(null);
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
@@ -132,7 +132,7 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 		this.record_retrieve_sessionNotAvailable();
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -152,7 +152,7 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object

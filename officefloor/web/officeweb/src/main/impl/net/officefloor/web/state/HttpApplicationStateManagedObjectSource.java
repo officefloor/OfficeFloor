@@ -27,13 +27,15 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationStateManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public class HttpApplicationStateManagedObjectSource extends AbstractManagedObjectSource<None, None>
+		implements ManagedObject, HttpApplicationState {
 
 	/**
 	 * Attributes.
@@ -56,49 +58,54 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpRequestStateManagedObject();
+		return this;
 	}
 
-	/**
-	 * {@link ManagedObject} for the {@link HttpRequestState}.
+	/*
+	 * ====================== ManagedObject ===========================
 	 */
-	private class HttpRequestStateManagedObject implements ManagedObject, HttpApplicationState {
 
-		/*
-		 * ====================== ManagedObject ===========================
-		 */
+	@Override
+	public Object getObject() throws Throwable {
+		return this;
+	}
 
-		@Override
-		public Object getObject() throws Throwable {
-			return this;
-		}
+	/*
+	 * ==================== HttpApplicationState ==========================
+	 */
 
-		/*
-		 * ==================== HttpApplicationState ==========================
-		 */
+	@Override
+	public String getContextPath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		@Override
-		public Object getAttribute(String name) {
-			return HttpApplicationStateManagedObjectSource.this.attributes.get(name);
-		}
+	@Override
+	public String createApplicationClientUrl(boolean isSecure, String path, ServerHttpConnection connection) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		@Override
-		public Iterator<String> getAttributeNames() {
-			// Create copy of names (stops concurrency issues)
-			List<String> names = new ArrayList<String>(
-					HttpApplicationStateManagedObjectSource.this.attributes.keySet());
-			return names.iterator();
-		}
+	@Override
+	public Object getAttribute(String name) {
+		return HttpApplicationStateManagedObjectSource.this.attributes.get(name);
+	}
 
-		@Override
-		public void setAttribute(String name, Object object) {
-			HttpApplicationStateManagedObjectSource.this.attributes.put(name, object);
-		}
+	@Override
+	public Iterator<String> getAttributeNames() {
+		// Create copy of names (stops concurrency issues)
+		List<String> names = new ArrayList<String>(this.attributes.keySet());
+		return names.iterator();
+	}
 
-		@Override
-		public void removeAttribute(String name) {
-			HttpApplicationStateManagedObjectSource.this.attributes.remove(name);
-		}
+	@Override
+	public void setAttribute(String name, Object object) {
+		this.attributes.put(name, object);
+	}
+
+	@Override
+	public void removeAttribute(String name) {
+		this.attributes.remove(name);
 	}
 
 }

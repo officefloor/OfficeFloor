@@ -33,13 +33,13 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteFunctionTest;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 

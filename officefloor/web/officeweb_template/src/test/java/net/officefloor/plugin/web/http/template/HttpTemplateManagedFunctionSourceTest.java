@@ -41,7 +41,6 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -56,6 +55,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.path.HttpApplicationLocation;
 
 /**
  * Tests the {@link HttpTemplateManagedFunctionSource}.

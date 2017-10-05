@@ -20,8 +20,8 @@ package net.officefloor.plugin.web.http.template;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.web.path.HttpApplicationLocation;
 
 /**
  * Interface to write the template content to {@link ServerWriter}.

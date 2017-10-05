@@ -144,7 +144,7 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 
 		// Record changing expire time and storing
 		this.record_instantiate();
-		this.record_cookie_addSessionId(true, SESSION_ID, NEW_EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, NEW_EXPIRE_TIME);
 		this.record_store_sessionStored();
 
 		// Change expire time and store
@@ -162,7 +162,7 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 	private void record_instantiate() {
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 	}
 
 	/**

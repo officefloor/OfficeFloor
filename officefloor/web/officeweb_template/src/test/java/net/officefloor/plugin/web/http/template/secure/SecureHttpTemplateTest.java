@@ -26,7 +26,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
@@ -37,6 +36,7 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpUrlContinuation;
 import net.officefloor.web.WebArchitect;
+import net.officefloor.web.path.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpTemplateSection;
 

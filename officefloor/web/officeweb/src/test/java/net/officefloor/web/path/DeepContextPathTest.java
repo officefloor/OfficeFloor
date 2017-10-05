@@ -15,22 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.location;
+package net.officefloor.web.path;
 
 /**
- * Tests the {@link HttpApplicationLocationMangedObject} with a deep context
- * path. In other words, multiple directory deep context path.
+ * Tests with a deep context path. In other words, multiple directory deep
+ * context path.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeepContextApplicationPathTest extends
-		AbstractHttpApplicationLocationManagedObjectTestCase {
+public class DeepContextPathTest extends AbstractPathTestCase {
 
 	@Override
-	protected HttpApplicationLocationMangedObject createHttpApplicationLocation(
-			String domain, int httpPort, int httpsPort) {
-		return new HttpApplicationLocationMangedObject(domain, httpPort,
-				httpsPort, "/context/path", "node.officefloor.net", 7878, 7979);
+	protected String getContextPath() {
+		return "/context/path";
 	}
 
 }

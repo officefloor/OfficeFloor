@@ -18,7 +18,6 @@
 package net.officefloor.web.session;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.easymock.AbstractMatcher;
@@ -27,14 +26,14 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpResponseBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.web.cookie.HttpCookie;
-import net.officefloor.web.session.HttpSessionManagedObject;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
-import net.officefloor.web.session.spi.FreshHttpSession;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
 import net.officefloor.web.session.spi.HttpSessionStore;
 
@@ -63,21 +62,6 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 
 	/**
-	 * Mock {@link HttpRequest}.
-	 */
-	private final HttpRequest httpRequest = this.createMock(HttpRequest.class);
-
-	/**
-	 * Mock {@link HttpResponse}.
-	 */
-	private final HttpResponse httpResponse = this.createMock(HttpResponse.class);
-
-	/**
-	 * Mock {@link HttpSessionIdGenerator}.
-	 */
-	private final HttpSessionIdGenerator generator = this.createMock(HttpSessionIdGenerator.class);
-
-	/**
 	 * Mock {@link HttpSessionStore}.
 	 */
 	private final HttpSessionStore store = this.createMock(HttpSessionStore.class);
@@ -89,26 +73,15 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record obtaining the HTTP request
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(0), this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.httpRequest);
 
 		// Record attempting to creating a new session.
-		// (Also ensures directly using the generator and store)
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), new ArrayList<HttpHeader>(0));
-		this.generator.generateSessionId(null);
-		this.control(this.generator).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				FreshHttpSession session = (FreshHttpSession) actual[0];
-				session.setSessionId("SESSION_ID");
-				return true;
-			}
-		});
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.httpResponse);
-		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
-		this.recordReturn(this.httpResponse,
-				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
-						new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue()),
-				this.createMock(HttpHeader.class));
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
+		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
+
+		// Record obtaining the response
+		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
+		this.recordReturn(this.connection, this.connection.getHttpResponse(), response);
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override
@@ -121,10 +94,17 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Create the HTTP Session Managed Object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, -1, this.generator, -1, this.store);
+		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, -1, generator, -1, this.store);
+		mo.setProcessAwareContext(new MockProcessAwareContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		mo.loadObjects(this.objectRegistry);
 		this.verifyMockObjects();
+
+		// Verify created session
+		MockHttpResponse mockResponse = response.build();
+		assertEquals("Should have session",
+				new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue(),
+				mockResponse.getFirstHeader("set-cookie").getValue());
 	}
 
 	/**
@@ -134,30 +114,19 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record obtaining the HTTP request
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(0), this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.httpRequest);
-
-		// Record obtaining as dependencies
-		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(1), this.generator);
-		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(2), this.store);
 
 		// Record attempting to creating a new session.
-		// (Also ensures using the dependency generator and store)
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), new ArrayList<HttpHeader>(0));
-		this.generator.generateSessionId(null);
-		this.control(this.generator).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				FreshHttpSession session = (FreshHttpSession) actual[0];
-				session.setSessionId("SESSION_ID");
-				return true;
-			}
-		});
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.httpResponse);
-		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
-		this.recordReturn(this.httpResponse,
-				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
-						new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue()),
-				this.createMock(HttpHeader.class));
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
+		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
+
+		// Record obtaining as dependencies
+		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(1), generator);
+		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(2), this.store);
+
+		// Record obtaining the response
+		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
+		this.recordReturn(this.connection, this.connection.getHttpResponse(), response);
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override
@@ -171,9 +140,16 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		// Create the HTTP Session Managed Object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, 1, null, 2, null);
+		mo.setProcessAwareContext(new MockProcessAwareContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		mo.loadObjects(this.objectRegistry);
 		this.verifyMockObjects();
+
+		// Verify created session
+		MockHttpResponse mockResponse = response.build();
+		assertEquals("Should have session",
+				new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue(),
+				mockResponse.getFirstHeader("set-cookie").getValue());
 	}
 
 }

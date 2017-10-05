@@ -15,16 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.location;
+package net.officefloor.web.path;
 
-import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.web.escalation.InvalidRequestUriHttpException;
 import net.officefloor.web.escalation.UnknownContextPathHttpException;
+import net.officefloor.web.route.WebRouter;
+import net.officefloor.web.state.HttpApplicationState;
+import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
 
 /**
  * Provides listing of common tests for the various states of the
@@ -32,21 +35,14 @@ import net.officefloor.web.escalation.UnknownContextPathHttpException;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpApplicationLocationManagedObjectTestCase extends OfficeFrameTestCase {
+public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Creates the {@link HttpApplicationLocation} for test.
+	 * Obtains the context path for the test.
 	 * 
-	 * @param domain
-	 *            Domain.
-	 * @param httpPort
-	 *            HTTP port.
-	 * @param httpsPort
-	 *            HTTPS port.
-	 * @return {@link HttpApplicationLocation} for test.
+	 * @return Context path.
 	 */
-	protected abstract HttpApplicationLocationMangedObject createHttpApplicationLocation(String domain, int httpPort,
-			int httpsPort);
+	protected abstract String getContextPath();
 
 	/**
 	 * Ensure null path is defaulted to root.
@@ -116,15 +112,12 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase exten
 	 */
 	public void testApplicationPath_ParentCanonicalPath() throws Exception {
 
-		// Create the application location
-		HttpApplicationLocation location = this.createHttpApplicationLocation("host.officefloor.net", 80, 443);
-
-		String contextPath = location.getContextPath();
+		String contextPath = this.getContextPath();
 		contextPath = (contextPath == null ? "" : contextPath);
 		String requestUri = contextPath + "/..";
 		try {
 			// Transform to application path
-			location.transformToApplicationCanonicalPath(requestUri);
+			WebRouter.transformToApplicationCanonicalPath(requestUri, contextPath);
 			fail("Should not be successful");
 
 		} catch (InvalidRequestUriHttpException ex) {
@@ -228,6 +221,32 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase exten
 	}
 
 	/**
+	 * Undertakes the application path test.
+	 * 
+	 * @param expectedPath
+	 *            Expected path.
+	 * @param requestUri
+	 *            {@link HttpRequest} request URI.
+	 */
+	private void doApplicationPathTest(String expectedPath, String requestUri) throws Exception {
+
+		// Obtain the context path
+		String contextPath = this.getContextPath();
+
+		// Transform request URI for context
+		if (requestUri != null) {
+			contextPath = (contextPath == null ? "" : contextPath);
+			requestUri = requestUri.replace("/CONTEXT", contextPath);
+		}
+
+		// Transform to application path
+		String actualPath = WebRouter.transformToApplicationCanonicalPath(requestUri, contextPath);
+
+		// Ensure correct path
+		assertEquals("Incorrect application path", expectedPath, actualPath);
+	}
+
+	/**
 	 * Ensure use unqualified link as both unsecured.
 	 */
 	public void testClientPath_UnsecureConnectionWithUnsecureLink() {
@@ -286,33 +305,6 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase exten
 	}
 
 	/**
-	 * Undertakes the application path test.
-	 * 
-	 * @param expectedPath
-	 *            Expected path.
-	 * @param requestUri
-	 *            {@link HttpRequest} request URI.
-	 */
-	private void doApplicationPathTest(String expectedPath, String requestUri) throws Exception {
-
-		// Create the application location
-		HttpApplicationLocation location = this.createHttpApplicationLocation("host.officefloor.net", 80, 443);
-
-		// Transform request URI for context
-		if (requestUri != null) {
-			String contextPath = location.getContextPath();
-			contextPath = (contextPath == null ? "" : contextPath);
-			requestUri = requestUri.replace("/CONTEXT", contextPath);
-		}
-
-		// Transform to application path
-		String actualPath = location.transformToApplicationCanonicalPath(requestUri);
-
-		// Ensure correct path
-		assertEquals("Incorrect application path", expectedPath, actualPath);
-	}
-
-	/**
 	 * Undertakes the client path test with default details.
 	 * 
 	 * @param expectedPath
@@ -348,32 +340,26 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase exten
 	 * @param isSecureLink
 	 *            Indicates whether link is to be secure.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void doClientPathTest(String expectedPath, boolean isSecureConnection, String domain, int httpPort,
 			int httpsPort, String applicationPath, boolean isSecureLink) {
 		try {
 
-			// Create the application location
-			HttpApplicationLocationMangedObject location = this.createHttpApplicationLocation(domain, httpPort,
-					httpsPort);
+			// Transform expected path for context
+			String contextPath = this.getContextPath();
+			contextPath = (contextPath == null ? "" : contextPath);
+			expectedPath = expectedPath.replace("/CONTEXT", contextPath);
 
-			final ObjectRegistry registry = this.createMock(ObjectRegistry.class);
+			// Record creating the path
+			HttpServerLocation location = new HttpServerLocationImpl(domain, httpPort, httpsPort);
 			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-
-			// Record determine if over secure link
-			this.recordReturn(registry, registry.getObject(Dependencies.SERVER_HTTP_CONNECTION), connection);
 			this.recordReturn(connection, connection.isSecure(), isSecureConnection);
+			this.recordReturn(connection, connection.getHttpServerLocation(), location);
 
 			// Test
 			this.replayMockObjects();
-			location.loadObjects(registry);
-			String clientPath = location.transformToClientPath(applicationPath, isSecureLink);
+			HttpApplicationState application = new HttpApplicationStateManagedObjectSource();
+			String clientPath = application.createApplicationClientUrl(isSecureLink, applicationPath, connection);
 			this.verifyMockObjects();
-
-			// Transform expected path for context
-			String contextPath = location.getContextPath();
-			contextPath = (contextPath == null ? "" : contextPath);
-			expectedPath = expectedPath.replace("/CONTEXT", contextPath);
 
 			// Validate correct client path
 			assertEquals("Incorrect client path", expectedPath, clientPath);

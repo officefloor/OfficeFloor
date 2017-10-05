@@ -22,9 +22,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import net.officefloor.plugin.value.retriever.ValueRetriever;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.web.path.HttpApplicationLocation;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 

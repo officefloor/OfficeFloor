@@ -52,7 +52,7 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 		this.record_sessionIdCookie(null);
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -72,7 +72,7 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 		this.record_delay(); // creating session id
 		this.asynchronousContext.start(null);
 		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
@@ -94,7 +94,7 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_delay(); // creating within store
 		this.asynchronousContext.start(null);
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
@@ -117,7 +117,7 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 		this.record_delay(); // creating session id
 		this.asynchronousContext.start(null);
 		this.record_delay(); // creating within store
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
@@ -222,7 +222,7 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 		this.record_create_sessionIdCollision();
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -243,7 +243,7 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object

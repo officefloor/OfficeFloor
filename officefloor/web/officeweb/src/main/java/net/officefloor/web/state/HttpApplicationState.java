@@ -19,17 +19,34 @@ package net.officefloor.web.state;
 
 import java.util.Iterator;
 
-import net.officefloor.web.WebArchitect;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
- * State for the {@link WebArchitect}.
- * <p>
- * This interface is used within the {@link WebArchitect} to allow
- * integration with a JEE Servlet container.
+ * State for the web application instance.
  * 
  * @author Daniel Sagenschneider
  */
 public interface HttpApplicationState {
+
+	/**
+	 * Obtains the context path for the application.
+	 * 
+	 * @return Context path for the application.
+	 */
+	String getContextPath();
+
+	/**
+	 * Creates the client URL for this application.
+	 * 
+	 * @param isSecure
+	 *            Indicates if the URL is secure.
+	 * @param path
+	 *            Path including query string and fragment for the URL.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return Client URL for the application.
+	 */
+	String createApplicationClientUrl(boolean isSecure, String path, ServerHttpConnection connection);
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.

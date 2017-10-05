@@ -19,12 +19,12 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.web.escalation.InvalidRequestUriHttpException;
+import net.officefloor.web.path.HttpApplicationLocation;
 
 /**
  * {@link HttpTemplateWriter} to write the link.

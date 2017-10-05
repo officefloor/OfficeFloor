@@ -15,21 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.location;
+package net.officefloor.web.path;
 
 /**
- * Tests the {@link HttpApplicationLocationMangedObject} without a context path.
+ * Tests no context path.
  * 
  * @author Daniel Sagenschneider
  */
-public class NoContextApplicationPathTest extends
-		AbstractHttpApplicationLocationManagedObjectTestCase {
+public class NoContextPathTest extends AbstractPathTestCase {
 
 	@Override
-	protected HttpApplicationLocationMangedObject createHttpApplicationLocation(
-			String domain, int httpPort, int httpsPort) {
-		return new HttpApplicationLocationMangedObject(domain, httpPort,
-				httpsPort, null, "node.officefloor.net", 7878, 7979);
+	protected String getContextPath() {
+		return null;
 	}
 
 }

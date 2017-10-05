@@ -38,7 +38,6 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSource;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSourceImpl;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -49,6 +48,7 @@ import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionC
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.web.path.HttpApplicationLocation;
 
 /**
  * {@link ManagedFunction} to write the {@link HttpTemplateSection}.
