@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectResponder;
 
 /**
@@ -99,16 +100,21 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		 */
 
 		@Override
-		public void setObjectResponses(HttpObjectResponder<?>[] objectResponses) {
-			this.context.run(() -> {
-				this.objectResponses = objectResponses;
-				return null;
-			});
+		public HttpArgument getHttpArguments() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 		@Override
-		public HttpObjectResponder<?>[] getObjectResponses() {
-			return this.context.run(() -> this.objectResponses);
+		public HttpObjectParser<?>[] getObjectParsers() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HttpObjectResponder<?>[] getObjectResponders() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 		@Override

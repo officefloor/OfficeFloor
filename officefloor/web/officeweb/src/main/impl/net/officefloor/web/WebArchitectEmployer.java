@@ -32,7 +32,10 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
@@ -222,39 +225,41 @@ public class WebArchitectEmployer implements WebArchitect {
 		return this.addHttpRequestObject(objectClass, isLoadParameters, null);
 	}
 
-//	@Override
-//	public HttpUrlContinuation linkUri(String httpMethod, String uri, OfficeSectionInput sectionInput) {
-//		return this.urlContinuations.linkUri(httpMethod, uri, sectionInput);
-//	}
+	// @Override
+	// public HttpUrlContinuation linkUri(String httpMethod, String uri,
+	// OfficeSectionInput sectionInput) {
+	// return this.urlContinuations.linkUri(httpMethod, uri, sectionInput);
+	// }
 
 	@Override
 	public void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
 		this.chainedServicers.add(new ChainedServicer(sectionInput, notHandledOutput));
 	}
 
-//	@Override
-//	public String[] getURIs() {
-//
-//		// Create the URIs
-//		List<String> uris = new LinkedList<String>();
-//
-//		// Add the linked URIs
-//		for (String uri : this.urlContinuations.getRegisteredHttpUris()) {
-//
-//			// Obtain the URI path
-//			try {
-//				uri = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uri);
-//			} catch (InvalidRequestUriHttpException ex) {
-//				// Do nothing and keep URI path as is
-//			}
-//
-//			// Add the URI path
-//			uris.add(uri);
-//		}
-//
-//		// Return the URIs
-//		return uris.toArray(new String[uris.size()]);
-//	}
+	// @Override
+	// public String[] getURIs() {
+	//
+	// // Create the URIs
+	// List<String> uris = new LinkedList<String>();
+	//
+	// // Add the linked URIs
+	// for (String uri : this.urlContinuations.getRegisteredHttpUris()) {
+	//
+	// // Obtain the URI path
+	// try {
+	// uri =
+	// HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uri);
+	// } catch (InvalidRequestUriHttpException ex) {
+	// // Do nothing and keep URI path as is
+	// }
+	//
+	// // Add the URI path
+	// uris.add(uri);
+	// }
+	//
+	// // Return the URIs
+	// return uris.toArray(new String[uris.size()]);
+	// }
 
 	@Override
 	public void informOfficeArchitect() {
@@ -277,39 +282,45 @@ public class WebArchitectEmployer implements WebArchitect {
 				.addOfficeManagedObjectSource("HTTP_REQUEST_STATE", HttpRequestStateManagedObjectSource.class.getName())
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
-//		// Add the HTTP section
-//		OfficeSection httpSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
-//				WebApplicationSectionSource.class.getName(), null);
-//		httpSection.addProperty(WebApplicationSectionSource.PROPERTY_LINK_SERVICE_FUNCTION_NAME_PREFIX,
-//				LINK_SERVICE_FUNCTION_NAME_PREFIX);
-//
-//		// Add location
-//		OfficeManagedObjectSource locationMos = this.officeArchitect.addOfficeManagedObjectSource(
-//				HttpApplicationLocation.class.getName(), HttpApplicationLocationManagedObjectSource.class.getName());
-//		HttpApplicationLocationManagedObjectSource.copyProperties(officeSourceContext, locationMos);
-//		locationMos.addOfficeManagedObject(HttpApplicationLocation.class.getName(), ManagedObjectScope.PROCESS);
-//
-//		// Chain the servicers
-//		OfficeSectionOutput previousChainedOutput = httpSection
-//				.getOfficeSectionOutput(WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME);
-//		for (ChainedServicer chainedServicer : this.chainedServicers) {
-//
-//			// Link the chained servicer (if previous chained output)
-//			if (previousChainedOutput != null) {
-//				this.officeArchitect.link(previousChainedOutput, chainedServicer.sectionInput);
-//			}
-//
-//			// Configure for next in chain
-//			previousChainedOutput = chainedServicer.notHandledOutput;
-//		}
-//
-//		// End chain with file sender servicer (if previous chained output)
-//		if (previousChainedOutput != null) {
-//
-//			// TODO configure chained servicers
-//
-//			// TODO configure 404 not found
-//		}
+		// // Add the HTTP section
+		// OfficeSection httpSection =
+		// this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
+		// WebApplicationSectionSource.class.getName(), null);
+		// httpSection.addProperty(WebApplicationSectionSource.PROPERTY_LINK_SERVICE_FUNCTION_NAME_PREFIX,
+		// LINK_SERVICE_FUNCTION_NAME_PREFIX);
+		//
+		// // Add location
+		// OfficeManagedObjectSource locationMos =
+		// this.officeArchitect.addOfficeManagedObjectSource(
+		// HttpApplicationLocation.class.getName(),
+		// HttpApplicationLocationManagedObjectSource.class.getName());
+		// HttpApplicationLocationManagedObjectSource.copyProperties(officeSourceContext,
+		// locationMos);
+		// locationMos.addOfficeManagedObject(HttpApplicationLocation.class.getName(),
+		// ManagedObjectScope.PROCESS);
+		//
+		// // Chain the servicers
+		// OfficeSectionOutput previousChainedOutput = httpSection
+		// .getOfficeSectionOutput(WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME);
+		// for (ChainedServicer chainedServicer : this.chainedServicers) {
+		//
+		// // Link the chained servicer (if previous chained output)
+		// if (previousChainedOutput != null) {
+		// this.officeArchitect.link(previousChainedOutput,
+		// chainedServicer.sectionInput);
+		// }
+		//
+		// // Configure for next in chain
+		// previousChainedOutput = chainedServicer.notHandledOutput;
+		// }
+		//
+		// // End chain with file sender servicer (if previous chained output)
+		// if (previousChainedOutput != null) {
+		//
+		// // TODO configure chained servicers
+		//
+		// // TODO configure 404 not found
+		// }
 	}
 
 	/**
@@ -344,6 +355,18 @@ public class WebArchitectEmployer implements WebArchitect {
 	@Override
 	public void setContextPath(String contextPath) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addHttpObjectParser(HttpObjectParserFactory objectParserFactory) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory) {
+		// TODO Auto-generated method stub
 		
 	}
 
@@ -363,11 +386,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	@Override
 	public void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public HttpInputBuilder[] getHttpInputs() {
+	public HttpInput[] getHttpInputs() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -375,7 +398,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	@Override
 	public void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
