@@ -24,10 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.build.HttpArgumentParser;
-import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -45,8 +42,8 @@ import net.officefloor.web.state.HttpRequestState;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface HttpParameters {
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+public @interface HttpQueryParameter {
 
 	/**
 	 * Allows specifying the name to bind the object into the
@@ -56,30 +53,6 @@ public @interface HttpParameters {
 	 *         blank default value indicates for the {@link ManagedObject} to
 	 *         assign its own unique value.
 	 */
-	String bind() default "";
+	String value();
 
-	/**
-	 * Indicates to interrogate the {@link HttpHeader} instances for parameter
-	 * values.
-	 * 
-	 * @return <code>true</code> to interrogate the {@link HttpHeader} instances
-	 *         for parameter values.
-	 */
-	boolean headers() default false;
-
-	/**
-	 * Indicates to interrogate the {@link HttpCookie} instances for parameter
-	 * values.
-	 * 
-	 * @return <code>true</code> to interrogate the {@link HttpCookie} instances
-	 *         for parameter values.
-	 */
-	boolean cookies() default false;
-
-	/**
-	 * {@link HttpArgumentParser} instances to retrieve the arguments.
-	 * 
-	 * @return {@link HttpArgumentParser} instances to retrieve the arguments.
-	 */
-	Class<HttpArgumentParser>[] content() default {};
 }

@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.build;
 
+import java.util.ServiceLoader;
+
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -54,6 +56,30 @@ public abstract interface WebArchitect {
 	 *            Context path for the application.
 	 */
 	void setContextPath(String contextPath);
+
+	/**
+	 * <p>
+	 * Manually adds a {@link HttpObjectParserFactory}.
+	 * <p>
+	 * Typically these should be configured via {@link ServiceLoader}, so can be
+	 * plugged in as required.
+	 * 
+	 * @param objectParserFactory
+	 *            {@link HttpObjectParserFactory}.
+	 */
+	void addHttpObjectParser(HttpObjectParserFactory objectParserFactory);
+
+	/**
+	 * <p>
+	 * Manually adds a {@link HttpObjectResponderFactory}.
+	 * <p>
+	 * Typically these should be configured via {@link ServiceLoader}, so can be
+	 * plugged in as required.
+	 * 
+	 * @param objectResponderFactory
+	 *            {@link HttpObjectResponderFactory}.
+	 */
+	void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory);
 
 	/**
 	 * Adds an object to be lazily created and stored within the

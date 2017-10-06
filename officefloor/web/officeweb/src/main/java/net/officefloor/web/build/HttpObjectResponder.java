@@ -26,24 +26,43 @@ import net.officefloor.server.http.ServerHttpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ObjectResponder<T> {
+public interface HttpObjectResponder<T> {
 
 	/**
-	 * Obtains the object type expected for this {@link ObjectResponder}.
+	 * Obtains the <code>Content-Type</code> provided by this
+	 * {@link HttpObjectResponder}.
 	 * 
-	 * @return Type of object expected for this {@link ObjectResponder}.
+	 * @return <code>Content-Type</code> provided by this
+	 *         {@link HttpObjectResponder}.
+	 */
+	String getContentType();
+
+	/**
+	 * Obtains the object type expected for this {@link HttpObjectResponder}.
+	 * 
+	 * @return Type of object expected for this {@link HttpObjectResponder}.
 	 */
 	Class<T> getObjectType();
 
 	/**
-	 * Indicates whether can handle the {@link Object}.
+	 * Indicates whether can handle the {@link Object} for the
+	 * {@link ServerHttpConnection}.
 	 * 
 	 * @param object
 	 *            Response {@link Object}.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
 	 * @return <code>true</code> if able to handle the object.
 	 */
-	default boolean isHandle(T object) {
-		return this.getObjectType().isAssignableFrom(object.getClass());
+	default boolean isHandle(T object, ServerHttpConnection connection) {
+		
+		// Ensure the appropriate object type
+		if (!this.getObjectType().isAssignableFrom(object.getClass())) {
+			return false;
+		}
+		
+		// TODO handle based on whether client will accept content-type
+		return true; // handle for time being
 	}
 
 	/**

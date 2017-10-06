@@ -23,29 +23,33 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.web.state.HttpApplicationState;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.build.HttpArgumentParser;
 
 /**
- * Annotated on the class of the parameter to indicate it should be bound to the
- * application state. This allows for in-line configuration of application
- * objects.
+ * Annotation to in-line configuration of parameters from content of
+ * {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface HttpApplicationStateful {
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+public @interface HttpContentParameter {
 
 	/**
-	 * Allows specifying the name to bind the object into the
-	 * {@link HttpApplicationState}.
+	 * Name of the parameter.
 	 * 
-	 * @return Name to bind the object into the {@link HttpApplicationState}.
-	 *         The blank default value indicates for the {@link ManagedObject}
-	 *         to assign its own unique value.
+	 * @return Name of the parameter. Use blank string to default to property
+	 *         name.
 	 */
-	String bind() default "";
+	String name();
+
+	/**
+	 * {@link HttpArgumentParser} instances to retrieve the arguments.
+	 * 
+	 * @return {@link HttpArgumentParser} instances to retrieve the arguments.
+	 */
+	Class<? extends HttpArgumentParser>[] content() default {};
 
 }

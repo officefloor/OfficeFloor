@@ -20,12 +20,14 @@ package net.officefloor.web;
 import java.io.IOException;
 import java.io.Serializable;
 
+import lombok.Data;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
@@ -33,11 +35,15 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.build.HttpObjectParser;
+import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
-import net.officefloor.web.build.ObjectResponder;
 import net.officefloor.web.build.ObjectResponse;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.session.HttpSession;
 
 /**
@@ -134,38 +140,43 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to provide parameter via query string.
+	 * Ensure able to provide parameter via path.
 	 */
-	public void testQueryStringParameter() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockParameter.class,
-				MockHttpServer.mockRequest("/path?param=value"));
+	public void testPathParameter() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}", MockPathParameter.class,
+				MockHttpServer.mockRequest("/path/value"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
 		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
 	}
 
+	@Data // simplified object declaration
 	@HttpParameters
-	public static class Parameter {
+	public static class PathParameter {
+		@HttpPathParameter("") // default to field property name
 		protected String param;
-
-		public void setParam(String param) {
-			this.param = param;
-		}
 	}
 
-	public static class MockParameter {
-		public void service(Parameter param, ServerHttpConnection connection) throws IOException {
+	public static class MockPathParameter {
+		public void service(PathParameter param, ServerHttpConnection connection) throws IOException {
 			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param.param);
 		}
 	}
 
 	/**
-	 * Ensure able to provide parameter via path.
+	 * Ensure able to provide value via path.
 	 */
-	public void testPathParameter() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}", MockParameter.class,
+	public void testPathValue() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}", MockPathValue.class,
 				MockHttpServer.mockRequest("/path/value"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+	}
+
+	public static class MockPathValue {
+		public void service(@HttpPathParameter("param") String param, ServerHttpConnection connection)
+				throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		}
 	}
 
 	/**
@@ -179,9 +190,10 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	@HttpParameters
-	public static class MultipleParameters extends Parameter {
+	public static class MultipleParameters extends PathParameter {
 		private String second;
 
+		// No path annotation, so will take from anywhere
 		public void setSecond(String second) {
 			this.second = second;
 		}
@@ -194,14 +206,318 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can have multiple values on the path.
+	 */
+	public void testPathMultipleValues() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path/with/first-{param}/and/{second}/param",
+				MockMultipleValues.class, MockHttpServer.mockRequest("/path/with/first-one/and/two/param"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "One=one and Two=two", response.getHttpEntity(null));
+	}
+
+	public static class MockMultipleValues {
+		public void service(@HttpPathParameter("second") String second, ServerHttpConnection connection,
+				@HttpPathParameter("param") String param) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("One=" + param + " and Two=" + second);
+		}
+	}
+
+	/**
+	 * Ensure able to provide parameter via query string.
+	 */
+	public void testQueryParameter() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockQueryParameter.class,
+				MockHttpServer.mockRequest("/path?param=value"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+	}
+
+	@HttpParameters
+	public static class QueryParameter {
+		protected String param;
+
+		@HttpQueryParameter("") // default to method property name
+		public void setParam(String param) {
+			this.param = param;
+		}
+	}
+
+	public static class MockQueryParameter {
+		public void service(QueryParameter param, ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param.param);
+		}
+	}
+
+	/**
+	 * Ensure able to provide value via query string.
+	 */
+	public void testQueryValue() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockQueryValue.class,
+				MockHttpServer.mockRequest("/path?param=value"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+	}
+
+	public static class MockQueryValue {
+		public void service(@HttpQueryParameter("param") String param, ServerHttpConnection connection)
+				throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		}
+	}
+
+	/**
+	 * Ensure able to provide value via {@link HttpHeader}.
+	 */
+	public void testHeaderValue() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockHeaderValue.class,
+				MockHttpServer.mockRequest("/path").header("x-test", "value"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+	}
+
+	public static class MockHeaderValue {
+		public void service(@HttpHeaderParameter("x-test") String param, ServerHttpConnection connection)
+				throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		}
+	}
+
+	/**
+	 * Ensure able to provide value via {@link HttpCookie}.
+	 */
+	public void testCookieValue() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockCookieValue.class,
+				MockHttpServer.mockRequest("/path").header(HttpCookie.COOKIE,
+						new HttpCookie("param", "value").toHttpResponseHeaderValue()));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+	}
+
+	public static class MockCookieValue {
+		public void service(@HttpCookieParameter("param") String param, ServerHttpConnection connection)
+				throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		}
+	}
+
+	/**
 	 * Ensure able to provide form parameter.
 	 */
 	public void testFormParameter() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockParameter.class,
+		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockFormParameter.class,
 				MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
 		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+	}
+
+	// TODO provide form implementation of argument parser
+	@HttpParameters(content = HttpArgumentParser.class)
+	public static class FormParameter {
+		protected String param;
+
+		public void setParam(String param) {
+			this.param = param;
+		}
+	}
+
+	public static class MockFormParameter {
+		public void service(FormParameter param, ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param.param);
+		}
+	}
+
+	/**
+	 * Ensure able to provide form value.
+	 */
+	public void testFormValue() throws Exception {
+		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockQueryParameter.class,
+				MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+	}
+
+	public static class MockFormValue {
+		// TODO provide form implementation of argument parser
+		public void service(@HttpContentParameter(name = "param", content = HttpArgumentParser.class) String param,
+				ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		}
+	}
+
+	/**
+	 * Ensure able to parse out the request object.
+	 */
+	public void testRequestObject() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			OfficeSectionInput servicer = context.addSection("SECTION", MockObjectValue.class)
+					.getOfficeSectionInput("service");
+			WebArchitect web = context.getWebArchitect();
+			web.addHttpObjectParser(new ObjectValueFactory());
+			web.link(false, HttpMethod.POST, "/path", servicer);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "application/mock").entity("value"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+	}
+
+	@HttpObject
+	public static class ObjectValue {
+		private final String content;
+
+		public ObjectValue(String content) {
+			this.content = content;
+		}
+	}
+
+	public static class ObjectValueFactory implements HttpObjectParserFactory, HttpObjectParser<ObjectValue> {
+
+		@Override
+		public String getContentType() {
+			return "application/mock";
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpObjectParser<? extends T> createHttpObjectParser(Class<T> objectType) {
+			return (HttpObjectParser<T>) this;
+		}
+
+		@Override
+		public Class<ObjectValue> getObjectType() {
+			return ObjectValue.class;
+		}
+
+		@Override
+		public ObjectValue parse(ServerHttpConnection connection) throws Exception {
+			String content = MockHttpServer.getContent(connection.getHttpRequest(), null);
+			return new ObjectValue(content);
+		}
+	}
+
+	public static class MockObjectValue {
+		public void service(ObjectValue object, ServerHttpConnection connection) throws Exception {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + object.content);
+		}
+	}
+
+	/**
+	 * Ensure can send object.
+	 */
+	public void testResponseObject() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, HttpMethod.GET, "/path/{param}", MockObjectSection.class);
+			WebArchitect web = context.getWebArchitect();
+			web.addHttpObjectResponder(new MockObjectResponderFactory());
+		});
+
+		// Send request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path/value"));
+		assertEquals("Should be serviced", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("content-type").getValue());
+		assertEquals("Incorrect object", "{value=\"OBJECT value\"}");
+	}
+
+	public static class MockObjectSection {
+		public void service(PathParameter param, ObjectResponse<String> response) {
+			response.send("OBJECT " + param.param);
+		}
+	}
+
+	public static class MockObjectResponderFactory implements HttpObjectResponderFactory {
+
+		@Override
+		public String getContentType() {
+			return "application/json";
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpObjectResponder<? extends T> createHttpObjectResponder(Class<T> objectType) {
+			return (HttpObjectResponder<T>) new StringObjectResponder();
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <E extends Throwable> HttpObjectResponder<? extends E> createHttpEscalationResponder(
+				Class<E> escalationType) {
+			return (HttpObjectResponder<E>) new EscalationObjectResponder();
+		}
+	}
+
+	public static class StringObjectResponder implements HttpObjectResponder<String> {
+
+		@Override
+		public String getContentType() {
+			return "application/json";
+		}
+
+		@Override
+		public Class<String> getObjectType() {
+			return String.class;
+		}
+
+		@Override
+		public void send(String object, ServerHttpConnection connection) throws IOException {
+			HttpResponse response = connection.getHttpResponse();
+			response.setContentType(this.getContentType(), null);
+			response.getEntityWriter().write("{value=\"" + object + "\"}");
+		}
+	}
+
+	public static class EscalationObjectResponder implements HttpObjectResponder<Throwable> {
+
+		@Override
+		public String getContentType() {
+			return "application/mock";
+		}
+
+		@Override
+		public Class<Throwable> getObjectType() {
+			return Throwable.class;
+		}
+
+		@Override
+		public void send(Throwable object, ServerHttpConnection connection) throws IOException {
+			HttpResponse response = connection.getHttpResponse();
+			response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.setContentType(this.getContentType(), null);
+			response.getEntityWriter().write("{error: \"" + object.getMessage() + "\"}");
+		}
+	}
+
+	/**
+	 * Ensure can send escalation.
+	 */
+	public void testResponseObjectEscalation() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, HttpMethod.GET, "/path", MockEscalate.class);
+			WebArchitect web = context.getWebArchitect();
+			web.addHttpObjectResponder(new MockObjectResponderFactory());
+		});
+
+		// Send request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should be error", 500, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("content-type").getValue());
+		assertEquals("Incorrect error object", "{error: \"TEST ESCALATION\"}", response.getHttpEntity(null));
+	}
+
+	public static class MockEscalate {
+		public void service() throws Exception {
+			throw new Exception("TEST ESCALATION");
+		}
 	}
 
 	/**
@@ -238,7 +554,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockApplication {
-		public void service(Parameter parameter, ServerHttpConnection connection, ApplicationObject object)
+		public void service(QueryParameter parameter, ServerHttpConnection connection, ApplicationObject object)
 				throws IOException {
 			if (connection.getHttpRequest().getHttpMethod() == HttpMethod.POST) {
 				object.value = parameter.param;
@@ -281,7 +597,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockSession {
-		public void service(ServerHttpConnection connection, SessionObject object, Parameter parameter)
+		public void service(ServerHttpConnection connection, SessionObject object, QueryParameter parameter)
 				throws IOException {
 			if (connection.getHttpRequest().getHttpMethod() == HttpMethod.POST) {
 				object.value = parameter.param;
@@ -298,7 +614,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			// Provide continuation
-			HttpUrlContinuation continuation = context.link(false, "/path", MockParameter.class);
+			HttpUrlContinuation continuation = context.link(false, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			WebArchitect web = context.getWebArchitect();
@@ -341,7 +657,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			// Provide continuation
-			HttpUrlContinuation continuation = context.link(false, "/path/{param}", MockParameter.class);
+			HttpUrlContinuation continuation = context.link(false, "/path/{param}", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			WebArchitect web = context.getWebArchitect();
@@ -444,83 +760,6 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		@NextFunction("chain")
 		public void pass(ServerHttpConnection connection) throws IOException {
 			connection.getHttpResponse().getEntityWriter().write("pass - ");
-		}
-	}
-
-	/**
-	 * Ensure can send object.
-	 */
-	public void testSendObject() throws Exception {
-
-		// Configure the server
-		this.compile.web((context) -> {
-			HttpInputBuilder input = context.link(false, HttpMethod.GET, "/path/{param}", MockObjectSection.class);
-			input.addObjectResponder(new StringObjectResponder());
-		});
-
-		// Send request
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path/value"));
-		assertEquals("Should be serviced", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("content-type").getValue());
-		assertEquals("Incorrect object", "{value=\"OBJECT value\"}");
-	}
-
-	public static class MockObjectSection {
-		public void service(Parameter param, ObjectResponse<String> response) {
-			response.send("OBJECT " + param.param);
-		}
-	}
-
-	public static class StringObjectResponder implements ObjectResponder<String> {
-
-		@Override
-		public Class<String> getObjectType() {
-			return String.class;
-		}
-
-		@Override
-		public void send(String object, ServerHttpConnection connection) throws IOException {
-			HttpResponse response = connection.getHttpResponse();
-			response.setContentType("application/json", null);
-			response.getEntityWriter().write("{value=\"" + object + "\"}");
-		}
-	}
-
-	/**
-	 * Ensure can send escalation.
-	 */
-	public void testSendObjectEscalation() throws Exception {
-
-		// Configure the server
-		this.compile.web((context) -> {
-			HttpInputBuilder input = context.link(false, HttpMethod.GET, "/path", MockEscalate.class);
-			input.addObjectResponder(new EscalationObjectResponder());
-		});
-
-		// Send request
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should be error", 500, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect error object", "{error: \"TEST ESCALATION\"}", response.getHttpEntity(null));
-	}
-
-	public static class MockEscalate {
-		public void service() throws Exception {
-			throw new Exception("TEST ESCALATION");
-		}
-	}
-
-	public static class EscalationObjectResponder implements ObjectResponder<Throwable> {
-
-		@Override
-		public Class<Throwable> getObjectType() {
-			return Throwable.class;
-		}
-
-		@Override
-		public void send(Throwable object, ServerHttpConnection connection) throws IOException {
-			HttpResponse response = connection.getHttpResponse();
-			response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getEntityWriter().write("{error: \"" + object.getMessage() + "\"}");
 		}
 	}
 

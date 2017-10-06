@@ -18,20 +18,27 @@
 package net.officefloor.web.build;
 
 /**
- * Context the {@link HttpEntityArgumentParser}.
+ * Factory for the creation of {@link HttpObjectParser} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityArgumentParserContext {
+public interface HttpObjectParserFactory {
 
 	/**
-	 * Adds an argument.
+	 * Obtains the <code>Content-Type</code> supported by the create
+	 * {@link HttpObjectParser} instances.
 	 * 
-	 * @param name
-	 *            Name of the argument.
-	 * @param value
-	 *            Value of the argument.
+	 * @return <code>Content-Type</code>.
 	 */
-	void addArgument(String name, String value);
+	String getContentType();
+
+	/**
+	 * Creates the {@link HttpObjectParser} for the {@link Object} type.
+	 * 
+	 * @param objectType
+	 *            {@link Object} type.
+	 * @return {@link HttpObjectParser} for the {@link Object} type.
+	 */
+	<T> HttpObjectParser<? extends T> createHttpObjectParser(Class<T> objectType);
 
 }

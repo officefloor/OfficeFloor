@@ -31,7 +31,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.web.build.ObjectResponder;
+import net.officefloor.web.build.HttpObjectResponder;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
@@ -71,9 +71,9 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		private ProcessAwareContext context;
 
 		/**
-		 * {@link ObjectResponder} instances.
+		 * {@link HttpObjectResponder} instances.
 		 */
-		private ObjectResponder<?>[] objectResponses;
+		private HttpObjectResponder<?>[] objectResponses;
 
 		/**
 		 * Attributes.
@@ -99,7 +99,7 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		 */
 
 		@Override
-		public void setObjectResponses(ObjectResponder<?>[] objectResponses) {
+		public void setObjectResponses(HttpObjectResponder<?>[] objectResponses) {
 			this.context.run(() -> {
 				this.objectResponses = objectResponses;
 				return null;
@@ -107,7 +107,7 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		}
 
 		@Override
-		public ObjectResponder<?>[] getObjectResponses() {
+		public HttpObjectResponder<?>[] getObjectResponses() {
 			return this.context.run(() -> this.objectResponses);
 		}
 

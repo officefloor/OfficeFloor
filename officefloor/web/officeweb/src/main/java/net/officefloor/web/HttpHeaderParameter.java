@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2017 Daniel Sagenschneider
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.build;
+package net.officefloor.web;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.server.http.HttpHeader;
 
 /**
- * Parameter within the HTTP entity.
+ * Annotation to in-line configuration of parameters from a {@link HttpHeader}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityParametersBuilder {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+public @interface HttpHeaderParameter {
 
-	HttpParameterBuilder addParameter(String name);
+	/**
+	 * Name of parameter.
+	 * 
+	 * @return Name of parameter.
+	 */
+	String value();
 
 }

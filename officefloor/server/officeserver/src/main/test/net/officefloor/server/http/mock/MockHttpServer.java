@@ -92,17 +92,6 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
-	 * {@link ExternalServiceInput}.
-	 */
-	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
-
-	/**
-	 * Instantiated via static methods.
-	 */
-	private MockHttpServer() {
-	}
-
-	/**
 	 * Creates the {@link MockHttpRequestBuilder}.
 	 * 
 	 * @return {@link MockHttpRequestBuilder}.
@@ -131,6 +120,49 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 */
 	public static MockHttpResponseBuilder mockResponse() {
 		return new MockHttpResponseBuilderImpl();
+	}
+
+	/**
+	 * Obtains the HTTP entity content from the {@link HttpRequest}.
+	 * 
+	 * @param request
+	 *            {@link HttpRequest}.
+	 * @param charset
+	 *            {@link Charset}. May be <code>null</code> to use default
+	 *            {@link Charset}.
+	 * @return HTTP entity content.
+	 */
+	public static String getContent(HttpRequest request, Charset charset) {
+
+		// Ensure have charset
+		if (charset == null) {
+			charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
+		}
+
+		// Obtain the content
+		StringWriter content = new StringWriter();
+		try {
+			InputStreamReader reader = new InputStreamReader(request.getEntity().createBrowseInputStream(), charset);
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				content.write(character);
+			}
+		} catch (IOException ex) {
+			throw OfficeFrameTestCase.fail(ex);
+		}
+
+		// Return the content
+		return content.toString();
+	}
+
+	/**
+	 * {@link ExternalServiceInput}.
+	 */
+	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
+
+	/**
+	 * Instantiated via static methods.
+	 */
+	private MockHttpServer() {
 	}
 
 	/**

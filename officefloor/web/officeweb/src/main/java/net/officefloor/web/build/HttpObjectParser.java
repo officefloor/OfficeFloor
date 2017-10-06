@@ -17,34 +17,32 @@
  */
 package net.officefloor.web.build;
 
-import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
- * HTTP parameter.
+ * Parses an object from the {@link ServerHttpConnection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpParameter {
+public interface HttpObjectParser<T> extends HttpContentParser {
 
 	/**
-	 * Obtains the name.
+	 * Obtains the type of object parsed from the {@link ServerHttpConnection}.
 	 * 
-	 * @return Name.
+	 * @return Object type.
 	 */
-	String getName();
+	Class<T> getObjectType();
 
 	/**
-	 * Obtains the {@link HttpValueLocation} on the {@link HttpRequest}.
+	 * Parses the object from the {@link ServerHttpConnection}.
 	 * 
-	 * @return {@link HttpValueLocation} on the {@link HttpRequest}.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return Parsed object.
+	 * @throws Exception
+	 *             If fails to parse the object from the
+	 *             {@link ServerHttpConnection}.
 	 */
-	HttpValueLocation getLocation();
-
-	/**
-	 * Indicates if required.
-	 * 
-	 * @return <code>true</code> if required.
-	 */
-	boolean isRequired();
+	T parse(ServerHttpConnection connection) throws Exception;
 
 }

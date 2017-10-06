@@ -22,7 +22,7 @@ package net.officefloor.web.build;
  * 
  * @author Daniel Sagenschneider
  */
-public enum HttpParameterLocation {
+public enum HttpValueLocation {
 
 	PATH, QUERY, HEADER, COOKIE, ENTITY
 }

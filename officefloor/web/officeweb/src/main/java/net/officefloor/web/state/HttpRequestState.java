@@ -22,8 +22,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.build.HttpEntityObjectParser;
-import net.officefloor.web.build.ObjectResponder;
+import net.officefloor.web.build.HttpObjectParser;
+import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.session.HttpSession;
 
 /**
@@ -41,20 +41,20 @@ public interface HttpRequestState {
 	HttpArgument getHttpArguments();
 
 	/**
-	 * Obtains the {@link HttpEntityObjectParser} instances.
+	 * Obtains the {@link HttpObjectParser} instances.
 	 * 
-	 * @return {@link HttpEntityObjectParser} instances. May be
-	 *         <code>null</code> if no {@link HttpEntityObjectParser} instances.
+	 * @return {@link HttpObjectParser} instances. May be
+	 *         <code>null</code> if no {@link HttpObjectParser} instances.
 	 */
-	HttpEntityObjectParser<?>[] getObjectParsers();
+	HttpObjectParser<?>[] getObjectParsers();
 
 	/**
-	 * Obtains the {@link ObjectResponder} instances.
+	 * Obtains the {@link HttpObjectResponder} instances.
 	 * 
-	 * @return {@link ObjectResponder} instances. May be <code>null</code> if no
-	 *         {@link ObjectResponder} instances.
+	 * @return {@link HttpObjectResponder} instances. May be <code>null</code> if no
+	 *         {@link HttpObjectResponder} instances.
 	 */
-	ObjectResponder<?>[] getObjectResponders();
+	HttpObjectResponder<?>[] getObjectResponders();
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.

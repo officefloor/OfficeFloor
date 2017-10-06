@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2017 Daniel Sagenschneider
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.build;
+package net.officefloor.web;
 
-import net.officefloor.server.http.ServerHttpConnection;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.web.cookie.HttpCookie;
 
 /**
- * Parses arguments from the {@link ServerHttpConnection}.
+ * Annotation to in-line configuration of parameters from a {@link HttpCookie}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityArgumentParser extends HttpEntityParser {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+public @interface HttpCookieParameter {
 
 	/**
-	 * Parses the HTTP entity.
+	 * Name of parameter.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param context
-	 *            {@link HttpEntityArgumentParserContext}.
-	 * @throws Exception
-	 *             If fails to parse the {@link ServerHttpConnection}.
+	 * @return Name parameter.
 	 */
-	void parse(ServerHttpConnection connection, HttpEntityArgumentParserContext context) throws Exception;
+	String value();
 
 }

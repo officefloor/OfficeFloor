@@ -25,7 +25,7 @@ import net.officefloor.server.http.ServerHttpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityParser {
+public interface HttpContentParser {
 
 	/**
 	 * <code>Content-Type</code> {@link HttpHeader} name.
@@ -34,9 +34,9 @@ public interface HttpEntityParser {
 
 	/**
 	 * Obtains the <code>Content-Type</code> handled by this
-	 * {@link HttpEntityArgumentParser}.
+	 * {@link HttpArgumentParser}.
 	 * 
-	 * @return <code>Content-Type</code> handled by this {@link HttpEntityArgumentParser}.
+	 * @return <code>Content-Type</code> handled by this {@link HttpArgumentParser}.
 	 */
 	String getContentType();
 

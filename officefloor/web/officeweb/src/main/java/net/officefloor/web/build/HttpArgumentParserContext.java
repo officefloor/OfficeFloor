@@ -17,32 +17,23 @@
  */
 package net.officefloor.web.build;
 
-import net.officefloor.server.http.ServerHttpConnection;
-
 /**
- * Parses an object from the {@link ServerHttpConnection}.
+ * Context the {@link HttpArgumentParser}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityObjectParser<T> extends HttpEntityParser {
+public interface HttpArgumentParserContext {
 
 	/**
-	 * Obtains the type of object parsed from the {@link ServerHttpConnection}.
+	 * Adds an argument.
 	 * 
-	 * @return Object type.
+	 * @param name
+	 *            Name of the argument.
+	 * @param value
+	 *            Value of the argument.
+	 * @param location
+	 *            {@link HttpValueLocation}.
 	 */
-	Class<T> getObjectType();
-
-	/**
-	 * Parses the object from the {@link ServerHttpConnection}.
-	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @return Parsed object.
-	 * @throws Exception
-	 *             If fails to parse the object from the
-	 *             {@link ServerHttpConnection}.
-	 */
-	T parse(ServerHttpConnection connection) throws Exception;
+	void addArgument(String name, String value, HttpValueLocation location);
 
 }

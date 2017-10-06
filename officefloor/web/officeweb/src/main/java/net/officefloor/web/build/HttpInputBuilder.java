@@ -52,31 +52,41 @@ public interface HttpInputBuilder {
 	HttpParameterBuilder addCookieParameter(String name);
 
 	/**
-	 * Adds an {@link HttpEntityArgumentParser} for the
-	 * {@link HttpInputBuilder}.
+	 * Adds an {@link HttpArgumentParser} for the {@link HttpInputBuilder}.
 	 * 
 	 * @param argumentParser
-	 *            {@link HttpEntityArgumentParser} for the
-	 *            {@link HttpInputBuilder}.
+	 *            {@link HttpArgumentParser} for the {@link HttpInputBuilder}.
 	 */
-	HttpEntityParametersBuilder addEntityParameters(HttpEntityArgumentParser argumentParser);
+	HttpContentParametersBuilder addEntityParameters(HttpArgumentParser argumentParser);
 
 	/**
-	 * Adds an {@link HttpEntityObjectParser} for the {@link HttpInputBuilder}.
+	 * Adds an {@link HttpObjectParser} for the {@link HttpInputBuilder}.
 	 * 
 	 * @param objectParser
-	 *            {@link HttpEntityObjectParser} for the
-	 *            {@link HttpInputBuilder}.
+	 *            {@link HttpObjectParser} for the {@link HttpInputBuilder}.
 	 */
-	void addRequestObject(HttpEntityObjectParser<?> objectParser);
+	void addRequestObject(HttpObjectParser<?> objectParser);
 
 	/**
-	 * Adds an {@link ObjectResponder} for the {@link HttpInputBuilder}.
+	 * <p>
+	 * Allows specifying a restricted set of supported response
+	 * <code>Content-Type</code> values.
+	 * <p>
+	 * If none are specified, then will support all configured
+	 * {@link HttpObjectResponderFactory} instances.
+	 * 
+	 * @param contentType
+	 *            <code>Content-Type</code>.
+	 */
+	void addResponseContentType(String contentType);
+
+	/**
+	 * Adds an {@link HttpObjectResponder} for the {@link HttpInputBuilder}.
 	 * 
 	 * @param objectResponder
-	 *            {@link ObjectResponder} for the {@link HttpInputBuilder}.
+	 *            {@link HttpObjectResponder} for the {@link HttpInputBuilder}.
 	 */
-	void addResponseObject(ObjectResponder<?> objectResponder);
+	void addResponseObject(HttpObjectResponder<?> objectResponder);
 
 	/**
 	 * <p>

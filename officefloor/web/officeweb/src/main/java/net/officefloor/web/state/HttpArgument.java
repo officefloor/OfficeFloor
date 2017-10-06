@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.state;
 
+import net.officefloor.web.build.HttpValueLocation;
+
 /**
  * HTTP argument.
  * 
@@ -35,6 +37,11 @@ public class HttpArgument {
 	public final String value;
 
 	/**
+	 * Location that this {@link HttpArgument} was sourced.
+	 */
+	public final HttpValueLocation location;
+
+	/**
 	 * Next {@link HttpArgument}.
 	 */
 	public HttpArgument next = null;
@@ -46,10 +53,13 @@ public class HttpArgument {
 	 *            Argument name.
 	 * @param value
 	 *            Argument value.
+	 * @param location
+	 *            {@link HttpValueLocation}.
 	 */
-	public HttpArgument(String name, String value) {
+	public HttpArgument(String name, String value, HttpValueLocation location) {
 		this.name = name;
 		this.value = value;
+		this.location = location;
 	}
 
 }

@@ -24,19 +24,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.web.build.HttpEntityObjectParser;
-import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.state.HttpRequestState;
 
 /**
- * <p>
- * Annotated on the class of the parameter to indicate it should be a
- * {@link HttpRequestObjectManagedObjectSource} that will load from
- * {@link HttpEntityObjectParser}.
- * <p>
- * This simplifies means to specifying
- * {@link HttpRequestObjectManagedObjectSource} instances by in-lining it with
- * the code.
+ * Annotation on the {@link Class} of the parameter to indicate it is parsed out
+ * of the {@link HttpRequest} via an {@link HttpObjectParser}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -53,6 +47,18 @@ public @interface HttpObject {
 	 *         blank default value indicates for the {@link ManagedObject} to
 	 *         assign its own unique value.
 	 */
-	String value() default "";
+	String bind() default "";
+
+	/**
+	 * <p>
+	 * Leaving an empty array will provide all <code>Content-Type</code> parsing
+	 * available for the {@link Object}.
+	 * <p>
+	 * This is provided to restrict <code>Content-Type</code> parsing.
+	 * 
+	 * @return Restricted list of <code>Content-Type</code> parsing available
+	 *         for the {@link Object}.
+	 */
+	String[] acceptedContentTypes() default {};
 
 }
