@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
+package net.officefloor.web.build;
 
-import java.util.ServiceLoader;
-
-import net.officefloor.web.build.WebArchitect;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
- * {@link ServiceLoader} service that enables extending functionality over and
- * above the {@link WoofLoader} by directly configuring the
- * {@link WebArchitect}.
+ * Parses arguments from the {@link ServerHttpConnection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofExtensionService {
+public interface HttpEntityArgumentParser extends HttpEntityParser {
 
 	/**
-	 * Extends the {@link WebArchitect}.
+	 * Parses the HTTP entity.
 	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
 	 * @param context
-	 *            {@link WoofExtensionServiceContext}.
+	 *            {@link HttpEntityArgumentParserContext}.
 	 * @throws Exception
-	 *             If fails to extend the {@link WebArchitect}.
+	 *             If fails to parse the {@link ServerHttpConnection}.
 	 */
-	void extend(WoofExtensionServiceContext context) throws Exception;
+	void parse(ServerHttpConnection connection, HttpEntityArgumentParserContext context) throws Exception;
 
 }

@@ -27,7 +27,7 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.web.HttpUrlContinuation;
+import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;

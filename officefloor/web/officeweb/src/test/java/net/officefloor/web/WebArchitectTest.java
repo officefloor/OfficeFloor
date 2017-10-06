@@ -33,6 +33,11 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.build.ObjectResponder;
+import net.officefloor.web.build.ObjectResponse;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSession;
 
 /**

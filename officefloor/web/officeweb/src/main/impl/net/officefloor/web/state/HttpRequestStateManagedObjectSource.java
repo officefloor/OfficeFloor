@@ -31,7 +31,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.web.ObjectResponder;
+import net.officefloor.web.build.ObjectResponder;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.

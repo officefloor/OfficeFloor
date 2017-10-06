@@ -20,7 +20,7 @@ package net.officefloor.plugin.web.http.security;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * <p>

@@ -15,16 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
+package net.officefloor.web.build;
 
 /**
- *
+ * Location of the {@link HttpParameter}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface HttpParameterBuilder {
+public enum HttpParameterLocation {
 
-	void setRequired(boolean isRequired);
-	
-	void setAlias(String aliasName);
-
+	PATH, QUERY, HEADER, COOKIE, ENTITY
 }

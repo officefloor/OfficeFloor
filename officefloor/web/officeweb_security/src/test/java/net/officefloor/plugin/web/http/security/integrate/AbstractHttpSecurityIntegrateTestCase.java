@@ -41,7 +41,7 @@ import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.state.HttpSecuritySection;
 
 /**

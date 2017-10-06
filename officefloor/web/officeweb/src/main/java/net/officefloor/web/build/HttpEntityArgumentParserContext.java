@@ -15,34 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
-
-import net.officefloor.server.http.ServerHttpConnection;
+package net.officefloor.web.build;
 
 /**
- * Parses an object from the {@link ServerHttpConnection}.
+ * Context the {@link HttpEntityArgumentParser}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityObjectParser<T> extends HttpEntityParser {
+public interface HttpEntityArgumentParserContext {
 
 	/**
-	 * Obtains the type of object parsed from the {@link ServerHttpConnection}.
+	 * Adds an argument.
 	 * 
-	 * @return Object type.
+	 * @param name
+	 *            Name of the argument.
+	 * @param value
+	 *            Value of the argument.
 	 */
-	Class<T> getObjectType();
-
-	/**
-	 * Parses the object from the {@link ServerHttpConnection}.
-	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @return Parsed object.
-	 * @throws Exception
-	 *             If fails to parse the object from the
-	 *             {@link ServerHttpConnection}.
-	 */
-	T parse(ServerHttpConnection connection) throws Exception;
+	void addArgument(String name, String value);
 
 }

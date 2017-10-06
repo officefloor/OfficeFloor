@@ -29,7 +29,7 @@ import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Mock {@link WoofLoaderExtensionService} for testing.

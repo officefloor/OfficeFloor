@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Loads the WoOF configuration to the {@link WebArchitect}.

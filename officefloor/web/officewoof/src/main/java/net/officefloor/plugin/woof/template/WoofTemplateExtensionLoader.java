@@ -26,7 +26,7 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.state.HttpTemplateSection;
 
 /**

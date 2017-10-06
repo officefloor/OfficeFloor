@@ -20,7 +20,7 @@ package net.officefloor.plugin.woof.template;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.state.HttpTemplateSection;
 
 /**

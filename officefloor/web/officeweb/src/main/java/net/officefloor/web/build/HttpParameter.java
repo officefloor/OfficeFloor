@@ -15,15 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
+package net.officefloor.web.build;
+
+import net.officefloor.server.http.HttpRequest;
 
 /**
- * Parameter within the HTTP entity.
+ * HTTP parameter.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityParametersBuilder {
+public interface HttpParameter {
 
-	HttpParameterBuilder addParameter(String name);
+	/**
+	 * Obtains the name.
+	 * 
+	 * @return Name.
+	 */
+	String getName();
+
+	/**
+	 * Obtains the {@link HttpParameterLocation} on the {@link HttpRequest}.
+	 * 
+	 * @return {@link HttpParameterLocation} on the {@link HttpRequest}.
+	 */
+	HttpParameterLocation getLocation();
+
+	/**
+	 * Indicates if required.
+	 * 
+	 * @return <code>true</code> if required.
+	 */
+	boolean isRequired();
 
 }

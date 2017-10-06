@@ -48,8 +48,8 @@ import net.officefloor.plugin.teams.WoofTeamsLoader;
 import net.officefloor.plugin.teams.WoofTeamsLoaderContext;
 import net.officefloor.plugin.teams.WoofTeamsLoaderImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.web.WebArchitect;
 import net.officefloor.web.WebArchitectEmployer;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * {@link OfficeFloorExtensionService} / {@link OfficeExtensionService} to

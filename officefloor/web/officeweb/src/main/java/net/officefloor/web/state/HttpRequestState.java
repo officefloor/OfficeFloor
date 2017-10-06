@@ -22,8 +22,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.HttpEntityObjectParser;
-import net.officefloor.web.ObjectResponder;
+import net.officefloor.web.build.HttpEntityObjectParser;
+import net.officefloor.web.build.ObjectResponder;
 import net.officefloor.web.session.HttpSession;
 
 /**

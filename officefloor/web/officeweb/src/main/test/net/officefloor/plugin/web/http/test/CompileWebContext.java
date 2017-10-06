@@ -19,9 +19,9 @@ package net.officefloor.plugin.web.http.test;
 
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.web.HttpInputBuilder;
-import net.officefloor.web.HttpUrlContinuation;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Context for the {@link CompileWebExtension}.

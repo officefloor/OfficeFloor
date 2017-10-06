@@ -52,7 +52,7 @@ import net.officefloor.web.HttpApplicationStateful;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpRequestStateful;
 import net.officefloor.web.HttpSessionStateful;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.path.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;

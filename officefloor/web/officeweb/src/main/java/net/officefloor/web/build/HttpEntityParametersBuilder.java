@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
-
-import java.util.ServiceLoader;
-
-import net.officefloor.web.build.WebArchitect;
+package net.officefloor.web.build;
 
 /**
- * {@link ServiceLoader} service that enables extending functionality over and
- * above the {@link WoofLoader} by directly configuring the
- * {@link WebArchitect}.
+ * Parameter within the HTTP entity.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofExtensionService {
+public interface HttpEntityParametersBuilder {
 
-	/**
-	 * Extends the {@link WebArchitect}.
-	 * 
-	 * @param context
-	 *            {@link WoofExtensionServiceContext}.
-	 * @throws Exception
-	 *             If fails to extend the {@link WebArchitect}.
-	 */
-	void extend(WoofExtensionServiceContext context) throws Exception;
+	HttpParameterBuilder addParameter(String name);
 
 }

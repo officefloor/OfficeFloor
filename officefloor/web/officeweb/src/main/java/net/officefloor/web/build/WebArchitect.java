@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
+package net.officefloor.web.build;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -165,7 +165,8 @@ public abstract interface WebArchitect {
 	 *            {@link OfficeSectionInput} servicing the URI.
 	 * @return {@link HttpInputBuilder}.
 	 */
-	HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
+	HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
+			OfficeSectionInput sectionInput);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to the {@link HttpUrlContinuation}.
@@ -182,11 +183,11 @@ public abstract interface WebArchitect {
 	void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType);
 
 	/**
-	 * Obtains the configured {@link HttpInputBuilder} instances for the application.
+	 * Obtains the configured {@link HttpInput} instances for the application.
 	 * 
-	 * @return Configured {@link HttpInputBuilder} instances.
+	 * @return Configured {@link HttpInput} instances.
 	 */
-	HttpInputBuilder[] getHttpInputs();
+	HttpInput[] getHttpInputs();
 
 	/**
 	 * <p>

@@ -25,7 +25,7 @@ import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.state.HttpSecuritySection;
 
 /**

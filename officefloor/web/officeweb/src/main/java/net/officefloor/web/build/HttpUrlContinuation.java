@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2017 Daniel Sagenschneider
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web;
+package net.officefloor.web.build;
 
-import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.cookie.HttpCookie;
 
 /**
- * Parses arguments from the {@link ServerHttpConnection}.
+ * HTTP URL continuation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpEntityArgumentParser extends HttpEntityParser {
+public interface HttpUrlContinuation {
 
 	/**
-	 * Parses the HTTP entity.
+	 * Adds a parameter from a {@link HttpCookie}.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param context
-	 *            {@link HttpEntityArgumentParserContext}.
-	 * @throws Exception
-	 *             If fails to parse the {@link ServerHttpConnection}.
+	 * @param name
+	 *            Name of parameter.
 	 */
-	void parse(ServerHttpConnection connection, HttpEntityArgumentParserContext context) throws Exception;
+	HttpParameterBuilder addCookieParameter(String name);
 
 }

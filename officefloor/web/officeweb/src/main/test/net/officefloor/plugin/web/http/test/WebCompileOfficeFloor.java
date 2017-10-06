@@ -26,10 +26,10 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.web.HttpInputBuilder;
-import net.officefloor.web.HttpUrlContinuation;
-import net.officefloor.web.WebArchitect;
 import net.officefloor.web.WebArchitectEmployer;
+import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Provides {@link WebArchitect} and server configuration for testing web

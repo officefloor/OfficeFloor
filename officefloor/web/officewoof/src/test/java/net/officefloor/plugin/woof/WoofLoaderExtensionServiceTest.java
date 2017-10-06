@@ -43,7 +43,7 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Tests the {@link WoofLoaderExtensionService}.

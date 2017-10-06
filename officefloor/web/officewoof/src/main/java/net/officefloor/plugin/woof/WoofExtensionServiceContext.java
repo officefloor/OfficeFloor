@@ -19,7 +19,7 @@ package net.officefloor.plugin.woof;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Context for the {@link WoofLoaderExtensionService}.

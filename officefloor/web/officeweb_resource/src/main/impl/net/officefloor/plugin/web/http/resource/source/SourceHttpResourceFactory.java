@@ -41,7 +41,7 @@ import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.direct.DirectHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
-import net.officefloor.web.WebArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * <p>
