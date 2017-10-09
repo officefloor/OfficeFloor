@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -79,5 +80,14 @@ public interface SectionInputNode
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	OfficeSectionInputType loadOfficeSectionInputType(CompileContext compileContext);
+
+	/**
+	 * Runs the {@link ExecutionExplorer} instances.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully explored execution.
+	 */
+	boolean runExecutionExplorers(CompileContext compileContext);
 
 }

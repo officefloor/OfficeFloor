@@ -639,6 +639,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 					.forEachOrdered((office) -> office.autoWireTeams(autoWirer, compileContext));
 		}
 
+		// Run the execution explorers (as now fully configured)
+		boolean isExplored = this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.allMatch((office) -> office.runExecutionExplorers(compileContext));
+		if (!isExplored) {
+			return false;
+		}
+
 		// As here, successfully sourced
 		return true;
 	}

@@ -22,6 +22,7 @@ import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -254,6 +255,15 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 *            {@link CompileContext}.
 	 */
 	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Runs the {@link ExecutionExplorer} instances.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully explored execution.
+	 */
+	boolean runExecutionExplorers(CompileContext compileContext);
 
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.

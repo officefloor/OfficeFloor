@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
@@ -33,6 +36,7 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
@@ -114,6 +118,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * {@link ExternalServiceProxyFunctionManager}.
 	 */
 	private ExternalServiceProxyFunctionManager externalFunctionManager = null;
+
+	/**
+	 * {@link ExecutionExplorer} instances.
+	 */
+	private final List<ExecutionExplorer> executionExplorers = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -217,6 +226,19 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		return new OfficeSectionInputTypeImpl(this.inputName, this.state.parameterType);
 	}
 
+	@Override
+	public boolean runExecutionExplorers(CompileContext compileContext) {
+
+		// Run the execution explorer
+		for (ExecutionExplorer explorer : this.executionExplorers) {
+			// TODO implement
+			throw new UnsupportedOperationException("TODO implement execution exploration");
+		}
+
+		// As here, successfully explored
+		return true;
+	}
+
 	/*
 	 * ================= SectionInput =========================
 	 */
@@ -247,6 +269,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	@Override
 	public String getOfficeSectionInputName() {
 		return this.inputName;
+	}
+
+	@Override
+	public void addExecutionExplorer(ExecutionExplorer executionExplorer) {
+		this.executionExplorers.add(executionExplorer);
 	}
 
 	/*

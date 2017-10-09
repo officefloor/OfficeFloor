@@ -870,6 +870,15 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
+	public boolean runExecutionExplorers(CompileContext compileContext) {
+
+		// Run execution explorers for the sections (in deterministic order)
+		return this.sections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.allMatch((section) -> section.runExecutionExplorers(compileContext));
+	}
+
+	@Override
 	public OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler) {
 
 		// Register as possible MBean

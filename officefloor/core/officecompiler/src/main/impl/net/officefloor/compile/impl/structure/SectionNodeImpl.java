@@ -788,6 +788,15 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
+	public boolean runExecutionExplorers(CompileContext compileContext) {
+
+		// Run execution explorers for the inputs (in deterministic order)
+		return this.inputs.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionInputName(), b.getSectionInputName()))
+				.allMatch((input) -> input.runExecutionExplorers(compileContext));
+	}
+
+	@Override
 	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			CompileContext compileContext) {
 

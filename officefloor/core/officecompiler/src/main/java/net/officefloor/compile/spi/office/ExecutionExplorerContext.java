@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,36 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.frame.api.function.ManagedFunction;
+
 /**
- * Input into the {@link OfficeSection}.
+ * Context for the {@link ExecutionExplorer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionInput {
+public interface ExecutionExplorerContext {
 
 	/**
-	 * Obtains the {@link OfficeSection} containing this
+	 * Obtains the initial {@link ExecutionManagedFunction} for the
 	 * {@link OfficeSectionInput}.
 	 * 
-	 * @return {@link OfficeSection} containing this {@link OfficeSectionInput}.
+	 * @return Initial {@link ExecutionManagedFunction} for the
+	 *         {@link OfficeSectionInput}.
 	 */
-	OfficeSection getOfficeSection();
+	ExecutionManagedFunction getInitialManagedFunction();
 
 	/**
-	 * Obtains the name of this {@link OfficeSectionInput}.
+	 * <p>
+	 * Obtains the {@link ExecutionManagedFunction} by {@link ManagedFunction}
+	 * name.
+	 * <p>
+	 * This enables obtaining dynamically invoked {@link ManagedFunction}
+	 * instances via execution.
 	 * 
-	 * @return Name of this {@link OfficeSectionInput}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link ExecutionManagedFunction}.
 	 */
-	String getOfficeSectionInputName();
-
-	/**
-	 * Adds an {@link ExecutionExplorer} for the execution tree from this
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @param executionExplorer
-	 *            {@link ExecutionExplorer}.
-	 */
-	void addExecutionExplorer(ExecutionExplorer executionExplorer);
+	ExecutionManagedFunction getManagedFunction(String functionName);
 
 }

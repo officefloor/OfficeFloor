@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,34 +18,20 @@
 package net.officefloor.compile.spi.office;
 
 /**
- * Input into the {@link OfficeSection}.
+ * Explorer of an execution tree.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionInput {
+public interface ExecutionExplorer {
 
 	/**
-	 * Obtains the {@link OfficeSection} containing this
-	 * {@link OfficeSectionInput}.
+	 * Explores the execution tree for the {@link OfficeSectionInput}.
 	 * 
-	 * @return {@link OfficeSection} containing this {@link OfficeSectionInput}.
+	 * @param context
+	 *            {@link ExecutionExplorerContext}.
+	 * @throws Exception
+	 *             If failure in exploring the {@link OfficeSectionInput}.
 	 */
-	OfficeSection getOfficeSection();
-
-	/**
-	 * Obtains the name of this {@link OfficeSectionInput}.
-	 * 
-	 * @return Name of this {@link OfficeSectionInput}.
-	 */
-	String getOfficeSectionInputName();
-
-	/**
-	 * Adds an {@link ExecutionExplorer} for the execution tree from this
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @param executionExplorer
-	 *            {@link ExecutionExplorer}.
-	 */
-	void addExecutionExplorer(ExecutionExplorer executionExplorer);
+	void explore(ExecutionExplorerContext context) throws Exception;
 
 }
