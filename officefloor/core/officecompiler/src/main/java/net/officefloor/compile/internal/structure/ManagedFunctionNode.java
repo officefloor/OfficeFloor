@@ -22,6 +22,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -123,6 +124,17 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	 *         {@link ManagedFunctionType}.
 	 */
 	ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext);
+
+	/**
+	 * Creates an {@link ExecutionManagedFunction} for this
+	 * {@link ManagedFunctionNode}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link ExecutionManagedFunction} for this
+	 *         {@link ManagedFunctionNode}.
+	 */
+	ExecutionManagedFunction createExecutionManagedFunction(CompileContext compileContext);
 
 	/**
 	 * Builds the {@link ManagedFunction} for this {@link ManagedFunctionNode}.

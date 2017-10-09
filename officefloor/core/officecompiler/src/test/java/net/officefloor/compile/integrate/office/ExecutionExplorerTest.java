@@ -46,7 +46,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -71,9 +70,10 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 			ExecutionManagedFunction function = context.getInitialManagedFunction();
 			assertEquals("Incorrect function name", "SECTION.function", function.getManagedFunctionName());
 			ManagedFunctionType<?, ?> functionType = function.getManagedFunctionType();
-			assertEquals("Should be no dependencies", 0, functionType.getObjectTypes().length);
+			assertNotNull("Should have managed function type", functionType);
 			assertEquals("Should be no flows", 0, functionType.getFlowTypes().length);
 			assertEquals("Shoud be no escalations", 0, functionType.getEscalationTypes().length);
+			assertEquals("Should only have section object dependency", 1, functionType.getObjectTypes().length);
 		});
 	}
 
@@ -98,9 +98,13 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 		});
 	}
 
+	@FlowInterface
+	public static interface FunctionFlows {
+		void function();
+	}
+
 	public static class FlowToFunction {
-		@NextFunction("function")
-		public void initiate() {
+		public void initiate(FunctionFlows flows) {
 		}
 
 		public void function() {
@@ -128,7 +132,7 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 		public void trigger() throws SQLException {
 		}
 
-		public void handle(@Parameter IOException ex) {
+		public void handle(@Parameter SQLException ex) {
 		}
 	}
 
@@ -164,8 +168,8 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 			ExecutionManagedFunction function = context.getInitialManagedFunction();
 			assertEquals("Incorrect function", "SECTION.function", function.getManagedFunctionName());
 			ManagedFunctionObjectType<?>[] objects = function.getManagedFunctionType().getObjectTypes();
-			assertEquals("Incorrect number of objects", 1, objects.length);
-			ExecutionManagedObject object = function.getManagedObject(objects[0]);
+			assertEquals("Incorrect number of objects (includes section object)", 2, objects.length);
+			ExecutionManagedObject object = function.getManagedObject(objects[1]);
 			assertEquals("Incorrect managed boject", "OFFICE.MO", object.getManagedObjectName());
 		});
 	}
@@ -190,8 +194,8 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 			ExecutionManagedFunction function = context.getInitialManagedFunction();
 			assertEquals("Incorrect function", "SECTION.function", function.getManagedFunctionName());
 			ManagedFunctionObjectType<?>[] objects = function.getManagedFunctionType().getObjectTypes();
-			assertEquals("Incorrect number of objects", 1, objects.length);
-			ExecutionManagedObject object = function.getManagedObject(objects[0]);
+			assertEquals("Incorrect number of objects (includes seciton object)", 2, objects.length);
+			ExecutionManagedObject object = function.getManagedObject(objects[1]);
 			assertEquals("Incorrect managed boject", "OFFICE.MO", object.getManagedObjectName());
 			ManagedObjectDependencyType<?>[] dependencies = object.getManagedObjectType().getDependencyTypes();
 			assertEquals("Incorrect number of dependencies", 1, dependencies.length);
@@ -230,8 +234,8 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 			ExecutionManagedFunction function = context.getInitialManagedFunction();
 			assertEquals("Incorrect function", "SECTION.function", function.getManagedFunctionName());
 			ManagedFunctionObjectType<?>[] objects = function.getManagedFunctionType().getObjectTypes();
-			assertEquals("Incorrect number of objects", 1, objects.length);
-			ExecutionManagedObject object = function.getManagedObject(objects[0]);
+			assertEquals("Incorrect number of objects (includes seciton object)", 2, objects.length);
+			ExecutionManagedObject object = function.getManagedObject(objects[1]);
 			assertEquals("Incorrect managed boject", "OFFICE.MO", object.getManagedObjectName());
 			ManagedObjectFlowType<?>[] flows = object.getManagedObjectType().getFlowTypes();
 			assertEquals("Incorrect number of flows", 1, flows.length);

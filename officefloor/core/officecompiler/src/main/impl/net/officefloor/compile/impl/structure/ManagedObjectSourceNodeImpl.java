@@ -66,6 +66,7 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.AugmentedManagedObject;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -647,6 +648,28 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Not managed by office, so link to the office
 		LinkUtil.linkOfficeNode(this.managingOffice, officeNode, issues,
 				(link) -> this.managingOffice.linkOfficeNode(link));
+	}
+
+	@Override
+	public ExecutionManagedFunction createExecutionManagedFunction(ManagedObjectFlowType<?> flowType,
+			CompileContext compileContext) {
+
+		// Obtain the flow
+		String flowName = flowType.getFlowName();
+		ManagedObjectFlowNode flow = this.flows.get(flowName);
+		if (flow == null) {
+			return null;
+		}
+
+		// Obtain the managed function
+		ManagedFunctionNode function = LinkUtil.findTarget(flow, ManagedFunctionNode.class,
+				this.context.getCompilerIssues());
+		if (function == null) {
+			return null;
+		}
+
+		// Create and return the execution function
+		return function.createExecutionManagedFunction(compileContext);
 	}
 
 	@Override

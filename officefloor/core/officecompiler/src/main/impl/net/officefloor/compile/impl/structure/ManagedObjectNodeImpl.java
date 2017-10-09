@@ -43,6 +43,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
@@ -50,6 +51,8 @@ import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
@@ -307,6 +310,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 								(link) -> dependency.linkObjectNode(link));
 					}
 				});
+	}
+
+	@Override
+	public ExecutionManagedObject createExecutionManagedObject(CompileContext compileContext) {
+		return new ExecutionManagedObjectImpl(this, compileContext);
 	}
 
 	@Override
@@ -574,6 +582,76 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
 		return this.linkedObjectNode;
+	}
+
+	/**
+	 * {@link ExecutionManagedObject} implementation.
+	 */
+	private static class ExecutionManagedObjectImpl implements ExecutionManagedObject {
+
+		/**
+		 * {@link ManagedObjectNodeImpl}.
+		 */
+		private final ManagedObjectNodeImpl node;
+
+		/**
+		 * {@link CompileContext}.
+		 */
+		private final CompileContext compileContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param node
+		 *            {@link ManagedObjectNodeImpl}.
+		 * @param compileContext
+		 *            {@link CompileContext}.
+		 */
+		public ExecutionManagedObjectImpl(ManagedObjectNodeImpl node, CompileContext compileContext) {
+			this.node = node;
+			this.compileContext = compileContext;
+		}
+
+		/*
+		 * ================== ExecutionManagedObject ========================
+		 */
+
+		@Override
+		public String getManagedObjectName() {
+			return this.node.getBoundManagedObjectName();
+		}
+
+		@Override
+		public ManagedObjectType<?> getManagedObjectType() {
+			return this.node.state.managedObjectSourceNode.loadManagedObjectType(compileContext);
+		}
+
+		@Override
+		public ExecutionManagedObject getManagedObject(ManagedObjectDependencyType<?> dependencyType) {
+
+			// Obtain the dependency
+			String dependencyName = dependencyType.getDependencyName();
+			ManagedObjectDependencyNode dependency = this.node.dependencies.get(dependencyName);
+			if (dependency == null) {
+				return null;
+			}
+
+			// Obtain the managed object node
+			ManagedObjectNode object = LinkUtil.retrieveTarget(dependency, ManagedObjectNode.class,
+					this.node.context.getCompilerIssues());
+			if (object == null) {
+				return null;
+			}
+
+			// Return the execution managed object
+			return object.createExecutionManagedObject(this.compileContext);
+		}
+
+		@Override
+		public ExecutionManagedFunction getManagedFunction(ManagedObjectFlowType<?> flowType) {
+			return this.node.state.managedObjectSourceNode.createExecutionManagedFunction(flowType,
+					this.compileContext);
+		}
 	}
 
 }

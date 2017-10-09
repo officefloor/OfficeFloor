@@ -20,7 +20,6 @@ package net.officefloor.compile.impl.structure;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -37,6 +36,8 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.ExecutionExplorer;
+import net.officefloor.compile.spi.office.ExecutionExplorerContext;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
@@ -194,7 +195,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		// Obtain the function node servicing this section input
 		ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(this, ManagedFunctionNode.class,
-				new FailCompilerIssues());
+				this.context.getCompilerIssues());
 		if (functionNode == null) {
 			// Compiled, so this should not occur
 			return; // must have function
@@ -230,9 +231,37 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	public boolean runExecutionExplorers(CompileContext compileContext) {
 
 		// Run the execution explorer
+		ExecutionManagedFunction initialFunction = null;
 		for (ExecutionExplorer explorer : this.executionExplorers) {
-			// TODO implement
-			throw new UnsupportedOperationException("TODO implement execution exploration");
+
+			// Lazy obtain function servicing this section input
+			if (initialFunction == null) {
+				ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(this, ManagedFunctionNode.class,
+						this.context.getCompilerIssues());
+				if (functionNode != null) {
+					initialFunction = functionNode.createExecutionManagedFunction(compileContext);
+				}
+			}
+
+			// Explore from this input
+			try {
+				final ExecutionManagedFunction finalInitialFunction = initialFunction;
+				explorer.explore(new ExecutionExplorerContext() {
+
+					@Override
+					public ExecutionManagedFunction getManagedFunction(String functionName) {
+						// TODO implement
+						throw new UnsupportedOperationException("TODO implement getManagedFunction(name)");
+					}
+
+					@Override
+					public ExecutionManagedFunction getInitialManagedFunction() {
+						return finalInitialFunction;
+					}
+				});
+			} catch (Throwable ex) {
+				this.context.getCompilerIssues().addIssue(this, "Failure in exploring execution", ex);
+			}
 		}
 
 		// As here, successfully explored
