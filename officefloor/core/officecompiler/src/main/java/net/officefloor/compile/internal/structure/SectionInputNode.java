@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import java.util.Map;
+
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
@@ -84,10 +86,12 @@ public interface SectionInputNode
 	/**
 	 * Runs the {@link ExecutionExplorer} instances.
 	 * 
+	 * @param managedFunctions
+	 *            {@link ManagedFunctionNode} instances by their qualified name.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully explored execution.
 	 */
-	boolean runExecutionExplorers(CompileContext compileContext);
+	boolean runExecutionExplorers(Map<String, ManagedFunctionNode> managedFunctions, CompileContext compileContext);
 
 }

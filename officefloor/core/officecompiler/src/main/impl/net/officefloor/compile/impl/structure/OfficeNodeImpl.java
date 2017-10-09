@@ -872,10 +872,16 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public boolean runExecutionExplorers(CompileContext compileContext) {
 
+		// Create the map of all managed functions
+		Map<String, ManagedFunctionNode> managedFunctions = new HashMap<>();
+		this.sections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctions));
+
 		// Run execution explorers for the sections (in deterministic order)
 		return this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-				.allMatch((section) -> section.runExecutionExplorers(compileContext));
+				.allMatch((section) -> section.runExecutionExplorers(managedFunctions, compileContext));
 	}
 
 	@Override

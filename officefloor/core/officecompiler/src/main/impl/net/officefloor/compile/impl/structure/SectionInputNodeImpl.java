@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
@@ -228,7 +229,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public boolean runExecutionExplorers(CompileContext compileContext) {
+	public boolean runExecutionExplorers(Map<String, ManagedFunctionNode> managedFunctions,
+			CompileContext compileContext) {
 
 		// Run the execution explorer
 		ExecutionManagedFunction initialFunction = null;
@@ -250,8 +252,15 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 					@Override
 					public ExecutionManagedFunction getManagedFunction(String functionName) {
-						// TODO implement
-						throw new UnsupportedOperationException("TODO implement getManagedFunction(name)");
+
+						// Obtain the managed function node
+						ManagedFunctionNode function = managedFunctions.get(functionName);
+						if (function == null) {
+							return null;
+						}
+
+						// Create and return the execution managed function
+						return function.createExecutionManagedFunction(compileContext);
 					}
 
 					@Override

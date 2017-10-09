@@ -788,12 +788,23 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public boolean runExecutionExplorers(CompileContext compileContext) {
+	public void loadManagedFunctionNodes(Map<String, ManagedFunctionNode> managedFunctionNodes) {
+		this.functionNodes.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionFunctionName(), b.getSectionFunctionName()))
+				.forEachOrdered((function) -> {
+					String functionName = function.getQualifiedFunctionName();
+					managedFunctionNodes.put(functionName, function);
+				});
+	}
+
+	@Override
+	public boolean runExecutionExplorers(Map<String, ManagedFunctionNode> managedFunctions,
+			CompileContext compileContext) {
 
 		// Run execution explorers for the inputs (in deterministic order)
 		return this.inputs.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionInputName(), b.getSectionInputName()))
-				.allMatch((input) -> input.runExecutionExplorers(compileContext));
+				.allMatch((input) -> input.runExecutionExplorers(managedFunctions, compileContext));
 	}
 
 	@Override

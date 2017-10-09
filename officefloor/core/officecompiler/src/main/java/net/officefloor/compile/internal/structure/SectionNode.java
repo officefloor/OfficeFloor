@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import java.util.Map;
+
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.section.OfficeSectionType;
@@ -257,13 +259,24 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
+	 * Loads the {@link ManagedFunctionNode} instances.
+	 * 
+	 * @param managedFunctionNodes
+	 *            {@link Map} to be loaded with the {@link ManagedFunctionNode}
+	 *            instances by their qualified name.
+	 */
+	void loadManagedFunctionNodes(Map<String, ManagedFunctionNode> managedFunctionNodes);
+
+	/**
 	 * Runs the {@link ExecutionExplorer} instances.
 	 * 
+	 * @param managedFunctions
+	 *            {@link ManagedFunctionNode} instances by their qualified name.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully explored execution.
 	 */
-	boolean runExecutionExplorers(CompileContext compileContext);
+	boolean runExecutionExplorers(Map<String, ManagedFunctionNode> managedFunctions, CompileContext compileContext);
 
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
