@@ -789,12 +789,19 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public void loadManagedFunctionNodes(Map<String, ManagedFunctionNode> managedFunctionNodes) {
+
+		// Load the managed functions from this section
 		this.functionNodes.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionFunctionName(), b.getSectionFunctionName()))
 				.forEachOrdered((function) -> {
 					String functionName = function.getQualifiedFunctionName();
 					managedFunctionNodes.put(functionName, function);
 				});
+
+		// Load the sub section managed functions
+		this.subSections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
+				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctionNodes));
 	}
 
 	@Override

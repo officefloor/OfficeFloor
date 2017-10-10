@@ -639,7 +639,7 @@ public class HttpServerSocketManagedObjectSource
 			// Default constructor so load configuration
 			this.serverLocation = new HttpServerLocationImpl(mosContext);
 			this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
-			this.sslContext = HttpServer.getSslContext(mosContext);
+			this.sslContext = this.isSecure ? HttpServer.getSslContext(mosContext) : null;
 		}
 
 		// Add recycle function (to capture clean up failures)

@@ -33,6 +33,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -46,7 +47,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.SectionInterface;
 
 /**
  * Tests the {@link ExecutionExplorer} exploring the execution tree.
@@ -280,6 +283,37 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 		}
 
 		public void dynamic() {
+		}
+	}
+
+	/**
+	 * Ensure can dynamically obtain the {@link ExecutionManagedFunction} from a
+	 * {@link SubSection}.
+	 */
+	public void testDynamicSubSectionFunction() throws Exception {
+		this.doExplore((context) -> {
+			return context.addSection("SECTION", SectionFunction.class).getOfficeSectionInput("trigger");
+		}, (context) -> {
+			// Ensure can dynamically obtain function
+			ExecutionManagedFunction dynamic = context.getManagedFunction("SECTION.SubSectionFunction.function");
+			assertNotNull("Should find sub section function", dynamic);
+			assertEquals("Incorrect sub section function", "SECTION.SubSectionFunction.function",
+					dynamic.getManagedFunctionName());
+		});
+	}
+
+	@SectionInterface(source = ClassSectionSource.class, locationClass = SubSectionFunctionImpl.class)
+	public static interface SubSectionFunction {
+		public void function();
+	}
+
+	public static class SubSectionFunctionImpl {
+		public void function() {
+		}
+	}
+
+	public static class SectionFunction {
+		public void trigger(SubSectionFunction subSection) {
 		}
 	}
 

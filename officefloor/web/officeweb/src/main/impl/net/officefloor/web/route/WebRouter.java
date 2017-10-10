@@ -20,8 +20,12 @@ package net.officefloor.web.route;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.escalation.BadRequestHttpException;
 
@@ -262,6 +266,21 @@ public class WebRouter {
 
 		// Path continues to be canonical for the segment
 		return true;
+	}
+
+	/**
+	 * Services the {@link HttpRequest}.
+	 * 
+	 * @param request
+	 *            {@link HttpRequest}.
+	 * @param managedFunctionContext
+	 *            {@link ManagedFunctionContext}.
+	 * @return <code>true</code> if {@link HttpRequest} was routed to a
+	 *         {@link WebRouteHandler}. <code>false</code> indicates not
+	 *         handled.
+	 */
+	public boolean service(HttpRequest request, ManagedFunctionContext<None, Indexed> managedFunctionContext) {
+		return false;
 	}
 
 }

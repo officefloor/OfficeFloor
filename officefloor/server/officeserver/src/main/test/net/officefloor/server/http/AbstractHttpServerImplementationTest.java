@@ -275,6 +275,15 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 	}
 
+	public static class EncodedUrlServicer {
+
+		public void service(ServerHttpConnection connection) throws IOException {
+			String requestUri = connection.getHttpRequest().getRequestURI();
+			assertEquals("Should have encoded ? #", "/encoded-%3f-%23-+?query=string", requestUri);
+			connection.getHttpResponse().getEntityWriter().write("success");
+		}
+	}
+
 	public static class ThreadedManagedObject {
 	}
 
@@ -330,6 +339,20 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		this.startHttpServer(Servicer.class);
 		for (int i = 0; i < 100; i++) {
 			this.doSingleRequest(true);
+		}
+	}
+
+	/**
+	 * Ensure does not decode characters (allows for routing to work correctly
+	 * and not find query string / fragment incorrectly).
+	 */
+	public void testNotDecodeRequetUrl() throws Exception {
+		this.startHttpServer(EncodedUrlServicer.class);
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet(
+					this.serverLocation.createClientUrl(false, "/encoded-%3f-%23-+?query=string#fragment")));
+			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response", "success", HttpClientTestUtil.getEntityBody(response));
 		}
 	}
 

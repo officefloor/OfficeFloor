@@ -439,7 +439,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * translation as need to distinguish '&amp;' characters appropriately.
 	 */
 	public void testPercentageEscape() {
-		this.doMethodTest("GET /space%20byte HTTP/1.1\n\n", HttpMethod.GET, "/space byte", HttpVersion.HTTP_1_1, "");
+		this.doMethodTest("GET /space%20byte HTTP/1.1\n\n", HttpMethod.GET, "/space%20byte", HttpVersion.HTTP_1_1, "");
 	}
 
 	/**
@@ -448,20 +448,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * if not using URL then do not raise issue unnecessarily.
 	 */
 	public void testPercentageInvalidValue() throws HttpException {
-
-		// Parse the content (lazy decode, so successful)
-		byte[] data = UsAsciiUtil.convertToHttp("GET /invalid%WRONG HTTP/1.1\n\n");
-		this.parse(this.parser, data);
-
-		// Ensure issue in decoding the URI
-		try {
-			this.parser.getRequestURI().get();
-			fail("Should not be successful, when attempting to decode request URI");
-		} catch (HttpException ex) {
-			assertEquals("Incorrect status code", HttpStatus.BAD_REQUEST.getStatusCode(),
-					ex.getHttpStatus().getStatusCode());
-			assertEquals("Incorrect reason", "Invalid encoded character R for URI", ex.getMessage());
-		}
+		this.doMethodTest("GET /invalid%WRONG HTTP/1.1\n\n", HttpMethod.GET, "/invalid%WRONG", HttpVersion.HTTP_1_1,
+				"");
 	}
 
 	/**
@@ -489,11 +477,10 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 				if ((value <= 31) || (value == 127)) {
 					continue; // control character
 				}
-				String decodedCharacter = Character.toString((char) value);
 
 				// Validate not parse escaped character
-				this.doMethodTest("GET /" + encodedCharacters + " HTTP/1.1\n\n", HttpMethod.GET, "/" + decodedCharacter,
-						HttpVersion.HTTP_1_1, "");
+				this.doMethodTest("GET /" + encodedCharacters + " HTTP/1.1\n\n", HttpMethod.GET,
+						"/" + encodedCharacters, HttpVersion.HTTP_1_1, "");
 			}
 		}
 	}
