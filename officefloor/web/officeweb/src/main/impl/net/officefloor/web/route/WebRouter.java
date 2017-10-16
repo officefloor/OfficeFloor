@@ -21,10 +21,10 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.escalation.BadRequestHttpException;
@@ -269,6 +269,21 @@ public class WebRouter {
 	}
 
 	/**
+	 * Root {@link WebRouteNode} instances.
+	 */
+	private final WebRouteNode[] nodes;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param nodes
+	 *            Root {@link WebRouteNode} instances.
+	 */
+	public WebRouter(WebRouteNode[] nodes) {
+		this.nodes = nodes;
+	}
+
+	/**
 	 * Services the {@link HttpRequest}.
 	 * 
 	 * @param request
@@ -279,7 +294,23 @@ public class WebRouter {
 	 *         {@link WebRouteHandler}. <code>false</code> indicates not
 	 *         handled.
 	 */
-	public boolean service(HttpRequest request, ManagedFunctionContext<None, Indexed> managedFunctionContext) {
+	public boolean service(HttpRequest request, ManagedFunctionContext<?, Indexed> managedFunctionContext) {
+
+		// Obtain the request details
+		HttpMethod method = request.getHttpMethod();
+		String requestUri = request.getRequestURI();
+
+		// Attempt to match to a route
+		for (int i = 0; i < this.nodes.length; i++) {
+			WebRouteNode node = this.nodes[i];
+
+			// Determine if handled by node
+			if (node.handle(method, requestUri, 0, null, managedFunctionContext)) {
+				return true; // servicing request
+			}
+		}
+
+		// As here, not handling request
 		return false;
 	}
 

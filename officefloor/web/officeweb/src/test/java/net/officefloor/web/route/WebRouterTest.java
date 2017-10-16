@@ -18,9 +18,9 @@
 package net.officefloor.web.route;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.state.HttpArgument;
 
@@ -34,7 +34,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedFunctionContext}.
 	 */
-	private static ManagedFunctionContext<None, Indexed> managedFunctionContext;
+	private static ManagedFunctionContext<?, Indexed> managedFunctionContext;
 
 	/**
 	 * Ensure can route root (/) path.
@@ -111,7 +111,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 * Prefix with parameter in the path.
 	 */
 	public void testParamPrefix() {
-		this.route("/value/path", T("/{param}/value", "param", "value"));
+		this.route("/value/path", T("/{param}/path", "param", "value"));
 	}
 
 	/**
@@ -119,14 +119,14 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 * string values).
 	 */
 	public void testMixInParameter() {
-		this.route("/mix-{param}-in", T("/mix-value-in", "param", "value"));
+		this.route("/mix-value-in", T("/mix-{param}-in", "param", "value"));
 	}
 
 	/**
 	 * Ensure can have multiple path parameters.
 	 */
 	public void testMultipleParameters() {
-		this.route("/one-{one}-two-{two}/{three}", T("/one-1-two-2/3", "one", "1", "two", "2", "three", "3"));
+		this.route("/one-1-two-2/3", T("/one-{one}-two-{two}/{three}", "three", "3", "two", "2", "one", "1"));
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testNonGreedyMatchLeftToRight() {
 		this.route("/path/value12static", R("/path/{param}2{another}"),
-				T("/path/{param}1{another}", "param", "value", "another", "2static"));
+				T("/path/{param}1{another}", "another", "2static", "param", "value"));
 	}
 
 	/**
@@ -154,14 +154,14 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	public void testBackoutParameters() {
 		this.route("/path/value12static/backout",
 				R("/path/{param}1{two}/not/match/but/longer/static/match/so/first/route/checked"),
-				T("/path/{param}2{second}/backout", "param", "value", "second", "static"));
+				T("/path/{param}2{second}/backout", "second", "static", "param", "value1"));
 	}
 
 	/**
 	 * Ensure can ignore prefix of path only (ignoring rest of path in match).
 	 */
 	public void testMatchingIgnoringRemaining() {
-		this.route("/prefix/extra", T("/prefix{}"));
+		this.route("/prefix/extra", T("/prefix{}", "", "/extra"));
 	}
 
 	@Override
@@ -182,9 +182,9 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		}
 
 		// Build the web router (from routes)
-		WebRouterBuilder builder = new WebRouterBuilder();
+		WebRouterBuilder builder = new WebRouterBuilder(null);
 		for (MockWebRoute route : routes) {
-			builder.addPath(route.path, route);
+			builder.addRoute(HttpMethod.GET, route.path, route);
 		}
 		WebRouter router = builder.build();
 
@@ -229,7 +229,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public void handle(HttpArgument pathArguments, ManagedFunctionContext<None, Indexed> context) {
+		public void handle(HttpArgument pathArguments, ManagedFunctionContext<?, Indexed> context) {
 
 			// Ensure should be handling route
 			assertTrue("Should not handle route (" + this.path + ")", this.isHandler);

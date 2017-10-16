@@ -19,24 +19,32 @@ package net.officefloor.web.route;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.state.HttpArgument;
 
 /**
- * Handles the web route.
+ * Node in the {@link WebRouter} route tree.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebRouteHandler {
+public interface WebRouteNode {
 
 	/**
-	 * Handles the web route.
+	 * Attempts to handle the path.
 	 * 
-	 * @param pathArguments
-	 *            Head {@link HttpArgument} of the linked list of
-	 *            {@link HttpArgument} from the path.
+	 * @param method
+	 *            {@link HttpMethod}.
+	 * @param path
+	 *            Path.
+	 * @param index
+	 *            Index into the path.
+	 * @param headPathArgument
+	 *            Head {@link HttpArgument} from the path.
 	 * @param context
 	 *            {@link ManagedFunctionContext}.
+	 * @return <code>true</code> if handled the path.
 	 */
-	void handle(HttpArgument pathArguments, ManagedFunctionContext<?, Indexed> context);
+	boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
+			ManagedFunctionContext<?, Indexed> context);
 
 }
