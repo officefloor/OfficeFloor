@@ -18,14 +18,14 @@
 package net.officefloor.web.route;
 
 import java.util.Map;
-import java.util.function.Function;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
-import net.officefloor.web.state.HttpArgument;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.build.HttpValueLocation;
+import net.officefloor.web.state.HttpArgument;
 
 /**
  * Leaf {@link WebRouteNode} that services the {@link HttpRequest}.
@@ -35,17 +35,18 @@ import net.officefloor.server.http.HttpRequest;
 public class LeafWebRouteNode implements WebRouteNode {
 
 	/**
-	 * {@link WebRouteHandler} instances by their {@link HttpMethod}.
+	 * {@link LeafWebRouteHandling} instances by their {@link HttpMethod}.
 	 */
-	private final Map<HttpMethodEnum, Function<HttpMethod, WebRouteHandler>> handlers;
+	private final Map<HttpMethodEnum, LeafWebRouteHandling> handlers;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param handlers
-	 *            {@link WebRouteHandler} instances by their {@link HttpMethod}.
+	 *            {@link LeafWebRouteHandling} instances by their
+	 *            {@link HttpMethod}.
 	 */
-	public LeafWebRouteNode(Map<HttpMethodEnum, Function<HttpMethod, WebRouteHandler>> handlers) {
+	public LeafWebRouteNode(Map<HttpMethodEnum, LeafWebRouteHandling> handlers) {
 		this.handlers = handlers;
 	}
 
@@ -92,14 +93,40 @@ public class LeafWebRouteNode implements WebRouteNode {
 
 		// Obtain the handler
 		WebRouteHandler handler = null;
-		Function<HttpMethod, WebRouteHandler> handlerFactory = this.handlers.get(method.getEnum());
-		if (handlerFactory != null) {
-			handler = handlerFactory.apply(method);
+		LeafWebRouteHandling handling = this.handlers.get(method.getEnum());
+		if (handling != null) {
+			handler = handling.handlerFactory.apply(method);
 		}
 
 		// Undertake handling
 		if (handler != null) {
-			handler.handle(headPathArgument, context);
+
+			// Obtain the named path arguments
+			HttpArgument namedArguments = null;
+			String[] parameterNames = handling.parameterNamesFactory.apply(method);
+			if (parameterNames.length > 0) {
+
+				// Load the last parameter
+				String name = parameterNames[parameterNames.length - 1];
+				namedArguments = new HttpArgument(name, headPathArgument.value, HttpValueLocation.PATH);
+				headPathArgument = headPathArgument.next;
+
+				// Load the remaining parameters
+				for (int i = parameterNames.length - 2; i >= 0; i--) {
+					name = parameterNames[i];
+
+					// Add in the parameter
+					HttpArgument nextArgument = new HttpArgument(name, headPathArgument.value, HttpValueLocation.PATH);
+					nextArgument.next = namedArguments;
+					namedArguments = nextArgument;
+
+					// Move to next argument
+					headPathArgument = headPathArgument.next;
+				}
+			}
+
+			// Handle request
+			handler.handle(namedArguments, context);
 		}
 
 		// Handled

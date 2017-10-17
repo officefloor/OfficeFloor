@@ -126,7 +126,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 * Ensure can have multiple path parameters.
 	 */
 	public void testMultipleParameters() {
-		this.route("/one-1-two-2/3", T("/one-{one}-two-{two}/{three}", "three", "3", "two", "2", "one", "1"));
+		this.route("/one-1-two-2/3", T("/one-{one}-two-{two}/{three}", "one", "1", "two", "2", "three", "3"));
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testNonGreedyMatchLeftToRight() {
 		this.route("/path/value12static", R("/path/{param}2{another}"),
-				T("/path/{param}1{another}", "another", "2static", "param", "value"));
+				T("/path/{param}1{another}", "param", "value", "another", "2static"));
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	public void testBackoutParameters() {
 		this.route("/path/value12static/backout",
 				R("/path/{param}1{two}/not/match/but/longer/static/match/so/first/route/checked"),
-				T("/path/{param}2{second}/backout", "second", "static", "param", "value1"));
+				T("/path/{param}2{second}/backout", "param", "value1", "second", "static"));
 	}
 
 	/**

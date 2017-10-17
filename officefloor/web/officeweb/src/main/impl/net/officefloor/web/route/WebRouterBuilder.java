@@ -202,18 +202,41 @@ public class WebRouterBuilder {
 		// Branch choice in routing tree
 		switch (choice.type) {
 		case LEAF:
-			// Create the method handling
-			Map<String, WebRouteHandler> generic = new HashMap<>();
+			// Create the mapping of route to parameter names
+			Map<WebRoute, String[]> routeParameterNames = new HashMap<>();
+			for (WebRoute route : choice.routes) {
+				List<String> parameterNames = new LinkedList<>();
+				PathSegment segment = route.segmentHead;
+				while (segment != null) {
+					if (segment.type == PathTypeEnum.PARAMETER) {
+						parameterNames.add(segment.value);
+					}
+					segment = segment.next;
+				}
+				routeParameterNames.put(route, parameterNames.toArray(new String[parameterNames.size()]));
+			}
+
+			// Create the method handling (by name)
+			Map<String, WebRouteHandler> genericHandling = new HashMap<>();
+			Map<String, String[]> genericParameterNames = new HashMap<>();
 			for (WebRoute route : choice.routes) {
 				String methodName = route.method.getName();
-				generic.put(methodName, route.handler);
+				genericHandling.put(methodName, route.handler);
+				String[] parameterNames = routeParameterNames.get(route);
+				genericParameterNames.put(methodName, parameterNames);
 			}
-			Map<HttpMethodEnum, Function<HttpMethod, WebRouteHandler>> handlers = new EnumMap<>(HttpMethodEnum.class);
-			handlers.put(HttpMethodEnum.OTHER, (method) -> generic.get(method.getName()));
+			Map<HttpMethodEnum, LeafWebRouteHandling> handlers = new EnumMap<>(HttpMethodEnum.class);
+			handlers.put(HttpMethodEnum.OTHER,
+					new LeafWebRouteHandling((method) -> genericParameterNames.get(method.getName()),
+							(method) -> genericHandling.get(method.getName())));
+
+			// Load handling by enum
 			for (WebRoute route : choice.routes) {
+				String[] parameterNames = routeParameterNames.get(route);
 				HttpMethodEnum routeMethod = route.method.getEnum();
 				if (routeMethod != HttpMethodEnum.OTHER) {
-					handlers.put(routeMethod, (method) -> route.handler);
+					handlers.put(routeMethod,
+							new LeafWebRouteHandling((method) -> parameterNames, (method) -> route.handler));
 				}
 			}
 
@@ -247,9 +270,6 @@ public class WebRouterBuilder {
 			}
 
 		case PARAMETER:
-			// Load the parameter
-			String parameterName = choice.value;
-
 			// Load children nodes
 			LeafWebRouteNode leafNode = null;
 			List<StaticWebRouteNode> staticNodes = new LinkedList<>();
@@ -278,7 +298,7 @@ public class WebRouterBuilder {
 			}
 
 			// Return the parameter node
-			return getStaticWrap.apply(new ParameterWebRouteNode(parameterName,
+			return getStaticWrap.apply(new ParameterWebRouteNode(
 					staticNodes.toArray(new StaticWebRouteNode[staticNodes.size()]), leafNode));
 
 		default:
@@ -298,7 +318,7 @@ public class WebRouterBuilder {
 		// Create the listing of choices (static always before parameters)
 		WebRouteChoice endChoice = null;
 		List<WebRouteChoice> staticChoices = new ArrayList<>();
-		List<WebRouteChoice> paramChoices = new ArrayList<>();
+		WebRouteChoice paramChoice = null;
 
 		// Load the route choices
 		for (WebRoute route : routes) {
@@ -315,7 +335,11 @@ public class WebRouterBuilder {
 				break;
 
 			case PARAMETER:
-				paramChoices.add(choice);
+				if (paramChoice == null) {
+					paramChoice = choice;
+				} else {
+					paramChoice.routes.addAll(choice.routes);
+				}
 				break;
 
 			case STATIC:
@@ -335,7 +359,7 @@ public class WebRouterBuilder {
 
 		// Load the choices
 		WebRouteChoice[] choices = new WebRouteChoice[(endChoice == null ? 0 : 1) + staticChoices.size()
-				+ paramChoices.size()];
+				+ (paramChoice == null ? 0 : 1)];
 		int index = 0;
 		if (endChoice != null) {
 			choices[index++] = endChoice;
@@ -343,7 +367,7 @@ public class WebRouterBuilder {
 		for (WebRouteChoice staticChoice : staticChoices) {
 			choices[index++] = staticChoice;
 		}
-		for (WebRouteChoice paramChoice : paramChoices) {
+		if (paramChoice != null) {
 			choices[index++] = paramChoice;
 		}
 

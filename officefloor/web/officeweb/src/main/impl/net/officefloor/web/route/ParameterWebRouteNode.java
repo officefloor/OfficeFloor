@@ -39,11 +39,6 @@ import net.officefloor.web.state.HttpArgument;
 public class ParameterWebRouteNode implements WebRouteNode {
 
 	/**
-	 * Parameter name.
-	 */
-	private final String parameterName;
-
-	/**
 	 * Terminating characters for the parameter.
 	 */
 	private final char[] terminatingCharacters;
@@ -62,8 +57,6 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param parameterName
-	 *            Parameter name.
 	 * @param nodes
 	 *            Further {@link StaticWebRouteNode} instances.
 	 * @param leafNode
@@ -71,8 +64,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	 *            May be <code>null</code> if parameter is always embedded in
 	 *            middle of the path.
 	 */
-	public ParameterWebRouteNode(String parameterName, StaticWebRouteNode[] nodes, LeafWebRouteNode leafNode) {
-		this.parameterName = parameterName;
+	public ParameterWebRouteNode(StaticWebRouteNode[] nodes, LeafWebRouteNode leafNode) {
 		this.leafNode = leafNode;
 
 		// Create the terminating characters and map to children
@@ -134,7 +126,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	 * @return Head {@link HttpArgument} of arguments including the argument.
 	 */
 	private HttpArgument includePathArgument(HttpArgument headPathArgument, String argumentValue) {
-		HttpArgument argumentIncluded = new HttpArgument(this.parameterName, argumentValue, HttpValueLocation.PATH);
+		HttpArgument argumentIncluded = new HttpArgument(null, argumentValue, HttpValueLocation.PATH);
 		argumentIncluded.next = headPathArgument;
 		return argumentIncluded;
 	}
