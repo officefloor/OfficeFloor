@@ -25,6 +25,8 @@ import java.nio.charset.Charset;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
@@ -252,12 +254,32 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			this.unsafeReset();
 
 			// Send the error
-			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
-			this.contentType = TEXT_CONTENT;
-			PrintWriter writer = new PrintWriter(
-					this.bufferPoolOutputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
-			escalation.printStackTrace(writer);
-			writer.flush();
+			if (escalation instanceof HttpException) {
+				// Provide the HTTP escalation
+				HttpException httpEscalation = (HttpException) escalation;
+				this.status = httpEscalation.getHttpStatus();
+				HttpHeader[] escalationHeaders = httpEscalation.getHttpHeaders();
+				for (int i = 0; i < escalationHeaders.length; i++) {
+					HttpHeader escalationHeader = escalationHeaders[i];
+					this.headers.addHeader(escalationHeader.getName(), escalationHeader.getValue());
+				}
+				String entity = httpEscalation.getEntity();
+				if (entity != null) {
+					PrintWriter writer = new PrintWriter(this.bufferPoolOutputStream
+							.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+					writer.write(entity);
+					writer.flush();
+				}
+
+			} else {
+				// Unknown escalation, so error
+				this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+				this.contentType = TEXT_CONTENT;
+				PrintWriter writer = new PrintWriter(
+						this.bufferPoolOutputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+				escalation.printStackTrace(writer);
+				writer.flush();
+			}
 		}
 
 		// Ensure send

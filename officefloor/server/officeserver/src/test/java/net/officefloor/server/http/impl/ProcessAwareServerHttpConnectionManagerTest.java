@@ -30,6 +30,7 @@ import java.sql.SQLException;
 
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
@@ -213,6 +214,26 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.status = null;
 		connection.getServiceFlowCallback().run(null);
 		assertNull("Should not write response again on flush", this.status);
+	}
+
+	/**
+	 * Ensure handles {@link HttpException}.
+	 */
+	public void testHttpEscalation() throws Throwable {
+
+		// Handle HTTP escalation
+		HttpException escalation = new HttpException(HttpStatus.NOT_FOUND,
+				new WritableHttpHeader[] { new WritableHttpHeader("name", "value") }, "ENTITY");
+		this.connection.run(escalation);
+
+		// Validate exception details
+		assertEquals("Incorrect version", this.requestVersion, this.responseVersion);
+		assertEquals("Incorrect status", HttpStatus.NOT_FOUND, this.status);
+		assertEquals("Incorrect header", "name", this.responseHeader.getName());
+		assertNull("Should be just the one header", this.responseHeader.next);
+		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		assertEquals("Incorrect entity", "ENTITY", content);
 	}
 
 	/**

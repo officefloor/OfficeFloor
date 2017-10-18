@@ -315,7 +315,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath);
 		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
 		for (HttpInputBuilderImpl input : this.inputs) {
-			String outputName = routing.addRoute(HttpMethod.GET, input.applicationPath);
+			String outputName = routing.addRoute(input.method, input.applicationPath);
 			OfficeSectionOutput output = routingSection.getOfficeSectionOutput(outputName);
 			this.officeArchitect.link(output, input.sectionInput);
 		}

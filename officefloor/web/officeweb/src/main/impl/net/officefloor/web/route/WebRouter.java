@@ -286,17 +286,18 @@ public class WebRouter {
 	/**
 	 * Services the {@link HttpRequest}.
 	 * 
-	 * @param request
-	 *            {@link HttpRequest}.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
 	 * @param managedFunctionContext
 	 *            {@link ManagedFunctionContext}.
 	 * @return <code>true</code> if {@link HttpRequest} was routed to a
 	 *         {@link WebRouteHandler}. <code>false</code> indicates not
 	 *         handled.
 	 */
-	public boolean service(HttpRequest request, ManagedFunctionContext<?, Indexed> managedFunctionContext) {
+	public boolean service(ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> managedFunctionContext) {
 
 		// Obtain the request details
+		HttpRequest request = connection.getHttpRequest();
 		HttpMethod method = request.getHttpMethod();
 		String requestUri = request.getRequestURI();
 

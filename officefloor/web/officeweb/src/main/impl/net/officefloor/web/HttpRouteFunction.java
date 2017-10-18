@@ -76,8 +76,7 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 				.getObject(HttpRouteDependencies.SERVER_HTTP_CONNECTION);
 
 		// Attempt to route the request
-		HttpRequest request = connection.getHttpRequest();
-		if (this.router.service(request, context)) {
+		if (this.router.service(connection, context)) {
 			return null; // routed to servicing
 		}
 

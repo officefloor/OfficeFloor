@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -39,6 +40,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpServer;
@@ -123,6 +125,18 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
+	 * Creates the {@link MockServerHttpConnection}.
+	 * 
+	 * @param request
+	 *            {@link MockHttpRequestBuilder} for the {@link HttpRequest} of
+	 *            the {@link MockServerHttpConnection}.
+	 * @return {@link MockServerHttpConnection}.
+	 */
+	public static MockServerHttpConnection mockConnection(MockHttpRequestBuilder request) {
+		return new MockServerHttpConnectionImpl(request);
+	}
+
+	/**
 	 * Obtains the HTTP entity content from the {@link HttpRequest}.
 	 * 
 	 * @param request
@@ -155,26 +169,18 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
-	 * {@link ExternalServiceInput}.
-	 */
-	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
-
-	/**
-	 * Instantiated via static methods.
-	 */
-	private MockHttpServer() {
-	}
-
-	/**
-	 * Sends the {@link MockHttpRequestBuilder}.
+	 * Creates the {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * 
 	 * @param request
 	 *            {@link MockHttpRequestBuilder}.
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
 	 * @param callback
-	 *            {@link MockHttpRequestCallback} to receive the
-	 *            {@link MockHttpResponse}.
+	 *            {@link MockHttpRequestCallback}.
+	 * @return {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 */
-	public void send(MockHttpRequestBuilder request, MockHttpRequestCallback callback) {
+	private static ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
+			MockHttpRequestBuilder request, HttpServerLocation serverLocation, MockHttpRequestCallback callback) {
 
 		// Ensure have implementation
 		if (!(request instanceof MockHttpRequestBuilderImpl)) {
@@ -207,8 +213,38 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				this, isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
-				responseWriter, bufferPool);
+				serverLocation, isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders,
+				requestEntity, responseWriter, bufferPool);
+
+		// Return the connection
+		return connection;
+	}
+
+	/**
+	 * {@link ExternalServiceInput}.
+	 */
+	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
+
+	/**
+	 * Instantiated via static methods.
+	 */
+	private MockHttpServer() {
+	}
+
+	/**
+	 * Sends the {@link MockHttpRequestBuilder}.
+	 * 
+	 * @param request
+	 *            {@link MockHttpRequestBuilder}.
+	 * @param callback
+	 *            {@link MockHttpRequestCallback} to receive the
+	 *            {@link MockHttpResponse}.
+	 */
+	public void send(MockHttpRequestBuilder request, MockHttpRequestCallback callback) {
+
+		// Create the server HTTP connection
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = createServerHttpConnection(request, this,
+				callback);
 
 		// Service the request
 		this.serviceInput.service(connection, connection.getServiceFlowCallback());
@@ -814,6 +850,104 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 			// Return the entity as text
 			return writer.toString();
+		}
+	}
+
+	/**
+	 * {@link MockServerHttpConnection} implementation.
+	 */
+	public static class MockServerHttpConnectionImpl implements MockServerHttpConnection, MockHttpRequestCallback {
+
+		/**
+		 * Delegate {@link ServerHttpConnection}.
+		 */
+		private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> delegate;
+
+		/**
+		 * {@link MockHttpResponse}.
+		 */
+		private MockHttpResponse response = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param request
+		 *            {@link MockHttpRequestBuilder}.
+		 */
+		public MockServerHttpConnectionImpl(MockHttpRequestBuilder request) {
+			this.delegate = createServerHttpConnection(request, new MockHttpServer(), this);
+			this.delegate.setProcessAwareContext(new MockProcessAwareContext());
+		}
+
+		/*
+		 * ================= MockServerHttpConnection ==================
+		 */
+
+		@Override
+		public MockHttpResponse send(Throwable escalation) {
+
+			// Send the response
+			try {
+				this.delegate.getServiceFlowCallback().run(escalation);
+			} catch (Throwable ex) {
+				throw OfficeFrameTestCase.fail(ex);
+			}
+
+			// Return the response
+			return this.response;
+		}
+
+		/*
+		 * ================= MockHttpRequestCallback ===================
+		 */
+
+		@Override
+		public void response(MockHttpResponse response) {
+			this.response = response;
+		}
+
+		/*
+		 * =================== ServerHttpConnection ====================
+		 */
+
+		@Override
+		public HttpRequest getHttpRequest() {
+			return this.delegate.getHttpRequest();
+		}
+
+		@Override
+		public HttpResponse getHttpResponse() {
+			return this.delegate.getHttpResponse();
+		}
+
+		@Override
+		public boolean isSecure() {
+			return this.delegate.isSecure();
+		}
+
+		@Override
+		public HttpServerLocation getHttpServerLocation() {
+			return this.delegate.getHttpServerLocation();
+		}
+
+		@Override
+		public Serializable exportState() throws IOException {
+			return this.delegate.exportState();
+		}
+
+		@Override
+		public void importState(Serializable momento) throws IllegalArgumentException, IOException {
+			this.delegate.importState(momento);
+		}
+
+		@Override
+		public HttpMethod getClientHttpMethod() {
+			return this.delegate.getClientHttpMethod();
+		}
+
+		@Override
+		public HttpRequestHeaders getClientHttpHeaders() {
+			return this.delegate.getClientHttpHeaders();
 		}
 	}
 

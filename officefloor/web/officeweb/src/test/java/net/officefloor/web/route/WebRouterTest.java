@@ -21,7 +21,9 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -44,6 +46,13 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can POST to root (/).
+	 */
+	public void testPostRoot() {
+		this.route(HttpMethod.POST, "/", T(HttpMethod.POST, "/"));
+	}
+
+	/**
 	 * Ensure can route static path.
 	 */
 	public void testStaticPath() {
@@ -55,6 +64,13 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testStaticPathWithQueryString() {
 		this.route("/path?query=string", T("/path"));
+	}
+
+	/**
+	 * Ensure can POST static path with query string.
+	 */
+	public void testPostPathWithQueryString() {
+		this.route(HttpMethod.POST, "/path?query=string", T(HttpMethod.POST, "/path"));
 	}
 
 	/**
@@ -72,6 +88,13 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure matches the longer POST path.
+	 */
+	public void testPostLongStaticPath() {
+		this.route(HttpMethod.POST, "/path/longer", R(HttpMethod.POST, "/path"), T(HttpMethod.POST, "/path/longer"));
+	}
+
+	/**
 	 * Ensure static route to path can ignore ending slash.
 	 */
 	public void testStaticPathMatchEndingSlash() {
@@ -83,6 +106,13 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testParamSuffix() {
 		this.route("/path/value", T("/path/{param}", "param", "value"));
+	}
+
+	/**
+	 * Ensure can POST with path parameter.
+	 */
+	public void testPostParamSuffix() {
+		this.route(HttpMethod.POST, "/path/value", T(HttpMethod.POST, "/path/{param}", "param", "value"));
 	}
 
 	/**
@@ -100,6 +130,13 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure POST path parameter terminated by query string.
+	 */
+	public void testPostParamTermintedByQueryString() {
+		this.route(HttpMethod.POST, "/path/value?query=string", T(HttpMethod.POST, "/path/{param}", "param", "value"));
+	}
+
+	/**
 	 * Ensure path parameter terminated by fragment. Should not occur, but
 	 * included for completeness.
 	 */
@@ -112,6 +149,13 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testParamPrefix() {
 		this.route("/value/path", T("/{param}/path", "param", "value"));
+	}
+
+	/**
+	 * Prefix with parameter in the POST path.
+	 */
+	public void testPostParamPrefix() {
+		this.route(HttpMethod.POST, "/value/path", T(HttpMethod.POST, "/{param}/path", "param", "value"));
 	}
 
 	/**
@@ -148,6 +192,17 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * <p>
+	 * Ensure not greedy in matching POST values.
+	 * <p>
+	 * Note: static content can not be part of the parameter value.
+	 */
+	public void testPostNonGreedyMatchLeftToRight() {
+		this.route(HttpMethod.POST, "/path/value12static", R(HttpMethod.POST, "/path/{param}2{another}"),
+				T(HttpMethod.POST, "/path/{param}1{another}", "param", "value", "another", "2static"));
+	}
+
+	/**
 	 * Ensure if back out down one route that parameters are not included for
 	 * that route.
 	 */
@@ -155,6 +210,16 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		this.route("/path/value12static/backout",
 				R("/path/{param}1{two}/not/match/but/longer/static/match/so/first/route/checked"),
 				T("/path/{param}2{second}/backout", "param", "value1", "second", "static"));
+	}
+
+	/**
+	 * Ensure if back out down one route that parameters are not included for
+	 * that POST route.
+	 */
+	public void testPostBackoutParameters() {
+		this.route(HttpMethod.POST, "/path/value12static/backout",
+				R(HttpMethod.POST, "/path/{param}1{two}/not/match/but/longer/static/match/so/first/route/checked"),
+				T(HttpMethod.POST, "/path/{param}2{second}/backout", "param", "value1", "second", "static"));
 	}
 
 	/**
@@ -171,6 +236,10 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	}
 
 	public void route(String path, MockWebRoute... routes) {
+		this.route(HttpMethod.GET, path, routes);
+	}
+
+	public void route(HttpMethod method, String path, MockWebRoute... routes) {
 
 		// Determine if should be handled
 		boolean isHandled = false;
@@ -184,12 +253,14 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		// Build the web router (from routes)
 		WebRouterBuilder builder = new WebRouterBuilder(null);
 		for (MockWebRoute route : routes) {
-			builder.addRoute(HttpMethod.GET, route.path, route);
+			builder.addRoute(route.method, route.path, route);
 		}
 		WebRouter router = builder.build();
 
 		// Undertake the route
-		boolean isServiced = router.service(MockHttpServer.mockRequest(path).build(), managedFunctionContext);
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).method(method);
+		MockServerHttpConnection connection = MockHttpServer.mockConnection(request);
+		boolean isServiced = router.service(connection, managedFunctionContext);
 
 		// Determine if appropriately serviced
 		assertEquals("Invalid servicing", isHandled, isServiced);
@@ -201,14 +272,24 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	}
 
 	private static MockWebRoute R(String path) {
-		return new MockWebRoute(path, false);
+		return new MockWebRoute(HttpMethod.GET, path, false);
+	}
+
+	private static MockWebRoute R(HttpMethod method, String path) {
+		return new MockWebRoute(method, path, false);
 	}
 
 	private static MockWebRoute T(String path, String... pathArgumentNameValuePairs) {
-		return new MockWebRoute(path, true, pathArgumentNameValuePairs);
+		return new MockWebRoute(HttpMethod.GET, path, true, pathArgumentNameValuePairs);
+	}
+
+	private static MockWebRoute T(HttpMethod method, String path, String... pathArgumentNameValuePairs) {
+		return new MockWebRoute(method, path, true, pathArgumentNameValuePairs);
 	}
 
 	private static class MockWebRoute implements WebRouteHandler {
+
+		private final HttpMethod method;
 
 		private final String path;
 
@@ -218,7 +299,8 @@ public class WebRouterTest extends OfficeFrameTestCase {
 
 		private final String[] pathArgumentNameValuePairs;
 
-		private MockWebRoute(String path, boolean isHandler, String... pathArgumentNameValuePairs) {
+		private MockWebRoute(HttpMethod method, String path, boolean isHandler, String... pathArgumentNameValuePairs) {
+			this.method = method;
 			this.path = path;
 			this.isHandler = isHandler;
 			this.pathArgumentNameValuePairs = pathArgumentNameValuePairs;
