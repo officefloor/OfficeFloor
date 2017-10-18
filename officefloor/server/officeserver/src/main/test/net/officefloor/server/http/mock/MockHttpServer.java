@@ -440,6 +440,13 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		@Override
 		public MockHttpRequestBuilder entity(String entity) {
+
+			// Do nothing if no entity content
+			if (entity == null) {
+				return this;
+			}
+
+			// Load the entity
 			try {
 				this.entity.write(entity.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 			} catch (IOException ex) {

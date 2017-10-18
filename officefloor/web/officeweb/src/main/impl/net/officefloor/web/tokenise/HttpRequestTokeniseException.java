@@ -18,14 +18,13 @@
 package net.officefloor.web.tokenise;
 
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.parameter.HttpParametersException;
 
 /**
  * Indicates a failure tokenising the {@link HttpRequest} parameters.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestTokeniseException extends HttpParametersException {
+public class HttpRequestTokeniseException extends Exception {
 
 	/**
 	 * Initiate.

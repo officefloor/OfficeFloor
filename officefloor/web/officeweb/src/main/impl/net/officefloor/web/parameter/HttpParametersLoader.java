@@ -27,7 +27,6 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.tokenise.HttpRequestTokenHandler;
 import net.officefloor.web.tokenise.HttpRequestTokeniseException;
 import net.officefloor.web.tokenise.HttpRequestTokeniser;
-import net.officefloor.web.tokenise.HttpRequestTokeniserImpl;
 import net.officefloor.web.value.load.ObjectInstantiator;
 import net.officefloor.web.value.load.ValueLoader;
 import net.officefloor.web.value.load.ValueLoaderFactory;
@@ -158,36 +157,37 @@ public class HttpParametersLoader<T> {
 		}
 		final ValueLoader valueLoader = loader;
 
-		// Create the tokeniser
-		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
-
 		// Parse the parameters and load onto the object
-		tokeniser.tokeniseHttpRequest(httpRequest, new HttpRequestTokenHandler() {
-			@Override
-			public void handlePath(String path) throws HttpRequestTokeniseException {
-				// Ignore path as only interested in parameters
-			}
-
-			@Override
-			public void handleHttpParameter(String name, String value) throws HttpRequestTokeniseException {
-				// Load the value
-				try {
-					valueLoader.loadValue(name, value);
-				} catch (Exception ex) {
-					throw new HttpRequestTokeniseException(ex);
+		try {
+			HttpRequestTokeniser.tokeniseHttpRequest(httpRequest, new HttpRequestTokenHandler() {
+				@Override
+				public void handlePath(String path) throws HttpRequestTokeniseException {
+					// Ignore path as only interested in parameters
 				}
-			}
 
-			@Override
-			public void handleQueryString(String queryString) throws HttpRequestTokeniseException {
-				// Ignore query string as only interested in parameters
-			}
+				@Override
+				public void handleHttpParameter(String name, String value) throws HttpRequestTokeniseException {
+					// Load the value
+					try {
+						valueLoader.loadValue(name, value);
+					} catch (Exception ex) {
+						throw new HttpRequestTokeniseException(ex);
+					}
+				}
 
-			@Override
-			public void handleFragment(String fragment) throws HttpRequestTokeniseException {
-				// Ignore fragment as only interested in parameters
-			}
-		});
+				@Override
+				public void handleQueryString(String queryString) throws HttpRequestTokeniseException {
+					// Ignore query string as only interested in parameters
+				}
+
+				@Override
+				public void handleFragment(String fragment) throws HttpRequestTokeniseException {
+					// Ignore fragment as only interested in parameters
+				}
+			});
+		} catch (HttpRequestTokeniseException ex) {
+			throw new HttpParametersException(ex);
+		}
 	}
 
 }

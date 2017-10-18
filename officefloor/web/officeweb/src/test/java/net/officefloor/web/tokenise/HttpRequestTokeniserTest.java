@@ -22,10 +22,6 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.tokenise.HttpRequestTokenHandler;
-import net.officefloor.web.tokenise.HttpRequestTokeniseException;
-import net.officefloor.web.tokenise.HttpRequestTokeniser;
-import net.officefloor.web.tokenise.HttpRequestTokeniserImpl;
 
 /**
  * Tests the {@link HttpRequestTokeniser}.
@@ -38,22 +34,6 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpRequestTokenHandler}.
 	 */
 	private final HttpRequestTokenHandler handler = this.createMock(HttpRequestTokenHandler.class);
-
-	/**
-	 * Ensure can load domain.
-	 */
-	public void testDomain() throws Exception {
-		this.handler.handlePath("http://wwww.officefloor.net");
-		this.doTest(HttpMethod.GET, "http://wwww.officefloor.net", null);
-	}
-
-	/**
-	 * Ensure can load domain directory.
-	 */
-	public void testDomainDirectory() throws Exception {
-		this.handler.handlePath("http://wwww.officefloor.net/");
-		this.doTest(HttpMethod.GET, "http://wwww.officefloor.net/", null);
-	}
 
 	/**
 	 * Ensure can load GET request with no parameters.
@@ -252,8 +232,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 				String entity = escapedCharacter + "=" + escapedCharacter + ";another=value";
 				HttpRequest request = MockHttpServer.mockRequest().method(HttpMethod.POST)
 						.uri(path + "?" + queryString + "#" + fragment).entity(entity).build();
-				HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
-				tokeniser.tokeniseHttpRequest(request, this.handler);
+				HttpRequestTokeniser.tokeniseHttpRequest(request, this.handler);
 			}
 		}
 
@@ -321,8 +300,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 
 		// Test with request URI
 		this.replayMockObjects();
-		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
-		tokeniser.tokeniseRequestURI("/path?FirstName=Daniel&LastName=Sagenschneider#fragment", this.handler);
+		HttpRequestTokeniser.tokeniseRequestURI("/path?FirstName=Daniel&LastName=Sagenschneider#fragment",
+				this.handler);
 		this.verifyMockObjects();
 	}
 
@@ -339,8 +318,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	private void doTest(HttpMethod method, String requestUri, String entity) throws Exception {
 		this.replayMockObjects();
 		HttpRequest request = MockHttpServer.mockRequest().method(method).uri(requestUri).entity(entity).build();
-		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
-		tokeniser.tokeniseHttpRequest(request, this.handler);
+		HttpRequestTokeniser.tokeniseHttpRequest(request, this.handler);
 		this.verifyMockObjects();
 	}
 

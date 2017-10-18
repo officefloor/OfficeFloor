@@ -780,7 +780,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 			MockHttpRequestBuilder request) throws Exception {
 		this.compile.web((context) -> context.link(false, httpMethod, applicationPath, servicer));
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
-		return this.server.send(MockHttpServer.mockRequest("/").method(HttpMethod.POST));
+		return this.server.send(request);
 	}
 
 }

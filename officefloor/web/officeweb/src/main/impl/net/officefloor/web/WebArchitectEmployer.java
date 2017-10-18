@@ -25,17 +25,22 @@ import java.util.Map;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.build.HttpContentParametersBuilder;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.build.HttpParameterBuilder;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
@@ -67,11 +72,6 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	/**
-	 * Prefix for the link service {@link ManagedFunction} name.
-	 */
-	private static final String LINK_SERVICE_FUNCTION_NAME_PREFIX = "LINK_";
-
-	/**
 	 * {@link OfficeArchitect}.
 	 */
 	private final OfficeArchitect officeArchitect;
@@ -97,9 +97,19 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final Map<String, OfficeManagedObject> httpRequestObjects = new HashMap<>();
 
 	/**
+	 * {@link HttpInputBuilderImpl} instances.
+	 */
+	private final List<HttpInputBuilderImpl> inputs = new LinkedList<>();
+
+	/**
 	 * {@link ChainedServicer} instances.
 	 */
-	private final List<ChainedServicer> chainedServicers = new LinkedList<ChainedServicer>();
+	private final List<ChainedServicer> chainedServicers = new LinkedList<>();
+
+	/**
+	 * Context path.
+	 */
+	private String contextPath = null;
 
 	/**
 	 * Instantiate.
@@ -123,7 +133,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	 *            Optional bind name. May be <code>null</code>.
 	 * @return Bind name for the {@link OfficeManagedObject};
 	 */
-	private String getBindName(Class<?> objectClass, String bindName) {
+	private static String getBindName(Class<?> objectClass, String bindName) {
 		return (bindName == null ? objectClass.getName() : bindName);
 	}
 
@@ -225,41 +235,60 @@ public class WebArchitectEmployer implements WebArchitect {
 		return this.addHttpRequestObject(objectClass, isLoadParameters, null);
 	}
 
-	// @Override
-	// public HttpUrlContinuation linkUri(String httpMethod, String uri,
-	// OfficeSectionInput sectionInput) {
-	// return this.urlContinuations.linkUri(httpMethod, uri, sectionInput);
-	// }
+	@Override
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	@Override
+	public void addHttpObjectParser(HttpObjectParserFactory objectParserFactory) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
+		HttpInputBuilderImpl continuation = new HttpInputBuilderImpl(isSecure, applicationPath, sectionInput);
+		this.inputs.add(continuation);
+		return continuation;
+	}
+
+	@Override
+	public HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
+			OfficeSectionInput sectionInput) {
+		HttpInputBuilderImpl input = new HttpInputBuilderImpl(isSecure, httpMethod, applicationPath, sectionInput);
+		this.inputs.add(input);
+		return input;
+	}
+
+	@Override
+	public void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public HttpInput[] getHttpInputs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
 		this.chainedServicers.add(new ChainedServicer(sectionInput, notHandledOutput));
 	}
-
-	// @Override
-	// public String[] getURIs() {
-	//
-	// // Create the URIs
-	// List<String> uris = new LinkedList<String>();
-	//
-	// // Add the linked URIs
-	// for (String uri : this.urlContinuations.getRegisteredHttpUris()) {
-	//
-	// // Obtain the URI path
-	// try {
-	// uri =
-	// HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uri);
-	// } catch (InvalidRequestUriHttpException ex) {
-	// // Do nothing and keep URI path as is
-	// }
-	//
-	// // Add the URI path
-	// uris.add(uri);
-	// }
-	//
-	// // Return the URIs
-	// return uris.toArray(new String[uris.size()]);
-	// }
 
 	@Override
 	public void informOfficeArchitect() {
@@ -276,51 +305,146 @@ public class WebArchitectEmployer implements WebArchitect {
 		// Configure the HTTP Application and Request States
 		this.officeArchitect
 				.addOfficeManagedObjectSource("HTTP_APPLICATION_STATE",
-						HttpApplicationStateManagedObjectSource.class.getName())
+						new HttpApplicationStateManagedObjectSource(this.contextPath))
 				.addOfficeManagedObject("HTTP_APPLICATION_STATE", ManagedObjectScope.PROCESS);
 		this.officeArchitect
 				.addOfficeManagedObjectSource("HTTP_REQUEST_STATE", HttpRequestStateManagedObjectSource.class.getName())
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
-		// // Add the HTTP section
-		// OfficeSection httpSection =
-		// this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
-		// WebApplicationSectionSource.class.getName(), null);
-		// httpSection.addProperty(WebApplicationSectionSource.PROPERTY_LINK_SERVICE_FUNCTION_NAME_PREFIX,
-		// LINK_SERVICE_FUNCTION_NAME_PREFIX);
-		//
-		// // Add location
-		// OfficeManagedObjectSource locationMos =
-		// this.officeArchitect.addOfficeManagedObjectSource(
-		// HttpApplicationLocation.class.getName(),
-		// HttpApplicationLocationManagedObjectSource.class.getName());
-		// HttpApplicationLocationManagedObjectSource.copyProperties(officeSourceContext,
-		// locationMos);
-		// locationMos.addOfficeManagedObject(HttpApplicationLocation.class.getName(),
-		// ManagedObjectScope.PROCESS);
-		//
-		// // Chain the servicers
-		// OfficeSectionOutput previousChainedOutput = httpSection
-		// .getOfficeSectionOutput(WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME);
-		// for (ChainedServicer chainedServicer : this.chainedServicers) {
-		//
-		// // Link the chained servicer (if previous chained output)
-		// if (previousChainedOutput != null) {
-		// this.officeArchitect.link(previousChainedOutput,
-		// chainedServicer.sectionInput);
-		// }
-		//
-		// // Configure for next in chain
-		// previousChainedOutput = chainedServicer.notHandledOutput;
-		// }
-		//
-		// // End chain with file sender servicer (if previous chained output)
-		// if (previousChainedOutput != null) {
-		//
-		// // TODO configure chained servicers
-		//
-		// // TODO configure 404 not found
-		// }
+		// Configure the HTTP handler
+		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath);
+		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
+		for (HttpInputBuilderImpl input : this.inputs) {
+			String outputName = routing.addRoute(HttpMethod.GET, input.applicationPath);
+			OfficeSectionOutput output = routingSection.getOfficeSectionOutput(outputName);
+			this.officeArchitect.link(output, input.sectionInput);
+		}
+
+		// Configure not handled
+		this.officeArchitect.link(routingSection.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME),
+				routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+	}
+
+	/**
+	 * {@link HttpInputBuilder} implementation.
+	 */
+	private static class HttpInputBuilderImpl implements HttpInputBuilder, HttpUrlContinuation {
+
+		/**
+		 * Indicates if {@link HttpUrlContinuation}.
+		 */
+		private final boolean isUrlContinuation;
+
+		/**
+		 * Indicates if secure.
+		 */
+		private final boolean isSecure;
+
+		/**
+		 * {@link HttpMethod}.
+		 */
+		private final HttpMethod method;
+
+		/**
+		 * Application path.
+		 */
+		private final String applicationPath;
+
+		/**
+		 * Handling {@link OfficeSectionInput}.
+		 */
+		private final OfficeSectionInput sectionInput;
+
+		/**
+		 * Instantiate as {@link HttpUrlContinuation}.
+		 * 
+		 * @param isSecure
+		 *            Indicates if secure.
+		 * @param applicationPath
+		 *            Application path.
+		 * @param sectionInput
+		 *            Handling {@link OfficeSectionInput}.
+		 */
+		public HttpInputBuilderImpl(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
+			this.isUrlContinuation = true;
+			this.isSecure = isSecure;
+			this.method = HttpMethod.GET;
+			this.applicationPath = applicationPath;
+			this.sectionInput = sectionInput;
+		}
+
+		/**
+		 * Instantiate as {@link HttpInputBuilder}.
+		 * 
+		 * @param isSecure
+		 *            Indicates if secure.
+		 * @param method
+		 *            {@link HttpMethod}.
+		 * @param applicationPath
+		 *            Application path.
+		 * @param sectionInput
+		 *            Handling {@link OfficeSectionInput}.
+		 */
+		public HttpInputBuilderImpl(boolean isSecure, HttpMethod method, String applicationPath,
+				OfficeSectionInput sectionInput) {
+			this.isUrlContinuation = false;
+			this.isSecure = isSecure;
+			this.method = method;
+			this.applicationPath = applicationPath;
+			this.sectionInput = sectionInput;
+		}
+
+		/*
+		 * ================== HttpInputBuilder ====================
+		 */
+
+		@Override
+		public HttpParameterBuilder addQueryParameter(String name) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HttpParameterBuilder addHeaderParameter(String name) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HttpParameterBuilder addCookieParameter(String name) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HttpContentParametersBuilder addEntityParameters(HttpArgumentParser argumentParser) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void addRequestObject(HttpObjectParser<?> objectParser) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addResponseContentType(String contentType) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addResponseObject(HttpObjectResponder<?> objectResponder) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addAnnotation(Object annotation) {
+			// TODO Auto-generated method stub
+
+		}
 	}
 
 	/**
@@ -350,55 +474,6 @@ public class WebArchitectEmployer implements WebArchitect {
 			this.sectionInput = sectionInput;
 			this.notHandledOutput = notHandledOutput;
 		}
-	}
-
-	@Override
-	public void setContextPath(String contextPath) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addHttpObjectParser(HttpObjectParserFactory objectParserFactory) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
-			OfficeSectionInput sectionInput) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public HttpInput[] getHttpInputs() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
-		// TODO Auto-generated method stub
-
 	}
 
 }
