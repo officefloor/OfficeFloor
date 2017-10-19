@@ -36,6 +36,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.HttpRouteSectionSource.RouteInput;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpContentParametersBuilder;
 import net.officefloor.web.build.HttpInput;
@@ -319,12 +320,20 @@ public class WebArchitectEmployer implements WebArchitect {
 		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath);
 		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
 		for (HttpInputBuilderImpl input : this.inputs) {
-			String outputName = routing.addRoute(input.method, input.applicationPath);
-			OfficeSectionOutput output = routingSection.getOfficeSectionOutput(outputName);
-			this.officeArchitect.link(output, input.sectionInput);
+
+			// Obtain the input meta-data
+			HttpInputMetaData inputMetaData = new HttpInputMetaData();
+			// TODO configure input from input builder
+
+			// Add the route
+			RouteInput routeInput = routing.addRoute(input.method, input.applicationPath, inputMetaData);
+
+			// Link route output to handling section input
+			OfficeSectionOutput routeOutput = routingSection.getOfficeSectionOutput(routeInput.getOutputName());
+			this.officeArchitect.link(routeOutput, input.sectionInput);
 		}
 
-		// Load inline configured dependencies
+		// Load in-line configured dependencies
 		final Set<Class<?>> httpParameters = new HashSet<>();
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 			ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();

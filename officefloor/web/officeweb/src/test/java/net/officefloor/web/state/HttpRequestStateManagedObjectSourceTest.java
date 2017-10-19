@@ -106,7 +106,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		HttpRequestState requestState = this.createHttpRequestState();
 
 		try {
-			requestState.importState(momento);
+			HttpRequestStateManagedObjectSource.importHttpRequestState(momento, requestState);
 			fail("Should not be successful");
 		} catch (IllegalArgumentException ex) {
 			assertEquals("Incorrect cause", "Invalid momento for HttpRequestState", ex.getMessage());
@@ -152,7 +152,8 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		clonedState.setAttribute("ATTRIBUTE", "CLONE");
 
 		// Import the state
-		clonedState.importState(requestState.exportState());
+		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
+		HttpRequestStateManagedObjectSource.importHttpRequestState(momento, clonedState);
 
 		// Ensure override state
 		assertHttpRequestState(clonedState, "ATTRIBUTE", "OVERRIDE");
@@ -218,7 +219,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 	private HttpRequestState createClonedState(HttpRequestState requestState) throws Throwable {
 
 		// Export the momento
-		Serializable momento = requestState.exportState();
+		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
 
 		// Serialise the momento
 		ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
@@ -233,7 +234,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Create a new request state from momento
 		HttpRequestState clonedState = this.createHttpRequestState();
-		clonedState.importState(unserialisedMomento);
+		HttpRequestStateManagedObjectSource.importHttpRequestState(unserialisedMomento, clonedState);
 
 		// Return the cloned state
 		return clonedState;

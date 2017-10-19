@@ -26,11 +26,15 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpInputMetaData;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.value.load.ValueLoader;
@@ -40,7 +44,77 @@ import net.officefloor.web.value.load.ValueLoader;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public class HttpRequestStateManagedObjectSource
+		extends AbstractManagedObjectSource<HttpRequestStateManagedObjectSource.HttpRequestStateDependencies, None> {
+
+	/**
+	 * Dependency keys.
+	 */
+	public static enum HttpRequestStateDependencies {
+		SERVER_HTTP_CONNECTION
+	}
+
+	/**
+	 * Initialises the {@link HttpRequestState}.
+	 * 
+	 * @param pathArguments
+	 *            Head path {@link HttpArgument} of the linked list of
+	 *            {@link HttpArgument} instances.
+	 * @param inputMetaData
+	 *            {@link HttpInputMetaData}.
+	 * @param requestState
+	 *            {@link HttpRequestState}.
+	 */
+	public static void initialiseHttpRequestState(HttpArgument pathArguments, HttpInputMetaData inputMetaData,
+			HttpRequestState requestState) {
+		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
+		mo.initialise(pathArguments, inputMetaData);
+	}
+
+	/**
+	 * Imports the state from the momento.
+	 * 
+	 * @param momento
+	 *            Momento containing the state for the {@link HttpRequestState}.
+	 * @throws IOException
+	 *             If fails to import state.
+	 * @throws IllegalArgumentException
+	 *             If invalid momento.
+	 */
+	public static void importHttpRequestState(Serializable momento, HttpRequestState requestState)
+			throws IllegalArgumentException {
+		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
+		mo.context.run(() -> {
+			// Ensure valid state momento
+			if (!(momento instanceof StateMomento)) {
+				throw new IllegalArgumentException("Invalid momento for " + HttpRequestState.class.getSimpleName());
+			}
+			StateMomento state = (StateMomento) momento;
+
+			// Load the state
+			mo.attributes = new HashMap<String, Serializable>(state.attributes);
+
+			// Void return
+			return null;
+		});
+	}
+
+	/**
+	 * Exports a momento for the current state of this {@link HttpRequestState}.
+	 * 
+	 * @return Momento for the current state of this {@link HttpRequestState}.
+	 */
+	public static Serializable exportHttpRequestState(HttpRequestState requestState) {
+		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
+		return mo.context.run(() -> {
+
+			// Create the momento state
+			Map<String, Serializable> momentoAttributes = new HashMap<String, Serializable>(mo.attributes);
+
+			// Create and return the momento
+			return new StateMomento(momentoAttributes);
+		});
+	}
 
 	/*
 	 * =================== ManagedObjectSource ==========================
@@ -52,9 +126,10 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<HttpRequestStateDependencies, None> context) throws Exception {
 		context.setObjectClass(HttpRequestState.class);
 		context.setManagedObjectClass(HttpRequestStateManagedObject.class);
+		context.addDependency(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 	}
 
 	@Override
@@ -65,7 +140,8 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 	/**
 	 * {@link ManagedObject} for the {@link HttpRequestState}.
 	 */
-	private static class HttpRequestStateManagedObject implements ProcessAwareManagedObject, HttpRequestState {
+	private static class HttpRequestStateManagedObject implements ProcessAwareManagedObject,
+			CoordinatingManagedObject<HttpRequestStateDependencies>, HttpRequestState {
 
 		/**
 		 * {@link ProcessAwareContext}.
@@ -73,14 +149,42 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		private ProcessAwareContext context;
 
 		/**
-		 * {@link HttpObjectResponder} instances.
+		 * {@link ServerHttpConnection}.
 		 */
-		private HttpObjectResponder<?>[] objectResponses;
+		private ServerHttpConnection connection;
+
+		/**
+		 * Head path {@link HttpArgument} of the linked list of
+		 * {@link HttpArgument} instances.
+		 */
+		private HttpArgument pathArguments = null;
+
+		/**
+		 * {@link HttpInputMetaData}.
+		 */
+		private HttpInputMetaData inputMetaData = null;
 
 		/**
 		 * Attributes.
 		 */
 		private Map<String, Serializable> attributes = new HashMap<String, Serializable>();
+
+		/**
+		 * Initialises this {@link HttpRequestState}.
+		 * 
+		 * @param pathArguments
+		 *            Head path {@link HttpArgument} of the linked list of
+		 *            {@link HttpArgument} instances.
+		 * @param inputMetaData
+		 *            {@link HttpInputMetaData}.
+		 */
+		public void initialise(HttpArgument pathArguments, HttpInputMetaData inputMetaData) {
+			this.context.run(() -> {
+				this.pathArguments = pathArguments;
+				this.inputMetaData = inputMetaData;
+				return null;
+			});
+		}
 
 		/*
 		 * ====================== ManagedObject ===========================
@@ -89,6 +193,12 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		@Override
 		public void setProcessAwareContext(ProcessAwareContext context) {
 			this.context = context;
+		}
+
+		@Override
+		public void loadObjects(ObjectRegistry<HttpRequestStateDependencies> registry) throws Throwable {
+			this.connection = (ServerHttpConnection) registry
+					.getObject(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION);
 		}
 
 		@Override
@@ -139,35 +249,6 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		@Override
 		public void removeAttribute(String name) {
 			this.context.run(() -> this.attributes.remove(name));
-		}
-
-		@Override
-		public Serializable exportState() throws IOException {
-			return this.context.run(() -> {
-
-				// Create the momento state
-				Map<String, Serializable> momentoAttributes = new HashMap<String, Serializable>(this.attributes);
-
-				// Create and return the momento
-				return new StateMomento(momentoAttributes);
-			});
-		}
-
-		@Override
-		public void importState(Serializable momento) throws IOException, IllegalArgumentException {
-			this.context.run(() -> {
-				// Ensure valid state momento
-				if (!(momento instanceof StateMomento)) {
-					throw new IllegalArgumentException("Invalid momento for " + HttpRequestState.class.getSimpleName());
-				}
-				StateMomento state = (StateMomento) momento;
-
-				// Load the state
-				this.attributes = new HashMap<String, Serializable>(state.attributes);
-
-				// Void return
-				return null;
-			});
 		}
 	}
 

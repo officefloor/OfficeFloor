@@ -275,7 +275,10 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		// Build the web router (from routes)
 		WebRouterBuilder builder = new WebRouterBuilder(null);
 		for (MockWebRoute route : routes) {
-			builder.addRoute(route.method, route.path, route);
+			boolean isPathParameter = builder.addRoute(route.method, route.path, route);
+			boolean isParameter = route.path.contains("{");
+			assertEquals("Route " + route.path + " incorrect indication of path parameters", isParameter,
+					isPathParameter);
 		}
 		WebRouter router = builder.build();
 

@@ -67,9 +67,9 @@ public class WebRouterBuilder {
 	 *            Path. Use <code>{param}</code> to signify path parameters.
 	 * @param handler
 	 *            {@link WebRouteHandler} for the route.
-	 * @return <code>this</code> for builder pattern.
+	 * @return <code>true</code> if contains path parameters.
 	 */
-	public WebRouterBuilder addRoute(HttpMethod method, String path, WebRouteHandler handler) {
+	public boolean addRoute(HttpMethod method, String path, WebRouteHandler handler) {
 
 		// Ignore / at end of path
 		if ((!"/".equals(path)) && (path.endsWith("/"))) {
@@ -82,6 +82,7 @@ public class WebRouterBuilder {
 		}
 
 		// Parse out the static segments and parameters from path
+		boolean isPathParamter = false;
 		List<PathSegment> segments = new ArrayList<>();
 		int currentIndex = 0;
 		do {
@@ -111,6 +112,7 @@ public class WebRouterBuilder {
 				}
 				String parameterName = path.substring(nextParamStart + 1, nextParamEnd);
 				segments.add(new PathSegment(PathTypeEnum.PARAMETER, parameterName));
+				isPathParamter = true;
 
 				// Move to after parameter
 				currentIndex = nextParamEnd + "}".length();
@@ -126,8 +128,8 @@ public class WebRouterBuilder {
 		WebRoute route = new WebRoute(method, segments.get(0), handler);
 		this.routes.add(route);
 
-		// Return for builder pattern
-		return this;
+		// Return whether path parameter
+		return isPathParamter;
 	}
 
 	/**
