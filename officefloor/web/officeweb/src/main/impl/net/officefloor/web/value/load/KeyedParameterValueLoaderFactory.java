@@ -20,17 +20,14 @@ package net.officefloor.web.value.load;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import net.officefloor.web.value.load.PropertyKey;
-import net.officefloor.web.value.load.StatelessValueLoader;
-import net.officefloor.web.value.load.StatelessValueLoaderFactory;
+import net.officefloor.web.build.HttpValueLocation;
 
 /**
  * {@link StatelessValueLoaderFactory} to load keyed string parameter.
  * 
  * @author Daniel Sagenschneider
  */
-public class KeyedParameterValueLoaderFactory implements
-		StatelessValueLoaderFactory {
+public class KeyedParameterValueLoaderFactory implements StatelessValueLoaderFactory {
 
 	/**
 	 * Property name.
@@ -50,8 +47,7 @@ public class KeyedParameterValueLoaderFactory implements
 	 * @param methodName
 	 *            {@link Method} name.
 	 */
-	public KeyedParameterValueLoaderFactory(String propertyName,
-			String methodName) {
+	public KeyedParameterValueLoaderFactory(String propertyName, String methodName) {
 		this.propertyName = propertyName;
 		this.methodName = methodName;
 	}
@@ -66,19 +62,24 @@ public class KeyedParameterValueLoaderFactory implements
 	}
 
 	@Override
-	public StatelessValueLoader createValueLoader(Class<?> clazz)
-			throws Exception {
+	public StatelessValueLoader createValueLoader(Class<?> clazz) throws Exception {
 
 		// Obtain the loader method
-		final Method loaderMethod = clazz.getMethod(this.methodName,
-				String.class, String.class);
+		final Method loaderMethod = clazz.getMethod(this.methodName, String.class, String.class);
+
+		// Obtain the value location
+		final HttpValueLocation loaderLocation = ValueLoaderSource.getLocation(loaderMethod);
 
 		// Return the new value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String name, int nameIndex,
-					String value, Map<PropertyKey, Object> state)
-					throws Exception {
+			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
+					Map<PropertyKey, Object> state) throws Exception {
+
+				// Determine if match location
+				if (!ValueLoaderSource.isLocationMatch(loaderLocation, location)) {
+					return; // not match, so do not load
+				}
 
 				// Obtain the keyed value
 				int keyEnd = name.indexOf('}', nameIndex);
@@ -88,8 +89,7 @@ public class KeyedParameterValueLoaderFactory implements
 				String key = name.substring(nameIndex, keyEnd);
 
 				// Load the value
-				ValueLoaderSource.loadValue(object, loaderMethod, key,
-						value);
+				ValueLoaderSource.loadValue(object, loaderMethod, key, value);
 			}
 		};
 	}

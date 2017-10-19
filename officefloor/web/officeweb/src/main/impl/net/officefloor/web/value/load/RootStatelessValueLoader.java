@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.PropertyKey;
 import net.officefloor.web.value.load.PropertyKeyFactory;
 import net.officefloor.web.value.load.StatelessValueLoader;
@@ -49,8 +50,7 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 	 * @param propertyKeyFactory
 	 *            {@link PropertyKeyFactory}.
 	 */
-	public RootStatelessValueLoader(
-			Map<PropertyKey, StatelessValueLoader> valueLoaders,
+	public RootStatelessValueLoader(Map<PropertyKey, StatelessValueLoader> valueLoaders,
 			PropertyKeyFactory propertyKeyFactory) {
 		this.valueLoaders = valueLoaders;
 		this.propertyKeyFactory = propertyKeyFactory;
@@ -61,8 +61,8 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 	 */
 
 	@Override
-	public void loadValue(Object object, String name, int nameIndex,
-			String value, Map<PropertyKey, Object> state) throws Exception {
+	public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
+			Map<PropertyKey, Object> state) throws Exception {
 
 		// Parse out the property name (start at name index)
 		int index = -1;
@@ -91,8 +91,7 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 		}
 
 		// Create the property key
-		PropertyKey propertyKey = this.propertyKeyFactory
-				.createPropertyKey(propertyName);
+		PropertyKey propertyKey = this.propertyKeyFactory.createPropertyKey(propertyName);
 
 		// Obtain the value loader for the property name
 		StatelessValueLoader valueLoader = this.valueLoaders.get(propertyKey);
@@ -101,7 +100,7 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 		}
 
 		// Load the value
-		valueLoader.loadValue(object, name, nameIndex, value, state);
+		valueLoader.loadValue(object, name, nameIndex, value, location, state);
 	}
 
 }

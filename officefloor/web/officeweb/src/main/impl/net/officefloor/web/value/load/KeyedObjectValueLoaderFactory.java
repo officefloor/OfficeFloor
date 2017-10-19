@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.ObjectInstantiator;
 import net.officefloor.web.value.load.PropertyKey;
 import net.officefloor.web.value.load.PropertyKeyFactory;
@@ -31,8 +32,7 @@ import net.officefloor.web.value.load.StatelessValueLoaderFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class KeyedObjectValueLoaderFactory implements
-		StatelessValueLoaderFactory {
+public class KeyedObjectValueLoaderFactory implements StatelessValueLoaderFactory {
 
 	/**
 	 * Property name.
@@ -78,10 +78,8 @@ public class KeyedObjectValueLoaderFactory implements
 	 * @param propertyKeyFactory
 	 *            {@link PropertyKeyFactory}.
 	 */
-	public KeyedObjectValueLoaderFactory(String propertyName,
-			String methodName, Class<?> objectType,
-			ObjectInstantiator objectInstantiator,
-			PropertyKeyFactory propertyKeyFactory) {
+	public KeyedObjectValueLoaderFactory(String propertyName, String methodName, Class<?> objectType,
+			ObjectInstantiator objectInstantiator, PropertyKeyFactory propertyKeyFactory) {
 		this.propertyName = propertyName;
 		this.methodName = methodName;
 		this.objectType = objectType;
@@ -109,19 +107,16 @@ public class KeyedObjectValueLoaderFactory implements
 	}
 
 	@Override
-	public StatelessValueLoader createValueLoader(Class<?> clazz)
-			throws Exception {
+	public StatelessValueLoader createValueLoader(Class<?> clazz) throws Exception {
 
 		// Obtain the loader method
-		final Method loaderMethod = clazz.getMethod(this.methodName,
-				String.class, this.objectType);
+		final Method loaderMethod = clazz.getMethod(this.methodName, String.class, this.objectType);
 
 		// Return the value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String name, int nameIndex,
-					String value, Map<PropertyKey, Object> state)
-					throws Exception {
+			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
+					Map<PropertyKey, Object> state) throws Exception {
 
 				// Obtain the keyed value
 				int keyEnd = name.indexOf('}', nameIndex);
@@ -152,13 +147,12 @@ public class KeyedObjectValueLoaderFactory implements
 					state.put(propertyKey, parameter);
 
 					// Load the parameter
-					ValueLoaderSource.loadValue(object, loaderMethod, key,
-							parameter);
+					ValueLoaderSource.loadValue(object, loaderMethod, key, parameter);
 				}
 
 				// Load the property onto the object
-				KeyedObjectValueLoaderFactory.this.valueLoader.loadValue(
-						parameter, name, nameIndex, value, state);
+				KeyedObjectValueLoaderFactory.this.valueLoader.loadValue(parameter, name, nameIndex, value, location,
+						state);
 			}
 		};
 	}

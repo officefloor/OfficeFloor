@@ -33,6 +33,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.value.load.ValueLoader;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
@@ -100,9 +101,8 @@ public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSo
 		 */
 
 		@Override
-		public HttpArgument getHttpArguments() {
+		public void loadValues(ValueLoader valueLoader) {
 			// TODO Auto-generated method stub
-			return null;
 		}
 
 		@Override

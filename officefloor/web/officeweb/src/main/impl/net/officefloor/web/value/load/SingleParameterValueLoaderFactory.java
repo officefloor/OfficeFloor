@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.PropertyKey;
 import net.officefloor.web.value.load.StatelessValueLoader;
 import net.officefloor.web.value.load.StatelessValueLoaderFactory;
@@ -29,8 +30,7 @@ import net.officefloor.web.value.load.StatelessValueLoaderFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class SingleParameterValueLoaderFactory implements
-		StatelessValueLoaderFactory {
+public class SingleParameterValueLoaderFactory implements StatelessValueLoaderFactory {
 
 	/**
 	 * Property name.
@@ -49,9 +49,10 @@ public class SingleParameterValueLoaderFactory implements
 	 *            Property name.
 	 * @param methodName
 	 *            {@link Method} name.
+	 * @param location
+	 *            {@link HttpValueLocation}.
 	 */
-	public SingleParameterValueLoaderFactory(String propertyName,
-			String methodName) {
+	public SingleParameterValueLoaderFactory(String propertyName, String methodName) {
 		this.propertyName = propertyName;
 		this.methodName = methodName;
 	}
@@ -66,19 +67,26 @@ public class SingleParameterValueLoaderFactory implements
 	}
 
 	@Override
-	public StatelessValueLoader createValueLoader(Class<?> clazz)
-			throws Exception {
+	public StatelessValueLoader createValueLoader(Class<?> clazz) throws Exception {
 
 		// Obtain the loader method
-		final Method loaderMethod = clazz.getMethod(this.methodName,
-				String.class);
+		final Method loaderMethod = clazz.getMethod(this.methodName, String.class);
+
+		// Obtain the value location
+		final HttpValueLocation loaderLocation = ValueLoaderSource.getLocation(loaderMethod);
 
 		// Return the new value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String name, int nameIndex,
-					String value, Map<PropertyKey, Object> state)
-					throws Exception {
+			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
+					Map<PropertyKey, Object> state) throws Exception {
+
+				// Determine if match location
+				if (!ValueLoaderSource.isLocationMatch(loaderLocation, location)) {
+					return; // not match, so do not load
+				}
+
+				// Load the value
 				ValueLoaderSource.loadValue(object, loaderMethod, value);
 			}
 		};

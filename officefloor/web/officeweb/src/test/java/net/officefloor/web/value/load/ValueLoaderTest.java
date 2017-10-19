@@ -17,14 +17,18 @@
  */
 package net.officefloor.web.value.load;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.value.load.ObjectInstantiator;
-import net.officefloor.web.value.load.ValueLoader;
-import net.officefloor.web.value.load.ValueLoaderFactory;
-import net.officefloor.web.value.load.ValueLoaderSource;
+import net.officefloor.web.HttpContentParameter;
+import net.officefloor.web.HttpCookieParameter;
+import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.build.HttpValueLocation;
 
 /**
  * Tests loading values via a {@link ValueLoader}.
@@ -41,8 +45,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ObjectInstantiator}.
 	 */
-	private ObjectInstantiator instantiator = this
-			.createMock(ObjectInstantiator.class);
+	private ObjectInstantiator instantiator = this.createMock(ObjectInstantiator.class);
 
 	/**
 	 * Alias mappings.
@@ -59,7 +62,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testSingleProperty() {
 		this.object.setPropertyOne("ONE");
-		this.doTest("PropertyOne", "ONE");
+		this.doTest(V("PropertyOne", "ONE"));
 	}
 
 	/**
@@ -68,14 +71,14 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	public void testMultipleProperties() {
 		this.object.setPropertyOne("A");
 		this.object.setPropertyTwo("B");
-		this.doTest("PropertyOne", "A", "PropertyTwo", "B");
+		this.doTest(V("PropertyOne", "A"), V("PropertyTwo", "B"));
 	}
 
 	/**
 	 * Do not load primitive values.
 	 */
 	public void testIgnorePrimatives() {
-		this.doTest("Ignore", "not load");
+		this.doTest(V("Ignore", "not load"));
 	}
 
 	/**
@@ -84,7 +87,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	public void testAliasProperties() {
 		this.mapAlias("Alias", "PropertyOne");
 		this.object.setPropertyOne("VALUE");
-		this.doTest("Alias", "VALUE");
+		this.doTest(V("Alias", "VALUE"));
 	}
 
 	/**
@@ -94,7 +97,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.isCaseSensitive = false;
 		this.object.setPropertyOne("Lower");
 		this.object.setPropertyTwo("Upper");
-		this.doTest("propertyone", "Lower", "PROPERTYTWO", "Upper");
+		this.doTest(V("propertyone", "Lower"), V("PROPERTYTWO", "Upper"));
 	}
 
 	/**
@@ -106,7 +109,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.mapAlias("ALIASTWO", "PROPERTYTWO");
 		this.object.setPropertyOne("One");
 		this.object.setPropertyTwo("Two");
-		this.doTest("AliasOne", "One", "AliasTwo", "Two");
+		this.doTest(V("AliasOne", "One"), V("AliasTwo", "Two"));
 	}
 
 	/**
@@ -116,7 +119,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		MockObjectOne objectOne = this.record_instantiate(MockObjectOne.class);
 		this.object.setObjectOne(objectOne);
 		objectOne.setPropertyA("VALUE");
-		this.doTest("ObjectOne.PropertyA", "VALUE");
+		this.doTest(V("ObjectOne.PropertyA", "VALUE"));
 	}
 
 	/**
@@ -127,7 +130,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.object.setObjectOne(objectOne);
 		objectOne.setPropertyA("a");
 		objectOne.setPropertyB("b");
-		this.doTest("ObjectOne.PropertyA", "a", "ObjectOne.PropertyB", "b");
+		this.doTest(V("ObjectOne.PropertyA", "a"), V("ObjectOne.PropertyB", "b"));
 	}
 
 	/**
@@ -139,7 +142,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.mapAlias("AliasOne", "ObjectOne");
 		this.mapAlias("AliasA", "PropertyA");
 		objectOne.setPropertyA("VALUE");
-		this.doTest("AliasOne.AliasA", "VALUE");
+		this.doTest(V("AliasOne.AliasA", "VALUE"));
 	}
 
 	/**
@@ -151,8 +154,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.object.setObjectOne(objectOne);
 		objectOne.setPropertyA("Lower");
 		objectOne.setPropertyB("Upper");
-		this.doTest("objectone.propertya", "Lower", "OBJECTONE.PROPERTYB",
-				"Upper");
+		this.doTest(V("objectone.propertya", "Lower"), V("OBJECTONE.PROPERTYB", "Upper"));
 	}
 
 	/**
@@ -160,7 +162,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testKeyedProperty() {
 		this.object.setKeyOne("KEY", "VALUE");
-		this.doTest("KeyOne{KEY}", "VALUE");
+		this.doTest(V("KeyOne{KEY}", "VALUE"));
 	}
 
 	/**
@@ -173,8 +175,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.object.setKeyOne("0", "FIRST");
 		this.object.setKeyOne("1", "SECOND");
 		this.object.setKeyOne("2", "THIRD");
-		this.doTest("KeyOne{0}", "FIRST", "KeyOne{1}", "SECOND", "KeyOne{2}",
-				"THIRD");
+		this.doTest(V("KeyOne{0}", "FIRST"), V("KeyOne{1}", "SECOND"), V("KeyOne{2}", "THIRD"));
 	}
 
 	/**
@@ -183,7 +184,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	public void testKeysForAliasProperty() {
 		this.mapAlias("AliasOne", "KeyOne");
 		this.object.setKeyOne("KEY", "VALUE");
-		this.doTest("AliasOne{KEY}", "VALUE");
+		this.doTest(V("AliasOne{KEY}", "VALUE"));
 	}
 
 	/**
@@ -198,8 +199,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		this.object.setKeyOne("case", "Lower");
 		this.object.setKeyOne("CASE", "Upper");
 		this.object.setKeyOne("Case", "Title");
-		this.doTest("keyone{case}", "Lower", "KEYONE{CASE}", "Upper",
-				"KeyOne{Case}", "Title");
+		this.doTest(V("keyone{case}", "Lower"), V("KEYONE{CASE}", "Upper"), V("KeyOne{Case}", "Title"));
 	}
 
 	/**
@@ -209,7 +209,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		MockObjectOne objectOne = this.record_instantiate(MockObjectOne.class);
 		this.object.setMapOne("KEY", objectOne);
 		objectOne.setPropertyA("VALUE");
-		this.doTest("MapOne{KEY}.PropertyA", "VALUE");
+		this.doTest(V("MapOne{KEY}.PropertyA", "VALUE"));
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		MockObjectOne two = this.record_instantiate(MockObjectOne.class);
 		this.object.setMapOne("2", two);
 		two.setPropertyA("TWO");
-		this.doTest("MapOne{1}.PropertyA", "ONE", "MapOne{2}.PropertyA", "TWO");
+		this.doTest(V("MapOne{1}.PropertyA", "ONE"), V("MapOne{2}.PropertyA", "TWO"));
 	}
 
 	/**
@@ -234,7 +234,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		MockObjectOne one = this.record_instantiate(MockObjectOne.class);
 		this.object.setMapOne("KEY", one);
 		one.setPropertyA("VALUE");
-		this.doTest("AliasOne{KEY}.AliasA", "VALUE");
+		this.doTest(V("AliasOne{KEY}.AliasA", "VALUE"));
 	}
 
 	/**
@@ -248,8 +248,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		MockObjectOne two = this.record_instantiate(MockObjectOne.class);
 		this.object.setMapOne("CASE", two);
 		two.setPropertyA("Upper");
-		this.doTest("mapone{case}.propertya", "Lower",
-				"MAPONE{CASE}.PROPERTYA", "Upper");
+		this.doTest(V("mapone{case}.propertya", "Lower"), V("MAPONE{CASE}.PROPERTYA", "Upper"));
 	}
 
 	/**
@@ -263,7 +262,118 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		MockRecursive three = this.record_instantiate(MockRecursive.class);
 		two.setRecursive(three);
 		three.setValue("VALUE");
-		this.doTest("Recursive.Recursive.Recursive.Value", "VALUE");
+		this.doTest(V("Recursive.Recursive.Recursive.Value", "VALUE"));
+	}
+
+	/**
+	 * Ensure load only from path location.
+	 */
+	public void testPathOnly() {
+		this.object.setPathOnly("value");
+		this.doTest(V("PathOnly", "value", HttpValueLocation.PATH), V("PathOnly", "not path", HttpValueLocation.QUERY));
+	}
+
+	/**
+	 * Ensure can load keyed path parameter.
+	 */
+	public void testKeyedPathOnly() {
+		this.object.setKeyPathOnly("KEY", "VALUE");
+		this.doTest(V("KeyPathOnly{KEY}", "VALUE", HttpValueLocation.PATH),
+				V("KeyPathOnly{KEY}", "not path", HttpValueLocation.QUERY));
+	}
+
+	/**
+	 * Ensure load only from query location.
+	 */
+	public void testQueryOnly() {
+		this.object.setQueryOnly("value");
+		this.doTest(V("QueryOnly", "value", HttpValueLocation.QUERY),
+				V("QueryOnly", "not query", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure can load keyed query parameter.
+	 */
+	public void testKeyedQueryOnly() {
+		this.object.setKeyQueryOnly("KEY", "VALUE");
+		this.doTest(V("KeyQueryOnly{KEY}", "VALUE", HttpValueLocation.QUERY),
+				V("KeyQueryOnly{KEY}", "not path", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure load only from header location.
+	 */
+	public void testHeaderOnly() {
+		this.object.setHeaderOnly("value");
+		this.doTest(V("HeaderOnly", "value", HttpValueLocation.HEADER),
+				V("HeaderOnly", "not header", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure can load keyed header parameter.
+	 */
+	public void testKeyedHeaderOnly() {
+		this.object.setKeyHeaderOnly("KEY", "VALUE");
+		this.doTest(V("KeyHeaderOnly{KEY}", "VALUE", HttpValueLocation.HEADER),
+				V("KeyHeaderOnly{KEY}", "not header", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure load only from cookie location.
+	 */
+	public void testCookieOnly() {
+		this.object.setCookieOnly("value");
+		this.doTest(V("CookieOnly", "value", HttpValueLocation.COOKIE),
+				V("CookieOnly", "not header", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure can load keyed cookie parameter.
+	 */
+	public void testKeyedCookieOnly() {
+		this.object.setKeyCookieOnly("KEY", "VALUE");
+		this.doTest(V("KeyCookieOnly{KEY}", "VALUE", HttpValueLocation.COOKIE),
+				V("KeyCookieOnly{KEY}", "not header", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure load only from content location.
+	 */
+	public void testContentOnly() {
+		this.object.setContentOnly("value");
+		this.doTest(V("ContentOnly", "value", HttpValueLocation.ENTITY),
+				V("ContentOnly", "not content", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure can load keyed content parameter.
+	 */
+	public void testKeyedContentOnly() {
+		this.object.setKeyContentOnly("KEY", "VALUE");
+		this.doTest(V("KeyContentOnly{KEY}", "VALUE", HttpValueLocation.ENTITY),
+				V("KeyContentOnly{KEY}", "not content", HttpValueLocation.PATH));
+	}
+
+	/**
+	 * Ensure not create objects for graph if not match location.
+	 */
+	public void testStringedTogetherPropertyWithLocation() {
+		MockObjectOne objectOne = this.record_instantiate(MockObjectOne.class);
+		this.object.setObjectOne(objectOne);
+		// property not loaded, as not in location
+		this.doTest(V("ObjectOne.PathOnly", "VALUE", HttpValueLocation.QUERY));
+	}
+
+	/**
+	 * Ensure can use annotation of the {@link Field}.
+	 */
+	public void testFieldAnnotation() throws Exception {
+		MockField field = new MockField();
+		this.recordReturn(this.instantiator, this.instantiator.instantiate(MockField.class), field);
+		this.object.setField(field);
+		this.doTest(V("Field.Property", "value", HttpValueLocation.PATH),
+				V("Field.Property", "not path", HttpValueLocation.QUERY));
+		assertEquals("Incorrect field value", "value", field.property);
 	}
 
 	/**
@@ -291,8 +401,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 			T mock = this.createMock(clazz);
 
 			// Record instantiating the object
-			this.recordReturn(this.instantiator,
-					this.instantiator.instantiate(clazz), mock);
+			this.recordReturn(this.instantiator, this.instantiator.instantiate(clazz), mock);
 
 			// Return the instantiated object
 			return mock;
@@ -304,32 +413,75 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Does the test.
 	 * 
-	 * @param nameValuePairs
-	 *            Name value pairs for properties to load.
+	 * @param values
+	 *            {@link Value} instances to load.
 	 */
-	private void doTest(String... nameValuePairs) {
+	private void doTest(Value... values) {
 		this.replayMockObjects();
 		try {
 			// Create the source
-			ValueLoaderSource source = new ValueLoaderSource(MockType.class, !this.isCaseSensitive,
-					this.aliasMappings, this.instantiator);
+			ValueLoaderSource source = new ValueLoaderSource(MockType.class, !this.isCaseSensitive, this.aliasMappings,
+					this.instantiator);
 
 			// Create and return the value loader
-			ValueLoaderFactory<MockType> factory = source
-					.sourceValueLoaderFactory(MockType.class);
+			ValueLoaderFactory<MockType> factory = source.sourceValueLoaderFactory(MockType.class);
 			ValueLoader valueLoader = factory.createValueLoader(this.object);
 
 			// Load the values
-			for (int i = 0; i < nameValuePairs.length; i += 2) {
-				String name = nameValuePairs[i];
-				String value = nameValuePairs[i + 1];
-				valueLoader.loadValue(name, value);
+			for (Value value : values) {
+				valueLoader.loadValue(value.name, value.value, value.location);
 			}
 
 		} catch (Exception ex) {
 			fail(ex);
 		}
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Convenience method to construct a {@link Value}.
+	 * 
+	 * @param name
+	 *            Name for {@link Value}.
+	 * @param value
+	 *            Value for {@link Value}.
+	 * @return {@link Value}.
+	 */
+	public static Value V(String name, String value) {
+		return new Value(name, value, HttpValueLocation.ENTITY);
+	}
+
+	/**
+	 * Convenience method to construct a {@link Value}.
+	 * 
+	 * @param name
+	 *            Name for {@link Value}.
+	 * @param value
+	 *            Value for {@link Value}.
+	 * @param location
+	 *            {@link HttpValueLocation}.
+	 * @return {@link Value}.
+	 */
+	public static Value V(String name, String value, HttpValueLocation location) {
+		return new Value(name, value, location);
+	}
+
+	/**
+	 * Value to load.
+	 */
+	private static class Value {
+
+		private final String name;
+
+		private final String value;
+
+		private final HttpValueLocation location;
+
+		public Value(String name, String value, HttpValueLocation location) {
+			this.name = name;
+			this.value = value;
+			this.location = location;
+		}
 	}
 
 	/**
@@ -356,6 +508,38 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		void setRecursive(MockRecursive recursive);
 
 		void setIgnore(int value);
+
+		@HttpPathParameter("")
+		void setPathOnly(String pathArgument);
+
+		@HttpPathParameter("")
+		void setKeyPathOnly(String key, String value);
+
+		@HttpQueryParameter("")
+		void setQueryOnly(String queryArgument);
+
+		@HttpQueryParameter("")
+		void setKeyQueryOnly(String key, String value);
+
+		@HttpHeaderParameter("")
+		void setHeaderOnly(String headerArgument);
+
+		@HttpHeaderParameter("")
+		void setKeyHeaderOnly(String key, String value);
+
+		@HttpCookieParameter("")
+		void setCookieOnly(String cookieArgument);
+
+		@HttpCookieParameter("")
+		void setKeyCookieOnly(String key, String value);
+
+		@HttpContentParameter(name = "", content = HttpArgumentParser.class)
+		void setContentOnly(String contentArgument);
+
+		@HttpContentParameter(name = "", content = HttpArgumentParser.class)
+		void setKeyContentOnly(String key, String value);
+
+		void setField(MockField field);
 	}
 
 	/**
@@ -366,6 +550,9 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		void setPropertyA(String propertyA);
 
 		void setPropertyB(String propertyB);
+
+		@HttpPathParameter("")
+		void setPathOnly(String value);
 	}
 
 	/**
@@ -386,6 +573,19 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		void setRecursive(MockRecursive recursive);
 
 		void setValue(String value);
+	}
+
+	/**
+	 * Mock object with field annotated parameter.
+	 */
+	public static class MockField {
+
+		@HttpPathParameter("")
+		private String property;
+
+		public void setProperty(String value) {
+			this.property = value;
+		}
 	}
 
 }

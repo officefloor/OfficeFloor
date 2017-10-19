@@ -25,6 +25,7 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.value.load.ValueLoader;
 
 /**
  * State for the {@link HttpRequest}.
@@ -34,25 +35,26 @@ import net.officefloor.web.session.HttpSession;
 public interface HttpRequestState {
 
 	/**
-	 * Obtains the {@link HttpArgument} instances.
+	 * Loads values from the {@link HttpRequest}.
 	 * 
-	 * @return {@link HttpArgument} instances.
+	 * @param valueLoader
+	 *            {@link ValueLoader} to receive the values.
 	 */
-	HttpArgument getHttpArguments();
+	void loadValues(ValueLoader valueLoader);
 
 	/**
 	 * Obtains the {@link HttpObjectParser} instances.
 	 * 
-	 * @return {@link HttpObjectParser} instances. May be
-	 *         <code>null</code> if no {@link HttpObjectParser} instances.
+	 * @return {@link HttpObjectParser} instances. May be <code>null</code> if
+	 *         no {@link HttpObjectParser} instances.
 	 */
 	HttpObjectParser<?>[] getObjectParsers();
 
 	/**
 	 * Obtains the {@link HttpObjectResponder} instances.
 	 * 
-	 * @return {@link HttpObjectResponder} instances. May be <code>null</code> if no
-	 *         {@link HttpObjectResponder} instances.
+	 * @return {@link HttpObjectResponder} instances. May be <code>null</code>
+	 *         if no {@link HttpObjectResponder} instances.
 	 */
 	HttpObjectResponder<?>[] getObjectResponders();
 

@@ -152,7 +152,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	@Data // simplified object declaration
 	@HttpParameters
-	public static class PathParameter {
+	public static class PathParameter implements Serializable {
 		@HttpPathParameter("") // default to field property name
 		protected String param;
 	}

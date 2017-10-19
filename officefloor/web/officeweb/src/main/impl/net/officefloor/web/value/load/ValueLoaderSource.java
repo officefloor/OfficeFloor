@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.value.load;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,8 +28,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.web.value.load.ObjectInstantiator;
-import net.officefloor.web.value.load.ValueLoaderFactory;
+import net.officefloor.web.HttpContentParameter;
+import net.officefloor.web.HttpCookieParameter;
+import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.build.HttpValueLocation;
 
 /**
  * Sources the {@link ValueLoaderFactory} for a {@link Class} type.
@@ -67,6 +73,79 @@ public class ValueLoaderSource {
 				throw ex;
 			}
 		}
+	}
+
+	/**
+	 * Obtains the {@link HttpValueLocation} for the {@link Method}.
+	 * 
+	 * @param method
+	 *            {@link Method}.
+	 * @return {@link HttpValueLocation} or <code>null</code> if match all
+	 *         {@link HttpValueLocation}.
+	 */
+	public static HttpValueLocation getLocation(Method method) {
+
+		// Interrogate for annotations
+		HttpValueLocation location = extractLocation(method);
+		if (location != null) {
+			return location; // defined on method
+		}
+
+		// Determine if associated field for property
+		String methodName = method.getName();
+		String propertyName = methodName.substring("set".length());
+		propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+		Class<?> clazz = method.getDeclaringClass();
+		while (clazz != null) {
+			for (Field field : clazz.getDeclaredFields()) {
+				if (propertyName.equals(field.getName())) {
+					// Found field, so return based location details
+					return extractLocation(field);
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+
+		// As here, matches any location
+		return null;
+	}
+
+	/**
+	 * Extracts the {@link HttpValueLocation} from the {@link AnnotatedElement}.
+	 * 
+	 * @param element
+	 *            {@link AnnotatedElement}.
+	 * @return Extracted {@link HttpValueLocation} or <code>null</code> if not
+	 *         {@link HttpValueLocation} details.
+	 */
+	private static HttpValueLocation extractLocation(AnnotatedElement element) {
+		if (element.isAnnotationPresent(HttpPathParameter.class)) {
+			return HttpValueLocation.PATH;
+		} else if (element.isAnnotationPresent(HttpQueryParameter.class)) {
+			return HttpValueLocation.QUERY;
+		} else if (element.isAnnotationPresent(HttpHeaderParameter.class)) {
+			return HttpValueLocation.HEADER;
+		} else if (element.isAnnotationPresent(HttpCookieParameter.class)) {
+			return HttpValueLocation.COOKIE;
+		} else if (element.isAnnotationPresent(HttpContentParameter.class)) {
+			return HttpValueLocation.ENTITY;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Indicates if match {@link HttpValueLocation}.
+	 * 
+	 * @param loaderLocation
+	 *            {@link StatelessValueLoader} {@link HttpValueLocation}. May be
+	 *            <code>null</code> to match any {@link HttpValueLocation}.
+	 * @param valueLocation
+	 *            {@link HttpValueLocation} for the value.
+	 * @return <code>true</code> if match {@link HttpValueLocation}.
+	 */
+	public static boolean isLocationMatch(HttpValueLocation loaderLocation, HttpValueLocation valueLocation) {
+		return (loaderLocation == null) || (loaderLocation == valueLocation);
 	}
 
 	/**

@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.ObjectInstantiator;
 import net.officefloor.web.value.load.PropertyKey;
 import net.officefloor.web.value.load.PropertyKeyFactory;
@@ -31,8 +32,7 @@ import net.officefloor.web.value.load.StatelessValueLoaderFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class ObjectParameterValueLoaderFactory implements
-		StatelessValueLoaderFactory {
+public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFactory {
 
 	/**
 	 * Property name.
@@ -78,10 +78,8 @@ public class ObjectParameterValueLoaderFactory implements
 	 * @param propertyKeyFactory
 	 *            {@link PropertyKeyFactory}.
 	 */
-	public ObjectParameterValueLoaderFactory(String propertyName,
-			String methodName, Class<?> objectType,
-			ObjectInstantiator objectInstantiator,
-			PropertyKeyFactory propertyKeyFactory) {
+	public ObjectParameterValueLoaderFactory(String propertyName, String methodName, Class<?> objectType,
+			ObjectInstantiator objectInstantiator, PropertyKeyFactory propertyKeyFactory) {
 		this.propertyName = propertyName;
 		this.methodName = methodName;
 		this.objectType = objectType;
@@ -109,19 +107,16 @@ public class ObjectParameterValueLoaderFactory implements
 	}
 
 	@Override
-	public StatelessValueLoader createValueLoader(Class<?> clazz)
-			throws Exception {
+	public StatelessValueLoader createValueLoader(Class<?> clazz) throws Exception {
 
 		// Obtain the loader method
-		final Method loaderMethod = clazz.getMethod(this.methodName,
-				this.objectType);
+		final Method loaderMethod = clazz.getMethod(this.methodName, this.objectType);
 
 		// Return the value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String name, int nameIndex,
-					String value, Map<PropertyKey, Object> state)
-					throws Exception {
+			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
+					Map<PropertyKey, Object> state) throws Exception {
 
 				// Determine parameter key (-1 to ignore separator '.')
 				String propertyName = name.substring(0, nameIndex - 1);
@@ -139,13 +134,12 @@ public class ObjectParameterValueLoaderFactory implements
 					state.put(key, parameter);
 
 					// Load the parameter
-					ValueLoaderSource.loadValue(object, loaderMethod,
-							parameter);
+					ValueLoaderSource.loadValue(object, loaderMethod, parameter);
 				}
 
 				// Load the remaining object
-				ObjectParameterValueLoaderFactory.this.valueLoader.loadValue(
-						parameter, name, nameIndex, value, state);
+				ObjectParameterValueLoaderFactory.this.valueLoader.loadValue(parameter, name, nameIndex, value,
+						location, state);
 			}
 		};
 	}

@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.value.load;
 
+import net.officefloor.web.build.HttpValueLocation;
+
 /**
  * Loads a value onto the Object graph.
  * 
@@ -31,9 +33,11 @@ public interface ValueLoader {
 	 *            Property name.
 	 * @param value
 	 *            Property value.
+	 * @param location
+	 *            {@link HttpValueLocation}.
 	 * @throws Exception
 	 *             If fails to load the value.
 	 */
-	void loadValue(String name, String value) throws Exception;
+	void loadValue(String name, String value, HttpValueLocation location) throws Exception;
 
 }

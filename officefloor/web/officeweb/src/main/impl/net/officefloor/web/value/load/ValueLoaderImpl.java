@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.PropertyKey;
 import net.officefloor.web.value.load.StatelessValueLoader;
 import net.officefloor.web.value.load.ValueLoader;
@@ -64,9 +65,9 @@ public class ValueLoaderImpl implements ValueLoader {
 	 */
 
 	@Override
-	public void loadValue(String name, String value) throws Exception {
+	public void loadValue(String name, String value, HttpValueLocation location) throws Exception {
 		// Load the value
-		this.delegate.loadValue(this.object, name, 0, value, this.state);
+		this.delegate.loadValue(this.object, name, 0, value, location, this.state);
 	}
 
 }

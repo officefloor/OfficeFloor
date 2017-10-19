@@ -169,7 +169,7 @@ public class HttpParametersLoader<T> {
 				public void handleHttpParameter(String name, String value) throws HttpRequestTokeniseException {
 					// Load the value
 					try {
-						valueLoader.loadValue(name, value);
+						valueLoader.loadValue(name, value, null);
 					} catch (Exception ex) {
 						throw new HttpRequestTokeniseException(ex);
 					}

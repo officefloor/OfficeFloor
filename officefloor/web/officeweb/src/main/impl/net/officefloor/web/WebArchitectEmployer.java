@@ -18,10 +18,14 @@
 package net.officefloor.web;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -319,6 +323,23 @@ public class WebArchitectEmployer implements WebArchitect {
 			OfficeSectionOutput output = routingSection.getOfficeSectionOutput(outputName);
 			this.officeArchitect.link(output, input.sectionInput);
 		}
+
+		// Load inline configured dependencies
+		final Set<Class<?>> httpParameters = new HashSet<>();
+		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
+			ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
+			for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
+				Class<?> objectType = functionParameterType.getObjectType();
+
+				if (objectType.isAnnotationPresent(HttpParameters.class)) {
+					// Load as HTTP parameters (only once)
+					if (!httpParameters.contains(objectType)) {
+						this.addHttpRequestObject(objectType, true);
+						httpParameters.add(objectType);
+					}
+				}
+			}
+		});
 
 		// Configure not handled
 		this.officeArchitect.link(routingSection.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME),
