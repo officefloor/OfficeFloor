@@ -32,9 +32,13 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
+import net.officefloor.web.state.HttpRequestStateManagedObjectSource.HttpRequestStateDependencies;
 
 /**
  * Tests the {@link HttpRequestStateManagedObjectSource}.
@@ -47,6 +51,11 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 	 * {@link HttpRequestObjectManagedObjectSource}.
 	 */
 	private HttpRequestStateManagedObjectSource source;
+
+	/**
+	 * {@link MockServerHttpConnection}.
+	 */
+	private MockServerHttpConnection connection = MockHttpServer.mockConnection();
 
 	/**
 	 * Validate specification.
@@ -64,6 +73,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		// Create expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpRequestState.class);
+		type.addDependency(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpRequestStateManagedObjectSource.class);
@@ -89,6 +99,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Source another managed object as should be new empty state
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION, this.connection);
 		HttpRequestState another = (HttpRequestState) user.sourceManagedObject(this.source).getObject();
 		assertNull("Should be new empty state", another.getAttribute(NAME));
 
@@ -253,6 +264,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION, this.connection);
 		ManagedObject mo = user.sourceManagedObject(this.source);
 
 		// Ensure correct object

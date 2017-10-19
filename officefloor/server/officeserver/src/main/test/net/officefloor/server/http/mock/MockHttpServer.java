@@ -125,6 +125,16 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
+	 * Convenience method to create the {@link MockServerHttpConnection} for GET
+	 * / with no headers nor entity.
+	 * 
+	 * @return {@link MockServerHttpConnection}.
+	 */
+	public static MockServerHttpConnection mockConnection() {
+		return new MockServerHttpConnectionImpl(mockRequest());
+	}
+
+	/**
 	 * Creates the {@link MockServerHttpConnection}.
 	 * 
 	 * @param request
