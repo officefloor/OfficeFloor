@@ -21,9 +21,14 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.server.http.HttpHeaderName;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.state.HttpArgument;
 
@@ -35,19 +40,43 @@ import net.officefloor.web.state.HttpArgument;
 public class LeafWebRouteNode implements WebRouteNode {
 
 	/**
+	 * <code>Allow</code> {@link HttpHeaderName}.
+	 */
+	private static final HttpHeaderName ALLOW = new HttpHeaderName("allow");
+
+	/**
 	 * {@link LeafWebRouteHandling} instances by their {@link HttpMethod}.
 	 */
 	private final Map<HttpMethodEnum, LeafWebRouteHandling> handlers;
 
 	/**
+	 * <code>Allow</code> {@link HttpHeaderValue}.
+	 */
+	private final HttpHeaderValue allowedMethods;
+
+	/**
 	 * Instantiate.
 	 * 
+	 * @param allowedMethods
+	 *            Allowed {@link HttpMethod} names.
 	 * @param handlers
 	 *            {@link LeafWebRouteHandling} instances by their
 	 *            {@link HttpMethod}.
 	 */
-	public LeafWebRouteNode(Map<HttpMethodEnum, LeafWebRouteHandling> handlers) {
+	public LeafWebRouteNode(String[] allowedMethods, Map<HttpMethodEnum, LeafWebRouteHandling> handlers) {
 		this.handlers = handlers;
+
+		// Create the allow value
+		StringBuilder value = new StringBuilder();
+		boolean isFirst = true;
+		for (String allowedMethod : allowedMethods) {
+			if (!isFirst) {
+				value.append(", ");
+			}
+			isFirst = false;
+			value.append(allowedMethod);
+		}
+		this.allowedMethods = new HttpHeaderValue(value.toString());
 	}
 
 	/*
@@ -56,7 +85,7 @@ public class LeafWebRouteNode implements WebRouteNode {
 
 	@Override
 	public boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
-			ManagedFunctionContext<?, Indexed> context) {
+			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
 		// Determine if end of path
 		boolean isFurtherChecks;
@@ -127,6 +156,12 @@ public class LeafWebRouteNode implements WebRouteNode {
 
 			// Handle request
 			handler.handle(namedArguments, context);
+
+		} else {
+			// Method not allowed
+			HttpResponse response = connection.getHttpResponse();
+			response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+			response.getHttpHeaders().addHeader(ALLOW, this.allowedMethods);
 		}
 
 		// Handled

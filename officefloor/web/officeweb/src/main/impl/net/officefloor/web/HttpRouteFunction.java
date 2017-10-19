@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.route.WebRouter;
@@ -46,13 +47,21 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	private final WebRouter router;
 
 	/**
+	 * {@link Flow} index for non handled.
+	 */
+	private final int nonHandledFlowIndex;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param router
 	 *            {@link WebRouter}.
+	 * @param nonHandledFlowIndex
+	 *            {@link Flow} index for non handled.
 	 */
-	public HttpRouteFunction(WebRouter router) {
+	public HttpRouteFunction(WebRouter router, int nonHandledFlowIndex) {
 		this.router = router;
+		this.nonHandledFlowIndex = nonHandledFlowIndex;
 	}
 
 	/*
@@ -78,10 +87,12 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 		// Attempt to route the request
 		if (this.router.service(connection, context)) {
 			return null; // routed to servicing
-		}
 
-		// As here, not handled
-		return null;
+		} else {
+			// Not handled
+			context.doFlow(this.nonHandledFlowIndex, null, null);
+			return null; // flow invoked
+		}
 	}
 
 }

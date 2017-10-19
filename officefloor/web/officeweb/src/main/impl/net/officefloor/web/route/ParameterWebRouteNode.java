@@ -28,6 +28,7 @@ import java.util.Set;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.state.HttpArgument;
 
@@ -137,7 +138,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 
 	@Override
 	public boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
-			ManagedFunctionContext<?, Indexed> context) {
+			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
 		// Capture starting position of parameter value
 		final int parameterStart = index;
@@ -163,7 +164,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 
 						// Determine if handle route
 						if (node.handle(method, path, index, this.includePathArgument(headPathArgument, parameterValue),
-								context)) {
+								connection, context)) {
 							return true; // parameter terminated (route handled)
 						}
 					}
@@ -188,7 +189,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 
 			// Handle by leaf
 			return this.leafNode.handle(method, path, index, this.includePathArgument(headPathArgument, parameterValue),
-					context);
+					connection, context);
 		}
 
 		// As here, no match

@@ -20,6 +20,7 @@ package net.officefloor.web.route;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -40,11 +41,13 @@ public interface WebRouteNode {
 	 *            Index into the path.
 	 * @param headPathArgument
 	 *            Head {@link HttpArgument} from the path.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
 	 * @param context
 	 *            {@link ManagedFunctionContext}.
 	 * @return <code>true</code> if handled the path.
 	 */
 	boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
-			ManagedFunctionContext<?, Indexed> context);
+			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context);
 
 }

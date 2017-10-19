@@ -22,6 +22,7 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.state.HttpArgument;
@@ -229,6 +230,27 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		this.route("/prefix/extra", T("/prefix{}", "", "/extra"));
 	}
 
+	/**
+	 * Ensure indicate that method not allowed.
+	 */
+	public void testMethodNotAllowed() {
+		MockServerHttpConnection connection = this.route(HttpMethod.POST, "/", Ti("/"));
+		MockHttpResponse response = connection.send(null);
+		assertEquals("Should not allow POST", 405, response.getHttpStatus().getStatusCode());
+		assertEquals("Should indicate available methods", "GET, HEAD, OPTIONS",
+				response.getFirstHeader("Allow").getValue());
+	}
+
+	/**
+	 * Ensure indicate method not allowed when matching with path parameter.
+	 */
+	public void testMethodNotAllowedWithPathParameter() {
+		MockServerHttpConnection connection = this.route(HttpMethod.GET, "/value", Ti(HttpMethod.POST, "/{param}"));
+		MockHttpResponse response = connection.send(null);
+		assertEquals("Should not allow GET", 405, response.getHttpStatus().getStatusCode());
+		assertEquals("Should indicate available methods", "OPTIONS, POST", response.getFirstHeader("Allow").getValue());
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
@@ -239,7 +261,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		this.route(HttpMethod.GET, path, routes);
 	}
 
-	public void route(HttpMethod method, String path, MockWebRoute... routes) {
+	public MockServerHttpConnection route(HttpMethod method, String path, MockWebRoute... routes) {
 
 		// Determine if should be handled
 		boolean isHandled = false;
@@ -269,6 +291,9 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		for (MockWebRoute route : routes) {
 			assertEquals("Invalid route handling of path " + route.path, route.isHandler, route.isInvoked);
 		}
+
+		// Return the connection
+		return connection;
 	}
 
 	private static MockWebRoute R(String path) {
@@ -285,6 +310,18 @@ public class WebRouterTest extends OfficeFrameTestCase {
 
 	private static MockWebRoute T(HttpMethod method, String path, String... pathArgumentNameValuePairs) {
 		return new MockWebRoute(method, path, true, pathArgumentNameValuePairs);
+	}
+
+	private static MockWebRoute Ti(String path) {
+		MockWebRoute route = T(path);
+		route.isInvoked = true; // target but issue so not serviced
+		return route;
+	}
+
+	private static MockWebRoute Ti(HttpMethod method, String path) {
+		MockWebRoute route = T(method, path);
+		route.isInvoked = true; // target but issue so not serviced
+		return route;
 	}
 
 	private static class MockWebRoute implements WebRouteHandler {

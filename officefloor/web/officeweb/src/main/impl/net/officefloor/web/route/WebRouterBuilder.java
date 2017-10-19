@@ -20,9 +20,11 @@ package net.officefloor.web.route;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -230,6 +232,14 @@ public class WebRouterBuilder {
 					new LeafWebRouteHandling((method) -> genericParameterNames.get(method.getName()),
 							(method) -> genericHandling.get(method.getName())));
 
+			// Obtain the allowed methods
+			Set<String> allowedMethodsSet = new HashSet<>(genericHandling.keySet());
+			allowedMethodsSet.add(HttpMethod.OPTIONS.getName());
+			if (allowedMethodsSet.contains(HttpMethod.GET.getName())) {
+				allowedMethodsSet.add(HttpMethod.HEAD.getName());
+			}
+			String[] allowedMethods = allowedMethodsSet.stream().sorted().toArray(String[]::new);
+
 			// Load handling by enum
 			for (WebRoute route : choice.routes) {
 				String[] parameterNames = routeParameterNames.get(route);
@@ -241,7 +251,7 @@ public class WebRouterBuilder {
 			}
 
 			// Return the leaf node
-			return getStaticWrap.apply(new LeafWebRouteNode(handlers));
+			return getStaticWrap.apply(new LeafWebRouteNode(allowedMethods, handlers));
 
 		case STATIC:
 			// Add the character to static routes and continue static route

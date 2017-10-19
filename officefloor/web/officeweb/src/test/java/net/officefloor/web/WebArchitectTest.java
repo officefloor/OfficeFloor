@@ -120,13 +120,14 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure appropriately indicates {@link HttpMethod} not supported.
+	 * Ensure appropriately indicates {@link HttpMethod} not allowed.
 	 */
-	public void testPostUnsupported() throws Exception {
+	public void testPostNotAllowed() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/", MockSection.class,
 				MockHttpServer.mockRequest("/").method(HttpMethod.POST));
 		assertEquals("Incorrect response status", 405, response.getHttpStatus().getStatusCode());
-		assertEquals("Must indicate allowed methods", "GET", response.getFirstHeader("Allow").getValue());
+		assertEquals("Must indicate allowed methods", "GET, HEAD, OPTIONS",
+				response.getFirstHeader("Allow").getValue());
 	}
 
 	/**

@@ -20,6 +20,7 @@ package net.officefloor.web.route;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -67,7 +68,7 @@ public class StaticWebRouteNode implements WebRouteNode {
 
 	@Override
 	public boolean handle(HttpMethod method, String path, int index, HttpArgument headPathParameter,
-			ManagedFunctionContext<?, Indexed> context) {
+			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
 		// Determine if enough characters
 		if (this.characters.length + index > path.length()) {
@@ -86,7 +87,7 @@ public class StaticWebRouteNode implements WebRouteNode {
 		// As here, match on paths, so continue matching
 		for (int i = 0; i < this.nodes.length; i++) {
 			WebRouteNode node = this.nodes[i];
-			if (node.handle(method, path, index + this.characters.length, headPathParameter, context)) {
+			if (node.handle(method, path, index + this.characters.length, headPathParameter, connection, context)) {
 				return true; // handled
 			}
 		}

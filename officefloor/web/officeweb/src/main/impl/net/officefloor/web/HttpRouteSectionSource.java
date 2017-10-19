@@ -151,8 +151,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		}
 
 		// Link non-handled to output
+		FunctionFlow unhandledFlow = route.getFunctionFlow(UNHANDLED_OUTPUT_NAME);
 		SectionOutput unhandled = designer.addSectionOutput(UNHANDLED_OUTPUT_NAME, null, false);
-		designer.link(route, unhandled);
+		designer.link(unhandledFlow, unhandled, false);
 
 		// Configure the not found input
 		SectionInput notFoundInput = designer.addSectionInput(NOT_FOUND_INPUT_NAME, null);
@@ -255,10 +256,14 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
+			// Obtain the non handled flow index
+			int nonHandledFlowIndex = HttpRouteSectionSource.this.routes.size();
+
 			// Add the route function
 			ManagedFunctionTypeBuilder<HttpRouteDependencies, Indexed> builder = functionNamespaceTypeBuilder
-					.addManagedFunctionType(ROUTE_FUNCTION_NAME, new HttpRouteFunction(this.router),
-							HttpRouteDependencies.class, Indexed.class);
+					.addManagedFunctionType(ROUTE_FUNCTION_NAME,
+							new HttpRouteFunction(this.router, nonHandledFlowIndex), HttpRouteDependencies.class,
+							Indexed.class);
 
 			// Configure dependency on server HTTP connection
 			builder.addObject(ServerHttpConnection.class).setKey(HttpRouteDependencies.SERVER_HTTP_CONNECTION);
@@ -269,6 +274,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				flow.setLabel(route.getOutputName());
 				flow.setArgumentType(HttpArgument.class);
 			}
+
+			// Configure the unhandled flow
+			builder.addFlow().setLabel(UNHANDLED_OUTPUT_NAME);
 		}
 	}
 

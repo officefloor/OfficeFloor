@@ -306,7 +306,7 @@ public class WebRouter {
 			WebRouteNode node = this.nodes[i];
 
 			// Determine if handled by node
-			if (node.handle(method, requestUri, 0, null, managedFunctionContext)) {
+			if (node.handle(method, requestUri, 0, null, connection, managedFunctionContext)) {
 				return true; // servicing request
 			}
 		}
