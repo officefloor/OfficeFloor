@@ -17,7 +17,6 @@
  */
 package net.officefloor.web.build;
 
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -28,38 +27,12 @@ import net.officefloor.server.http.ServerHttpConnection;
 public interface HttpContentParser {
 
 	/**
-	 * <code>Content-Type</code> {@link HttpHeader} name.
-	 */
-	static final String CONTENT_TYPE = "content-type";
-
-	/**
 	 * Obtains the <code>Content-Type</code> handled by this
 	 * {@link HttpArgumentParser}.
 	 * 
-	 * @return <code>Content-Type</code> handled by this {@link HttpArgumentParser}.
+	 * @return <code>Content-Type</code> handled by this
+	 *         {@link HttpArgumentParser}.
 	 */
 	String getContentType();
-
-	/**
-	 * Indicates whether can handle the {@link ServerHttpConnection}.
-	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @return <code>true</code> if able to handle parsing the entity of the
-	 *         {@link ServerHttpConnection}.
-	 */
-	default boolean isHandle(ServerHttpConnection connection) {
-		HttpHeader header = connection.getHttpRequest().getHttpHeaders().getHeader(CONTENT_TYPE);
-		if (header != null) {
-			String handledContentType = this.getContentType();
-			String requestContentType = header.getValue();
-			if (handledContentType.equalsIgnoreCase(requestContentType)) {
-				return true; // handling content
-			}
-		}
-
-		// As here, not handle
-		return false;
-	}
 
 }

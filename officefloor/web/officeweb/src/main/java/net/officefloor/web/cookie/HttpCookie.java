@@ -36,6 +36,7 @@ import net.officefloor.server.http.HttpResponseHeaders;
  *
  * @author Daniel Sagenschneider
  */
+@Deprecated // use java.net.HttpCookie
 public class HttpCookie {
 
 	/**

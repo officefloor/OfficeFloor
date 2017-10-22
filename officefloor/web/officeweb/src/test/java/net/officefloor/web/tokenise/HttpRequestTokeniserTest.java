@@ -17,11 +17,21 @@
  */
 package net.officefloor.web.tokenise;
 
+import java.net.HttpCookie;
+
+import javax.xml.ws.http.HTTPException;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.UsAsciiUtil;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.build.HttpValueLocation;
+import net.officefloor.web.escalation.BadRequestHttpException;
+import net.officefloor.web.value.load.ValueLoader;
 
 /**
  * Tests the {@link HttpRequestTokeniser}.
@@ -31,15 +41,14 @@ import net.officefloor.server.http.mock.MockHttpServer;
 public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 
 	/**
-	 * Mock {@link HttpRequestTokenHandler}.
+	 * Mock {@link ValueLoader}.
 	 */
-	private final HttpRequestTokenHandler handler = this.createMock(HttpRequestTokenHandler.class);
+	private final ValueLoader loader = this.createMock(ValueLoader.class);
 
 	/**
 	 * Ensure can load GET request with no parameters.
 	 */
 	public void testGetWithNoParameters() throws Exception {
-		this.handler.handlePath("/path");
 		this.doTest(HttpMethod.GET, "/path", null);
 	}
 
@@ -47,9 +56,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load a single parameter.
 	 */
 	public void testGetWithOneParameter() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.handler.handleQueryString("FirstName=Daniel");
+		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.QUERY);
 		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel", null);
 	}
 
@@ -57,10 +64,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load multiple parameters.
 	 */
 	public void testGetWithMultipleParameters() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this.handler.handleQueryString("FirstName=Daniel;LastName=Sagenschneider");
+		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.QUERY);
+		this.loader.loadValue("LastName", "Sagenschneider", HttpValueLocation.QUERY);
 		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel;LastName=Sagenschneider", null);
 	}
 
@@ -68,8 +73,6 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensures able to parse GET with only a segment.
 	 */
 	public void testGetWithFragment() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleFragment("fragment");
 		this.doTest(HttpMethod.GET, "/path#fragment", null);
 	}
 
@@ -77,10 +80,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensures able to parse GET with empty tokens.
 	 */
 	public void testEmptyTokens() throws Exception {
-		this.handler.handlePath("");
-		this.handler.handleHttpParameter("", "");
-		this.handler.handleQueryString("=");
-		this.handler.handleFragment("");
+		this.loader.loadValue("", "", HttpValueLocation.QUERY);
 		this.doTest(HttpMethod.GET, "?=#", null);
 	}
 
@@ -88,11 +88,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensures able to parse GET with parameters and fragments.
 	 */
 	public void testGetWithParametersAndFragments() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this.handler.handleQueryString("FirstName=Daniel&LastName=Sagenschneider");
-		this.handler.handleFragment("fragment");
+		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.QUERY);
+		this.loader.loadValue("LastName", "Sagenschneider", HttpValueLocation.QUERY);
 		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel&LastName=Sagenschneider#fragment", null);
 	}
 
@@ -100,9 +97,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure able to load parameter with <code>+</code> for space.
 	 */
 	public void testGetParameterWithSpace() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel Aaron");
-		this.handler.handleQueryString("FirstName=Daniel+Aaron");
+		this.loader.loadValue("FirstName", "Daniel Aaron", HttpValueLocation.QUERY);
 		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel+Aaron", null);
 	}
 
@@ -110,9 +105,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure able to load parameter with <code>%HH</code> escaping.
 	 */
 	public void testGetParameterWithEscape() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel Aaron");
-		this.handler.handleQueryString("FirstName=Daniel%20Aaron");
+		this.loader.loadValue("FirstName", "Daniel Aaron", HttpValueLocation.QUERY);
 		this.doTest(HttpMethod.GET, "/path?FirstName=Daniel%20Aaron", null);
 	}
 
@@ -120,15 +113,11 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure if invalid <code>%HH</code> escaping.
 	 */
 	public void testGetParameterWithInvalidEscape() throws Exception {
-
-		// Only gets to path
-		this.handler.handlePath("/path");
-
 		try {
 			this.doTest(HttpMethod.GET, "/path?Invalid=%WRONG", null);
 			fail("Should not be successful");
-		} catch (HttpRequestTokeniseException ex) {
-			assertEquals("Incorrect cause", "Invalid character for escaping: W", ex.getMessage());
+		} catch (BadRequestHttpException ex) {
+			assertEquals("Incorrect cause", "Invalid character for escaping: W", ex.getEntity());
 		}
 
 		// Verify (as exception did not trigger)
@@ -139,7 +128,6 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with no parameters.
 	 */
 	public void testPostNoParameter() throws Exception {
-		this.handler.handlePath("/path");
 		this.doTest(HttpMethod.POST, "/path", "");
 	}
 
@@ -147,30 +135,41 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with a parameter.
 	 */
 	public void testPostWithOneParameter() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel");
+		this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.ENTITY);
+		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel", "content-type", "application/x-www-form-urlencoded");
 	}
 
 	/**
 	 * Ensure can load POST request with multiple parameters.
 	 */
 	public void testPostWithMultipleParameters() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel&LastName=Sagenschneider");
+		this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.ENTITY);
+		this.loader.loadValue("LastName", "Sagenschneider", HttpValueLocation.ENTITY);
+		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel&LastName=Sagenschneider", "content-type",
+				"application/x-www-form-urlencoded");
+	}
+
+	/**
+	 * Ensure can tokenise {@link HttpCookie} values.
+	 */
+	public void testCookieParameter() {
+		HttpCookie cookie = new HttpCookie("name", "value");
+		this.loader.loadValue("cookie", cookie.toString(), HttpValueLocation.HEADER);
+		this.loader.loadValue("name", "value", HttpValueLocation.COOKIE);
+		this.doTest(HttpMethod.GET, "/path", null, "cookie", cookie.toString());
 	}
 
 	/**
 	 * Ensure can load POST request with parameters in the URI and the body.
 	 */
 	public void testPostWithUriAndBodyParameters() throws Exception {
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.handler.handleQueryString("FirstName=Daniel");
-		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this.doTest(HttpMethod.POST, "/path?FirstName=Daniel", "LastName=Sagenschneider");
+		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.QUERY);
+		this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+		this.loader.loadValue("LastName", "Sagenschneider", HttpValueLocation.ENTITY);
+		this.doTest(HttpMethod.POST, "/path?FirstName=Daniel", "LastName=Sagenschneider", "content-type",
+				"application/x-www-form-urlencoded");
 	}
 
 	/**
@@ -192,19 +191,15 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 					continue;
 				}
 
-				// Obtain the characters
-				String high = getCharacterValue(highBits);
-				String low = getCharacterValue(lowBits);
+				// Obtain the character
 				String character = getCharacterValue((byte) highBits, (byte) lowBits);
 
 				// Record handling
-				this.handler.handlePath("/path" + character);
-				this.handler.handleHttpParameter(character, character);
-				this.handler.handleHttpParameter("other", "value");
-				this.handler.handleQueryString("%" + high + low + "=%" + high + low + "&other=value");
-				this.handler.handleFragment("fragment" + character);
-				this.handler.handleHttpParameter(character, character);
-				this.handler.handleHttpParameter("another", "value");
+				this.loader.loadValue(character, character, HttpValueLocation.QUERY);
+				this.loader.loadValue("other", "value", HttpValueLocation.QUERY);
+				this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+				this.loader.loadValue(character, character, HttpValueLocation.ENTITY);
+				this.loader.loadValue("another", "value", HttpValueLocation.ENTITY);
 			}
 		}
 
@@ -231,8 +226,10 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 				String fragment = "fragment" + escapedCharacter;
 				String entity = escapedCharacter + "=" + escapedCharacter + ";another=value";
 				HttpRequest request = MockHttpServer.mockRequest().method(HttpMethod.POST)
-						.uri(path + "?" + queryString + "#" + fragment).entity(entity).build();
-				HttpRequestTokeniser.tokeniseHttpRequest(request, this.handler);
+						.uri(path + "?" + queryString + "#" + fragment)
+						.header("content-type", "application/x-www-form-urlencoded").entity(entity).build();
+				HttpRequestTokeniser.tokeniseHttpRequest(request,
+						new HttpArgumentParser[] { new FormHttpArgumentParser() }, this.loader);
 			}
 		}
 
@@ -288,24 +285,6 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can tokenise on just request URI.
-	 */
-	public void testRequestURI() throws Exception {
-		// Record tokenising of Request URI
-		this.handler.handlePath("/path");
-		this.handler.handleHttpParameter("FirstName", "Daniel");
-		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this.handler.handleQueryString("FirstName=Daniel&LastName=Sagenschneider");
-		this.handler.handleFragment("fragment");
-
-		// Test with request URI
-		this.replayMockObjects();
-		HttpRequestTokeniser.tokeniseRequestURI("/path?FirstName=Daniel&LastName=Sagenschneider#fragment",
-				this.handler);
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Does the test, expecting mocks to have recorded actions.
 	 * 
 	 * @param method
@@ -314,11 +293,18 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 *            {@link HttpRequest} Request URI.
 	 * @param entity
 	 *            Entity of the {@link HttpRequest}.
+	 * @param headerNameValues
+	 *            {@link HttpHeader} name value pairs.
 	 */
-	private void doTest(HttpMethod method, String requestUri, String entity) throws Exception {
+	private void doTest(HttpMethod method, String requestUri, String entity, String... headerNameValues)
+			throws HTTPException {
 		this.replayMockObjects();
-		HttpRequest request = MockHttpServer.mockRequest().method(method).uri(requestUri).entity(entity).build();
-		HttpRequestTokeniser.tokeniseHttpRequest(request, this.handler);
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(requestUri).method(method).entity(entity);
+		for (int i = 0; i < headerNameValues.length; i += 2) {
+			request.header(headerNameValues[i], headerNameValues[i + 1]);
+		}
+		HttpRequestTokeniser.tokeniseHttpRequest(request.build(),
+				new HttpArgumentParser[] { new FormHttpArgumentParser() }, this.loader);
 		this.verifyMockObjects();
 	}
 

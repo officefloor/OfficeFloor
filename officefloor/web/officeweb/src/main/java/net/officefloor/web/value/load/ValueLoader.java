@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.value.load;
 
+import javax.xml.ws.http.HTTPException;
+
 import net.officefloor.web.build.HttpValueLocation;
 
 /**
@@ -35,9 +37,9 @@ public interface ValueLoader {
 	 *            Property value.
 	 * @param location
 	 *            {@link HttpValueLocation}.
-	 * @throws Exception
+	 * @throws HTTPException
 	 *             If fails to load the value.
 	 */
-	void loadValue(String name, String value, HttpValueLocation location) throws Exception;
+	void loadValue(String name, String value, HttpValueLocation location) throws HTTPException;
 
 }

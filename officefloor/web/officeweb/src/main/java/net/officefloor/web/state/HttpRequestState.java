@@ -20,6 +20,7 @@ package net.officefloor.web.state;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectResponder;
@@ -38,8 +39,10 @@ public interface HttpRequestState {
 	 * 
 	 * @param valueLoader
 	 *            {@link ValueLoader} to receive the values.
+	 * @throws HttpException
+	 *             if fails to load values.
 	 */
-	void loadValues(ValueLoader valueLoader);
+	void loadValues(ValueLoader valueLoader) throws HttpException;
 
 	/**
 	 * Obtains the {@link HttpObjectParser} instances.

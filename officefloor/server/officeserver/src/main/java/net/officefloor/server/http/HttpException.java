@@ -122,6 +122,17 @@ public class HttpException extends RuntimeException {
 	}
 
 	/**
+	 * Enable wrapping {@link Throwable} in a {@link HttpException} for
+	 * {@link HttpStatus#INTERNAL_SERVER_ERROR}.
+	 * 
+	 * @param cause
+	 *            {@link Throwable} cause.
+	 */
+	public HttpException(Throwable cause) {
+		this(HttpStatus.INTERNAL_SERVER_ERROR, cause);
+	}
+
+	/**
 	 * Obtains the {@link HttpStatus} for the {@link HttpResponse}.
 	 * 
 	 * @return {@link HttpStatus} for the {@link HttpResponse}.
@@ -142,8 +153,7 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Obtains the entity for the {@link HttpResponse}.
 	 * 
-	 * @return Entity for the {@link HttpResponse}. May be <code>null</code> for
-	 *         no entity.
+	 * @return Entity for the {@link HttpResponse}.
 	 */
 	public String getEntity() {
 		return this.entity;

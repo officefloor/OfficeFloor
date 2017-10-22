@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.ws.http.HTTPException;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -33,10 +35,15 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputMetaData;
+import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpValueLocation;
+import net.officefloor.web.tokenise.HttpRequestTokeniser;
 import net.officefloor.web.value.load.ValueLoader;
 
 /**
@@ -116,6 +123,21 @@ public class HttpRequestStateManagedObjectSource
 		});
 	}
 
+	/**
+	 * {@link HttpArgumentParser} instances.
+	 */
+	private final HttpArgumentParser[] argumentParsers;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param argumentParsers
+	 *            {@link HttpArgumentParser} instances.
+	 */
+	public HttpRequestStateManagedObjectSource(HttpArgumentParser[] argumentParsers) {
+		this.argumentParsers = argumentParsers;
+	}
+
 	/*
 	 * =================== ManagedObjectSource ==========================
 	 */
@@ -140,8 +162,8 @@ public class HttpRequestStateManagedObjectSource
 	/**
 	 * {@link ManagedObject} for the {@link HttpRequestState}.
 	 */
-	private static class HttpRequestStateManagedObject implements ProcessAwareManagedObject,
-			CoordinatingManagedObject<HttpRequestStateDependencies>, HttpRequestState {
+	private class HttpRequestStateManagedObject implements ProcessAwareManagedObject,
+			CoordinatingManagedObject<HttpRequestStateDependencies>, HttpRequestState, ValueLoader {
 
 		/**
 		 * {@link ProcessAwareContext}.
@@ -154,10 +176,15 @@ public class HttpRequestStateManagedObjectSource
 		private ServerHttpConnection connection;
 
 		/**
-		 * Head path {@link HttpArgument} of the linked list of
-		 * {@link HttpArgument} instances.
+		 * Head {@link HttpArgument} of the linked list of {@link HttpArgument}
+		 * instances.
 		 */
-		private HttpArgument pathArguments = null;
+		private HttpArgument arguments = null;
+
+		/**
+		 * Indicates if tokenised the {@link HttpRequest}.
+		 */
+		private boolean isTokenisedRequest = false;
 
 		/**
 		 * {@link HttpInputMetaData}.
@@ -180,7 +207,7 @@ public class HttpRequestStateManagedObjectSource
 		 */
 		public void initialise(HttpArgument pathArguments, HttpInputMetaData inputMetaData) {
 			this.context.run(() -> {
-				this.pathArguments = pathArguments;
+				this.arguments = pathArguments;
 				this.inputMetaData = inputMetaData;
 				return null;
 			});
@@ -207,12 +234,46 @@ public class HttpRequestStateManagedObjectSource
 		}
 
 		/*
+		 * ===================== ValueLoader =========================
+		 */
+
+		@Override
+		public void loadValue(String name, String value, HttpValueLocation location) throws HTTPException {
+			HttpArgument oldHead = this.arguments;
+			this.arguments = new HttpArgument(name, value, location);
+			this.arguments.next = oldHead;
+		}
+
+		/*
 		 * ==================== HttpRequestState ==========================
 		 */
 
 		@Override
-		public void loadValues(ValueLoader valueLoader) {
-			// TODO Auto-generated method stub
+		public void loadValues(ValueLoader valueLoader) throws HttpException {
+			this.context.run(() -> {
+
+				// Tokenise the HTTP request
+				if (!this.isTokenisedRequest) {
+
+					// Tokenise out the arguments
+					HttpRequest request = this.connection.getHttpRequest();
+					HttpRequestTokeniser.tokeniseHttpRequest(request,
+							HttpRequestStateManagedObjectSource.this.argumentParsers, this);
+
+					// Request now tokenised
+					this.isTokenisedRequest = true;
+				}
+
+				// Load the arguments
+				HttpArgument argument = this.arguments;
+				while (argument != null) {
+					valueLoader.loadValue(argument.name, argument.value, argument.location);
+					argument = argument.next;
+				}
+
+				// Void return
+				return null;
+			});
 		}
 
 		@Override

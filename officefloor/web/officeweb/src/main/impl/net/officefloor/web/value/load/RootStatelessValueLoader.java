@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.PropertyKey;
 import net.officefloor.web.value.load.PropertyKeyFactory;
@@ -62,7 +63,7 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 
 	@Override
 	public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
-			Map<PropertyKey, Object> state) throws Exception {
+			Map<PropertyKey, Object> state) throws HttpException {
 
 		// Parse out the property name (start at name index)
 		int index = -1;

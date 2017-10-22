@@ -20,6 +20,7 @@ package net.officefloor.web.value.load;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.ObjectInstantiator;
 import net.officefloor.web.value.load.PropertyKey;
@@ -116,7 +117,7 @@ public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFa
 		return new StatelessValueLoader() {
 			@Override
 			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
-					Map<PropertyKey, Object> state) throws Exception {
+					Map<PropertyKey, Object> state) throws HttpException {
 
 				// Determine parameter key (-1 to ignore separator '.')
 				String propertyName = name.substring(0, nameIndex - 1);
@@ -127,8 +128,16 @@ public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFa
 				Object parameter = state.get(key);
 				if (parameter == null) {
 					// Instantiate the parameter object
-					parameter = ObjectParameterValueLoaderFactory.this.objectInstantiator
-							.instantiate(ObjectParameterValueLoaderFactory.this.objectType);
+					try {
+						parameter = ObjectParameterValueLoaderFactory.this.objectInstantiator
+								.instantiate(ObjectParameterValueLoaderFactory.this.objectType);
+					} catch (Exception ex) {
+						if (ex instanceof HttpException) {
+							throw (HttpException) ex;
+						} else {
+							throw new HttpException(ex);
+						}
+					}
 
 					// Record on state for possible further loading
 					state.put(key, parameter);

@@ -22,23 +22,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
-import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
-import net.officefloor.web.state.HttpRequestState;
-import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource.HttpRequestStateDependencies;
+import net.officefloor.web.tokenise.FormHttpArgumentParser;
+import net.officefloor.web.value.load.ValueLoader;
 
 /**
  * Tests the {@link HttpRequestStateManagedObjectSource}.
@@ -62,7 +65,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 	 */
 	public void testSpecification() {
 		// Should require no properties
-		ManagedObjectLoaderUtil.validateSpecification(HttpRequestStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(new HttpRequestStateManagedObjectSource(null));
 	}
 
 	/**
@@ -76,7 +79,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		type.addDependency(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpRequestStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, new HttpRequestStateManagedObjectSource(null));
 	}
 
 	/**
@@ -106,6 +109,44 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		// Ensure can remove attribute
 		state.removeAttribute(NAME);
 		assertNull("Attribute should be removed", state.getAttribute(NAME));
+	}
+
+	/**
+	 * Ensure can load values to {@link ValueLoader}.
+	 */
+	public void testLoadValues() throws Throwable {
+
+		// Create the request with all values
+		HttpCookie cookie = new HttpCookie("c", "C");
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		request.uri("/P?q=Q");
+		request.header("header", "H");
+		request.header("cookie", cookie.toString());
+		this.connection = MockHttpServer.mockConnection(request);
+
+		// Create the request state (with path parameters)
+		HttpRequestState state = this.createHttpRequestState();
+		HttpRequestStateManagedObjectSource
+				.initialiseHttpRequestState(new HttpArgument("p", "P", HttpValueLocation.PATH), null, state);
+
+		// Load the values
+		List<HttpArgument> arguments = new LinkedList<>();
+		state.loadValues((name, value, location) -> {
+			arguments.add(new HttpArgument(name, value, location));
+		});
+		HttpArgument[] expectedArguments = new HttpArgument[] { new HttpArgument("c", "C", HttpValueLocation.COOKIE),
+				new HttpArgument("cookie", cookie.toString(), HttpValueLocation.HEADER),
+				new HttpArgument("header", "H", HttpValueLocation.HEADER),
+				new HttpArgument("q", "Q", HttpValueLocation.QUERY),
+				new HttpArgument("p", "P", HttpValueLocation.PATH) };
+		assertEquals("Incorrect number of arguments", expectedArguments.length, arguments.size());
+		int index = 0;
+		for (HttpArgument expected : expectedArguments) {
+			HttpArgument actual = arguments.get(index++);
+			assertEquals("Incorrect name", expected.name, actual.name);
+			assertEquals("Incorrect value", expected.value, actual.value);
+			assertEquals("Incorrect location", expected.location, actual.location);
+		}
 	}
 
 	/**
@@ -259,8 +300,8 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 	private HttpRequestState createHttpRequestState() throws Throwable {
 
 		// Load the source
-		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		this.source = loader.loadManagedObjectSource(HttpRequestStateManagedObjectSource.class);
+		this.source = new HttpRequestStateManagedObjectSource(
+				new HttpArgumentParser[] { new FormHttpArgumentParser() });
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

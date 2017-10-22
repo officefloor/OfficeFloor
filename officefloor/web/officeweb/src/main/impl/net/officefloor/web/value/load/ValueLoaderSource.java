@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.HttpContentParameter;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
@@ -51,27 +52,25 @@ public class ValueLoaderSource {
 	 *            {@link Method} to load the values.
 	 * @param parameters
 	 *            Values to be loaded into the {@link Method}.
-	 * @throws Exception
+	 * @throws HttpException
 	 *             If fails to load the values.
 	 */
-	public static void loadValue(Object object, Method method, Object... parameters) throws Exception {
+	public static void loadValue(Object object, Method method, Object... parameters) throws HttpException {
 		try {
 
 			// Load the value
 			method.invoke(object, parameters);
 
 		} catch (InvocationTargetException ex) {
-
-			// Propagate cause (if possible)
+			// Propagate cause of invocation escalation
 			Throwable cause = ex.getCause();
-			if (cause instanceof Exception) {
-				throw (Exception) cause;
-			} else if (cause instanceof Error) {
-				throw (Error) cause;
+			if (cause instanceof HttpException) {
+				throw (HttpException) cause;
 			} else {
-				// Throw original invocation exception
-				throw ex;
+				throw new HttpException(cause);
 			}
+		} catch (Exception ex) {
+			throw new HttpException(ex);
 		}
 	}
 

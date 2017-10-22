@@ -19,6 +19,7 @@ package net.officefloor.web.value.load;
 
 import java.util.Map;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
 
 /**
@@ -44,10 +45,10 @@ public interface StatelessValueLoader {
 	 *            {@link HttpValueLocation}.
 	 * @param state
 	 *            State of loading values to the Object graph.
-	 * @throws Exception
+	 * @throws HttpException
 	 *             If fails to load the value.
 	 */
 	void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
-			Map<PropertyKey, Object> state) throws Exception;
+			Map<PropertyKey, Object> state) throws HttpException;
 
 }

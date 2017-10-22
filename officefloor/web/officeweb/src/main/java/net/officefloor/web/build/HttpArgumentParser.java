@@ -17,7 +17,11 @@
  */
 package net.officefloor.web.build;
 
+import javax.xml.ws.http.HTTPException;
+
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.value.load.ValueLoader;
 
 /**
  * Parses arguments from the {@link ServerHttpConnection}.
@@ -29,13 +33,13 @@ public interface HttpArgumentParser extends HttpContentParser {
 	/**
 	 * Parses the HTTP entity.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param context
-	 *            {@link HttpArgumentParserContext}.
-	 * @throws Exception
+	 * @param request
+	 *            {@link HttpRequest}.
+	 * @param valueLoader
+	 *            {@link ValueLoader}.
+	 * @throws HTTPException
 	 *             If fails to parse the {@link ServerHttpConnection}.
 	 */
-	void parse(ServerHttpConnection connection, HttpArgumentParserContext context) throws Exception;
+	void parse(HttpRequest request, ValueLoader valueLoader) throws HTTPException;
 
 }

@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -33,11 +31,11 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
-import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.state.HttpRequestObjectManagedObjectSource.HttpRequestObjectDependencies;
+import net.officefloor.web.state.HttpRequestStateManagedObjectSource.HttpRequestStateDependencies;
 
 /**
  * Tests the {@link HttpRequestObjectManagedObjectSource}.
@@ -79,10 +77,7 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 		// Obtain the type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockObject.class);
-		type.addDependency("REQUEST_STATE", HttpRequestState.class, null, 0, null);
-		if (isLoadParameters) {
-			type.addDependency("SERVER_HTTP_CONNECTION", ServerHttpConnection.class, null, 1, null);
-		}
+		type.addDependency(HttpRequestObjectDependencies.HTTP_REQUEST_STATE, HttpRequestState.class, null);
 
 		// Validate the managed object type
 		List<String> properties = new ArrayList<String>(4);
@@ -193,43 +188,22 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	public void doTest(boolean isAlreadyRegistered, String boundName, boolean isLoadParameters, String requestUri,
 			String expectedValue, String... propertyNameValuePairs) throws Throwable {
 
-		final HttpRequestState state = this.createMock(HttpRequestState.class);
-		final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+		// Create the server HTTP connection
+		ServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest(requestUri));
+
+		// Create the request state
+		HttpRequestState requestState = this.createHttpRequestState(connection);
 
 		// Determine the name to retrieve object from request state
 		final String MO_NAME = "MO";
 		final String RETRIEVE_NAME = (boundName == null ? MO_NAME : boundName);
 
 		// Obtain the object
-		final MockObject[] object = new MockObject[1];
+		MockObject object = new MockObject();
 		if (isAlreadyRegistered) {
 			// Record obtain registered object
-			object[0] = new MockObject();
-			this.recordReturn(state, state.getAttribute(RETRIEVE_NAME), object[0]);
-
-		} else {
-			// Record instantiate and register in request state
-			this.recordReturn(state, state.getAttribute(RETRIEVE_NAME), null);
-			state.setAttribute(RETRIEVE_NAME, null);
-			this.control(state).setMatcher(new AbstractMatcher() {
-				@Override
-				public boolean matches(Object[] expected, Object[] actual) {
-					assertEquals("Incorrect bound name", RETRIEVE_NAME, actual[0]);
-					object[0] = (MockObject) actual[1];
-					assertNotNull("Expecting instantiated object", object[0]);
-					return true;
-				}
-			});
-
-			// Load parameters
-			if (isLoadParameters) {
-				HttpRequest request = MockHttpServer.mockRequest(requestUri).build();
-				this.recordReturn(connection, connection.getHttpRequest(), request);
-			}
+			requestState.setAttribute(RETRIEVE_NAME, object);
 		}
-
-		// Test
-		this.replayMockObjects();
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
@@ -248,18 +222,29 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 		// Instantiate and obtain the object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
 		user.setBoundManagedObjectName(MO_NAME);
-		user.mapDependency(0, state);
-		if (isLoadParameters) {
-			user.mapDependency(1, connection);
-		}
+		user.mapDependency(HttpRequestObjectDependencies.HTTP_REQUEST_STATE, requestState);
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertSame("Incorrect instantiated object", object[0], managedObject.getObject());
+		if (isAlreadyRegistered) {
+			assertSame("Incorrect instantiated object", object, managedObject.getObject());
+			assertNull("Should not load value to existing object", object.value);
+		} else {
+			object = (MockObject) managedObject.getObject();
+			assertEquals("Incorrect loaded value", expectedValue, object.value);
+		}
+	}
 
-		// Verify
-		this.verifyMockObjects();
-
-		// Ensure correct value
-		assertEquals("Incorrect value", expectedValue, object[0].value);
+	/**
+	 * Creates the {@link HttpRequestState}.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return {@link HttpRequestState}.
+	 */
+	private HttpRequestState createHttpRequestState(ServerHttpConnection connection) throws Throwable {
+		HttpRequestStateManagedObjectSource mos = new HttpRequestStateManagedObjectSource(new HttpArgumentParser[0]);
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(HttpRequestStateDependencies.SERVER_HTTP_CONNECTION, connection);
+		return (HttpRequestState) user.sourceManagedObject(mos);
 	}
 
 	/**

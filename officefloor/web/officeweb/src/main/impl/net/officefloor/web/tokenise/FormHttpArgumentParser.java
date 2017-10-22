@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.parameter;
+package net.officefloor.web.tokenise;
 
-import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.build.HttpArgumentParser;
+import net.officefloor.web.value.load.ValueLoader;
 
 /**
- * Enum providing the dependency keys for the {@link HttpParametersLoader}.
- *
+ * Form {@link HttpArgumentParser}.
+ * 
  * @author Daniel Sagenschneider
  */
-public enum HttpParametersLoaderDependencies {
+public class FormHttpArgumentParser implements HttpArgumentParser {
 
-	/**
-	 * {@link ServerHttpConnection}.
+	/*
+	 * =================== HttpArgumentParser ====================
 	 */
-	SERVER_HTTP_CONNECTION,
 
-	/**
-	 * Object to be loaded.
-	 */
-	OBJECT
+	@Override
+	public String getContentType() {
+		return "application/x-www-form-urlencoded";
+	}
+
+	@Override
+	public void parse(HttpRequest request, ValueLoader valueLoader) throws HttpException {
+		HttpRequestTokeniser.tokeniseFormEntity(request, valueLoader);
+	}
 
 }
