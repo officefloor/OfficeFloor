@@ -267,7 +267,8 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 							Class<?> annotationType = annotation.annotationType();
 
 							// Determine if qualifier annotation
-							if (annotationType.isAnnotationPresent(Qualifier.class)) {
+							Qualifier qualifierAnnotation = annotationType.getAnnotation(Qualifier.class);
+							if (qualifierAnnotation != null) {
 
 								// Allow only one qualifier
 								if (typeQualifier != null) {
@@ -275,8 +276,14 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 											+ " has more than one " + Qualifier.class.getSimpleName());
 								}
 
+								// Obtain the qualifier name factory
+								@SuppressWarnings("rawtypes")
+								Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation
+										.nameFactory();
+								QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.newInstance();
+
 								// Provide type qualifier
-								typeQualifier = annotationType.getName();
+								typeQualifier = nameFactory.getQualifierName(annotation);
 								objectTypeBuilder.setTypeQualifier(typeQualifier);
 							}
 						}

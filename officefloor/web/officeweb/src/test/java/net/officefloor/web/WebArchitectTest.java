@@ -19,6 +19,7 @@ package net.officefloor.web;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.HttpCookie;
 
 import lombok.Data;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -43,7 +44,6 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.ObjectResponse;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.session.HttpSession;
 
 /**
@@ -288,8 +288,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testCookieValue() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockCookieValue.class,
-				MockHttpServer.mockRequest("/path").header(HttpCookie.COOKIE,
-						new HttpCookie("param", "value").toHttpResponseHeaderValue()));
+				MockHttpServer.mockRequest("/path").header("cookie", new HttpCookie("param", "value").toString()));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
 		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
 	}

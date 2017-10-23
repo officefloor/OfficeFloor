@@ -54,6 +54,7 @@ import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
+import net.officefloor.web.tokenise.FormHttpArgumentParser;
 
 /**
  * {@link WebArchitect} implementation.
@@ -307,13 +308,17 @@ public class WebArchitectEmployer implements WebArchitect {
 		httpSessionMos.setTimeout(10 * 1000); // TODO make configurable
 		httpSessionMos.addOfficeManagedObject("HTTP_SESSION", ManagedObjectScope.PROCESS);
 
-		// Configure the HTTP Application and Request States
+		// Load the argument parsers
+		HttpArgumentParser[] argumentParsers = new HttpArgumentParser[] { new FormHttpArgumentParser() };
+
+		// Configure the HTTP Application and Request State
 		this.officeArchitect
 				.addOfficeManagedObjectSource("HTTP_APPLICATION_STATE",
 						new HttpApplicationStateManagedObjectSource(this.contextPath))
 				.addOfficeManagedObject("HTTP_APPLICATION_STATE", ManagedObjectScope.PROCESS);
 		this.officeArchitect
-				.addOfficeManagedObjectSource("HTTP_REQUEST_STATE", HttpRequestStateManagedObjectSource.class.getName())
+				.addOfficeManagedObjectSource("HTTP_REQUEST_STATE",
+						new HttpRequestStateManagedObjectSource(argumentParsers))
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
 		// Configure the HTTP handler

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,30 +18,21 @@
 package net.officefloor.plugin.managedfunction.clazz;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 /**
- * Enables qualifying dependencies.
+ * {@link QualifierNameFactory} providing the fully qualified {@link Class}
+ * name.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface Qualifier {
+public class ClassNameQualifierNameFactory implements QualifierNameFactory<Annotation> {
 
-	/**
-	 * {@link QualifierNameFactory} to derive the name from the
-	 * {@link Annotation}.
-	 * 
-	 * @return {@link QualifierNameFactory} {@link Class} to be instantiated by
-	 *         default constructor.
+	/*
+	 * ================ QualifierNameFactory ====================
 	 */
-	@SuppressWarnings("rawtypes")
-	Class<? extends QualifierNameFactory> nameFactory() default ClassNameQualifierNameFactory.class;
 
+	@Override
+	public String getQualifierName(Annotation annotation) {
+		return annotation.annotationType().getName();
+	}
 }

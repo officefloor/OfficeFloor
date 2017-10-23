@@ -169,6 +169,68 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to dynamically determine qualifier.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testDynamicQualifiedDependency() throws Exception {
+
+		// Create the namespace type builder
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+
+		// Function
+		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
+		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(String.class);
+		objectOne.setTypeQualifier("MOCK_ONE");
+		objectOne.setLabel("MOCK_ONE-" + String.class.getName());
+		ManagedFunctionObjectTypeBuilder<?> objectTwo = function.addObject(String.class);
+		objectTwo.setTypeQualifier("MOCK_TWO");
+		objectTwo.setLabel("MOCK_TWO-" + String.class.getName());
+
+		// Validate the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
+				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				MockDynamicQualifiedClass.class.getName());
+
+		// Ensure appropriate objects for function
+		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
+		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
+		assertEquals("Incorrect number of function objects", 2, functionObjects.length);
+		assertEquals("Incorrect first object", "MOCK_ONE-" + String.class.getName(),
+				functionObjects[0].getObjectName());
+		assertEquals("Incorrect second object", "MOCK_TWO-" + String.class.getName(),
+				functionObjects[1].getObjectName());
+	}
+
+	/**
+	 * Dynamic mock {@link Qualifier}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier(nameFactory = MockQualifierNameFactory.class)
+	public @interface MockDynamicQualification {
+		String value();
+	}
+
+	/**
+	 * Mock {@link QualifierNameFactory}.
+	 */
+	public static class MockQualifierNameFactory implements QualifierNameFactory<MockDynamicQualification> {
+		@Override
+		public String getQualifierName(MockDynamicQualification annotation) {
+			return "MOCK_" + annotation.value();
+		}
+
+	}
+
+	/**
+	 * Mock dynamic qualified {@link Class}.
+	 */
+	public static class MockDynamicQualifiedClass {
+		public void function(@MockDynamicQualification("ONE") String one, @MockDynamicQualification("TWO") String two) {
+		}
+	}
+
+	/**
 	 * Ensure able to load {@link FunctionNamespaceType} for the
 	 * {@link ClassManagedFunctionSource}.
 	 */
