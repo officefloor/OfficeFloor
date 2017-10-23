@@ -170,13 +170,13 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}/{two}", MockPathValue.class,
 				MockHttpServer.mockRequest("/path/value/2"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value and Two=2", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
 	}
 
 	public static class MockPathValue {
-		public void service(@HttpPathParameter("param") String param, @HttpPathParameter("two") String two,
-				ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param + " and Two=" + two);
+		public void service(@HttpPathParameter("param") String param, ServerHttpConnection connection)
+				throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
 		}
 	}
 
@@ -234,7 +234,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	@HttpParameters
-	public static class QueryParameter {
+	public static class QueryParameter implements Serializable {
 		protected String param;
 
 		@HttpQueryParameter("") // default to method property name

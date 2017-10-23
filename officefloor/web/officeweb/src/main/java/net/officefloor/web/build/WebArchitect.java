@@ -82,19 +82,6 @@ public abstract interface WebArchitect {
 	void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory);
 
 	/**
-	 * Adds a HTTP argument.
-	 * 
-	 * @param parameterName
-	 *            Name of the parameter.
-	 * @param location
-	 *            {@link HttpValueLocation} to obtain the argument value. May be
-	 *            <code>null</code> to obtain from anywhere on the
-	 *            {@link HttpRequest}.
-	 * @return {@link OfficeManagedObject}.
-	 */
-	OfficeManagedObject addHttpArgument(String parameterName, HttpValueLocation location);
-
-	/**
 	 * Adds an object to be lazily created and stored within the
 	 * {@link HttpApplicationState}.
 	 * 
@@ -175,6 +162,19 @@ public abstract interface WebArchitect {
 	 * @return {@link OfficeManagedObject}.
 	 */
 	OfficeManagedObject addHttpRequestObject(Class<?> objectClass, boolean isLoadParameters);
+
+	/**
+	 * Adds a HTTP argument.
+	 * 
+	 * @param parameterName
+	 *            Name of the parameter.
+	 * @param location
+	 *            {@link HttpValueLocation} to obtain the argument value. May be
+	 *            <code>null</code> to obtain from anywhere on the
+	 *            {@link HttpRequest}.
+	 * @return {@link OfficeManagedObject}.
+	 */
+	OfficeManagedObject addHttpArgument(String parameterName, HttpValueLocation location);
 
 	/**
 	 * Links a URL to an {@link OfficeSectionInput}. This will always be a

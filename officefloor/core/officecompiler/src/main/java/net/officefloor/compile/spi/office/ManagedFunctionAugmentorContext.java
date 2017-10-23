@@ -30,6 +30,13 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 public interface ManagedFunctionAugmentorContext {
 
 	/**
+	 * Obtains the name of the {@link ManagedFunction}.
+	 * 
+	 * @return Name of the {@link ManagedFunction}.
+	 */
+	String getManagedFunctionName();
+
+	/**
 	 * Obtains the {@link ManagedFunctionType} of the {@link ManagedFunction}.
 	 * 
 	 * @return {@link ManagedFunctionType} of the {@link ManagedFunction}.

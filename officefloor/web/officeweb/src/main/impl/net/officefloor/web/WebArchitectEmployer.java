@@ -389,11 +389,24 @@ public class WebArchitectEmployer implements WebArchitect {
 						HttpPathParameter pathParameter = (HttpPathParameter) annotation;
 						if (objectType != String.class) {
 							this.officeArchitect.addIssue("Parameter must be " + String.class.getName() + " but was "
-									+ objectType.getName() + " for function " + functionType.getFunctionName());
+									+ objectType.getName() + " for function " + context.getManagedFunctionName());
 						}
 						String typeQualifier = new HttpPathParameter.HttpPathParameterNameFactory()
 								.getQualifierName(pathParameter);
 						this.addHttpArgument(pathParameter.value(), HttpValueLocation.PATH)
+								.addTypeQualification(typeQualifier, String.class.getName());
+					}
+
+					// HTTP query parameter
+					if (annotation instanceof HttpQueryParameter) {
+						HttpQueryParameter queryParameter = (HttpQueryParameter) annotation;
+						if (objectType != String.class) {
+							this.officeArchitect.addIssue("Parameter must be " + String.class.getName() + " but was "
+									+ objectType.getName() + " for function " + context.getManagedFunctionName());
+						}
+						String typeQualifier = new HttpQueryParameter.HttpQueryParameterNameFactory()
+								.getQualifierName(queryParameter);
+						this.addHttpArgument(queryParameter.value(), HttpValueLocation.QUERY)
 								.addTypeQualification(typeQualifier, String.class.getName());
 					}
 				}

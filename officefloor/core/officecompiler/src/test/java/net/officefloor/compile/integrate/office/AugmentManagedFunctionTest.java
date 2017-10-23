@@ -59,6 +59,11 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 			// Augment the function object
 			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+
+				// Ensure have managed function name (identify function)
+				assertEquals("Incorrect managed function name", "SECTION.function", augment.getManagedFunctionName());
+
+				// Validate can add objects for function parameters
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
 					Class<?> objectType = type.getObjectType();
 					if (objectType.isAnnotationPresent(MockAnnotation.class)) {

@@ -437,6 +437,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		ManagedFunctionAugmentorContext context = new ManagedFunctionAugmentorContext() {
 
 			@Override
+			public String getManagedFunctionName() {
+				return managedFunctionNode.getQualifiedFunctionName();
+			}
+
+			@Override
 			public ManagedFunctionType<?, ?> getManagedFunctionType() {
 				return managedFunctionType;
 			}

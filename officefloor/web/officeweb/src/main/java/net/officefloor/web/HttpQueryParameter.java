@@ -17,41 +17,41 @@
  */
 package net.officefloor.web;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
-import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.QualifierNameFactory;
 
 /**
- * <p>
- * Annotated on the class of the parameter to indicate it should be a
- * {@link HttpRequestObjectManagedObjectSource} that will load the
- * {@link HttpRequest} parameters onto the object.
- * <p>
- * This simplifies means to specifying
- * {@link HttpRequestObjectManagedObjectSource} instances by in-lining it with
- * the code.
+ * {@link Annotation} to indicate the value is loaded from a query parameter.
  * 
  * @author Daniel Sagenschneider
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Qualifier(nameFactory = HttpQueryParameter.HttpQueryParameterNameFactory.class)
 public @interface HttpQueryParameter {
 
 	/**
-	 * Allows specifying the name to bind the object into the
-	 * {@link HttpRequestState}.
+	 * {@link QualifierNameFactory}.
+	 */
+	public static class HttpQueryParameterNameFactory implements QualifierNameFactory<HttpQueryParameter> {
+		@Override
+		public String getQualifierName(HttpQueryParameter annotation) {
+			return HttpQueryParameter.class.getSimpleName() + "_" + annotation.value();
+		}
+	}
+
+	/**
+	 * Allows specifying the query parameter name.
 	 * 
-	 * @return Name to bind the object into the {@link HttpRequestState}. The
-	 *         blank default value indicates for the {@link ManagedObject} to
-	 *         assign its own unique value.
+	 * @return Query parameter name.
 	 */
 	String value();
 
