@@ -18,6 +18,7 @@
 package net.officefloor.plugin.managedfunction.clazz;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -92,8 +93,12 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
 		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
 		assertEquals("Incorrect number of function objects", 2, functionObjects.length);
+		ManagedFunctionObjectType<?> functionObjectOne = functionObjects[0];
 		assertEquals("Incorrect first object", MockQualification.class.getName() + "-" + String.class.getName(),
-				functionObjects[0].getObjectName());
+				functionObjectOne.getObjectName());
+		Object[] functionObjectOneAnnotations = functionObjectOne.getAnnotations();
+		assertEquals("Incorrect number of annotations", 1, functionObjectOneAnnotations.length);
+		assertTrue("Incorrect annotation", functionObjectOneAnnotations[0] instanceof MockQualification);
 		assertEquals("Incorrect second object", String.class.getName(), functionObjects[1].getObjectName());
 	}
 
@@ -196,10 +201,15 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
 		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
 		assertEquals("Incorrect number of function objects", 2, functionObjects.length);
-		assertEquals("Incorrect first object", "MOCK_ONE-" + String.class.getName(),
-				functionObjects[0].getObjectName());
+		ManagedFunctionObjectType<?> functionObjectOne = functionObjects[0];
+		assertEquals("Incorrect first object", "MOCK_ONE-" + String.class.getName(), functionObjectOne.getObjectName());
+		MockDynamicQualification objectOneAnnotation = (MockDynamicQualification) functionObjectOne.getAnnotations()[0];
+		assertEquals("Incorrect function object one annotation", "ONE", objectOneAnnotation.value());
+		ManagedFunctionObjectType<?> functionObjectTwo = functionObjects[1];
 		assertEquals("Incorrect second object", "MOCK_TWO-" + String.class.getName(),
-				functionObjects[1].getObjectName());
+				functionObjectTwo.getObjectName());
+		MockDynamicQualification objectTwoAnnotation = (MockDynamicQualification) functionObjectTwo.getAnnotations()[0];
+		assertEquals("Incorrect function object two annotation", "TWO", objectTwoAnnotation.value());
 	}
 
 	/**
@@ -219,7 +229,6 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		public String getQualifierName(MockDynamicQualification annotation) {
 			return "MOCK_" + annotation.value();
 		}
-
 	}
 
 	/**
@@ -227,6 +236,61 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockDynamicQualifiedClass {
 		public void function(@MockDynamicQualification("ONE") String one, @MockDynamicQualification("TWO") String two) {
+		}
+	}
+
+	/**
+	 * Ensure {@link Annotation} instances on the parameter type are included in
+	 * the object annotations.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testParameterTypeAnnotations() throws Exception {
+
+		// Create the namespace type builder
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+
+		// Function
+		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
+		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(MockParameter.class);
+		objectOne.setTypeQualifier("MOCK_value");
+		objectOne.setLabel("MOCK_value-" + MockParameter.class.getName());
+
+		// Validate the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
+				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				MockAnnotateParameterClass.class.getName());
+
+		// Ensure appropriate objects for function
+		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
+		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
+		assertEquals("Incorrect number of function objects", 1, functionObjects.length);
+		ManagedFunctionObjectType<?> functionObject = functionObjects[0];
+		Object[] annotations = functionObject.getAnnotations();
+		assertEquals("Incorrect number of annotations", 2, annotations.length);
+		assertTrue("Incorrect first annotation", annotations[0] instanceof MockTypeAnnotation);
+		assertTrue("Incorrect second annotation", annotations[1] instanceof MockDynamicQualification);
+	}
+
+	/**
+	 * Type mock {@link Annotation}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface MockTypeAnnotation {
+	}
+
+	/**
+	 * Mock parameter.
+	 */
+	@MockTypeAnnotation
+	private static class MockParameter {
+	}
+
+	/**
+	 * Mock type qualified parameter.
+	 */
+	public static class MockAnnotateParameterClass {
+		public void function(@MockDynamicQualification("value") MockParameter parameter) {
 		}
 	}
 

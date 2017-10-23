@@ -343,6 +343,31 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to load annotation for parameters.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testObjectAnnotation() {
+
+		final ManagedFunctionFactory<Indexed, None> functionFactory = this.createMock(ManagedFunctionFactory.class);
+		final Object ANNOTATION = "Annotation";
+
+		// Attempt to load annotation
+		FunctionNamespaceType namespace = this.loadManagedFunctionType(true, new Loader() {
+			@Override
+			public void sourceManagedFunction(FunctionNamespaceBuilder namespace, ManagedFunctionSourceContext context)
+					throws Exception {
+				ManagedFunctionTypeBuilder<Indexed, None> function = namespace.addManagedFunctionType("FUNCTION",
+						functionFactory, Indexed.class, None.class);
+				function.addObject(String.class).addAnnotation(ANNOTATION);
+			}
+		});
+
+		// Ensure annotation available
+		Object annotation = namespace.getManagedFunctionTypes()[0].getObjectTypes()[0].getAnnotations()[0];
+		assertEquals("Incorrect annotation", ANNOTATION, annotation);
+	}
+
+	/**
 	 * Ensure issue if using {@link Enum} but no
 	 * {@link ManagedFunctionObjectType} provided for a key.
 	 */

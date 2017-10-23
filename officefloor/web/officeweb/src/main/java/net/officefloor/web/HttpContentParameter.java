@@ -24,7 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.build.HttpArgumentParser;
 
 /**
  * Annotation to in-line configuration of parameters from content of
@@ -43,13 +42,6 @@ public @interface HttpContentParameter {
 	 * @return Name of the parameter. Use blank string to default to property
 	 *         name.
 	 */
-	String name();
-
-	/**
-	 * {@link HttpArgumentParser} instances to retrieve the arguments.
-	 * 
-	 * @return {@link HttpArgumentParser} instances to retrieve the arguments.
-	 */
-	Class<? extends HttpArgumentParser>[] content() default {};
+	String value();
 
 }

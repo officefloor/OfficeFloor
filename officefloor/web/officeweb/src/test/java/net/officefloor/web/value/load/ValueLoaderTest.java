@@ -27,7 +27,6 @@ import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
-import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpValueLocation;
 
 /**
@@ -533,10 +532,10 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		@HttpCookieParameter("")
 		void setKeyCookieOnly(String key, String value);
 
-		@HttpContentParameter(name = "", content = HttpArgumentParser.class)
+		@HttpContentParameter("")
 		void setContentOnly(String contentArgument);
 
-		@HttpContentParameter(name = "", content = HttpArgumentParser.class)
+		@HttpContentParameter("")
 		void setKeyContentOnly(String key, String value);
 
 		void setField(MockField field);

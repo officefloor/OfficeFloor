@@ -66,4 +66,12 @@ public interface ManagedFunctionObjectTypeBuilder<M extends Enum<M>> {
 	 */
 	void setLabel(String label);
 
+	/**
+	 * Adds an annotation.
+	 * 
+	 * @param annotation
+	 *            Annotation.
+	 */
+	void addAnnotation(Object annotation);
+
 }

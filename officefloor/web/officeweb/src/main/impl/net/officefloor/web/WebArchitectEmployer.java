@@ -47,11 +47,13 @@ import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpParameterBuilder;
 import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
+import net.officefloor.web.state.HttpArgumentManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 import net.officefloor.web.tokenise.FormHttpArgumentParser;
@@ -86,6 +88,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * {@link OfficeSourceContext}.
 	 */
 	private final OfficeSourceContext officeSourceContext;
+
+	/**
+	 * Registry of HTTP arguments to its {@link OfficeManagedObject}.
+	 */
+	private final Map<String, OfficeManagedObject> httpArguments = new HashMap<>();
 
 	/**
 	 * Registry of HTTP Application Object to its {@link OfficeManagedObject}.
@@ -146,6 +153,26 @@ public class WebArchitectEmployer implements WebArchitect {
 	/*
 	 * ======================== WebArchitect =========================
 	 */
+
+	@Override
+	public OfficeManagedObject addHttpArgument(String parameterName, HttpValueLocation location) {
+
+		// Obtain the bind name
+		String bindName = "HTTP_" + (location == null ? "ANY" : location.name()) + "_" + parameterName;
+		OfficeManagedObject object = this.httpArguments.get(bindName);
+		if (object != null) {
+			return object; // return the already register object
+		}
+
+		// Not registered, so register
+		OfficeManagedObjectSource mos = this.officeArchitect.addOfficeManagedObjectSource(bindName,
+				new HttpArgumentManagedObjectSource(parameterName, location));
+		object = mos.addOfficeManagedObject(bindName, ManagedObjectScope.PROCESS);
+		this.httpArguments.put(bindName, object);
+
+		// Return the object
+		return object;
+	}
 
 	@Override
 	public OfficeManagedObject addHttpApplicationObject(Class<?> objectClass, String bindName) {
@@ -345,11 +372,29 @@ public class WebArchitectEmployer implements WebArchitect {
 			for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
 				Class<?> objectType = functionParameterType.getObjectType();
 
-				if (objectType.isAnnotationPresent(HttpParameters.class)) {
-					// Load as HTTP parameters (only once)
-					if (!httpParameters.contains(objectType)) {
-						this.addHttpRequestObject(objectType, true);
-						httpParameters.add(objectType);
+				// Determine if in-line configuration of dependency
+				for (Object annotation : functionParameterType.getAnnotations()) {
+
+					// HTTP parameters
+					if (annotation instanceof HttpParameters) {
+						// Load as HTTP parameters (only once)
+						if (!httpParameters.contains(objectType)) {
+							this.addHttpRequestObject(objectType, true);
+							httpParameters.add(objectType);
+						}
+					}
+
+					// HTTP path parameter
+					if (annotation instanceof HttpPathParameter) {
+						HttpPathParameter pathParameter = (HttpPathParameter) annotation;
+						if (objectType != String.class) {
+							this.officeArchitect.addIssue("Parameter must be " + String.class.getName() + " but was "
+									+ objectType.getName() + " for function " + functionType.getFunctionName());
+						}
+						String typeQualifier = new HttpPathParameter.HttpPathParameterNameFactory()
+								.getQualifierName(pathParameter);
+						this.addHttpArgument(pathParameter.value(), HttpValueLocation.PATH)
+								.addTypeQualification(typeQualifier, String.class.getName());
 					}
 				}
 			}

@@ -36,12 +36,12 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.ObjectResponse;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSession;
@@ -167,16 +167,16 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide value via path.
 	 */
 	public void testPathValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}", MockPathValue.class,
-				MockHttpServer.mockRequest("/path/value"));
+		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}/{two}", MockPathValue.class,
+				MockHttpServer.mockRequest("/path/value/2"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Value=value and Two=2", response.getHttpEntity(null));
 	}
 
 	public static class MockPathValue {
-		public void service(@HttpPathParameter("param") String param, ServerHttpConnection connection)
-				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		public void service(@HttpPathParameter("param") String param, @HttpPathParameter("two") String two,
+				ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + param + " and Two=" + two);
 		}
 	}
 
@@ -311,8 +311,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
 	}
 
-	// TODO provide form implementation of argument parser
-	@HttpParameters(content = HttpArgumentParser.class)
+	@HttpParameters
 	public static class FormParameter {
 		protected String param;
 
@@ -339,10 +338,37 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockFormValue {
-		// TODO provide form implementation of argument parser
-		public void service(@HttpContentParameter(name = "param", content = HttpArgumentParser.class) String param,
-				ServerHttpConnection connection) throws IOException {
+		public void service(@HttpContentParameter("param") String param, ServerHttpConnection connection)
+				throws IOException {
 			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+		}
+	}
+
+	/**
+	 * Ensure able to provide HTTP argument.
+	 */
+	public void testHttpArgument() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			OfficeSectionInput servicer = context.addSection("SECTION", HttpArgumentSection.class)
+					.getOfficeSectionInput("service");
+			WebArchitect web = context.getWebArchitect();
+			web.addHttpArgument("param", HttpValueLocation.QUERY);
+			web.link(false, HttpMethod.GET, "/", servicer);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server
+				.send(MockHttpServer.mockRequest("/?param=value").method(HttpMethod.POST));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Argument=value", response.getHttpEntity(null));
+	}
+
+	public static class HttpArgumentSection {
+		public void service(String argument, ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("Argument=" + argument);
 		}
 	}
 

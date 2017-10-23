@@ -21,6 +21,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -239,6 +241,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 					// Obtain the parameter type and its annotations
 					Class<?> paramType = paramTypes[i];
+					Annotation[] typeAnnotations = paramType.getAnnotations();
 					Annotation[] paramAnnotations = methodParamAnnotations[i];
 
 					// Obtain the parameter factory
@@ -259,9 +262,18 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = functionTypeBuilder
 								.addObject(paramType);
 
+						// Create the listing of all annotations
+						List<Annotation> allAnnotations = new ArrayList<>(
+								typeAnnotations.length + paramAnnotations.length);
+						allAnnotations.addAll(Arrays.asList(typeAnnotations));
+						allAnnotations.addAll(Arrays.asList(paramAnnotations));
+
 						// Determine type qualifier
 						String typeQualifier = null;
-						for (Annotation annotation : paramAnnotations) {
+						for (Annotation annotation : allAnnotations) {
+
+							// Add the annotation for the object
+							objectTypeBuilder.addAnnotation(annotation);
 
 							// Obtain the annotation type
 							Class<?> annotationType = annotation.annotationType();
