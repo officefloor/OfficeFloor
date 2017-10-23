@@ -17,16 +17,19 @@
  */
 package net.officefloor.web;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.QualifierNameFactory;
 import net.officefloor.server.http.HttpRequest;
 
 /**
- * Annotation to in-line configuration of parameters from content of
+ * {@link Annotation} to indicate the value is loaded from content of
  * {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
@@ -34,13 +37,23 @@ import net.officefloor.server.http.HttpRequest;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Qualifier(nameFactory = HttpContentParameter.HttpContentParameterNameFactory.class)
 public @interface HttpContentParameter {
+
+	/**
+	 * {@link QualifierNameFactory}.
+	 */
+	public static class HttpContentParameterNameFactory implements QualifierNameFactory<HttpContentParameter> {
+		@Override
+		public String getQualifierName(HttpContentParameter annotation) {
+			return HttpContentParameter.class.getSimpleName() + "_" + annotation.value();
+		}
+	}
 
 	/**
 	 * Name of the parameter.
 	 * 
-	 * @return Name of the parameter. Use blank string to default to property
-	 *         name.
+	 * @return Name of the parameter.
 	 */
 	String value();
 

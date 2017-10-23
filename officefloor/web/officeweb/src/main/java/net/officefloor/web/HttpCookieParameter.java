@@ -17,23 +17,38 @@
  */
 package net.officefloor.web;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.HttpCookie;
 
-import net.officefloor.web.cookie.HttpCookie;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.QualifierNameFactory;
 
 /**
- * Annotation to in-line configuration of parameters from a {@link HttpCookie}.
+ * {@link Annotation} to indicate the value is loaded from a {@link HttpCookie}
+ * parameter.
  * 
  * @author Daniel Sagenschneider
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Qualifier(nameFactory = HttpCookieParameter.HttpCookieParameterNameFactory.class)
 public @interface HttpCookieParameter {
+
+	/**
+	 * {@link QualifierNameFactory}.
+	 */
+	public static class HttpCookieParameterNameFactory implements QualifierNameFactory<HttpCookieParameter> {
+		@Override
+		public String getQualifierName(HttpCookieParameter annotation) {
+			return HttpCookieParameter.class.getSimpleName() + "_" + annotation.value();
+		}
+	}
 
 	/**
 	 * Name of parameter.

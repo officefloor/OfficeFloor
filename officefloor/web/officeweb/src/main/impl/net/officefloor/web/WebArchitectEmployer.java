@@ -17,15 +17,18 @@
  */
 package net.officefloor.web;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -384,31 +387,27 @@ public class WebArchitectEmployer implements WebArchitect {
 						}
 					}
 
-					// HTTP path parameter
-					if (annotation instanceof HttpPathParameter) {
-						HttpPathParameter pathParameter = (HttpPathParameter) annotation;
-						if (objectType != String.class) {
-							this.officeArchitect.addIssue("Parameter must be " + String.class.getName() + " but was "
-									+ objectType.getName() + " for function " + context.getManagedFunctionName());
-						}
-						String typeQualifier = new HttpPathParameter.HttpPathParameterNameFactory()
-								.getQualifierName(pathParameter);
-						this.addHttpArgument(pathParameter.value(), HttpValueLocation.PATH)
-								.addTypeQualification(typeQualifier, String.class.getName());
-					}
-
-					// HTTP query parameter
-					if (annotation instanceof HttpQueryParameter) {
-						HttpQueryParameter queryParameter = (HttpQueryParameter) annotation;
-						if (objectType != String.class) {
-							this.officeArchitect.addIssue("Parameter must be " + String.class.getName() + " but was "
-									+ objectType.getName() + " for function " + context.getManagedFunctionName());
-						}
-						String typeQualifier = new HttpQueryParameter.HttpQueryParameterNameFactory()
-								.getQualifierName(queryParameter);
-						this.addHttpArgument(queryParameter.value(), HttpValueLocation.QUERY)
-								.addTypeQualification(typeQualifier, String.class.getName());
-					}
+					// Load HTTP arguments
+					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpPathParameter.class,
+							HttpValueLocation.PATH, objectType, context, (parameter) -> parameter.value(),
+							(parameter) -> new HttpPathParameter.HttpPathParameterNameFactory()
+									.getQualifierName(parameter));
+					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpQueryParameter.class,
+							HttpValueLocation.QUERY, objectType, context, (parameter) -> parameter.value(),
+							(parameter) -> new HttpQueryParameter.HttpQueryParameterNameFactory()
+									.getQualifierName(parameter));
+					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpHeaderParameter.class,
+							HttpValueLocation.HEADER, objectType, context, (parameter) -> parameter.value(),
+							(parameter) -> new HttpHeaderParameter.HttpHeaderParameterNameFactory()
+									.getQualifierName(parameter));
+					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpCookieParameter.class,
+							HttpValueLocation.COOKIE, objectType, context, (parameter) -> parameter.value(),
+							(parameter) -> new HttpCookieParameter.HttpCookieParameterNameFactory()
+									.getQualifierName(parameter));
+					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpContentParameter.class,
+							HttpValueLocation.ENTITY, objectType, context, (parameter) -> parameter.value(),
+							(parameter) -> new HttpContentParameter.HttpContentParameterNameFactory()
+									.getQualifierName(parameter));
 				}
 			}
 		});
@@ -416,6 +415,52 @@ public class WebArchitectEmployer implements WebArchitect {
 		// Configure not handled
 		this.officeArchitect.link(routingSection.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME),
 				routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+	}
+
+	/**
+	 * Loads the in-line HTTP argument.
+	 * 
+	 * @param annotation
+	 *            {@link Annotation}.
+	 * @param annotationType
+	 *            Type of {@link Annotation}.
+	 * @param valueLocation
+	 *            {@link HttpValueLocation}.
+	 * @param objectType
+	 *            Parameter object type.
+	 * @param context
+	 *            {@link ManagedFunctionAugmentorContext}.
+	 * @param getParameterName
+	 *            {@link Function} to obtain the parameter name.
+	 * @param getQualifierName
+	 *            {@link Function} to obtain the type qualification name.
+	 */
+	private <P extends Annotation> void loadInlineHttpArgument(Object annotation, Class<P> annotationType,
+			HttpValueLocation valueLocation, Class<?> objectType, ManagedFunctionAugmentorContext context,
+			Function<P, String> getParameterName, Function<P, String> getQualifierName) {
+
+		// Ensure appropriate annotation
+		if (!(annotation instanceof Annotation)) {
+			return;
+		}
+		if (((Annotation) annotation).annotationType() != annotationType) {
+			return;
+		}
+
+		// Obtain the parameter
+		@SuppressWarnings("unchecked")
+		P parameterAnnotation = (P) annotation;
+
+		// Ensure parameter object is a String
+		if (objectType != String.class) {
+			this.officeArchitect.addIssue("Parameter must be " + String.class.getName() + " but was "
+					+ objectType.getName() + " for function " + context.getManagedFunctionName());
+		}
+
+		// Add the HTTP argument
+		String parameterName = getParameterName.apply(parameterAnnotation);
+		String typeQualifier = getQualifierName.apply(parameterAnnotation);
+		this.addHttpArgument(parameterName, valueLocation).addTypeQualification(typeQualifier, String.class.getName());
 	}
 
 	/**

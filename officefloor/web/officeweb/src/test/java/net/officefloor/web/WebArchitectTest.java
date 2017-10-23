@@ -312,7 +312,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	@HttpParameters
-	public static class FormParameter {
+	public static class FormParameter implements Serializable {
 		protected String param;
 
 		public void setParam(String param) {
@@ -330,7 +330,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide form value.
 	 */
 	public void testFormValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockQueryParameter.class,
+		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockFormValue.class,
 				MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
@@ -340,7 +340,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockFormValue {
 		public void service(@HttpContentParameter("param") String param, ServerHttpConnection connection)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param);
 		}
 	}
 
@@ -360,8 +360,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send the request
-		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest("/?param=value").method(HttpMethod.POST));
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/?param=value"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
 		assertEquals("Incorrect response", "Argument=value", response.getHttpEntity(null));
 	}
