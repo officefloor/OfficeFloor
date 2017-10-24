@@ -94,17 +94,39 @@ public class ManagedObjectSourceStandAlone {
 	 * @throws Exception
 	 *             If fails to initialise {@link ManagedObjectSource}.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS initManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
 		MS moSource = managedObjectSourceClass.newInstance();
 
+		// Return the initialised managed object source
+		return initManagedObjectSource(moSource);
+	}
+
+	/**
+	 * Instantiates and initialises the {@link ManagedObjectSource}.
+	 * 
+	 * @param <O>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @return Initialised {@link ManagedObjectSource}.
+	 * @throws Exception
+	 *             If fails to initialise {@link ManagedObjectSource}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS initManagedObjectSource(
+			MS managedObjectSource) throws Exception {
+
 		// Create necessary builders
 		OfficeFloorBuilder officeFloorBuilder = OfficeFrame.createOfficeFloorBuilder();
 		ManagingOfficeBuilder<F> managingOfficeBuilder = officeFloorBuilder
-				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, managedObjectSourceClass)
+				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, managedObjectSource)
 				.setManagingOffice("STAND ALONE");
 		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
@@ -115,10 +137,10 @@ public class ManagedObjectSourceStandAlone {
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(false,
 				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, null, this.properties, context, managingOfficeBuilder,
 				officeBuilder);
-		moSource.init(sourceContext);
+		managedObjectSource.init(sourceContext);
 
 		// Return the initialised managed object source
-		return moSource;
+		return managedObjectSource;
 	}
 
 	/**
@@ -162,6 +184,34 @@ public class ManagedObjectSourceStandAlone {
 
 		// Initialise the managed object source
 		MS moSource = this.initManagedObjectSource(managedObjectSourceClass);
+
+		// Start the managed object source
+		this.startManagedObjectSource(moSource);
+
+		// Return the loaded managed object source
+		return moSource;
+	}
+
+	/**
+	 * Loads (init and start) the {@link ManagedObjectSource}.
+	 *
+	 * @param <O>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @return Loaded {@link ManagedObjectSource}.
+	 * @throws Exception
+	 *             If fails to init and start the {@link ManagedObjectSource}.
+	 */
+	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS loadManagedObjectSource(
+			MS managedObjectSource) throws Exception {
+
+		// Initialise the managed object source
+		MS moSource = this.initManagedObjectSource(managedObjectSource);
 
 		// Start the managed object source
 		this.startManagedObjectSource(moSource);

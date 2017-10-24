@@ -24,10 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.build.HttpArgumentParser;
-import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestState;
 

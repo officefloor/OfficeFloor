@@ -283,9 +283,21 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	public OfficeManagedObject addHttpObject(Class<?> objectClass, String... acceptedContentTypes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public OfficeManagedObject addHttpObjectResponder(Class<?> objectType) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -356,12 +368,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
 		for (HttpInputBuilderImpl input : this.inputs) {
 
-			// Obtain the input meta-data
-			HttpInputMetaData inputMetaData = new HttpInputMetaData();
-			// TODO configure input from input builder
-
 			// Add the route
-			RouteInput routeInput = routing.addRoute(input.method, input.applicationPath, inputMetaData);
+			RouteInput routeInput = routing.addRoute(input.method, input.applicationPath);
 
 			// Link route output to handling section input
 			OfficeSectionOutput routeOutput = routingSection.getOfficeSectionOutput(routeInput.getOutputName());

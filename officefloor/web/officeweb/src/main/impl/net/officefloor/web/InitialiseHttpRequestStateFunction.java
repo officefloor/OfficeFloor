@@ -30,8 +30,8 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialiseHttpRequestStateFunction
-		implements ManagedFunctionFactory<InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies, None>,
+public class InitialiseHttpRequestStateFunction implements
+		ManagedFunctionFactory<InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies, None>,
 		ManagedFunction<InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies, None> {
 
 	/**
@@ -39,21 +39,6 @@ public class InitialiseHttpRequestStateFunction
 	 */
 	public static enum InitialiseHttpRequestStateDependencies {
 		PATH_ARGUMENTS, HTTP_REQUEST_STATE
-	}
-
-	/**
-	 * {@link HttpInputMetaData}.
-	 */
-	private final HttpInputMetaData inputMetaData;
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param inputMetaData
-	 *            {@link HttpInputMetaData}.
-	 */
-	public InitialiseHttpRequestStateFunction(HttpInputMetaData inputMetaData) {
-		this.inputMetaData = inputMetaData;
 	}
 
 	/*
@@ -70,15 +55,17 @@ public class InitialiseHttpRequestStateFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<InitialiseHttpRequestStateDependencies, None> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<InitialiseHttpRequestStateDependencies, None> context)
+			throws Throwable {
 
 		// Obtain the dependencies
-		HttpArgument arguments = (HttpArgument) context.getObject(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS);
+		HttpArgument arguments = (HttpArgument) context
+				.getObject(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS);
 		HttpRequestState requestState = (HttpRequestState) context
 				.getObject(InitialiseHttpRequestStateDependencies.HTTP_REQUEST_STATE);
 
 		// Initialise the request state
-		HttpRequestStateManagedObjectSource.initialiseHttpRequestState(arguments, this.inputMetaData, requestState);
+		HttpRequestStateManagedObjectSource.initialiseHttpRequestState(arguments, requestState);
 
 		// Carry on to service request
 		return null;

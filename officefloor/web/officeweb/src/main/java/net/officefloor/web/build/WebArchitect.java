@@ -177,6 +177,29 @@ public abstract interface WebArchitect {
 	OfficeManagedObject addHttpArgument(String parameterName, HttpValueLocation location);
 
 	/**
+	 * Adds a HTTP {@link Object} to be parsed from the {@link HttpRequest}.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @param acceptedContentTypes
+	 *            Listing of the <code>content-type</code> values accepted. May
+	 *            be empty array to allow supporting all available
+	 *            <code>content-type</code> {@link HttpObjectParser} instances
+	 *            available.
+	 * @return {@link OfficeManagedObject}.
+	 */
+	OfficeManagedObject addHttpObject(Class<?> objectClass, String... acceptedContentTypes);
+
+	/**
+	 * Adds a HTTP {@link Object} responder for the {@link Object} type.
+	 * 
+	 * @param objectType
+	 *            {@link Object} type.
+	 * @return {@link OfficeManagedObject}.
+	 */
+	OfficeManagedObject addHttpObjectResponder(Class<?> objectType);
+
+	/**
 	 * Links a URL to an {@link OfficeSectionInput}. This will always be a
 	 * {@link HttpMethod#GET} due to redirection required for the
 	 * {@link HttpUrlContinuation}.

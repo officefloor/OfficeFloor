@@ -38,10 +38,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.HttpInputMetaData;
 import net.officefloor.web.build.HttpArgumentParser;
-import net.officefloor.web.build.HttpObjectParser;
-import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.tokenise.HttpRequestTokeniser;
 import net.officefloor.web.value.load.ValueLoader;
@@ -67,15 +64,12 @@ public class HttpRequestStateManagedObjectSource
 	 * @param pathArguments
 	 *            Head path {@link HttpArgument} of the linked list of
 	 *            {@link HttpArgument} instances.
-	 * @param inputMetaData
-	 *            {@link HttpInputMetaData}.
 	 * @param requestState
 	 *            {@link HttpRequestState}.
 	 */
-	public static void initialiseHttpRequestState(HttpArgument pathArguments, HttpInputMetaData inputMetaData,
-			HttpRequestState requestState) {
+	public static void initialiseHttpRequestState(HttpArgument pathArguments, HttpRequestState requestState) {
 		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
-		mo.initialise(pathArguments, inputMetaData);
+		mo.initialise(pathArguments);
 	}
 
 	/**
@@ -187,11 +181,6 @@ public class HttpRequestStateManagedObjectSource
 		private boolean isTokenisedRequest = false;
 
 		/**
-		 * {@link HttpInputMetaData}.
-		 */
-		private HttpInputMetaData inputMetaData = null;
-
-		/**
 		 * Attributes.
 		 */
 		private Map<String, Serializable> attributes = new HashMap<String, Serializable>();
@@ -202,13 +191,10 @@ public class HttpRequestStateManagedObjectSource
 		 * @param pathArguments
 		 *            Head path {@link HttpArgument} of the linked list of
 		 *            {@link HttpArgument} instances.
-		 * @param inputMetaData
-		 *            {@link HttpInputMetaData}.
 		 */
-		public void initialise(HttpArgument pathArguments, HttpInputMetaData inputMetaData) {
+		public void initialise(HttpArgument pathArguments) {
 			this.context.run(() -> {
 				this.arguments = pathArguments;
-				this.inputMetaData = inputMetaData;
 				return null;
 			});
 		}
@@ -274,18 +260,6 @@ public class HttpRequestStateManagedObjectSource
 				// Void return
 				return null;
 			});
-		}
-
-		@Override
-		public HttpObjectParser<?>[] getObjectParsers() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public HttpObjectResponder<?>[] getObjectResponders() {
-			// TODO Auto-generated method stub
-			return null;
 		}
 
 		@Override

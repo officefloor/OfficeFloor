@@ -127,7 +127,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		// Create the request state (with path parameters)
 		HttpRequestState state = this.createHttpRequestState();
 		HttpRequestStateManagedObjectSource
-				.initialiseHttpRequestState(new HttpArgument("p", "P", HttpValueLocation.PATH), null, state);
+				.initialiseHttpRequestState(new HttpArgument("p", "P", HttpValueLocation.PATH), state);
 
 		// Load the values
 		List<HttpArgument> arguments = new LinkedList<>();

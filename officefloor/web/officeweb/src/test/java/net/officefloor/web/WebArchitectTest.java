@@ -28,6 +28,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
@@ -42,7 +43,6 @@ import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
-import net.officefloor.web.build.ObjectResponse;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSession;
 
@@ -404,6 +404,10 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class ObjectValueFactory implements HttpObjectParserFactory, HttpObjectParser<ObjectValue> {
 
+		/*
+		 * =================== HttpObjectParserFactory =====================
+		 */
+
 		@Override
 		public String getContentType() {
 			return "application/mock";
@@ -411,9 +415,13 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> HttpObjectParser<? extends T> createHttpObjectParser(Class<T> objectType) {
+		public <T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectType) {
 			return (HttpObjectParser<T>) this;
 		}
+
+		/*
+		 * ==================== HttpObjectParser ===========================
+		 */
 
 		@Override
 		public Class<ObjectValue> getObjectType() {
@@ -421,7 +429,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public ObjectValue parse(ServerHttpConnection connection) throws Exception {
+		public ObjectValue parse(ServerHttpConnection connection) throws HttpException {
 			String content = MockHttpServer.getContent(connection.getHttpRequest(), null);
 			return new ObjectValue(content);
 		}

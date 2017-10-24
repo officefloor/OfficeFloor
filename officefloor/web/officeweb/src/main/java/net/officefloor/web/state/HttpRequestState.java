@@ -22,8 +22,6 @@ import java.util.Iterator;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.build.HttpObjectParser;
-import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.value.load.ValueLoader;
 
@@ -43,22 +41,6 @@ public interface HttpRequestState {
 	 *             if fails to load values.
 	 */
 	void loadValues(ValueLoader valueLoader) throws HttpException;
-
-	/**
-	 * Obtains the {@link HttpObjectParser} instances.
-	 * 
-	 * @return {@link HttpObjectParser} instances. May be <code>null</code> if
-	 *         no {@link HttpObjectParser} instances.
-	 */
-	HttpObjectParser<?>[] getObjectParsers();
-
-	/**
-	 * Obtains the {@link HttpObjectResponder} instances.
-	 * 
-	 * @return {@link HttpObjectResponder} instances. May be <code>null</code>
-	 *         if no {@link HttpObjectResponder} instances.
-	 */
-	HttpObjectResponder<?>[] getObjectResponders();
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.

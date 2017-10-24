@@ -106,11 +106,6 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		private final boolean isPathParameters;
 
 		/**
-		 * {@link HttpInputMetaData}.
-		 */
-		private final HttpInputMetaData inputMetaData;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param flowIndex
@@ -123,16 +118,12 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 *            {@link WebRouterBuilder}.
 		 * @param isPathParameters
 		 *            Indicates if path parameters for the route.
-		 * @param inputMetaData
-		 *            {@link HttpInputMetaData}.
 		 */
-		public RouteInput(int flowIndex, HttpMethod method, String path, boolean isPathParameters,
-				HttpInputMetaData inputMetaData) {
+		public RouteInput(int flowIndex, HttpMethod method, String path, boolean isPathParameters) {
 			this.flowIndex = flowIndex;
 			this.method = method;
 			this.path = path;
 			this.isPathParameters = isPathParameters;
-			this.inputMetaData = inputMetaData;
 		}
 
 		/**
@@ -172,11 +163,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 *            {@link HttpMethod}.
 	 * @param path
 	 *            Route path.
-	 * @param inputMetaData
-	 *            {@link HttpInputMetaData}.
 	 * @return {@link RouteInput} for the route.
 	 */
-	public RouteInput addRoute(HttpMethod method, String path, HttpInputMetaData inputMetaData) {
+	public RouteInput addRoute(HttpMethod method, String path) {
 
 		// Obtain the flow index for the route
 		int flowIndex = this.routes.size();
@@ -185,7 +174,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		boolean isPathParameters = this.builder.addRoute(method, path, new WebRouteHandlerImpl(flowIndex));
 
 		// Track route information for configuration
-		RouteInput input = new RouteInput(flowIndex, method, path, isPathParameters, inputMetaData);
+		RouteInput input = new RouteInput(flowIndex, method, path, isPathParameters);
 		this.routes.add(input);
 
 		// Return the route input
@@ -232,7 +221,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			} else {
 				// Path parameters, so must load to request state
 				SectionFunctionNamespace initialiseNamespace = designer.addSectionFunctionNamespace(outputName,
-						new InitialiseHttpRequestStateManagedFunctionSource(routeConfig.inputMetaData));
+						new InitialiseHttpRequestStateManagedFunctionSource());
 				SectionFunction initialise = initialiseNamespace.addSectionFunction(outputName,
 						INITIALISE_REQUEST_STATE_FUNCTION_NAME);
 				designer.link(flow, initialise, false);
@@ -343,21 +332,6 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 */
 	private class InitialiseHttpRequestStateManagedFunctionSource extends AbstractManagedFunctionSource {
 
-		/**
-		 * {@link HttpInputMetaData}.
-		 */
-		private final HttpInputMetaData inputMetaData;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param inputMetaData
-		 *            {@link HttpInputMetaData}.
-		 */
-		private InitialiseHttpRequestStateManagedFunctionSource(HttpInputMetaData inputMetaData) {
-			this.inputMetaData = inputMetaData;
-		}
-
 		/*
 		 * ============ ManagedFunctionSource ==============
 		 */
@@ -373,8 +347,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Add the initialise HTTP request state function
 			ManagedFunctionTypeBuilder<InitialiseHttpRequestStateDependencies, None> builder = functionNamespaceTypeBuilder
 					.addManagedFunctionType(INITIALISE_REQUEST_STATE_FUNCTION_NAME,
-							new InitialiseHttpRequestStateFunction(inputMetaData),
-							InitialiseHttpRequestStateDependencies.class, None.class);
+							new InitialiseHttpRequestStateFunction(), InitialiseHttpRequestStateDependencies.class,
+							None.class);
 
 			// Configure dependency on the request state and path arguments
 			builder.addObject(HttpArgument.class).setKey(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS);

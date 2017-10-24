@@ -93,8 +93,8 @@ public class HttpArgumentManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Create the request state
 		HttpRequestState requestState = this.createHttpRequestState(connection);
-		HttpRequestStateManagedObjectSource.initialiseHttpRequestState(
-				new HttpArgument("param", "value", HttpValueLocation.PATH), null, requestState);
+		HttpRequestStateManagedObjectSource
+				.initialiseHttpRequestState(new HttpArgument("param", "value", HttpValueLocation.PATH), requestState);
 
 		// Load the managed object source
 		HttpArgumentManagedObjectSource source = new HttpArgumentManagedObjectSource("param", matchValueLocation);

@@ -33,12 +33,17 @@ public interface HttpObjectParserFactory {
 	String getContentType();
 
 	/**
-	 * Creates the {@link HttpObjectParser} for the {@link Object} type.
+	 * Creates the {@link HttpObjectParser} for the {@link Object}.
 	 * 
-	 * @param objectType
-	 *            {@link Object} type.
-	 * @return {@link HttpObjectParser} for the {@link Object} type.
+	 * @param objectClass
+	 *            {@link Object} {@link Class}.
+	 * @return {@link HttpObjectParser} for the {@link Object}. May return
+	 *         <code>null</code> if does not support parsing out the particular
+	 *         {@link Object}.
+	 * @throws Exception
+	 *             If fails to create the {@link HttpObjectParser} for the
+	 *             {@link Object}.
 	 */
-	<T> HttpObjectParser<? extends T> createHttpObjectParser(Class<T> objectType);
+	<T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectClass) throws Exception;
 
 }
