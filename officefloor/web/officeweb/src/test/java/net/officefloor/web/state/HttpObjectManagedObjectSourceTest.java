@@ -62,8 +62,8 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 		type.addDependency(HttpObjectDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 
 		// Validate the managed object type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				new HttpObjectManagedObjectSource<>(MockObject.class, null, new ArrayList<>()));
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, new HttpObjectManagedObjectSource<>(MockObject.class,
+				null, Arrays.asList(new MockHttpObjectParserFactory())));
 	}
 
 	/**
@@ -78,24 +78,42 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure propagate issue with creating {@link HttpObjectParser}.
 	 */
 	public void testFailObject() throws Throwable {
-		this.doLoadObjectTest(Exception.class, MOCK_CONTENT_TYPE, null);
-		fail("Should not be successful");
+		try {
+			this.doLoadObjectTest(Exception.class, MOCK_CONTENT_TYPE, null);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertEquals("Incorrect cause",
+					"Failed to create HttpObjectParser for Content-Type application/mock for object "
+							+ Exception.class.getName() + " (cause: TEST)",
+					ex.getMessage());
+		}
 	}
 
 	/**
 	 * Ensure issue if no {@link HttpObjectParser} made available.
 	 */
 	public void testNoObjectParser() throws Throwable {
-		this.doLoadObjectTest(Void.class, MOCK_CONTENT_TYPE, null);
-		fail("Should not be successful");
+		try {
+			this.doLoadObjectTest(Void.class, MOCK_CONTENT_TYPE, null);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertEquals("Incorrect cause",
+					"No HttpObjectParser available for object " + Void.class.getName() + " in any Content-Type",
+					ex.getMessage());
+		}
 	}
 
 	/**
 	 * Ensure issue if the <code>content-type</code> required is not supported.
 	 */
 	public void testContentTypeNotSupported() throws Throwable {
-		this.doLoadObjectTest(MockObject.class, MOCK_CONTENT_TYPE, null, "unsupported/content");
-		fail("Should not be successful");
+		try {
+			this.doLoadObjectTest(MockObject.class, MOCK_CONTENT_TYPE, null, "unsupported/content");
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertEquals("Incorrect cause", "No HttpObjectParser available for object " + MockObject.class.getName()
+					+ " for accepting Content-Type unsupported/content", ex.getMessage());
+		}
 	}
 
 	/**

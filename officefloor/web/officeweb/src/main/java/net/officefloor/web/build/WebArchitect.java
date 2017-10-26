@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.build;
 
+import java.lang.annotation.Annotation;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -26,6 +27,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.HttpObject;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;
@@ -68,6 +70,26 @@ public abstract interface WebArchitect {
 	 *            {@link HttpObjectParserFactory}.
 	 */
 	void addHttpObjectParser(HttpObjectParserFactory objectParserFactory);
+
+	/**
+	 * <p>
+	 * Adds another {@link Class} as an alias for the {@link HttpObject}
+	 * annotation.
+	 * <p>
+	 * As code generators are likely to be used for the HTTP objects, it is not
+	 * always possible to generate the {@link Class} annotated with
+	 * {@link HttpObject}. This allows another {@link Annotation} to indicate
+	 * the parameter object is a HTTP object.
+	 * 
+	 * @param httpObjectAnnotationAliasClass
+	 *            Alias {@link Annotation} {@link Class} for {@link HttpObject}.
+	 * @param acceptedContentTypes
+	 *            Listing of the <code>content-type</code> values accepted. May
+	 *            be empty array to allow supporting all available
+	 *            <code>content-type</code> {@link HttpObjectParser} instances
+	 *            available.
+	 */
+	void addHttpObjectAnnotationAlias(Class<?> httpObjectAnnotationAliasClass, String... acceptedContentTypes);
 
 	/**
 	 * <p>

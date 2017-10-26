@@ -57,6 +57,7 @@ import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
 import net.officefloor.web.state.HttpArgumentManagedObjectSource;
+import net.officefloor.web.state.HttpObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 import net.officefloor.web.tokenise.FormHttpArgumentParser;
@@ -96,6 +97,25 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Registry of HTTP arguments to its {@link OfficeManagedObject}.
 	 */
 	private final Map<String, OfficeManagedObject> httpArguments = new HashMap<>();
+
+	/**
+	 * Singleton {@link List} provided to the
+	 * {@link HttpObjectManagedObjectSource} for the registered
+	 * {@link HttpObjectParserFactory} instances.
+	 */
+	private final List<HttpObjectParserFactory> singletonObjectParserList = new LinkedList<>();
+
+	/**
+	 * Registry of {@link HttpObject} {@link Annotation} alias to accepted
+	 * <code>content-type</code> values. Note: the keys indicate the aliases, as
+	 * accepted <code>content-type</code> values are optional.
+	 */
+	private final Map<Class<?>, String[]> httpObjectAliases = new HashMap<>();
+
+	/**
+	 * Registry of HTTP objects by their {@link Class}.
+	 */
+	private final Map<Class<?>, OfficeManagedObject> httpObjects = new HashMap<>();
 
 	/**
 	 * Registry of HTTP Application Object to its {@link OfficeManagedObject}.
@@ -278,14 +298,31 @@ public class WebArchitectEmployer implements WebArchitect {
 
 	@Override
 	public void addHttpObjectParser(HttpObjectParserFactory objectParserFactory) {
-		// TODO Auto-generated method stub
+		this.singletonObjectParserList.add(objectParserFactory);
+	}
 
+	@Override
+	public void addHttpObjectAnnotationAlias(Class<?> httpObjectAnnotationAliasClass, String... acceptedContentTypes) {
+		this.httpObjectAliases.put(httpObjectAnnotationAliasClass, acceptedContentTypes);
 	}
 
 	@Override
 	public OfficeManagedObject addHttpObject(Class<?> objectClass, String... acceptedContentTypes) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Determine if already registered
+		OfficeManagedObject object = this.httpObjects.get(objectClass);
+		if (object == null) {
+
+			// Not registered, so register
+			OfficeManagedObjectSource mos = this.officeArchitect.addOfficeManagedObjectSource(objectClass.getName(),
+					new HttpObjectManagedObjectSource<>(objectClass, acceptedContentTypes,
+							this.singletonObjectParserList));
+			object = mos.addOfficeManagedObject(objectClass.getName(), ManagedObjectScope.PROCESS);
+			this.httpObjects.put(objectClass, object);
+		}
+
+		// Return the object
+		return object;
 	}
 
 	@Override
@@ -393,6 +430,21 @@ public class WebArchitectEmployer implements WebArchitect {
 							this.addHttpRequestObject(objectType, true);
 							httpParameters.add(objectType);
 						}
+					}
+
+					// HTTP object
+					if (annotation instanceof HttpObject) {
+						HttpObject httpObject = (HttpObject) annotation;
+						String[] acceptedContentTypes = httpObject.acceptedContentTypes();
+						this.addHttpObject(objectType, acceptedContentTypes);
+					}
+
+					// Determine if HTTP object alias annotation
+					String[] acceptedContentTypes = WebArchitectEmployer.this.httpObjectAliases
+							.get(annotation instanceof Annotation ? ((Annotation) annotation).annotationType()
+									: annotation.getClass());
+					if (acceptedContentTypes != null) {
+						this.addHttpObject(objectType, acceptedContentTypes);
 					}
 
 					// Load HTTP arguments

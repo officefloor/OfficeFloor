@@ -17,20 +17,20 @@
  */
 package net.officefloor.web;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.build.HttpObjectParser;
-import net.officefloor.web.state.HttpRequestState;
 
 /**
- * Annotation on the {@link Class} of the parameter to indicate it is parsed out
- * of the {@link HttpRequest} via an {@link HttpObjectParser}.
+ * {@link Annotation} on the {@link Class} of the parameter (or the parameter
+ * itself) to indicate it is parsed out of the {@link HttpRequest} via an
+ * {@link HttpObjectParser}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -38,16 +38,6 @@ import net.officefloor.web.state.HttpRequestState;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface HttpObject {
-
-	/**
-	 * Allows specifying the name to bind the object into the
-	 * {@link HttpRequestState}.
-	 * 
-	 * @return Name to bind the object into the {@link HttpRequestState}. The
-	 *         blank default value indicates for the {@link ManagedObject} to
-	 *         assign its own unique value.
-	 */
-	String bind() default "";
 
 	/**
 	 * <p>

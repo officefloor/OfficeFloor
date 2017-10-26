@@ -19,6 +19,11 @@ package net.officefloor.web;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.HttpCookie;
 
 import lombok.Data;
@@ -372,9 +377,9 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to parse out the request object.
+	 * Ensure able to parse out the HTTP object.
 	 */
-	public void testRequestObject() throws Exception {
+	public void testHttpObject() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -437,6 +442,85 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockObjectValue {
 		public void service(ObjectValue object, ServerHttpConnection connection) throws Exception {
+			connection.getHttpResponse().getEntityWriter().write("Value=" + object.content);
+		}
+	}
+
+	/**
+	 * Code generators are likely to create objects with different
+	 * {@link Annotation} values. Therefore, rather than force the code
+	 * generators to include {@link HttpObject}, another {@link Annotation} can
+	 * be used to alias the {@link HttpObject}.
+	 */
+	public void testHttpObjectAlias() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			OfficeSectionInput servicer = context.addSection("SECTION", MockObjectAlias.class)
+					.getOfficeSectionInput("service");
+			WebArchitect web = context.getWebArchitect();
+			web.addHttpObjectParser(new ObjectAliasFactory());
+			web.addHttpObjectAnnotationAlias(MockAlias.class, "application/alias");
+			web.link(false, HttpMethod.POST, "/path", servicer);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "application/alias").entity("value"));
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect response", "Value=value", response.getHttpEntity(null));
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MockAlias {
+	}
+
+	@MockAlias
+	public static class ObjectAlias {
+		private final String content;
+
+		public ObjectAlias(String content) {
+			this.content = content;
+		}
+	}
+
+	public static class ObjectAliasFactory implements HttpObjectParserFactory, HttpObjectParser<ObjectAlias> {
+
+		/*
+		 * =================== HttpObjectParserFactory =====================
+		 */
+
+		@Override
+		public String getContentType() {
+			return "application/alias";
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectType) {
+			return (HttpObjectParser<T>) this;
+		}
+
+		/*
+		 * ==================== HttpObjectParser ===========================
+		 */
+
+		@Override
+		public Class<ObjectAlias> getObjectType() {
+			return ObjectAlias.class;
+		}
+
+		@Override
+		public ObjectAlias parse(ServerHttpConnection connection) throws HttpException {
+			String content = MockHttpServer.getContent(connection.getHttpRequest(), null);
+			return new ObjectAlias(content);
+		}
+	}
+
+	public static class MockObjectAlias {
+		public void service(ObjectAlias object, ServerHttpConnection connection) throws Exception {
 			connection.getHttpResponse().getEntityWriter().write("Value=" + object.content);
 		}
 	}

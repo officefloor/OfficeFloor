@@ -45,27 +45,6 @@ public interface HttpObjectResponder<T> {
 	Class<T> getObjectType();
 
 	/**
-	 * Indicates whether can handle the {@link Object} for the
-	 * {@link ServerHttpConnection}.
-	 * 
-	 * @param object
-	 *            Response {@link Object}.
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @return <code>true</code> if able to handle the object.
-	 */
-	default boolean isHandle(T object, ServerHttpConnection connection) {
-		
-		// Ensure the appropriate object type
-		if (!this.getObjectType().isAssignableFrom(object.getClass())) {
-			return false;
-		}
-		
-		// TODO handle based on whether client will accept content-type
-		return true; // handle for time being
-	}
-
-	/**
 	 * Sends the object.
 	 * 
 	 * @param object

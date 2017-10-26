@@ -20,6 +20,7 @@ package net.officefloor.web.state;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -102,24 +103,64 @@ public class HttpObjectManagedObjectSource<T>
 
 		// Load the meta-data
 		context.setObjectClass(this.objectClass);
+		context.setManagedObjectClass(HttpObjectManagedObject.class);
 		context.addDependency(HttpObjectDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
+
+		// Create filter message
+		String acceptContentTypeMessage = " in any Content-Type";
+		if ((this.acceptedContentTypes != null) && (this.acceptedContentTypes.length > 0)) {
+			acceptContentTypeMessage = " for accepting Content-Type"
+					+ ((this.acceptedContentTypes.length > 2) ? "s " : " ")
+					+ String.join(", ", this.acceptedContentTypes);
+		}
 
 		// Create the list of parsers
 		List<HttpObjectParser<T>> objectParsers = new LinkedList<>();
 		NEXT_PARSER: for (HttpObjectParserFactory parserFactory : this.parserFactories) {
 
-			// Create the parser for the object class
-			HttpObjectParser<T> parser = parserFactory.createHttpObjectParser(this.objectClass);
-			if (parser == null) {
-				continue NEXT_PARSER; // parser not able to handle object
+			// Obtain the content type
+			String contentType = parserFactory.getContentType();
+
+			// Determine if accept Content-Type
+			if ((this.acceptedContentTypes != null) && (this.acceptedContentTypes.length > 0)) {
+				// Ensure one of the accepted content types
+				boolean isAcceptableContentType = false;
+				for (String acceptedContentType : this.acceptedContentTypes) {
+					if (acceptedContentType.equals(contentType)) {
+						isAcceptableContentType = true;
+					}
+				}
+				if (!isAcceptableContentType) {
+					// Not acceptable Content-Type
+					continue NEXT_PARSER;
+				}
 			}
 
-			// Include the parser
-			objectParsers.add(parser);
+			// Create the parser for the object class
+			try {
+				HttpObjectParser<T> parser = parserFactory.createHttpObjectParser(this.objectClass);
+				if (parser == null) {
+					continue NEXT_PARSER; // parser not able to handle object
+				}
+
+				// Include the parser
+				objectParsers.add(parser);
+
+			} catch (Exception ex) {
+				// Propagate failure about creating object parser
+				String errorMessage = ex.getMessage();
+				errorMessage = CompileUtil.isBlank(errorMessage) ? "" : " (cause: " + errorMessage + ")";
+				throw new Exception("Failed to create " + HttpObjectParser.class.getSimpleName() + " for Content-Type "
+						+ contentType + " for object " + this.objectClass.getName() + errorMessage, ex);
+			}
 		}
 		this.parsers = objectParsers.toArray(new HttpObjectParser[objectParsers.size()]);
-		
-		// Ensure have a parser for each accepted content-type
+
+		// Ensure have at least one object parser
+		if (this.parsers.length == 0) {
+			throw new Exception("No " + HttpObjectParser.class.getSimpleName() + " available for object "
+					+ this.objectClass.getName() + acceptContentTypeMessage);
+		}
 	}
 
 	@Override
