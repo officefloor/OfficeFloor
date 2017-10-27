@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.state;
+package net.officefloor.web.response;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,8 +42,8 @@ import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.response.ObjectResponseManagedObjectSource.ObjectResponseDependencies;
 import net.officefloor.web.state.HttpObjectManagedObjectSource.HttpObjectDependencies;
-import net.officefloor.web.state.ObjectResponseManagedObjectSource.ObjectResponseDependencies;
 
 /**
  * Tests the {@link ObjectResponseManagedObjectSource}.

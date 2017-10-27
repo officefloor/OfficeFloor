@@ -52,6 +52,7 @@ import net.officefloor.web.build.HttpParameterBuilder;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.response.ObjectResponseManagedObjectSource;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
@@ -60,7 +61,6 @@ import net.officefloor.web.state.HttpArgumentManagedObjectSource;
 import net.officefloor.web.state.HttpObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
-import net.officefloor.web.state.ObjectResponseManagedObjectSource;
 import net.officefloor.web.tokenise.FormHttpArgumentParser;
 
 /**
