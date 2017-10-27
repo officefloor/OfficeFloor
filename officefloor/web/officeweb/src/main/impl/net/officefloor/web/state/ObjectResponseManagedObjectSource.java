@@ -31,9 +31,13 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderName;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
@@ -69,6 +73,11 @@ public class ObjectResponseManagedObjectSource
 	 * {@link HttpObjectResponderFactory}.
 	 */
 	private ContentTypeCache[] cache;
+
+	/**
+	 * {@link WritableHttpHeader} instances when not acceptable type requested.
+	 */
+	private WritableHttpHeader[] notAcceptableHeaders;
 
 	/**
 	 * Instantiate.
@@ -107,6 +116,19 @@ public class ObjectResponseManagedObjectSource
 			throw new Exception(
 					"Must have at least one " + HttpObjectResponderFactory.class.getSimpleName() + " configured");
 		}
+
+		// Create the not acceptable headers
+		StringBuilder accept = new StringBuilder();
+		boolean isFirst = true;
+		for (ContentTypeCache item : this.cache) {
+			if (!isFirst) {
+				accept.append(", ");
+			}
+			isFirst = false;
+			accept.append(item.contentType);
+		}
+		this.notAcceptableHeaders = new WritableHttpHeader[] {
+				new WritableHttpHeader(new HttpHeaderName("accept"), new HttpHeaderValue(accept.toString())) };
 	}
 
 	@Override
@@ -171,13 +193,34 @@ public class ObjectResponseManagedObjectSource
 				if (this.head == null) {
 
 					// Load the accept types
-					HttpRequest request = this.connection.getHttpRequest();
-					for (HttpHeader header : request.getHttpHeaders().getHeaders("accept")) {
+					HttpRequestHeaders headers = this.connection.getHttpRequest().getHttpHeaders();
+					for (HttpHeader header : headers.getHeaders("accept")) {
 						this.head = parseAccept(header.getValue(), this.head);
 					}
 
-					// Ensure have value
-					this.head = (this.head != null) ? this.head : MATCH_ANY;
+					// Determine if only wild card match
+					// - no head, so will match any type
+					// - only one head that is any match, so will match any type
+					boolean isOnlyWildcard = ((this.head == null)
+							|| ((this.head.next == null) && (this.head instanceof AnyAcceptType)));
+
+					// Default to content-type if wild card only
+					if (isOnlyWildcard) {
+
+						// Attempt to match first on input content type
+						// (e.g. if JSON sent then respond with JSON)
+						HttpHeader contentTypeHeader = headers.getHeader("content-type");
+						if (contentTypeHeader != null) {
+							this.head = new SubTypeAcceptType(contentTypeHeader.getValue(), "1", 0);
+						}
+
+						// Now match any
+						if (this.head == null) {
+							this.head = MATCH_ANY;
+						} else {
+							this.head.next = MATCH_ANY;
+						}
+					}
 				}
 
 				// Obtain the object type
@@ -232,7 +275,8 @@ public class ObjectResponseManagedObjectSource
 				}
 
 				// As here, not able to send acceptable content type
-				throw new HttpException(HttpStatus.NOT_ACCEPTABLE);
+				throw new HttpException(HttpStatus.NOT_ACCEPTABLE,
+						ObjectResponseManagedObjectSource.this.notAcceptableHeaders, null);
 			});
 		}
 	}
@@ -255,7 +299,7 @@ public class ObjectResponseManagedObjectSource
 		/**
 		 * {@link ObjectResponderCache} items.
 		 */
-		private ObjectResponderCache[] responders = new ObjectResponderCache[0];
+		private ObjectResponderCache<?>[] responders = new ObjectResponderCache[0];
 
 		/**
 		 * Instantiate.
@@ -302,6 +346,24 @@ public class ObjectResponseManagedObjectSource
 	}
 
 	/**
+	 * State of parsing.
+	 */
+	private static enum ParseState {
+		NEW_ACCEPT, TYPE, SUB_TYPE, PARAMETER_START, PARAMETER_NAME, PARAMETER_VALUE_START, PARAMETER_VALUE
+	}
+
+	/**
+	 * Indicates if the character is a white space.
+	 * 
+	 * @param character
+	 *            Character.
+	 * @return <code>true</code> if character is white space.
+	 */
+	private static final boolean isWhiteSpace(char character) {
+		return (character == ' ') || (character == '\t');
+	}
+
+	/**
 	 * Parses the <code>accept</code> {@link HttpHeader} value returning the
 	 * head {@link AcceptType} of the linked list of {@link AcceptType}
 	 * instances.
@@ -316,8 +378,321 @@ public class ObjectResponseManagedObjectSource
 	 * @return Head {@link AcceptType} for parsed out linked list of
 	 *         {@link AcceptType} instances. The values are sorted with highest
 	 *         weighted first.
+	 * @throws HttpException
+	 *             If invalid <code>accept</code> value.
 	 */
-	private static AcceptType parseAccept(String accept, AcceptType head) {
+	private static final AcceptType parseAccept(String accept, AcceptType head) throws HttpException {
+
+		// State for parsing
+		ParseState state = ParseState.NEW_ACCEPT;
+		int typeStart = -1;
+		int typeSeparatorPosition = -1;
+		int subTypeEnd = -1;
+		int paramStart = -1;
+		int paramEnd = -1;
+		boolean isParamEnd = false;
+		boolean isQ = false;
+		String q = "0";
+		int parameterCount = 0;
+
+		// Parse out the accept types
+		NEXT_CHARACTER: for (int index = 0; index < accept.length(); index++) {
+			char character = accept.charAt(index);
+
+			// Handle based on state
+			switch (state) {
+			case NEW_ACCEPT:
+
+				// Determine if load previous accept type
+				if (typeStart != -1) {
+					// Load the previous accept type
+					head = loadAcceptType(accept, typeStart, typeSeparatorPosition, subTypeEnd, q, parameterCount,
+							head);
+
+					// Reset if multiple spaces
+					typeStart = -1;
+				}
+
+				// Ignore leading space
+				if (isWhiteSpace(character)) {
+					continue NEXT_CHARACTER;
+				}
+
+				// Start of type
+				typeStart = index;
+				subTypeEnd = -1; // reset to find
+				q = "0";
+				parameterCount = 0; // reset for new accept type
+				state = ParseState.TYPE;
+				break;
+
+			case TYPE:
+				// Look for end of type
+				if (character == '/') {
+					// Separator between type/sub-type
+					typeSeparatorPosition = index;
+					state = ParseState.SUB_TYPE;
+				}
+				break;
+
+			case SUB_TYPE:
+				// Determine if terminated by space
+				if (isWhiteSpace(character)) {
+					// Ensure not multiple spaces
+					if (subTypeEnd == -1) {
+						subTypeEnd = index;
+					}
+				} else if (character == ';') {
+					// Starting parameter
+					if (subTypeEnd == -1) {
+						subTypeEnd = index;
+					}
+					state = ParseState.PARAMETER_START;
+				} else if (character == ',') {
+					// No parameters for accept type
+					if (subTypeEnd == -1) {
+						subTypeEnd = index;
+					}
+
+					// Start new accept
+					state = ParseState.NEW_ACCEPT;
+				}
+				break;
+
+			case PARAMETER_START:
+				// Ignore leading space
+				if (isWhiteSpace(character)) {
+					continue NEXT_CHARACTER;
+				}
+
+				// Start of parameter name
+				paramStart = index;
+				paramEnd = -1; // reset to find
+				isQ = false; // reset to determine
+				state = ParseState.PARAMETER_NAME;
+				break;
+
+			case PARAMETER_NAME:
+				// Determine if terminated by space
+				isParamEnd = false;
+				if (isWhiteSpace(character)) {
+					// Ensure not multiple spaces
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+
+				} else if (character == '=') {
+					// Parameter with value
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+					state = ParseState.PARAMETER_VALUE_START;
+
+				} else if (character == ';') {
+					// Parameter without value
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+					state = ParseState.PARAMETER_START;
+
+				} else if (character == ',') {
+					// Parameter without value, and no more parameters
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+					state = ParseState.NEW_ACCEPT;
+				}
+				if (isParamEnd) {
+					// Have another parameter
+					parameterCount++;
+
+					// Found end of parameter name, so determine if q
+					if ((paramEnd - paramStart) == 1) { // "q"
+						isQ = accept.charAt(paramStart) == 'q';
+					}
+				}
+				break;
+
+			case PARAMETER_VALUE_START:
+				// Ignore leading space
+				if (isWhiteSpace(character)) {
+					continue NEXT_CHARACTER;
+				}
+
+				// Start of parameter name
+				paramStart = index;
+				paramEnd = -1; // reset to find
+				state = ParseState.PARAMETER_VALUE;
+				break;
+
+			case PARAMETER_VALUE:
+				// Determine if terminated by space
+				isParamEnd = false;
+				if (isWhiteSpace(character)) {
+					// Ensure not multiple spaces
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+
+				} else if (character == ';') {
+					// Another parameter
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+					state = ParseState.PARAMETER_START;
+
+				} else if (character == ',') {
+					// No more parameters
+					if (paramEnd == -1) {
+						paramEnd = index;
+						isParamEnd = true;
+					}
+					state = ParseState.NEW_ACCEPT;
+				}
+				if (isParamEnd && isQ) {
+					// Found q value
+					q = accept.substring(paramStart, paramEnd);
+					if (q.length() == 0) {
+						// No value, so assume lowest
+						q = "0";
+					} else if (q.charAt(0) == '.') {
+						// Prefix with 0 to allow string sorting
+						q = "0" + q;
+					}
+				}
+				break;
+			}
+		}
+
+		// Handle reached end of accept value
+		switch (state) {
+		case NEW_ACCEPT:
+		case TYPE:
+			break;
+		case SUB_TYPE:
+			// Load the default accept type
+			head = loadAcceptType(accept, typeStart, typeSeparatorPosition, accept.length(), "0", 0, head);
+			break;
+		case PARAMETER_NAME:
+			parameterCount++; // include last parameter
+			// carry on to load accept type
+			
+		case PARAMETER_START:
+		case PARAMETER_VALUE_START:
+			// Just parameter name, so no check for q ending parameter
+			head = loadAcceptType(accept, typeStart, typeSeparatorPosition, subTypeEnd, q, parameterCount, head);
+			break;
+		case PARAMETER_VALUE:
+			// Check if last parameter is q
+			if ((paramEnd == -1) && isQ) {
+				q = accept.substring(paramStart, accept.length());
+			}
+			head = loadAcceptType(accept, typeStart, typeSeparatorPosition, subTypeEnd, q, parameterCount, head);
+			break;
+		}
+
+		return head;
+	}
+
+	/**
+	 * Loads the {@link AcceptType} to the linked list, returning the head of
+	 * the linked list.
+	 * 
+	 * @param accept
+	 *            <code>accept</code> {@link HttpHeader} value.
+	 * @param typeStart
+	 *            Start of type.
+	 * @param typeSeparatorPosition
+	 *            Position of / separating type and sub-type.
+	 * @param subTypeEnd
+	 *            End of sub-type.
+	 * @param q
+	 *            <code>q</code> value.
+	 * @param parameterCount
+	 *            Number of parameters.
+	 * @param head
+	 *            Previous head {@link AcceptType} of the linked list.
+	 * @return Potentially new head {@link AcceptType} of the linked list.
+	 */
+	private static final AcceptType loadAcceptType(String accept, int typeStart, int typeSeparatorPosition,
+			int subTypeEnd, String q, int parameterCount, AcceptType head) {
+
+		// Determine if wild card match
+		if ((subTypeEnd - typeStart) == 3) { // "*/*"
+			// Potentially wild card match
+			boolean isTypeWild = accept.charAt(typeStart) == '*';
+			boolean isSubTypeWild = accept.charAt(subTypeEnd - 1) == '*';
+			if (isTypeWild && isSubTypeWild) {
+				// Accept any content type
+				return appendAcceptType(head, new AnyAcceptType(q, parameterCount));
+			} else if (isSubTypeWild) {
+				// Accept specific type and any sub type
+				String typePrefix = accept.substring(typeStart, typeSeparatorPosition);
+				return appendAcceptType(head, new TypeAcceptType(typePrefix, q, parameterCount));
+			}
+
+		} else if ((subTypeEnd - (typeSeparatorPosition + 1)) == 1) { // "*"
+			// Potentially sub type wild card match
+			boolean isSubTypeWild = accept.charAt(subTypeEnd - 1) == '*';
+			if (isSubTypeWild) {
+				// Accept specific type and any sub type (+1 to include /)
+				String typePrefix = accept.substring(typeStart, (typeSeparatorPosition + 1));
+				return appendAcceptType(head, new TypeAcceptType(typePrefix, q, parameterCount));
+			}
+		}
+
+		// Accept specific type and specific sub type
+		String contentType = accept.substring(typeStart, subTypeEnd);
+		return appendAcceptType(head, new SubTypeAcceptType(contentType, q, parameterCount));
+	}
+
+	/**
+	 * Appends the {@link AcceptType} into the linked list.
+	 * 
+	 * @param head
+	 *            Previous head {@link AcceptType} of the linked list.
+	 * @param newAccept
+	 *            {@link AcceptType} to add.
+	 * @return Potentially new head {@link AcceptType} of the linked list.
+	 */
+	private static final AcceptType appendAcceptType(AcceptType head, AcceptType newAccept) {
+
+		// Determine if head
+		if (head == null) {
+			return newAccept; // only entry in list
+		}
+
+		// Determine if should be head
+		if (head.compare(newAccept) < 0) {
+			// Accept is to be new head
+			newAccept.next = head;
+			return newAccept;
+		}
+
+		// Insert somewhere in the list
+		AcceptType current = head;
+		while (current.next != null) {
+
+			// Determine if should come before next value
+			if (current.next.compare(newAccept) < 0) {
+				// Insert before next value
+				newAccept.next = current.next;
+				current.next = newAccept;
+				return head; // inserted
+			}
+
+			// Move to next position
+			current = current.next;
+		}
+
+		// As here, did not insert, so append to list
+		current.next = newAccept;
 		return head;
 	}
 
@@ -363,7 +738,7 @@ public class ObjectResponseManagedObjectSource
 		 *            Parameter count.
 		 */
 		protected AcceptType(String q, int wildcardWeight, int parameterCount) {
-			this.q = q == null ? "1" : q;
+			this.q = q;
 			this.wildcardWeight = wildcardWeight;
 			this.parameterCount = parameterCount;
 		}

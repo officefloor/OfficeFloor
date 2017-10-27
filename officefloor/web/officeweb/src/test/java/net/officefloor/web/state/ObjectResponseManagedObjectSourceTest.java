@@ -134,6 +134,24 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure matches on specific sub-type first.
+	 */
+	public void testMatchOnSubTypeFirst() throws Throwable {
+		MockHttpResponse response = this.doObjectResponse("*/*,application/*,application/match", new MockObject("TEST"),
+				"application/not-match", "application/match");
+		assertResponse(response, "application/match", "{value: 'TEST-1'}");
+	}
+
+	/**
+	 * Ensure matches on specific type first.
+	 */
+	public void testMatchOnTypeFirst() throws Throwable {
+		MockHttpResponse response = this.doObjectResponse("*/*,application/*", new MockObject("TEST"), "not/match",
+				"application/match");
+		assertResponse(response, "application/match", "{value: 'TEST-1'}");
+	}
+
+	/**
 	 * Ensure matches as per q priority.
 	 */
 	public void testMatchOnPriority() throws Throwable {
@@ -145,18 +163,10 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure matches as per q priority.
 	 */
-	public void testMatchOnWildcardSuffixPriority() throws Throwable {
-		MockHttpResponse response = this.doObjectResponse("application/not-match;q=0.6,application/*;q=0.8,*/*;q=0.4",
-				new MockObject("TEST"), "application/first", "application/not-match");
-		assertResponse(response, "application/first", "{value: 'TEST-0'}");
-	}
-
-	/**
-	 * Ensure matches as per q priority.
-	 */
-	public void testMatchOnWildcardPriority() throws Throwable {
-		MockHttpResponse response = this.doObjectResponse("application/not-match;q=1,*/*=0.8", new MockObject("TEST"),
-				"application/first", "application/second");
+	public void testMatchOnPriorityBeforeWildcards() throws Throwable {
+		MockHttpResponse response = this.doObjectResponse(
+				"application/*,*/*,application/not-match;q=0.6,application/first;q=0.8", new MockObject("TEST"),
+				"application/first", "application/not-match");
 		assertResponse(response, "application/first", "{value: 'TEST-0'}");
 	}
 
@@ -167,15 +177,25 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Match becoming more specific
 		List<String> availableContentTypes = new LinkedList<>();
 		for (String availableContentType : new String[] { "wildcard/wildcard", "specific/wildcard", "specific/type",
-				"parameter/type", "parameter/type" }) {
+				"parameter/type", "multiple/parameters" }) {
 			availableContentTypes.add(availableContentType);
 
 			MockHttpResponse response = this.doObjectResponse(
-					"*/*,specific/*,specific/type,parameter/type;with=parameter,parameter/type;with=two;parameter=values",
+					"*/*,specific/*,specific/type,parameter/type;one=parameter,multiple/parameters;has=two;parameters",
 					new MockObject("TEST"), availableContentTypes.toArray(new String[0]));
 			assertResponse(response, availableContentType,
 					"{value: 'TEST-" + (availableContentTypes.size() - 1) + "'}");
 		}
+	}
+
+	/**
+	 * Ensure can parse out values with spacing.
+	 */
+	public void testParsingWithSpacing() throws Throwable {
+		MockHttpResponse response = this.doObjectResponse(
+				"\t application/* \t , \t */* \t , application/match \t ; \t q=0.6 ; \t another = value \t ; param",
+				new MockObject("TEST"), "application/not-match", "application/match");
+		assertResponse(response, "application/match", "{value: 'TEST-1'}");
 	}
 
 	private static String[] A(String... values) {

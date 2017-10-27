@@ -92,11 +92,7 @@ public abstract interface WebArchitect {
 	void addHttpObjectAnnotationAlias(Class<?> httpObjectAnnotationAliasClass, String... acceptedContentTypes);
 
 	/**
-	 * <p>
-	 * Manually adds a {@link HttpObjectResponderFactory}.
-	 * <p>
-	 * Typically these should be configured via {@link ServiceLoader}, so can be
-	 * plugged in as required.
+	 * Adds a {@link HttpObjectResponderFactory}.
 	 * 
 	 * @param objectResponderFactory
 	 *            {@link HttpObjectResponderFactory}.
@@ -211,15 +207,6 @@ public abstract interface WebArchitect {
 	 * @return {@link OfficeManagedObject}.
 	 */
 	OfficeManagedObject addHttpObject(Class<?> objectClass, String... acceptedContentTypes);
-
-	/**
-	 * Adds a HTTP {@link Object} responder for the {@link Object} type.
-	 * 
-	 * @param objectType
-	 *            {@link Object} type.
-	 * @return {@link OfficeManagedObject}.
-	 */
-	OfficeManagedObject addHttpObjectResponder(Class<?> objectType);
 
 	/**
 	 * Links a URL to an {@link OfficeSectionInput}. This will always be a

@@ -536,12 +536,13 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 			WebArchitect web = context.getWebArchitect();
 			web.addHttpObjectResponder(new MockObjectResponderFactory());
 		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path/value"));
 		assertEquals("Should be serviced", 200, response.getHttpStatus().getStatusCode());
 		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("content-type").getValue());
-		assertEquals("Incorrect object", "{value=\"OBJECT value\"}");
+		assertEquals("Incorrect object", "{value=\"OBJECT value\"}", response.getHttpEntity(null));
 	}
 
 	public static class MockObjectSection {
@@ -622,6 +623,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 			WebArchitect web = context.getWebArchitect();
 			web.addHttpObjectResponder(new MockObjectResponderFactory());
 		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));

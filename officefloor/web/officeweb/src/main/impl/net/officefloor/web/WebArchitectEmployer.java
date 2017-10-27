@@ -60,6 +60,7 @@ import net.officefloor.web.state.HttpArgumentManagedObjectSource;
 import net.officefloor.web.state.HttpObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
+import net.officefloor.web.state.ObjectResponseManagedObjectSource;
 import net.officefloor.web.tokenise.FormHttpArgumentParser;
 
 /**
@@ -131,6 +132,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Registry of HTTP Request Object to its {@link OfficeManagedObject}.
 	 */
 	private final Map<String, OfficeManagedObject> httpRequestObjects = new HashMap<>();
+
+	/**
+	 * {@link HttpObjectResponderFactory} instances.
+	 */
+	private final List<HttpObjectResponderFactory> objectResponderFactories = new LinkedList<>();
 
 	/**
 	 * {@link HttpInputBuilderImpl} instances.
@@ -327,14 +333,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 	@Override
 	public void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public OfficeManagedObject addHttpObjectResponder(Class<?> objectType) {
-		// TODO Auto-generated method stub
-		return null;
+		this.objectResponderFactories.add(objectResponderFactory);
 	}
 
 	@Override
@@ -399,6 +398,14 @@ public class WebArchitectEmployer implements WebArchitect {
 				.addOfficeManagedObjectSource("HTTP_REQUEST_STATE",
 						new HttpRequestStateManagedObjectSource(argumentParsers))
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
+
+		// Configure the object responder (if configured factories)
+		if (this.objectResponderFactories.size() > 0) {
+			this.officeArchitect
+					.addOfficeManagedObjectSource("OBJECT_RESPONSE",
+							new ObjectResponseManagedObjectSource(this.objectResponderFactories))
+					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
+		}
 
 		// Configure the HTTP handler
 		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath);
