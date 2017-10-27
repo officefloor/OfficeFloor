@@ -41,7 +41,7 @@ public interface HttpObjectResponderFactory {
 	 *            {@link Object} type.
 	 * @return {@link HttpObjectResponder} for the {@link Object} type.
 	 */
-	<T> HttpObjectResponder<? extends T> createHttpObjectResponder(Class<T> objectType);
+	<T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType);
 
 	/**
 	 * Creates the {@link HttpObjectResponder} for the {@link Escalation} type.
@@ -50,6 +50,6 @@ public interface HttpObjectResponderFactory {
 	 *            {@link Escalation} type.
 	 * @return {@link HttpObjectResponder} for the {@link Escalation} type.
 	 */
-	<E extends Throwable> HttpObjectResponder<? extends E> createHttpEscalationResponder(Class<E> escalationType);
+	<E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType);
 
 }

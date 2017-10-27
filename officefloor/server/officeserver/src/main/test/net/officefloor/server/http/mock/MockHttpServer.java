@@ -300,6 +300,12 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			try {
 				// Obtain the listing of response HTTP headers
 				List<WritableHttpHeader> headers = new ArrayList<>();
+				if (contentType != null) {
+					headers.add(new WritableHttpHeader("content-type", contentType));
+				}
+				if (contentLength > 0) {
+					headers.add(new WritableHttpHeader("content-length", String.valueOf(contentLength)));
+				}
 				while (headHttpHeader != null) {
 					headers.add(headHttpHeader);
 					headHttpHeader = headHttpHeader.next;

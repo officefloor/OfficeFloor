@@ -84,7 +84,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 					.initManagedObjectSource(new ObjectResponseManagedObjectSource(Collections.EMPTY_LIST));
 			fail("Should not be successful");
 		} catch (Exception ex) {
-			assertEquals("Incorrect cause", "Must have at least one HttpObjectResponderFactory configured", ex.getMessage());
+			assertEquals("Incorrect cause", "Must have at least one HttpObjectResponderFactory configured",
+					ex.getMessage());
 		}
 	}
 
@@ -261,17 +262,16 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> HttpObjectResponder<? extends T> createHttpObjectResponder(Class<T> objectType) {
+		public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
 			if (objectType == MockObject.class) {
-				return (HttpObjectResponder<? extends T>) new MockHttpObjectResponder();
+				return (HttpObjectResponder<T>) new MockHttpObjectResponder();
 			} else {
 				return null;
 			}
 		}
 
 		@Override
-		public <E extends Throwable> HttpObjectResponder<? extends E> createHttpEscalationResponder(
-				Class<E> escalationType) {
+		public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
 			return new MockHttpEscalationResponder<>(escalationType);
 		}
 

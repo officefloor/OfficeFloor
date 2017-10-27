@@ -559,14 +559,13 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> HttpObjectResponder<? extends T> createHttpObjectResponder(Class<T> objectType) {
+		public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
 			return (HttpObjectResponder<T>) new StringObjectResponder();
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <E extends Throwable> HttpObjectResponder<? extends E> createHttpEscalationResponder(
-				Class<E> escalationType) {
+		public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
 			return (HttpObjectResponder<E>) new EscalationObjectResponder();
 		}
 	}

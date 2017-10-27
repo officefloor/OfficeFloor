@@ -110,7 +110,10 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		MockHttpResponse response = builder.build();
 		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getHttpVersion());
 		assertSame("Incorrect status", HttpStatus.OK, response.getHttpStatus());
-		assertEquals("Should have one header", 1, response.getHttpHeaders().size());
+		assertEquals("Should have one header", 3, response.getHttpHeaders().size());
+		assertEquals("Incorrect content-type", "application/octet-stream",
+				response.getFirstHeader("content-type").getValue());
+		assertEquals("Incorrect content-length", "1", response.getFirstHeader("content-length").getValue());
 		assertEquals("Incorrect header value", "value", response.getFirstHeader("TEST").getValue());
 		assertEquals("Incorrect response", 1, response.getHttpEntity().read());
 		assertEquals("Should have read entity", -1, response.getHttpEntity().read());
@@ -132,7 +135,10 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		// Validate the response
 		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getHttpVersion());
 		assertSame("Incorrect status", HttpStatus.OK, response.getHttpStatus());
-		assertEquals("Should be one headers", 1, response.getHttpHeaders().size());
+		assertEquals("Should be one header (plus content-type and content-length)", 3,
+				response.getHttpHeaders().size());
+		assertEquals("Incorrect content-type", "text/plain", response.getFirstHeader("content-type").getValue());
+		assertEquals("Incorrect content-length", "11", response.getFirstHeader("content-length").getValue());
 		assertEquals("Incorrect header value", "Value", response.getFirstHeader("TEST").getValue());
 		assertEquals("Incorrect response", "Hello World",
 				response.getHttpEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
@@ -155,6 +161,34 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 			ServerWriter writer = connection.getHttpResponse().getEntityWriter();
 			writer.write("Hello World");
 			writer.flush();
+		}
+	}
+
+	/**
+	 * Ensure can mock with no entity.
+	 */
+	public void testNoEntity() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", NoEntityHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure can service request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		MockHttpResponse response = this.server.send(request);
+
+		// Validate the response
+		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getHttpVersion());
+		assertSame("Incorrect status", HttpStatus.NO_CONTENT, response.getHttpStatus());
+		assertEquals("Should be just the one header", 1, response.getHttpHeaders().size());
+		assertEquals("Incorrect header value", "Value", response.getFirstHeader("TEST").getValue());
+		assertEquals("Should be no entity", "",
+				response.getHttpEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+	}
+
+	public static class NoEntityHandler {
+		public void service(ServerHttpConnection connection) {
+			connection.getHttpResponse().getHttpHeaders().addHeader("TEST", "Value");
 		}
 	}
 
