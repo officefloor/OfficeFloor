@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
@@ -89,7 +90,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 */
 	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) {
 		MockHttpServer httpServer = new MockHttpServer();
-		new HttpServer(httpServer, httpServer, null, input, null, null);
+		new HttpServer(httpServer, httpServer, true, null, input, null, null);
 		return httpServer;
 	}
 
@@ -224,7 +225,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				serverLocation, isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders,
-				requestEntity, responseWriter, bufferPool);
+				requestEntity, true, responseWriter, bufferPool);
 
 		// Return the connection
 		return connection;
@@ -626,7 +627,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 		private MockHttpResponseBuilderImpl() {
 			MockStreamBufferPool bufferPool = new MockStreamBufferPool();
-			this.delegate = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1, bufferPool,
+			this.delegate = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1, bufferPool, true,
 					new MockProcessAwareContext(), new MockHttpResponseWriter(this, null));
 		}
 
@@ -687,6 +688,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public ServerWriter getEntityWriter() throws IOException {
 			return this.delegate.getEntityWriter();
+		}
+
+		@Override
+		public void setEscalationHandler(HttpEscalationHandler escalationHandler) {
+			this.delegate.setEscalationHandler(escalationHandler);
 		}
 
 		@Override

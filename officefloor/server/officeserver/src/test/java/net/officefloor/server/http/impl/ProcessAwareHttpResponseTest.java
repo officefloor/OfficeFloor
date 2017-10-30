@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -58,7 +59,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	 * {@link ProcessAwareHttpResponse} to test.
 	 */
 	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1,
-			this.bufferPool, new MockProcessAwareContext(), this);
+			this.bufferPool, true, new MockProcessAwareContext(), this);
 
 	/**
 	 * Ensure correct defaults on writing.
@@ -426,6 +427,39 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
 		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+	}
+
+	/**
+	 * Ensure can provide {@link HttpEscalationHandler}.
+	 */
+	public void testHandleEscalation() throws IOException {
+
+		final Exception escalation = new Exception("TEST");
+
+		// Configure escalation handling
+		Closure<Boolean> isInvoked = new Closure<>(false);
+		this.response.setEscalationHandler((context) -> {
+			assertSame("Incorrect escalation", escalation, context.getEscalation());
+			isInvoked.value = true;
+			HttpResponse response = context.getHttpResponse();
+			response.setContentType("application/mock", null);
+			response.getEntityWriter().write("{error: '" + escalation.getMessage() + "'}");
+			return true; // handled
+		});
+
+		// Send escalation
+		this.response.flushResponseToHttpResponseWriter(escalation);
+
+		// Obtain the escalation content
+		final String expected = "{error: 'TEST'}";
+
+		// Ensure correct escalation
+		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
+		assertSame("Should default to internal status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
+		assertNull("Should be no headers", this.httpHeader);
+		assertEquals("Incorrect content-type", "application/mock", this.contentType.getValue());
 		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
 				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 	}

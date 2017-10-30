@@ -43,6 +43,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -497,6 +498,12 @@ public class HttpServerSocketManagedObjectSource
 	private HttpServerLocation serverLocation;
 
 	/**
+	 * Indicates whether to include the {@link Escalation} stack trace in the
+	 * {@link HttpResponse}.
+	 */
+	private boolean isIncludeEscalationStackTrace = true;
+
+	/**
 	 * {@link HttpRequestParserMetaData}.
 	 */
 	private HttpRequestParserMetaData httpRequestParserMetaData;
@@ -548,9 +555,14 @@ public class HttpServerSocketManagedObjectSource
 	 * 
 	 * @param serverLocation
 	 *            {@link HttpServerLocation}.
+	 * @param isIncludeEscalationStackTrace
+	 *            Indicates if include the {@link Escalation} stack trace on the
+	 *            {@link HttpResponse}.
 	 */
-	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation) {
+	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation,
+			boolean isIncludeEscalationStackTrace) {
 		this.serverLocation = serverLocation;
+		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.isSecure = false;
 		this.sslContext = null;
 	}
@@ -560,12 +572,17 @@ public class HttpServerSocketManagedObjectSource
 	 * 
 	 * @param serverLocation
 	 *            {@link HttpServerLocation}.
+	 * @param isIncludeEscalationStackTrace
+	 *            Indicates if include the {@link Escalation} stack trace on the
+	 *            {@link HttpResponse}.
 	 * @param sslContext
 	 *            {@link SSLContext}. May be <code>null</code> if behind reverse
 	 *            proxy handling secure communication.
 	 */
-	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, SSLContext sslContext) {
+	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, boolean isIncludeEscalationStackTrace,
+			SSLContext sslContext) {
 		this.serverLocation = serverLocation;
+		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.isSecure = true;
 		this.sslContext = sslContext;
 	}
@@ -638,6 +655,8 @@ public class HttpServerSocketManagedObjectSource
 
 			// Default constructor so load configuration
 			this.serverLocation = new HttpServerLocationImpl(mosContext);
+			this.isIncludeEscalationStackTrace = Boolean.parseBoolean(mosContext.getProperty(
+					HttpServer.PROPERTY_INCLUDE_STACK_TRACE, String.valueOf(this.isIncludeEscalationStackTrace)));
 			this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
 			this.sslContext = this.isSecure ? HttpServer.getSslContext(mosContext) : null;
 		}
@@ -663,7 +682,8 @@ public class HttpServerSocketManagedObjectSource
 				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
 				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool);
+				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool,
+				this.isIncludeEscalationStackTrace);
 
 		// Create the SSL servicer factory
 		SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -748,11 +768,14 @@ public class HttpServerSocketManagedObjectSource
 		 *            {@link HttpRequestParserMetaData}.
 		 * @param serviceBufferPool
 		 *            Service {@link StreamBufferPool}.
+		 * @param isIncludeEscalationStackTrace
+		 *            Indicates whether to include the {@link Escalation} stack
+		 *            trace in the {@link HttpResponse}.
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(serverLocation, isSecure, metaData, serviceBufferPool);
+				StreamBufferPool<ByteBuffer> serviceBufferPool, boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serviceBufferPool, isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 

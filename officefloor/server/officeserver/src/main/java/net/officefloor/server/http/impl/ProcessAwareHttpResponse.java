@@ -22,9 +22,13 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.server.http.CleanupException;
+import net.officefloor.server.http.HttpEscalationContext;
+import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -74,6 +78,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private HttpStatus status = HttpStatus.OK;
 
 	/**
+	 * Flag indicating whether the stack trace should be included on
+	 * {@link Escalation}.
+	 */
+	private final boolean isIncludeStackTraceOnEscalation;
+
+	/**
 	 * {@link ProcessAwareHttpResponseHeaders}.
 	 */
 	private ProcessAwareHttpResponseHeaders headers;
@@ -104,6 +114,17 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private final HttpResponseWriter<B> responseWriter;
 
 	/**
+	 * {@link CleanupEscalation} instances. Will be <code>null</code> if
+	 * successful clean up.
+	 */
+	private CleanupEscalation[] cleanupEscalations = null;
+
+	/**
+	 * {@link HttpEscalationHandler}.
+	 */
+	private HttpEscalationHandler escalationHandler = null;
+
+	/**
 	 * <code>Content-Type</code> value.
 	 */
 	private HttpHeaderValue contentType = null;
@@ -131,18 +152,23 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 *            {@link HttpVersion}.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
+	 * @param isIncludeStackTraceOnEscalation
+	 *            <code>true</code> for stack trace to be included on
+	 *            {@link Escalation}.
 	 * @param processAwareContext
 	 *            {@link ProcessAwareContext}.
 	 * @param responseWriter
 	 *            {@link HttpResponseWriter}.
 	 */
 	public ProcessAwareHttpResponse(HttpVersion version, StreamBufferPool<B> bufferPool,
-			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
+			boolean isIncludeStackTraceOnEscalation, ProcessAwareContext processAwareContext,
+			HttpResponseWriter<B> responseWriter) {
 		this.clientVersion = version;
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
 		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(bufferPool, this);
 		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
+		this.isIncludeStackTraceOnEscalation = isIncludeStackTraceOnEscalation;
 		this.processAwareContext = processAwareContext;
 		this.responseWriter = responseWriter;
 	}
@@ -180,49 +206,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			return; // no escalations
 		}
 
-		// Need to reset response to write the escalations
+		// Store the clean up escalations
 		this.processAwareContext.run(() -> {
-
-			// If written, do nothing
-			if (this.isWritten) {
-				return null;
-			}
-
-			// Clear sent to allow writing content
-			this.isSent = false;
-
-			// Reset the response to write escalations
-			this.unsafeReset();
-
-			// Send error
-			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
-			this.contentType = TEXT_CONTENT;
-
-			// Obtain the content
-			PrintWriter writer = new PrintWriter(
-					this.bufferPoolOutputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
-			for (int i = 0; i < cleanupEscalations.length; i++) {
-				CleanupEscalation cleanupEscalation = cleanupEscalations[i];
-
-				// Write the clean up escalation
-				writer.println("Clean up failure with object of type " + cleanupEscalation.getObjectType().getName());
-				cleanupEscalation.getEscalation().printStackTrace(writer);
-				writer.println();
-				writer.println();
-			}
-			writer.flush();
-
-			// Consider now sent
-			this.isSent = true;
-
-			// Write the response
-			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
-			this.contentType = TEXT_CONTENT;
-			long contentLength = this.bufferPoolOutputStream.getContentLength();
-			this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
-					contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
-			this.isWritten = true;
-
+			this.cleanupEscalations = cleanupEscalations;
 			return null;
 		});
 	}
@@ -244,6 +230,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			return; // already written
 		}
 
+		// Determine if clean up escalation
+		if ((escalation == null) && (this.cleanupEscalations != null)) {
+			// No escalation, but clean up escalation
+			escalation = new CleanupException(this.cleanupEscalations);
+		}
+
 		// Handle escalation
 		if (escalation != null) {
 
@@ -253,8 +245,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			// Reset the response to send an error
 			this.unsafeReset();
 
-			// Send the error
-			if (escalation instanceof HttpException) {
+			// Determine if HTTP escalation
+			boolean isHttpEscalation = escalation instanceof HttpException;
+
+			// Set up response for escalation
+			if (isHttpEscalation) {
 				// Provide the HTTP escalation
 				HttpException httpEscalation = (HttpException) escalation;
 				this.status = httpEscalation.getHttpStatus();
@@ -263,22 +258,55 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 					HttpHeader escalationHeader = escalationHeaders[i];
 					this.headers.addHeader(escalationHeader.getName(), escalationHeader.getValue());
 				}
-				String entity = httpEscalation.getEntity();
-				if (entity != null) {
-					PrintWriter writer = new PrintWriter(this.bufferPoolOutputStream
-							.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
-					writer.write(entity);
-					writer.flush();
-				}
-
 			} else {
 				// Unknown escalation, so error
 				this.status = HttpStatus.INTERNAL_SERVER_ERROR;
-				this.contentType = TEXT_CONTENT;
-				PrintWriter writer = new PrintWriter(
-						this.bufferPoolOutputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
-				escalation.printStackTrace(writer);
-				writer.flush();
+			}
+
+			// Determine if escalation handler
+			if (this.escalationHandler != null) {
+
+				// Handle the escalation
+				final Throwable finalEscalation = escalation;
+				this.escalationHandler.handle(new HttpEscalationContext() {
+
+					@Override
+					public Throwable getEscalation() {
+						return finalEscalation;
+					}
+
+					@Override
+					public boolean isIncludeStacktrace() {
+						return ProcessAwareHttpResponse.this.isIncludeStackTraceOnEscalation;
+					}
+
+					@Override
+					public HttpResponse getHttpResponse() {
+						return ProcessAwareHttpResponse.this;
+					}
+				});
+
+			} else {
+				// Default send the escalation
+				if (isHttpEscalation) {
+					// Send the HTTP entity (if provided)
+					HttpException httpEscalation = (HttpException) escalation;
+					String entity = httpEscalation.getEntity();
+					if (entity != null) {
+						PrintWriter writer = new PrintWriter(this.bufferPoolOutputStream
+								.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+						writer.write(entity);
+						writer.flush();
+					}
+
+				} else if (this.isIncludeStackTraceOnEscalation) {
+					// Send escalation stack trace
+					this.contentType = TEXT_CONTENT;
+					PrintWriter writer = new PrintWriter(this.bufferPoolOutputStream
+							.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+					escalation.printStackTrace(writer);
+					writer.flush();
+				}
 			}
 		}
 
@@ -492,6 +520,14 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 						this.bufferPoolOutputStream.getServerWriter(this.charset), this.processAwareContext);
 			}
 			return this.entityWriter;
+		});
+	}
+
+	@Override
+	public void setEscalationHandler(HttpEscalationHandler escalationHandler) {
+		this.safe(() -> {
+			this.escalationHandler = escalationHandler;
+			return null;
 		});
 	}
 

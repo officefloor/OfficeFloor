@@ -202,7 +202,7 @@ public class ObjectResponseManagedObjectSource
 					// - no head, so will match any type
 					// - only one head that is any match, so will match any type
 					boolean isOnlyWildcard = ((this.head == null)
-							|| ((this.head.next == null) && (this.head instanceof AnyAcceptType)));
+							|| ((this.head.next == null) && (this.head.getClass() == AnyAcceptType.class)));
 
 					// Default to content-type if wild card only
 					if (isOnlyWildcard) {
@@ -582,7 +582,7 @@ public class ObjectResponseManagedObjectSource
 		case PARAMETER_NAME:
 			parameterCount++; // include last parameter
 			// carry on to load accept type
-			
+
 		case PARAMETER_START:
 		case PARAMETER_VALUE_START:
 			// Just parameter name, so no check for q ending parameter
@@ -796,7 +796,7 @@ public class ObjectResponseManagedObjectSource
 		 * @param q
 		 *            <code>q</code> value.
 		 * @param parameterCount
-		 *            Parmeter count.
+		 *            Parameter count.
 		 */
 		protected AnyAcceptType(String q, int parameterCount) {
 			super(q, 0, parameterCount);
@@ -831,7 +831,7 @@ public class ObjectResponseManagedObjectSource
 		 * @param q
 		 *            <code>q</code> value.
 		 * @param parameterCount
-		 *            Parmeter count.
+		 *            Parameter count.
 		 */
 		protected TypeAcceptType(String contentPrefix, String q, int parameterCount) {
 			super(q, 1, parameterCount);
@@ -849,7 +849,7 @@ public class ObjectResponseManagedObjectSource
 	}
 
 	/**
-	 * {@link AcceptType} for type/subtype.
+	 * {@link AcceptType} for type/sub-type.
 	 */
 	private static class SubTypeAcceptType extends AcceptType {
 
@@ -866,7 +866,7 @@ public class ObjectResponseManagedObjectSource
 		 * @param q
 		 *            <code>q</code> value.
 		 * @param parameterCount
-		 *            Parmeter count.
+		 *            Parameter count.
 		 */
 		protected SubTypeAcceptType(String contentType, String q, int parameterCount) {
 			super(q, 2, parameterCount);

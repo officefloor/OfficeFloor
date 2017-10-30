@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
@@ -107,6 +108,12 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private final StreamBufferPool<B> bufferPool;
 
 	/**
+	 * Indicates whether to include the stack trace in {@link Escalation}
+	 * {@link HttpResponse}.
+	 */
+	private final boolean isIncludeStackTrace;
+
+	/**
 	 * {@link HttpResponseWriter}.
 	 */
 	private final HttpResponseWriter<B> httpResponseWriter;
@@ -135,6 +142,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 *            {@link HttpRequest}.
 	 * @param requestEntity
 	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
+	 * @param isIncludeStackTrace
+	 *            <code>true</code> to include the {@link Escalation} stack
+	 *            trace in the {@link HttpResponse}.
 	 * @param writer
 	 *            {@link HttpResponseWriter}.
 	 * @param bufferPool
@@ -142,8 +152,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(HttpServerLocation serverLocation, boolean isSecure,
 			Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier, HttpVersion version,
-			NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity, HttpResponseWriter<B> writer,
-			StreamBufferPool<B> bufferPool) {
+			NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity, boolean isIncludeStackTrace,
+			HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
 		this.serverLocation = serverLocation;
 
 		// Indicate if secure
@@ -158,6 +168,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 
 		// Store remaining state
 		this.bufferPool = bufferPool;
+		this.isIncludeStackTrace = isIncludeStackTrace;
 		this.httpResponseWriter = writer;
 	}
 
@@ -192,8 +203,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.processAwareContext = context;
 
 		// Create the HTTP response (with context awareness)
-		this.response = new ProcessAwareHttpResponse<B>(this.request.getHttpVersion(), this.bufferPool, context,
-				this.httpResponseWriter);
+		this.response = new ProcessAwareHttpResponse<B>(this.request.getHttpVersion(), this.bufferPool,
+				this.isIncludeStackTrace, context, this.httpResponseWriter);
 	}
 
 	@Override

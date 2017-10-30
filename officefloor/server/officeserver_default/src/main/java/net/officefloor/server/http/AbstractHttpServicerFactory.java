@@ -22,6 +22,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.RequestHandler;
 import net.officefloor.server.RequestServicer;
 import net.officefloor.server.RequestServicerFactory;
@@ -76,6 +77,12 @@ public abstract class AbstractHttpServicerFactory
 	private final StreamBufferPool<ByteBuffer> serviceBufferPool;
 
 	/**
+	 * Indicates if include the {@link Escalation} stack trace in the
+	 * {@link HttpResponse}.
+	 */
+	private boolean isIncludeEscalationStackTrace;
+
+	/**
 	 * Services the {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * 
 	 * @param connection
@@ -117,13 +124,18 @@ public abstract class AbstractHttpServicerFactory
 	 *            {@link StreamBufferPool} used to service requests.
 	 * @param metaData
 	 *            {@link HttpRequestParserMetaData}.
+	 * @param isIncludeEscalationStackTrace
+	 *            Indicates whether to include the {@link Escalation} stack
+	 *            trace in {@link HttpResponse}.
 	 */
 	public AbstractHttpServicerFactory(HttpServerLocation serverLocation, boolean isSecure,
-			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool) {
+			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool,
+			boolean isIncludeEscalationStackTrace) {
 		this.serverLocation = serverLocation;
 		this.isSecure = isSecure;
 		this.metaData = metaData;
 		this.serviceBufferPool = serviceBufferPool;
+		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 	}
 
 	/**
@@ -188,7 +200,9 @@ public abstract class AbstractHttpServicerFactory
 			if (this.parseFailure != null) {
 				// Write parse failure
 				responseWriter.write((responseHead, socketBufferPool) -> {
-					this.parseFailure.writeHttpResponse(HttpVersion.HTTP_1_1, false, responseHead, socketBufferPool);
+					this.parseFailure.writeHttpResponse(HttpVersion.HTTP_1_1,
+							AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace, responseHead,
+							socketBufferPool);
 				}, null);
 				return;
 			}
@@ -239,7 +253,8 @@ public abstract class AbstractHttpServicerFactory
 			// Create the connection
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 					AbstractHttpServicerFactory.this.serverLocation, AbstractHttpServicerFactory.this.isSecure,
-					methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, writer,
+					methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
+					AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace, writer,
 					AbstractHttpServicerFactory.this.serviceBufferPool);
 
 			try {
@@ -255,7 +270,8 @@ public abstract class AbstractHttpServicerFactory
 			} catch (HttpException ex) {
 				// Send HTTP exception
 				responseWriter.write((responseHead, socketBufferPool) -> {
-					ex.writeHttpResponse(version, true, responseHead, socketBufferPool);
+					ex.writeHttpResponse(version, AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace,
+							responseHead, socketBufferPool);
 				}, null);
 			}
 		}

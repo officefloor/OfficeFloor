@@ -51,6 +51,6 @@ public @interface HttpSessionStateful {
 	 *         default value indicates for the {@link ManagedObject} to assign
 	 *         its own unique value.
 	 */
-	String value() default "";
+	String bind() default "";
 
 }

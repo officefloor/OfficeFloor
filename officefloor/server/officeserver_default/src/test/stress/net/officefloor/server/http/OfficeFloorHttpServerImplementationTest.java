@@ -103,7 +103,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		 */
 		public RawHttpServicerFactory(HttpServerLocation serverLocation,
 				StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool);
+			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, true);
 		}
 
 		/*

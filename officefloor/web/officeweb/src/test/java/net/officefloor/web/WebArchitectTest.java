@@ -657,13 +657,12 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/path?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Application=value", response.getHttpEntity(null));
 
 		// Obtain value from application state
-		response = this.server.send(
-				MockHttpServer.mockRequest("/path").header("cookie", response.getFirstHeader("set-cookie").getValue()));
+		response = this.server.send(MockHttpServer.mockRequest("/path"));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Application=value", response.getHttpEntity(null));
 	}
 
 	@HttpApplicationStateful
@@ -700,13 +699,13 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/path?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Session=value", response.getHttpEntity(null));
 
 		// Obtain value from session
 		response = this.server.send(
 				MockHttpServer.mockRequest("/path").header("cookie", response.getFirstHeader("set-cookie").getValue()));
 		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getHttpEntity(null));
+		assertEquals("Incorrect response", "Session=value", response.getHttpEntity(null));
 	}
 
 	@HttpSessionStateful

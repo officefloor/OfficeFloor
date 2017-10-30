@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
@@ -176,7 +177,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * @return Bind name for the {@link OfficeManagedObject};
 	 */
 	private static String getBindName(Class<?> objectClass, String bindName) {
-		return (bindName == null ? objectClass.getName() : bindName);
+		return (CompileUtil.isBlank(bindName) ? objectClass.getName() : bindName);
 	}
 
 	/*
@@ -429,6 +430,18 @@ public class WebArchitectEmployer implements WebArchitect {
 
 				// Determine if in-line configuration of dependency
 				for (Object annotation : functionParameterType.getAnnotations()) {
+
+					// Application object
+					if (annotation instanceof HttpApplicationStateful) {
+						HttpApplicationStateful stateful = (HttpApplicationStateful) annotation;
+						this.addHttpApplicationObject(objectType, stateful.bind());
+					}
+
+					// Session object
+					if (annotation instanceof HttpSessionStateful) {
+						HttpSessionStateful stateful = (HttpSessionStateful) annotation;
+						this.addHttpSessionObject(objectType, stateful.bind());
+					}
 
 					// HTTP parameters
 					if (annotation instanceof HttpParameters) {

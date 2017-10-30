@@ -59,6 +59,11 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	 * {@link HttpServerImplementationContext}.
 	 */
 	private HttpServerImplementationContext context;
+	
+	/**
+	 * Indicates whether to include the stack trace.
+	 */
+	private boolean isIncludeStackTrace;
 
 	/**
 	 * {@link ExternalServiceInput}.
@@ -73,6 +78,9 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
 		this.context = context;
+		
+		// Determine if include stack trace
+		this.isIncludeStackTrace = context.isIncludeEscalationStackTrace();
 
 		// Obtain the service input for handling requests
 		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
@@ -248,7 +256,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
+				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, this.isIncludeStackTrace,
 				responseWriter, bufferPool);
 
 		// Service the request

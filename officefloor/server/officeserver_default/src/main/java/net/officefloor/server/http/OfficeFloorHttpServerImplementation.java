@@ -48,9 +48,12 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 		// Obtain the HTTP server location
 		HttpServerLocation serverLocation = context.getHttpServerLocation();
 
+		// Obtain whether to include the escalation stack trace
+		boolean isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
+
 		// Configure the non-secure HTTP
 		OfficeFloorManagedObjectSource http = deployer.addManagedObjectSource("HTTP",
-				new HttpServerSocketManagedObjectSource(serverLocation));
+				new HttpServerSocketManagedObjectSource(serverLocation, isIncludeEscalationStackTrace));
 		deployer.link(http.getManagingOffice(), office);
 		deployer.link(http.getManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
 				serviceInput);
@@ -60,7 +63,8 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 		int httpsPort = serverLocation.getClusterHttpsPort();
 		if (httpsPort > 0) {
 			OfficeFloorManagedObjectSource https = deployer.addManagedObjectSource("HTTPS",
-					new HttpServerSocketManagedObjectSource(serverLocation, context.getSslContext()));
+					new HttpServerSocketManagedObjectSource(serverLocation, isIncludeEscalationStackTrace,
+							context.getSslContext()));
 			deployer.link(https.getManagingOffice(), office);
 			deployer.link(https.getManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
 					serviceInput);

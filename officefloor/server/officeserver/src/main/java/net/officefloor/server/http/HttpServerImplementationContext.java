@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationH
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -39,6 +40,19 @@ public interface HttpServerImplementationContext {
 	 * @return {@link HttpServerLocation}.
 	 */
 	HttpServerLocation getHttpServerLocation();
+
+	/**
+	 * <p>
+	 * Indicates whether the {@link HttpServerImplementation} should include the
+	 * stack trace in {@link Escalation} responses.
+	 * <p>
+	 * For development, stack traces should be enabled for easier debugging of
+	 * issues. However, in production, they should be hidden.
+	 * 
+	 * @return <code>true</code> to include the stack traces. <code>false</code>
+	 *         should hide stack traces.
+	 */
+	boolean isIncludeEscalationStackTrace();
 
 	/**
 	 * <p>

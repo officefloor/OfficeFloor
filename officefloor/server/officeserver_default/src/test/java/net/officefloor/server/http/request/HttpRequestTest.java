@@ -95,7 +95,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 					compile.officeFloor((extension) -> {
 						DeployedOfficeInput serviceInput = extension.getDeployedOffice()
 								.getDeployedOfficeInput("SECTION", "service");
-						new HttpServer(serverLocation, new OfficeFloorHttpServerImplementation(),
+						new HttpServer(new OfficeFloorHttpServerImplementation(), serverLocation, true,
 								OfficeFloorDefaultSslContextSource.createServerSslContext(null), serviceInput,
 								extension.getOfficeFloorDeployer(), extension.getOfficeFloorSourceContext());
 					});

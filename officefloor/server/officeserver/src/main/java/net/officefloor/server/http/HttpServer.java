@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationH
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
@@ -44,6 +45,11 @@ import net.officefloor.server.ssl.SslContextSource;
  * @author Daniel Sagenschneider
  */
 public class HttpServer {
+
+	/**
+	 * Name of {@link Property} to include the stack trace.
+	 */
+	public static final String PROPERTY_INCLUDE_STACK_TRACE = "http.include.stacktrace";
 
 	/**
 	 * Name of {@link Property} for the {@link SslContextSource}.
@@ -141,6 +147,12 @@ public class HttpServer {
 	private final HttpServerLocation serverLocation;
 
 	/**
+	 * Indicates whether to include {@link Escalation} stack trace in the
+	 * {@link HttpResponse}.
+	 */
+	private final boolean isIncludeEscalationStackTrace;
+
+	/**
 	 * {@link HttpServerImplementation}.
 	 */
 	private final HttpServerImplementation serverImplementation;
@@ -168,6 +180,10 @@ public class HttpServer {
 
 		// Load the server location
 		this.serverLocation = new HttpServerLocationImpl(context);
+
+		// Load whether to include stack traces
+		this.isIncludeEscalationStackTrace = Boolean
+				.parseBoolean(getPropertyString(PROPERTY_INCLUDE_STACK_TRACE, context, () -> Boolean.TRUE.toString()));
 
 		// Obtain the server implementation
 		List<HttpServerImplementation> implementations = new ArrayList<>();
@@ -215,10 +231,13 @@ public class HttpServer {
 	/**
 	 * Instantiates the {@link HttpServer} from direct configuration.
 	 * 
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
 	 * @param implementation
 	 *            {@link HttpServerImplementation}.
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
+	 * @param isIncludeEscalationStackTrace
+	 *            Indicates whether to include {@link Escalation} stack trace in
+	 *            {@link HttpResponse}.
 	 * @param sslContext
 	 *            {@link SSLContext}.
 	 * @param serviceInput
@@ -229,10 +248,11 @@ public class HttpServer {
 	 * @param context
 	 *            {@link OfficeFloorSourceContext}.
 	 */
-	public HttpServer(HttpServerLocation serverLocation, HttpServerImplementation implementation, SSLContext sslContext,
-			DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
-			OfficeFloorSourceContext context) {
+	public HttpServer(HttpServerImplementation implementation, HttpServerLocation serverLocation,
+			boolean isIncludeEscalationStackTrace, SSLContext sslContext, DeployedOfficeInput serviceInput,
+			OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context) {
 		this.serverLocation = serverLocation;
+		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.serverImplementation = implementation;
 		this.sslContext = sslContext;
 
@@ -264,6 +284,11 @@ public class HttpServer {
 			@Override
 			public HttpServerLocation getHttpServerLocation() {
 				return HttpServer.this.serverLocation;
+			}
+
+			@Override
+			public boolean isIncludeEscalationStackTrace() {
+				return HttpServer.this.isIncludeEscalationStackTrace;
 			}
 
 			@Override

@@ -181,6 +181,14 @@ public interface HttpResponse {
 	ServerWriter getEntityWriter() throws IOException;
 
 	/**
+	 * Sets the {@link HttpEscalationHandler} for the response.
+	 * 
+	 * @param escalationHandler
+	 *            {@link HttpEscalationHandler} for the response.
+	 */
+	void setEscalationHandler(HttpEscalationHandler escalationHandler);
+
+	/**
 	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances
 	 * and the entity.
 	 * 
