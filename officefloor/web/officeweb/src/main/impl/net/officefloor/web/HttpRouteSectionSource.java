@@ -40,6 +40,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -142,6 +143,11 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	private final WebRouterBuilder builder;
 
 	/**
+	 * {@link HttpEscalationHandler}. May be <code>null</code>.
+	 */
+	private final HttpEscalationHandler escalationHandler;
+
+	/**
 	 * {@link RouteInput} instances.
 	 */
 	private final List<RouteInput> routes = new LinkedList<>();
@@ -151,9 +157,12 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * 
 	 * @param contextPath
 	 *            Context path. May be <code>null</code>.
+	 * @param escalationHandler
+	 *            {@link HttpEscalationHandler}. May be <code>null</code>.
 	 */
-	public HttpRouteSectionSource(String contextPath) {
+	public HttpRouteSectionSource(String contextPath, HttpEscalationHandler escalationHandler) {
 		this.builder = new WebRouterBuilder(contextPath);
+		this.escalationHandler = escalationHandler;
 	}
 
 	/**
@@ -308,8 +317,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Add the route function
 			ManagedFunctionTypeBuilder<HttpRouteDependencies, Indexed> builder = functionNamespaceTypeBuilder
 					.addManagedFunctionType(ROUTE_FUNCTION_NAME,
-							new HttpRouteFunction(this.router, nonHandledFlowIndex), HttpRouteDependencies.class,
-							Indexed.class);
+							new HttpRouteFunction(this.router, nonHandledFlowIndex,
+									HttpRouteSectionSource.this.escalationHandler),
+							HttpRouteDependencies.class, Indexed.class);
 
 			// Configure dependency on server HTTP connection
 			builder.addObject(ServerHttpConnection.class).setKey(HttpRouteDependencies.SERVER_HTTP_CONNECTION);

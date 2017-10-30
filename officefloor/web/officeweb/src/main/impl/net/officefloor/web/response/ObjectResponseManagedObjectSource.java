@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
@@ -72,10 +73,16 @@ public class ObjectResponseManagedObjectSource
 	private final List<HttpObjectResponderFactory> objectResponderFactoriesList;
 
 	/**
-	 * {@link ContentTypeCache} instances for each
+	 * {@link ContentTypeCache} instances for each {@link Object}
 	 * {@link HttpObjectResponderFactory}.
 	 */
-	private ContentTypeCache[] cache;
+	private ContentTypeCache[] objectCache;
+
+	/**
+	 * {@link ContentTypeCache} instances for each {@link Escalation}
+	 * {@link HttpObjectResponderFactory}.
+	 */
+	private ContentTypeCache[] escalationCache;
 
 	/**
 	 * {@link WritableHttpHeader} instances when not acceptable type requested.
@@ -109,13 +116,15 @@ public class ObjectResponseManagedObjectSource
 		context.addDependency(ObjectResponseDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 
 		// Create the cache of factories
-		this.cache = new ContentTypeCache[this.objectResponderFactoriesList.size()];
-		for (int i = 0; i < this.cache.length; i++) {
+		this.objectCache = new ContentTypeCache[this.objectResponderFactoriesList.size()];
+		this.escalationCache = new ContentTypeCache[this.objectResponderFactoriesList.size()];
+		for (int i = 0; i < this.objectCache.length; i++) {
 			HttpObjectResponderFactory factory = this.objectResponderFactoriesList.get(i);
 			String contentType = factory.getContentType();
-			this.cache[i] = new ContentTypeCache(contentType, factory);
+			this.objectCache[i] = new ContentTypeCache(contentType, factory);
+			this.escalationCache[i] = new ContentTypeCache(contentType, factory);
 		}
-		if (this.cache.length == 0) {
+		if (this.objectCache.length == 0) {
 			throw new Exception(
 					"Must have at least one " + HttpObjectResponderFactory.class.getSimpleName() + " configured");
 		}
@@ -123,7 +132,7 @@ public class ObjectResponseManagedObjectSource
 		// Create the not acceptable headers
 		StringBuilder accept = new StringBuilder();
 		boolean isFirst = true;
-		for (ContentTypeCache item : this.cache) {
+		for (ContentTypeCache item : this.objectCache) {
 			if (!isFirst) {
 				accept.append(", ");
 			}
@@ -188,7 +197,6 @@ public class ObjectResponseManagedObjectSource
 		 */
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public void send(T object) throws HttpException {
 			this.context.run(() -> {
 
@@ -197,55 +205,11 @@ public class ObjectResponseManagedObjectSource
 					this.head = parseAccept(this.connection);
 				}
 
-				// Obtain the object type
-				Class<T> objectType = (Class<T>) object.getClass();
-
-				// Attempt to find match
-				AcceptType accept = this.head;
-				while (accept != null) {
-
-					// Attempt to obtain matching responder
-					ContentTypeCache[] cache = ObjectResponseManagedObjectSource.this.cache;
-					for (int i = 0; i < cache.length; i++) {
-						ContentTypeCache item = cache[i];
-						if (accept.isMatch(item.contentType)) {
-
-							// Find the corresponding type
-							HttpObjectResponder<T> objectResponder = null;
-							FIND_RESPONDER: for (int j = 0; j < item.responders.length; j++) {
-								ObjectResponderCache<?> responder = item.responders[j];
-								if (responder.objectType == objectType) {
-									objectResponder = (HttpObjectResponder<T>) responder.objectResponder;
-									break FIND_RESPONDER;
-								}
-							}
-							if (objectResponder == null) {
-								// Need to create object responder for type
-								objectResponder = item.factory.createHttpObjectResponder(objectType);
-								ObjectResponderCache<T> responder = new ObjectResponderCache<>(objectType,
-										objectResponder);
-
-								// Append the object responder to cache
-								ObjectResponderCache<?>[] responders = Arrays.copyOf(item.responders,
-										item.responders.length + 1);
-								responders[responders.length - 1] = responder;
-								item.responders = responders;
-							}
-
-							// Send the response
-							try {
-								objectResponder.send(object, this.connection);
-							} catch (IOException ex) {
-								throw new HttpException(ex);
-							}
-
-							// Response sent
-							return null;
-						}
-					}
-
-					// Attempt next accept
-					accept = accept.next;
+				// Attempt to handle the object
+				boolean isHandled = handleObject(object, this.head, ObjectResponseManagedObjectSource.this.objectCache,
+						OBJECT_RESPONDER_FACTORY, this.connection);
+				if (isHandled) {
+					return null; // handled the object
 				}
 
 				// As here, not able to send acceptable content type
@@ -265,7 +229,125 @@ public class ObjectResponseManagedObjectSource
 		// Parse out the accept linked list
 		AcceptType head = parseAccept(context.getServerHttpConnection());
 
-		// TODO Auto-generated method stub
+		// Obtain the escalation details
+		Throwable escalation = context.getEscalation();
+		ServerHttpConnection connection = context.getServerHttpConnection();
+
+		// Attempt to handle escalation
+		return handleObject(escalation, head, this.escalationCache, ESCALATION_RESPONDER_FACTORY, connection);
+	}
+
+	/**
+	 * Object {@link ResponderFactory}.
+	 */
+	private static ResponderFactory OBJECT_RESPONDER_FACTORY = new ResponderFactory() {
+		@Override
+		public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType,
+				HttpObjectResponderFactory factory) {
+			return factory.createHttpObjectResponder(objectType);
+		}
+	};
+
+	/**
+	 * {@link Escalation} {@link ResponderFactory}.
+	 */
+	private static ResponderFactory ESCALATION_RESPONDER_FACTORY = new ResponderFactory() {
+		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public <E> HttpObjectResponder<E> createHttpObjectResponder(Class<E> objectType,
+				HttpObjectResponderFactory factory) {
+			Class escalationType = objectType;
+			return factory.createHttpEscalationResponder(escalationType);
+		}
+	};
+
+	/**
+	 * Responder factory.
+	 */
+	private static interface ResponderFactory {
+
+		/**
+		 * Creates the {@link HttpObjectResponder}.
+		 * 
+		 * @param objectType
+		 *            Object type.
+		 * @param factory
+		 *            {@link HttpObjectResponderFactory}.
+		 * @return {@link HttpObjectResponder}.
+		 */
+		<T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType, HttpObjectResponderFactory factory);
+	}
+
+	/**
+	 * Handles the object.
+	 * 
+	 * @param object
+	 *            Object for the response.
+	 * @param head
+	 *            Head {@link AcceptType} for the linked list of
+	 *            {@link AcceptType} instances.
+	 * @param cache
+	 *            {@link ContentTypeCache} instances.
+	 * @param responderFactory
+	 *            {@link ResponderFactory}.
+	 * @param connection
+	 *            {@link ServerHttpConnection} connection.
+	 * @return <code>true</code> if object sent.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> boolean handleObject(T object, AcceptType head, ContentTypeCache[] cache,
+			ResponderFactory responderFactory, ServerHttpConnection connection) {
+
+		// Obtain the object type
+		Class<T> objectType = (Class<T>) object.getClass();
+
+		// Attempt to find match
+		AcceptType accept = head;
+		while (accept != null) {
+
+			// Attempt to obtain matching responder
+			for (int i = 0; i < cache.length; i++) {
+				ContentTypeCache item = cache[i];
+				if (accept.isMatch(item.contentType)) {
+
+					// Find the corresponding type
+					HttpObjectResponder<T> objectResponder = null;
+					FIND_RESPONDER: for (int j = 0; j < item.responders.length; j++) {
+						ObjectResponderCache<?> responder = item.responders[j];
+						if (responder.objectType == objectType) {
+							objectResponder = (HttpObjectResponder<T>) responder.objectResponder;
+							break FIND_RESPONDER;
+						}
+					}
+					if (objectResponder == null) {
+						// Need to create object responder for type
+						objectResponder = responderFactory.createHttpObjectResponder(objectType, item.factory);
+						ObjectResponderCache<T> responder = new ObjectResponderCache<>(objectType, objectResponder);
+
+						// Append the object responder to cache
+						ObjectResponderCache<?>[] responders = Arrays.copyOf(item.responders,
+								item.responders.length + 1);
+						responders[responders.length - 1] = responder;
+						item.responders = responders;
+					}
+
+					// Send the response
+					try {
+						objectResponder.send(object, connection);
+					} catch (IOException ex) {
+						throw new HttpException(ex);
+					}
+
+					// Response sent
+					return true;
+				}
+			}
+
+			// Attempt next accept
+			accept = accept.next;
+		}
+
+		// As here, response not sent
 		return false;
 	}
 

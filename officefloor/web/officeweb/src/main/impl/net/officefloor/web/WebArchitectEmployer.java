@@ -401,15 +401,15 @@ public class WebArchitectEmployer implements WebArchitect {
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
 		// Configure the object responder (if configured factories)
+		ObjectResponseManagedObjectSource objectResponseMos = null;
 		if (this.objectResponderFactories.size() > 0) {
-			this.officeArchitect
-					.addOfficeManagedObjectSource("OBJECT_RESPONSE",
-							new ObjectResponseManagedObjectSource(this.objectResponderFactories))
+			objectResponseMos = new ObjectResponseManagedObjectSource(this.objectResponderFactories);
+			this.officeArchitect.addOfficeManagedObjectSource("OBJECT_RESPONSE", objectResponseMos)
 					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
 		}
 
 		// Configure the HTTP handler
-		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath);
+		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath, objectResponseMos);
 		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
 		for (HttpInputBuilderImpl input : this.inputs) {
 

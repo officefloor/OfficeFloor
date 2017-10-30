@@ -22,6 +22,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.route.WebRouter;
@@ -52,15 +53,23 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	private final int nonHandledFlowIndex;
 
 	/**
+	 * {@link HttpEscalationHandler}. May be <code>null</code>.
+	 */
+	private final HttpEscalationHandler escalationHandler;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param router
 	 *            {@link WebRouter}.
 	 * @param nonHandledFlowIndex
 	 *            {@link Flow} index for non handled.
+	 * @param escalationHandler
+	 *            {@link HttpEscalationHandler}. May be <code>null</code>.
 	 */
-	public HttpRouteFunction(WebRouter router, int nonHandledFlowIndex) {
+	public HttpRouteFunction(WebRouter router, int nonHandledFlowIndex, HttpEscalationHandler escalationHandler) {
 		this.router = router;
+		this.escalationHandler = escalationHandler;
 		this.nonHandledFlowIndex = nonHandledFlowIndex;
 	}
 
@@ -83,6 +92,11 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 		// Obtain the server HTTP connection
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(HttpRouteDependencies.SERVER_HTTP_CONNECTION);
+
+		// Load the escalation handler
+		if (this.escalationHandler != null) {
+			connection.getHttpResponse().setEscalationHandler(this.escalationHandler);
+		}
 
 		// Attempt to route the request
 		if (this.router.service(connection, context)) {

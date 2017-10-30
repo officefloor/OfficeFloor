@@ -628,7 +628,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		// Send request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		assertEquals("Should be error", 500, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("content-type").getValue());
+		assertEquals("Incorrect content type", "application/mock", response.getFirstHeader("content-type").getValue());
 		assertEquals("Incorrect error object", "{error: \"TEST ESCALATION\"}", response.getHttpEntity(null));
 	}
 
