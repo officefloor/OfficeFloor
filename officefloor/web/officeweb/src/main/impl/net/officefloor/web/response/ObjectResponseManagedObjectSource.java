@@ -29,6 +29,8 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.HttpEscalationContext;
+import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
@@ -48,7 +50,8 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
  * @author Daniel Sagenschneider
  */
 public class ObjectResponseManagedObjectSource
-		extends AbstractManagedObjectSource<ObjectResponseManagedObjectSource.ObjectResponseDependencies, None> {
+		extends AbstractManagedObjectSource<ObjectResponseManagedObjectSource.ObjectResponseDependencies, None>
+		implements HttpEscalationHandler {
 
 	/**
 	 * {@link AcceptType} linked list to use should there be no
@@ -189,38 +192,9 @@ public class ObjectResponseManagedObjectSource
 		public void send(T object) throws HttpException {
 			this.context.run(() -> {
 
-				// Parse out the accept types from request
+				// Lazy parse out the accept types from request
 				if (this.head == null) {
-
-					// Load the accept types
-					HttpRequestHeaders headers = this.connection.getHttpRequest().getHttpHeaders();
-					for (HttpHeader header : headers.getHeaders("accept")) {
-						this.head = parseAccept(header.getValue(), this.head);
-					}
-
-					// Determine if only wild card match
-					// - no head, so will match any type
-					// - only one head that is any match, so will match any type
-					boolean isOnlyWildcard = ((this.head == null)
-							|| ((this.head.next == null) && (this.head.getClass() == AnyAcceptType.class)));
-
-					// Default to content-type if wild card only
-					if (isOnlyWildcard) {
-
-						// Attempt to match first on input content type
-						// (e.g. if JSON sent then respond with JSON)
-						HttpHeader contentTypeHeader = headers.getHeader("content-type");
-						if (contentTypeHeader != null) {
-							this.head = new SubTypeAcceptType(contentTypeHeader.getValue(), "1", 0);
-						}
-
-						// Now match any
-						if (this.head == null) {
-							this.head = MATCH_ANY;
-						} else {
-							this.head.next = MATCH_ANY;
-						}
-					}
+					this.head = parseAccept(this.connection);
 				}
 
 				// Obtain the object type
@@ -279,6 +253,66 @@ public class ObjectResponseManagedObjectSource
 						ObjectResponseManagedObjectSource.this.notAcceptableHeaders, null);
 			});
 		}
+	}
+
+	/*
+	 * ==================== HttpEscalationHandler ====================
+	 */
+
+	@Override
+	public boolean handle(HttpEscalationContext context) throws IOException {
+
+		// Parse out the accept linked list
+		AcceptType head = parseAccept(context.getServerHttpConnection());
+
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/**
+	 * Parses the {@link AcceptType} linked list from the
+	 * {@link ServerHttpConnection}.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return Head {@link AcceptType} of the linked list.
+	 */
+	private static AcceptType parseAccept(ServerHttpConnection connection) {
+
+		// Accept type
+		AcceptType head = null;
+
+		// Load the accept types
+		HttpRequestHeaders headers = connection.getHttpRequest().getHttpHeaders();
+		for (HttpHeader header : headers.getHeaders("accept")) {
+			head = parseAccept(header.getValue(), head);
+		}
+
+		// Determine if only wild card match
+		// - no head, so will match any type
+		// - only one head that is any match, so will match any type
+		boolean isOnlyWildcard = ((head == null) || ((head.next == null) && (head.getClass() == AnyAcceptType.class)));
+
+		// Default to content-type if wild card only
+		if (isOnlyWildcard) {
+
+			// Attempt to match first on input content type
+			// (e.g. if JSON sent then respond with JSON)
+			HttpHeader contentTypeHeader = headers.getHeader("content-type");
+			if (contentTypeHeader != null) {
+				head = new SubTypeAcceptType(contentTypeHeader.getValue(), "1", 0);
+			}
+
+			// Now match any
+			if (head == null) {
+				head = MATCH_ANY;
+			} else {
+				head.next = MATCH_ANY;
+			}
+		}
+
+		// Return the head of the linked list
+		return head;
 	}
 
 	/**

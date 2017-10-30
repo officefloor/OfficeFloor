@@ -63,6 +63,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private static final HttpHeaderValue TEXT_CONTENT = new HttpHeaderValue("text/plain");
 
 	/**
+	 * {@link ProcessAwareServerHttpConnectionManagedObject}.
+	 */
+	private final ProcessAwareServerHttpConnectionManagedObject<B> serverHttpConnection;
+
+	/**
 	 * Client {@link HttpVersion}.
 	 */
 	private final HttpVersion clientVersion;
@@ -76,12 +81,6 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * {@link HttpStatus}.
 	 */
 	private HttpStatus status = HttpStatus.OK;
-
-	/**
-	 * Flag indicating whether the stack trace should be included on
-	 * {@link Escalation}.
-	 */
-	private final boolean isIncludeStackTraceOnEscalation;
 
 	/**
 	 * {@link ProcessAwareHttpResponseHeaders}.
@@ -107,11 +106,6 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * {@link ProcessAwareContext}.
 	 */
 	private final ProcessAwareContext processAwareContext;
-
-	/**
-	 * {@link HttpResponseWriter}.
-	 */
-	private final HttpResponseWriter<B> responseWriter;
 
 	/**
 	 * {@link CleanupEscalation} instances. Will be <code>null</code> if
@@ -148,6 +142,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param serverHttpConnection
+	 *            {@link ServerHttpConnection}.
 	 * @param version
 	 *            {@link HttpVersion}.
 	 * @param bufferPool
@@ -160,17 +156,15 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * @param responseWriter
 	 *            {@link HttpResponseWriter}.
 	 */
-	public ProcessAwareHttpResponse(HttpVersion version, StreamBufferPool<B> bufferPool,
-			boolean isIncludeStackTraceOnEscalation, ProcessAwareContext processAwareContext,
-			HttpResponseWriter<B> responseWriter) {
+	public ProcessAwareHttpResponse(ProcessAwareServerHttpConnectionManagedObject<B> serverHttpConnection,
+			HttpVersion version, ProcessAwareContext processAwareContext) {
+		this.serverHttpConnection = serverHttpConnection;
 		this.clientVersion = version;
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
-		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(bufferPool, this);
+		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(this.serverHttpConnection.bufferPool, this);
 		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
-		this.isIncludeStackTraceOnEscalation = isIncludeStackTraceOnEscalation;
 		this.processAwareContext = processAwareContext;
-		this.responseWriter = responseWriter;
 	}
 
 	/**
@@ -277,12 +271,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 					@Override
 					public boolean isIncludeStacktrace() {
-						return ProcessAwareHttpResponse.this.isIncludeStackTraceOnEscalation;
+						return ProcessAwareHttpResponse.this.serverHttpConnection.isIncludeStackTraceOnEscalation;
 					}
 
 					@Override
-					public HttpResponse getHttpResponse() {
-						return ProcessAwareHttpResponse.this;
+					public ServerHttpConnection getServerHttpConnection() {
+						return ProcessAwareHttpResponse.this.serverHttpConnection;
 					}
 				});
 
@@ -299,7 +293,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 						writer.flush();
 					}
 
-				} else if (this.isIncludeStackTraceOnEscalation) {
+				} else if (this.serverHttpConnection.isIncludeStackTraceOnEscalation) {
 					// Send escalation stack trace
 					this.contentType = TEXT_CONTENT;
 					PrintWriter writer = new PrintWriter(this.bufferPoolOutputStream
@@ -326,8 +320,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 		// Write the response (and consider written)
 		this.isWritten = true;
-		this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
-				contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
+		this.serverHttpConnection.httpResponseWriter.writeHttpResponse(this.version, this.status,
+				this.headers.getWritableHttpHeaders(), contentLength, contentType,
+				this.bufferPoolOutputStream.getBuffers());
 	}
 
 	/**
@@ -521,6 +516,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			}
 			return this.entityWriter;
 		});
+	}
+
+	@Override
+	public HttpEscalationHandler getEscalationHandler() {
+		return this.safe(() -> this.escalationHandler);
 	}
 
 	@Override

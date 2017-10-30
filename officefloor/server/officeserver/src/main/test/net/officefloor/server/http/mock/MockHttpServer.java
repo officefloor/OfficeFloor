@@ -627,8 +627,12 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 		private MockHttpResponseBuilderImpl() {
 			MockStreamBufferPool bufferPool = new MockStreamBufferPool();
-			this.delegate = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1, bufferPool, true,
-					new MockProcessAwareContext(), new MockHttpResponseWriter(this, null));
+			HttpServerLocation serverLocation = new MockHttpServer();
+			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> serverHttpConnection = new ProcessAwareServerHttpConnectionManagedObject<>(
+					serverLocation, false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null, true,
+					new MockHttpResponseWriter(this, null), bufferPool);
+			this.delegate = new ProcessAwareHttpResponse<>(serverHttpConnection, HttpVersion.HTTP_1_1,
+					new MockProcessAwareContext());
 		}
 
 		/*
@@ -688,6 +692,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public ServerWriter getEntityWriter() throws IOException {
 			return this.delegate.getEntityWriter();
+		}
+
+		@Override
+		public HttpEscalationHandler getEscalationHandler() {
+			return this.delegate.getEscalationHandler();
 		}
 
 		@Override

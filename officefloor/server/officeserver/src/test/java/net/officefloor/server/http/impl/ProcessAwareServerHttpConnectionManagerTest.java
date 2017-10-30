@@ -250,7 +250,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Handle escalation
 		final Exception escalation = new Exception("TEST");
 		this.connection.getHttpResponse().setEscalationHandler((context) -> {
-			context.getHttpResponse().getEntityWriter()
+			context.getServerHttpConnection().getHttpResponse().getEntityWriter()
 					.write("{escalation: '" + context.getEscalation().getMessage() + "'}");
 			return true;
 		});
@@ -295,7 +295,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 				new WritableHttpHeader[] { new WritableHttpHeader("name", "value") }, "TEST");
 		this.connection.getHttpResponse().setEscalationHandler((context) -> {
 			HttpException ex = (HttpException) context.getEscalation();
-			context.getHttpResponse().getEntityWriter().write("{escalation: '" + ex.getEntity() + "'}");
+			context.getServerHttpConnection().getHttpResponse().getEntityWriter()
+					.write("{escalation: '" + ex.getEntity() + "'}");
 			return true;
 		});
 		this.connection.getServiceFlowCallback().run(escalation);
@@ -423,7 +424,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Send the response
 		response.setEscalationHandler((context) -> {
 			CleanupException exception = (CleanupException) context.getEscalation();
-			context.getHttpResponse().getEntityWriter()
+			context.getServerHttpConnection().getHttpResponse().getEntityWriter()
 					.write("{escalation: '" + exception.getCleanupEscalations()[0].getEscalation().getMessage() + "'}");
 			return true;
 		});

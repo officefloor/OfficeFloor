@@ -41,10 +41,10 @@ public interface HttpEscalationContext {
 	boolean isIncludeStacktrace();
 
 	/**
-	 * Obtains the {@link HttpResponse} to write the {@link Escalation}.
+	 * Obtains the {@link ServerHttpConnection} to write the {@link Escalation}.
 	 * 
-	 * @return {@link HttpResponse}.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	HttpResponse getHttpResponse();
+	ServerHttpConnection getServerHttpConnection();
 
 }

@@ -32,6 +32,7 @@ import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -56,10 +57,17 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	private final MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 
 	/**
+	 * {@link ProcessAwareServerHttpConnectionManagedObject}.
+	 */
+	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
+			new HttpServerLocationImpl(), false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null,
+			true, this, this.bufferPool);
+
+	/**
 	 * {@link ProcessAwareHttpResponse} to test.
 	 */
-	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1,
-			this.bufferPool, true, new MockProcessAwareContext(), this);
+	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<ByteBuffer>(
+			this.connection, HttpVersion.HTTP_1_1, new MockProcessAwareContext());
 
 	/**
 	 * Ensure correct defaults on writing.
@@ -443,9 +451,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.setEscalationHandler((context) -> {
 			assertSame("Incorrect escalation", escalation, context.getEscalation());
 			isInvoked.value = true;
-			HttpResponse response = context.getHttpResponse();
-			response.setContentType("application/mock", null);
-			response.getEntityWriter().write("{error: '" + escalation.getMessage() + "'}");
+			this.response.setContentType("application/mock", null);
+			this.response.getEntityWriter().write("{error: '" + escalation.getMessage() + "'}");
 			return true; // handled
 		});
 

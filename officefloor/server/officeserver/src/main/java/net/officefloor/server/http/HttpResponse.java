@@ -181,6 +181,14 @@ public interface HttpResponse {
 	ServerWriter getEntityWriter() throws IOException;
 
 	/**
+	 * Obtains the {@link HttpEscalationHandler}.
+	 * 
+	 * @return {@link HttpEscalationHandler} or <code>null</code> if no
+	 *         {@link HttpEscalationHandler} configured.
+	 */
+	HttpEscalationHandler getEscalationHandler();
+
+	/**
 	 * Sets the {@link HttpEscalationHandler} for the response.
 	 * 
 	 * @param escalationHandler
