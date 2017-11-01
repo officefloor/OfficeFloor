@@ -17,7 +17,7 @@
  */
 package net.officefloor.web.build;
 
-import net.officefloor.web.cookie.HttpCookie;
+import java.net.HttpCookie;
 
 /**
  * HTTP URL continuation.

@@ -44,6 +44,7 @@ import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpRedirectFunction.HttpRedirectDependencies;
 import net.officefloor.web.HttpRouteFunction.HttpRouteDependencies;
 import net.officefloor.web.InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies;
 import net.officefloor.web.NotFoundFunction.NotFoundDependencies;
@@ -80,6 +81,53 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * Name of the initialise {@link HttpRequestState} {@link ManagedFunction}.
 	 */
 	private static final String INITIALISE_REQUEST_STATE_FUNCTION_NAME = "initialise";
+
+	/**
+	 * Obtains the interception details.
+	 */
+	public static class Interception {
+
+		/**
+		 * {@link SectionOutput} name to link the interception.
+		 */
+		private final String outputName;
+
+		/**
+		 * {@link SectionInput} name to link the routing.
+		 */
+		private final String inputName;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param outputName
+		 *            {@link SectionOutput} name to link the interception.
+		 * @param inputName
+		 *            {@link SectionInput} name to link the routing.
+		 */
+		private Interception(String outputName, String inputName) {
+			this.outputName = outputName;
+			this.inputName = inputName;
+		}
+
+		/**
+		 * Obtains the {@link SectionOutput} name to link the interception.
+		 * 
+		 * @return {@link SectionOutput} name to link the interception.
+		 */
+		public String getOutputName() {
+			return this.outputName;
+		}
+
+		/**
+		 * Obtains the {@link SectionInput} name to link the routing.
+		 * 
+		 * @return {@link SectionInput} name to link the routing.
+		 */
+		public String getInputName() {
+			return this.inputName;
+		}
+	}
 
 	/**
 	 * Route input information.
@@ -120,7 +168,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 * @param isPathParameters
 		 *            Indicates if path parameters for the route.
 		 */
-		public RouteInput(int flowIndex, HttpMethod method, String path, boolean isPathParameters) {
+		private RouteInput(int flowIndex, HttpMethod method, String path, boolean isPathParameters) {
 			this.flowIndex = flowIndex;
 			this.method = method;
 			this.path = path;
@@ -138,6 +186,52 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Redirect.
+	 */
+	public static class Redirect {
+
+		/**
+		 * Indicates if redirect to a secure port.
+		 */
+		private final boolean isSecure;
+
+		/**
+		 * Application path for the redirect.
+		 */
+		private final String applicationPath;
+
+		/**
+		 * Name of the {@link SectionInput} to handle the redirect.
+		 */
+		private final String inputName;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param isSecure
+		 *            Indicates if redirect to a secure port.
+		 * @param applicationPath
+		 *            Application path for the redirect.
+		 * @param inputName
+		 *            Name of the {@link SectionInput} to handle the redirect.
+		 */
+		private Redirect(boolean isSecure, String applicationPath, String inputName) {
+			this.isSecure = isSecure;
+			this.applicationPath = applicationPath;
+			this.inputName = inputName;
+		}
+
+		/**
+		 * Obtains the name of the {@link SectionInput} to handle the redirect.
+		 * 
+		 * @return Name of the {@link SectionInput} to handle the redirect.
+		 */
+		public String getInputName() {
+			return this.inputName;
+		}
+	}
+
+	/**
 	 * {@link WebRouterBuilder}.
 	 */
 	private final WebRouterBuilder builder;
@@ -148,9 +242,19 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	private final HttpEscalationHandler escalationHandler;
 
 	/**
+	 * Optional {@link Interception}.
+	 */
+	private Interception interception = null;
+
+	/**
 	 * {@link RouteInput} instances.
 	 */
 	private final List<RouteInput> routes = new LinkedList<>();
+
+	/**
+	 * {@link Redirect} instances.
+	 */
+	private final List<Redirect> redirects = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -163,6 +267,18 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	public HttpRouteSectionSource(String contextPath, HttpEscalationHandler escalationHandler) {
 		this.builder = new WebRouterBuilder(contextPath);
 		this.escalationHandler = escalationHandler;
+	}
+
+	/**
+	 * Obtains the {@link Interception}.
+	 * 
+	 * @return {@link Interception}.
+	 */
+	public Interception getInterception() {
+		if (this.interception == null) {
+			this.interception = new Interception("INTERCEPTION_OUT", "INTERCEPTION_IN");
+		}
+		return this.interception;
 	}
 
 	/**
@@ -190,6 +306,31 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		return input;
 	}
 
+	/**
+	 * Adds a {@link Redirect}.
+	 * 
+	 * @param isSecure
+	 *            Indicates to redirect to a secure port.
+	 * @param applicationPath
+	 *            Application path for the redirect.
+	 * @return {@link Redirect}.
+	 */
+	public Redirect addRedirect(boolean isSecure, String applicationPath) {
+
+		// Obtain the redirect index (to keep name unique)
+		int redirectIndex = this.redirects.size();
+
+		// Create the redirect input name
+		String inputName = "REDIRECT_" + redirectIndex + (isSecure ? "_SECURE_" : "_") + applicationPath;
+
+		// Create and register the redirect
+		Redirect redirect = new Redirect(isSecure, applicationPath, inputName);
+		this.redirects.add(redirect);
+
+		// Return the redirect
+		return redirect;
+	}
+
 	/*
 	 * ==================== SectionSource ========================
 	 */
@@ -209,9 +350,28 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				new HttpRouteManagedFunctionSource(router));
 		SectionFunction route = routeNamespace.addSectionFunction(WebArchitect.HANDLER_INPUT_NAME, ROUTE_FUNCTION_NAME);
 
-		// Make routing function handle routing
-		SectionInput routeInput = designer.addSectionInput(WebArchitect.HANDLER_INPUT_NAME, null);
-		designer.link(routeInput, route);
+		// Determine if interception
+		SectionInput handleHttpInput = designer.addSectionInput(WebArchitect.HANDLER_INPUT_NAME, null);
+		if (this.interception == null) {
+			// No interception, make routing function handle HTTP input
+			designer.link(handleHttpInput, route);
+
+		} else {
+			// Have interception, so provide hooks to intercept
+			SectionFunctionNamespace interceptNamespace = designer.addSectionFunctionNamespace(
+					InterceptManagedFunctionSource.FUNCTION_NAME, new InterceptManagedFunctionSource());
+			SectionFunction intercept = interceptNamespace.addSectionFunction(
+					InterceptManagedFunctionSource.FUNCTION_NAME, InterceptManagedFunctionSource.FUNCTION_NAME);
+			designer.link(handleHttpInput, intercept);
+
+			// Trigger interception
+			SectionOutput interceptOutput = designer.addSectionOutput(this.interception.outputName, null, false);
+			designer.link(intercept, interceptOutput);
+
+			// After interception, let routing service
+			SectionInput routeInput = designer.addSectionInput(this.interception.inputName, null);
+			designer.link(routeInput, route);
+		}
 
 		// Link the routing to section outputs
 		SectionObject requestState = null;
@@ -277,6 +437,54 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				serverHttpConnection);
 		designer.link(notFound.getFunctionObject(NotFoundDependencies.SERVER_HTTP_CONNECTION.name()),
 				serverHttpConnection);
+
+		// Configure the redirects
+		for (Redirect redirect : this.redirects) {
+
+			// Obtain the function name
+			String functionName = redirect.inputName;
+
+			// Add the function to send the redirect
+			SectionFunctionNamespace redirectNamespace = designer.addSectionFunctionNamespace(functionName,
+					new RedirectManagedFunctionSource(redirect));
+			SectionFunction redirection = redirectNamespace.addSectionFunction(functionName, functionName);
+
+			// Link input to the function
+			SectionInput redirectInput = designer.addSectionInput(functionName, null);
+			designer.link(redirectInput, redirection);
+
+			// Configure dependency on server HTTP connection
+			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.SERVER_HTTP_CONNECTION.name()),
+					serverHttpConnection);
+		}
+	}
+
+	/**
+	 * {@link ManagedFunctionSource} for the {@link InterceptFunction}.
+	 */
+	private static class InterceptManagedFunctionSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * Name of the {@link ManagedFunction}.
+		 */
+		private static final String FUNCTION_NAME = "INTERCEPT";
+
+		/*
+		 * ============ ManagedFunctionSource ==============
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Add the intercept function
+			functionNamespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, new InterceptFunction(), None.class,
+					None.class);
+		}
 	}
 
 	/**
@@ -363,6 +571,52 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Configure dependency on the request state and path arguments
 			builder.addObject(HttpArgument.class).setKey(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS);
 			builder.addObject(HttpRequestState.class).setKey(InitialiseHttpRequestStateDependencies.HTTP_REQUEST_STATE);
+		}
+	}
+
+	/**
+	 * {@link ManagedFunctionSource} for the {@link HttpRedirectFunction}.
+	 */
+	private class RedirectManagedFunctionSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * {@link Redirect}.
+		 */
+		private final Redirect redirect;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param redirect
+		 *            {@link Redirect}.
+		 */
+		private RedirectManagedFunctionSource(Redirect redirect) {
+			this.redirect = redirect;
+		}
+
+		/*
+		 * ============ ManagedFunctionSource ==============
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Create the function and obtain it's name
+			final String functionName = this.redirect.inputName;
+			HttpRedirectFunction function = new HttpRedirectFunction(this.redirect.isSecure,
+					this.redirect.applicationPath);
+
+			// Add the redirect function
+			ManagedFunctionTypeBuilder<HttpRedirectDependencies, None> builder = functionNamespaceTypeBuilder
+					.addManagedFunctionType(functionName, function, HttpRedirectDependencies.class, None.class);
+
+			// Configure dependency on server HTTP connection
+			builder.addObject(ServerHttpConnection.class).setKey(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
 		}
 	}
 

@@ -402,7 +402,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 	@Override
 	public String createClientUrl(boolean isSecure, String path) {
-		return (isSecure ? "https" : "http") + "://" + this.getDomain();
+		return (isSecure ? "https" : "http") + "://" + this.getDomain() + path;
 	}
 
 	/*

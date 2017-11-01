@@ -745,9 +745,10 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/redirect?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status", 303, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect redirect location", "/path", response.getFirstHeader("location").getValue());
+		assertEquals("Incorrect redirect location", "http://mock.officefloor.net/path",
+				response.getFirstHeader("location").getValue());
 		String cookie = response.getFirstHeader("set-cookie").getValue();
-		assertEquals("Should have redirect cookie", "ofc=/path", cookie);
+		assertEquals("Should have redirect cookie", "ofc=http://mock.officefloor.net/path", cookie);
 
 		// Ensure can redirect
 		response = this.server.send(MockHttpServer.mockRequest("/path").header("cookie", cookie));

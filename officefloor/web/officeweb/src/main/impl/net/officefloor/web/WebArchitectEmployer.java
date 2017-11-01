@@ -40,6 +40,9 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.HttpRouteSectionSource.Interception;
+import net.officefloor.web.HttpRouteSectionSource.Redirect;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpContentParametersBuilder;
@@ -143,6 +146,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * {@link HttpInputBuilderImpl} instances.
 	 */
 	private final List<HttpInputBuilderImpl> inputs = new LinkedList<>();
+
+	/**
+	 * {@link Interceptor} instances.
+	 */
+	private final List<Interceptor> interceptors = new LinkedList<>();
 
 	/**
 	 * {@link ChainedServicer} instances.
@@ -354,8 +362,8 @@ public class WebArchitectEmployer implements WebArchitect {
 
 	@Override
 	public void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType) {
-		// TODO Auto-generated method stub
-
+		HttpInputBuilderImpl input = (HttpInputBuilderImpl) continuation;
+		input.redirects.add(new RedirectContinuation(output, parameterType));
 	}
 
 	@Override
@@ -366,8 +374,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 	@Override
 	public void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
-		// TODO Auto-generated method stub
-
+		this.interceptors.add(new Interceptor(sectionInput, sectionOutput));
 	}
 
 	@Override
@@ -408,9 +415,34 @@ public class WebArchitectEmployer implements WebArchitect {
 					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
 		}
 
-		// Configure the HTTP handler
+		// Create the routing source
 		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath, objectResponseMos);
 		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
+
+		// Determine if intercept
+		if (this.interceptors.size() > 0) {
+
+			// Obtain the interception
+			Interception interception = routing.getInterception();
+
+			// Obtain the section output
+			OfficeSectionOutput interceptionOutput = routingSection
+					.getOfficeSectionOutput(interception.getOutputName());
+			for (Interceptor interceptor : this.interceptors) {
+
+				// Link in interception
+				this.officeArchitect.link(interceptionOutput, interceptor.sectionInput);
+
+				// Set up for next iteration
+				interceptionOutput = interceptor.sectionOutput;
+			}
+
+			// Link interception back to routing
+			OfficeSectionInput routingInput = routingSection.getOfficeSectionInput(interception.getInputName());
+			this.officeArchitect.link(interceptionOutput, routingInput);
+		}
+
+		// Configure the routing
 		for (HttpInputBuilderImpl input : this.inputs) {
 
 			// Add the route
@@ -419,6 +451,19 @@ public class WebArchitectEmployer implements WebArchitect {
 			// Link route output to handling section input
 			OfficeSectionOutput routeOutput = routingSection.getOfficeSectionOutput(routeInput.getOutputName());
 			this.officeArchitect.link(routeOutput, input.sectionInput);
+
+			// Determine if URL continuation
+			if ((input.isUrlContinuation) && (input.redirects.size() > 0)) {
+
+				// Create the redirect
+				Redirect redirect = routing.addRedirect(input.isSecure, input.applicationPath);
+
+				// Configure the redirect continuation
+				OfficeSectionInput redirectInput = routingSection.getOfficeSectionInput(redirect.getInputName());
+				for (RedirectContinuation continuation : input.redirects) {
+					this.officeArchitect.link(continuation.output, redirectInput);
+				}
+			}
 		}
 
 		// Load in-line configured dependencies
@@ -574,6 +619,12 @@ public class WebArchitectEmployer implements WebArchitect {
 		private final OfficeSectionInput sectionInput;
 
 		/**
+		 * {@link RedirectContinuation} instances for this
+		 * {@link HttpUrlContinuation}.
+		 */
+		private final List<RedirectContinuation> redirects = new LinkedList<>();
+
+		/**
 		 * Instantiate as {@link HttpUrlContinuation}.
 		 * 
 		 * @param isSecure
@@ -666,6 +717,66 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	/**
+	 * Redirect continuation.
+	 */
+	private static class RedirectContinuation {
+
+		/**
+		 * {@link OfficeSectionOutput} triggering the redirect.
+		 */
+		private final OfficeSectionOutput output;
+
+		/**
+		 * Type of parameter from {@link OfficeSectionOutput}. May be
+		 * <code>null</code> for no parameter.
+		 */
+		private final Class<?> parameterType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param output
+		 *            {@link OfficeSectionOutput} triggering the redirect.
+		 * @param parameterType
+		 *            Type of parameter from {@link OfficeSectionOutput}. May be
+		 *            <code>null</code> for no parameter.
+		 */
+		private RedirectContinuation(OfficeSectionOutput output, Class<?> parameterType) {
+			this.output = output;
+			this.parameterType = parameterType;
+		}
+	}
+
+	/**
+	 * Intercepts the {@link HttpRequest} before web application functionality.
+	 */
+	private static class Interceptor {
+
+		/**
+		 * {@link OfficeSectionInput}.
+		 */
+		public final OfficeSectionInput sectionInput;
+
+		/**
+		 * {@link SectionOutput}.
+		 */
+		public final OfficeSectionOutput sectionOutput;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param sectionInput
+		 *            {@link OfficeSectionInput}.
+		 * @param sectionOutput
+		 *            {@link SectionOutput}.
+		 */
+		private Interceptor(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
+			this.sectionInput = sectionInput;
+			this.sectionOutput = sectionOutput;
+		}
+	}
+
+	/**
 	 * Chained servicer.
 	 */
 	private static class ChainedServicer {
@@ -676,7 +787,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		public final OfficeSectionInput sectionInput;
 
 		/**
-		 * Name of the {@link SectionOutput}. May be <code>null</code>.
+		 * {@link SectionOutput}. May be <code>null</code>.
 		 */
 		public final OfficeSectionOutput notHandledOutput;
 
@@ -688,7 +799,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		 * @param notHandledOutput
 		 *            {@link SectionOutput}. May be <code>null</code>.
 		 */
-		public ChainedServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
+		private ChainedServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
 			this.sectionInput = sectionInput;
 			this.notHandledOutput = notHandledOutput;
 		}
