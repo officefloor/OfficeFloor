@@ -94,11 +94,6 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final OfficeArchitect officeArchitect;
 
 	/**
-	 * {@link OfficeSourceContext}.
-	 */
-	private final OfficeSourceContext officeSourceContext;
-
-	/**
 	 * Registry of HTTP arguments to its {@link OfficeManagedObject}.
 	 */
 	private final Map<String, OfficeManagedObject> httpArguments = new HashMap<>();
@@ -172,7 +167,6 @@ public class WebArchitectEmployer implements WebArchitect {
 	 */
 	private WebArchitectEmployer(OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
 		this.officeArchitect = officeArchitect;
-		this.officeSourceContext = officeSourceContext;
 	}
 
 	/**
@@ -537,9 +531,28 @@ public class WebArchitectEmployer implements WebArchitect {
 			}
 		});
 
+		// Chain in the servicer instances
+		OfficeSectionOutput chainOutput = routingSection
+				.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME);
+		NEXT_CHAINED_SERVICER: for (ChainedServicer servicer : this.chainedServicers) {
+
+			// Do nothing if no output (all handled by previous servicer)
+			if (chainOutput == null) {
+				continue NEXT_CHAINED_SERVICER;
+			}
+
+			// Link output to to input
+			this.officeArchitect.link(chainOutput, servicer.sectionInput);
+
+			// Set up for next chain
+			chainOutput = servicer.notHandledOutput;
+		}
+
 		// Configure not handled
-		this.officeArchitect.link(routingSection.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME),
-				routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+		if (chainOutput != null) {
+			this.officeArchitect.link(chainOutput,
+					routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+		}
 	}
 
 	/**
