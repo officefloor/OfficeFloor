@@ -17,6 +17,8 @@
  */
 package net.officefloor.web;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -25,6 +27,10 @@ import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.state.HttpCookie;
+import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
 /**
  * {@link ManagedFunction} to send a redirect.
@@ -36,10 +42,16 @@ public class HttpRedirectFunction
 		ManagedFunction<HttpRedirectFunction.HttpRedirectDependencies, None> {
 
 	/**
+	 * Name of the {@link HttpSession} attribute containing the
+	 * {@link HttpRequestState} momento.
+	 */
+	public static final String SESSION_ATTRIBUTE_REDIRECT_MOMENTO = "_redirect_";
+
+	/**
 	 * Dependency keys.
 	 */
 	public static enum HttpRedirectDependencies {
-		SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION_STATE
 	}
 
 	/**
@@ -86,18 +98,29 @@ public class HttpRedirectFunction
 	@Override
 	public Object execute(ManagedFunctionContext<HttpRedirectDependencies, None> context) {
 
-		// Obtain the server HTTP connection
+		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(HttpRedirectDependencies.REQUEST_STATE);
+		HttpSession session = (HttpSession) context.getObject(HttpRedirectDependencies.SESSION_STATE);
 
 		// Obtain the redirect location
-		String redirectLocation = connection.getHttpServerLocation().createClientUrl(this.isSecure,
+		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure,
 				this.applicationPath);
 
 		// Send the redirect
-		HttpResponse response = connection.getHttpResponse();
-		response.setHttpStatus(HttpStatus.SEE_OTHER);
-		response.getHttpHeaders().addHeader(LOCATION, redirectLocation);
+		HttpResponse response = connection.getResponse();
+		response.setStatus(HttpStatus.SEE_OTHER);
+		response.getHeaders().addHeader(LOCATION, redirectLocation);
+
+		// Export the request state
+		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
+
+		// Store in session (to import on servicing redirect)
+		session.setAttribute(SESSION_ATTRIBUTE_REDIRECT_MOMENTO, momento);
+
+		// Load cookie indicating redirect
+		HttpCookie.addHttpCookie(new HttpCookie("ofr", redirectLocation), connection.getResponse());
 
 		// No further functions
 		return null;

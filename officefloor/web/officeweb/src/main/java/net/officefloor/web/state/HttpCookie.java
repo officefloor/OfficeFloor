@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.cookie;
+package net.officefloor.web.state;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -36,7 +36,6 @@ import net.officefloor.server.http.HttpResponseHeaders;
  *
  * @author Daniel Sagenschneider
  */
-@Deprecated // use java.net.HttpCookie
 public class HttpCookie {
 
 	/**
@@ -78,7 +77,7 @@ public class HttpCookie {
 	 */
 	public static List<HttpCookie> extractHttpCookies(HttpRequest request) {
 		List<HttpCookie> cookies = new LinkedList<HttpCookie>();
-		for (HttpHeader header : request.getHttpHeaders().getHeaders(COOKIE)) {
+		for (HttpHeader header : request.getHeaders().getHeaders(COOKIE)) {
 			cookies.addAll(HttpCookie.parse(header.getValue()));
 		}
 		return cookies;
@@ -98,7 +97,7 @@ public class HttpCookie {
 	 */
 	public static HttpCookie extractHttpCookie(String cookieName, HttpRequest request) {
 		// Search for the cookie by the name
-		for (HttpHeader header : request.getHttpHeaders().getHeaders(COOKIE)) {
+		for (HttpHeader header : request.getHeaders().getHeaders(COOKIE)) {
 			List<HttpCookie> cookies = HttpCookie.parse(header.getValue());
 			for (HttpCookie cookie : cookies) {
 				if (cookieName.equalsIgnoreCase(cookie.getName())) {
@@ -129,13 +128,13 @@ public class HttpCookie {
 		String cookieValuePrefix = cookie.getName().toLowerCase() + "=";
 
 		// Obtain the headers
-		HttpResponseHeaders headers = response.getHttpHeaders();
+		HttpResponseHeaders headers = response.getHeaders();
 
 		// Remove any cookies by the name
 		Iterator<HttpHeader> iterator = headers.getHeaders(SET_COOKIE.getName()).iterator();
 		while (iterator.hasNext()) {
 			HttpHeader header = iterator.next();
-			
+
 			// Determine if cookie by name
 			if (header.getValue().toLowerCase().startsWith(cookieValuePrefix)) {
 				// Remove the header containing cookie by same name

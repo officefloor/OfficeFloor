@@ -68,6 +68,41 @@ public abstract class StreamBuffer<B> {
 	}
 
 	/**
+	 * Writes the {@link CharSequence} to the {@link StreamBuffer} stream.
+	 * 
+	 * @param characters
+	 *            Characters to be written to the {@link StreamBuffer} stream.
+	 *            Head {@link StreamBuffer} in the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} should additional
+	 *            {@link StreamBuffer} instances be required in writing the
+	 *            bytes.
+	 */
+	public static <B> void write(CharSequence characters, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+
+		// Obtain the write stream buffer
+		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool);
+
+		// Write the characters to the buffer
+		int length = characters.length();
+		for (int i = 0; i < length; i++) {
+			byte character = (byte) characters.charAt(i);
+
+			// Attempt to write the character
+			if (!headBuffer.write(character)) {
+
+				// Append another buffer for character
+				headBuffer.next = bufferPool.getPooledStreamBuffer();
+				headBuffer = headBuffer.next;
+
+				// Write character to the new buffer
+				headBuffer.write(character);
+			}
+		}
+	}
+
+	/**
 	 * Obtains the {@link StreamBuffer} to use for writing.
 	 * 
 	 * @param headBuffer

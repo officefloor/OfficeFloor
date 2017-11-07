@@ -78,6 +78,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private HttpRequest request;
 
 	/**
+	 * Client {@link HttpRequest}.
+	 */
+	private final HttpRequest clientRequest;
+
+	/**
 	 * {@link HttpRequest} entity {@link ByteSequence}.
 	 */
 	private ByteSequence requestEntity;
@@ -86,16 +91,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * {@link HttpResponse}.
 	 */
 	private ProcessAwareHttpResponse<B> response;
-
-	/**
-	 * {@link Supplier} for the {@link HttpMethod}.
-	 */
-	private final Supplier<HttpMethod> methodSupplier;
-
-	/**
-	 * Client {@link HttpMethod}.
-	 */
-	private HttpMethod clientMethod = null;
 
 	/**
 	 * Client {@link HttpRequestHeaders}.
@@ -163,7 +158,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.clientHeaders = new MaterialisingHttpRequestHeaders(requestHeaders);
 		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, this.clientHeaders,
 				requestEntity);
-		this.methodSupplier = methodSupplier;
+		this.clientRequest = this.request;
 		this.requestEntity = requestEntity;
 
 		// Store remaining state
@@ -203,7 +198,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.processAwareContext = context;
 
 		// Create the HTTP response (with context awareness)
-		this.response = new ProcessAwareHttpResponse<B>(this, this.request.getHttpVersion(), context);
+		this.response = new ProcessAwareHttpResponse<B>(this, this.request.getVersion(), context);
 	}
 
 	@Override
@@ -216,7 +211,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 */
 
 	@Override
-	public HttpServerLocation getHttpServerLocation() {
+	public HttpServerLocation getServerLocation() {
 		return this.serverLocation;
 	}
 
@@ -226,12 +221,12 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	@Override
-	public HttpRequest getHttpRequest() {
+	public HttpRequest getRequest() {
 		return this.processAwareContext.run(() -> this.request);
 	}
 
 	@Override
-	public HttpResponse getHttpResponse() {
+	public HttpResponse getResponse() {
 		return this.response;
 	}
 
@@ -247,7 +242,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 				throw new IllegalArgumentException("Invalid momento to import state");
 			}
 			SerialisableHttpRequest state = (SerialisableHttpRequest) momento;
-			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getHttpVersion());
+			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getVersion());
 			this.request = serialisableRequest;
 			this.requestEntity = serialisableRequest.getEntityByteSequence();
 			return null;
@@ -255,16 +250,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	@Override
-	public HttpMethod getClientHttpMethod() {
-		if (this.clientMethod == null) {
-			this.clientMethod = this.methodSupplier.get();
-		}
-		return this.clientMethod;
-	}
-
-	@Override
-	public HttpRequestHeaders getClientHttpHeaders() {
-		return this.clientHeaders;
+	public HttpRequest getClientRequest() {
+		return this.clientRequest;
 	}
 
 	/*

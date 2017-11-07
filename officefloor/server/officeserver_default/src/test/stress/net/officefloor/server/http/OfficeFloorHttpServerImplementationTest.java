@@ -118,7 +118,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 			connection.setProcessAwareContext(processAwareContext);
 
 			// Service the connection
-			HttpResponse response = connection.getHttpResponse();
+			HttpResponse response = connection.getResponse();
 			response.getEntity().write(helloWorld);
 			response.setContentType(textPlain, null);
 

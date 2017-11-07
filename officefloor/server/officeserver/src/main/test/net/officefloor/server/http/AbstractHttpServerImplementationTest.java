@@ -240,8 +240,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	public static class Servicer {
 
 		public void service(ServerHttpConnection connection) throws Exception {
-			assertEquals("Incorrect request URI", "/test", connection.getHttpRequest().getRequestURI());
-			connection.getHttpResponse().getEntityWriter().write("hello world");
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
+			connection.getResponse().getEntityWriter().write("hello world");
 		}
 	}
 
@@ -252,8 +252,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		private static final HttpHeaderValue TEXT_PLAIN = new HttpHeaderValue("text/plain");
 
 		public void service(ServerHttpConnection connection) throws Exception {
-			assertEquals("Incorrect request URI", "/test", connection.getHttpRequest().getRequestURI());
-			net.officefloor.server.http.HttpResponse response = connection.getHttpResponse();
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.setContentType(TEXT_PLAIN, null);
 			response.getEntity().write(HELLO_WORLD);
 		}
@@ -261,11 +261,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	public static class FailServicer {
 		public void service(ServerHttpConnection connection) throws Exception {
-			assertEquals("Incorrect request URI", "/test", connection.getHttpRequest().getRequestURI());
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
 
 			// Write some content, that should be reset
-			net.officefloor.server.http.HttpResponse response = connection.getHttpResponse();
-			response.getHttpHeaders().addHeader("test", "not sent");
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
+			response.getHeaders().addHeader("test", "not sent");
 			ServerWriter writer = response.getEntityWriter();
 			writer.write("This content should be reset");
 			writer.flush();
@@ -278,9 +278,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	public static class EncodedUrlServicer {
 
 		public void service(ServerHttpConnection connection) throws IOException {
-			String requestUri = connection.getHttpRequest().getRequestURI();
+			String requestUri = connection.getRequest().getUri();
 			assertEquals("Should have encoded ? #", "/encoded-%3f-%23-+?query=string", requestUri);
-			connection.getHttpResponse().getEntityWriter().write("success");
+			connection.getResponse().getEntityWriter().write("success");
 		}
 	}
 
@@ -300,9 +300,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		public void doFlow(ServerHttpConnection connection, @Parameter Thread thread,
 				ThreadedManagedObject managedObject) throws IOException {
-			assertEquals("Incorrect request URI", "/test", connection.getHttpRequest().getRequestURI());
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
 			assertNotSame("Should be different handling thread", thread, Thread.currentThread());
-			connection.getHttpResponse().getEntityWriter().write("hello world");
+			connection.getResponse().getEntityWriter().write("hello world");
 		}
 	}
 

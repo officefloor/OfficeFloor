@@ -32,10 +32,10 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
-import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
 import net.officefloor.web.session.spi.HttpSessionStore;
+import net.officefloor.web.state.HttpCookie;
 
 /**
  * Tests that {@link HttpSessionIdGenerator} and {@link HttpSessionStore} can be
@@ -76,12 +76,12 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record attempting to creating a new session.
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
+		this.recordReturn(this.connection, this.connection.getRequest(), request.build());
 		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
 
 		// Record obtaining the response
 		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), response);
+		this.recordReturn(this.connection, this.connection.getResponse(), response);
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override
@@ -117,7 +117,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record attempting to creating a new session.
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
+		this.recordReturn(this.connection, this.connection.getRequest(), request.build());
 		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
 
 		// Record obtaining as dependencies
@@ -126,7 +126,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record obtaining the response
 		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), response);
+		this.recordReturn(this.connection, this.connection.getResponse(), response);
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override

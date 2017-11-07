@@ -99,8 +99,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		};
 
 		// Ensure disallow null values
-		checkNull.accept(() -> this.response.setHttpStatus(null));
-		checkNull.accept(() -> this.response.setHttpVersion(null));
+		checkNull.accept(() -> this.response.setStatus(null));
+		checkNull.accept(() -> this.response.setVersion(null));
 	}
 
 	/**
@@ -109,9 +109,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testChangeStatus() throws IOException {
 
 		// Validate mutating status
-		assertEquals("Incorrect default status", HttpStatus.OK, this.response.getHttpStatus());
-		this.response.setHttpStatus(HttpStatus.CONTINUE);
-		assertEquals("Should have status changed", HttpStatus.CONTINUE, this.response.getHttpStatus());
+		assertEquals("Incorrect default status", HttpStatus.OK, this.response.getStatus());
+		this.response.setStatus(HttpStatus.CONTINUE);
+		assertEquals("Should have status changed", HttpStatus.CONTINUE, this.response.getStatus());
 
 		// Ensure writes the changes status
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -124,9 +124,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testChangeVersion() throws IOException {
 
 		// Validate mutating version
-		assertEquals("Incorrect default version", HttpVersion.HTTP_1_1, this.response.getHttpVersion());
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
-		assertEquals("Should have version changed", HttpVersion.HTTP_1_0, this.response.getHttpVersion());
+		assertEquals("Incorrect default version", HttpVersion.HTTP_1_1, this.response.getVersion());
+		this.response.setVersion(HttpVersion.HTTP_1_0);
+		assertEquals("Should have version changed", HttpVersion.HTTP_1_0, this.response.getVersion());
 
 		// Ensure writes the changed version
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -139,7 +139,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testAddHeader() throws IOException {
 
 		// Add header
-		this.response.getHttpHeaders().addHeader("test", "value");
+		this.response.getHeaders().addHeader("test", "value");
 
 		// Ensure writes have HTTP header
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -323,7 +323,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testSendOnlyOnce() throws IOException {
 
 		// Set altered status (to check does not change on sending again)
-		this.response.setHttpStatus(HttpStatus.BAD_REQUEST);
+		this.response.setStatus(HttpStatus.BAD_REQUEST);
 
 		// Obtain the entity (must be before close, otherwise exception)
 		ServerOutputStream entity = this.response.getEntity();
@@ -334,7 +334,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertTrue("Should be sent", this.response.isClosed());
 
 		// Change response and send (but now should not send)
-		response.setHttpStatus(HttpStatus.OK);
+		response.setStatus(HttpStatus.OK);
 		this.response.flushResponseToHttpResponseWriter(null);
 		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
 
@@ -357,33 +357,33 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
 
 		// Mutate the response
-		this.response.setHttpStatus(HttpStatus.CONTINUE);
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
+		this.response.setStatus(HttpStatus.CONTINUE);
+		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.setContentType("text/html", charset);
-		this.response.getHttpHeaders().addHeader("name", "value");
+		this.response.getHeaders().addHeader("name", "value");
 		ServerWriter writer = this.response.getEntityWriter();
 		writer.write("TEST");
 		writer.flush();
 
 		// Ensure response mutated
-		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getHttpStatus());
-		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getHttpVersion());
-		assertEquals("Incorrect mutated heders", 1, this.response.getHttpHeaders().length());
+		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getStatus());
+		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getVersion());
+		assertEquals("Incorrect mutated heders", "value", this.response.getHeaders().getHeader("name").getValue());
 		assertTrue("Should be using buffers for entity content", this.bufferPool.isActiveBuffers());
 
 		// Reset
 		this.response.reset();
 
 		// Ensure response reset
-		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getHttpStatus());
-		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getHttpVersion());
-		assertEquals("Should clear headers", 0, this.response.getHttpHeaders().length());
+		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getStatus());
+		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getVersion());
+		assertFalse("Should clear headers", this.response.getHeaders().iterator().hasNext());
 		assertFalse("No entity, as should release all buffers", this.bufferPool.isActiveBuffers());
 
 		// Ensure able to continue forming response (typically an error)
-		this.response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
-		this.response.getHttpHeaders().addHeader("error", "occurred");
+		this.response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		this.response.setVersion(HttpVersion.HTTP_1_0);
+		this.response.getHeaders().addHeader("error", "occurred");
 		this.response.getEntityWriter().write("ERROR: something");
 
 		// Send response (to ensure reset entity)
@@ -477,9 +477,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testResetForSendingEscalation() throws IOException {
 
 		// Provide details and send response
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
-		this.response.setHttpStatus(HttpStatus.NOT_FOUND);
-		this.response.getHttpHeaders().addHeader("TEST", "VALUE");
+		this.response.setVersion(HttpVersion.HTTP_1_0);
+		this.response.setStatus(HttpStatus.NOT_FOUND);
+		this.response.getHeaders().addHeader("TEST", "VALUE");
 		this.response.getEntityWriter().write("TEST");
 
 		// Send escalation

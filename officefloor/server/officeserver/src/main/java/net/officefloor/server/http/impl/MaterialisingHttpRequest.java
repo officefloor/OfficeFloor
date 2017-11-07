@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.stream.ServerInputStream;
@@ -103,7 +104,7 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	 */
 
 	@Override
-	public HttpMethod getHttpMethod() {
+	public HttpMethod getMethod() {
 		if (this.method == null) {
 			this.method = this.methodSupplier.get();
 		}
@@ -111,7 +112,7 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public String getRequestURI() {
+	public String getUri() {
 		if (this.requestUri == null) {
 			this.requestUri = this.requestUriSupplier.get();
 		}
@@ -119,13 +120,19 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public HttpVersion getHttpVersion() {
+	public HttpVersion getVersion() {
 		return this.version;
 	}
 
 	@Override
-	public HttpRequestHeaders getHttpHeaders() {
+	public HttpRequestHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public HttpRequestCookies getCookies() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement get HttpRequestCookies");
 	}
 
 	@Override

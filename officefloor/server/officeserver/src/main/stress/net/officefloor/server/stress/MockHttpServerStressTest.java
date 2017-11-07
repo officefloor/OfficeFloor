@@ -102,7 +102,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 
 	public static class Servicer {
 		public void service(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("hello world");
+			connection.getResponse().getEntityWriter().write("hello world");
 		}
 	}
 
@@ -123,7 +123,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 		public void doFlow(@Parameter Thread thread, ServerHttpConnection connection,
 				ThreadedManagedObject managedObject) throws IOException {
 			assertNotSame("Should be different threads", Thread.currentThread(), thread);
-			connection.getHttpResponse().getEntityWriter().write("hello world");
+			connection.getResponse().getEntityWriter().write("hello world");
 		}
 	}
 

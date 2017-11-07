@@ -108,7 +108,7 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 			return path;
 		} else {
 			// Full path back to server
-			return connection.getHttpServerLocation().createClientUrl(isSecure, path);
+			return connection.getServerLocation().createClientUrl(isSecure, path);
 		}
 	}
 

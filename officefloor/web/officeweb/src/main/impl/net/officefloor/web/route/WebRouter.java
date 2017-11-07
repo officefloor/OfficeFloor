@@ -297,9 +297,9 @@ public class WebRouter {
 	public boolean service(ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> managedFunctionContext) {
 
 		// Obtain the request details
-		HttpRequest request = connection.getHttpRequest();
-		HttpMethod method = request.getHttpMethod();
-		String requestUri = request.getRequestURI();
+		HttpRequest request = connection.getRequest();
+		HttpMethod method = request.getMethod();
+		String requestUri = request.getUri();
 
 		// Attempt to match to a route
 		for (int i = 0; i < this.nodes.length; i++) {

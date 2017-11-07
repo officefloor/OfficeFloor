@@ -309,7 +309,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			@Override
 			public void send(MockObject object, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getHttpResponse();
+				HttpResponse response = connection.getResponse();
 				response.setContentType(MockHttpObjectResponderFactory.this.headerValue, null);
 				response.getEntityWriter()
 						.write("{value: '" + object.value + "-" + MockHttpObjectResponderFactory.this.index + "'}");
@@ -336,7 +336,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			@Override
 			public void send(E escalation, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getHttpResponse();
+				HttpResponse response = connection.getResponse();
 				response.setContentType(MockHttpObjectResponderFactory.this.headerValue, null);
 				response.getEntityWriter().write(
 						"{error: '" + escalation.getMessage() + "-" + MockHttpObjectResponderFactory.this.index + "'}");

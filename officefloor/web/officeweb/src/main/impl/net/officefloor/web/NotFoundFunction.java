@@ -58,7 +58,7 @@ public class NotFoundFunction implements ManagedFunctionFactory<NotFoundFunction
 		// Obtain the request path
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(NotFoundDependencies.SERVER_HTTP_CONNECTION);
-		String requestPath = connection.getHttpRequest().getRequestURI();
+		String requestPath = connection.getRequest().getUri();
 
 		// Not found
 		throw new NotFoundHttpException(requestPath);

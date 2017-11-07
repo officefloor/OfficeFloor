@@ -52,6 +52,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.escalation.NotFoundHttpException;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.route.WebRouterBuilder;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpArgument;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -615,8 +616,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			ManagedFunctionTypeBuilder<HttpRedirectDependencies, None> builder = functionNamespaceTypeBuilder
 					.addManagedFunctionType(functionName, function, HttpRedirectDependencies.class, None.class);
 
-			// Configure dependency on server HTTP connection
+			// Configure dependencies
 			builder.addObject(ServerHttpConnection.class).setKey(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
+			builder.addObject(HttpRequestState.class).setKey(HttpRedirectDependencies.REQUEST_STATE);
+			builder.addObject(HttpSession.class).setKey(HttpRedirectDependencies.SESSION_STATE);
 		}
 	}
 

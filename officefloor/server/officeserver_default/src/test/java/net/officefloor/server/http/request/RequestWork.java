@@ -96,15 +96,15 @@ public class RequestWork {
 
 		// Validate the request
 		RequestConfig req = communication.request;
-		HttpRequest request = connection.getHttpRequest();
-		TestCase.assertEquals("Incorrect method", req.method, request.getHttpMethod().getName());
-		TestCase.assertEquals("Incorrect request URI", req.path, request.getRequestURI());
-		TestCase.assertEquals("Incorrect version", req.version, request.getHttpVersion().getName());
+		HttpRequest request = connection.getRequest();
+		TestCase.assertEquals("Incorrect method", req.method, request.getMethod().getName());
+		TestCase.assertEquals("Incorrect request URI", req.path, request.getUri());
+		TestCase.assertEquals("Incorrect version", req.version, request.getVersion().getName());
 
 		// Validate request headers provided
 		for (int i = 0; i < req.headers.size(); i++) {
 			HeaderConfig headerConfig = req.headers.get(i);
-			HttpHeader httpHeader = request.getHttpHeaders().headerAt(i);
+			HttpHeader httpHeader = request.getHeaders().headerAt(i);
 			TestCase.assertEquals("Invalid request header name (" + i + ")", headerConfig.name, httpHeader.getName());
 			TestCase.assertEquals("Invalid request header value (" + headerConfig.name + ", " + i + ")",
 					headerConfig.value, httpHeader.getValue());
@@ -129,7 +129,7 @@ public class RequestWork {
 		}
 
 		// Provide the response
-		HttpResponse response = connection.getHttpResponse();
+		HttpResponse response = connection.getResponse();
 		ServerOutputStream entity = response.getEntity();
 		if (process.body != null) {
 			Writer writer = new OutputStreamWriter(entity);
@@ -138,7 +138,7 @@ public class RequestWork {
 		}
 
 		// Send the response
-		connection.getHttpResponse().send();
+		connection.getResponse().send();
 	}
 
 }

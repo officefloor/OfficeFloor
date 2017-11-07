@@ -109,7 +109,7 @@ public class HttpRequestTokeniser {
 		ParseState state = parseState.get();
 
 		// Load the query string arguments
-		String requestUri = request.getRequestURI();
+		String requestUri = request.getUri();
 
 		// Values to aid in parsing
 		boolean isPathProcessed = false;
@@ -188,7 +188,7 @@ public class HttpRequestTokeniser {
 
 		// Load the header and cookie arguments (and determine content type)
 		String contentType = null;
-		for (HttpHeader header : request.getHttpHeaders()) {
+		for (HttpHeader header : request.getHeaders()) {
 			name = header.getName();
 			value = header.getValue();
 

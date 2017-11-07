@@ -123,15 +123,15 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.requestHeaders.addHttpHeader("name", "value");
 
 		// Ensure correct connection information
-		assertEquals("Incorrect connection method", HttpMethod.GET, this.connection.getClientHttpMethod());
+		assertEquals("Incorrect connection method", HttpMethod.GET, this.connection.getClientRequest().getMethod());
 
 		// Ensure correct request information
-		HttpRequest request = this.connection.getHttpRequest();
-		assertEquals("Incorrect request method", HttpMethod.GET, request.getHttpMethod());
-		assertEquals("Incorrect request URI", "/", request.getRequestURI());
-		assertEquals("Incorrect request version", this.requestVersion, request.getHttpVersion());
-		assertEquals("Incorrect number of request headers", 1, request.getHttpHeaders().length());
-		assertEquals("Incorrect request header", "value", request.getHttpHeaders().getHeader("name").getValue());
+		HttpRequest request = this.connection.getRequest();
+		assertEquals("Incorrect request method", HttpMethod.GET, request.getMethod());
+		assertEquals("Incorrect request URI", "/", request.getUri());
+		assertEquals("Incorrect request version", this.requestVersion, request.getVersion());
+		assertEquals("Incorrect number of request headers", 1, request.getHeaders().length());
+		assertEquals("Incorrect request header", "value", request.getHeaders().getHeader("name").getValue());
 
 		// Ensure correct request entity content
 		StringWriter requestContent = new StringWriter();
@@ -168,10 +168,10 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		Charset charset = Charset.forName("UTF-16");
 
 		// Alter the response
-		HttpResponse response = this.connection.getHttpResponse();
-		response.setHttpStatus(HttpStatus.CREATED);
-		response.setHttpVersion(HttpVersion.HTTP_1_0);
-		response.getHttpHeaders().addHeader("name", "value");
+		HttpResponse response = this.connection.getResponse();
+		response.setStatus(HttpStatus.CREATED);
+		response.setVersion(HttpVersion.HTTP_1_0);
+		response.getHeaders().addHeader("name", "value");
 		response.setContentType("text/html", charset);
 		ServerWriter writer = response.getEntityWriter();
 		writer.write("TEST RESPONSE");
@@ -249,8 +249,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 
 		// Handle escalation
 		final Exception escalation = new Exception("TEST");
-		this.connection.getHttpResponse().setEscalationHandler((context) -> {
-			context.getServerHttpConnection().getHttpResponse().getEntityWriter()
+		this.connection.getResponse().setEscalationHandler((context) -> {
+			context.getServerHttpConnection().getResponse().getEntityWriter()
 					.write("{escalation: '" + context.getEscalation().getMessage() + "'}");
 			return true;
 		});
@@ -293,9 +293,9 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Handle HTTP escalation
 		HttpException escalation = new HttpException(HttpStatus.NOT_FOUND,
 				new WritableHttpHeader[] { new WritableHttpHeader("name", "value") }, "TEST");
-		this.connection.getHttpResponse().setEscalationHandler((context) -> {
+		this.connection.getResponse().setEscalationHandler((context) -> {
 			HttpException ex = (HttpException) context.getEscalation();
-			context.getServerHttpConnection().getHttpResponse().getEntityWriter()
+			context.getServerHttpConnection().getResponse().getEntityWriter()
 					.write("{escalation: '" + ex.getEntity() + "'}");
 			return true;
 		});
@@ -320,8 +320,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
 
 		// Write a response (should be reset)
-		HttpResponse response = connection.getHttpResponse();
-		response.getHttpHeaders().addHeader("TEST", "HEADER");
+		HttpResponse response = connection.getResponse();
+		response.getHeaders().addHeader("TEST", "HEADER");
 		response.setContentType("text/html", Charset.forName("UTF-16"));
 		response.getEntityWriter().write("Content to be reset");
 
@@ -401,8 +401,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
 
 		// Write a response (should be reset)
-		HttpResponse response = connection.getHttpResponse();
-		response.getHttpHeaders().addHeader("TEST", "HEADER");
+		HttpResponse response = connection.getResponse();
+		response.getHeaders().addHeader("TEST", "HEADER");
 		response.setContentType("text/html", Charset.forName("UTF-16"));
 		response.getEntityWriter().write("Content to be reset");
 
@@ -424,7 +424,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Send the response
 		response.setEscalationHandler((context) -> {
 			CleanupException exception = (CleanupException) context.getEscalation();
-			context.getServerHttpConnection().getHttpResponse().getEntityWriter()
+			context.getServerHttpConnection().getResponse().getEntityWriter()
 					.write("{escalation: '" + exception.getCleanupEscalations()[0].getEscalation().getMessage() + "'}");
 			return true;
 		});
@@ -461,8 +461,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
 
 		// Write a response (should be reset)
-		HttpResponse response = connection.getHttpResponse();
-		response.getHttpHeaders().addHeader("TEST", "HEADER");
+		HttpResponse response = connection.getResponse();
+		response.getHeaders().addHeader("TEST", "HEADER");
 		response.setContentType("text/html", Charset.forName("UTF-16"));
 		response.getEntityWriter().write("Content to be reset");
 
@@ -576,30 +576,31 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 			HttpMethod clientMethod, String[] clientHeaderNameValuePairs) throws IOException {
 
 		// Validate the client details
-		assertEquals("Incorrect client method", this.method, connection.getClientHttpMethod());
+		HttpRequest clientRequest = connection.getClientRequest();
+		assertEquals("Incorrect client method", this.method, clientRequest.getMethod());
 		assertEquals("Incorrect number of client headers", clientHeaderNameValuePairs.length / 2,
-				connection.getClientHttpHeaders().length());
+				clientRequest.getHeaders().length());
 		for (int i = 0; i < clientHeaderNameValuePairs.length; i += 2) {
 			String name = clientHeaderNameValuePairs[i];
 			String value = clientHeaderNameValuePairs[i + 1];
-			HttpHeader header = connection.getClientHttpHeaders().headerAt(i / 2);
+			HttpHeader header = clientRequest.getHeaders().headerAt(i / 2);
 			assertEquals("Incorrect client header name", name, header.getName());
 			assertEquals("Incorrect client header value", value, header.getValue());
 		}
 
 		// Validate the request
-		HttpRequest request = connection.getHttpRequest();
-		assertEquals("Incorrect request method", requestMethod, request.getHttpMethod());
-		assertEquals("Incorrect request URI", requestUri, request.getRequestURI());
-		assertEquals("Incorrect request version", requestVersion, request.getHttpVersion());
+		HttpRequest request = connection.getRequest();
+		assertEquals("Incorrect request method", requestMethod, request.getMethod());
+		assertEquals("Incorrect request URI", requestUri, request.getUri());
+		assertEquals("Incorrect request version", requestVersion, request.getVersion());
 
 		// Validate the request headers
 		assertEquals("Incorrect number of request headers", requestHeaderNameValuePairs.length / 2,
-				request.getHttpHeaders().length());
+				request.getHeaders().length());
 		for (int i = 0; i < requestHeaderNameValuePairs.length; i += 2) {
 			String name = requestHeaderNameValuePairs[i];
 			String value = requestHeaderNameValuePairs[i + 1];
-			HttpHeader header = request.getHttpHeaders().headerAt(i / 2);
+			HttpHeader header = request.getHeaders().headerAt(i / 2);
 			assertEquals("Incorrect request header name", name, header.getName());
 			assertEquals("Incorrect request header value", value, header.getValue());
 		}

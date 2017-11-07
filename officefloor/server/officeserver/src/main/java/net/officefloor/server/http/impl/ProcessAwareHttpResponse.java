@@ -33,6 +33,7 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookies;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -420,12 +421,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 */
 
 	@Override
-	public HttpVersion getHttpVersion() {
+	public HttpVersion getVersion() {
 		return this.safe(() -> this.version);
 	}
 
 	@Override
-	public void setHttpVersion(HttpVersion version) {
+	public void setVersion(HttpVersion version) {
 		if (version == null) {
 			throw new IllegalArgumentException("Must provide version");
 		}
@@ -433,12 +434,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	}
 
 	@Override
-	public HttpStatus getHttpStatus() {
+	public HttpStatus getStatus() {
 		return this.safe(() -> this.status);
 	}
 
 	@Override
-	public void setHttpStatus(HttpStatus status) {
+	public void setStatus(HttpStatus status) {
 		if (status == null) {
 			throw new IllegalArgumentException("Must provide status");
 		}
@@ -446,8 +447,14 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	}
 
 	@Override
-	public HttpResponseHeaders getHttpHeaders() {
+	public HttpResponseHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public HttpResponseCookies getCookies() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement add HttpResponseCookies");
 	}
 
 	@Override

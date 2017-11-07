@@ -18,7 +18,7 @@
 package net.officefloor.web.build;
 
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.web.cookie.HttpCookie;
+import net.officefloor.web.state.HttpCookie;
 
 /**
  * Input details for the application.

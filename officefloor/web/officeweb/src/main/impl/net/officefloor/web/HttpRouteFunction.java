@@ -95,7 +95,7 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 
 		// Load the escalation handler
 		if (this.escalationHandler != null) {
-			connection.getHttpResponse().setEscalationHandler(this.escalationHandler);
+			connection.getResponse().setEscalationHandler(this.escalationHandler);
 		}
 
 		// Attempt to route the request

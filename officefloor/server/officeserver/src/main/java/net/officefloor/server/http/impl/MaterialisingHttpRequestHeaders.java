@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequestCookie;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.ServerHttpConnection;
 
@@ -104,6 +106,11 @@ public class MaterialisingHttpRequestHeaders implements HttpRequestHeaders {
 	 * will just rebuild if <code>null</code> (or element is <code>null</code>).
 	 */
 	private HttpHeader[] materialisedHttpHeaders = null;
+
+	/**
+	 * {@link MaterialisingHttpRequestCookies}.
+	 */
+	MaterialisingHttpRequestCookies cookies = new MaterialisingHttpRequestCookies();
 
 	/**
 	 * Instantiate.
@@ -308,6 +315,40 @@ public class MaterialisingHttpRequestHeaders implements HttpRequestHeaders {
 	@Override
 	public int length() {
 		return this.nonMaterialised.length();
+	}
+
+	/**
+	 * Materialising {@link HttpRequestCookies}.
+	 */
+	private class MaterialisingHttpRequestCookies implements HttpRequestCookies {
+
+		/*
+		 * ================= HttpRequestCookies ==================
+		 */
+
+		@Override
+		public Iterator<HttpRequestCookie> iterator() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HttpRequestCookie getCookie(String name) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HttpRequestCookie cookieAt(int index) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int length() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	}
 
 }

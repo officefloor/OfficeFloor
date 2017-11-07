@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.stream.ServerInputStream;
@@ -79,12 +80,12 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	 *            {@link ByteSequence} to entity of {@link HttpRequest}.
 	 */
 	public SerialisableHttpRequest(HttpRequest request, ByteSequence entity) {
-		this.method = request.getHttpMethod();
-		this.requestUri = request.getRequestURI();
-		this.version = request.getHttpVersion();
+		this.method = request.getMethod();
+		this.requestUri = request.getUri();
+		this.version = request.getVersion();
 
 		// Ensure have serializable headers
-		HttpRequestHeaders headers = request.getHttpHeaders();
+		HttpRequestHeaders headers = request.getHeaders();
 		if (headers instanceof SerialisableHttpRequestHeaders) {
 			// Use immutable serialisable instance
 			this.headers = (SerialisableHttpRequestHeaders) headers;
@@ -160,23 +161,29 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	 */
 
 	@Override
-	public HttpMethod getHttpMethod() {
+	public HttpMethod getMethod() {
 		return this.method;
 	}
 
 	@Override
-	public String getRequestURI() {
+	public String getUri() {
 		return this.requestUri;
 	}
 
 	@Override
-	public HttpVersion getHttpVersion() {
+	public HttpVersion getVersion() {
 		return this.version;
 	}
 
 	@Override
-	public HttpRequestHeaders getHttpHeaders() {
+	public HttpRequestHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public HttpRequestCookies getCookies() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement get HttpRequestCookies");
 	}
 
 	@Override

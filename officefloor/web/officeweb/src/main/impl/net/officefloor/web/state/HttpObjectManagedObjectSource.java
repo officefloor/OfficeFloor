@@ -190,8 +190,8 @@ public class HttpObjectManagedObjectSource<T>
 					.getObject(HttpObjectDependencies.SERVER_HTTP_CONNECTION);
 
 			// Obtain the content type
-			HttpRequest request = connection.getHttpRequest();
-			HttpHeader header = request.getHttpHeaders().getHeader("content-type");
+			HttpRequest request = connection.getRequest();
+			HttpHeader header = request.getHeaders().getHeader("content-type");
 			if (header == null) {
 				// No content-type so can not parse out object
 				this.httpObject = null;

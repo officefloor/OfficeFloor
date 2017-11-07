@@ -177,7 +177,7 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		@Override
 		public MockObject parse(ServerHttpConnection connection) {
-			String content = MockHttpServer.getContent(connection.getHttpRequest(), null);
+			String content = MockHttpServer.getContent(connection.getRequest(), null);
 			return new MockObject(content);
 		}
 	}

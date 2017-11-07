@@ -365,7 +365,7 @@ public class ObjectResponseManagedObjectSource
 		AcceptType head = null;
 
 		// Load the accept types
-		HttpRequestHeaders headers = connection.getHttpRequest().getHttpHeaders();
+		HttpRequestHeaders headers = connection.getRequest().getHeaders();
 		for (HttpHeader header : headers.getHeaders("accept")) {
 			head = parseAccept(header.getValue(), head);
 		}

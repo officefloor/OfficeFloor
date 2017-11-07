@@ -131,7 +131,7 @@ public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 			session.setAttribute("CALL_INDEX", callIndex);
 
 			// Return the call index
-			OutputStream response = connection.getHttpResponse().getEntity();
+			OutputStream response = connection.getResponse().getEntity();
 			response.write(String.valueOf(callIndex.intValue()).getBytes());
 		}
 	}

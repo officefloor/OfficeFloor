@@ -18,44 +18,35 @@
 package net.officefloor.server.http;
 
 /**
- * {@link HttpHeader} instances for the {@link HttpRequest}.
+ * {@link HttpRequestCookie} instances for the {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpRequestHeaders extends Iterable<HttpHeader> {
+public interface HttpRequestCookies extends Iterable<HttpRequestCookie> {
 
 	/**
-	 * Obtains the first {@link HttpHeader} by the name.
+	 * Obtains the first {@link HttpRequestCookie} by the name.
 	 * 
 	 * @param name
-	 *            Name of the {@link HttpHeader}.
-	 * @return First {@link HttpHeader} or <code>null</code> if no
-	 *         {@link HttpHeader} by the name.
+	 *            Name of the {@link HttpRequestCookie}.
+	 * @return First {@link HttpRequestCookie} or <code>null</code> if no
+	 *         {@link HttpRequestCookie} by the name.
 	 */
-	HttpHeader getHeader(CharSequence name);
+	HttpRequestCookie getCookie(String name);
 
 	/**
-	 * Obtains all the {@link HttpHeader} instances by the name.
-	 * 
-	 * @param name
-	 *            Name of the {@link HttpHeader} instances.
-	 * @return All {@link HttpHeader} instances by the name.
-	 */
-	Iterable<HttpHeader> getHeaders(CharSequence name);
-
-	/**
-	 * Obtains the {@link HttpHeader} at the index.
+	 * Obtains the {@link HttpRequestCookie} at the index.
 	 * 
 	 * @param index
-	 *            Index of the {@link HttpHeader}.
-	 * @return {@link HttpHeader} at the index.
+	 *            Index of the {@link HttpRequestCookie}.
+	 * @return {@link HttpRequestCookie} at the index.
 	 */
-	HttpHeader headerAt(int index);
+	HttpRequestCookie cookieAt(int index);
 
 	/**
-	 * Obtains the number of {@link HttpHeader} instances.
+	 * Obtains the number of {@link HttpRequestCookie} instances.
 	 * 
-	 * @return Number of {@link HttpHeader} instances.
+	 * @return Number of {@link HttpRequestCookie} instances.
 	 */
 	int length();
 

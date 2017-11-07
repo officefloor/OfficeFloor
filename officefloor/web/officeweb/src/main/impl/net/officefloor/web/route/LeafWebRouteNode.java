@@ -159,9 +159,9 @@ public class LeafWebRouteNode implements WebRouteNode {
 
 		} else {
 			// Method not allowed
-			HttpResponse response = connection.getHttpResponse();
-			response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
-			response.getHttpHeaders().addHeader(ALLOW, this.allowedMethods);
+			HttpResponse response = connection.getResponse();
+			response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+			response.getHeaders().addHeader(ALLOW, this.allowedMethods);
 		}
 
 		// Handled

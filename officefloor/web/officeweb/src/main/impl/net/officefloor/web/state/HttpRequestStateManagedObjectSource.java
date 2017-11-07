@@ -242,7 +242,7 @@ public class HttpRequestStateManagedObjectSource
 				if (!this.isTokenisedRequest) {
 
 					// Tokenise out the arguments
-					HttpRequest request = this.connection.getHttpRequest();
+					HttpRequest request = this.connection.getRequest();
 					HttpRequestTokeniser.tokeniseHttpRequest(request,
 							HttpRequestStateManagedObjectSource.this.argumentParsers, this);
 

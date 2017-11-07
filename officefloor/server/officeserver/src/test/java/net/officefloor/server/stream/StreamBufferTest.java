@@ -20,6 +20,7 @@ package net.officefloor.server.stream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
@@ -110,6 +111,15 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can write {@link CharSequence}.
+	 */
+	public void testCharSequence() {
+		final String text = "AbCd09";
+		StreamBuffer.write(text, this.head, this.bufferPool);
+		this.assertBytes(text.getBytes(Charset.forName("US-ASCII")));
+	}
+
+	/**
 	 * Writes bytes to the linked list.
 	 * 
 	 * @param bytes
@@ -121,6 +131,20 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 			data[i] = (byte) bytes[i];
 		}
 		StreamBuffer.write(data, 0, data.length, this.head, this.bufferPool);
+	}
+
+	/**
+	 * Verifies the bytes.
+	 * 
+	 * @param bytes
+	 *            Expected bytes.
+	 */
+	private void assertBytes(byte... bytes) {
+		int[] transformed = new int[bytes.length];
+		for (int i = 0; i < transformed.length; i++) {
+			transformed[i] = bytes[i];
+		}
+		assertBytes(transformed);
 	}
 
 	/**

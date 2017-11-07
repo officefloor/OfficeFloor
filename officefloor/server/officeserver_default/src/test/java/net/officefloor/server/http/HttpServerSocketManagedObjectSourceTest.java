@@ -201,7 +201,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	public static class MockSection {
 
 		public void service(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("test");
+			connection.getResponse().getEntityWriter().write("test");
 		}
 	}
 

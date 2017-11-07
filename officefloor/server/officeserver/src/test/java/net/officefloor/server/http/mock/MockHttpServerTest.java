@@ -88,11 +88,11 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 		// Obtain the mock HTTP request
 		HttpRequest request = builder.build();
-		assertSame("Incorrect method", HttpMethod.GET, request.getHttpMethod());
-		assertEquals("Inocrrect request URI", "/", request.getRequestURI());
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, request.getHttpVersion());
-		assertEquals("Should have header", 1, request.getHttpHeaders().length());
-		assertEquals("Incorrect header", "value", request.getHttpHeaders().getHeader("test").getValue());
+		assertSame("Incorrect method", HttpMethod.GET, request.getMethod());
+		assertEquals("Inocrrect request URI", "/", request.getUri());
+		assertSame("Incorrect version", HttpVersion.HTTP_1_1, request.getVersion());
+		assertEquals("Should have header", 1, request.getHeaders().length());
+		assertEquals("Incorrect header", "value", request.getHeaders().getHeader("test").getValue());
 		assertEquals("Incorrect entity", 1, request.getEntity().read());
 	}
 
@@ -103,7 +103,7 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 		// Create and configure the response
 		MockHttpResponseBuilder builder = MockHttpServer.mockResponse();
-		builder.getHttpHeaders().addHeader("TEST", "value");
+		builder.getHeaders().addHeader("TEST", "value");
 		builder.getEntity().write(1);
 
 		// Validate the built response
@@ -148,17 +148,17 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		public void service(ServerHttpConnection connection) throws IOException {
 
 			// Validate the request
-			HttpRequest request = connection.getHttpRequest();
-			assertSame("Incorrect method", HttpMethod.GET, request.getHttpMethod());
-			assertEquals("Incorrect URI", "/", request.getRequestURI());
-			assertSame("Incorrect version", HttpVersion.HTTP_1_1, request.getHttpVersion());
-			assertEquals("Should be no headers", 0, request.getHttpHeaders().length());
+			HttpRequest request = connection.getRequest();
+			assertSame("Incorrect method", HttpMethod.GET, request.getMethod());
+			assertEquals("Incorrect URI", "/", request.getUri());
+			assertSame("Incorrect version", HttpVersion.HTTP_1_1, request.getVersion());
+			assertEquals("Should be no headers", 0, request.getHeaders().length());
 			assertEquals("Should be no entity", -1, request.getEntity().read());
 
 			// Send content for response (to ensure handled)
-			HttpResponse response = connection.getHttpResponse();
-			response.getHttpHeaders().addHeader("TEST", "Value");
-			ServerWriter writer = connection.getHttpResponse().getEntityWriter();
+			HttpResponse response = connection.getResponse();
+			response.getHeaders().addHeader("TEST", "Value");
+			ServerWriter writer = connection.getResponse().getEntityWriter();
 			writer.write("Hello World");
 			writer.flush();
 		}
@@ -188,7 +188,7 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 	public static class NoEntityHandler {
 		public void service(ServerHttpConnection connection) {
-			connection.getHttpResponse().getHttpHeaders().addHeader("TEST", "Value");
+			connection.getResponse().getHeaders().addHeader("TEST", "Value");
 		}
 	}
 

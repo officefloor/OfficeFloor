@@ -106,9 +106,9 @@ public class MockWoofExtensionService implements WoofExtensionService {
 		}
 
 		public void service(ServerHttpConnection connection, Flows flows) throws IOException {
-			if ("/chain".equals(connection.getHttpRequest().getRequestURI())) {
+			if ("/chain".equals(connection.getRequest().getUri())) {
 				// Provide chained response
-				Writer writer = connection.getHttpResponse().getEntityWriter();
+				Writer writer = connection.getResponse().getEntityWriter();
 				writer.write("CHAINED");
 				writer.flush();
 

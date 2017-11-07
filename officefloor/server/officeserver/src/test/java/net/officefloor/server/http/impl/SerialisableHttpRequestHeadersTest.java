@@ -60,7 +60,7 @@ public class SerialisableHttpRequestHeadersTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
-		// Load the HTTTP headers
+		// Load the HTTP headers
 		this.list.add(new MockHttpHeader("one", "1"));
 		this.list.add(new MockHttpHeader("same", "S1"));
 		this.list.add(new MockHttpHeader("two", "2"));

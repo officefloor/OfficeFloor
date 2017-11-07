@@ -354,7 +354,7 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 			if (isSecureConnection != isSecureLink) {
 				// Must obtain full path
 				HttpServerLocation location = new HttpServerLocationImpl(domain, httpPort, httpsPort);
-				this.recordReturn(connection, connection.getHttpServerLocation(), location);
+				this.recordReturn(connection, connection.getServerLocation(), location);
 			}
 
 			// Test

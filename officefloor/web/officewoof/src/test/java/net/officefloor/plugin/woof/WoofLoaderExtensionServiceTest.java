@@ -423,7 +423,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 			String content = "WOOF " + dependency.getMessage() + " " + thread.getName();
 
 			// Write response
-			net.officefloor.server.http.HttpResponse response = connection.getHttpResponse();
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.getEntity().write(content.getBytes());
 		}
 	}

@@ -41,8 +41,8 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookies;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerImplementation;
@@ -640,28 +640,33 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 
 		@Override
-		public HttpVersion getHttpVersion() {
-			return this.delegate.getHttpVersion();
+		public HttpVersion getVersion() {
+			return this.delegate.getVersion();
 		}
 
 		@Override
-		public void setHttpVersion(HttpVersion version) {
-			this.delegate.setHttpVersion(version);
+		public void setVersion(HttpVersion version) {
+			this.delegate.setVersion(version);
 		}
 
 		@Override
-		public HttpStatus getHttpStatus() {
-			return this.delegate.getHttpStatus();
+		public HttpStatus getStatus() {
+			return this.delegate.getStatus();
 		}
 
 		@Override
-		public void setHttpStatus(HttpStatus status) {
-			this.delegate.setHttpStatus(status);
+		public void setStatus(HttpStatus status) {
+			this.delegate.setStatus(status);
 		}
 
 		@Override
-		public HttpResponseHeaders getHttpHeaders() {
-			return this.delegate.getHttpHeaders();
+		public HttpResponseHeaders getHeaders() {
+			return this.delegate.getHeaders();
+		}
+
+		@Override
+		public HttpResponseCookies getCookies() {
+			return this.delegate.getCookies();
 		}
 
 		@Override
@@ -942,13 +947,13 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 
 		@Override
-		public HttpRequest getHttpRequest() {
-			return this.delegate.getHttpRequest();
+		public HttpRequest getRequest() {
+			return this.delegate.getRequest();
 		}
 
 		@Override
-		public HttpResponse getHttpResponse() {
-			return this.delegate.getHttpResponse();
+		public HttpResponse getResponse() {
+			return this.delegate.getResponse();
 		}
 
 		@Override
@@ -957,8 +962,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 
 		@Override
-		public HttpServerLocation getHttpServerLocation() {
-			return this.delegate.getHttpServerLocation();
+		public HttpServerLocation getServerLocation() {
+			return this.delegate.getServerLocation();
 		}
 
 		@Override
@@ -972,13 +977,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 
 		@Override
-		public HttpMethod getClientHttpMethod() {
-			return this.delegate.getClientHttpMethod();
-		}
-
-		@Override
-		public HttpRequestHeaders getClientHttpHeaders() {
-			return this.delegate.getClientHttpHeaders();
+		public HttpRequest getClientRequest() {
+			return this.delegate.getClientRequest();
 		}
 	}
 

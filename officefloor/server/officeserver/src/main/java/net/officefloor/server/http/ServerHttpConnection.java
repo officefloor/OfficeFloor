@@ -50,14 +50,14 @@ public interface ServerHttpConnection {
 	 * 
 	 * @return {@link HttpRequest} to be serviced.
 	 */
-	HttpRequest getHttpRequest();
+	HttpRequest getRequest();
 
 	/**
 	 * Obtains the {@link HttpResponse}.
 	 * 
 	 * @return {@link HttpResponse}.
 	 */
-	HttpResponse getHttpResponse();
+	HttpResponse getResponse();
 
 	/**
 	 * Indicates if the connection is over a secure channel (e.g. utilising
@@ -72,7 +72,7 @@ public interface ServerHttpConnection {
 	 * 
 	 * @return {@link HttpServerLocation}.
 	 */
-	HttpServerLocation getHttpServerLocation();
+	HttpServerLocation getServerLocation();
 
 	/**
 	 * <p>
@@ -109,38 +109,32 @@ public interface ServerHttpConnection {
 
 	/**
 	 * <p>
-	 * Obtains the client sent {@link HttpMethod} of the
+	 * Obtains the actual client sent {@link HttpRequest} for the
 	 * {@link ServerHttpConnection}.
 	 * <p>
-	 * As the {@link HttpRequest} is overridden, this allows logic requiring to
-	 * know the actual client {@link HttpMethod}. An example of this logic is
-	 * the POST/redirect/GET pattern that needs to know whether the client sent
-	 * {@link HttpRequest} method is a <code>POST</code> or <code>GET</code>
-	 * (regardless of imported state).
+	 * As the {@link HttpRequest} can be overridden, this allows logic requiring
+	 * to know details of the actual client {@link HttpRequest}. Examples of
+	 * this logic are:
+	 * <ul>
+	 * <li>the POST/redirect/GET pattern that needs to know whether the client
+	 * sent {@link HttpMethod} is a <code>POST</code> or <code>GET</code>
+	 * (regardless of imported state)</li>
+	 * <li>checking for the <code>Authorization</code> {@link HttpHeader} to
+	 * ensure it was sent by the client for servicing the
+	 * {@link HttpRequest}</li>
+	 * <li>checking for the JWT token {@link HttpRequestCookie} to ensure it was
+	 * sent by the client for servicing the {@link HttpRequest}</li>
+	 * </ul>
+	 * <p>
+	 * Note for most application logic the {@link #getRequest()} should be used,
+	 * as the intention is for this to contain the appropriate information for
+	 * servicing the {@link HttpRequest}.
 	 * 
-	 * @return Client sent {@link HttpMethod}.
+	 * @return Actual client {@link HttpRequest}.
 	 * 
 	 * @see #exportState()
 	 * @see #importState(Serializable)
 	 */
-	HttpMethod getClientHttpMethod();
-
-	/**
-	 * <p>
-	 * Obtains the client sent {@link HttpRequestHeaders} of the
-	 * {@link ServerHttpConnection}.
-	 * <p>
-	 * As the {@link HttpRequest} is overridden, this allows logic requiring to
-	 * know the actual client {@link HttpRequestHeaders}. An example of this
-	 * logic is checking for the <code>Authorization</code> {@link HttpHeader}
-	 * to ensure it was sent by the client for servicing the
-	 * {@link HttpRequest}.
-	 * 
-	 * @return Client sent {@link HttpRequestHeaders}.
-	 * 
-	 * @see #exportState()
-	 * @see #importState(Serializable)
-	 */
-	HttpRequestHeaders getClientHttpHeaders();
+	HttpRequest getClientRequest();
 
 }

@@ -100,7 +100,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockSection {
 		public void service(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("TEST");
+			connection.getResponse().getEntityWriter().write("TEST");
 		}
 	}
 
@@ -164,7 +164,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockPathParameter {
 		public void service(PathParameter param, ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param.param);
+			connection.getResponse().getEntityWriter().write("Parameter=" + param.param);
 		}
 	}
 
@@ -181,7 +181,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockPathValue {
 		public void service(@HttpPathParameter("param") String param, ServerHttpConnection connection)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+			connection.getResponse().getEntityWriter().write("Value=" + param);
 		}
 	}
 
@@ -207,7 +207,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockMultipleParameters {
 		public void service(ServerHttpConnection connection, MultipleParameters params) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("One=" + params.param + " and Two=" + params.second);
+			connection.getResponse().getEntityWriter().write("One=" + params.param + " and Two=" + params.second);
 		}
 	}
 
@@ -224,7 +224,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockMultipleValues {
 		public void service(@HttpPathParameter("second") String second, ServerHttpConnection connection,
 				@HttpPathParameter("param") String param) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("One=" + param + " and Two=" + second);
+			connection.getResponse().getEntityWriter().write("One=" + param + " and Two=" + second);
 		}
 	}
 
@@ -250,7 +250,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockQueryParameter {
 		public void service(QueryParameter param, ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param.param);
+			connection.getResponse().getEntityWriter().write("Parameter=" + param.param);
 		}
 	}
 
@@ -267,7 +267,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockQueryValue {
 		public void service(@HttpQueryParameter("param") String param, ServerHttpConnection connection)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+			connection.getResponse().getEntityWriter().write("Value=" + param);
 		}
 	}
 
@@ -284,7 +284,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockHeaderValue {
 		public void service(@HttpHeaderParameter("x-test") String param, ServerHttpConnection connection)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+			connection.getResponse().getEntityWriter().write("Value=" + param);
 		}
 	}
 
@@ -301,7 +301,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockCookieValue {
 		public void service(@HttpCookieParameter("param") String param, ServerHttpConnection connection)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + param);
+			connection.getResponse().getEntityWriter().write("Value=" + param);
 		}
 	}
 
@@ -327,7 +327,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockFormParameter {
 		public void service(FormParameter param, ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param.param);
+			connection.getResponse().getEntityWriter().write("Parameter=" + param.param);
 		}
 	}
 
@@ -345,7 +345,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockFormValue {
 		public void service(@HttpContentParameter("param") String param, ServerHttpConnection connection)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Parameter=" + param);
+			connection.getResponse().getEntityWriter().write("Parameter=" + param);
 		}
 	}
 
@@ -372,7 +372,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class HttpArgumentSection {
 		public void service(String argument, ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("Argument=" + argument);
+			connection.getResponse().getEntityWriter().write("Argument=" + argument);
 		}
 	}
 
@@ -435,14 +435,14 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public ObjectValue parse(ServerHttpConnection connection) throws HttpException {
-			String content = MockHttpServer.getContent(connection.getHttpRequest(), null);
+			String content = MockHttpServer.getContent(connection.getRequest(), null);
 			return new ObjectValue(content);
 		}
 	}
 
 	public static class MockObjectValue {
 		public void service(ObjectValue object, ServerHttpConnection connection) throws Exception {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + object.content);
+			connection.getResponse().getEntityWriter().write("Value=" + object.content);
 		}
 	}
 
@@ -514,14 +514,14 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public ObjectAlias parse(ServerHttpConnection connection) throws HttpException {
-			String content = MockHttpServer.getContent(connection.getHttpRequest(), null);
+			String content = MockHttpServer.getContent(connection.getRequest(), null);
 			return new ObjectAlias(content);
 		}
 	}
 
 	public static class MockObjectAlias {
 		public void service(ObjectAlias object, ServerHttpConnection connection) throws Exception {
-			connection.getHttpResponse().getEntityWriter().write("Value=" + object.content);
+			connection.getResponse().getEntityWriter().write("Value=" + object.content);
 		}
 	}
 
@@ -585,7 +585,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public void send(String object, ServerHttpConnection connection) throws IOException {
-			HttpResponse response = connection.getHttpResponse();
+			HttpResponse response = connection.getResponse();
 			response.setContentType(this.getContentType(), null);
 			response.getEntityWriter().write("{value=\"" + object + "\"}");
 		}
@@ -605,8 +605,8 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public void send(Throwable object, ServerHttpConnection connection) throws IOException {
-			HttpResponse response = connection.getHttpResponse();
-			response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+			HttpResponse response = connection.getResponse();
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 			response.setContentType(this.getContentType(), null);
 			response.getEntityWriter().write("{error: \"" + object.getMessage() + "\"}");
 		}
@@ -673,10 +673,10 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockApplication {
 		public void service(QueryParameter parameter, ServerHttpConnection connection, ApplicationObject object)
 				throws IOException {
-			if (connection.getHttpRequest().getHttpMethod() == HttpMethod.POST) {
+			if (connection.getRequest().getMethod() == HttpMethod.POST) {
 				object.value = parameter.param;
 			}
-			connection.getHttpResponse().getEntityWriter().write("Application=" + object.value);
+			connection.getResponse().getEntityWriter().write("Application=" + object.value);
 		}
 	}
 
@@ -716,10 +716,10 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockSession {
 		public void service(ServerHttpConnection connection, SessionObject object, QueryParameter parameter)
 				throws IOException {
-			if (connection.getHttpRequest().getHttpMethod() == HttpMethod.POST) {
+			if (connection.getRequest().getMethod() == HttpMethod.POST) {
 				object.value = parameter.param;
 			}
-			connection.getHttpResponse().getEntityWriter().write("Session=" + object.value);
+			connection.getResponse().getEntityWriter().write("Session=" + object.value);
 		}
 	}
 
@@ -824,7 +824,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockIntercept {
 		@NextFunction("service")
 		public void intercept(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("intercepted ");
+			connection.getResponse().getEntityWriter().write("intercepted ");
 		}
 	}
 
@@ -849,7 +849,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockChainedServicer {
 		public void input(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("chained");
+			connection.getResponse().getEntityWriter().write("chained");
 		}
 	}
 
@@ -877,7 +877,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 	public static class MockPassThroughChainedServicer {
 		@NextFunction("chain")
 		public void pass(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("pass - ");
+			connection.getResponse().getEntityWriter().write("pass - ");
 		}
 	}
 

@@ -32,7 +32,6 @@ import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.HttpSessionAdministration;
 import net.officefloor.web.session.InvalidatedSessionHttpException;
@@ -44,6 +43,7 @@ import net.officefloor.web.session.spi.HttpSessionStore;
 import net.officefloor.web.session.spi.InvalidateHttpSessionOperation;
 import net.officefloor.web.session.spi.RetrieveHttpSessionOperation;
 import net.officefloor.web.session.spi.StoreHttpSessionOperation;
+import net.officefloor.web.state.HttpCookie;
 
 /**
  * {@link ManagedObject} for a {@link HttpSession}.
@@ -411,7 +411,7 @@ public class HttpSessionManagedObject
 	 */
 	private void addSessionIdCookieToHttpResponse(String sessionId, long expireTime) {
 		HttpCookie sessionIdCookie = new HttpCookie(this.sessionIdCookieName, sessionId, expireTime, null, "/");
-		HttpCookie.addHttpCookie(sessionIdCookie, this.connection.getHttpResponse());
+		HttpCookie.addHttpCookie(sessionIdCookie, this.connection.getResponse());
 	}
 
 	/*
@@ -441,7 +441,7 @@ public class HttpSessionManagedObject
 
 		// Obtain the HTTP request
 		this.connection = (ServerHttpConnection) registry.getObject(this.serverHttpConnectionIndex);
-		HttpRequest request = this.connection.getHttpRequest();
+		HttpRequest request = this.connection.getRequest();
 
 		// Ensure have the HTTP session Id generator
 		if (this.httpSessionIdGenerator == null) {

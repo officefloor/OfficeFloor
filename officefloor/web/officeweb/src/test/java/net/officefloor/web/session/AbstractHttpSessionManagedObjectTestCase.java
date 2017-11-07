@@ -36,7 +36,6 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
-import net.officefloor.web.cookie.HttpCookie;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.FreshHttpSession;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
@@ -44,6 +43,7 @@ import net.officefloor.web.session.spi.HttpSessionStore;
 import net.officefloor.web.session.spi.InvalidateHttpSessionOperation;
 import net.officefloor.web.session.spi.RetrieveHttpSessionOperation;
 import net.officefloor.web.session.spi.StoreHttpSessionOperation;
+import net.officefloor.web.state.HttpCookie;
 
 /**
  * Tests the {@link HttpSessionManagedObject}.
@@ -156,7 +156,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 		// Record obtaining the request
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(this.serverHttpConnectionIndex),
 				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), request.build());
+		this.recordReturn(this.connection, this.connection.getRequest(), request.build());
 	}
 
 	/**
@@ -363,8 +363,8 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 		final HttpResponseHeaders headers = this.createMock(HttpResponseHeaders.class);
 
 		// Record obtaining the headers
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), response);
-		this.recordReturn(response, response.getHttpHeaders(), headers);
+		this.recordReturn(this.connection, this.connection.getResponse(), response);
+		this.recordReturn(response, response.getHeaders(), headers);
 
 		// Record removing existing cookie
 		final HttpHeader header = this.createMock(HttpHeader.class);

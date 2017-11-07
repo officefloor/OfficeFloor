@@ -30,7 +30,7 @@ import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.cookie.HttpCookie;
+import net.officefloor.web.state.HttpCookie;
 
 /**
  * Tests the {@link HttpCookieUtil}.
@@ -214,7 +214,7 @@ public class HttpCookieTest extends OfficeFrameTestCase {
 	 *         normalised into the single {@link HttpHeader}.
 	 */
 	private static MockHttpRequestBuilder normaliseCookies(MockHttpRequestBuilder setup) {
-		HttpRequestHeaders headers = setup.build().getHttpHeaders();
+		HttpRequestHeaders headers = setup.build().getHeaders();
 		StringBuilder value = new StringBuilder();
 		boolean isFirst = true;
 		for (HttpHeader header : headers.getHeaders(HttpCookie.COOKIE)) {
