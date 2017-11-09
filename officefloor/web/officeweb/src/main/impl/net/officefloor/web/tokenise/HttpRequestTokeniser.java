@@ -20,12 +20,12 @@ package net.officefloor.web.tokenise;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.HttpCookie;
 import java.util.Arrays;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpValueLocation;
@@ -186,7 +186,7 @@ public class HttpRequestTokeniser {
 			valueLoader.loadValue(name, value, HttpValueLocation.QUERY);
 		}
 
-		// Load the header and cookie arguments (and determine content type)
+		// Load the header arguments (and determine content type)
 		String contentType = null;
 		for (HttpHeader header : request.getHeaders()) {
 			name = header.getName();
@@ -196,19 +196,19 @@ public class HttpRequestTokeniser {
 			valueLoader.loadValue(name, value, HttpValueLocation.HEADER);
 
 			// Handle specific header values
-			switch (name.toLowerCase()) {
-			case "content-type":
+			if ("content-type".equalsIgnoreCase(name)) {
 				// Capture content type, for later parsing content
 				contentType = header.getValue();
-				break;
-			case "cookie":
-			case "cookie2":
-				// Load the cookie values
-				for (HttpCookie cookie : HttpCookie.parse(header.getValue())) {
-					valueLoader.loadValue(cookie.getName(), cookie.getValue(), HttpValueLocation.COOKIE);
-				}
-				break;
 			}
+		}
+
+		// Load the cookie arguments
+		for (HttpRequestCookie cookie : request.getCookies()) {
+			name = cookie.getName();
+			value = cookie.getValue();
+
+			// Load the cookie value
+			valueLoader.loadValue(name, value, HttpValueLocation.COOKIE);
 		}
 
 		// Load content arguments

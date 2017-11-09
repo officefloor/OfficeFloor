@@ -89,6 +89,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private ProcessAwareHttpResponseHeaders headers;
 
 	/**
+	 * {@link ProcessAwareHttpResponseCookies}.
+	 */
+	private ProcessAwareHttpResponseCookies cookies;
+
+	/**
 	 * {@link BufferPoolServerOutputStream}.
 	 */
 	private final BufferPoolServerOutputStream<B> bufferPoolOutputStream;
@@ -163,6 +168,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		this.clientVersion = version;
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
+		this.cookies = new ProcessAwareHttpResponseCookies(processAwareContext);
 		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(this.serverHttpConnection.bufferPool, this);
 		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
 		this.processAwareContext = processAwareContext;
@@ -322,7 +328,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		// Write the response (and consider written)
 		this.isWritten = true;
 		this.serverHttpConnection.httpResponseWriter.writeHttpResponse(this.version, this.status,
-				this.headers.getWritableHttpHeaders(), contentLength, contentType,
+				this.headers.getWritableHttpHeaders(), this.cookies.getWritableHttpCookie(), contentLength, contentType,
 				this.bufferPoolOutputStream.getBuffers());
 	}
 
@@ -359,7 +365,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		// Reset the response
 		this.version = this.clientVersion;
 		this.status = HttpStatus.OK;
-		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
+		this.headers = new ProcessAwareHttpResponseHeaders(this.processAwareContext);
+		this.cookies = new ProcessAwareHttpResponseCookies(this.processAwareContext);
 
 		// Release writing content
 		this.contentType = null;
@@ -453,8 +460,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 	@Override
 	public HttpResponseCookies getCookies() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement add HttpResponseCookies");
+		return this.cookies;
 	}
 
 	@Override

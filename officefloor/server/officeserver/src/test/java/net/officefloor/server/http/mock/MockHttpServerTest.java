@@ -108,15 +108,15 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 		// Validate the built response
 		MockHttpResponse response = builder.build();
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getHttpVersion());
-		assertSame("Incorrect status", HttpStatus.OK, response.getHttpStatus());
-		assertEquals("Should have one header", 3, response.getHttpHeaders().size());
+		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
+		assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
+		assertEquals("Should have one header", 3, response.getHeaders().size());
 		assertEquals("Incorrect content-type", "application/octet-stream",
-				response.getFirstHeader("content-type").getValue());
-		assertEquals("Incorrect content-length", "1", response.getFirstHeader("content-length").getValue());
-		assertEquals("Incorrect header value", "value", response.getFirstHeader("TEST").getValue());
-		assertEquals("Incorrect response", 1, response.getHttpEntity().read());
-		assertEquals("Should have read entity", -1, response.getHttpEntity().read());
+				response.getHeader("content-type").getValue());
+		assertEquals("Incorrect content-length", "1", response.getHeader("content-length").getValue());
+		assertEquals("Incorrect header value", "value", response.getHeader("TEST").getValue());
+		assertEquals("Incorrect response", 1, response.getEntity().read());
+		assertEquals("Should have read entity", -1, response.getEntity().read());
 	}
 
 	/**
@@ -133,15 +133,15 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(request);
 
 		// Validate the response
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getHttpVersion());
-		assertSame("Incorrect status", HttpStatus.OK, response.getHttpStatus());
+		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
+		assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
 		assertEquals("Should be one header (plus content-type and content-length)", 3,
-				response.getHttpHeaders().size());
-		assertEquals("Incorrect content-type", "text/plain", response.getFirstHeader("content-type").getValue());
-		assertEquals("Incorrect content-length", "11", response.getFirstHeader("content-length").getValue());
-		assertEquals("Incorrect header value", "Value", response.getFirstHeader("TEST").getValue());
+				response.getHeaders().size());
+		assertEquals("Incorrect content-type", "text/plain", response.getHeader("content-type").getValue());
+		assertEquals("Incorrect content-length", "11", response.getHeader("content-length").getValue());
+		assertEquals("Incorrect header value", "Value", response.getHeader("TEST").getValue());
 		assertEquals("Incorrect response", "Hello World",
-				response.getHttpEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+				response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 	}
 
 	public static class SimpleRequestHandler {
@@ -178,12 +178,12 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(request);
 
 		// Validate the response
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getHttpVersion());
-		assertSame("Incorrect status", HttpStatus.NO_CONTENT, response.getHttpStatus());
-		assertEquals("Should be just the one header", 1, response.getHttpHeaders().size());
-		assertEquals("Incorrect header value", "Value", response.getFirstHeader("TEST").getValue());
+		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
+		assertSame("Incorrect status", HttpStatus.NO_CONTENT, response.getStatus());
+		assertEquals("Should be just the one header", 1, response.getHeaders().size());
+		assertEquals("Incorrect header value", "Value", response.getHeader("TEST").getValue());
 		assertEquals("Should be no entity", "",
-				response.getHttpEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+				response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 	}
 
 	public static class NoEntityHandler {

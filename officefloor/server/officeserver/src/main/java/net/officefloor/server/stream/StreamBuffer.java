@@ -17,7 +17,11 @@
  */
 package net.officefloor.server.stream;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.time.format.DateTimeFormatter;
+
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Buffer that is part of a stream.
@@ -27,6 +31,23 @@ import java.nio.ByteBuffer;
  * @author Daniel Sagenschneider
  */
 public abstract class StreamBuffer<B> {
+
+	/**
+	 * Writes all the bytes to the {@link StreamBuffer} stream.
+	 * 
+	 * @param bytes
+	 *            Bytes to be written to the {@link StreamBuffer} stream.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} in the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} should additional
+	 *            {@link StreamBuffer} instances be required in writing the
+	 *            bytes.
+	 */
+	public static <B> void write(byte[] bytes, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+		write(bytes, 0, bytes.length, headBuffer, bufferPool);
+	}
 
 	/**
 	 * Writes the bytes to the {@link StreamBuffer} stream.
@@ -68,10 +89,11 @@ public abstract class StreamBuffer<B> {
 	}
 
 	/**
-	 * Writes the {@link CharSequence} to the {@link StreamBuffer} stream.
+	 * Writes all the {@link CharSequence} to the {@link StreamBuffer} stream.
 	 * 
 	 * @param characters
 	 *            Characters to be written to the {@link StreamBuffer} stream.
+	 * @param headBuffer
 	 *            Head {@link StreamBuffer} in the linked list of
 	 *            {@link StreamBuffer} instances.
 	 * @param bufferPool
@@ -80,26 +102,169 @@ public abstract class StreamBuffer<B> {
 	 *            bytes.
 	 */
 	public static <B> void write(CharSequence characters, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+		write(characters, 0, characters.length(), headBuffer, bufferPool);
+	}
+
+	/**
+	 * Writes the {@link CharSequence} to the {@link StreamBuffer} stream.
+	 * 
+	 * @param characters
+	 *            Characters to be written to the {@link StreamBuffer} stream.
+	 * @param offset
+	 *            Offset into the {@link CharSequence} to start writing.
+	 * @param length
+	 *            Length of characters to write.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} in the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} should additional
+	 *            {@link StreamBuffer} instances be required in writing the
+	 *            bytes.
+	 */
+	public static <B> void write(CharSequence characters, int offset, int length, StreamBuffer<B> headBuffer,
+			StreamBufferPool<B> bufferPool) {
 
 		// Obtain the write stream buffer
 		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool);
 
 		// Write the characters to the buffer
-		int length = characters.length();
 		for (int i = 0; i < length; i++) {
-			byte character = (byte) characters.charAt(i);
-
-			// Attempt to write the character
-			if (!headBuffer.write(character)) {
-
-				// Append another buffer for character
-				headBuffer.next = bufferPool.getPooledStreamBuffer();
-				headBuffer = headBuffer.next;
-
-				// Write character to the new buffer
-				headBuffer.write(character);
-			}
+			byte character = (byte) characters.charAt(offset + i);
+			headBuffer = writeByte(character, headBuffer, bufferPool);
 		}
+	}
+
+	/**
+	 * HTTP - (minus) value.
+	 */
+	private static final byte MINUS = "-".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+
+	/**
+	 * HTTP 0 value.
+	 */
+	private static final byte ZERO = "0".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+
+	/**
+	 * HTTP {@link Long#MIN_VALUE} value.
+	 */
+	private static final byte[] MIN_VALUE = String.valueOf(Long.MIN_VALUE).getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * Writes a long value to the {@link StreamBuffer}.
+	 * 
+	 * @param value
+	 *            Long value to write to the {@link StreamBuffer}.
+	 * @param head
+	 *            Head {@link StreamBuffer} of linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
+	 */
+	public static <B> void write(long value, StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
+
+		// Determine if min value (as can not make positive)
+		if (value == Long.MIN_VALUE) {
+			StreamBuffer.write(MIN_VALUE, head, bufferPool);
+			return;
+		}
+
+		// Obtain the write buffer
+		StreamBuffer<B> writeBuffer = StreamBuffer.getWriteStreamBuffer(head, bufferPool);
+
+		// Write sign
+		if (value < 0) {
+			writeByte(MINUS, writeBuffer, bufferPool);
+
+			// Make positive to write digits
+			value = -value;
+		}
+
+		// Obtain the one's digit
+		byte onesDigit = (byte) (value % 10);
+		onesDigit += ZERO;
+
+		// Write the value
+		long lessMagnitude = value / 10;
+		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool);
+
+		// Always write the first digit
+		writeByte(onesDigit, writeBuffer, bufferPool);
+	}
+
+	/**
+	 * Uses recursion to write the long digits.
+	 * 
+	 * @param value
+	 *            Value to write.
+	 * @param writeBuffer
+	 *            Write {@link StreamBuffer}.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
+	 * @return Next write {@link StreamBuffer}.
+	 */
+	private static <B> StreamBuffer<B> recusiveWriteInteger(long value, StreamBuffer<B> writeBuffer,
+			StreamBufferPool<B> bufferPool) {
+
+		// Drop out when value at zero
+		if (value == 0) {
+			return writeBuffer;
+		}
+
+		// Not complete, so continue writing the next digit
+		long lessMagnitude = value / 10;
+		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool);
+
+		// Now write the current digit
+		byte currentDigit = (byte) (value % 10);
+		currentDigit += ZERO;
+		writeBuffer = writeByte(currentDigit, writeBuffer, bufferPool);
+
+		// Return the write buffer
+		return writeBuffer;
+	}
+
+	/**
+	 * <p>
+	 * Obtains an {@link Appendable} to write to the {@link StreamBuffer}
+	 * stream.
+	 * <p>
+	 * Typical use of this is for the {@link DateTimeFormatter}.
+	 * 
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} in the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} should additional
+	 *            {@link StreamBuffer} instances be required in writing the
+	 *            bytes.
+	 * @return {@link Appendable} to write to the {@link StreamBuffer} stream.
+	 */
+	public static <B> Appendable getAppendable(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+		return new Appendable() {
+
+			private StreamBuffer<B> writeBuffer = StreamBuffer.getWriteStreamBuffer(headBuffer, bufferPool);
+
+			@Override
+			public Appendable append(CharSequence csq, int start, int end) throws IOException {
+				for (int i = start; i < end; i++) {
+					char character = csq.charAt(i);
+					this.append(character);
+				}
+				return this;
+			}
+
+			@Override
+			public Appendable append(char c) throws IOException {
+				this.writeBuffer = writeByte((byte) c, this.writeBuffer, bufferPool);
+				return this;
+			}
+
+			@Override
+			public Appendable append(CharSequence csq) throws IOException {
+				return this.append(csq, 0, csq.length());
+			}
+		};
 	}
 
 	/**
@@ -129,6 +294,31 @@ public abstract class StreamBuffer<B> {
 
 		// Return the write stream buffer
 		return headBuffer;
+	}
+
+	/**
+	 * Writes a HTTP encoded character.
+	 * 
+	 * @param character
+	 *            Character to write.
+	 * @param writeBuffer
+	 *            Write {@link StreamBuffer}.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
+	 * @return Next write {@link StreamBuffer}.
+	 */
+	public static <B> StreamBuffer<B> writeByte(byte character, StreamBuffer<B> writeBuffer,
+			StreamBufferPool<B> bufferPool) {
+		// Attempt to write to buffer
+		if (!writeBuffer.write(character)) {
+			// Buffer full, so write to new buffer
+			writeBuffer.next = bufferPool.getPooledStreamBuffer();
+			writeBuffer = writeBuffer.next;
+			if (!writeBuffer.write(character)) {
+				throw new IllegalStateException("New pooled space buffer should always have space");
+			}
+		}
+		return writeBuffer;
 	}
 
 	/**

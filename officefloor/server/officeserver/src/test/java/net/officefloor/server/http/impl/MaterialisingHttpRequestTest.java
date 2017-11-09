@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -59,6 +60,11 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 	private final HttpRequestHeaders headers = this.createMock(HttpRequestHeaders.class);
 
 	/**
+	 * {@link HttpRequestCookies}.
+	 */
+	private final HttpRequestCookies cookies = this.createMock(HttpRequestCookies.class);
+
+	/**
 	 * {@link ByteSequence}.
 	 */
 	private final ByteSequence entity = new ByteArrayByteSequence("TEST".getBytes(ServerHttpConnection.HTTP_CHARSET));
@@ -67,7 +73,7 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 	 * {@link MaterialisingHttpRequest} to test.
 	 */
 	private final MaterialisingHttpRequest request = new MaterialisingHttpRequest(this.methodSupplier,
-			this.requestUriSupplier, this.version, this.headers, this.entity);
+			this.requestUriSupplier, this.version, this.headers, this.cookies, this.entity);
 
 	/**
 	 * Ensure can obtain {@link HttpMethod}.

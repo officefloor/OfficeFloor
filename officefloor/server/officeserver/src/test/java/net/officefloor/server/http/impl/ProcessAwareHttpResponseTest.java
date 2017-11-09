@@ -34,9 +34,11 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
@@ -81,6 +83,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertEquals("Incorrect status", HttpStatus.NO_CONTENT, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookeis", this.httpCookie);
 		assertNull("Should be no entity data", this.contentHeadStreamBuffer);
 	}
 
@@ -147,6 +150,22 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect header name", "test", this.httpHeader.getName());
 		assertEquals("Incorrect header value", "value", this.httpHeader.getValue());
 		assertNull("Should be no further headers", this.httpHeader.next);
+	}
+
+	/**
+	 * Add a {@link HttpResponseCookie}.
+	 */
+	public void testAddCookie() throws IOException {
+
+		// Add cookie
+		this.response.getCookies().addCookie("test", "value");
+
+		// Ensure writes have HTTP header
+		this.response.flushResponseToHttpResponseWriter(null);
+		assertNotNull("Should have cookie", this.httpCookie);
+		assertEquals("Incorrect cookie name", "test", this.httpCookie.getName());
+		assertEquals("Incorrect cookie value", "value", this.httpCookie.getValue());
+		assertNull("Should be no further cookies", this.httpCookie.next);
 	}
 
 	/**
@@ -361,6 +380,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.setContentType("text/html", charset);
 		this.response.getHeaders().addHeader("name", "value");
+		this.response.getCookies().addCookie("name", "value");
 		ServerWriter writer = this.response.getEntityWriter();
 		writer.write("TEST");
 		writer.flush();
@@ -369,6 +389,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getStatus());
 		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getVersion());
 		assertEquals("Incorrect mutated heders", "value", this.response.getHeaders().getHeader("name").getValue());
+		assertEquals("Incorrect mutated cookies", "value", this.response.getCookies().getCookie("name").getValue());
 		assertTrue("Should be using buffers for entity content", this.bufferPool.isActiveBuffers());
 
 		// Reset
@@ -378,12 +399,14 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getStatus());
 		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getVersion());
 		assertFalse("Should clear headers", this.response.getHeaders().iterator().hasNext());
+		assertFalse("Should clear cookies", this.response.getCookies().iterator().hasNext());
 		assertFalse("No entity, as should release all buffers", this.bufferPool.isActiveBuffers());
 
 		// Ensure able to continue forming response (typically an error)
 		this.response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.getHeaders().addHeader("error", "occurred");
+		this.response.getCookies().addCookie("store", "failure");
 		this.response.getEntityWriter().write("ERROR: something");
 
 		// Send response (to ensure reset entity)
@@ -396,6 +419,10 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect header name", "error", this.httpHeader.getName());
 		assertEquals("incorrect header value", "occurred", this.httpHeader.getValue());
 		assertNull("Should only be one header", this.httpHeader.next);
+		assertNotNull("Should be a cookie", this.httpCookie);
+		assertEquals("Incorrect cookie name", "store", this.httpCookie.getName());
+		assertEquals("Incorrect cookie value", "failure", this.httpCookie.getValue());
+		assertNull("Should only be one cookie", this.httpCookie.next);
 
 		// Ensure only entity content after the reset is sent
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
@@ -432,6 +459,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookies", this.httpCookie);
 		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
 		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
@@ -466,6 +494,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertSame("Should default to internal status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookies", this.httpCookie);
 		assertEquals("Incorrect content-type", "application/mock", this.contentType.getValue());
 		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
 				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
@@ -480,6 +509,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.setStatus(HttpStatus.NOT_FOUND);
 		this.response.getHeaders().addHeader("TEST", "VALUE");
+		this.response.getCookies().addCookie("TEST", "VALUE");
 		this.response.getEntityWriter().write("TEST");
 
 		// Send escalation
@@ -497,6 +527,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookies", this.httpCookie);
 		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
 		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
@@ -514,6 +545,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 	private WritableHttpHeader httpHeader = null;
 
+	private WritableHttpCookie httpCookie = null;
+
 	private long contentLength;
 
 	private HttpHeaderValue contentType = null;
@@ -522,10 +555,12 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 	@Override
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader httpHeader,
-			long contentLength, HttpHeaderValue contentType, StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
+			WritableHttpCookie httpCookie, long contentLength, HttpHeaderValue contentType,
+			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 		this.version = version;
 		this.status = status;
 		this.httpHeader = httpHeader;
+		this.httpCookie = httpCookie;
 		this.contentLength = contentLength;
 		this.contentType = contentType;
 		this.contentHeadStreamBuffer = contentHeadStreamBuffer;

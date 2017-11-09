@@ -51,7 +51,7 @@ public class MaterialisingHttpRequestCookiesTest extends OfficeFrameTestCase {
 	 * Ensure can parse out multiple Cookies.
 	 */
 	public void testMultipleCookies() {
-		assertCookies("one=1;two=2;three=3", "one", "1", "two", "2", "three", "3");
+		assertCookies("one=1;two=2;three=3", "three", "3", "two", "2", "one", "1");
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class MaterialisingHttpRequestCookiesTest extends OfficeFrameTestCase {
 	 * Ignore Cookie without name or value.
 	 */
 	public void testIgnoreBlankCookie() {
-		assertCookies(";;");
+		assertCookies("; ; = ; ");
 	}
 
 	/**
@@ -93,6 +93,9 @@ public class MaterialisingHttpRequestCookiesTest extends OfficeFrameTestCase {
 	private static void assertCookies(String cookieString, String... cookieNameValuePairs) {
 		HttpRequestCookies cookies = cookies(cookieString);
 
+		// Ensure correct number of cookies
+		assertEquals("Incorrect number of cookies", cookieNameValuePairs.length / 2, cookies.length());
+
 		// Ensure correct cookies returned
 		Iterator<HttpRequestCookie> iterator = cookies.iterator();
 		for (int i = 0; i < cookieNameValuePairs.length; i += 2) {
@@ -100,7 +103,7 @@ public class MaterialisingHttpRequestCookiesTest extends OfficeFrameTestCase {
 			String value = cookieNameValuePairs[i + 1];
 
 			// Ensure have cookie value
-			assertTrue("Should have another cookie (" + name + ")", iterator.hasNext());
+			assertTrue("Should have cookie (" + name + ")", iterator.hasNext());
 			HttpRequestCookie cookie = iterator.next();
 			assertEquals("Incorrect cookie name", name, cookie.getName());
 			assertEquals("Incorrect cookie value", value, cookie.getValue());
@@ -109,7 +112,13 @@ public class MaterialisingHttpRequestCookiesTest extends OfficeFrameTestCase {
 			HttpRequestCookie found = cookies.getCookie(name);
 			assertEquals("Incorrect found cookie name", name, found.getName());
 			assertEquals("Incorrect found cookie value", value, found.getValue());
+
+			// Ensure able to obtain cookie at index
+			HttpRequestCookie index = cookies.cookieAt(i / 2);
+			assertEquals("Incorrect indexed cookie name", name, index.getName());
+			assertEquals("Incorrect indexed cookie value", value, index.getValue());
 		}
+		assertFalse("Should have no further cookies", iterator.hasNext());
 	}
 
 	/**
@@ -163,7 +172,7 @@ public class MaterialisingHttpRequestCookiesTest extends OfficeFrameTestCase {
 		};
 
 		// Return the request cookies
-		return new MaterialisingHttpRequestHeaders(headers).cookies;
+		return new MaterialisingHttpRequestCookies(new MaterialisingHttpRequestHeaders(headers));
 	}
 
 }

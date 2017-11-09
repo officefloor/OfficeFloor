@@ -24,6 +24,7 @@ import java.util.List;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 
 /**
@@ -38,14 +39,14 @@ public interface MockHttpResponse {
 	 * 
 	 * @return {@link HttpVersion}.
 	 */
-	HttpVersion getHttpVersion();
+	HttpVersion getVersion();
 
 	/**
 	 * Obtains the {@link HttpStatus}.
 	 * 
 	 * @return {@link HttpStatus}.
 	 */
-	HttpStatus getHttpStatus();
+	HttpStatus getStatus();
 
 	/**
 	 * Obtains the first {@link WritableHttpHeader} by the name.
@@ -55,21 +56,28 @@ public interface MockHttpResponse {
 	 * @return First {@link WritableHttpHeader} by the name, or
 	 *         <code>null</code> if no {@link WritableHttpHeader} by the name.
 	 */
-	WritableHttpHeader getFirstHeader(String name);
+	WritableHttpHeader getHeader(String name);
 
 	/**
 	 * Obtains the response {@link WritableHttpHeader} instances.
 	 * 
 	 * @return {@link WritableHttpHeader} instances.
 	 */
-	List<WritableHttpHeader> getHttpHeaders();
+	List<WritableHttpHeader> getHeaders();
+
+	/**
+	 * Obtains the response {@link WritableHttpCookie} instances.
+	 * 
+	 * @return {@link WritableHttpCookie} instances.
+	 */
+	List<WritableHttpCookie> getCookies();
 
 	/**
 	 * Obtains {@link InputStream} to the response HTTP entity.
 	 * 
 	 * @return {@link InputStream} to the response HTTP entity.
 	 */
-	InputStream getHttpEntity();
+	InputStream getEntity();
 
 	/**
 	 * Obtains the HTTP entity as text.
@@ -79,6 +87,6 @@ public interface MockHttpResponse {
 	 *            use default {@link Charset}.
 	 * @return Text of the HTTP entity.
 	 */
-	String getHttpEntity(Charset charset);
+	String getEntity(Charset charset);
 
 }

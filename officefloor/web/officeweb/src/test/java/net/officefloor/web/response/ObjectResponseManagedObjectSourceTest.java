@@ -256,9 +256,9 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Asserts the {@link MockHttpResponse} to be correct.
 	 */
 	private static void assertResponse(MockHttpResponse response, String contentType, String entity) {
-		assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
-		assertEquals("Incorrect response content", contentType, response.getFirstHeader("content-type").getValue());
-		assertEquals("Incorrect response", entity, response.getHttpEntity(null));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response content", contentType, response.getHeader("content-type").getValue());
+		assertEquals("Incorrect response", entity, response.getEntity(null));
 	}
 
 	private static class MockHttpObjectResponderFactory implements HttpObjectResponderFactory {

@@ -68,7 +68,7 @@ public class HttpHeaderName {
 	 *            {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
-		StreamBuffer.write(this.encodedName, 0, this.encodedName.length, head, bufferPool);
+		StreamBuffer.write(this.encodedName, head, bufferPool);
 	}
 
 }

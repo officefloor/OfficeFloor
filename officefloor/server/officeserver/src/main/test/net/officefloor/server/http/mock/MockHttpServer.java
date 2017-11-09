@@ -42,6 +42,7 @@ import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpResponseCookies;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpServer;
@@ -51,9 +52,11 @@ import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.MaterialisingHttpRequest;
+import net.officefloor.server.http.impl.MaterialisingHttpRequestCookies;
 import net.officefloor.server.http.impl.MaterialisingHttpRequestHeaders;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
@@ -297,7 +300,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		@Override
 		public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader headHttpHeader,
-				long contentLength, HttpHeaderValue contentType, StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
+				WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
+				StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 			try {
 				// Obtain the listing of response HTTP headers
 				List<WritableHttpHeader> headers = new ArrayList<>();
@@ -310,6 +314,13 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				while (headHttpHeader != null) {
 					headers.add(headHttpHeader);
 					headHttpHeader = headHttpHeader.next;
+				}
+
+				// Obtain the listing of response HTTP cookies
+				List<WritableHttpCookie> cookies = new ArrayList<>();
+				while (headHttpCookie != null) {
+					cookies.add(headHttpCookie);
+					headHttpCookie = headHttpCookie.next;
 				}
 
 				// Copy out the response entity
@@ -333,7 +344,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				}
 
 				// Create the response
-				MockHttpResponseImpl response = new MockHttpResponseImpl(version, status, headers,
+				MockHttpResponseImpl response = new MockHttpResponseImpl(version, status, headers, cookies,
 						new ByteArrayInputStream(responseEntity));
 
 				// Response received
@@ -525,8 +536,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			final HttpMethod method = this.method;
 			final String requestUri = this.requestUri;
 			final MaterialisingHttpRequestHeaders headers = new MaterialisingHttpRequestHeaders(this);
+			final MaterialisingHttpRequestCookies cookies = new MaterialisingHttpRequestCookies(headers);
 			final ByteArrayByteSequence entity = new ByteArrayByteSequence(this.entity.toByteArray());
-			return new MaterialisingHttpRequest(() -> method, () -> requestUri, this.version, headers, entity);
+			return new MaterialisingHttpRequest(() -> method, () -> requestUri, this.version, headers, cookies, entity);
 		}
 
 		/*
@@ -764,6 +776,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		private final List<WritableHttpHeader> headers;
 
 		/**
+		 * {@link HttpResponseCookie} instances.
+		 */
+		private final List<WritableHttpCookie> cookies;
+
+		/**
 		 * HTTP entity {@link InputStream}.
 		 */
 		private final InputStream entityInputStream;
@@ -782,14 +799,17 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 *            {@link HttpStatus}.
 		 * @param headers
 		 *            {@link List} of {@link HttpHeader} instances.
+		 * @param cookies
+		 *            {@link List} of {@link HttpResponseCookie} instances.
 		 * @param entityInputStream
 		 *            HTTP entity {@link InputStream}.
 		 */
 		private MockHttpResponseImpl(HttpVersion version, HttpStatus status, List<WritableHttpHeader> headers,
-				InputStream entityInputStream) {
+				List<WritableHttpCookie> cookies, InputStream entityInputStream) {
 			this.version = version;
 			this.status = status;
 			this.headers = headers;
+			this.cookies = cookies;
 			this.entityInputStream = entityInputStream;
 			this.failure = null;
 		}
@@ -811,6 +831,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			this.version = null;
 			this.status = null;
 			this.headers = null;
+			this.cookies = null;
 			this.entityInputStream = null;
 		}
 
@@ -828,19 +849,19 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 
 		@Override
-		public HttpVersion getHttpVersion() {
+		public HttpVersion getVersion() {
 			this.ensureNoFailure();
 			return this.version;
 		}
 
 		@Override
-		public HttpStatus getHttpStatus() {
+		public HttpStatus getStatus() {
 			this.ensureNoFailure();
 			return this.status;
 		}
 
 		@Override
-		public WritableHttpHeader getFirstHeader(String name) {
+		public WritableHttpHeader getHeader(String name) {
 			for (WritableHttpHeader header : this.headers) {
 				if (name.equalsIgnoreCase(header.getName())) {
 					return header; // found
@@ -852,19 +873,25 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 
 		@Override
-		public List<WritableHttpHeader> getHttpHeaders() {
+		public List<WritableHttpHeader> getHeaders() {
 			this.ensureNoFailure();
 			return this.headers;
 		}
 
 		@Override
-		public InputStream getHttpEntity() {
+		public List<WritableHttpCookie> getCookies() {
+			this.ensureNoFailure();
+			return this.cookies;
+		}
+
+		@Override
+		public InputStream getEntity() {
 			this.ensureNoFailure();
 			return this.entityInputStream;
 		}
 
 		@Override
-		public String getHttpEntity(Charset charset) {
+		public String getEntity(Charset charset) {
 			this.ensureNoFailure();
 
 			// Ensure have charset

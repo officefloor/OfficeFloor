@@ -113,9 +113,9 @@ public class WritableHttpHeader implements HttpHeader {
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		this.name.write(head, bufferPool);
-		StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, head, bufferPool);
+		StreamBuffer.write(COLON_SPACE, head, bufferPool);
 		this.value.write(head, bufferPool);
-		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 	}
 
 	/*

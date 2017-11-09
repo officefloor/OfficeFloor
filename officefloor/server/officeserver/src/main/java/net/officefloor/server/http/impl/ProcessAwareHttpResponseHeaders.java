@@ -123,20 +123,16 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	 *             {@link ProcessSafeOperation}.
 	 */
 	private final <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
-		return ProcessAwareHttpResponseHeaders.this.context.run(operation);
+		return this.context.run(operation);
 	}
 
 	/**
 	 * Safely adds a {@link HttpHeader}.
 	 * 
-	 * @param name
-	 *            Name of {@link HttpHeader}.
 	 * @param headerName
-	 *            Optional {@link HttpHeaderName}.
-	 * @param value
-	 *            Value of {@link HttpHeader}.
+	 *            {@link HttpHeaderName}.
 	 * @param headerValue
-	 *            Optional {@link HttpHeaderValue}.
+	 *            {@link HttpHeaderValue}.
 	 * @return Added {@link HttpHeader}.
 	 */
 	private final HttpHeader safeAddHeader(HttpHeaderName headerName, HttpHeaderValue headerValue) {

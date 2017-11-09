@@ -66,6 +66,11 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	private final HttpRequestHeaders headers;
 
 	/**
+	 * {@link HttpRequestCookies}.
+	 */
+	private final HttpRequestCookies cookies;
+
+	/**
 	 * {@link ByteSequence} for the HTTP entity.
 	 */
 	private final ByteSequence entity;
@@ -86,15 +91,18 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	 *            {@link HttpVersion}.
 	 * @param headers
 	 *            {@link HttpRequestHeaders}.
+	 * @param cookies
+	 *            {@link HttpRequestCookies}.
 	 * @param entity
 	 *            {@link ByteSequence} for the HTTP entity.
 	 */
 	public MaterialisingHttpRequest(Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier,
-			HttpVersion version, HttpRequestHeaders headers, ByteSequence entity) {
+			HttpVersion version, HttpRequestHeaders headers, HttpRequestCookies cookies, ByteSequence entity) {
 		this.methodSupplier = methodSupplier;
 		this.requestUriSupplier = requestUriSupplier;
 		this.version = version;
 		this.headers = headers;
+		this.cookies = cookies;
 		this.entity = entity;
 		this.entityStream = new ByteSequenceServerInputStream(this.entity, 0);
 	}
@@ -131,8 +139,7 @@ public class MaterialisingHttpRequest implements HttpRequest {
 
 	@Override
 	public HttpRequestCookies getCookies() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement get HttpRequestCookies");
+		return this.cookies;
 	}
 
 	@Override

@@ -30,6 +30,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpServerLocation;
@@ -93,11 +94,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private ProcessAwareHttpResponse<B> response;
 
 	/**
-	 * Client {@link HttpRequestHeaders}.
-	 */
-	private final HttpRequestHeaders clientHeaders;
-
-	/**
 	 * {@link StreamBufferPool}.
 	 */
 	final StreamBufferPool<B> bufferPool;
@@ -155,8 +151,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.isSecure = isSecure;
 
 		// Create the HTTP request
-		this.clientHeaders = new MaterialisingHttpRequestHeaders(requestHeaders);
-		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, this.clientHeaders,
+		HttpRequestHeaders headers = new MaterialisingHttpRequestHeaders(requestHeaders);
+		HttpRequestCookies cookies = new MaterialisingHttpRequestCookies(headers);
+		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, headers, cookies,
 				requestEntity);
 		this.clientRequest = this.request;
 		this.requestEntity = requestEntity;
@@ -232,7 +229,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 
 	@Override
 	public Serializable exportState() throws IOException {
-		return new SerialisableHttpRequest(this.request, this.requestEntity);
+		return new SerialisableHttpRequest(this.request, this.request.getCookies(), this.requestEntity);
 	}
 
 	@Override
@@ -242,7 +239,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 				throw new IllegalArgumentException("Invalid momento to import state");
 			}
 			SerialisableHttpRequest state = (SerialisableHttpRequest) momento;
-			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getVersion());
+			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getVersion(),
+					this.clientRequest.getCookies());
 			this.request = serialisableRequest;
 			this.requestEntity = serialisableRequest.getEntityByteSequence();
 			return null;

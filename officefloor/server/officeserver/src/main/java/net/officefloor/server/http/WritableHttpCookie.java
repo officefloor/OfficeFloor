@@ -17,6 +17,9 @@
  */
 package net.officefloor.server.http;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +43,111 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	/**
 	 * : then space encoded bytes.
 	 */
-	private static byte[] COLON_SPACE = ": ".getBytes(ServerHttpConnection.HTTP_CHARSET);
+	private static final byte[] COLON_SPACE = ": ".getBytes(ServerHttpConnection.HTTP_CHARSET);
 
 	/**
 	 * = encoded bytes.
 	 */
-	private static byte[] EQUALS = "=".getBytes(ServerHttpConnection.HTTP_CHARSET);
+	private static final byte[] EQUALS = "=".getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * <code>Expires</code> prefix.
+	 */
+	private static final String EXPIRES_STRING = "; Expires=";
+
+	/**
+	 * <code>Expires</code> prefix bytes.
+	 */
+	private static final byte[] EXPIRES_BYTES = EXPIRES_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * Expires {@link DateTimeFormatter}. Default {@link ZoneId} to allow
+	 * {@link Instant#now()} (and derived {@link TemporalAccessor} instances) to
+	 * be formatted.
+	 */
+	private static final DateTimeFormatter EXPIRE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME
+			.withZone(ZoneId.of("GMT"));
+
+	/**
+	 * <code>Max-Age</code> prefix.
+	 */
+	private static final String MAX_AGE_STRING = "; Max-Age=";
+
+	/**
+	 * <code>Max-Age</code> prefix bytes.
+	 */
+	private static final byte[] MAX_AGE_BYTES = MAX_AGE_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * <code>Domain</code> prefix.
+	 */
+	private static final String DOMAIN_STRING = "; Domain=";
+
+	/**
+	 * <code>Domain</code> prefix bytes.
+	 */
+	private static final byte[] DOMAIN_BYTES = DOMAIN_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * <code>Path</code> prefix.
+	 */
+	private static final String PATH_STRING = "; Path=";
+
+	/**
+	 * <code>Path</code> prefix bytes.
+	 */
+	private static final byte[] PATH_BYTES = PATH_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * <code>Secure<code>.
+	 */
+	private static final String SECURE_STRING = "; Secure";
+
+	/**
+	 * <code>Secure</code> bytes.
+	 */
+	private static final byte[] SECURE_BYTES = SECURE_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * <code>HttpOnly</code>.
+	 */
+	private static final String HTTP_ONLY_STRING = "; HttpOnly";
+
+	/**
+	 * <code>HttpOnly</code> bytes.
+	 */
+	private static final byte[] HTTP_ONLY_BYTES = HTTP_ONLY_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * Extension attribute.
+	 */
+	private static final String EXTENSION_STRING = "; ";
+
+	/**
+	 * Extension attribute prefix.
+	 */
+	private static final byte[] EXTENSION_BYTES = EXTENSION_STRING.getBytes(ServerHttpConnection.HTTP_CHARSET);
 
 	/**
 	 * {@link HttpHeader} end of line encoded bytes.
 	 */
-	private static byte[] HEADER_EOLN = "\r\n".getBytes(ServerHttpConnection.HTTP_CHARSET);
+	private static final byte[] HEADER_EOLN = "\r\n".getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * No extensions.
+	 */
+	private static final String[] NO_EXTENSIONS = new String[0];
+
+	/**
+	 * Cached {@link StringBuilder} to reduce object creation, when creating
+	 * {@link HttpHeader} value.
+	 */
+	private static final ThreadLocal<StringBuilder> stringBuilder = new ThreadLocal<StringBuilder>() {
+		@Override
+		protected StringBuilder initialValue() {
+			return new StringBuilder(256);
+		}
+	};
 
 	/**
 	 * Next {@link WritableHttpCookie} to enable chaining together into linked
@@ -125,7 +222,7 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	/**
-	 * Writes this HTTP Cookie to the {@link StreamBuffer}.
+	 * Writes this HTTP Cookie to the {@link StreamBuffer} stream.
 	 * 
 	 * @param head
 	 *            Head {@link StreamBuffer} of linked list of
@@ -135,11 +232,81 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		SET_COOKIE.write(head, bufferPool);
-		StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, head, bufferPool);
+		StreamBuffer.write(COLON_SPACE, head, bufferPool);
 		StreamBuffer.write(this.name, head, bufferPool);
-		StreamBuffer.write(EQUALS, 0, EQUALS.length, head, bufferPool);
+		StreamBuffer.write(EQUALS, head, bufferPool);
 		StreamBuffer.write(this.value, head, bufferPool);
-		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+		if (this.expires != null) {
+			StreamBuffer.write(EXPIRES_BYTES, head, bufferPool);
+			EXPIRE_FORMATTER.formatTo(this.expires, StreamBuffer.getAppendable(head, bufferPool));
+		}
+		if (this.maxAge != BROWSER_SESSION_MAX_AGE) {
+			StreamBuffer.write(MAX_AGE_BYTES, head, bufferPool);
+			StreamBuffer.write(this.maxAge, head, bufferPool);
+		}
+		if (this.domain != null) {
+			StreamBuffer.write(DOMAIN_BYTES, head, bufferPool);
+			StreamBuffer.write(this.domain, head, bufferPool);
+		}
+		if (this.path != null) {
+			StreamBuffer.write(PATH_BYTES, head, bufferPool);
+			StreamBuffer.write(this.path, head, bufferPool);
+		}
+		if (this.isSecure) {
+			StreamBuffer.write(SECURE_BYTES, head, bufferPool);
+		}
+		if (this.isHttpOnly) {
+			StreamBuffer.write(HTTP_ONLY_BYTES, head, bufferPool);
+		}
+		if (this.extensions != null) {
+			for (String extension : this.extensions) {
+				StreamBuffer.write(EXTENSION_BYTES, head, bufferPool);
+				StreamBuffer.write(extension, head, bufferPool);
+			}
+		}
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
+	}
+
+	/**
+	 * Obtains the HTTP Cookie value for the HTTP response.
+	 * 
+	 * @return HTTP header value.
+	 */
+	public String toResponseHeaderValue() {
+		StringBuilder value = stringBuilder.get();
+		value.setLength(0); // clear
+		value.append(this.name);
+		value.append("=");
+		value.append(this.value);
+		if (this.expires != null) {
+			value.append(EXPIRES_STRING);
+			EXPIRE_FORMATTER.formatTo(this.expires, value);
+		}
+		if (this.maxAge != BROWSER_SESSION_MAX_AGE) {
+			value.append(MAX_AGE_STRING);
+			value.append(this.maxAge);
+		}
+		if (this.domain != null) {
+			value.append(DOMAIN_STRING);
+			value.append(this.domain);
+		}
+		if (this.path != null) {
+			value.append(PATH_STRING);
+			value.append(this.path);
+		}
+		if (this.isSecure) {
+			value.append(SECURE_STRING);
+		}
+		if (this.isHttpOnly) {
+			value.append(HTTP_ONLY_STRING);
+		}
+		if (this.extensions != null) {
+			for (String extension : this.extensions) {
+				value.append(EXTENSION_STRING);
+				value.append(extension);
+			}
+		}
+		return value.toString();
 	}
 
 	/*
@@ -240,7 +407,8 @@ public class WritableHttpCookie implements HttpResponseCookie {
 
 	@Override
 	public String[] getExtensions() {
-		return this.context.run(() -> this.extensions.toArray(new String[this.extensions.size()]));
+		return this.context.run(() -> this.extensions == null ? NO_EXTENSIONS
+				: this.extensions.toArray(new String[this.extensions.size()]));
 	}
 
 }

@@ -75,6 +75,10 @@ public class NettyHttpServerImplementationTest
 		private static final CharSequence CONTENT_TYPE = new AsciiString("Content-Type");
 		private static final CharSequence TYPE_PLAIN = new AsciiString("text/plain");
 
+		public RawNettyHttpServer() {
+			super(1024);
+		}
+
 		@Override
 		protected void service(ChannelHandlerContext context, HttpRequest request) throws Exception {
 			FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,

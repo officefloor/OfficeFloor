@@ -104,7 +104,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		MockHttpResponse mockResponse = response.build();
 		assertEquals("Should have session",
 				new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue(),
-				mockResponse.getFirstHeader("set-cookie").getValue());
+				mockResponse.getHeader("set-cookie").getValue());
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		MockHttpResponse mockResponse = response.build();
 		assertEquals("Should have session",
 				new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue(),
-				mockResponse.getFirstHeader("set-cookie").getValue());
+				mockResponse.getHeader("set-cookie").getValue());
 	}
 
 }

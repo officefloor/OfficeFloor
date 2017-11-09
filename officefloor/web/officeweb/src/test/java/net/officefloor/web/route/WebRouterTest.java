@@ -236,9 +236,9 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	public void testMethodNotAllowed() {
 		MockServerHttpConnection connection = this.route(HttpMethod.POST, "/", Ti("/"));
 		MockHttpResponse response = connection.send(null);
-		assertEquals("Should not allow POST", 405, response.getHttpStatus().getStatusCode());
+		assertEquals("Should not allow POST", 405, response.getStatus().getStatusCode());
 		assertEquals("Should indicate available methods", "GET, HEAD, OPTIONS",
-				response.getFirstHeader("Allow").getValue());
+				response.getHeader("Allow").getValue());
 	}
 
 	/**
@@ -247,8 +247,8 @@ public class WebRouterTest extends OfficeFrameTestCase {
 	public void testMethodNotAllowedWithPathParameter() {
 		MockServerHttpConnection connection = this.route(HttpMethod.GET, "/value", Ti(HttpMethod.POST, "/{param}"));
 		MockHttpResponse response = connection.send(null);
-		assertEquals("Should not allow GET", 405, response.getHttpStatus().getStatusCode());
-		assertEquals("Should indicate available methods", "OPTIONS, POST", response.getFirstHeader("Allow").getValue());
+		assertEquals("Should not allow GET", 405, response.getStatus().getStatusCode());
+		assertEquals("Should indicate available methods", "OPTIONS, POST", response.getHeader("Allow").getValue());
 	}
 
 	@Override

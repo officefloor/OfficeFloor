@@ -149,7 +149,7 @@ public class HttpCookieTest extends OfficeFrameTestCase {
 		final String expectedValue = "test=\"value\"; expires=" + expireText + "; path=/; domain=.officefloor.net";
 		assertEquals("Incorrect HTTP header", expectedValue, returnedHeader.getValue());
 		assertEquals("Incorrect response", expectedValue,
-				response.build().getFirstHeader(HttpCookie.SET_COOKIE.getName()).getValue());
+				response.build().getHeader(HttpCookie.SET_COOKIE.getName()).getValue());
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class HttpCookieTest extends OfficeFrameTestCase {
 		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
 		HttpCookie.addHttpCookie(existingCookie, response);
 		HttpCookie.addHttpCookie(cookie, response);
-		List<WritableHttpHeader> headers = response.build().getHttpHeaders();
+		List<WritableHttpHeader> headers = response.build().getHeaders();
 		assertEquals("Should be just the one header, as replaced", 1, headers.size());
 		final String expectedValue = "test=\"replace\"; expires=" + expireText
 				+ "; path=/replace; domain=.replace.officefloor.net";

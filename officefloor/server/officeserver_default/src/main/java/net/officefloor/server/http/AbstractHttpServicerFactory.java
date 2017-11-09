@@ -215,8 +215,8 @@ public abstract class AbstractHttpServicerFactory
 			ByteSequence requestEntity = this.getEntity();
 
 			// Create the HTTP response writer
-			HttpResponseWriter<ByteBuffer> writer = (responseVersion, status, httpHeader, contentLength, contentType,
-					content) -> {
+			HttpResponseWriter<ByteBuffer> writer = (responseVersion, status, httpHeader, httpCookie, contentLength,
+					contentType, content) -> {
 
 				// Write the response
 				responseWriter.write((responseHead, socketBufferPool) -> {
@@ -237,13 +237,18 @@ public abstract class AbstractHttpServicerFactory
 					if (contentLength > 0) {
 						CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool);
 						StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
-						HttpHeaderValue.writeInteger(contentLength, responseHead, socketBufferPool);
+						StreamBuffer.write(contentLength, responseHead, socketBufferPool);
 						StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 					}
 					WritableHttpHeader header = httpHeader;
 					while (header != null) {
 						header.write(responseHead, socketBufferPool);
 						header = header.next;
+					}
+					WritableHttpCookie cookie = httpCookie;
+					while (cookie != null) {
+						cookie.write(responseHead, socketBufferPool);
+						cookie = cookie.next;
 					}
 					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 

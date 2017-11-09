@@ -96,11 +96,11 @@ public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			// Call the server
 			MockHttpResponse response = this.server.send(request);
-			int status = response.getHttpStatus().getStatusCode();
-			String callIndex = response.getHttpEntity(null);
+			int status = response.getStatus().getStatusCode();
+			String callIndex = response.getEntity(null);
 
 			// Obtain the cookie
-			cookie = response.getFirstHeader("set-cookie").getValue();
+			cookie = response.getHeader("set-cookie").getValue();
 
 			// Ensure results match and call index remembered by Session
 			assertEquals("Call should be successful", 200, status);

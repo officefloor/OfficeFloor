@@ -41,9 +41,9 @@ import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.ReferenceCountUtil;
@@ -62,9 +62,24 @@ public abstract class AbstractNettyHttpServer {
 	}
 
 	/**
+	 * Maximum length of the request entity.
+	 */
+	private final int maxRequestEntityLength;
+
+	/**
 	 * {@link EventLoopGroup}.
 	 */
 	private EventLoopGroup loopGroup = null;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param maxRequestEntityLength
+	 *            Maximum length of the request entity.
+	 */
+	public AbstractNettyHttpServer(int maxRequestEntityLength) {
+		this.maxRequestEntityLength = maxRequestEntityLength;
+	}
 
 	/**
 	 * Starts the HTTP Server.
@@ -178,6 +193,18 @@ public abstract class AbstractNettyHttpServer {
 	}
 
 	/**
+	 * Initialises the {@link ChannelPipeline}.
+	 * 
+	 * @param pipeline
+	 *            {@link ChannelPipeline}.
+	 */
+	private void initPipeline(ChannelPipeline pipeline) {
+		pipeline.addLast("server", new HttpServerCodec());
+		pipeline.addLast("aggregator", new HttpObjectAggregator(this.maxRequestEntityLength));
+		pipeline.addLast("handler", new ServiceServerHandler());
+	}
+
+	/**
 	 * Netty Server {@link ChannelInitializer}.
 	 */
 	private class ServerChannelInitialiser extends ChannelInitializer<SocketChannel> {
@@ -189,9 +216,7 @@ public abstract class AbstractNettyHttpServer {
 		@Override
 		protected void initChannel(SocketChannel channel) throws Exception {
 			ChannelPipeline pipeline = channel.pipeline();
-			pipeline.addLast("encoder", new HttpResponseEncoder());
-			pipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false));
-			pipeline.addLast("handler", new ServiceServerHandler());
+			AbstractNettyHttpServer.this.initPipeline(pipeline);
 		}
 	}
 
@@ -229,9 +254,7 @@ public abstract class AbstractNettyHttpServer {
 			// Create the secure pipeline
 			ChannelPipeline pipeline = channel.pipeline();
 			pipeline.addLast("ssl", new SslHandler(engine, true));
-			pipeline.addLast("encoder", new HttpResponseEncoder());
-			pipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false));
-			pipeline.addLast("handler", new ServiceServerHandler());
+			AbstractNettyHttpServer.this.initPipeline(pipeline);
 		}
 	}
 

@@ -32,10 +32,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -52,6 +57,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
 
@@ -303,6 +309,67 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
 			assertNotSame("Should be different handling thread", thread, Thread.currentThread());
 			connection.getResponse().getEntityWriter().write("hello world");
+		}
+	}
+
+	public static class FunctionalityServicer {
+
+		public void service(ServerHttpConnection connection) throws IOException {
+
+			// Assert has all content of request
+			HttpRequest request = connection.getRequest();
+			assertEquals("Incorrect method", HttpMethod.POST, request.getMethod());
+			assertEquals("Incorrect request URI", "/functionality", request.getUri());
+			assertEquals("Incorrect version", HttpVersion.HTTP_1_1, request.getVersion());
+			StringBuilder allHeaders = new StringBuilder();
+			allHeaders.append("\n");
+			for (HttpHeader header : request.getHeaders()) {
+				allHeaders.append("\n\t" + header.getName() + "=" + header.getValue());
+			}
+			allHeaders.append("\n");
+			assertEquals("Incorrect number of headers (with extra by HTTP client):" + allHeaders.toString(), 8,
+					request.getHeaders().length());
+			assertEquals("Incorrect header", "header", request.getHeaders().getHeader("request").getValue());
+			assertEquals("Incorrect number of cookies", 1, request.getCookies().length());
+			assertEquals("Incorrect cookie", "cookie", request.getCookies().getCookie("request").getValue());
+			assertEquals("Incorrect entity", "request", MockHttpServer.getContent(request, null));
+
+			// Send a full response
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
+			response.setStatus(HttpStatus.OK);
+			response.getHeaders().addHeader("response", "header");
+			response.getCookies().addCookie("response", "cookie");
+			response.getEntityWriter().write("response");
+		}
+	}
+
+	/**
+	 * Ensure able to send all details and receive all details.
+	 */
+	public void testFunctionality() throws Exception {
+		this.startHttpServer(FunctionalityServicer.class);
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
+			HttpPost post = new HttpPost(this.serverLocation.createClientUrl(false, "/functionality"));
+			post.addHeader("request", "header");
+			post.addHeader("cookie", "request=cookie");
+			post.setEntity(new StringEntity("request"));
+			HttpResponse response = client.execute(post);
+
+			// Validate the response
+			String entity = EntityUtils.toString(response.getEntity());
+			assertEquals("Incorrect status: " + entity, 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect version: " + entity, new ProtocolVersion("HTTP", 1, 1),
+					response.getStatusLine().getProtocolVersion());
+			StringBuilder allHeaders = new StringBuilder();
+			for (Header header : response.getAllHeaders()) {
+				allHeaders.append("\n\t" + header.getName() + "=" + header.getValue());
+			}
+			assertEquals("Incorrect number of headers:" + allHeaders.toString(), 4, response.getAllHeaders().length);
+			assertEquals("Incorrect header:" + allHeaders.toString(), "header",
+					response.getFirstHeader("response").getValue());
+			assertEquals("Incorrect cookie:" + allHeaders.toString(), "response=cookie",
+					response.getFirstHeader("set-cookie").getValue());
+			assertEquals("Incorrect entity", "response", entity);
 		}
 	}
 

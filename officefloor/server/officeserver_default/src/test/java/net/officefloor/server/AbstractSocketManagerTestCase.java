@@ -564,7 +564,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			this.delay(() -> responseWriter.write((buffer, pool) -> {
-				StreamBuffer.write(new byte[] { 1, 2, 3 }, 0, 3, buffer, pool);
+				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool);
 			}, null));
 		});
 
@@ -606,7 +606,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Create the header response
 			ResponseHeaderWriter header = (buffer, pool) -> {
-				StreamBuffer.write(new byte[] { index, (byte) '*' }, 0, 2, buffer, pool);
+				StreamBuffer.write(new byte[] { index, (byte) '*' }, buffer, pool);
 			};
 
 			// Delay only the even responses

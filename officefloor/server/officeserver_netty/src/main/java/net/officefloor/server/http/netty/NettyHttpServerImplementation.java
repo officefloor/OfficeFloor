@@ -19,6 +19,7 @@ package net.officefloor.server.http.netty;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 import io.netty.buffer.ByteBuf;
@@ -56,10 +57,19 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		implements HttpServerImplementation, OfficeFloorListener {
 
 	/**
+	 * Obtains the maximum request entity length.
+	 * 
+	 * @return Maximum request entity length.
+	 */
+	private static int getMaxRequestEntityLength() {
+		return Integer.parseInt(System.getProperty("netty.max.entity.size", String.valueOf(1 * 1024 * 1024)));
+	}
+
+	/**
 	 * {@link HttpServerImplementationContext}.
 	 */
 	private HttpServerImplementationContext context;
-	
+
 	/**
 	 * Indicates whether to include the stack trace.
 	 */
@@ -71,6 +81,13 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	@SuppressWarnings("rawtypes")
 	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> serviceInput;
 
+	/**
+	 * Default constructor required for {@link ServiceLoader}.
+	 */
+	public NettyHttpServerImplementation() {
+		super(getMaxRequestEntityLength());
+	}
+
 	/*
 	 * ================== HttpServerImplementation ==================
 	 */
@@ -78,7 +95,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
 		this.context = context;
-		
+
 		// Determine if include stack trace
 		this.isIncludeStackTrace = context.isIncludeEscalationStackTrace();
 
@@ -140,7 +157,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 			} else if (methodName.contentEquals("HEAD")) {
 				return HttpMethod.HEAD;
 			} else {
-				return new HttpMethod(methodName.toString());
+				return HttpMethod.getHttpMethod(methodName.toString());
 			}
 		};
 
@@ -199,7 +216,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		};
 
 		// Obtain the request entity content
-		ByteSequence requestEntity = null;
+		ByteSequence requestEntity = ByteSequence.EMPTY;
 		if (request instanceof FullHttpRequest) {
 			FullHttpRequest fullRequest = (FullHttpRequest) request;
 			ByteBuf entityByteBuf = fullRequest.content();
@@ -222,8 +239,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 				HttpResponseStatus.OK, false);
 
 		// Handle response
-		HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, httpHeader, contentLength, contentType,
-				content) -> {
+		HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, httpHeader, httpCookie, contentLength,
+				contentType, content) -> {
 
 			// Specify the status
 			HttpResponseStatus nettyStatus = HttpResponseStatus.valueOf(status.getStatusCode());
@@ -244,6 +261,12 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 				httpHeader = httpHeader.next;
 			}
 
+			// Load the cookies
+			if (httpCookie != null) {
+				headers.add("set-cookie", httpCookie.toResponseHeaderValue());
+				httpCookie = httpCookie.next;
+			}
+
 			// Send the response
 			context.executor().execute(() -> {
 				context.write(response);
@@ -256,8 +279,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, this.isIncludeStackTrace,
-				responseWriter, bufferPool);
+				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
+				this.isIncludeStackTrace, responseWriter, bufferPool);
 
 		// Service the request
 		NettyHttpServerImplementation.this.serviceInput.service(connection, connection.getServiceFlowCallback());

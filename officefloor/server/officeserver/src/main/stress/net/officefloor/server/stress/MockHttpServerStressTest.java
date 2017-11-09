@@ -264,9 +264,9 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 			});
 			MockHttpResponse response = listener.waitAndGet();
 			assertNotNull("Should have response on single thread servicing", response);
-			assertSame("Incorrect status", HttpStatus.OK, response.getHttpStatus());
+			assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
 			assertEquals("Incorrect response entity", "hello world",
-					response.getHttpEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+					response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		}
 		long runTime = (System.currentTimeMillis() - startTime);
 		System.out.println(prefix + " serviced " + requestCount + " requests in " + runTime
