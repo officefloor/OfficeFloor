@@ -18,6 +18,8 @@
 package net.officefloor.web.session;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
 import org.easymock.AbstractMatcher;
@@ -27,15 +29,13 @@ import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
 import net.officefloor.web.session.spi.HttpSessionStore;
-import net.officefloor.web.state.HttpCookie;
 
 /**
  * Tests that {@link HttpSessionIdGenerator} and {@link HttpSessionStore} can be
@@ -44,6 +44,21 @@ import net.officefloor.web.state.HttpCookie;
  * @author Daniel Sagenschneider
  */
 public class HttpSessionDependencyTest extends OfficeFrameTestCase {
+
+	/**
+	 * Capture current time (for deterministic test).
+	 */
+	private static final Instant MOCK_CURRENT_TIME = Instant.now();
+
+	/**
+	 * Expire time.
+	 */
+	private static final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(2000, ChronoUnit.MILLIS);
+
+	/**
+	 * {@link ServerHttpConnection}.
+	 */
+	private final MockServerHttpConnection connection = MockHttpServer.mockConnection();
 
 	/**
 	 * Mock {@link AsynchronousContext}.
@@ -55,11 +70,6 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
-
-	/**
-	 * Mock {@link ServerHttpConnection}.
-	 */
-	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 
 	/**
 	 * Mock {@link HttpSessionStore}.
@@ -75,19 +85,15 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(0), this.connection);
 
 		// Record attempting to creating a new session.
-		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		this.recordReturn(this.connection, this.connection.getRequest(), request.build());
 		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
 
 		// Record obtaining the response
-		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
-		this.recordReturn(this.connection, this.connection.getResponse(), response);
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
-				operation.sessionCreated(1000, 2000, new HashMap<String, Serializable>(0));
+				operation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<String, Serializable>(0));
 				return true;
 			}
 		});
@@ -101,10 +107,8 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify created session
-		MockHttpResponse mockResponse = response.build();
-		assertEquals("Should have session",
-				new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue(),
-				mockResponse.getHeader("set-cookie").getValue());
+		MockHttpResponse response = connection.send(null);
+		response.assertCookie(MockHttpServer.mockResponseCookie("JSESSIONID", "SESSION_ID").setExpires(EXPIRE_TIME));
 	}
 
 	/**
@@ -116,8 +120,6 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(0), this.connection);
 
 		// Record attempting to creating a new session.
-		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		this.recordReturn(this.connection, this.connection.getRequest(), request.build());
 		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
 
 		// Record obtaining as dependencies
@@ -125,14 +127,12 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(2), this.store);
 
 		// Record obtaining the response
-		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
-		this.recordReturn(this.connection, this.connection.getResponse(), response);
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
-				operation.sessionCreated(1000, 2000, new HashMap<String, Serializable>(0));
+				operation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<String, Serializable>(0));
 				return true;
 			}
 		});
@@ -146,10 +146,8 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify created session
-		MockHttpResponse mockResponse = response.build();
-		assertEquals("Should have session",
-				new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue(),
-				mockResponse.getHeader("set-cookie").getValue());
+		MockHttpResponse response = this.connection.send(null);
+		response.assertCookie(MockHttpServer.mockResponseCookie("JSESSIONID", "SESSION_ID").setExpires(EXPIRE_TIME));
 	}
 
 }

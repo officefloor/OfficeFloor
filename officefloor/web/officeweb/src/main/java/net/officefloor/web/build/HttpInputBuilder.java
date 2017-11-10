@@ -18,7 +18,7 @@
 package net.officefloor.web.build;
 
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.web.state.HttpCookie;
+import net.officefloor.server.http.HttpRequestCookie;
 
 /**
  * Input details for the application.
@@ -44,7 +44,7 @@ public interface HttpInputBuilder {
 	HttpParameterBuilder addHeaderParameter(String name);
 
 	/**
-	 * Adds a parameter from a {@link HttpCookie}.
+	 * Adds a parameter from a {@link HttpRequestCookie}.
 	 * 
 	 * @param name
 	 *            Name of parameter.

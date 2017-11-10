@@ -18,6 +18,7 @@
 package net.officefloor.web.session.spi;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Map;
 
 import net.officefloor.web.session.HttpSession;
@@ -49,8 +50,7 @@ public interface RetrieveHttpSessionOperation {
 	 * @param attributes
 	 *            Attributes for the retrieved {@link HttpSession}.
 	 */
-	void sessionRetrieved(long creationTime, long expireTime,
-			Map<String, Serializable> attributes);
+	void sessionRetrieved(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes);
 
 	/**
 	 * <p>

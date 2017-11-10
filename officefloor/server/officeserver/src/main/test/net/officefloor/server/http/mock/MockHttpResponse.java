@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.WritableHttpCookie;
@@ -66,11 +68,41 @@ public interface MockHttpResponse {
 	List<WritableHttpHeader> getHeaders();
 
 	/**
+	 * Asserts contains the {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            Expected name.
+	 * @param value
+	 *            Expected value.
+	 */
+	void assertHeader(String name, String value);
+
+	/**
+	 * Obtains the {@link WritableHttpCookie} by the name.
+	 * 
+	 * @param name
+	 *            Name of the {@link WritableHttpCookie}.
+	 * @return {@link WritableHttpCookie} by the name, or <code>null</code> if
+	 *         no {@link WritableHttpCookie} by the name.
+	 */
+	WritableHttpCookie getCookie(String name);
+
+	/**
 	 * Obtains the response {@link WritableHttpCookie} instances.
 	 * 
 	 * @return {@link WritableHttpCookie} instances.
 	 */
 	List<WritableHttpCookie> getCookies();
+
+	/**
+	 * Asserts contains the {@link WritableHttpCookie}.
+	 * 
+	 * @param cookie
+	 *            Expected {@link WritableHttpCookie}.
+	 * 
+	 * @see MockHttpServer#mockResponseCookie(String, String)
+	 */
+	void assertCookie(HttpResponseCookie cookie);
 
 	/**
 	 * Obtains {@link InputStream} to the response HTTP entity.

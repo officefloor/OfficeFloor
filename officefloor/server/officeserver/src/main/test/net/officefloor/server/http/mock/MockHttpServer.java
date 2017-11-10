@@ -33,6 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.junit.Assert;
+
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -126,6 +128,15 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 */
 	public static MockHttpResponseBuilder mockResponse() {
 		return new MockHttpResponseBuilderImpl();
+	}
+
+	/**
+	 * Creates a mock {@link HttpResponseCookie}.
+	 * 
+	 * @return {@link HttpResponseCookie}.
+	 */
+	public static WritableHttpCookie mockResponseCookie(String name, String value) {
+		return new WritableHttpCookie(name, value, new MockProcessAwareContext());
 	}
 
 	/**
@@ -873,15 +884,44 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 
 		@Override
+		public void assertHeader(String name, String value) {
+			WritableHttpHeader header = this.getHeader(name);
+			Assert.assertNotNull("No header by name '" + name + "'", header);
+			Assert.assertEquals("Incorrect value for header " + name, value, header.getValue());
+		}
+
+		@Override
 		public List<WritableHttpHeader> getHeaders() {
 			this.ensureNoFailure();
 			return this.headers;
 		}
 
 		@Override
+		public WritableHttpCookie getCookie(String name) {
+			for (WritableHttpCookie cookie : this.cookies) {
+				if (name.equals(cookie.getName())) {
+					return cookie; // found
+				}
+			}
+
+			// As here, not found
+			return null;
+		}
+
+		@Override
 		public List<WritableHttpCookie> getCookies() {
 			this.ensureNoFailure();
 			return this.cookies;
+		}
+
+		@Override
+		public void assertCookie(HttpResponseCookie cookie) {
+			WritableHttpCookie writable = (WritableHttpCookie) cookie;
+			String name = cookie.getName();
+			WritableHttpCookie actual = this.getCookie(name);
+			Assert.assertNotNull("No cookie by name '" + name + "'", actual);
+			Assert.assertEquals("Incorrect cookie " + name, writable.toResponseHeaderValue(),
+					actual.toResponseHeaderValue());
 		}
 
 		@Override

@@ -18,6 +18,7 @@
 package net.officefloor.server.http;
 
 import java.time.temporal.TemporalAccessor;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -54,8 +55,9 @@ public interface HttpResponseCookie {
 	 * 
 	 * @param value
 	 *            Value.
+	 * @return this.
 	 */
-	void setValue(String value);
+	HttpResponseCookie setValue(String value);
 
 	/**
 	 * Obtains the expire time.
@@ -69,8 +71,9 @@ public interface HttpResponseCookie {
 	 * 
 	 * @param expires
 	 *            Expires time.
+	 * @return this.
 	 */
-	void setExpires(TemporalAccessor expires);
+	HttpResponseCookie setExpires(TemporalAccessor expires);
 
 	/**
 	 * Obtains the maximum age in seconds.
@@ -89,8 +92,9 @@ public interface HttpResponseCookie {
 	 * 
 	 * @param maxAge
 	 *            Maximum age in seconds.
+	 * @return this.
 	 */
-	void setMaxAge(long maxAge);
+	HttpResponseCookie setMaxAge(long maxAge);
 
 	/**
 	 * Obtains the domain.
@@ -104,8 +108,9 @@ public interface HttpResponseCookie {
 	 * 
 	 * @param domain
 	 *            Domain.
+	 * @return this.
 	 */
-	void setDomain(String domain);
+	HttpResponseCookie setDomain(String domain);
 
 	/**
 	 * Obtains the path.
@@ -119,8 +124,9 @@ public interface HttpResponseCookie {
 	 * 
 	 * @param path
 	 *            Path.
+	 * @return this.
 	 */
-	void setPath(String path);
+	HttpResponseCookie setPath(String path);
 
 	/**
 	 * <p>
@@ -144,8 +150,9 @@ public interface HttpResponseCookie {
 	 *            <code>true</code> to request the client to only send this
 	 *            Cookie over a secure connection (assuming the client supports
 	 *            this).
+	 * @return this.
 	 */
-	void setSecure(boolean isSecure);
+	HttpResponseCookie setSecure(boolean isSecure);
 
 	/**
 	 * Indicates if the Cookie is only sent over HTTP connection.
@@ -163,8 +170,9 @@ public interface HttpResponseCookie {
 	 *            <code>true</code> to request the client to only send this
 	 *            Cookie in HTTP requests, and not, for example, make available
 	 *            to JavaScript in the browser.
+	 * @return this.
 	 */
-	void setHttpOnly(boolean isHttpOnly);
+	HttpResponseCookie setHttpOnly(boolean isHttpOnly);
 
 	/**
 	 * <p>
@@ -175,8 +183,9 @@ public interface HttpResponseCookie {
 	 * 
 	 * @param extension
 	 *            Extension.
+	 * @return this.
 	 */
-	void addExtension(String extension);
+	HttpResponseCookie addExtension(String extension);
 
 	/**
 	 * Obtains the extensions.
@@ -184,5 +193,14 @@ public interface HttpResponseCookie {
 	 * @return Extensions.
 	 */
 	String[] getExtensions();
+
+	/**
+	 * Enables configuring multiple attributes with reduced locking.
+	 * 
+	 * @param configurer
+	 *            {@link Consumer} to configured the {@link HttpResponseCookie}.
+	 * @return this.
+	 */
+	HttpResponseCookie configure(Consumer<HttpResponseCookie> configurer);
 
 }

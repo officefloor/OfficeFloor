@@ -18,6 +18,7 @@
 package net.officefloor.web.session.spi;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Map;
 
 import net.officefloor.web.session.HttpSession;
@@ -42,14 +43,14 @@ public interface StoreHttpSessionOperation {
 	 *
 	 * @return Creation time for the {@link HttpSession}.
 	 */
-	long getCreationTime();
+	Instant getCreationTime();
 
 	/**
 	 * Obtains the time to expire the {@link HttpSession} should it be idle.
 	 *
 	 * @return Time to expire the {@link HttpSession} should it be idle.
 	 */
-	long getExpireTime();
+	Instant getExpireTime();
 
 	/**
 	 * Obtains the attributes of the {@link HttpSession}.

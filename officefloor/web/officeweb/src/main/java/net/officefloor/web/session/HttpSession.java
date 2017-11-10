@@ -18,8 +18,10 @@
 package net.officefloor.web.session;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Iterator;
 
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.web.session.spi.HttpSessionStore;
 
 /**
@@ -42,7 +44,8 @@ public interface HttpSession {
 	 * <p>
 	 * Obtains the token name.
 	 * <p>
-	 * This is the name of the cookie or parameter that contains the session Id.
+	 * This is the name of the {@link HttpRequestCookie} that contains the
+	 * session Id.
 	 * 
 	 * @return Token name.
 	 */
@@ -64,7 +67,7 @@ public interface HttpSession {
 	 * @throws InvalidatedSessionHttpException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	long getCreationTime() throws InvalidatedSessionHttpException;
+	Instant getCreationTime() throws InvalidatedSessionHttpException;
 
 	/**
 	 * Obtains the time this {@link HttpSession} will be expired should it be
@@ -74,7 +77,7 @@ public interface HttpSession {
 	 * @throws InvalidatedSessionHttpException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	long getExpireTime() throws InvalidatedSessionHttpException;
+	Instant getExpireTime() throws InvalidatedSessionHttpException;
 
 	/**
 	 * <p>
@@ -91,8 +94,7 @@ public interface HttpSession {
 	 * @throws InvalidatedSessionHttpException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	void setExpireTime(long expireTime) throws StoringSessionHttpException,
-			InvalidatedSessionHttpException;
+	void setExpireTime(Instant expireTime) throws StoringSessionHttpException, InvalidatedSessionHttpException;
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name for this
@@ -105,8 +107,7 @@ public interface HttpSession {
 	 * @throws InvalidatedSessionHttpException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	Serializable getAttribute(String name)
-			throws InvalidatedSessionHttpException;
+	Serializable getAttribute(String name) throws InvalidatedSessionHttpException;
 
 	/**
 	 * Obtains an {@link Iterator} to the names of the bound {@link Object}
@@ -150,8 +151,7 @@ public interface HttpSession {
 	 * @throws InvalidatedSessionHttpException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	void removeAttribute(String name) throws StoringSessionHttpException,
-			InvalidatedSessionHttpException;
+	void removeAttribute(String name) throws StoringSessionHttpException, InvalidatedSessionHttpException;
 
 	/**
 	 * Obtains the {@link HttpSessionAdministration} to administer this

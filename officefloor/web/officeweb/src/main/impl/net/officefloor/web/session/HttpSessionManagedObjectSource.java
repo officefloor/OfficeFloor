@@ -18,6 +18,8 @@
 package net.officefloor.web.session;
 
 import java.net.HttpCookie;
+import java.time.Clock;
+import java.time.ZoneId;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -130,7 +132,7 @@ public class HttpSessionManagedObjectSource extends AbstractManagedObjectSource<
 		this.serverHttpConnectionIndex = context.addDependency(ServerHttpConnection.class).setLabel("HTTP_CONNECTION")
 				.getIndex();
 
-		// Deterimine Session Id generator to use
+		// Determine Session Id generator to use
 		String useDependencySessionIdGenerator = mosContext.getProperty(PROPERTY_USE_DEPENDENCY_SESSION_ID_GENERATOR,
 				String.valueOf(false));
 		if (Boolean.parseBoolean(useDependencySessionIdGenerator)) {
@@ -153,7 +155,7 @@ public class HttpSessionManagedObjectSource extends AbstractManagedObjectSource<
 			// Use default Session Store
 			int maxIdleTime = Integer
 					.parseInt(mosContext.getProperty(PROPERTY_MAX_IDLE_TIME, String.valueOf(DEFAULT_MAX_IDLE_TIME)));
-			this.store = new MemoryHttpSessionStore(maxIdleTime);
+			this.store = new MemoryHttpSessionStore(Clock.system(ZoneId.of("GMT")), maxIdleTime);
 		}
 	}
 

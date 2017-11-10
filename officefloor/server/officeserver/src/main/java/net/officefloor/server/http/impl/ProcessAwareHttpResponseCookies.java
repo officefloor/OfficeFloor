@@ -132,11 +132,18 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	 *            Name of {@link HttpResponseCookie}.
 	 * @param value
 	 *            Value of {@link HttpResponseCookie}.
+	 * @param initialiser
+	 *            Optional {@link Consumer} to initialise the
+	 *            {@link HttpResponseCookie}. May be <code>null</code>.
 	 * @return Added {@link HttpResponseCookie}.
 	 */
-	private final HttpResponseCookie safeAddCookie(String name, String value) {
+	private final HttpResponseCookie safeAddCookie(String name, String value,
+			Consumer<HttpResponseCookie> initialiser) {
 		return this.safe(() -> {
 			WritableHttpCookie cookie = new WritableHttpCookie(name, value, this.context);
+			if (initialiser != null) {
+				initialiser.accept(cookie);
+			}
 			if (this.head == null) {
 				// First cookie
 				this.head = cookie;
@@ -270,12 +277,22 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 
 	@Override
 	public HttpResponseCookie addCookie(String name, String value) {
-		return this.safeAddCookie(name, value);
+		return this.safeAddCookie(name, value, null);
+	}
+
+	@Override
+	public HttpResponseCookie addCookie(String name, String value, Consumer<HttpResponseCookie> initialiser) {
+		return this.safeAddCookie(name, value, initialiser);
 	}
 
 	@Override
 	public HttpResponseCookie addCookie(HttpRequestCookie cookie) {
-		return this.safeAddCookie(cookie.getName(), cookie.getValue());
+		return this.safeAddCookie(cookie.getName(), cookie.getValue(), null);
+	}
+
+	@Override
+	public HttpResponseCookie addCookie(HttpRequestCookie cookie, Consumer<HttpResponseCookie> initialiser) {
+		return this.safeAddCookie(cookie.getName(), cookie.getValue(), initialiser);
 	}
 
 	@Override

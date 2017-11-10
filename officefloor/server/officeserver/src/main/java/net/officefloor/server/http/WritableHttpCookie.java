@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.server.stream.StreamBuffer;
@@ -324,8 +325,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setValue(String value) {
-		this.context.run(() -> this.value = value);
+	public HttpResponseCookie setValue(String value) {
+		return this.context.run(() -> {
+			this.value = value;
+			return this;
+		});
 	}
 
 	@Override
@@ -334,8 +338,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setExpires(TemporalAccessor expires) {
-		this.context.run(() -> this.expires = expires);
+	public HttpResponseCookie setExpires(TemporalAccessor expires) {
+		return this.context.run(() -> {
+			this.expires = expires;
+			return this;
+		});
 	}
 
 	@Override
@@ -344,8 +351,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setMaxAge(long maxAge) {
-		this.context.run(() -> this.maxAge = maxAge);
+	public HttpResponseCookie setMaxAge(long maxAge) {
+		return this.context.run(() -> {
+			this.maxAge = maxAge;
+			return this;
+		});
 	}
 
 	@Override
@@ -354,8 +364,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setDomain(String domain) {
-		this.context.run(() -> this.domain = domain);
+	public HttpResponseCookie setDomain(String domain) {
+		return this.context.run(() -> {
+			this.domain = domain;
+			return this;
+		});
 	}
 
 	@Override
@@ -364,8 +377,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setPath(String path) {
-		this.context.run(() -> this.path = path);
+	public HttpResponseCookie setPath(String path) {
+		return this.context.run(() -> {
+			this.path = path;
+			return this;
+		});
 	}
 
 	@Override
@@ -374,8 +390,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setSecure(boolean isSecure) {
-		this.context.run(() -> this.isSecure = isSecure);
+	public HttpResponseCookie setSecure(boolean isSecure) {
+		return this.context.run(() -> {
+			this.isSecure = isSecure;
+			return this;
+		});
 	}
 
 	@Override
@@ -384,13 +403,16 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
-	public void setHttpOnly(boolean isHttpOnly) {
-		this.context.run(() -> this.isHttpOnly = isHttpOnly);
+	public HttpResponseCookie setHttpOnly(boolean isHttpOnly) {
+		return this.context.run(() -> {
+			this.isHttpOnly = isHttpOnly;
+			return this;
+		});
 	}
 
 	@Override
-	public void addExtension(String extension) {
-		this.context.run(() -> {
+	public HttpResponseCookie addExtension(String extension) {
+		return this.context.run(() -> {
 
 			// Lazy create the extension list
 			if (this.extensions == null) {
@@ -400,8 +422,8 @@ public class WritableHttpCookie implements HttpResponseCookie {
 			// Add the extension
 			this.extensions.add(extension);
 
-			// Void return
-			return null;
+			// Return
+			return this;
 		});
 	}
 
@@ -409,6 +431,14 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	public String[] getExtensions() {
 		return this.context.run(() -> this.extensions == null ? NO_EXTENSIONS
 				: this.extensions.toArray(new String[this.extensions.size()]));
+	}
+
+	@Override
+	public HttpResponseCookie configure(Consumer<HttpResponseCookie> configurer) {
+		return this.context.run(() -> {
+			configurer.accept(this);
+			return this;
+		});
 	}
 
 }

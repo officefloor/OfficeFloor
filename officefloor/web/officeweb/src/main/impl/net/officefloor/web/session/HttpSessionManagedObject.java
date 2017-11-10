@@ -18,6 +18,8 @@
 package net.officefloor.web.session;
 
 import java.io.Serializable;
+import java.net.HttpCookie;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -30,12 +32,9 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionAdministration;
-import net.officefloor.web.session.InvalidatedSessionHttpException;
-import net.officefloor.web.session.StoringSessionHttpException;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.FreshHttpSession;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
@@ -43,7 +42,6 @@ import net.officefloor.web.session.spi.HttpSessionStore;
 import net.officefloor.web.session.spi.InvalidateHttpSessionOperation;
 import net.officefloor.web.session.spi.RetrieveHttpSessionOperation;
 import net.officefloor.web.session.spi.StoreHttpSessionOperation;
-import net.officefloor.web.state.HttpCookie;
 
 /**
  * {@link ManagedObject} for a {@link HttpSession}.
@@ -52,6 +50,11 @@ import net.officefloor.web.state.HttpCookie;
  */
 public class HttpSessionManagedObject
 		implements CoordinatingManagedObject<Indexed>, AsynchronousManagedObject, ProcessAwareManagedObject {
+
+	/**
+	 * Use epoch to expire cookies.
+	 */
+	private static final Instant EXPIRE_COOKIE_INSTANT = Instant.EPOCH;
 
 	/**
 	 * {@link HttpSession} to be provided as the object of this
@@ -238,7 +241,7 @@ public class HttpSessionManagedObject
 	 * @param attributes
 	 *            {@link HttpSession} Attributes.
 	 */
-	private void loadSession(long creationTime, long expireTime, Map<String, Serializable> attributes) {
+	private void loadSession(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes) {
 		this.isSessionLoaded = true;
 
 		// Load state of session
@@ -265,7 +268,7 @@ public class HttpSessionManagedObject
 	 * @throws Throwable
 	 *             If immediate failure in storing Session.
 	 */
-	private void storeSession(String sessionId, long creationTime, long expireTime,
+	private void storeSession(String sessionId, Instant creationTime, Instant expireTime,
 			Map<String, Serializable> attributes) throws Throwable {
 
 		// Trigger storing the session
@@ -307,12 +310,15 @@ public class HttpSessionManagedObject
 
 		// Flag invalid if not creating another session
 		if (!isRequireNewSession) {
+			// Capture the session
+			String sessionId = this.session.sessionId;
+
 			// Invalidate the Session
 			this.session.invalidate(null);
 
 			// Add expired cookie to remove Session Id.
-			// (If creating new Sesion will add appropriate Cookie)
-			this.addSessionIdCookieToHttpResponse("", 0);
+			// (If creating new Session will add appropriate Cookie)
+			this.addSessionIdCookieToHttpResponse(sessionId, EXPIRE_COOKIE_INSTANT);
 		}
 
 		// Trigger invalidating the session
@@ -409,9 +415,9 @@ public class HttpSessionManagedObject
 	 * @param expireTime
 	 *            Time that the {@link HttpCookie} is to expire.
 	 */
-	private void addSessionIdCookieToHttpResponse(String sessionId, long expireTime) {
-		HttpCookie sessionIdCookie = new HttpCookie(this.sessionIdCookieName, sessionId, expireTime, null, "/");
-		HttpCookie.addHttpCookie(sessionIdCookie, this.connection.getResponse());
+	private void addSessionIdCookieToHttpResponse(String sessionId, Instant expireTime) {
+		this.connection.getResponse().getCookies().addCookie(this.sessionIdCookieName, sessionId,
+				(cookie) -> cookie.setExpires(expireTime));
 	}
 
 	/*
@@ -454,7 +460,7 @@ public class HttpSessionManagedObject
 		}
 
 		// Obtain the Session Id from the Session cookie
-		HttpCookie sessionIdCookie = HttpCookie.extractHttpCookie(this.sessionIdCookieName, request);
+		HttpRequestCookie sessionIdCookie = request.getCookies().getCookie(this.sessionIdCookieName);
 		String sessionId = (sessionIdCookie == null ? null : sessionIdCookie.getValue());
 
 		// Handle based on Session Id being available
@@ -496,12 +502,12 @@ public class HttpSessionManagedObject
 		/**
 		 * Creation time of the {@link HttpSession}.
 		 */
-		private long creationTime;
+		private Instant creationTime;
 
 		/**
 		 * Time to expire the {@link HttpSession} should it be idle.
 		 */
-		private long expireTime;
+		private Instant expireTime;
 
 		/**
 		 * Indicates if this {@link HttpSession} is new.
@@ -537,7 +543,7 @@ public class HttpSessionManagedObject
 		 * @param attributes
 		 *            Attributes.
 		 */
-		private void loadState(String sessionId, long creationTime, long expireTime, boolean isNew,
+		private void loadState(String sessionId, Instant creationTime, Instant expireTime, boolean isNew,
 				Map<String, Serializable> attributes) {
 			// Load state
 			this.sessionId = sessionId;
@@ -608,7 +614,7 @@ public class HttpSessionManagedObject
 		}
 
 		@Override
-		public long getCreationTime() {
+		public Instant getCreationTime() {
 			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
 				this.ensureValid();
 				return this.creationTime;
@@ -616,7 +622,7 @@ public class HttpSessionManagedObject
 		}
 
 		@Override
-		public long getExpireTime() throws InvalidatedSessionHttpException {
+		public Instant getExpireTime() throws InvalidatedSessionHttpException {
 			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
 				this.ensureValid();
 				return this.expireTime;
@@ -624,7 +630,8 @@ public class HttpSessionManagedObject
 		}
 
 		@Override
-		public void setExpireTime(long expireTime) throws StoringSessionHttpException, InvalidatedSessionHttpException {
+		public void setExpireTime(Instant expireTime)
+				throws StoringSessionHttpException, InvalidatedSessionHttpException {
 			HttpSessionManagedObject.this.processAwareContext.run(() -> {
 				this.ensureValid();
 				this.ensureCanAlter();
@@ -791,7 +798,7 @@ public class HttpSessionManagedObject
 		}
 
 		@Override
-		public void sessionCreated(long creationTime, long expireTime, Map<String, Serializable> attributes) {
+		public void sessionCreated(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes) {
 			HttpSessionManagedObject.this.processAwareContext.run(() -> {
 				HttpSessionManagedObject.this.loadSession(creationTime, expireTime, attributes);
 				return null;
@@ -846,7 +853,7 @@ public class HttpSessionManagedObject
 		}
 
 		@Override
-		public void sessionRetrieved(long creationTime, long expireTime, Map<String, Serializable> attributes) {
+		public void sessionRetrieved(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes) {
 			HttpSessionManagedObject.this.processAwareContext.run(() -> {
 				HttpSessionManagedObject.this.loadSession(creationTime, expireTime, attributes);
 				return null;
@@ -884,12 +891,12 @@ public class HttpSessionManagedObject
 		/**
 		 * Creation time.
 		 */
-		private final long creationTime;
+		private final Instant creationTime;
 
 		/**
 		 * Expire time.
 		 */
-		private final long expireTime;
+		private final Instant expireTime;
 
 		/**
 		 * Attributes.
@@ -908,7 +915,7 @@ public class HttpSessionManagedObject
 		 * @param attributes
 		 *            Attributes.
 		 */
-		public StoreHttpSessionOperationImpl(String sessionId, long creationTime, long expireTime,
+		public StoreHttpSessionOperationImpl(String sessionId, Instant creationTime, Instant expireTime,
 				Map<String, Serializable> attributes) {
 			this.sessionId = sessionId;
 			this.creationTime = creationTime;
@@ -926,12 +933,12 @@ public class HttpSessionManagedObject
 		}
 
 		@Override
-		public long getCreationTime() {
+		public Instant getCreationTime() {
 			return this.creationTime;
 		}
 
 		@Override
-		public long getExpireTime() {
+		public Instant getExpireTime() {
 			return this.expireTime;
 		}
 

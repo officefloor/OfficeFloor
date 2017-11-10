@@ -18,6 +18,7 @@
 package net.officefloor.web.session.spi;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Map;
 
 import net.officefloor.web.session.HttpSession;
@@ -49,8 +50,7 @@ public interface CreateHttpSessionOperation {
 	 * @param attributes
 	 *            {@link Map} to contain the {@link HttpSession} attributes.
 	 */
-	void sessionCreated(long creationTime, long expireTime,
-			Map<String, Serializable> attributes);
+	void sessionCreated(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes);
 
 	/**
 	 * Flags that the session Id is the same as another {@link HttpSession}

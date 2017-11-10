@@ -28,7 +28,6 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpCookie;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
@@ -105,8 +104,7 @@ public class HttpRedirectFunction
 		HttpSession session = (HttpSession) context.getObject(HttpRedirectDependencies.SESSION_STATE);
 
 		// Obtain the redirect location
-		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure,
-				this.applicationPath);
+		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure, this.applicationPath);
 
 		// Send the redirect
 		HttpResponse response = connection.getResponse();
@@ -120,7 +118,7 @@ public class HttpRedirectFunction
 		session.setAttribute(SESSION_ATTRIBUTE_REDIRECT_MOMENTO, momento);
 
 		// Load cookie indicating redirect
-		HttpCookie.addHttpCookie(new HttpCookie("ofr", redirectLocation), connection.getResponse());
+		response.getCookies().addCookie("ofr", redirectLocation).setPath(redirectLocation).setMaxAge(60);
 
 		// No further functions
 		return null;

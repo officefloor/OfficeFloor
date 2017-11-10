@@ -17,6 +17,8 @@
  */
 package net.officefloor.server.http;
 
+import java.util.function.Consumer;
+
 /**
  * {@link HttpResponseCookie} instances for the {@link HttpResponse}.
  * 
@@ -27,10 +29,27 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	/**
 	 * Adds a {@link HttpResponseCookie}.
 	 * 
-	 * @param cookie
-	 *            {@link HttpResponseCookie}.
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
 	 */
 	HttpResponseCookie addCookie(String name, String value);
+
+	/**
+	 * Adds a {@link HttpResponseCookie}.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 * @param initialiser
+	 *            Enables initialising the attributes of the
+	 *            {@link HttpResponseCookie}. This reduces locking in setting
+	 *            multiple attributes.
+	 * @return {@link HttpResponseCookie}.
+	 */
+	HttpResponseCookie addCookie(String name, String value, Consumer<HttpResponseCookie> initialiser);
 
 	/**
 	 * <p>
@@ -44,6 +63,20 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 * @return {@link HttpResponseCookie}.
 	 */
 	HttpResponseCookie addCookie(HttpRequestCookie cookie);
+
+	/**
+	 * <p>
+	 * Adds a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
+	 * 
+	 * @param cookie
+	 *            {@link HttpRequestCookie}
+	 * @param initialiser
+	 *            Enables initialising the attributes of the
+	 *            {@link HttpResponseCookie}. This reduces locking in setting
+	 *            multiple attributes.
+	 * @return {@link HttpResponseCookie}.
+	 */
+	HttpResponseCookie addCookie(HttpRequestCookie cookie, Consumer<HttpResponseCookie> initialiser);
 
 	/**
 	 * Removes the {@link HttpResponseCookie}.
