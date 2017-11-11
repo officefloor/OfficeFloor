@@ -118,7 +118,7 @@ public class HttpRedirectFunction
 		session.setAttribute(SESSION_ATTRIBUTE_REDIRECT_MOMENTO, momento);
 
 		// Load cookie indicating redirect
-		response.getCookies().addCookie("ofr", redirectLocation).setPath(redirectLocation).setMaxAge(60);
+		response.getCookies().setCookie("ofr", redirectLocation).setPath(redirectLocation).setMaxAge(60);
 
 		// No further functions
 		return null;

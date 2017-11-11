@@ -17,6 +17,13 @@
  */
 package net.officefloor.web.session;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.HttpSessionAdministration;
 import net.officefloor.web.session.HttpSessionManagedObject;
@@ -36,19 +43,20 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 	private static final String SESSION_ID = "SESSION_ID";
 
 	/**
-	 * Constant time to enable easier testing.
-	 */
-	private static final long CREATION_TIME = 100;
-
-	/**
 	 * Time to expire the {@link HttpSession}.
 	 */
-	private static final long EXPIRE_TIME = Long.MAX_VALUE;
+	private static final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(2000, ChronoUnit.SECONDS);
 
 	/**
 	 * {@link HttpSession}.
 	 */
 	private HttpSession httpSession;
+
+	/**
+	 * {@link ServerHttpConnection}.
+	 */
+	private final MockServerHttpConnection connection = MockHttpServer
+			.mockConnection(MockHttpServer.mockRequest().cookie(SESSION_ID_COOKIE_NAME, SESSION_ID));
 
 	/**
 	 * Ensure can immediately store the {@link HttpSession}.
@@ -64,7 +72,7 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 		HttpSessionAdministration admin = this.createHttpSessionAdministration();
 		admin.store();
 		assertTrue("Should be immediately stored", admin.isOperationComplete());
-		this.verifyFunctionality();
+		this.verifyFunctionality(SESSION_ID, EXPIRE_TIME);
 	}
 
 	/**
@@ -86,7 +94,7 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 		this.ensureHttpSessionNotAlterable(this.httpSession);
 		this.storeOperation.sessionStored();
 		assertTrue("Should store after delay", admin.isOperationComplete());
-		this.verifyFunctionality();
+		this.verifyFunctionality(SESSION_ID, EXPIRE_TIME);
 	}
 
 	/**
@@ -140,11 +148,10 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 	 */
 	public void testChangeExpireTime() throws Throwable {
 
-		final long NEW_EXPIRE_TIME = System.currentTimeMillis() + 10000;
+		final Instant NEW_EXPIRE_TIME = MOCK_CURRENT_TIME.plus(10000, ChronoUnit.SECONDS);
 
 		// Record changing expire time and storing
 		this.record_instantiate();
-		this.record_cookie_addSessionId(SESSION_ID, NEW_EXPIRE_TIME);
 		this.record_store_sessionStored();
 
 		// Change expire time and store
@@ -153,16 +160,14 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 		this.httpSession.setExpireTime(NEW_EXPIRE_TIME);
 		admin.store();
 		assertTrue("Should be immediately stored", admin.isOperationComplete());
-		this.verifyFunctionality();
+		this.verifyFunctionality(SESSION_ID, NEW_EXPIRE_TIME);
 	}
 
 	/**
 	 * Records instantiating the {@link HttpSession}.
 	 */
 	private void record_instantiate() {
-		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
+		this.record_retrieve_sessionRetrieved(MOCK_CURRENT_TIME, EXPIRE_TIME, newAttributes());
 	}
 
 	/**
@@ -171,23 +176,34 @@ public class StoreHttpSessionTest extends AbstractHttpSessionManagedObjectTestCa
 	 * @return {@link HttpSessionAdministration}.
 	 */
 	private HttpSessionAdministration createHttpSessionAdministration() throws Throwable {
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.httpSession = (HttpSession) mo.getObject();
-		assertHttpSession(SESSION_ID, CREATION_TIME, false, this.httpSession);
+		assertHttpSession(SESSION_ID, MOCK_CURRENT_TIME, false, this.httpSession);
 		return this.httpSession.getHttpSessionAdministration();
 	}
 
 	/**
 	 * Verifies the functionality.
 	 */
-	private void verifyFunctionality() {
+	private void verifyFunctionality(String newSessionId, Instant expires) {
 		// Verify the mocks and operations
 		this.verifyOperations();
 
 		// Ensure can now alter session
 		this.httpSession.setAttribute("TEST", "ALTERED");
 		this.httpSession.removeAttribute("TEST");
+
+		// Verify response with session cookie
+		MockHttpResponse response = this.connection.send(null);
+		if (newSessionId == null) {
+			// Ensure cookie is not updated
+			assertEquals("Should not update session cookie", 0, response.getCookies().size());
+		} else {
+			// Ensure sending new session id
+			assertEquals("Should provide session cookie", 1, response.getCookies().size());
+			response.assertCookie(
+					MockHttpServer.mockResponseCookie(SESSION_ID_COOKIE_NAME, newSessionId).setExpires(expires));
+		}
 	}
 
 	/**

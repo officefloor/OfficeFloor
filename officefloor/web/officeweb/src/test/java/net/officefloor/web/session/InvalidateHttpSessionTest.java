@@ -17,10 +17,13 @@
  */
 package net.officefloor.web.session;
 
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionAdministration;
-import net.officefloor.web.session.HttpSessionManagedObject;
-import net.officefloor.web.session.InvalidatedSessionHttpException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 
 /**
  * Tests invalidating the {@link HttpSession}.
@@ -40,19 +43,20 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 	private static final String NEW_SESSION_ID = "NEW_SESSION";
 
 	/**
-	 * Instantiated time to enable easier testing.
-	 */
-	private static final long CREATION_TIME = 100;
-
-	/**
 	 * Time to expire the {@link HttpSession}.
 	 */
-	private static final long EXPIRE_TIME = Long.MAX_VALUE;
+	private static final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(1000, ChronoUnit.SECONDS);
 
 	/**
 	 * Creation time of new {@link HttpSession}.
 	 */
-	private static final long NEW_CREATION_TIME = 200;
+	private static final Instant NEW_CREATION_TIME = MOCK_CURRENT_TIME.plus(200, ChronoUnit.SECONDS);
+
+	/**
+	 * {@link ServerHttpConnection}.
+	 */
+	private final MockServerHttpConnection connection = MockHttpServer
+			.mockConnection(MockHttpServer.mockRequest().cookie(SESSION_ID_COOKIE_NAME, SESSION_ID));
 
 	/**
 	 * {@link HttpSession}.
@@ -67,7 +71,6 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		// Record
 		this.record_instantiate();
 		this.record_invalidate_sessionInvalidated();
-		this.record_cookie_addSessionId("", 0);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -87,7 +90,6 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		this.record_invalidate_sessionInvalidated();
 		this.record_generate_setSessionId(NEW_SESSION_ID);
 		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(NEW_SESSION_ID, EXPIRE_TIME);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -107,7 +109,6 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(NEW_SESSION_ID);
 		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(NEW_SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Invalidate
@@ -169,9 +170,7 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 	 * Records instantiating the {@link HttpSession}.
 	 */
 	private void record_instantiate() {
-		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
+		this.record_retrieve_sessionRetrieved(MOCK_CURRENT_TIME, EXPIRE_TIME, newAttributes());
 	}
 
 	/**
@@ -180,10 +179,9 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 	 * @return {@link HttpSessionAdministration}.
 	 */
 	private HttpSessionAdministration createHttpSessionAdministration() throws Throwable {
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.httpSession = (HttpSession) mo.getObject();
-		assertHttpSession(SESSION_ID, CREATION_TIME, false, this.httpSession);
+		assertHttpSession(SESSION_ID, MOCK_CURRENT_TIME, false, this.httpSession);
 		return this.httpSession.getHttpSessionAdministration();
 	}
 
@@ -207,9 +205,22 @@ public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectT
 		if (isCreateNew) {
 			// Ensure created new HTTP session
 			assertHttpSession(NEW_SESSION_ID, NEW_CREATION_TIME, isCreateNew, this.httpSession);
+
+			// Ensure response contains session cookie
+			MockHttpResponse response = this.connection.send(null);
+			assertEquals("Should only be the session cookie", 1, response.getCookies().size());
+			response.assertCookie(
+					MockHttpServer.mockResponseCookie(SESSION_ID_COOKIE_NAME, NEW_SESSION_ID).setExpires(EXPIRE_TIME));
+
 		} else {
 			// Ensure HTTP session invalidated (without cause)
 			this.ensureHttpSessionInvalidated(null);
+
+			// Ensure expire HTTP Cookie
+			MockHttpResponse response = this.connection.send(null);
+			assertEquals("Should only be the session cookie", 1, response.getCookies().size());
+			response.assertCookie(
+					MockHttpServer.mockResponseCookie(SESSION_ID_COOKIE_NAME, SESSION_ID).setExpires(Instant.EPOCH));
 		}
 	}
 

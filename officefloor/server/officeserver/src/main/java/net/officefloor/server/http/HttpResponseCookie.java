@@ -195,6 +195,13 @@ public interface HttpResponseCookie {
 	String[] getExtensions();
 
 	/**
+	 * Clears the attributes.
+	 * 
+	 * @return this.
+	 */
+	HttpResponseCookie clearAttributes();
+
+	/**
 	 * Enables configuring multiple attributes with reduced locking.
 	 * 
 	 * @param configurer

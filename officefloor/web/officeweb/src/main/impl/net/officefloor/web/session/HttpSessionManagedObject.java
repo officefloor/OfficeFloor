@@ -248,7 +248,7 @@ public class HttpSessionManagedObject
 		this.session.loadState(this.sessionId, creationTime, expireTime, this.isNewSession, attributes);
 
 		// Add cookie to maintain Session Id by client
-		this.addSessionIdCookieToHttpResponse(this.sessionId, expireTime);
+		this.setSessionIdCookieToHttpResponse(this.sessionId, expireTime);
 
 		// Flag completed load of the Session
 		this.flagComplete();
@@ -318,7 +318,7 @@ public class HttpSessionManagedObject
 
 			// Add expired cookie to remove Session Id.
 			// (If creating new Session will add appropriate Cookie)
-			this.addSessionIdCookieToHttpResponse(sessionId, EXPIRE_COOKIE_INSTANT);
+			this.setSessionIdCookieToHttpResponse(sessionId, EXPIRE_COOKIE_INSTANT);
 		}
 
 		// Trigger invalidating the session
@@ -415,8 +415,8 @@ public class HttpSessionManagedObject
 	 * @param expireTime
 	 *            Time that the {@link HttpCookie} is to expire.
 	 */
-	private void addSessionIdCookieToHttpResponse(String sessionId, Instant expireTime) {
-		this.connection.getResponse().getCookies().addCookie(this.sessionIdCookieName, sessionId,
+	private void setSessionIdCookieToHttpResponse(String sessionId, Instant expireTime) {
+		this.connection.getResponse().getCookies().setCookie(this.sessionIdCookieName, sessionId,
 				(cookie) -> cookie.setExpires(expireTime));
 	}
 
@@ -638,7 +638,7 @@ public class HttpSessionManagedObject
 
 				// Update expiring of Session Id (and its cookie)
 				this.expireTime = expireTime;
-				HttpSessionManagedObject.this.addSessionIdCookieToHttpResponse(this.sessionId, this.expireTime);
+				HttpSessionManagedObject.this.setSessionIdCookieToHttpResponse(this.sessionId, this.expireTime);
 
 				// Void return
 				return null;

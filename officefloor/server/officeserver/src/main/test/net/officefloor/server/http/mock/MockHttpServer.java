@@ -43,6 +43,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpResponseCookies;
@@ -467,7 +468,12 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * {@link HttpHeader} instances.
 		 */
-		private final List<MockNonMaterialisedHttpHeader> headers = new LinkedList<>();
+		private final List<NonMaterialisedHttpHeader> headers = new LinkedList<>();
+
+		/**
+		 * {@link MockNonMaterialisedHttpCookie}.
+		 */
+		private MockNonMaterialisedHttpCookie cookie = null;
 
 		/**
 		 * HTTP entity.
@@ -511,6 +517,25 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		public MockHttpRequestBuilder header(String name, String value) {
 			this.headers.add(new MockNonMaterialisedHttpHeader(name, value));
 			return this;
+		}
+
+		@Override
+		public MockHttpRequestBuilder cookie(String name, String value) {
+
+			// Lazy create the cookie header
+			if (this.cookie == null) {
+				this.cookie = new MockNonMaterialisedHttpCookie();
+				this.headers.add(this.cookie);
+			}
+
+			// Add the cookie
+			this.cookie.cookies.add(new MockCookie(name, value));
+			return this;
+		}
+
+		@Override
+		public MockHttpRequestBuilder cookie(HttpResponseCookie cookie) {
+			return this.cookie(cookie.getName(), cookie.getValue());
 		}
 
 		@Override
@@ -558,18 +583,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		@Override
 		public Iterator<NonMaterialisedHttpHeader> iterator() {
-			final Iterator<MockNonMaterialisedHttpHeader> iterator = this.headers.iterator();
-			return new Iterator<NonMaterialisedHttpHeader>() {
-				@Override
-				public boolean hasNext() {
-					return iterator.hasNext();
-				}
-
-				@Override
-				public NonMaterialisedHttpHeader next() {
-					return iterator.next();
-				}
-			};
+			return this.headers.iterator();
 		}
 
 		@Override
@@ -627,6 +641,102 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public String getValue() {
 			return this.value;
+		}
+	}
+
+	/**
+	 * {@link NonMaterialisedHttpHeader} containing the
+	 * {@link HttpRequestCookie} instances.
+	 */
+	private static class MockNonMaterialisedHttpCookie implements NonMaterialisedHttpHeader {
+
+		/**
+		 * {@link MockCookie} instances.
+		 */
+		private final List<MockCookie> cookies = new LinkedList<>();
+
+		/*
+		 * ================= NonMaterialisedHttpHeader ========================
+		 */
+
+		@Override
+		public CharSequence getName() {
+			return "cookie";
+		}
+
+		@Override
+		public HttpHeader materialiseHttpHeader() {
+			return new MockCookieHttpHeader(this);
+		}
+	}
+
+	/**
+	 * Mock Cookie.
+	 */
+	private static class MockCookie {
+
+		/**
+		 * Name.
+		 */
+		private final String name;
+
+		/**
+		 * Value.
+		 */
+		private final String value;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param value
+		 *            Value.
+		 */
+		private MockCookie(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+	}
+
+	/**
+	 * {@link HttpHeader} containing the {@link HttpRequestCookie} instances.
+	 */
+	private static class MockCookieHttpHeader implements HttpHeader {
+
+		/**
+		 * {@link MockNonMaterialisedHttpCookie}.
+		 */
+		private final MockNonMaterialisedHttpCookie header;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param header
+		 *            {@link MockNonMaterialisedHttpCookie}.
+		 */
+		private MockCookieHttpHeader(MockNonMaterialisedHttpCookie header) {
+			this.header = header;
+		}
+
+		/*
+		 * ======================== HttpHeader ================================
+		 */
+
+		@Override
+		public String getName() {
+			return "cookie";
+		}
+
+		@Override
+		public String getValue() {
+			StringBuilder value = new StringBuilder();
+			for (MockCookie cookie : this.header.cookies) {
+				value.append(cookie.name);
+				value.append("=");
+				value.append(cookie.value);
+			}
+			return value.toString();
 		}
 	}
 

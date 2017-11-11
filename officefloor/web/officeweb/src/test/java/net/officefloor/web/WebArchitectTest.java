@@ -50,6 +50,7 @@ import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.session.HttpSessionManagedObjectSource;
 
 /**
  * Tests the {@link WebArchitect}.
@@ -131,8 +132,7 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/", MockSection.class,
 				MockHttpServer.mockRequest("/").method(HttpMethod.POST));
 		assertEquals("Incorrect response status", 405, response.getStatus().getStatusCode());
-		assertEquals("Must indicate allowed methods", "GET, HEAD, OPTIONS",
-				response.getHeader("Allow").getValue());
+		assertEquals("Must indicate allowed methods", "GET, HEAD, OPTIONS", response.getHeader("Allow").getValue());
 	}
 
 	/**
@@ -702,8 +702,8 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect response", "Session=value", response.getEntity(null));
 
 		// Obtain value from session
-		response = this.server.send(
-				MockHttpServer.mockRequest("/path").header("cookie", response.getHeader("set-cookie").getValue()));
+		response = this.server.send(MockHttpServer.mockRequest("/path")
+				.cookie(response.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME)));
 		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "Session=value", response.getEntity(null));
 	}

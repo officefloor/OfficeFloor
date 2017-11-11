@@ -205,7 +205,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 		public void service(ServerHttpConnection connection) throws IOException {
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.getHeaders().addHeader("test", "header");
-			response.getCookies().addCookie("test", "cookie");
+			response.getCookies().setCookie("test", "cookie");
 			response.getEntityWriter().write("test");
 		}
 	}

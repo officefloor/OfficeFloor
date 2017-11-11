@@ -20,13 +20,10 @@ package net.officefloor.web.session;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionManagedObject;
 import net.officefloor.web.session.spi.HttpSessionStore;
 
 /**
@@ -268,9 +265,8 @@ public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestC
 
 		// Ensure response contains session cookie
 		MockHttpResponse response = this.connection.send(null);
-		HttpResponseCookie sessionCookie = response.getCookie(SESSION_ID_COOKIE_NAME);
-		assertEquals("Should specify session identifier", SESSION_ID, sessionCookie.getValue());
-		assertEquals("Incorrect expiry", EXPIRE_TIME, sessionCookie.getExpires());
+		response.assertCookie(
+				MockHttpServer.mockResponseCookie(SESSION_ID_COOKIE_NAME, SESSION_ID).setExpires(EXPIRE_TIME));
 	}
 
 	/**

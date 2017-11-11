@@ -137,22 +137,41 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	 *            {@link HttpResponseCookie}. May be <code>null</code>.
 	 * @return Added {@link HttpResponseCookie}.
 	 */
-	private final HttpResponseCookie safeAddCookie(String name, String value,
+	private final HttpResponseCookie safeSetCookie(String name, String value,
 			Consumer<HttpResponseCookie> initialiser) {
 		return this.safe(() -> {
-			WritableHttpCookie cookie = new WritableHttpCookie(name, value, this.context);
+
+			// Determine if cookie already exists
+			WritableHttpCookie cookie = this.head;
+			FOUND_COOKIE: while (cookie != null) {
+				if (name.equals(cookie.getName())) {
+					// Found the cookie
+					cookie.setValue(value);
+					break FOUND_COOKIE;
+				}
+				cookie = cookie.next;
+			}
+
+			// Add cookie if not already added
+			if (cookie == null) {
+				cookie = new WritableHttpCookie(name, value, this.context);
+				if (this.head == null) {
+					// First cookie
+					this.head = cookie;
+					this.tail = cookie;
+				} else {
+					// Append the cookie
+					this.tail.next = cookie;
+					this.tail = cookie;
+				}
+			}
+
+			// Initialise the cookie
 			if (initialiser != null) {
 				initialiser.accept(cookie);
 			}
-			if (this.head == null) {
-				// First cookie
-				this.head = cookie;
-				this.tail = cookie;
-			} else {
-				// Append the cookie
-				this.tail.next = cookie;
-				this.tail = cookie;
-			}
+
+			// Return the cookie
 			return cookie;
 		});
 	}
@@ -276,23 +295,23 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	}
 
 	@Override
-	public HttpResponseCookie addCookie(String name, String value) {
-		return this.safeAddCookie(name, value, null);
+	public HttpResponseCookie setCookie(String name, String value) {
+		return this.safeSetCookie(name, value, null);
 	}
 
 	@Override
-	public HttpResponseCookie addCookie(String name, String value, Consumer<HttpResponseCookie> initialiser) {
-		return this.safeAddCookie(name, value, initialiser);
+	public HttpResponseCookie setCookie(String name, String value, Consumer<HttpResponseCookie> initialiser) {
+		return this.safeSetCookie(name, value, initialiser);
 	}
 
 	@Override
-	public HttpResponseCookie addCookie(HttpRequestCookie cookie) {
-		return this.safeAddCookie(cookie.getName(), cookie.getValue(), null);
+	public HttpResponseCookie setCookie(HttpRequestCookie cookie) {
+		return this.safeSetCookie(cookie.getName(), cookie.getValue(), null);
 	}
 
 	@Override
-	public HttpResponseCookie addCookie(HttpRequestCookie cookie, Consumer<HttpResponseCookie> initialiser) {
-		return this.safeAddCookie(cookie.getName(), cookie.getValue(), initialiser);
+	public HttpResponseCookie setCookie(HttpRequestCookie cookie, Consumer<HttpResponseCookie> initialiser) {
+		return this.safeSetCookie(cookie.getName(), cookie.getValue(), initialiser);
 	}
 
 	@Override

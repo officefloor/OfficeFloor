@@ -338,7 +338,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.setStatus(HttpStatus.OK);
 			response.getHeaders().addHeader("response", "header");
-			response.getCookies().addCookie("response", "cookie");
+			response.getCookies().setCookie("response", "cookie");
 			response.getEntityWriter().write("response");
 		}
 	}

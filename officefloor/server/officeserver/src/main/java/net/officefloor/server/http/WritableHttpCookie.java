@@ -434,6 +434,20 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	}
 
 	@Override
+	public HttpResponseCookie clearAttributes() {
+		return this.context.run(() -> {
+			this.expires = null;
+			this.maxAge = BROWSER_SESSION_MAX_AGE;
+			this.domain = null;
+			this.path = null;
+			this.isSecure = false;
+			this.isHttpOnly = false;
+			this.extensions = null;
+			return this;
+		});
+	}
+
+	@Override
 	public HttpResponseCookie configure(Consumer<HttpResponseCookie> configurer) {
 		return this.context.run(() -> {
 			configurer.accept(this);

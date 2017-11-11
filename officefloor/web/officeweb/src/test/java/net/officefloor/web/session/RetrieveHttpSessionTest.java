@@ -17,8 +17,11 @@
  */
 package net.officefloor.web.session;
 
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionManagedObject;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.session.spi.HttpSessionStore;
 
 /**
@@ -34,14 +37,15 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 	private static final String SESSION_ID = "SESSION_ID";
 
 	/**
-	 * Constant time to enable easier testing.
-	 */
-	private static final long CREATION_TIME = 100;
-
-	/**
 	 * Time to expire the {@link HttpSession}.
 	 */
-	private static final long EXPIRE_TIME = Long.MAX_VALUE;
+	private static final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(2000, ChronoUnit.SECONDS);
+
+	/**
+	 * {@link MockServerHttpConnection}.
+	 */
+	private MockServerHttpConnection connection = MockHttpServer
+			.mockConnection(MockHttpServer.mockRequest().cookie(SESSION_ID_COOKIE_NAME, SESSION_ID));
 
 	/**
 	 * Ensure able to create a {@link HttpSession} immediately.
@@ -49,14 +53,11 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 	public void testImmediateRetrieval() throws Throwable {
 
 		// Record retrieving HTTP session
-		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
+		this.record_retrieve_sessionRetrieved(MOCK_CURRENT_TIME, EXPIRE_TIME, newAttributes());
 
 		// Load the managed object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.verifyFunctionality(mo, false);
 	}
 
@@ -67,17 +68,14 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 	public void testDeplayInRetrievingFromStore() throws Throwable {
 
 		// Record retrieving HTTP session
-		this.record_sessionIdCookie(SESSION_ID);
 		this.record_delay(); // retrieving from store
 		this.asynchronousContext.start(null);
-		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
-		this.retrieveOperation.sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
+		this.retrieveOperation.sessionRetrieved(MOCK_CURRENT_TIME, EXPIRE_TIME, newAttributes());
 		this.verifyFunctionality(mo, false);
 	}
 
@@ -90,13 +88,11 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 		final Exception failure = new Exception("Retrieve Session failure");
 
 		// Record retrieving HTTP session
-		this.record_sessionIdCookie(SESSION_ID);
 		this.record_retrieve_failedToRetrieveSession(failure);
 
 		// Load the managed object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.verifyFailure(mo, failure);
 	}
 
@@ -109,15 +105,13 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 		final Exception failure = new Exception("Retrieve Session failure");
 
 		// Record retrieving HTTP session
-		this.record_sessionIdCookie(SESSION_ID);
 		this.record_delay(); // failing to retrieve
 		this.asynchronousContext.start(null);
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.retrieveOperation.failedToRetreiveSession(failure);
 		this.verifyFailure(mo, failure);
 	}
@@ -127,17 +121,18 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 	 */
 	public void testImmediateSessionNotAvailable() throws Throwable {
 
+		// Create not available session request
+		this.connection = MockHttpServer.mockConnection(
+				MockHttpServer.mockRequest().cookie(SESSION_ID_COOKIE_NAME, "Not available Session Id"));
+
 		// Record retrieving HTTP session
-		this.record_sessionIdCookie("Not available Session Id");
 		this.record_retrieve_sessionNotAvailable();
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
+		this.record_create_sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, newAttributes());
 
 		// Load the managed object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.verifyFunctionality(mo, true);
 	}
 
@@ -146,19 +141,20 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 	 */
 	public void testDelayInSessionNotAvailable() throws Throwable {
 
+		// Create not available session request
+		this.connection = MockHttpServer.mockConnection(
+				MockHttpServer.mockRequest().cookie(SESSION_ID_COOKIE_NAME, "Not available Session Id"));
+
 		// Record retrieving HTTP session
-		this.record_sessionIdCookie("Not available Session Id");
 		this.record_delay(); // session not available
 		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
-		this.record_cookie_addSessionId(SESSION_ID, EXPIRE_TIME);
+		this.record_create_sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, newAttributes());
 		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
-		this.startCoordination(mo);
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(this.connection);
 		this.retrieveOperation.sessionNotAvailable();
 		this.verifyFunctionality(mo, true);
 	}
@@ -178,7 +174,7 @@ public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTes
 
 		// Verify new Http Session
 		HttpSession session = (HttpSession) mo.getObject();
-		assertHttpSession(SESSION_ID, CREATION_TIME, isNew, session);
+		assertHttpSession(SESSION_ID, MOCK_CURRENT_TIME, isNew, session);
 	}
 
 	/**

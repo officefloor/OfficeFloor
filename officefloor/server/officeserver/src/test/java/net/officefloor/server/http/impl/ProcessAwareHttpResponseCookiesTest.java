@@ -67,16 +67,16 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 		super.setUp();
 
 		// Add the cookies
-		this.cookies.addCookie("name", "1");
-		this.addCookie("value", "0", (cookie) -> cookie.setValue("2"));
-		this.addCookie("expires", "3", (cookie) -> cookie.setExpires(TEMPORAL_EXPIRE));
-		this.addCookie("max-age", "4", (cookie) -> cookie.setMaxAge(1000));
-		this.addCookie("domain", "5", (cookie) -> cookie.setDomain("officefloor.net"));
-		this.addCookie("path", "6", (cookie) -> cookie.setPath("/path"));
-		this.addCookie("secure", "7", (cookie) -> cookie.setSecure(true));
-		this.addCookie("http", "8", (cookie) -> cookie.setHttpOnly(true));
-		this.addCookie("extension", "9", (cookie) -> cookie.addExtension("extend"));
-		this.cookies.addCookie(new HttpRequestCookie() {
+		this.cookies.setCookie("name", "1");
+		this.setCookie("value", "0", (cookie) -> cookie.setValue("2"));
+		this.setCookie("expires", "3", (cookie) -> cookie.setExpires(TEMPORAL_EXPIRE));
+		this.setCookie("max-age", "4", (cookie) -> cookie.setMaxAge(1000));
+		this.setCookie("domain", "5", (cookie) -> cookie.setDomain("officefloor.net"));
+		this.setCookie("path", "6", (cookie) -> cookie.setPath("/path"));
+		this.setCookie("secure", "7", (cookie) -> cookie.setSecure(true));
+		this.setCookie("http", "8", (cookie) -> cookie.setHttpOnly(true));
+		this.setCookie("extension", "9", (cookie) -> cookie.addExtension("extend"));
+		this.cookies.setCookie(new HttpRequestCookie() {
 			@Override
 			public String getName() {
 				return "extensions";
@@ -87,14 +87,14 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 				return "10";
 			}
 		}, (init) -> init.addExtension("one").addExtension("two=2").addExtension("three"));
-		this.addCookie("all", "0",
+		this.setCookie("all", "0",
 				(cookie) -> cookie.setValue("11").setExpires(TEMPORAL_EXPIRE).setMaxAge(10)
 						.setDomain("mock.officefloor.net").setPath("/all").setSecure(true).setHttpOnly(true)
 						.addExtension("extension"));
 	}
 
 	/**
-	 * Adds a {@link HttpResponseCookie}.
+	 * Sets a {@link HttpResponseCookie}.
 	 * 
 	 * @param name
 	 *            Name.
@@ -103,9 +103,9 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	 * @param attributeConfigurer
 	 *            Attribute configurer.
 	 */
-	private void addCookie(String name, String value,
+	private void setCookie(String name, String value,
 			Function<HttpResponseCookie, HttpResponseCookie> attributeConfigurer) {
-		HttpResponseCookie original = this.cookies.addCookie(name, value);
+		HttpResponseCookie original = this.cookies.setCookie(name, value);
 		HttpResponseCookie updated = attributeConfigurer.apply(original);
 		assertSame("Incorrect returned cookie", original, updated);
 	}
@@ -133,6 +133,26 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 				extension("three"));
 		assertCookie(this.cookies.getCookie("all"), "all", "11", expires(EXPIRE), maxAge(10),
 				domain("mock.officefloor.net"), path("/all"), secure(true), httpOnly(true), extension("extension"));
+	}
+
+	/**
+	 * Ensure can set details on the same {@link HttpResponseCookie}.
+	 */
+	public void testOverwriteCookie() {
+		HttpResponseCookie expires = this.cookies.getCookie("expires");
+		HttpResponseCookie overwrite = this.cookies.setCookie("expires", "overwrite");
+		assertSame("Should be same cookie", expires, overwrite);
+		assertCookie(overwrite, "expires", "overwrite", expires(EXPIRE));
+	}
+
+	/**
+	 * Ensure can clear attributes.
+	 */
+	public void testClearAttributes() {
+		HttpResponseCookie all = this.cookies.getCookie("all");
+		assertEquals("Ensure obtained all", "/all", all.getPath());
+		all.clearAttributes();
+		assertCookie(all, "all", "11");
 	}
 
 	/**

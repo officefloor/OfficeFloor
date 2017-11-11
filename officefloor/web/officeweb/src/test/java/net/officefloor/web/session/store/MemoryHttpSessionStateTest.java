@@ -18,18 +18,20 @@
 package net.officefloor.web.session.store;
 
 import java.io.Serializable;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.HttpSessionStore;
 import net.officefloor.web.session.spi.InvalidateHttpSessionOperation;
 import net.officefloor.web.session.spi.RetrieveHttpSessionOperation;
 import net.officefloor.web.session.spi.StoreHttpSessionOperation;
-import net.officefloor.web.session.store.MemoryHttpSessionStore;
 
 /**
  * Tests the {@link MemoryHttpSessionStateTest}.
@@ -41,20 +43,17 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link CreateHttpSessionOperation}.
 	 */
-	private final CreateHttpSessionOperation createOperation = this
-			.createMock(CreateHttpSessionOperation.class);
+	private final CreateHttpSessionOperation createOperation = this.createMock(CreateHttpSessionOperation.class);
 
 	/**
 	 * Mock {@link StoreHttpSessionOperation}.
 	 */
-	private final StoreHttpSessionOperation storeOperation = this
-			.createMock(StoreHttpSessionOperation.class);
+	private final StoreHttpSessionOperation storeOperation = this.createMock(StoreHttpSessionOperation.class);
 
 	/**
 	 * Mock {@link RetrieveHttpSessionOperation}.
 	 */
-	private final RetrieveHttpSessionOperation retrieveOperation = this
-			.createMock(RetrieveHttpSessionOperation.class);
+	private final RetrieveHttpSessionOperation retrieveOperation = this.createMock(RetrieveHttpSessionOperation.class);
 
 	/**
 	 * Mock {@link InvalidateHttpSessionOperation}.
@@ -63,40 +62,57 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 			.createMock(InvalidateHttpSessionOperation.class);
 
 	/**
+	 * Capture current time for deterministic test.
+	 */
+	private final Instant MOCK_CURRENT_TIME = Instant.now();
+
+	/**
+	 * Mock {@link Clock}.
+	 */
+	private final Clock clock = new Clock() {
+
+		@Override
+		public Clock withZone(ZoneId zone) {
+			fail("Should not require another timezone");
+			return null;
+		}
+
+		@Override
+		public Instant instant() {
+			return MOCK_CURRENT_TIME;
+		}
+
+		@Override
+		public ZoneId getZone() {
+			return ZoneId.of("GMT");
+		}
+	};
+
+	/**
 	 * Ensure able to create, store and then retrieve the {@link HttpSession}.
 	 */
 	public void testCreateStoreRetrieve() {
 
 		// Create the memory store
-		HttpSessionStore store = new MemoryHttpSessionStore(10);
+		final int maxIdleTime = 200;
+		HttpSessionStore store = new MemoryHttpSessionStore(this.clock, maxIdleTime);
 
 		// Values for testing
 		final String SESSION_ID = "SESSION_ID";
-		final long CREATION_TIME = 100;
-		final long EXPIRE_TIME = Long.MAX_VALUE;
-		final Map<String, Serializable> attributes = new HashMap<String, Serializable>();
+		final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(maxIdleTime, ChronoUnit.SECONDS);
+		final Map<String, Serializable> attributes = new HashMap<>();
 		attributes.put("TEST", "VALUE");
 
 		// Record
-		this.recordReturn(this.createOperation,
-				this.createOperation.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				attributes);
-		this.control(this.createOperation).setMatcher(
-				new TypeMatcher(Long.class, Long.class, Map.class));
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getSessionId(), SESSION_ID);
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getCreationTime(), CREATION_TIME);
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getExpireTime(), EXPIRE_TIME);
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getAttributes(), attributes);
+		this.recordReturn(this.createOperation, this.createOperation.getSessionId(), SESSION_ID);
+		this.createOperation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<>());
+		this.recordReturn(this.storeOperation, this.storeOperation.getSessionId(), SESSION_ID);
+		this.recordReturn(this.storeOperation, this.storeOperation.getCreationTime(), MOCK_CURRENT_TIME);
+		this.recordReturn(this.storeOperation, this.storeOperation.getExpireTime(), EXPIRE_TIME);
+		this.recordReturn(this.storeOperation, this.storeOperation.getAttributes(), attributes);
 		this.storeOperation.sessionStored();
-		this.recordReturn(this.retrieveOperation,
-				this.retrieveOperation.getSessionId(), SESSION_ID);
-		this.retrieveOperation.sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
-				attributes);
+		this.recordReturn(this.retrieveOperation, this.retrieveOperation.getSessionId(), SESSION_ID);
+		this.retrieveOperation.sessionRetrieved(MOCK_CURRENT_TIME, EXPIRE_TIME, attributes);
 
 		// Test create, store, retrieve
 		this.replayMockObjects();
@@ -115,36 +131,26 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 	public void testCreateInvalidate() {
 
 		// Create the memory store
-		HttpSessionStore store = new MemoryHttpSessionStore(10);
+		final int maxIdleTime = 200;
+		HttpSessionStore store = new MemoryHttpSessionStore(this.clock, maxIdleTime);
 
 		// Values for testing
 		final String SESSION_ID = "SESSION_ID";
-		final long CREATION_TIME = 100;
-		final long EXPIRE_TIME = Long.MAX_VALUE;
+		final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(maxIdleTime, ChronoUnit.SECONDS);
 		final Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 		attributes.put("TEST", "VALUE");
 
 		// Record
-		this.recordReturn(this.createOperation,
-				this.createOperation.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				attributes);
-		this.control(this.createOperation).setMatcher(
-				new TypeMatcher(Long.class, Long.class, Map.class));
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getSessionId(), SESSION_ID);
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getCreationTime(), CREATION_TIME);
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getExpireTime(), EXPIRE_TIME);
-		this.recordReturn(this.storeOperation,
-				this.storeOperation.getAttributes(), attributes);
+		this.recordReturn(this.createOperation, this.createOperation.getSessionId(), SESSION_ID);
+		this.createOperation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<>());
+		this.recordReturn(this.storeOperation, this.storeOperation.getSessionId(), SESSION_ID);
+		this.recordReturn(this.storeOperation, this.storeOperation.getCreationTime(), MOCK_CURRENT_TIME);
+		this.recordReturn(this.storeOperation, this.storeOperation.getExpireTime(), EXPIRE_TIME);
+		this.recordReturn(this.storeOperation, this.storeOperation.getAttributes(), attributes);
 		this.storeOperation.sessionStored();
-		this.recordReturn(this.invalidateOperation,
-				this.invalidateOperation.getSessionId(), SESSION_ID);
+		this.recordReturn(this.invalidateOperation, this.invalidateOperation.getSessionId(), SESSION_ID);
 		this.invalidateOperation.sessionInvalidated();
-		this.recordReturn(this.retrieveOperation,
-				this.retrieveOperation.getSessionId(), SESSION_ID);
+		this.recordReturn(this.retrieveOperation, this.retrieveOperation.getSessionId(), SESSION_ID);
 		this.retrieveOperation.sessionNotAvailable();
 
 		// Test create, invalidate, can not retrieve
@@ -163,22 +169,19 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 	public void testCreateExpire() {
 
 		// Create the memory store (expires sessions immediately)
-		HttpSessionStore store = new MemoryHttpSessionStore(0);
+		final int maxIdleTime = -1;
+		HttpSessionStore store = new MemoryHttpSessionStore(this.clock, maxIdleTime);
 
 		// Values for testing
 		final String SESSION_ID = "SESSION_ID";
+		final Instant EXPIRE_TIME = MOCK_CURRENT_TIME.plus(maxIdleTime, ChronoUnit.SECONDS);
 
 		// Record
-		this.recordReturn(this.createOperation,
-				this.createOperation.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(-1, -1, null);
-		this.control(this.createOperation).setMatcher(
-				new TypeMatcher(Long.class, Long.class, Map.class));
-		this.recordReturn(this.createOperation,
-				this.createOperation.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(-1, -1, null); // same matcher
-		this.recordReturn(this.retrieveOperation,
-				this.retrieveOperation.getSessionId(), "ANOTHER_SESSION");
+		this.recordReturn(this.createOperation, this.createOperation.getSessionId(), SESSION_ID);
+		this.createOperation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<>());
+		this.recordReturn(this.createOperation, this.createOperation.getSessionId(), SESSION_ID);
+		this.createOperation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<>());
+		this.recordReturn(this.retrieveOperation, this.retrieveOperation.getSessionId(), "ANOTHER_SESSION");
 		this.retrieveOperation.sessionNotAvailable();
 
 		// Test create, expire, can not retrieve

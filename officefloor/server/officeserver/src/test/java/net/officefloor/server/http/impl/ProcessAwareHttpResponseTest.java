@@ -153,12 +153,14 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	}
 
 	/**
-	 * Add a {@link HttpResponseCookie}.
+	 * Set a {@link HttpResponseCookie}.
 	 */
-	public void testAddCookie() throws IOException {
+	public void testSetCookie() throws IOException {
 
-		// Add cookie
-		this.response.getCookies().addCookie("test", "value");
+		// Set the cookie
+		HttpResponseCookie initial = this.response.getCookies().setCookie("test", "initial");
+		HttpResponseCookie value = this.response.getCookies().setCookie("test", "value");
+		assertSame("Should be same cookie as same name", initial, value);
 
 		// Ensure writes have HTTP header
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -380,7 +382,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.setContentType("text/html", charset);
 		this.response.getHeaders().addHeader("name", "value");
-		this.response.getCookies().addCookie("name", "value");
+		this.response.getCookies().setCookie("name", "value");
 		ServerWriter writer = this.response.getEntityWriter();
 		writer.write("TEST");
 		writer.flush();
@@ -406,7 +408,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.getHeaders().addHeader("error", "occurred");
-		this.response.getCookies().addCookie("store", "failure");
+		this.response.getCookies().setCookie("store", "failure");
 		this.response.getEntityWriter().write("ERROR: something");
 
 		// Send response (to ensure reset entity)
@@ -509,7 +511,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.setStatus(HttpStatus.NOT_FOUND);
 		this.response.getHeaders().addHeader("TEST", "VALUE");
-		this.response.getCookies().addCookie("TEST", "VALUE");
+		this.response.getCookies().setCookie("TEST", "VALUE");
 		this.response.getEntityWriter().write("TEST");
 
 		// Send escalation

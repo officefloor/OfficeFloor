@@ -179,7 +179,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		response.setStatus(HttpStatus.CREATED);
 		response.setVersion(HttpVersion.HTTP_1_0);
 		response.getHeaders().addHeader("name", "value");
-		response.getCookies().addCookie("name", "value");
+		response.getCookies().setCookie("name", "value");
 		response.setContentType("text/html", charset);
 		ServerWriter writer = response.getEntityWriter();
 		writer.write("TEST RESPONSE");
@@ -335,7 +335,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Write a response (should be reset)
 		HttpResponse response = connection.getResponse();
 		response.getHeaders().addHeader("TEST", "HEADER");
-		response.getCookies().addCookie("TEST", "COOKIE");
+		response.getCookies().setCookie("TEST", "COOKIE");
 		response.setContentType("text/html", Charset.forName("UTF-16"));
 		response.getEntityWriter().write("Content to be reset");
 
@@ -418,7 +418,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Write a response (should be reset)
 		HttpResponse response = connection.getResponse();
 		response.getHeaders().addHeader("TEST", "HEADER");
-		response.getCookies().addCookie("TEST", "COOKIE");
+		response.getCookies().setCookie("TEST", "COOKIE");
 		response.setContentType("text/html", Charset.forName("UTF-16"));
 		response.getEntityWriter().write("Content to be reset");
 
@@ -480,7 +480,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Write a response (should be reset)
 		HttpResponse response = connection.getResponse();
 		response.getHeaders().addHeader("TEST", "HEADER");
-		response.getCookies().addCookie("TEST", "COOKIE");
+		response.getCookies().setCookie("TEST", "COOKIE");
 		response.setContentType("text/html", Charset.forName("UTF-16"));
 		response.getEntityWriter().write("Content to be reset");
 

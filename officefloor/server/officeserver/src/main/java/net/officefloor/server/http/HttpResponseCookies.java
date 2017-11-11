@@ -27,17 +27,27 @@ import java.util.function.Consumer;
 public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 
 	/**
-	 * Adds a {@link HttpResponseCookie}.
+	 * <p>
+	 * Sets a {@link HttpResponseCookie}.
+	 * <p>
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
+	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
+	 * added for the name.
 	 * 
 	 * @param name
 	 *            Name.
 	 * @param value
 	 *            Value.
 	 */
-	HttpResponseCookie addCookie(String name, String value);
+	HttpResponseCookie setCookie(String name, String value);
 
 	/**
-	 * Adds a {@link HttpResponseCookie}.
+	 * <p>
+	 * Sets a {@link HttpResponseCookie}.
+	 * <p>
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
+	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
+	 * added for the name.
 	 * 
 	 * @param name
 	 *            Name.
@@ -49,11 +59,15 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 *            multiple attributes.
 	 * @return {@link HttpResponseCookie}.
 	 */
-	HttpResponseCookie addCookie(String name, String value, Consumer<HttpResponseCookie> initialiser);
+	HttpResponseCookie setCookie(String name, String value, Consumer<HttpResponseCookie> initialiser);
 
 	/**
 	 * <p>
-	 * Adds a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
+	 * Sets a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
+	 * <p>
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
+	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
+	 * added for the name.
 	 * <p>
 	 * This is typically used to update the Cookie with the client. For example,
 	 * expiring the Cookie to no longer be sent.
@@ -62,11 +76,15 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 *            {@link HttpRequestCookie}.
 	 * @return {@link HttpResponseCookie}.
 	 */
-	HttpResponseCookie addCookie(HttpRequestCookie cookie);
+	HttpResponseCookie setCookie(HttpRequestCookie cookie);
 
 	/**
 	 * <p>
-	 * Adds a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
+	 * Sets a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
+	 * <p>
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
+	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
+	 * added for the name.
 	 * 
 	 * @param cookie
 	 *            {@link HttpRequestCookie}
@@ -76,7 +94,7 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 *            multiple attributes.
 	 * @return {@link HttpResponseCookie}.
 	 */
-	HttpResponseCookie addCookie(HttpRequestCookie cookie, Consumer<HttpResponseCookie> initialiser);
+	HttpResponseCookie setCookie(HttpRequestCookie cookie, Consumer<HttpResponseCookie> initialiser);
 
 	/**
 	 * Removes the {@link HttpResponseCookie}.

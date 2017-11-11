@@ -22,6 +22,8 @@ import java.io.OutputStream;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpVersion;
 
 /**
@@ -77,6 +79,26 @@ public interface MockHttpRequestBuilder {
 	 * @return <code>this</code>.
 	 */
 	MockHttpRequestBuilder header(String name, String value);
+
+	/**
+	 * Adds a {@link HttpRequestCookie}.
+	 * 
+	 * @param name
+	 *            {@link HttpRequestCookie} name.
+	 * @param value
+	 *            {@link HttpRequestCookie} value.
+	 * @return <code>this</code>.
+	 */
+	MockHttpRequestBuilder cookie(String name, String value);
+
+	/**
+	 * Adds a {@link HttpRequestCookie}.
+	 * 
+	 * @param cookie
+	 *            {@link HttpResponseCookie} to be sent back to server.
+	 * @return <code>this</code>.
+	 */
+	MockHttpRequestBuilder cookie(HttpResponseCookie cookie);
 
 	/**
 	 * Sets the HTTP entity.
