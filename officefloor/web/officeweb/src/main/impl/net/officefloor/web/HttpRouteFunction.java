@@ -98,6 +98,17 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 			connection.getResponse().setEscalationHandler(this.escalationHandler);
 		}
 
+		// Determine if potential redirect (no import state as requests same)
+		HttpRequest request = connection.getRequest();
+		if (request == connection.getClientRequest()) {
+			// No imported state, so check for redirect
+			if (request.getCookies().getCookie("ofr") != null) {
+				// Redirect, so trigger flow to import previous state
+				System.out.println("TODO import state for " + request.getCookies().getCookie("ofr").getValue()
+						+ " for request " + request.getUri());
+			}
+		}
+
 		// Attempt to route the request
 		if (this.router.service(connection, context)) {
 			return null; // routed to servicing

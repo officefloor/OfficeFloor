@@ -249,63 +249,65 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 	 * Ensure use unqualified link as both unsecured.
 	 */
 	public void testClientPath_UnsecureConnectionWithUnsecureLink() {
-		this.doClientPathTest("/CONTEXT/path", false, "/path", false);
+		this.doClientPathTest("/CONTEXT/path", "/CONTEXT/path", false, "/path", false);
 	}
 
 	/**
 	 * Ensure use qualified link as require secure.
 	 */
 	public void testClientPath_UnsecureConnectionWithSecureLink() {
-		this.doClientPathTest("https://host.officefloor.net/CONTEXT/path", false, "/path", true);
+		this.doClientPathTest("https://host.officefloor.net/CONTEXT/path", "/CONTEXT/path", false, "/path", true);
 	}
 
 	/**
 	 * Ensure use qualified link as require not secure.
 	 */
 	public void testClientPath_SecureConnectionWithUnsecureLink() {
-		this.doClientPathTest("http://host.officefloor.net/CONTEXT/path", true, "/path", false);
+		this.doClientPathTest("http://host.officefloor.net/CONTEXT/path", "/CONTEXT/path", true, "/path", false);
 	}
 
 	/**
 	 * Ensure use unqualified link as both secure.
 	 */
 	public void testClientPath_SecureConnectionWithSecureLink() {
-		this.doClientPathTest("/CONTEXT/path", true, "/path", true);
+		this.doClientPathTest("/CONTEXT/path", "/CONTEXT/path", true, "/path", true);
 	}
 
 	/**
 	 * Ensure provide HTTP port if not standard port.
 	 */
 	public void testClientPath_HttpPort() {
-		this.doClientPathTest("http://host.officefloor.net:7878/CONTEXT/path", true, "host.officefloor.net", 7878, 7979,
-				"/path", false);
+		this.doClientPathTest("http://host.officefloor.net:7878/CONTEXT/path", "/CONTEXT/path", true,
+				"host.officefloor.net", 7878, 7979, "/path", false);
 	}
 
 	/**
 	 * Ensure provide HTTPS port if not standard port.
 	 */
 	public void testClientPath_HttpsPort() {
-		this.doClientPathTest("https://host.officefloor.net:7979/CONTEXT/path", false, "host.officefloor.net", 7878,
-				7979, "/path", true);
+		this.doClientPathTest("https://host.officefloor.net:7979/CONTEXT/path", "/CONTEXT/path", false,
+				"host.officefloor.net", 7878, 7979, "/path", true);
 	}
 
 	/**
 	 * Ensure provide appropriate unsecured client path for root.
 	 */
 	public void testClientPath_UnsecureRootPath() {
-		this.doClientPathTest("http://host.officefloor.net/CONTEXT/", true, "/", false);
+		this.doClientPathTest("http://host.officefloor.net/CONTEXT/", "/CONTEXT/", true, "/", false);
 	}
 
 	/**
 	 * Ensure provide appropriate secured client path for root.
 	 */
 	public void testClientPath_SecureRoot() {
-		this.doClientPathTest("https://host.officefloor.net/CONTEXT/", false, "/", true);
+		this.doClientPathTest("https://host.officefloor.net/CONTEXT/", "/CONTEXT/", false, "/", true);
 	}
 
 	/**
 	 * Undertakes the client path test with default details.
 	 * 
+	 * @param expectedUrl
+	 *            Expected URL.
 	 * @param expectedPath
 	 *            Expected path.
 	 * @param isSecureConnection
@@ -315,15 +317,17 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 	 * @param isSecureLink
 	 *            Indicates whether link is to be secure.
 	 */
-	private void doClientPathTest(String expectedPath, boolean isSecureConnection, String applicationPath,
-			boolean isSecureLink) {
-		this.doClientPathTest(expectedPath, isSecureConnection, "host.officefloor.net", 80, 443, applicationPath,
-				isSecureLink);
+	private void doClientPathTest(String expectedUrl, String expectedPath, boolean isSecureConnection,
+			String applicationPath, boolean isSecureLink) {
+		this.doClientPathTest(expectedUrl, expectedPath, isSecureConnection, "host.officefloor.net", 80, 443,
+				applicationPath, isSecureLink);
 	}
 
 	/**
 	 * Undertakes the client path test.
 	 * 
+	 * @param expectedUrl
+	 *            Expected URL.
 	 * @param expectedPath
 	 *            Expected path.
 	 * @param isSecureConnection
@@ -339,16 +343,17 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 	 * @param isSecureLink
 	 *            Indicates whether link is to be secure.
 	 */
-	private void doClientPathTest(String expectedPath, boolean isSecureConnection, String domain, int httpPort,
-			int httpsPort, String applicationPath, boolean isSecureLink) {
+	private void doClientPathTest(String expectedUrl, String expectedPath, boolean isSecureConnection, String domain,
+			int httpPort, int httpsPort, String applicationPath, boolean isSecureLink) {
 		try {
 
 			// Transform expected path for context
 			String contextPath = this.getContextPath();
 			contextPath = (contextPath == null ? "" : contextPath);
+			expectedUrl = expectedUrl.replace("/CONTEXT", contextPath);
 			expectedPath = expectedPath.replace("/CONTEXT", contextPath);
 
-			// Record creating the path
+			// Record creating the URL
 			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 			this.recordReturn(connection, connection.isSecure(), isSecureConnection);
 			if (isSecureConnection != isSecureLink) {
@@ -360,10 +365,12 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 			// Test
 			this.replayMockObjects();
 			HttpApplicationState application = new HttpApplicationStateManagedObjectSource(contextPath);
-			String clientPath = application.createApplicationClientUrl(isSecureLink, applicationPath, connection);
+			String clientUrl = application.createApplicationClientUrl(isSecureLink, applicationPath, connection);
+			String clientPath = application.createApplicationClientPath(applicationPath);
 			this.verifyMockObjects();
 
 			// Validate correct client path
+			assertEquals("Incorrect client URL", expectedUrl, clientUrl);
 			assertEquals("Incorrect client path", expectedPath, clientPath);
 
 		} catch (Throwable ex) {

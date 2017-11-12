@@ -37,6 +37,7 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -731,10 +732,11 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			// Provide continuation
-			HttpUrlContinuation continuation = context.link(false, "/path", MockQueryParameter.class);
+			HttpUrlContinuation continuation = context.link(true, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			WebArchitect web = context.getWebArchitect();
+			web.setContextPath("/context");
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
 			web.link(false, HttpMethod.POST, "/redirect", section.getOfficeSectionInput("service"));
 			web.link(section.getOfficeSectionOutput("redirect"), continuation, null);
@@ -743,15 +745,15 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 
 		// Send request that provides redirect
 		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest("/redirect?param=value").method(HttpMethod.POST));
+				.send(MockHttpServer.mockRequest("/context/redirect?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status", 303, response.getStatus().getStatusCode());
-		assertEquals("Incorrect redirect location", "http://mock.officefloor.net/path",
+		assertEquals("Incorrect redirect location", "https://mock.officefloor.net/context/path",
 				response.getHeader("location").getValue());
-		String cookie = response.getHeader("set-cookie").getValue();
-		assertEquals("Should have redirect cookie", "ofc=http://mock.officefloor.net/path", cookie);
+		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", "/context/path").setPath("/context/path"));
+		HttpResponseCookie cookie = response.getCookie("ofr");
 
 		// Ensure can redirect
-		response = this.server.send(MockHttpServer.mockRequest("/path").header("cookie", cookie));
+		response = this.server.send(MockHttpServer.mockRequest("/context/path").secure(true).cookie(cookie));
 		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
 		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
 	}

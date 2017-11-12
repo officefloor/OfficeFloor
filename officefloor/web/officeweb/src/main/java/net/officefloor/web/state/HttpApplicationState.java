@@ -36,7 +36,11 @@ public interface HttpApplicationState {
 	String getContextPath();
 
 	/**
+	 * <p>
 	 * Creates the client URL for this application.
+	 * <p>
+	 * This includes <code>protocol</code>, <code>domain</code> and
+	 * <code>port</code>.
 	 * 
 	 * @param isSecure
 	 *            Indicates if the URL is secure.
@@ -47,6 +51,19 @@ public interface HttpApplicationState {
 	 * @return Client URL for the application.
 	 */
 	String createApplicationClientUrl(boolean isSecure, String path, ServerHttpConnection connection);
+
+	/**
+	 * <p>
+	 * Creates the client path for this application.
+	 * <p>
+	 * This is the public path on the server, and does NOT
+	 * <code>protocol</code>, <code>domain</code> nor <code>port</code>.
+	 * 
+	 * @param path
+	 *            Path including query string and fragment for the path.
+	 * @return Client path for the application.
+	 */
+	String createApplicationClientPath(String path);
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.

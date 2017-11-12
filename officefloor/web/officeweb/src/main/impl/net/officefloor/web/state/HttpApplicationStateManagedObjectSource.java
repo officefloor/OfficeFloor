@@ -98,9 +98,7 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 	public String createApplicationClientUrl(boolean isSecure, String path, ServerHttpConnection connection) {
 
 		// Create the application path
-		if (this.contextPath != null) {
-			path = this.contextPath + path;
-		}
+		path = this.createApplicationClientPath(path);
 
 		// Determine if appropriately secure
 		if (connection.isSecure() == isSecure) {
@@ -110,6 +108,18 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 			// Full path back to server
 			return connection.getServerLocation().createClientUrl(isSecure, path);
 		}
+	}
+
+	@Override
+	public String createApplicationClientPath(String path) {
+
+		// Create the application path
+		if (this.contextPath != null) {
+			path = this.contextPath + path;
+		}
+
+		// Return the path
+		return path;
 	}
 
 	@Override

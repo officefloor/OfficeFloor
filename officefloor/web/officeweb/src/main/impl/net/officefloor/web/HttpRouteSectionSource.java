@@ -53,6 +53,7 @@ import net.officefloor.web.escalation.NotFoundHttpException;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.route.WebRouterBuilder;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpArgument;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -374,8 +375,15 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			designer.link(routeInput, route);
 		}
 
+		// Obtain the request state, session and application state
+		SectionObject requestState = designer.addSectionObject(HttpRequestState.class.getSimpleName(),
+				HttpRequestState.class.getName());
+		SectionObject session = designer.addSectionObject(HttpSession.class.getSimpleName(),
+				HttpSession.class.getName());
+		SectionObject applicationState = designer.addSectionObject(HttpApplicationState.class.getSimpleName(),
+				HttpApplicationState.class.getName());
+
 		// Link the routing to section outputs
-		SectionObject requestState = null;
 		for (RouteInput routeConfig : this.routes) {
 
 			// Obtain the route flow
@@ -401,10 +409,6 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 						.flagAsParameter();
 
 				// Configure dependency on request state
-				if (requestState == null) {
-					requestState = designer.addSectionObject(HttpRequestState.class.getSimpleName(),
-							HttpRequestState.class.getName());
-				}
 				designer.link(
 						initialise.getFunctionObject(InitialiseHttpRequestStateDependencies.HTTP_REQUEST_STATE.name()),
 						requestState);
@@ -457,6 +461,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Configure dependency on server HTTP connection
 			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.SERVER_HTTP_CONNECTION.name()),
 					serverHttpConnection);
+			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.REQUEST_STATE.name()), requestState);
+			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.SESSION_STATE.name()), session);
+			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.APPLICATION_STATE.name()),
+					applicationState);
 		}
 	}
 
@@ -620,6 +628,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			builder.addObject(ServerHttpConnection.class).setKey(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
 			builder.addObject(HttpRequestState.class).setKey(HttpRedirectDependencies.REQUEST_STATE);
 			builder.addObject(HttpSession.class).setKey(HttpRedirectDependencies.SESSION_STATE);
+			builder.addObject(HttpApplicationState.class).setKey(HttpRedirectDependencies.APPLICATION_STATE);
 		}
 	}
 

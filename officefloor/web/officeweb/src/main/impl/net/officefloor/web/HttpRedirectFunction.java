@@ -28,6 +28,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
@@ -50,7 +51,7 @@ public class HttpRedirectFunction
 	 * Dependency keys.
 	 */
 	public static enum HttpRedirectDependencies {
-		SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION_STATE
+		SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION_STATE, APPLICATION_STATE
 	}
 
 	/**
@@ -102,9 +103,13 @@ public class HttpRedirectFunction
 				.getObject(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequestState requestState = (HttpRequestState) context.getObject(HttpRedirectDependencies.REQUEST_STATE);
 		HttpSession session = (HttpSession) context.getObject(HttpRedirectDependencies.SESSION_STATE);
+		HttpApplicationState applicationState = (HttpApplicationState) context
+				.getObject(HttpRedirectDependencies.APPLICATION_STATE);
 
-		// Obtain the redirect location
-		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure, this.applicationPath);
+		// Obtain the redirect location (and application path)
+		String redirectLocation = applicationState.createApplicationClientUrl(this.isSecure, this.applicationPath,
+				connection);
+		String clientApplicationPath = applicationState.createApplicationClientPath(this.applicationPath);
 
 		// Send the redirect
 		HttpResponse response = connection.getResponse();
@@ -118,7 +123,8 @@ public class HttpRedirectFunction
 		session.setAttribute(SESSION_ATTRIBUTE_REDIRECT_MOMENTO, momento);
 
 		// Load cookie indicating redirect
-		response.getCookies().setCookie("ofr", redirectLocation).setPath(redirectLocation).setMaxAge(60);
+		response.getCookies().setCookie("ofr", clientApplicationPath,
+				(cookie) -> cookie.setPath(clientApplicationPath));
 
 		// No further functions
 		return null;
