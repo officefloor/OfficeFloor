@@ -29,7 +29,6 @@ import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 

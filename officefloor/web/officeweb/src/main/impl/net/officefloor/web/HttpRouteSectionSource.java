@@ -440,14 +440,16 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Obtain the route flow
 			String outputName = routeConfig.getOutputName();
 			SectionOutput output = designer.addSectionOutput(outputName, null, false);
-			FunctionFlow routeFlow = route.getFunctionFlow(outputName);
+
+			// Obtain the handle redirect flow (never initialises)
 			FunctionFlow handleRedirectFlow = handleRedirect.getFunctionFlow(outputName);
+			designer.link(handleRedirectFlow, output, false);
 
 			// Determine if path parameters
+			FunctionFlow routeFlow = route.getFunctionFlow(outputName);
 			if (!routeConfig.webPathFactory.isPathParameters()) {
 				// No path parameters, so link directly
 				designer.link(routeFlow, output, false);
-				designer.link(handleRedirectFlow, output, false);
 
 			} else {
 				// Path parameters, so must load to request state
@@ -456,7 +458,6 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				SectionFunction initialise = initialiseNamespace.addSectionFunction(outputName,
 						INITIALISE_REQUEST_STATE_FUNCTION_NAME);
 				designer.link(routeFlow, initialise, false);
-				designer.link(handleRedirectFlow, initialise, false);
 
 				// Configure HTTP path arguments parameter
 				initialise.getFunctionObject(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS.name())
