@@ -155,10 +155,9 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can tokenise {@link HttpCookie} values.
 	 */
 	public void testCookieParameter() {
-		HttpCookie cookie = new HttpCookie("name", "value");
-		this.loader.loadValue("cookie", cookie.toString(), HttpValueLocation.HEADER);
-		this.loader.loadValue("name", "value", HttpValueLocation.COOKIE);
-		this.doTest(HttpMethod.GET, "/path", null, "cookie", cookie.toString());
+		this.loader.loadValue("cookie", "name=value", HttpValueLocation.HEADER);
+		// Cookie not tokenised
+		this.doTest(HttpMethod.GET, "/path", null, "cookie", "name=value");
 	}
 
 	/**

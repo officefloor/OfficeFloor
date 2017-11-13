@@ -25,7 +25,6 @@ import java.util.Arrays;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpValueLocation;
@@ -200,15 +199,6 @@ public class HttpRequestTokeniser {
 				// Capture content type, for later parsing content
 				contentType = header.getValue();
 			}
-		}
-
-		// Load the cookie arguments
-		for (HttpRequestCookie cookie : request.getCookies()) {
-			name = cookie.getName();
-			value = cookie.getValue();
-
-			// Load the cookie value
-			valueLoader.loadValue(name, value, HttpValueLocation.COOKIE);
 		}
 
 		// Load content arguments

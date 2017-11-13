@@ -743,17 +743,24 @@ public class WebArchitectTest extends OfficeFrameTestCase {
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
+		// Obtain the expected serialisable identifier
+		int nextSerialisableIdentifier = new SerialisedRequestState(null).identifier + 1;
+
 		// Send request that provides redirect
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/context/redirect?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status", 303, response.getStatus().getStatusCode());
 		assertEquals("Incorrect redirect location", "https://mock.officefloor.net/context/path",
 				response.getHeader("location").getValue());
-		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", "/context/path").setPath("/context/path"));
-		HttpResponseCookie cookie = response.getCookie("ofr");
+		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", String.valueOf(nextSerialisableIdentifier))
+				.setPath("/context/path"));
+		HttpResponseCookie session = response.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME);
+		HttpResponseCookie ofr = response.getCookie(HttpRedirectFunction.REDIRECT_COOKIE_NAME);
 
 		// Ensure can redirect
-		response = this.server.send(MockHttpServer.mockRequest("/context/path").secure(true).cookie(cookie));
+		MockHttpRequestBuilder redirectRequest = MockHttpServer.mockRequest("/context/path").secure(true)
+				.cookie(session).cookie(ofr);
+		response = this.server.send(redirectRequest);
 		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
 		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
 	}

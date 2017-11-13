@@ -735,6 +735,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				value.append(cookie.name);
 				value.append("=");
 				value.append(cookie.value);
+				value.append(";");
 			}
 			return value.toString();
 		}

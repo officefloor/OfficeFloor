@@ -25,6 +25,7 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
@@ -46,6 +47,11 @@ public class HttpRedirectFunction
 	 * {@link HttpRequestState} momento.
 	 */
 	public static final String SESSION_ATTRIBUTE_REDIRECT_MOMENTO = "_redirect_";
+
+	/**
+	 * Name of {@link HttpResponseCookie} to indicate a redirect.
+	 */
+	public static final String REDIRECT_COOKIE_NAME = "ofr";
 
 	/**
 	 * Dependency keys.
@@ -119,11 +125,14 @@ public class HttpRedirectFunction
 		// Export the request state
 		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
 
+		// Create wrapping serialisable to line up with cookie
+		SerialisedRequestState serialisable = new SerialisedRequestState(momento);
+
 		// Store in session (to import on servicing redirect)
-		session.setAttribute(SESSION_ATTRIBUTE_REDIRECT_MOMENTO, momento);
+		session.setAttribute(SESSION_ATTRIBUTE_REDIRECT_MOMENTO, serialisable);
 
 		// Load cookie indicating redirect
-		response.getCookies().setCookie("ofr", clientApplicationPath,
+		response.getCookies().setCookie(REDIRECT_COOKIE_NAME, String.valueOf(serialisable.identifier),
 				(cookie) -> cookie.setPath(clientApplicationPath));
 
 		// No further functions

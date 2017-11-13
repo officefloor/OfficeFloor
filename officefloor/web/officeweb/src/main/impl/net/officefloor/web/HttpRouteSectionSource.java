@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
@@ -43,7 +42,9 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpHandleRedirectFunction.HttpHandleRedirectDependencies;
 import net.officefloor.web.HttpRedirectFunction.HttpRedirectDependencies;
 import net.officefloor.web.HttpRouteFunction.HttpRouteDependencies;
 import net.officefloor.web.InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies;
@@ -78,6 +79,16 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * Name of the route {@link ManagedFunction}.
 	 */
 	private static final String ROUTE_FUNCTION_NAME = "route";
+
+	/**
+	 * Name of the handle redirect {@link ManagedFunction}.
+	 */
+	private static final String HANDLE_REDIRECT_FUNCTION_NAME = "redirect";
+
+	/**
+	 * Name of {@link FunctionFlow} to handle redirect.
+	 */
+	private static final String HANDLE_REDIRECT_FLOW = "REDIRECT";
 
 	/**
 	 * Name of the initialise {@link HttpRequestState} {@link ManagedFunction}.
@@ -345,12 +356,23 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// All routes added via office, so now build web router
-		WebRouter router = this.builder.build();
+		WebRouter webRouter = this.builder.build();
+		int nonHandledFlowIndex = this.routes.size();
+		HttpRouter httpRouter = new HttpRouter(webRouter, nonHandledFlowIndex);
 
 		// Add the routing function
 		SectionFunctionNamespace routeNamespace = designer.addSectionFunctionNamespace("ROUTE",
-				new HttpRouteManagedFunctionSource(router));
+				new HttpRouteManagedFunctionSource(httpRouter));
 		SectionFunction route = routeNamespace.addSectionFunction(WebArchitect.HANDLER_INPUT_NAME, ROUTE_FUNCTION_NAME);
+
+		// Add the handle redirect function
+		SectionFunctionNamespace handleRedirectNamespace = designer.addSectionFunctionNamespace("REDIRECT",
+				new HttpHandleRedirectFunctionSource(httpRouter));
+		SectionFunction handleRedirect = handleRedirectNamespace.addSectionFunction(HANDLE_REDIRECT_FUNCTION_NAME,
+				HANDLE_REDIRECT_FUNCTION_NAME);
+
+		// Link redirect flow to handle redirect
+		designer.link(route.getFunctionFlow(HANDLE_REDIRECT_FLOW), handleRedirect, false);
 
 		// Determine if interception
 		SectionInput handleHttpInput = designer.addSectionInput(WebArchitect.HANDLER_INPUT_NAME, null);
@@ -375,7 +397,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			designer.link(routeInput, route);
 		}
 
-		// Obtain the request state, session and application state
+		// Obtain the connection, request state, session and application state
+		SectionObject serverHttpConnection = designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
+				ServerHttpConnection.class.getName());
 		SectionObject requestState = designer.addSectionObject(HttpRequestState.class.getSimpleName(),
 				HttpRequestState.class.getName());
 		SectionObject session = designer.addSectionObject(HttpSession.class.getSimpleName(),
@@ -389,12 +413,14 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Obtain the route flow
 			String outputName = routeConfig.getOutputName();
 			SectionOutput output = designer.addSectionOutput(outputName, null, false);
-			FunctionFlow flow = route.getFunctionFlow(outputName);
+			FunctionFlow routeFlow = route.getFunctionFlow(outputName);
+			FunctionFlow handleRedirectFlow = handleRedirect.getFunctionFlow(outputName);
 
 			// Determine if path parameters
 			if (!routeConfig.isPathParameters) {
 				// No path parameters, so link directly
-				designer.link(flow, output, false);
+				designer.link(routeFlow, output, false);
+				designer.link(handleRedirectFlow, output, false);
 
 			} else {
 				// Path parameters, so must load to request state
@@ -402,7 +428,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 						new InitialiseHttpRequestStateManagedFunctionSource());
 				SectionFunction initialise = initialiseNamespace.addSectionFunction(outputName,
 						INITIALISE_REQUEST_STATE_FUNCTION_NAME);
-				designer.link(flow, initialise, false);
+				designer.link(routeFlow, initialise, false);
+				designer.link(handleRedirectFlow, initialise, false);
 
 				// Configure HTTP path arguments parameter
 				initialise.getFunctionObject(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS.name())
@@ -419,9 +446,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		}
 
 		// Link non-handled to output
-		FunctionFlow unhandledFlow = route.getFunctionFlow(UNHANDLED_OUTPUT_NAME);
 		SectionOutput unhandled = designer.addSectionOutput(UNHANDLED_OUTPUT_NAME, null, false);
-		designer.link(unhandledFlow, unhandled, false);
+		designer.link(route.getFunctionFlow(UNHANDLED_OUTPUT_NAME), unhandled, false);
+		designer.link(handleRedirect.getFunctionFlow(UNHANDLED_OUTPUT_NAME), unhandled, false);
 
 		// Configure the not found input
 		SectionInput notFoundInput = designer.addSectionInput(NOT_FOUND_INPUT_NAME, null);
@@ -435,11 +462,19 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				NotFoundHttpException.class.getName(), true);
 		designer.link(notFound.getFunctionEscalation(NotFoundHttpException.class.getName()), notFoundEscalation, true);
 
-		// Configure dependency on server HTTP connection
-		SectionObject serverHttpConnection = designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
-				ServerHttpConnection.class.getName());
+		// Configure routing dependencies
 		designer.link(route.getFunctionObject(HttpRouteDependencies.SERVER_HTTP_CONNECTION.name()),
 				serverHttpConnection);
+
+		// Configure handle redirect dependencies
+		handleRedirect.getFunctionObject(HttpHandleRedirectDependencies.COOKIE.name()).flagAsParameter();
+		designer.link(handleRedirect.getFunctionObject(HttpHandleRedirectDependencies.SERVER_HTTP_CONNECTION.name()),
+				serverHttpConnection);
+		designer.link(handleRedirect.getFunctionObject(HttpHandleRedirectDependencies.REQUEST_STATE.name()),
+				requestState);
+		designer.link(handleRedirect.getFunctionObject(HttpHandleRedirectDependencies.SESSION.name()), session);
+
+		// Configure not found dependencies
 		designer.link(notFound.getFunctionObject(NotFoundDependencies.SERVER_HTTP_CONNECTION.name()),
 				serverHttpConnection);
 
@@ -502,17 +537,17 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	private class HttpRouteManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
-		 * {@link WebRouter}.
+		 * {@link HttpRouter}.
 		 */
-		private final WebRouter router;
+		private final HttpRouter router;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param router
-		 *            {@link WebRouter}.
+		 *            {@link HttpRouter}.
 		 */
-		private HttpRouteManagedFunctionSource(WebRouter router) {
+		private HttpRouteManagedFunctionSource(HttpRouter router) {
 			this.router = router;
 		}
 
@@ -528,28 +563,78 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
-			// Obtain the non handled flow index
-			int nonHandledFlowIndex = HttpRouteSectionSource.this.routes.size();
+			// Obtain the routes
+			List<RouteInput> routes = HttpRouteSectionSource.this.routes;
 
-			// Add the route function
+			// Obtain the handle redirect flow (size is non-handled flow)
+			int handleRedirectFlowIndex = routes.size() + 1;
+
+			// Build the function
 			ManagedFunctionTypeBuilder<HttpRouteDependencies, Indexed> builder = functionNamespaceTypeBuilder
 					.addManagedFunctionType(ROUTE_FUNCTION_NAME,
-							new HttpRouteFunction(this.router, nonHandledFlowIndex,
-									HttpRouteSectionSource.this.escalationHandler),
+							new HttpRouteFunction(HttpRouteSectionSource.this.escalationHandler,
+									handleRedirectFlowIndex, this.router),
 							HttpRouteDependencies.class, Indexed.class);
+
+			// Configure the flows for the routes
+			this.router.configureRoutes(routes, builder);
+
+			// Add handle redirect flow
+			builder.addFlow().setLabel(HANDLE_REDIRECT_FLOW);
 
 			// Configure dependency on server HTTP connection
 			builder.addObject(ServerHttpConnection.class).setKey(HttpRouteDependencies.SERVER_HTTP_CONNECTION);
+		}
+	}
 
-			// Configure the route functions
-			for (RouteInput route : HttpRouteSectionSource.this.routes) {
-				ManagedFunctionFlowTypeBuilder<Indexed> flow = builder.addFlow();
-				flow.setLabel(route.getOutputName());
-				flow.setArgumentType(HttpArgument.class);
-			}
+	/**
+	 * {@link ManagedFunctionSource} for the {@link HttpHandleRedirectFunction}.
+	 */
+	private class HttpHandleRedirectFunctionSource extends AbstractManagedFunctionSource {
 
-			// Configure the unhandled flow
-			builder.addFlow().setLabel(UNHANDLED_OUTPUT_NAME);
+		/**
+		 * {@link HttpRouter}.
+		 */
+		private final HttpRouter router;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param router
+		 *            {@link HttpRouter}.
+		 */
+		private HttpHandleRedirectFunctionSource(HttpRouter router) {
+			this.router = router;
+		}
+
+		/*
+		 * ============ ManagedFunctionSource ==============
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Obtain the routes
+			List<RouteInput> routes = HttpRouteSectionSource.this.routes;
+
+			// Build the function
+			ManagedFunctionTypeBuilder<HttpHandleRedirectDependencies, Indexed> builder = functionNamespaceTypeBuilder
+					.addManagedFunctionType(HANDLE_REDIRECT_FUNCTION_NAME, new HttpHandleRedirectFunction(this.router),
+							HttpHandleRedirectDependencies.class, Indexed.class);
+
+			// Configure the flows for the routes
+			this.router.configureRoutes(routes, builder);
+
+			// Configure dependency on server HTTP connection
+			builder.addObject(HttpRequestCookie.class).setKey(HttpHandleRedirectDependencies.COOKIE);
+			builder.addObject(ServerHttpConnection.class).setKey(HttpHandleRedirectDependencies.SERVER_HTTP_CONNECTION);
+			builder.addObject(HttpRequestState.class).setKey(HttpHandleRedirectDependencies.REQUEST_STATE);
+			builder.addObject(HttpSession.class).setKey(HttpHandleRedirectDependencies.SESSION);
 		}
 	}
 

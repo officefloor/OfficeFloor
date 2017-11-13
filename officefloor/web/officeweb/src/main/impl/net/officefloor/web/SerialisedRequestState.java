@@ -15,18 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.state;
+package net.officefloor.web;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import net.officefloor.web.build.HttpValueLocation;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
- * HTTP argument.
+ * {@link Serializable} {@link HttpRequest} state.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpArgument implements Serializable {
+public class SerialisedRequestState implements Serializable {
+
+	/**
+	 * Generates identifier for {@link SerialisedRequestState}.
+	 */
+	private static final AtomicInteger identity = new AtomicInteger(0);
 
 	/**
 	 * {@link Serializable} version.
@@ -34,39 +41,25 @@ public class HttpArgument implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Argument name.
+	 * Identifier for this {@link SerialisedRequestState}.
 	 */
-	public final String name;
+	public final int identifier;
 
 	/**
-	 * Argument value.
+	 * {@link HttpRequestState} momento.
 	 */
-	public final String value;
-
-	/**
-	 * Location that this {@link HttpArgument} was sourced.
-	 */
-	public final HttpValueLocation location;
-
-	/**
-	 * Next {@link HttpArgument}.
-	 */
-	public HttpArgument next = null;
+	public final Serializable momento;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            Argument name.
-	 * @param value
-	 *            Argument value.
-	 * @param location
-	 *            {@link HttpValueLocation}.
+	 * @param momento
 	 */
-	public HttpArgument(String name, String value, HttpValueLocation location) {
-		this.name = name;
-		this.value = value;
-		this.location = location;
+	public SerialisedRequestState(Serializable momento) {
+		this.momento = momento;
+
+		// Generate identifier
+		this.identifier = identity.incrementAndGet();
 	}
 
 }

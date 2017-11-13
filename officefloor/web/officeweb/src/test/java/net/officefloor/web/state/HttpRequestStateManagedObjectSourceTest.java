@@ -24,15 +24,18 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.HttpCookie;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -134,11 +137,11 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 		state.loadValues((name, value, location) -> {
 			arguments.add(new HttpArgument(name, value, location));
 		});
-		HttpArgument[] expectedArguments = new HttpArgument[] { new HttpArgument("c", "C", HttpValueLocation.COOKIE),
+		HttpArgument[] expectedArguments = new HttpArgument[] {
 				new HttpArgument("cookie", cookie.toString(), HttpValueLocation.HEADER),
 				new HttpArgument("header", "H", HttpValueLocation.HEADER),
-				new HttpArgument("q", "Q", HttpValueLocation.QUERY),
-				new HttpArgument("p", "P", HttpValueLocation.PATH) };
+				new HttpArgument("q", "Q", HttpValueLocation.QUERY), new HttpArgument("p", "P", HttpValueLocation.PATH),
+				new HttpArgument("c", "C", HttpValueLocation.COOKIE) };
 		assertEquals("Incorrect number of arguments", expectedArguments.length, arguments.size());
 		int index = 0;
 		for (HttpArgument expected : expectedArguments) {
@@ -229,6 +232,53 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Cloned state should stay unchanged
 		assertHttpRequestState(clonedState, "ONE", "A");
+	}
+
+	/**
+	 * Ensure the {@link HttpArgument} values from previous are re-instated.
+	 * However, no {@link HttpRequestCookie} instances are re-instated (as must
+	 * come from client).
+	 */
+	public void testEnsureHttpArgumentsReinstated() throws Throwable {
+
+		// Provide request with header and cookie
+		this.connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("/path?query=two")
+				.header("header", "three").header("Content-Type", "application/x-www-form-urlencoded")
+				.cookie("cookie", "four").entity("entity=five"));
+
+		// Initiate request state with path arguments and attribute
+		HttpRequestState requestState = this.createHttpRequestState();
+		HttpRequestStateManagedObjectSource
+				.initialiseHttpRequestState(new HttpArgument("path", "one", HttpValueLocation.PATH), requestState);
+		requestState.setAttribute("ONE", "A");
+
+		// Now request with parameters to override (except cookie)
+		this.connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("/path?query=override")
+				.header("header", "override").header("Content-Type", "application/x-www-form-urlencoded")
+				.cookie("cookie", "client").entity("entity=override"));
+
+		HttpRequestState clonedState = this.createClonedState(requestState);
+		assertHttpRequestState(clonedState, "ONE", "A");
+
+		// Ensure provided previous arguments
+		Map<String, String> values = new HashMap<>();
+		Map<String, HttpValueLocation> locations = new HashMap<>();
+		clonedState.loadValues((name, value, location) -> {
+			values.put(name, value);
+			locations.put(name, location);
+		});
+		assertEquals("Incorrect number of parameters", 6, values.size());
+		assertEquals("Must have path", "one", values.get("path"));
+		assertEquals("Incorrect path location", HttpValueLocation.PATH, locations.get("path"));
+		assertEquals("Must have query", "two", values.get("query"));
+		assertEquals("Incorrect query location", HttpValueLocation.QUERY, locations.get("query"));
+		assertEquals("Must have header", "three", values.get("header"));
+		assertEquals("Incorrect Content-Type", "application/x-www-form-urlencoded", values.get("Content-Type"));
+		assertEquals("Incorrect header location", HttpValueLocation.HEADER, locations.get("header"));
+		assertEquals("Should have client cookie", "client", values.get("cookie"));
+		assertEquals("Incorrect cookie location", HttpValueLocation.COOKIE, locations.get("cookie"));
+		assertEquals("Must have entity", "five", values.get("entity"));
+		assertEquals("Incorrect entity location", HttpValueLocation.ENTITY, locations.get("entity"));
 	}
 
 	/**

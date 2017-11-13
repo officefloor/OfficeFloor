@@ -37,6 +37,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpValueLocation;
@@ -84,13 +85,17 @@ public class HttpRequestStateManagedObjectSource
 	 */
 	public static void importHttpRequestState(Serializable momento, HttpRequestState requestState)
 			throws IllegalArgumentException {
+		// Ensure valid state momento
+		if (!(momento instanceof StateMomento)) {
+			throw new IllegalArgumentException("Invalid momento for " + HttpRequestState.class.getSimpleName());
+		}
+		StateMomento state = (StateMomento) momento;
 		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
 		mo.context.run(() -> {
-			// Ensure valid state momento
-			if (!(momento instanceof StateMomento)) {
-				throw new IllegalArgumentException("Invalid momento for " + HttpRequestState.class.getSimpleName());
-			}
-			StateMomento state = (StateMomento) momento;
+
+			// Load the arguments
+			mo.arguments = state.headArgument;
+			mo.isTokenisedRequest = true;
 
 			// Load the state
 			mo.attributes = new HashMap<String, Serializable>(state.attributes);
@@ -109,11 +114,15 @@ public class HttpRequestStateManagedObjectSource
 		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
 		return mo.context.run(() -> {
 
+			// Obtain the arguments
+			mo.ensureTokenised();
+			HttpArgument headArgument = mo.arguments;
+
 			// Create the momento state
 			Map<String, Serializable> momentoAttributes = new HashMap<String, Serializable>(mo.attributes);
 
 			// Create and return the momento
-			return new StateMomento(momentoAttributes);
+			return new StateMomento(headArgument, momentoAttributes);
 		});
 	}
 
@@ -192,11 +201,30 @@ public class HttpRequestStateManagedObjectSource
 		 *            Head path {@link HttpArgument} of the linked list of
 		 *            {@link HttpArgument} instances.
 		 */
-		public void initialise(HttpArgument pathArguments) {
+		private void initialise(HttpArgument pathArguments) {
 			this.context.run(() -> {
 				this.arguments = pathArguments;
 				return null;
 			});
+		}
+
+		/**
+		 * Ensures the {@link HttpRequest} has been tokenized.
+		 * 
+		 * @return {@link HttpRequest}.
+		 */
+		private HttpRequest ensureTokenised() {
+			HttpRequest request = this.connection.getRequest();
+			if (!this.isTokenisedRequest) {
+
+				// Tokenise out the arguments
+				HttpRequestTokeniser.tokeniseHttpRequest(request,
+						HttpRequestStateManagedObjectSource.this.argumentParsers, this);
+
+				// Request now tokenised
+				this.isTokenisedRequest = true;
+			}
+			return request;
 		}
 
 		/*
@@ -239,22 +267,18 @@ public class HttpRequestStateManagedObjectSource
 			this.context.run(() -> {
 
 				// Tokenise the HTTP request
-				if (!this.isTokenisedRequest) {
-
-					// Tokenise out the arguments
-					HttpRequest request = this.connection.getRequest();
-					HttpRequestTokeniser.tokeniseHttpRequest(request,
-							HttpRequestStateManagedObjectSource.this.argumentParsers, this);
-
-					// Request now tokenised
-					this.isTokenisedRequest = true;
-				}
+				HttpRequest request = this.ensureTokenised();
 
 				// Load the arguments
 				HttpArgument argument = this.arguments;
 				while (argument != null) {
 					valueLoader.loadValue(argument.name, argument.value, argument.location);
 					argument = argument.next;
+				}
+
+				// Always load cookies from request
+				for (HttpRequestCookie cookie : request.getCookies()) {
+					valueLoader.loadValue(cookie.getName(), cookie.getValue(), HttpValueLocation.COOKIE);
 				}
 
 				// Void return
@@ -293,6 +317,16 @@ public class HttpRequestStateManagedObjectSource
 	private static class StateMomento implements Serializable {
 
 		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Head {@link HttpArgument}.
+		 */
+		private final HttpArgument headArgument;
+
+		/**
 		 * Attributes.
 		 */
 		private final Map<String, Serializable> attributes;
@@ -300,10 +334,13 @@ public class HttpRequestStateManagedObjectSource
 		/**
 		 * Initiate.
 		 * 
+		 * @param headArgument
+		 *            Head {@link HttpArgument}.
 		 * @param attributes
 		 *            Attributes.
 		 */
-		public StateMomento(Map<String, Serializable> attributes) {
+		public StateMomento(HttpArgument headArgument, Map<String, Serializable> attributes) {
+			this.headArgument = headArgument;
 			this.attributes = attributes;
 		}
 	}

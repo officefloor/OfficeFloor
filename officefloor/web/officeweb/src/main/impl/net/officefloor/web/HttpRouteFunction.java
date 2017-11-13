@@ -24,8 +24,8 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.route.WebRouter;
 
 /**
  * {@link ManagedFunction} to route the {@link HttpRequest}.
@@ -43,34 +43,34 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	}
 
 	/**
-	 * {@link WebRouter}.
-	 */
-	private final WebRouter router;
-
-	/**
-	 * {@link Flow} index for non handled.
-	 */
-	private final int nonHandledFlowIndex;
-
-	/**
 	 * {@link HttpEscalationHandler}. May be <code>null</code>.
 	 */
 	private final HttpEscalationHandler escalationHandler;
 
 	/**
+	 * {@link Flow} index to handle a redirect.
+	 */
+	private final int handleRedirectFlowIndex;
+
+	/**
+	 * {@link HttpRouter}.
+	 */
+	private final HttpRouter router;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param router
-	 *            {@link WebRouter}.
-	 * @param nonHandledFlowIndex
-	 *            {@link Flow} index for non handled.
 	 * @param escalationHandler
 	 *            {@link HttpEscalationHandler}. May be <code>null</code>.
+	 * @param handleRedirectFlowIndex
+	 *            {@link Flow} index to handle a redirect.
+	 * @param router
+	 *            {@link HttpRouter}.
 	 */
-	public HttpRouteFunction(WebRouter router, int nonHandledFlowIndex, HttpEscalationHandler escalationHandler) {
-		this.router = router;
+	public HttpRouteFunction(HttpEscalationHandler escalationHandler, int handleRedirectFlowIndex, HttpRouter router) {
 		this.escalationHandler = escalationHandler;
-		this.nonHandledFlowIndex = nonHandledFlowIndex;
+		this.handleRedirectFlowIndex = handleRedirectFlowIndex;
+		this.router = router;
 	}
 
 	/*
@@ -98,26 +98,17 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 			connection.getResponse().setEscalationHandler(this.escalationHandler);
 		}
 
-		// Determine if potential redirect (no import state as requests same)
-		HttpRequest request = connection.getRequest();
-		if (request == connection.getClientRequest()) {
-			// No imported state, so check for redirect
-			if (request.getCookies().getCookie("ofr") != null) {
-				// Redirect, so trigger flow to import previous state
-				System.out.println("TODO import state for " + request.getCookies().getCookie("ofr").getValue()
-						+ " for request " + request.getUri());
-			}
+		// Determine if potentially redirect
+		HttpRequestCookie cookie = connection.getRequest().getCookies()
+				.getCookie(HttpRedirectFunction.REDIRECT_COOKIE_NAME);
+		if (cookie != null) {
+			// Redirect, so trigger flow to import previous state
+			context.doFlow(this.handleRedirectFlowIndex, cookie, null);
+			return null; // serviced by redirect
 		}
 
-		// Attempt to route the request
-		if (this.router.service(connection, context)) {
-			return null; // routed to servicing
-
-		} else {
-			// Not handled
-			context.doFlow(this.nonHandledFlowIndex, null, null);
-			return null; // flow invoked
-		}
+		// No redirect, so route the request
+		return this.router.route(connection, context);
 	}
 
 }
