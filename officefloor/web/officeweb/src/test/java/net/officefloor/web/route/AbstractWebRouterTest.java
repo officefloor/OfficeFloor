@@ -25,6 +25,7 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
+import net.officefloor.web.HttpPathFactory;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -32,7 +33,14 @@ import net.officefloor.web.state.HttpArgument;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebRouterTest extends OfficeFrameTestCase {
+public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
+
+	/**
+	 * Obtains the context path.
+	 * 
+	 * @return Context path.
+	 */
+	protected abstract String getContextPath();
 
 	/**
 	 * {@link ManagedFunctionContext}.
@@ -237,8 +245,7 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		MockServerHttpConnection connection = this.route(HttpMethod.POST, "/", Ti("/"));
 		MockHttpResponse response = connection.send(null);
 		assertEquals("Should not allow POST", 405, response.getStatus().getStatusCode());
-		assertEquals("Should indicate available methods", "GET, HEAD, OPTIONS",
-				response.getHeader("Allow").getValue());
+		assertEquals("Should indicate available methods", "GET, HEAD, OPTIONS", response.getHeader("Allow").getValue());
 	}
 
 	/**
@@ -251,14 +258,105 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		assertEquals("Should indicate available methods", "OPTIONS, POST", response.getHeader("Allow").getValue());
 	}
 
+	/**
+	 * Ensure can create static path.
+	 */
+	public void testPathStatic() throws Exception {
+		this.pathFactory("/path", null, "/path");
+	}
+
+	/**
+	 * Ensure can create dynamic path containing path parameters.
+	 */
+	public void testPathDynamic() throws Exception {
+		this.pathFactory("/{param}", new Values(), "/value");
+	}
+
+	/**
+	 * Ensure can create path with sub properties.
+	 */
+	public void testPathSubProperty() throws Exception {
+		this.pathFactory("/{subValue.value}", new Values(), "/sub");
+	}
+
+	/**
+	 * Ensure can create path with multiple parameters.
+	 */
+	public void testPathMultipleParameters() throws Exception {
+		this.pathFactory("/test-{subValue.value}-another/property-{param}", new Values(),
+				"/test-sub-another/property-value");
+	}
+
+	/**
+	 * Ensure notified path parameters.
+	 */
+	public void testPathMissingParameter() throws Exception {
+		try {
+			this.pathFactory("/{missing}", null, null);
+		} catch (WebPathException ex) {
+			assertEquals("Incorrect cause",
+					"For path '/{missing}', no property 'missing' on object " + Object.class.getName(),
+					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure notified path parameters.
+	 */
+	public void testPathMissingSomeParameters() throws Exception {
+		try {
+			this.pathFactory("/{param}/{missing}", new Values(), null);
+		} catch (WebPathException ex) {
+			assertEquals("Incorrect cause",
+					"For path '/{param}/{missing}', no property 'missing' on object " + Values.class.getName(),
+					ex.getMessage());
+		}
+	}
+
+	public static class Values {
+		public String getParam() {
+			return "value";
+		}
+
+		public SubValues getSubValue() {
+			return new SubValues();
+		}
+	}
+
+	public static class SubValues {
+		public String getValue() {
+			return "sub";
+		}
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		managedFunctionContext = this.createMock(ManagedFunctionContext.class);
 	}
 
-	public void route(String path, MockWebRoute... routes) {
-		this.route(HttpMethod.GET, path, routes);
+	@SuppressWarnings("unchecked")
+	public <T> void pathFactory(String routePath, T values, String expectedPath) throws Exception {
+
+		// Create the builder and build route
+		WebRouterBuilder builder = new WebRouterBuilder(this.getContextPath());
+		WebPathFactory webPathFactory = builder.addRoute(HttpMethod.GET, routePath, null);
+
+		// Create the path factory
+		HttpPathFactory<T> httpPathFactory = webPathFactory
+				.createHttpPathFactory((Class<T>) ((values == null) ? Object.class : values.getClass()));
+		String path = httpPathFactory.createPath(values);
+
+		// Validate the expected path
+		String contextPath = this.getContextPath();
+		if (contextPath != null) {
+			expectedPath = contextPath + expectedPath;
+		}
+		assertEquals("Incorrect path", expectedPath, path);
+	}
+
+	public MockServerHttpConnection route(String path, MockWebRoute... routes) {
+		return this.route(HttpMethod.GET, path, routes);
 	}
 
 	public MockServerHttpConnection route(HttpMethod method, String path, MockWebRoute... routes) {
@@ -273,16 +371,20 @@ public class WebRouterTest extends OfficeFrameTestCase {
 		}
 
 		// Build the web router (from routes)
-		WebRouterBuilder builder = new WebRouterBuilder(null);
+		String contextPath = this.getContextPath();
+		WebRouterBuilder builder = new WebRouterBuilder(contextPath);
 		for (MockWebRoute route : routes) {
-			boolean isPathParameter = builder.addRoute(route.method, route.path, route);
+			WebPathFactory webPathFactory = builder.addRoute(route.method, route.path, route);
 			boolean isParameter = route.path.contains("{");
 			assertEquals("Route " + route.path + " incorrect indication of path parameters", isParameter,
-					isPathParameter);
+					webPathFactory.isPathParameters());
 		}
 		WebRouter router = builder.build();
 
 		// Undertake the route
+		if (contextPath != null) {
+			path = contextPath + path;
+		}
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).method(method);
 		MockServerHttpConnection connection = MockHttpServer.mockConnection(request);
 		boolean isServiced = router.service(connection, managedFunctionContext);

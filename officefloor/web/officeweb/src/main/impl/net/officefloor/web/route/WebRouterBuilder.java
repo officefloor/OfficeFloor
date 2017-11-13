@@ -30,6 +30,12 @@ import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
+import net.officefloor.web.HttpPathFactory;
+import net.officefloor.web.HttpPathFactory.ParameterSegment;
+import net.officefloor.web.HttpPathFactory.Segment;
+import net.officefloor.web.HttpPathFactory.StaticSegment;
+import net.officefloor.web.value.retrieve.ValueRetriever;
+import net.officefloor.web.value.retrieve.ValueRetrieverSource;
 
 /**
  * Builds the {@link WebRouter}.
@@ -67,9 +73,12 @@ public class WebRouterBuilder {
 	 *            Path. Use <code>{param}</code> to signify path parameters.
 	 * @param handler
 	 *            {@link WebRouteHandler} for the route.
-	 * @return <code>true</code> if contains path parameters.
+	 * @return {@link WebPathFactory}.
 	 */
-	public boolean addRoute(HttpMethod method, String path, WebRouteHandler handler) {
+	public WebPathFactory addRoute(HttpMethod method, String path, WebRouteHandler handler) {
+
+		// Keep track of input path
+		final String inputPath = path;
 
 		// Ignore / at end of path
 		if ((!"/".equals(path)) && (path.endsWith("/"))) {
@@ -82,7 +91,6 @@ public class WebRouterBuilder {
 		}
 
 		// Parse out the static segments and parameters from path
-		boolean isPathParamter = false;
 		List<PathSegment> segments = new ArrayList<>();
 		int currentIndex = 0;
 		do {
@@ -112,7 +120,6 @@ public class WebRouterBuilder {
 				}
 				String parameterName = path.substring(nextParamStart + 1, nextParamEnd);
 				segments.add(new PathSegment(PathTypeEnum.PARAMETER, parameterName));
-				isPathParamter = true;
 
 				// Move to after parameter
 				currentIndex = nextParamEnd + "}".length();
@@ -125,11 +132,11 @@ public class WebRouterBuilder {
 		}
 
 		// Create and register the web route
-		WebRoute route = new WebRoute(method, segments.get(0), handler);
+		WebRoute route = new WebRoute(method, inputPath, segments.get(0), handler);
 		this.routes.add(route);
 
-		// Return whether path parameter
-		return isPathParamter;
+		// Return web path factory
+		return route;
 	}
 
 	/**
@@ -390,12 +397,17 @@ public class WebRouterBuilder {
 	/**
 	 * Route for {@link WebRouter}.
 	 */
-	private static class WebRoute {
+	private static class WebRoute implements WebPathFactory {
 
 		/**
 		 * {@link HttpMethod}.
 		 */
 		private final HttpMethod method;
+
+		/**
+		 * Route path.
+		 */
+		private final String routePath;
 
 		/**
 		 * Head {@link PathSegment} of linked list of {@link PathSegment}
@@ -409,7 +421,7 @@ public class WebRouterBuilder {
 		private final int staticCharacterCount;
 
 		/**
-		 * Number of path parameters for sourting routes.
+		 * Number of path parameters for sorting routes.
 		 */
 		private final int parameterCount;
 
@@ -434,14 +446,17 @@ public class WebRouterBuilder {
 		 * 
 		 * @param method
 		 *            {@link HttpMethod}.
+		 * @param routePath
+		 *            Route path.
 		 * @param segmentHead
 		 *            Head {@link PathSegment} of linked list of
 		 *            {@link PathSegment} instances.
 		 * @param handler
 		 *            {@link WebRouteHandler}.
 		 */
-		public WebRoute(HttpMethod method, PathSegment segmentHead, WebRouteHandler handler) {
+		public WebRoute(HttpMethod method, String routePath, PathSegment segmentHead, WebRouteHandler handler) {
 			this.method = method;
+			this.routePath = routePath;
 			this.segmentHead = segmentHead;
 			this.handler = handler;
 
@@ -468,6 +483,53 @@ public class WebRouterBuilder {
 
 			// Load the current segment
 			this.currentSegment = this.segmentHead;
+		}
+
+		/*
+		 * ================== WebPathFactory ======================
+		 */
+
+		@Override
+		public boolean isPathParameters() {
+			return this.parameterCount > 0;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws Exception {
+
+			// Create the value retriever
+			ValueRetrieverSource source = new ValueRetrieverSource(true);
+			ValueRetriever<T> valueRetriever = source.sourceValueRetriever(valuesType);
+
+			// Create the segments
+			List<Segment<T>> segments = new ArrayList<>();
+			PathSegment segment = this.segmentHead;
+			while (segment != null) {
+				switch (segment.type) {
+				case STATIC:
+					// Add the static part of path
+					segments.add(new StaticSegment<T>(segment.value));
+					break;
+				case PARAMETER:
+					// Ensure parameter value is available
+					if (valueRetriever.getTypeMethod(segment.value) == null) {
+						throw new WebPathException("For path '" + this.routePath + "', no property '" + segment.value
+								+ "' on object " + valuesType.getName());
+					}
+
+					// Add the parameter
+					segments.add(new ParameterSegment<T>(segment.value, valueRetriever));
+					break;
+				default:
+					throw new IllegalStateException(
+							WebRoute.class.getSimpleName() + " should not have segment of type " + segment.type);
+				}
+				segment = segment.next;
+			}
+
+			// Create the HTTP path factory
+			return new HttpPathFactory<T>(valuesType, segments.toArray(new Segment[segments.size()]));
 		}
 	}
 

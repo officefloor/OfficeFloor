@@ -51,10 +51,10 @@ import net.officefloor.web.InitialiseHttpRequestStateFunction.InitialiseHttpRequ
 import net.officefloor.web.NotFoundFunction.NotFoundDependencies;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.escalation.NotFoundHttpException;
+import net.officefloor.web.route.WebPathFactory;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.route.WebRouterBuilder;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpArgument;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -163,9 +163,14 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		private final String path;
 
 		/**
+		 * {@link WebPathFactory}.
+		 */
+		private final WebPathFactory webPathFactory;
+
+		/**
 		 * Indicates if path parameters for the route.
 		 */
-		private final boolean isPathParameters;
+		// private final boolean isPathParameters;
 
 		/**
 		 * Instantiate.
@@ -176,16 +181,14 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 *            {@link HttpMethod} for the route.
 		 * @param path
 		 *            Path for the route.
-		 * @param routeBuilder
-		 *            {@link WebRouterBuilder}.
-		 * @param isPathParameters
-		 *            Indicates if path parameters for the route.
+		 * @param webPathFactory
+		 *            {@link WebPathFactory}.
 		 */
-		private RouteInput(int flowIndex, HttpMethod method, String path, boolean isPathParameters) {
+		private RouteInput(int flowIndex, HttpMethod method, String path, WebPathFactory webPathFactory) {
 			this.flowIndex = flowIndex;
 			this.method = method;
 			this.path = path;
-			this.isPathParameters = isPathParameters;
+			this.webPathFactory = webPathFactory;
 		}
 
 		/**
@@ -195,6 +198,15 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 */
 		public String getOutputName() {
 			return this.flowIndex + "_" + method.getName() + "_" + this.path;
+		}
+
+		/**
+		 * Obtains the {@link WebPathFactory} for this route.
+		 * 
+		 * @return {@link WebPathFactory} for this route.
+		 */
+		public WebPathFactory getWebPathFactory() {
+			return this.webPathFactory;
 		}
 	}
 
@@ -209,9 +221,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		private final boolean isSecure;
 
 		/**
-		 * Application path for the redirect.
+		 * {@link HttpPathFactory}.
 		 */
-		private final String applicationPath;
+		private final HttpPathFactory<?> httpPathFactory;
 
 		/**
 		 * Name of the {@link SectionInput} to handle the redirect.
@@ -223,14 +235,17 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 * 
 		 * @param isSecure
 		 *            Indicates if redirect to a secure port.
-		 * @param applicationPath
-		 *            Application path for the redirect.
+		 * @param webPathFactory
+		 *            {@link WebPathFactory} for this redirect.
 		 * @param inputName
 		 *            Name of the {@link SectionInput} to handle the redirect.
+		 * @param parameterType
+		 *            Type of parameter passed to the {@link ManagedFunction} to
+		 *            retrieve the values to construct the path.
 		 */
-		private Redirect(boolean isSecure, String applicationPath, String inputName) {
+		private Redirect(boolean isSecure, HttpPathFactory<?> httpPathFactory, String inputName) {
 			this.isSecure = isSecure;
-			this.applicationPath = applicationPath;
+			this.httpPathFactory = httpPathFactory;
 			this.inputName = inputName;
 		}
 
@@ -309,10 +324,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		int flowIndex = this.routes.size();
 
 		// Add the route
-		boolean isPathParameters = this.builder.addRoute(method, path, new WebRouteHandlerImpl(flowIndex));
+		WebPathFactory webPathFactory = this.builder.addRoute(method, path, new WebRouteHandlerImpl(flowIndex));
 
 		// Track route information for configuration
-		RouteInput input = new RouteInput(flowIndex, method, path, isPathParameters);
+		RouteInput input = new RouteInput(flowIndex, method, path, webPathFactory);
 		this.routes.add(input);
 
 		// Return the route input
@@ -326,18 +341,32 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 *            Indicates to redirect to a secure port.
 	 * @param applicationPath
 	 *            Application path for the redirect.
+	 * @param parameterType
+	 *            Type of parameter passed to the redirect
+	 *            {@link ManagedFunction} to source values for constructing the
+	 *            path. May be <code>null</code>.
 	 * @return {@link Redirect}.
+	 * @throws Exception
+	 *             If fails to add the redirect.
 	 */
-	public Redirect addRedirect(boolean isSecure, String applicationPath) {
+	public Redirect addRedirect(boolean isSecure, RouteInput routeInput, Class<?> parameterType) throws Exception {
+
+		// Determine if redirect already exists by details
+		System.out.println("TODO determine if redirect already exists by details");
 
 		// Obtain the redirect index (to keep name unique)
 		int redirectIndex = this.redirects.size();
 
+		// Create the HTTP path factory (defaulting type to object)
+		parameterType = (parameterType == null) ? Object.class : parameterType;
+		HttpPathFactory<?> httpPathFactory = routeInput.webPathFactory.createHttpPathFactory(parameterType);
+
 		// Create the redirect input name
-		String inputName = "REDIRECT_" + redirectIndex + (isSecure ? "_SECURE_" : "_") + applicationPath;
+		String inputName = "REDIRECT_" + redirectIndex + (isSecure ? "_SECURE_" : "_") + routeInput.path
+				+ (parameterType == null ? "" : "_" + parameterType.getName());
 
 		// Create and register the redirect
-		Redirect redirect = new Redirect(isSecure, applicationPath, inputName);
+		Redirect redirect = new Redirect(isSecure, httpPathFactory, inputName);
 		this.redirects.add(redirect);
 
 		// Return the redirect
@@ -404,8 +433,6 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				HttpRequestState.class.getName());
 		SectionObject session = designer.addSectionObject(HttpSession.class.getSimpleName(),
 				HttpSession.class.getName());
-		SectionObject applicationState = designer.addSectionObject(HttpApplicationState.class.getSimpleName(),
-				HttpApplicationState.class.getName());
 
 		// Link the routing to section outputs
 		for (RouteInput routeConfig : this.routes) {
@@ -417,7 +444,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			FunctionFlow handleRedirectFlow = handleRedirect.getFunctionFlow(outputName);
 
 			// Determine if path parameters
-			if (!routeConfig.isPathParameters) {
+			if (!routeConfig.webPathFactory.isPathParameters()) {
 				// No path parameters, so link directly
 				designer.link(routeFlow, output, false);
 				designer.link(handleRedirectFlow, output, false);
@@ -494,12 +521,11 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			designer.link(redirectInput, redirection);
 
 			// Configure dependency on server HTTP connection
+			redirection.getFunctionObject(HttpRedirectDependencies.PATH_VALUES.name()).flagAsParameter();
 			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.SERVER_HTTP_CONNECTION.name()),
 					serverHttpConnection);
 			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.REQUEST_STATE.name()), requestState);
 			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.SESSION_STATE.name()), session);
-			designer.link(redirection.getFunctionObject(HttpRedirectDependencies.APPLICATION_STATE.name()),
-					applicationState);
 		}
 	}
 
@@ -702,18 +728,19 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 			// Create the function and obtain it's name
 			final String functionName = this.redirect.inputName;
-			HttpRedirectFunction function = new HttpRedirectFunction(this.redirect.isSecure,
-					this.redirect.applicationPath);
+			HttpRedirectFunction<?> function = new HttpRedirectFunction<>(this.redirect.isSecure,
+					this.redirect.httpPathFactory);
 
 			// Add the redirect function
 			ManagedFunctionTypeBuilder<HttpRedirectDependencies, None> builder = functionNamespaceTypeBuilder
 					.addManagedFunctionType(functionName, function, HttpRedirectDependencies.class, None.class);
 
 			// Configure dependencies
+			builder.addObject(this.redirect.httpPathFactory.getValuesType())
+					.setKey(HttpRedirectDependencies.PATH_VALUES);
 			builder.addObject(ServerHttpConnection.class).setKey(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
 			builder.addObject(HttpRequestState.class).setKey(HttpRedirectDependencies.REQUEST_STATE);
 			builder.addObject(HttpSession.class).setKey(HttpRedirectDependencies.SESSION_STATE);
-			builder.addObject(HttpApplicationState.class).setKey(HttpRedirectDependencies.APPLICATION_STATE);
 		}
 	}
 

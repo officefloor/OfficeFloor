@@ -449,13 +449,21 @@ public class WebArchitectEmployer implements WebArchitect {
 			// Determine if URL continuation
 			if ((input.isUrlContinuation) && (input.redirects.size() > 0)) {
 
-				// Create the redirect
-				Redirect redirect = routing.addRedirect(input.isSecure, input.applicationPath);
-
 				// Configure the redirect continuation
-				OfficeSectionInput redirectInput = routingSection.getOfficeSectionInput(redirect.getInputName());
 				for (RedirectContinuation continuation : input.redirects) {
-					this.officeArchitect.link(continuation.output, redirectInput);
+					try {
+
+						// Create the redirect
+						Redirect redirect = routing.addRedirect(input.isSecure, routeInput, continuation.parameterType);
+						OfficeSectionInput redirectInput = routingSection
+								.getOfficeSectionInput(redirect.getInputName());
+
+						// Link the continuation to redirect
+						this.officeArchitect.link(continuation.output, redirectInput);
+
+					} catch (Exception ex) {
+						this.officeArchitect.addIssue("Failed to create redirect", ex);
+					}
 				}
 			}
 		}

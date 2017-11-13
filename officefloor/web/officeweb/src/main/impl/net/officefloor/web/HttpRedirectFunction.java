@@ -38,7 +38,7 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRedirectFunction
+public class HttpRedirectFunction<T>
 		implements ManagedFunctionFactory<HttpRedirectFunction.HttpRedirectDependencies, None>,
 		ManagedFunction<HttpRedirectFunction.HttpRedirectDependencies, None> {
 
@@ -57,7 +57,7 @@ public class HttpRedirectFunction
 	 * Dependency keys.
 	 */
 	public static enum HttpRedirectDependencies {
-		SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION_STATE, APPLICATION_STATE
+		PATH_VALUES, SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION_STATE
 	}
 
 	/**
@@ -71,21 +71,21 @@ public class HttpRedirectFunction
 	private final boolean isSecure;
 
 	/**
-	 * Application path.
+	 * {@link HttpPathFactory}.
 	 */
-	private final String applicationPath;
+	private final HttpPathFactory<T> pathFactory;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param isSecure
 	 *            Indicates if redirect to secure port.
-	 * @param applicationPath
-	 *            Application path.
+	 * @param pathFactory
+	 *            {@link HttpPathFactory}.
 	 */
-	public HttpRedirectFunction(boolean isSecure, String applicationPath) {
+	public HttpRedirectFunction(boolean isSecure, HttpPathFactory<T> pathFactory) {
 		this.isSecure = isSecure;
-		this.applicationPath = applicationPath;
+		this.pathFactory = pathFactory;
 	}
 
 	/*
@@ -102,20 +102,19 @@ public class HttpRedirectFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<HttpRedirectDependencies, None> context) {
+	@SuppressWarnings("unchecked")
+	public Object execute(ManagedFunctionContext<HttpRedirectDependencies, None> context) throws Exception {
 
 		// Obtain the dependencies
+		T pathValues = (T) context.getObject(HttpRedirectDependencies.PATH_VALUES);
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(HttpRedirectDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequestState requestState = (HttpRequestState) context.getObject(HttpRedirectDependencies.REQUEST_STATE);
 		HttpSession session = (HttpSession) context.getObject(HttpRedirectDependencies.SESSION_STATE);
-		HttpApplicationState applicationState = (HttpApplicationState) context
-				.getObject(HttpRedirectDependencies.APPLICATION_STATE);
 
 		// Obtain the redirect location (and application path)
-		String redirectLocation = applicationState.createApplicationClientUrl(this.isSecure, this.applicationPath,
-				connection);
-		String clientApplicationPath = applicationState.createApplicationClientPath(this.applicationPath);
+		String applicationPath = this.pathFactory.createPath(pathValues);
+		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure, applicationPath);
 
 		// Send the redirect
 		HttpResponse response = connection.getResponse();
@@ -133,7 +132,7 @@ public class HttpRedirectFunction
 
 		// Load cookie indicating redirect
 		response.getCookies().setCookie(REDIRECT_COOKIE_NAME, String.valueOf(serialisable.identifier),
-				(cookie) -> cookie.setPath(clientApplicationPath));
+				(cookie) -> cookie.setPath(applicationPath));
 
 		// No further functions
 		return null;

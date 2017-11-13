@@ -166,14 +166,12 @@ public class ValueRetrieverSource {
 	private boolean isCaseInsensitive;
 
 	/**
-	 * Initialises.
+	 * Instantiate.
 	 * 
 	 * @param isCaseInsensitive
 	 *            Indicates if property name comparison is case insensitive.
-	 * @throws Exception
-	 *             If fails to specify case sensitivity.
 	 */
-	public ValueRetrieverSource(boolean isCaseInsensitive) throws Exception {
+	public ValueRetrieverSource(boolean isCaseInsensitive) {
 		this.isCaseInsensitive = isCaseInsensitive;
 	}
 

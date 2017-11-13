@@ -18,8 +18,8 @@
 package net.officefloor.web.value.retrieve;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Meta-data for the property.
@@ -41,7 +41,7 @@ public class PropertyMetaData {
 	/**
 	 * Mapping of {@link Method} to the particular type.
 	 */
-	private final Map<Class<?>, Method> typeToMethod = new HashMap<Class<?>, Method>();
+	private final Map<Class<?>, Method> typeToMethod = new ConcurrentHashMap<Class<?>, Method>();
 
 	/**
 	 * Properties on the resulting property object.
@@ -58,8 +58,7 @@ public class PropertyMetaData {
 	 * @param properties
 	 *            Properties on the resulting property object.
 	 */
-	public PropertyMetaData(String propertyName, Method typeMethod,
-			PropertyMetaData[] properties) {
+	public PropertyMetaData(String propertyName, Method typeMethod, PropertyMetaData[] properties) {
 		this.propertyName = propertyName;
 		this.typeMethod = typeMethod;
 		this.properties = properties;
@@ -95,7 +94,7 @@ public class PropertyMetaData {
 	 * @throws Exception
 	 *             If fails to obtain the {@link Method}.
 	 */
-	public synchronized Method getMethod(Class<?> type) throws Exception {
+	public Method getMethod(Class<?> type) throws Exception {
 
 		// Lazy obtain the method
 		Method method = this.typeToMethod.get(type);
