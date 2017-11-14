@@ -27,7 +27,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.WebArchitectEmployer;
-import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 
@@ -38,6 +38,28 @@ import net.officefloor.web.build.WebArchitect;
  * @author Daniel Sagenschneider
  */
 public class WebCompileOfficeFloor extends CompileOfficeFloor {
+
+	/**
+	 * Context path. May be <code>null</code>.
+	 */
+	private final String contextPath;
+
+	/**
+	 * Instantiate with no context path.
+	 */
+	public WebCompileOfficeFloor() {
+		this(null);
+	}
+
+	/**
+	 * Instantiate with context path.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 */
+	public WebCompileOfficeFloor(String contextPath) {
+		this.contextPath = contextPath;
+	}
 
 	/**
 	 * Adds a {@link CompileWebExtension}.
@@ -60,7 +82,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 	/**
 	 * {@link CompileWebContext} implementation.
 	 */
-	private static class CompileWebContextImpl implements CompileWebContext {
+	private class CompileWebContextImpl implements CompileWebContext {
 
 		/**
 		 * {@link CompileOfficeContext}.
@@ -83,7 +105,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 
 			// Always employ the web architect
 			this.webArchitect = WebArchitectEmployer.employWebArchitect(this.officeContext.getOfficeArchitect(),
-					this.officeContext.getOfficeSourceContext());
+					WebCompileOfficeFloor.this.contextPath);
 		}
 
 		/*
@@ -132,7 +154,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		}
 
 		@Override
-		public HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass) {
+		public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass) {
 
 			// Add the section
 			OfficeSection section = this.addSection(httpMethod.getName() + "_" + applicationPath, sectionClass);

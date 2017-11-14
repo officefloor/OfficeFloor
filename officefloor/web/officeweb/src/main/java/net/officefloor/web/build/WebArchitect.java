@@ -52,14 +52,6 @@ public abstract interface WebArchitect {
 	static String HANDLER_INPUT_NAME = "HANDLE_HTTP_INPUT";
 
 	/**
-	 * Specifies the context path for the application.
-	 * 
-	 * @param contextPath
-	 *            Context path for the application.
-	 */
-	void setContextPath(String contextPath);
-
-	/**
 	 * <p>
 	 * Manually adds a {@link HttpObjectParserFactory}.
 	 * <p>
@@ -234,10 +226,9 @@ public abstract interface WebArchitect {
 	 *            URL path of the application to be linked.
 	 * @param sectionInput
 	 *            {@link OfficeSectionInput} servicing the URI.
-	 * @return {@link HttpInputBuilder}.
+	 * @return {@link HttpInput}.
 	 */
-	HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
-			OfficeSectionInput sectionInput);
+	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to the {@link HttpUrlContinuation}.
@@ -252,13 +243,6 @@ public abstract interface WebArchitect {
 	 *            {@link HttpUrlContinuation} path contains no parameters.
 	 */
 	void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType);
-
-	/**
-	 * Obtains the configured {@link HttpInput} instances for the application.
-	 * 
-	 * @return Configured {@link HttpInput} instances.
-	 */
-	HttpInput[] getHttpInputs();
 
 	/**
 	 * <p>

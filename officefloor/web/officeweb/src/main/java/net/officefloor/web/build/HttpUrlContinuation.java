@@ -17,21 +17,10 @@
  */
 package net.officefloor.web.build;
 
-import java.net.HttpCookie;
-
 /**
  * HTTP URL continuation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpUrlContinuation {
-
-	/**
-	 * Adds a parameter from a {@link HttpCookie}.
-	 * 
-	 * @param name
-	 *            Name of parameter.
-	 */
-	HttpParameterBuilder addCookieParameter(String name);
-
+public interface HttpUrlContinuation extends HttpInput {
 }

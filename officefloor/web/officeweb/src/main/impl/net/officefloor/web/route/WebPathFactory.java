@@ -17,10 +17,10 @@
  */
 package net.officefloor.web.route;
 
-import net.officefloor.web.HttpPathFactory;
+import net.officefloor.web.HttpPathFactoryImpl;
 
 /**
- * Factory for the creation of the {@link HttpPathFactory}.
+ * Factory for the creation of the {@link HttpPathFactoryImpl}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -38,11 +38,11 @@ public interface WebPathFactory {
 	 * 
 	 * @param valuesType
 	 *            Type of object that will be provided to retrieve values from.
-	 * @return {@link HttpPathFactory}.
+	 * @return {@link HttpPathFactoryImpl}.
 	 * @throws Exception
-	 *             If unable to create {@link HttpPathFactory} from the values
+	 *             If unable to create {@link HttpPathFactoryImpl} from the values
 	 *             type.
 	 */
-	<T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws Exception;
+	<T> HttpPathFactoryImpl<T> createHttpPathFactory(Class<T> valuesType) throws Exception;
 
 }

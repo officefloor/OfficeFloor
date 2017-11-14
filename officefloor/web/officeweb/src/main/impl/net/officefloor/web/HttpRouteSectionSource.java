@@ -221,9 +221,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		private final boolean isSecure;
 
 		/**
-		 * {@link HttpPathFactory}.
+		 * {@link HttpPathFactoryImpl}.
 		 */
-		private final HttpPathFactory<?> httpPathFactory;
+		private final HttpPathFactoryImpl<?> httpPathFactory;
 
 		/**
 		 * Name of the {@link SectionInput} to handle the redirect.
@@ -243,7 +243,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 *            Type of parameter passed to the {@link ManagedFunction} to
 		 *            retrieve the values to construct the path.
 		 */
-		private Redirect(boolean isSecure, HttpPathFactory<?> httpPathFactory, String inputName) {
+		private Redirect(boolean isSecure, HttpPathFactoryImpl<?> httpPathFactory, String inputName) {
 			this.isSecure = isSecure;
 			this.httpPathFactory = httpPathFactory;
 			this.inputName = inputName;
@@ -359,7 +359,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 		// Create the HTTP path factory (defaulting type to object)
 		parameterType = (parameterType == null) ? Object.class : parameterType;
-		HttpPathFactory<?> httpPathFactory = routeInput.webPathFactory.createHttpPathFactory(parameterType);
+		HttpPathFactoryImpl<?> httpPathFactory = routeInput.webPathFactory.createHttpPathFactory(parameterType);
 
 		// Create the redirect input name
 		String inputName = "REDIRECT_" + redirectIndex + (isSecure ? "_SECURE_" : "_") + routeInput.path

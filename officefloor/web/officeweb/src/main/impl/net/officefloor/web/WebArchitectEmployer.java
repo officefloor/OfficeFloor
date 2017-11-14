@@ -29,6 +29,7 @@ import java.util.function.Function;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -39,20 +40,17 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
 import net.officefloor.web.HttpRouteSectionSource.Redirect;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
 import net.officefloor.web.build.HttpArgumentParser;
-import net.officefloor.web.build.HttpContentParametersBuilder;
 import net.officefloor.web.build.HttpInput;
-import net.officefloor.web.build.HttpInputBuilder;
-import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
-import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
-import net.officefloor.web.build.HttpParameterBuilder;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
@@ -75,23 +73,53 @@ import net.officefloor.web.tokenise.FormHttpArgumentParser;
 public class WebArchitectEmployer implements WebArchitect {
 
 	/**
+	 * Name of {@link Property} specifying the context path.
+	 */
+	public static final String PROPERTY_CONTEXT_PATH = "context.path";
+
+	/**
 	 * Employs a {@link WebArchitect}.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 *            {@link OfficeSourceContext} used to source {@link Property}
+	 *            values to configure the {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(OfficeArchitect officeArchitect,
 			OfficeSourceContext officeSourceContext) {
-		return new WebArchitectEmployer(officeArchitect, officeSourceContext);
+
+		// Obtain the context path
+		String contextPath = officeSourceContext.getProperty(PROPERTY_CONTEXT_PATH, null);
+
+		// Employ the web architect
+		return employWebArchitect(officeArchitect, contextPath);
+	}
+
+	/**
+	 * Employs a {@link WebArchitect}.
+	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param contextPath
+	 *            Context path for the web application. May be <code>null</code>
+	 *            for no context path.
+	 * @return {@link WebArchitect}.
+	 */
+	public static WebArchitect employWebArchitect(OfficeArchitect officeArchitect, String contextPath) {
+		return new WebArchitectEmployer(officeArchitect, contextPath);
 	}
 
 	/**
 	 * {@link OfficeArchitect}.
 	 */
 	private final OfficeArchitect officeArchitect;
+
+	/**
+	 * Context path. May be <code>null</code> for no context path.
+	 */
+	private final String contextPath;
 
 	/**
 	 * Registry of HTTP arguments to its {@link OfficeManagedObject}.
@@ -138,9 +166,9 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final List<HttpObjectResponderFactory> objectResponderFactories = new LinkedList<>();
 
 	/**
-	 * {@link HttpInputBuilderImpl} instances.
+	 * {@link HttpInputImpl} instances.
 	 */
-	private final List<HttpInputBuilderImpl> inputs = new LinkedList<>();
+	private final List<HttpInputImpl> inputs = new LinkedList<>();
 
 	/**
 	 * {@link Interceptor} instances.
@@ -153,20 +181,17 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final List<ChainedServicer> chainedServicers = new LinkedList<>();
 
 	/**
-	 * Context path.
-	 */
-	private String contextPath = null;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 * @param contextPath
+	 *            Context path for the web application. May be <code>null</code>
+	 *            for no context path.
 	 */
-	private WebArchitectEmployer(OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
+	private WebArchitectEmployer(OfficeArchitect officeArchitect, String contextPath) {
 		this.officeArchitect = officeArchitect;
+		this.contextPath = contextPath;
 	}
 
 	/**
@@ -301,11 +326,6 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public void setContextPath(String contextPath) {
-		this.contextPath = contextPath;
-	}
-
-	@Override
 	public void addHttpObjectParser(HttpObjectParserFactory objectParserFactory) {
 		this.singletonObjectParserList.add(objectParserFactory);
 	}
@@ -341,29 +361,23 @@ public class WebArchitectEmployer implements WebArchitect {
 
 	@Override
 	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
-		HttpInputBuilderImpl continuation = new HttpInputBuilderImpl(isSecure, applicationPath, sectionInput);
+		HttpInputImpl continuation = new HttpInputImpl(isSecure, applicationPath, sectionInput);
 		this.inputs.add(continuation);
 		return continuation;
 	}
 
 	@Override
-	public HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
+	public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
 			OfficeSectionInput sectionInput) {
-		HttpInputBuilderImpl input = new HttpInputBuilderImpl(isSecure, httpMethod, applicationPath, sectionInput);
+		HttpInputImpl input = new HttpInputImpl(isSecure, httpMethod, applicationPath, sectionInput);
 		this.inputs.add(input);
 		return input;
 	}
 
 	@Override
 	public void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType) {
-		HttpInputBuilderImpl input = (HttpInputBuilderImpl) continuation;
+		HttpInputImpl input = (HttpInputImpl) continuation;
 		input.redirects.add(new RedirectContinuation(output, parameterType));
-	}
-
-	@Override
-	public HttpInput[] getHttpInputs() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -437,7 +451,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Configure the routing
-		for (HttpInputBuilderImpl input : this.inputs) {
+		for (HttpInputImpl input : this.inputs) {
 
 			// Add the route
 			RouteInput routeInput = routing.addRoute(input.method, input.applicationPath);
@@ -610,9 +624,9 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	/**
-	 * {@link HttpInputBuilder} implementation.
+	 * {@link HttpInput} implementation.
 	 */
-	private static class HttpInputBuilderImpl implements HttpInputBuilder, HttpUrlContinuation {
+	private static class HttpInputImpl implements HttpInput, HttpUrlContinuation {
 
 		/**
 		 * Indicates if {@link HttpUrlContinuation}.
@@ -655,7 +669,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		 * @param sectionInput
 		 *            Handling {@link OfficeSectionInput}.
 		 */
-		public HttpInputBuilderImpl(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
+		public HttpInputImpl(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
 			this.isUrlContinuation = true;
 			this.isSecure = isSecure;
 			this.method = HttpMethod.GET;
@@ -664,7 +678,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		/**
-		 * Instantiate as {@link HttpInputBuilder}.
+		 * Instantiate as {@link HttpInput}.
 		 * 
 		 * @param isSecure
 		 *            Indicates if secure.
@@ -675,7 +689,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		 * @param sectionInput
 		 *            Handling {@link OfficeSectionInput}.
 		 */
-		public HttpInputBuilderImpl(boolean isSecure, HttpMethod method, String applicationPath,
+		public HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath,
 				OfficeSectionInput sectionInput) {
 			this.isUrlContinuation = false;
 			this.isSecure = isSecure;
@@ -685,55 +699,13 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		/*
-		 * ================== HttpInputBuilder ====================
+		 * ================== HttpInput ====================
 		 */
 
 		@Override
-		public HttpParameterBuilder addQueryParameter(String name) {
+		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws HttpException {
 			// TODO Auto-generated method stub
 			return null;
-		}
-
-		@Override
-		public HttpParameterBuilder addHeaderParameter(String name) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public HttpParameterBuilder addCookieParameter(String name) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public HttpContentParametersBuilder addEntityParameters(HttpArgumentParser argumentParser) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public void addRequestObject(HttpObjectParser<?> objectParser) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void addResponseContentType(String contentType) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void addResponseObject(HttpObjectResponder<?> objectResponder) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void addAnnotation(Object annotation) {
-			// TODO Auto-generated method stub
-
 		}
 	}
 

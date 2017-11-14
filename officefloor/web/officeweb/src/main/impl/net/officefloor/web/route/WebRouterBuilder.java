@@ -30,10 +30,10 @@ import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
-import net.officefloor.web.HttpPathFactory;
-import net.officefloor.web.HttpPathFactory.ParameterSegment;
-import net.officefloor.web.HttpPathFactory.Segment;
-import net.officefloor.web.HttpPathFactory.StaticSegment;
+import net.officefloor.web.HttpPathFactoryImpl;
+import net.officefloor.web.HttpPathFactoryImpl.ParameterSegment;
+import net.officefloor.web.HttpPathFactoryImpl.Segment;
+import net.officefloor.web.HttpPathFactoryImpl.StaticSegment;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 import net.officefloor.web.value.retrieve.ValueRetrieverSource;
 
@@ -496,7 +496,7 @@ public class WebRouterBuilder {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws Exception {
+		public <T> HttpPathFactoryImpl<T> createHttpPathFactory(Class<T> valuesType) throws Exception {
 
 			// Create the value retriever
 			ValueRetrieverSource source = new ValueRetrieverSource(true);
@@ -529,7 +529,7 @@ public class WebRouterBuilder {
 			}
 
 			// Create the HTTP path factory
-			return new HttpPathFactory<T>(valuesType, segments.toArray(new Segment[segments.size()]));
+			return new HttpPathFactoryImpl<T>(valuesType, segments.toArray(new Segment[segments.size()]));
 		}
 	}
 

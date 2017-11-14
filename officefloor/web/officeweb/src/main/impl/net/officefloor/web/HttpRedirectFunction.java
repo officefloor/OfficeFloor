@@ -70,9 +70,9 @@ public class HttpRedirectFunction<T>
 	private final boolean isSecure;
 
 	/**
-	 * {@link HttpPathFactory}.
+	 * {@link HttpPathFactoryImpl}.
 	 */
-	private final HttpPathFactory<T> pathFactory;
+	private final HttpPathFactoryImpl<T> pathFactory;
 
 	/**
 	 * Instantiate.
@@ -80,9 +80,9 @@ public class HttpRedirectFunction<T>
 	 * @param isSecure
 	 *            Indicates if redirect to secure port.
 	 * @param pathFactory
-	 *            {@link HttpPathFactory}.
+	 *            {@link HttpPathFactoryImpl}.
 	 */
-	public HttpRedirectFunction(boolean isSecure, HttpPathFactory<T> pathFactory) {
+	public HttpRedirectFunction(boolean isSecure, HttpPathFactoryImpl<T> pathFactory) {
 		this.isSecure = isSecure;
 		this.pathFactory = pathFactory;
 	}

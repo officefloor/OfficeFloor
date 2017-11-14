@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.test;
 
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.web.build.HttpInputBuilder;
+import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 
@@ -63,8 +63,8 @@ public interface CompileWebContext extends CompileOfficeContext {
 	 *            Application path.
 	 * @param sectionClass
 	 *            {@link Class} containing a <code>service</code> method.
-	 * @return {@link HttpInputBuilder}.
+	 * @return {@link HttpInput}.
 	 */
-	HttpInputBuilder link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass);
+	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass);
 
 }
