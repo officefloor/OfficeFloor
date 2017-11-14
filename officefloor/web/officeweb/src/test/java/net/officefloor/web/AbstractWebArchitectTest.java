@@ -380,9 +380,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure construct static path
 		assertEquals("Incorrect path with no values", "/static/path",
-				input.value.createHttpPathFactory(null).createApplicationPath(null));
+				input.value.createHttpPathFactory(null).createApplicationClientPath(null));
 		assertEquals("Incorrect path ignoring values", "/static/path",
-				input.value.createHttpPathFactory(PathValues.class).createApplicationPath(new PathValues()));
+				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()));
 	}
 
 	public static class PathValues {
@@ -407,7 +407,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure construct dynamic path
 		assertEquals("Incorrect path ignoring values", "/dynamic/value",
-				input.value.createHttpPathFactory(PathValues.class).createApplicationPath(new PathValues()));
+				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()));
 
 		// Ensure not able to construct path missing values
 		try {

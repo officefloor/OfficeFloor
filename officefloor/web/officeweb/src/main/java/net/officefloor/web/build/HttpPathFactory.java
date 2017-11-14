@@ -27,7 +27,12 @@ import net.officefloor.server.http.HttpException;
 public interface HttpPathFactory<T> {
 
 	/**
-	 * Creates the application path.
+	 * <p>
+	 * Creates the client application path.
+	 * <p>
+	 * This is the path on the server to the {@link HttpInput} (i.e. includes
+	 * the context path). It, however, does not include <code>protocol</code>,
+	 * <code>domain</code> and <code>port</code>.
 	 * 
 	 * @param object
 	 *            Optional object to obtain values to create the path.
@@ -35,6 +40,6 @@ public interface HttpPathFactory<T> {
 	 * @throws HttpException
 	 *             If fails to create the application path.
 	 */
-	String createApplicationPath(T object) throws HttpException;
+	String createApplicationClientPath(T object) throws HttpException;
 
 }
