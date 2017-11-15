@@ -28,6 +28,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
@@ -70,9 +71,9 @@ public class HttpRedirectFunction<T>
 	private final boolean isSecure;
 
 	/**
-	 * {@link HttpPathFactoryImpl}.
+	 * {@link HttpPathFactory}.
 	 */
-	private final HttpPathFactoryImpl<T> pathFactory;
+	private final HttpPathFactory<T> pathFactory;
 
 	/**
 	 * Instantiate.
@@ -80,9 +81,9 @@ public class HttpRedirectFunction<T>
 	 * @param isSecure
 	 *            Indicates if redirect to secure port.
 	 * @param pathFactory
-	 *            {@link HttpPathFactoryImpl}.
+	 *            {@link HttpPathFactory}.
 	 */
-	public HttpRedirectFunction(boolean isSecure, HttpPathFactoryImpl<T> pathFactory) {
+	public HttpRedirectFunction(boolean isSecure, HttpPathFactory<T> pathFactory) {
 		this.isSecure = isSecure;
 		this.pathFactory = pathFactory;
 	}
@@ -112,7 +113,7 @@ public class HttpRedirectFunction<T>
 		HttpSession session = (HttpSession) context.getObject(HttpRedirectDependencies.SESSION_STATE);
 
 		// Obtain the redirect location (and application path)
-		String applicationPath = this.pathFactory.createPath(pathValues);
+		String applicationPath = this.pathFactory.createApplicationClientPath(pathValues);
 		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure, applicationPath);
 
 		// Send the redirect

@@ -81,8 +81,8 @@ public class PropertyMetaData {
 	 * 
 	 * @return Type {@link Method}.
 	 */
-	public Method getTypeMethod() {
-		return this.typeMethod;
+	public Class<?> getValueType() {
+		return this.typeMethod.getReturnType();
 	}
 
 	/**

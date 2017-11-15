@@ -15,35 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.route;
+package net.officefloor.plugin.web.template.build;
 
-import net.officefloor.web.HttpPathFactoryImpl;
-import net.officefloor.web.build.HttpPathFactory;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.web.build.WebArchitect;
 
 /**
- * Factory for the creation of the {@link HttpPathFactoryImpl}.
+ * {@link WebTemplater} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebPathFactory {
+public class WebTemplaterEmployer implements WebTemplater {
 
-	/**
-	 * Indicates if the path contains parameters.
-	 * 
-	 * @return <code>true</code> if the path contains parameters.
-	 */
-	boolean isPathParameters();
-
-	/**
-	 * Creates the web path.
-	 * 
-	 * @param valuesType
-	 *            Type of object that will be provided to retrieve values from.
-	 * @return {@link HttpPathFactoryImpl}.
-	 * @throws WebPathException
-	 *             If unable to create {@link HttpPathFactoryImpl} from the
-	 *             values type.
-	 */
-	<T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException;
+	public static WebTemplater employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect) {
+		return null;
+	}
 
 }

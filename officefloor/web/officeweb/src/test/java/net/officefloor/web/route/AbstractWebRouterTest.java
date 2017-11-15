@@ -25,7 +25,7 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
-import net.officefloor.web.HttpPathFactoryImpl;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -343,9 +343,9 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 		WebPathFactory webPathFactory = builder.addRoute(HttpMethod.GET, routePath, null);
 
 		// Create the path factory
-		HttpPathFactoryImpl<T> httpPathFactory = webPathFactory
+		HttpPathFactory<T> httpPathFactory = webPathFactory
 				.createHttpPathFactory((Class<T>) ((values == null) ? Object.class : values.getClass()));
-		String path = httpPathFactory.createPath(values);
+		String path = httpPathFactory.createApplicationClientPath(values);
 
 		// Validate the expected path
 		String contextPath = this.getContextPath();

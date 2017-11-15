@@ -34,6 +34,7 @@ import net.officefloor.web.HttpPathFactoryImpl;
 import net.officefloor.web.HttpPathFactoryImpl.ParameterSegment;
 import net.officefloor.web.HttpPathFactoryImpl.Segment;
 import net.officefloor.web.HttpPathFactoryImpl.StaticSegment;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 import net.officefloor.web.value.retrieve.ValueRetrieverSource;
 
@@ -496,7 +497,12 @@ public class WebRouterBuilder {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> HttpPathFactoryImpl<T> createHttpPathFactory(Class<T> valuesType) throws Exception {
+		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException {
+
+			// Ensure have type
+			if (valuesType == null) {
+				valuesType = (Class<T>) Void.TYPE;
+			}
 
 			// Create the value retriever
 			ValueRetrieverSource source = new ValueRetrieverSource(true);
@@ -513,7 +519,7 @@ public class WebRouterBuilder {
 					break;
 				case PARAMETER:
 					// Ensure parameter value is available
-					if (valueRetriever.getTypeMethod(segment.value) == null) {
+					if (valueRetriever.getValueType(segment.value) == null) {
 						throw new WebPathException("For path '" + this.routePath + "', no property '" + segment.value
 								+ "' on object " + valuesType.getName());
 					}

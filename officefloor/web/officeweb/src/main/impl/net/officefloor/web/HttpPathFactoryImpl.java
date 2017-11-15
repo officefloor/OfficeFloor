@@ -17,6 +17,8 @@
  */
 package net.officefloor.web;
 
+import net.officefloor.server.http.HttpException;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 
 /**
@@ -24,7 +26,7 @@ import net.officefloor.web.value.retrieve.ValueRetriever;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpPathFactoryImpl<T> {
+public class HttpPathFactoryImpl<T> implements HttpPathFactory<T> {
 
 	/**
 	 * Segment of the path.
@@ -153,38 +155,35 @@ public class HttpPathFactoryImpl<T> {
 		this.segments = segments;
 	}
 
-	/**
-	 * Obtains the type to obtain values.
-	 * 
-	 * @return Type to obtain values.
+	/*
+	 * ==================== HttpPathFactory ====================
 	 */
+
+	@Override
 	public Class<T> getValuesType() {
 		return this.valuesType;
 	}
 
-	/**
-	 * Creates the path.
-	 * 
-	 * @param values
-	 *            Object to retrieve the values from.
-	 * @return Path.
-	 * @throws Exception
-	 *             If fails to create path.
-	 */
-	public <S extends T> String createPath(S values) throws Exception {
+	@Override
+	public String createApplicationClientPath(T values) throws HttpException {
+		try {
 
-		// Obtain the string builder to create the path
-		StringBuilder buffer = stringBuilder.get();
-		buffer.setLength(0);
+			// Obtain the string builder to create the path
+			StringBuilder buffer = stringBuilder.get();
+			buffer.setLength(0);
 
-		// Generate the path
-		for (int i = 0; i < this.segments.length; i++) {
-			Segment<T> segment = this.segments[i];
-			segment.write(values, buffer);
+			// Generate the path
+			for (int i = 0; i < this.segments.length; i++) {
+				Segment<T> segment = this.segments[i];
+				segment.write(values, buffer);
+			}
+
+			// Return the path
+			return buffer.toString();
+
+		} catch (Exception ex) {
+			throw new HttpException(ex);
 		}
-
-		// Return the path
-		return buffer.toString();
 	}
 
 }

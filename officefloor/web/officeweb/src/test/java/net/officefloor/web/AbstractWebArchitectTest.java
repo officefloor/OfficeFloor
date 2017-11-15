@@ -49,6 +49,7 @@ import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
@@ -377,16 +378,17 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			WebArchitect web = context.getWebArchitect();
 			input.value = web.link(false, "/static/path", servicer);
 		});
+		this.compile.compileAndOpenOfficeFloor();
 
 		// Ensure construct static path
-		assertEquals("Incorrect path with no values", "/static/path",
+		assertEquals("Incorrect path with no values", this.contextUrl("", "/static/path"),
 				input.value.createHttpPathFactory(null).createApplicationClientPath(null));
-		assertEquals("Incorrect path ignoring values", "/static/path",
+		assertEquals("Incorrect path ignoring values", this.contextUrl("", "/static/path"),
 				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()));
 	}
 
 	public static class PathValues {
-		String getParam() {
+		public String getParam() {
 			return "value";
 		}
 	}
@@ -404,17 +406,21 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			WebArchitect web = context.getWebArchitect();
 			input.value = web.link(false, "/dynamic/{param}", servicer);
 		});
+		this.compile.compileAndOpenOfficeFloor();
 
 		// Ensure construct dynamic path
-		assertEquals("Incorrect path ignoring values", "/dynamic/value",
-				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()));
+		HttpPathFactory<PathValues> pathFactory = input.value.createHttpPathFactory(PathValues.class);
+		String path = pathFactory.createApplicationClientPath(new PathValues());
+		assertEquals("Incorrect path ignoring values", this.contextUrl("", "/dynamic/value"), path);
 
 		// Ensure not able to construct path missing values
 		try {
 			input.value.createHttpPathFactory(Exception.class);
 			fail("Should not be successful");
 		} catch (WebPathException ex) {
-			assertEquals("Incorrect cause", "TODO provide message", ex.getMessage());
+			assertEquals("Incorrect cause",
+					"For path '/dynamic/{param}', no property 'param' on object " + Exception.class.getName(),
+					ex.getMessage());
 		}
 	}
 

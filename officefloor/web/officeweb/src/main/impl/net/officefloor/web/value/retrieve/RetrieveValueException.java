@@ -15,35 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.route;
+package net.officefloor.web.value.retrieve;
 
-import net.officefloor.web.HttpPathFactoryImpl;
-import net.officefloor.web.build.HttpPathFactory;
+import net.officefloor.server.http.HttpException;
 
 /**
- * Factory for the creation of the {@link HttpPathFactoryImpl}.
+ * {@link HttpException} from attempting to retrieve a value.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebPathFactory {
+public class RetrieveValueException extends HttpException {
 
 	/**
-	 * Indicates if the path contains parameters.
+	 * Instantiate.
 	 * 
-	 * @return <code>true</code> if the path contains parameters.
+	 * @param cause
+	 *            Cause of failure to retrieve value.
 	 */
-	boolean isPathParameters();
-
-	/**
-	 * Creates the web path.
-	 * 
-	 * @param valuesType
-	 *            Type of object that will be provided to retrieve values from.
-	 * @return {@link HttpPathFactoryImpl}.
-	 * @throws WebPathException
-	 *             If unable to create {@link HttpPathFactoryImpl} from the
-	 *             values type.
-	 */
-	<T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException;
+	public RetrieveValueException(Throwable cause) {
+		super(cause);
+	}
 
 }

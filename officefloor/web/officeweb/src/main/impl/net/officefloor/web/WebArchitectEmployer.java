@@ -40,7 +40,6 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
@@ -55,6 +54,7 @@ import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource;
+import net.officefloor.web.route.WebPathException;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
@@ -120,6 +120,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Context path. May be <code>null</code> for no context path.
 	 */
 	private final String contextPath;
+
+	/**
+	 * {@link HttpRouteSectionSource}.
+	 */
+	private final HttpRouteSectionSource routing;
 
 	/**
 	 * Registry of HTTP arguments to its {@link OfficeManagedObject}.
@@ -192,6 +197,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	private WebArchitectEmployer(OfficeArchitect officeArchitect, String contextPath) {
 		this.officeArchitect = officeArchitect;
 		this.contextPath = contextPath;
+		this.routing = new HttpRouteSectionSource(this.contextPath);
 	}
 
 	/**
@@ -416,16 +422,16 @@ public class WebArchitectEmployer implements WebArchitect {
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
 		// Configure the object responder (if configured factories)
-		ObjectResponseManagedObjectSource objectResponseMos = null;
 		if (this.objectResponderFactories.size() > 0) {
-			objectResponseMos = new ObjectResponseManagedObjectSource(this.objectResponderFactories);
+			ObjectResponseManagedObjectSource objectResponseMos = new ObjectResponseManagedObjectSource(
+					this.objectResponderFactories);
 			this.officeArchitect.addOfficeManagedObjectSource("OBJECT_RESPONSE", objectResponseMos)
 					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
+			this.routing.setHttpEscalationHandler(objectResponseMos);
 		}
 
 		// Create the routing source
-		HttpRouteSectionSource routing = new HttpRouteSectionSource(this.contextPath, objectResponseMos);
-		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, routing, null);
+		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
 
 		// Determine if intercept
 		if (this.interceptors.size() > 0) {
@@ -453,11 +459,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		// Configure the routing
 		for (HttpInputImpl input : this.inputs) {
 
-			// Add the route
-			RouteInput routeInput = routing.addRoute(input.method, input.applicationPath);
-
 			// Link route output to handling section input
-			OfficeSectionOutput routeOutput = routingSection.getOfficeSectionOutput(routeInput.getOutputName());
+			OfficeSectionOutput routeOutput = routingSection.getOfficeSectionOutput(input.routeInput.getOutputName());
 			this.officeArchitect.link(routeOutput, input.sectionInput);
 
 			// Determine if URL continuation
@@ -468,7 +471,8 @@ public class WebArchitectEmployer implements WebArchitect {
 					try {
 
 						// Create the redirect
-						Redirect redirect = routing.addRedirect(input.isSecure, routeInput, continuation.parameterType);
+						Redirect redirect = this.routing.addRedirect(input.isSecure, input.routeInput,
+								continuation.parameterType);
 						OfficeSectionInput redirectInput = routingSection
 								.getOfficeSectionInput(redirect.getInputName());
 
@@ -626,7 +630,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * {@link HttpInput} implementation.
 	 */
-	private static class HttpInputImpl implements HttpInput, HttpUrlContinuation {
+	private class HttpInputImpl implements HttpInput, HttpUrlContinuation {
 
 		/**
 		 * Indicates if {@link HttpUrlContinuation}.
@@ -654,6 +658,11 @@ public class WebArchitectEmployer implements WebArchitect {
 		private final OfficeSectionInput sectionInput;
 
 		/**
+		 * {@link RouteInput}
+		 */
+		private final RouteInput routeInput;
+
+		/**
 		 * {@link RedirectContinuation} instances for this
 		 * {@link HttpUrlContinuation}.
 		 */
@@ -670,11 +679,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		 *            Handling {@link OfficeSectionInput}.
 		 */
 		public HttpInputImpl(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
-			this.isUrlContinuation = true;
-			this.isSecure = isSecure;
-			this.method = HttpMethod.GET;
-			this.applicationPath = applicationPath;
-			this.sectionInput = sectionInput;
+			this(true, isSecure, HttpMethod.GET, applicationPath, sectionInput);
 		}
 
 		/**
@@ -691,11 +696,31 @@ public class WebArchitectEmployer implements WebArchitect {
 		 */
 		public HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath,
 				OfficeSectionInput sectionInput) {
-			this.isUrlContinuation = false;
+			this(false, isSecure, method, applicationPath, sectionInput);
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param isUrlContinuation
+		 *            Indicates if {@link HttpUrlContinuation}.
+		 * @param isSecure
+		 *            Indicates if secure.
+		 * @param method
+		 *            {@link HttpMethod}.
+		 * @param applicationPath
+		 *            Application path.
+		 * @param sectionInput
+		 *            Handling {@link OfficeSectionInput}.
+		 */
+		private HttpInputImpl(boolean isUrlContinuation, boolean isSecure, HttpMethod method, String applicationPath,
+				OfficeSectionInput sectionInput) {
+			this.isUrlContinuation = isUrlContinuation;
 			this.isSecure = isSecure;
 			this.method = method;
 			this.applicationPath = applicationPath;
 			this.sectionInput = sectionInput;
+			this.routeInput = WebArchitectEmployer.this.routing.addRoute(this.method, this.applicationPath);
 		}
 
 		/*
@@ -703,9 +728,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		 */
 
 		@Override
-		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws HttpException {
-			// TODO Auto-generated method stub
-			return null;
+		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException {
+			return this.routeInput.getWebPathFactory().createHttpPathFactory(valuesType);
 		}
 	}
 

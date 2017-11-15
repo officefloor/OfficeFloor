@@ -27,6 +27,14 @@ import net.officefloor.server.http.HttpException;
 public interface HttpPathFactory<T> {
 
 	/**
+	 * Obtains the expected type to retrieve values in constructing the path.
+	 * 
+	 * @return Expected type to retrieve values in constructing the path. May be
+	 *         <code>null</code> if no values are required.
+	 */
+	Class<T> getValuesType();
+
+	/**
 	 * <p>
 	 * Creates the client application path.
 	 * <p>
@@ -34,12 +42,12 @@ public interface HttpPathFactory<T> {
 	 * the context path). It, however, does not include <code>protocol</code>,
 	 * <code>domain</code> and <code>port</code>.
 	 * 
-	 * @param object
+	 * @param values
 	 *            Optional object to obtain values to create the path.
 	 * @return Application path.
 	 * @throws HttpException
 	 *             If fails to create the application path.
 	 */
-	String createApplicationClientPath(T object) throws HttpException;
+	String createApplicationClientPath(T values) throws HttpException;
 
 }

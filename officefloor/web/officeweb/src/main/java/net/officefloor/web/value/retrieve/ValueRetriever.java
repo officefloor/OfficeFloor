@@ -17,7 +17,7 @@
  */
 package net.officefloor.web.value.retrieve;
 
-import java.lang.reflect.Method;
+import net.officefloor.server.http.HttpException;
 
 /**
  * Retrieves a value from an object graph.
@@ -34,27 +34,21 @@ public interface ValueRetriever<T> {
 	 * @param name
 	 *            Property name.
 	 * @return Property value.
-	 * @throws Exception
+	 * @throws HttpException
 	 *             If fails to retrieve the value.
 	 */
-	Object retrieveValue(T object, String name) throws Exception;
+	Object retrieveValue(T object, String name) throws HttpException;
 
 	/**
-	 * <p>
-	 * Obtains the {@link Method} getter on the object graph that will provide
-	 * the value.
-	 * <p>
-	 * This is the {@link Method} on the last bean in the path. It may be
+	 * Obtains the value type for the property on the object graph. It may be
 	 * <code>null</code> indicating the path does not exist on the bean graph.
 	 * 
 	 * @param name
 	 *            Property name.
-	 * @return {@link Method} of the object graph that provides the
-	 *         corresponding getter for the property name. May be
-	 *         <code>null</code> if the path not exists.
-	 * @throws Exception
+	 * @return Value type. May be <code>null</code> if the path not exists.
+	 * @throws HttpException
 	 *             If fails to determine if value is retrievable.
 	 */
-	Method getTypeMethod(String name) throws Exception;
+	Class<?> getValueType(String name) throws HttpException;
 
 }

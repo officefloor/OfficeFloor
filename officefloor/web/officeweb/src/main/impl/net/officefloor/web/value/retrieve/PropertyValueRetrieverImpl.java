@@ -20,6 +20,8 @@ package net.officefloor.web.value.retrieve;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import net.officefloor.server.http.HttpException;
+
 /**
  * {@link ValueRetriever} implementation.
  * 
@@ -47,8 +49,7 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 * @param valueRetrieverByMetaData
 	 *            {@link ValueRetriever} by its {@link PropertyMetaData}.
 	 */
-	PropertyValueRetrieverImpl(PropertyMetaData metaData,
-			boolean isCaseInsensitive,
+	PropertyValueRetrieverImpl(PropertyMetaData metaData, boolean isCaseInsensitive,
 			Map<PropertyMetaData, ValueRetriever<?>> valueRetrieverByMetaData) {
 		this.metaData = metaData;
 
@@ -57,8 +58,7 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 		valueRetrieverByMetaData.put(metaData, this);
 
 		// Create further retrievers in the property meta-data tree
-		this.delegate = new RootValueRetrieverImpl<Object>(
-				this.metaData.getProperties(), isCaseInsensitive,
+		this.delegate = new RootValueRetrieverImpl<Object>(this.metaData.getProperties(), isCaseInsensitive,
 				valueRetrieverByMetaData);
 	}
 
@@ -67,32 +67,37 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 */
 
 	@Override
-	public Method getTypeMethod(String name) throws Exception {
+	public Class<?> getValueType(String name) throws HttpException {
 		// Delegate to obtain type method
-		return this.delegate.getTypeMethod(name);
+		return this.delegate.getValueType(name);
 	}
 
 	@Override
-	public Object retrieveValue(T object, String name) throws Exception {
+	public Object retrieveValue(T object, String name) throws HttpException {
 
 		// Ensure have value
 		if (object == null) {
 			return null; // no value
 		}
 
-		// Obtain the method
-		Method method = this.metaData.getMethod(object.getClass());
+		try {
+			// Obtain the method
+			Method method = this.metaData.getMethod(object.getClass());
 
-		// Retrieve the property value
-		Object value = ValueRetrieverSource.retrieveValue(object, method);
+			// Retrieve the property value
+			Object value = ValueRetrieverSource.retrieveValue(object, method);
 
-		// Determine if further property navigation
-		if (name.length() > 0) {
-			// Further navigation
-			return this.delegate.retrieveValue(value, name);
-		} else {
-			// Navigated to the value, so return the value
-			return value;
+			// Determine if further property navigation
+			if (name.length() > 0) {
+				// Further navigation
+				return this.delegate.retrieveValue(value, name);
+			} else {
+				// Navigated to the value, so return the value
+				return value;
+			}
+
+		} catch (Exception ex) {
+			throw new RetrieveValueException(ex);
 		}
 	}
 

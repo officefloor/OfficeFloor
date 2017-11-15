@@ -102,12 +102,11 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 			ValueRetriever<RootObject> retriever = source.sourceValueRetriever(RootObject.class);
 
 			// Test
-			Method method = retriever.getTypeMethod(name);
+			Class<?> valueType = retriever.getValueType(name);
 			if (expectedMethodReturnType == null) {
-				assertNull("Not expecting method for " + name, method);
+				assertNull("Not expecting value type for " + name, valueType);
 			} else {
-				Class<?> returnType = method.getReturnType();
-				assertEquals("Incorrect method return type", expectedMethodReturnType, returnType);
+				assertEquals("Incorrect value type", expectedMethodReturnType, valueType);
 			}
 
 		} catch (Exception ex) {

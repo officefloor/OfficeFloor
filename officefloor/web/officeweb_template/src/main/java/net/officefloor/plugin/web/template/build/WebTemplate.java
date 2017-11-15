@@ -15,15 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.template;
+package net.officefloor.plugin.web.template.build;
+
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 
 /**
- * Creates web templates.
+ * Web template.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebTemplater {
-	
-	
+public interface WebTemplate {
+
+	/**
+	 * Specifies the logic {@link Class}.
+	 * 
+	 * @param logicClass
+	 *            Logic {@link Class}.
+	 */
+	void setLogicClass(Class<?> logicClass);
+
+	/**
+	 * Obtains the {@link OfficeSectionOutput} from the {@link WebTemplate}.
+	 * 
+	 * @param outputName
+	 *            {@link OfficeSectionOutput} name.
+	 * @return {@link OfficeSectionOutput} for the name.
+	 */
+	OfficeSectionOutput getOutput(String outputName);
 
 }

@@ -15,35 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.route;
+package net.officefloor.plugin.web.template.build;
 
-import net.officefloor.web.HttpPathFactoryImpl;
-import net.officefloor.web.build.HttpPathFactory;
+import java.io.Reader;
 
 /**
- * Factory for the creation of the {@link HttpPathFactoryImpl}.
+ * Creates web templates.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebPathFactory {
+public interface WebTemplater {
 
 	/**
-	 * Indicates if the path contains parameters.
+	 * Adds a {@link WebTemplate}.
 	 * 
-	 * @return <code>true</code> if the path contains parameters.
+	 * @param applicationPath
+	 *            Application path to the {@link WebTemplate}. May contain path
+	 *            parameters.
+	 * @param template
+	 *            {@link Reader} to the template content.
+	 * @return {@link WebTemplate}.
 	 */
-	boolean isPathParameters();
+	WebTemplate addTemplate(String applicationPath, Reader template);
 
 	/**
-	 * Creates the web path.
+	 * Adds a {@link WebTemplate}.
 	 * 
-	 * @param valuesType
-	 *            Type of object that will be provided to retrieve values from.
-	 * @return {@link HttpPathFactoryImpl}.
-	 * @throws WebPathException
-	 *             If unable to create {@link HttpPathFactoryImpl} from the
-	 *             values type.
+	 * @param applicationPath
+	 *            Application path to the {@link WebTemplate}. May contain path
+	 *            parameters.
+	 * @param locationOfTemplate
+	 *            Location of the template content.
+	 * @return {@link WebTemplate}.
 	 */
-	<T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException;
+	WebTemplate addTemplate(String applicationPath, String locationOfTemplate);
 
 }

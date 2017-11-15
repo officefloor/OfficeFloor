@@ -17,9 +17,10 @@
  */
 package net.officefloor.web.value.retrieve;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.officefloor.server.http.HttpException;
 
 /**
  * {@link ValueRetriever} implementation.
@@ -46,10 +47,8 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 * @param isCaseInsensitive
 	 *            Indicates if case insensitive.
 	 */
-	public RootValueRetrieverImpl(PropertyMetaData[] properties,
-			boolean isCaseInsensitive) {
-		this(properties, isCaseInsensitive,
-				new HashMap<PropertyMetaData, ValueRetriever<?>>());
+	public RootValueRetrieverImpl(PropertyMetaData[] properties, boolean isCaseInsensitive) {
+		this(properties, isCaseInsensitive, new HashMap<PropertyMetaData, ValueRetriever<?>>());
 	}
 
 	/**
@@ -63,8 +62,7 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 *            {@link ValueRetriever} by its {@link PropertyMetaData}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	RootValueRetrieverImpl(PropertyMetaData[] properties,
-			boolean isCaseInsensitive,
+	RootValueRetrieverImpl(PropertyMetaData[] properties, boolean isCaseInsensitive,
 			Map<PropertyMetaData, ValueRetriever<?>> valueRetrieverByMetaData) {
 		this.isCaseInsensitive = isCaseInsensitive;
 
@@ -75,18 +73,15 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 			String propertyName = property.getPropertyName();
 
 			// Determine if already registered value retriever
-			ValueRetriever propertyRetriever = valueRetrieverByMetaData
-					.get(property);
+			ValueRetriever propertyRetriever = valueRetrieverByMetaData.get(property);
 			if (propertyRetriever == null) {
 				// Create the property retriever (registers itself)
-				propertyRetriever = new PropertyValueRetrieverImpl<Object>(
-						property, this.isCaseInsensitive,
+				propertyRetriever = new PropertyValueRetrieverImpl<Object>(property, this.isCaseInsensitive,
 						valueRetrieverByMetaData);
 			}
 
 			// Register the property retriever
-			this.propertyToRetriever.put(propertyName, new RetrieveStruct(
-					propertyRetriever, property));
+			this.propertyToRetriever.put(propertyName, new RetrieveStruct(propertyRetriever, property));
 		}
 	}
 
@@ -97,10 +92,10 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	/**
 	 * {@link Processor} to determine if value is retrievable.
 	 */
-	private static Processor<Method> retrievable = new Processor<Method>() {
+	private static Processor<Class<?>> retrievable = new Processor<Class<?>>() {
 		@Override
-		public Method process(RetrieveStruct propertyRetriever, Object object,
-				String remainingName) throws Exception {
+		public Class<?> process(RetrieveStruct propertyRetriever, Object object, String remainingName)
+				throws HttpException {
 
 			// Must be retriever to obtain value
 			if (propertyRetriever == null) {
@@ -110,16 +105,16 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 			// Determine if further property
 			if (remainingName.length() == 0) {
 				// No further properties, so provide type method
-				return propertyRetriever.metaData.getTypeMethod();
+				return propertyRetriever.metaData.getValueType();
 			}
 
 			// Delegate to obtain type method
-			return propertyRetriever.retriever.getTypeMethod(remainingName);
+			return propertyRetriever.retriever.getValueType(remainingName);
 		}
 	};
 
 	@Override
-	public Method getTypeMethod(String name) throws Exception {
+	public Class<?> getValueType(String name) throws HttpException {
 		// Return type method
 		return this.process(name, null, retrievable);
 	}
@@ -129,8 +124,8 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 */
 	private static Processor<Object> retriever = new Processor<Object>() {
 		@Override
-		public Object process(RetrieveStruct propertyRetriever, Object object,
-				String remainingName) throws Exception {
+		public Object process(RetrieveStruct propertyRetriever, Object object, String remainingName)
+				throws HttpException {
 
 			// Ensure able to retrieve value
 			if (propertyRetriever == null) {
@@ -138,13 +133,12 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 			}
 
 			// Return the retrieved value
-			return propertyRetriever.retriever.retrieveValue(object,
-					remainingName);
+			return propertyRetriever.retriever.retrieveValue(object, remainingName);
 		}
 	};
 
 	@Override
-	public Object retrieveValue(T object, String name) throws Exception {
+	public Object retrieveValue(T object, String name) throws HttpException {
 		// Return the retrieved value
 		return this.process(name, object, retriever);
 	}
@@ -159,11 +153,10 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 * @param processor
 	 *            {@link Processor}.
 	 * @return Value as per the {@link Processor}.
-	 * @throws Exception
+	 * @throws HttpException
 	 *             If fails to process.
 	 */
-	private <R> R process(String name, Object object, Processor<R> processor)
-			throws Exception {
+	private <R> R process(String name, Object object, Processor<R> processor) throws HttpException {
 
 		// Obtain the property name
 		String propertyName;
@@ -183,8 +176,7 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		}
 
 		// Obtain the property value retrieve struct
-		RetrieveStruct retrieveStruct = this.propertyToRetriever
-				.get(propertyName);
+		RetrieveStruct retrieveStruct = this.propertyToRetriever.get(propertyName);
 
 		// Process
 		return processor.process(retrieveStruct, object, remainingName);
@@ -206,11 +198,10 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		 * @param remainingName
 		 *            Remaining name of the property.
 		 * @return Value as per processing.
-		 * @throws Exception
+		 * @throws HttpException
 		 *             If fails to process.
 		 */
-		R process(RetrieveStruct retrieveStruct, Object object,
-				String remainingName) throws Exception;
+		R process(RetrieveStruct retrieveStruct, Object object, String remainingName) throws HttpException;
 	}
 
 	/**
@@ -236,8 +227,7 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		 * @param metaData
 		 *            {@link PropertyMetaData}.
 		 */
-		public RetrieveStruct(ValueRetriever<Object> retriever,
-				PropertyMetaData metaData) {
+		public RetrieveStruct(ValueRetriever<Object> retriever, PropertyMetaData metaData) {
 			this.retriever = retriever;
 			this.metaData = metaData;
 		}

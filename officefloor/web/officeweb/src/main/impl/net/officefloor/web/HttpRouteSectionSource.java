@@ -49,6 +49,7 @@ import net.officefloor.web.HttpRedirectFunction.HttpRedirectDependencies;
 import net.officefloor.web.HttpRouteFunction.HttpRouteDependencies;
 import net.officefloor.web.InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies;
 import net.officefloor.web.NotFoundFunction.NotFoundDependencies;
+import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.escalation.NotFoundHttpException;
 import net.officefloor.web.route.WebPathFactory;
@@ -221,9 +222,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		private final boolean isSecure;
 
 		/**
-		 * {@link HttpPathFactoryImpl}.
+		 * {@link HttpPathFactory}.
 		 */
-		private final HttpPathFactoryImpl<?> httpPathFactory;
+		private final HttpPathFactory<?> httpPathFactory;
 
 		/**
 		 * Name of the {@link SectionInput} to handle the redirect.
@@ -235,15 +236,15 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 * 
 		 * @param isSecure
 		 *            Indicates if redirect to a secure port.
-		 * @param webPathFactory
-		 *            {@link WebPathFactory} for this redirect.
+		 * @param httpPathFactory
+		 *            {@link HttpPathFactory} for this redirect.
 		 * @param inputName
 		 *            Name of the {@link SectionInput} to handle the redirect.
 		 * @param parameterType
 		 *            Type of parameter passed to the {@link ManagedFunction} to
 		 *            retrieve the values to construct the path.
 		 */
-		private Redirect(boolean isSecure, HttpPathFactoryImpl<?> httpPathFactory, String inputName) {
+		private Redirect(boolean isSecure, HttpPathFactory<?> httpPathFactory, String inputName) {
 			this.isSecure = isSecure;
 			this.httpPathFactory = httpPathFactory;
 			this.inputName = inputName;
@@ -267,7 +268,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link HttpEscalationHandler}. May be <code>null</code>.
 	 */
-	private final HttpEscalationHandler escalationHandler;
+	private HttpEscalationHandler escalationHandler = null;
 
 	/**
 	 * Optional {@link Interception}.
@@ -289,11 +290,18 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * 
 	 * @param contextPath
 	 *            Context path. May be <code>null</code>.
+	 */
+	public HttpRouteSectionSource(String contextPath) {
+		this.builder = new WebRouterBuilder(contextPath);
+	}
+
+	/**
+	 * Specifies the {@link HttpEscalationHandler}
+	 * 
 	 * @param escalationHandler
 	 *            {@link HttpEscalationHandler}. May be <code>null</code>.
 	 */
-	public HttpRouteSectionSource(String contextPath, HttpEscalationHandler escalationHandler) {
-		this.builder = new WebRouterBuilder(contextPath);
+	public void setHttpEscalationHandler(HttpEscalationHandler escalationHandler) {
 		this.escalationHandler = escalationHandler;
 	}
 
@@ -351,15 +359,12 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 */
 	public Redirect addRedirect(boolean isSecure, RouteInput routeInput, Class<?> parameterType) throws Exception {
 
-		// Determine if redirect already exists by details
-		System.out.println("TODO determine if redirect already exists by details");
-
 		// Obtain the redirect index (to keep name unique)
 		int redirectIndex = this.redirects.size();
 
 		// Create the HTTP path factory (defaulting type to object)
 		parameterType = (parameterType == null) ? Object.class : parameterType;
-		HttpPathFactoryImpl<?> httpPathFactory = routeInput.webPathFactory.createHttpPathFactory(parameterType);
+		HttpPathFactory<?> httpPathFactory = routeInput.webPathFactory.createHttpPathFactory(parameterType);
 
 		// Create the redirect input name
 		String inputName = "REDIRECT_" + redirectIndex + (isSecure ? "_SECURE_" : "_") + routeInput.path
