@@ -15,22 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.template;
+package net.officefloor.plugin.web.template.extension;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.officefloor.plugin.web.template.build.WebTemplate;
 
 /**
- * Marker on a property method of a bean to indicate that its return value
- * should be rendered unescaped to the HTTP template response.
+ * Extension for the {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface UnescapedHtml {
+public interface WebTemplateExtension {
+
+	/**
+	 * Extends the {@link WebTemplate}.
+	 * 
+	 * @param context
+	 *            {@link WebTemplateExtensionContext}.
+	 * @throws Exception
+	 *             If fails to extend the {@link WebTemplate}.
+	 */
+	void extendWebTemplate(WebTemplateExtensionContext context) throws Exception;
+
 }

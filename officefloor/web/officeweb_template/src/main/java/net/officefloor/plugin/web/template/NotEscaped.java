@@ -15,25 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.template.section;
+package net.officefloor.plugin.web.template;
 
-import net.officefloor.plugin.web.template.section.HttpTemplateSectionSource;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Extension for the {@link HttpTemplateSectionSource}.
+ * Marker on a property method of a bean to indicate that its return value
+ * should be rendered unescaped to the HTTP template response.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateSectionExtension {
-
-	/**
-	 * Extends the template.
-	 * 
-	 * @param context
-	 *            {@link HttpTemplateSectionExtensionContext}.
-	 * @throws Exception
-	 *             If fails to extend the template.
-	 */
-	void extendTemplate(HttpTemplateSectionExtensionContext context) throws Exception;
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface NotEscaped {
 }

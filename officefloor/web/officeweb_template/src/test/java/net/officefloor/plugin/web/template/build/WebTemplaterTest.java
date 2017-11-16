@@ -19,15 +19,21 @@ package net.officefloor.plugin.web.template.build;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.plugin.web.template.NotEscaped;
+import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -90,8 +96,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure can add static template.
 	 */
 	public void testStaticTemplate() throws Exception {
-		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("TEST")),
-				"TEST");
+		MockHttpResponse response = this.template("/path",
+				(context, templater) -> templater.addTemplate("/path", new StringReader("TEST")), "TEST");
+
+		// Ensure default values for template
+		assertEquals("Incorrect default content-type", "text/html", response.getHeader("content-type").getValue());
 	}
 
 	/**
@@ -99,7 +108,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateLogic() throws Exception {
 		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("Data=${value}"))
-				.setLogicClass(TemplateLogic.class), "Data=value");
+				.setLogicClass(TemplateLogic.class), "Data=&lt;value&gt;");
 	}
 
 	public static class TemplateLogic {
@@ -108,7 +117,27 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		}
 
 		public String getValue() {
-			return "value";
+			return "<value>";
+		}
+	}
+
+	/**
+	 * Ensure render {@link NotEscaped}.
+	 */
+	public void testNotEscapedValue() throws Exception {
+		this.template("/path", (context, templater) -> templater
+				.addTemplate("/path", new StringReader("<html>${content}</html>")).setLogicClass(NotEscapedLogic.class),
+				"<html><body>Hello World</body></html>");
+	}
+
+	public static class NotEscapedLogic {
+		public NotEscapedLogic getData() {
+			return this;
+		}
+
+		@NotEscaped
+		public String getValue() {
+			return "<body>Hello World</body>";
 		}
 	}
 
@@ -156,6 +185,39 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			HttpRequest request = connection.getRequest();
 			connection.getResponse().getEntityWriter()
 					.write("section  " + request.getMethod().getName() + " " + request.getUri());
+		}
+	}
+
+	/**
+	 * Ensure re-render template after handling link.
+	 */
+	public void testLinkRerenderTemplate() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater.addTemplate("/path", new StringReader("Template #{link}"))
+						.setLogicClass(LinkRerenderTemplateLogic.class),
+				"LINK Template /path-link");
+	}
+
+	public static class LinkRerenderTemplateLogic {
+		public void link(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("LINK ");
+		}
+	}
+
+	/**
+	 * Ensure not re-render template after handling link.
+	 */
+	public void testLinkNotRerenderTemplate() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater.addTemplate("/path", new StringReader("Template #{link}"))
+						.setLogicClass(LinkNotRerenderTemplateLogic.class),
+				"LINK");
+	}
+
+	public static class LinkNotRerenderTemplateLogic {
+		@NotRenderTemplateAfter
+		public void link(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("LINK");
 		}
 	}
 
@@ -231,6 +293,160 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(this.mockRequest("/put-link").method(HttpMethod.PUT));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect link response", "section PUT /put-link");
+	}
+
+	/**
+	 * <p>
+	 * Ensure can flag for a {@link HttpMethod} to not trigger a redirect to
+	 * render the {@link WebTemplate}.
+	 * <p>
+	 * This allows templating responses to {@link HttpMethod} values other than
+	 * GET.
+	 */
+	public void testNonRedirectMethod() throws Exception {
+		final HttpMethod method = HttpMethod.getHttpMethod("TEST");
+		MockHttpResponse response = this.template((context, templater) -> templater
+				.addTemplate("/path", new StringReader("TEMPLATE")).addNonRedirectMethod(method),
+				this.mockRequest("/path").method(method));
+		assertEquals("Should render without redirect", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect template", "TEMPLATE", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can link to template.
+	 */
+	public void testLinkToTemplate() throws Exception {
+		MockHttpResponse redirect = this.template("/redirect", (context, templater) -> {
+			WebTemplate template = templater.addTemplate("/template", new StringReader("TEMPLATE"));
+			WebArchitect web = context.getWebArchitect();
+			web.link(false, "/redirect", template.getInput(null));
+		}, "");
+
+		// Ensure redirect
+		assertEquals("Should be redirect", HttpStatus.SEE_OTHER, redirect.getStatus());
+		String location = redirect.getHeader("location").getValue();
+		assertEquals("Incorrect location", this.contextUrl("", "/template"), location);
+
+		// Fire redirect to then get the template
+		MockHttpResponse response = this.server.send(this.mockRequest(location).cookies(redirect));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Should have template", "TEMPLATE", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can link to template with path parameters.
+	 */
+	public void testLinkToTemplateWithDynamicPath() throws Exception {
+		MockHttpResponse redirect = this.template("/redirect", (context, templater) -> {
+			WebArchitect web = context.getWebArchitect();
+			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSection section = context.addSection("SECTION", DynamicPathSection.class);
+			web.link(false, "/redirect", section.getOfficeSectionInput("service"));
+			WebTemplate template = templater.addTemplate("/{param}", new StringReader("TEMPLATE"));
+			office.link(section.getOfficeSectionOutput("template"), template.getInput(DynamicPathSection.class));
+		}, "");
+
+		// Ensure redirect
+		assertEquals("Should be redirect", HttpStatus.SEE_OTHER, redirect.getStatus());
+		String location = redirect.getHeader("location").getValue();
+		assertEquals("Incorrect location", this.contextUrl("", "/value"), location);
+
+		// Fire redirect to then get the template
+		MockHttpResponse response = this.server.send(this.mockRequest(location).cookies(redirect));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Should have template", "TEMPLATE", response.getEntity(null));
+	}
+
+	public static class DynamicPathSection {
+		@NextFunction("template")
+		public DynamicPathSection service() {
+			return this;
+		}
+
+		public String getParam() {
+			return "value";
+		}
+	}
+
+	/**
+	 * Ensure can change the <code>Content-Type</code> for the template.
+	 */
+	public void testContentType() throws Exception {
+		MockHttpResponse response = this.template("/path", (context, templater) -> templater
+				.addTemplate("/path", new StringReader("{value: JSON}")).setContentType("application/json"),
+				"{value: JSON}");
+		assertEquals("Incorrect default content-type", "application/json",
+				response.getHeader("content-type").getValue());
+	}
+
+	/**
+	 * ENsure can change the {@link Charset} for rendering the template.
+	 */
+	public void testCharset() throws Exception {
+		Charset charset = Charset.forName("UTF-16");
+		MockHttpResponse response = this.template((context, templater) -> templater
+				.addTemplate("/path", new StringReader("UTF-16 rendered")).setCharset(charset),
+				this.mockRequest("/path"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect content", "UTF-16 rendered", response.getEntity(charset));
+	}
+
+	/**
+	 * Ensure only sends {@link WebTemplate} content over a secure connection.
+	 */
+	public void testSecureTemplate() throws Exception {
+		MockHttpResponse response = this.template("/path",
+				(context, templater) -> templater.addTemplate("/path", new StringReader("SECURE")).setSecure(true), "");
+
+		// Non-secure request should have redirect to secure connection
+		assertEquals("Should redirect for secure connection", 307, response.getStatus().getStatusCode());
+		assertEquals("Should be secure redirect URL", this.contextUrl("https://mock.officefloor.net", "/path"),
+				response.getHeader("location").getValue());
+
+		// Ensure able to obtain template over secure connection
+		response = this.server.send(this.mockRequest("/path").secure(true));
+		assertEquals("Should obtain template", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect template", "SECURE", response.getEntity(null));
+	}
+
+	/*
+	 * Ensure only accepts link request over a secure connection.
+	 */
+	public void testSecureLink() throws Exception {
+		MockHttpResponse response = this.template("/path-link", (context, templater) -> {
+			WebTemplate template = templater.addTemplate("/path", new StringReader("Link=#{link}"));
+			template.setLinkSecure("link", true);
+			OfficeSection section = context.addSection("SECTION", MockSection.class);
+			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
+		}, "");
+
+		// Not-secure request should a have a redirect to secure connection
+		assertEquals("Should redirect for secure connection", 307, response.getStatus().getStatusCode());
+		assertEquals("Should be secure redirect URL", this.contextUrl("https://mock.officefloor.net", "/path-link"),
+				response.getHeader("location").getValue());
+
+		// Ensure able to obtain link over secure connection
+		response = this.server.send(this.mockRequest("/path-link").secure(true));
+	}
+
+	/**
+	 * Ensure can specify super {@link WebTemplate}.
+	 */
+	public void testSuperTemplate() throws Exception {
+		this.template("/child", (context, templater) -> {
+			WebTemplate parent = templater.addTemplate("/parent", new StringReader("TEST <!-- {section} --> PARENT"));
+			templater.addTemplate("/child", new StringReader("TEST <!-- {:section} -->Child")).setSuperTemplate(parent);
+		}, "TEST Child");
+	}
+
+	/**
+	 * Ensure can extend the {@link WebTemplate}.
+	 */
+	public void testExtendTemplate() throws Exception {
+		this.template("/extend", (context, templater) -> {
+			WebTemplate template = templater.addTemplate("/extend", new StringReader("original"));
+			template.addExtension((extension) -> extension.setTemplateContent("extended"));
+		}, "extended");
 	}
 
 	/**

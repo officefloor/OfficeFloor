@@ -30,7 +30,7 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
-import net.officefloor.plugin.web.template.UnescapedHtml;
+import net.officefloor.plugin.web.template.NotEscaped;
 import net.officefloor.plugin.web.template.parse.HttpTemplate;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
@@ -87,7 +87,7 @@ public class TemplateLogic {
 	 * 
 	 * @return HTML to be rendered as is.
 	 */
-	@UnescapedHtml
+	@NotEscaped
 	public String getUnescapedHtml() {
 		return "<img src=\"Test.png\" />";
 	}

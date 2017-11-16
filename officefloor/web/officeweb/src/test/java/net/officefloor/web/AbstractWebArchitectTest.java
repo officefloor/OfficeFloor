@@ -38,7 +38,6 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -55,7 +54,6 @@ import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.route.WebPathException;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionManagedObjectSource;
 
 /**
  * Abstract tests for the {@link WebArchitect}.
@@ -775,8 +773,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect response", "Session=value", response.getEntity(null));
 
 		// Obtain value from session
-		response = this.server.send(this.mockRequest("/path")
-				.cookie(response.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME)));
+		response = this.server.send(this.mockRequest("/path").cookies(response));
 		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "Session=value", response.getEntity(null));
 	}
@@ -824,11 +821,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 				response.getHeader("location").getValue());
 		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", String.valueOf(nextSerialisableIdentifier))
 				.setPath(this.contextUrl("", "/path")));
-		HttpResponseCookie session = response.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME);
-		HttpResponseCookie ofr = response.getCookie(HttpRedirectFunction.REDIRECT_COOKIE_NAME);
 
 		// Ensure can redirect
-		MockHttpRequestBuilder redirectRequest = this.mockRequest("/path").secure(true).cookie(session).cookie(ofr);
+		MockHttpRequestBuilder redirectRequest = this.mockRequest("/path").secure(true).cookies(response);
 		response = this.server.send(redirectRequest);
 		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
 		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
@@ -873,11 +868,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect status: " + response.getEntity(null), 303, response.getStatus().getStatusCode());
 		assertEquals("Incorrect redirect location", this.contextUrl("http://mock.officefloor.net", "/path/value"),
 				response.getHeader("location").getValue());
-		HttpResponseCookie session = response.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME);
-		HttpResponseCookie ofr = response.getCookie(HttpRedirectFunction.REDIRECT_COOKIE_NAME);
 
 		// Ensure can redirect
-		response = this.server.send(this.mockRequest("/path/value").cookie(session).cookie(ofr));
+		response = this.server.send(this.mockRequest("/path/value").cookies(response));
 		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
 		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
 	}

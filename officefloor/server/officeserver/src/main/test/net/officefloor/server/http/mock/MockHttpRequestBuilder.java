@@ -23,8 +23,8 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestCookie;
-import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.WritableHttpCookie;
 
 /**
  * Builder for a mock {@link HttpRequest}.
@@ -92,13 +92,19 @@ public interface MockHttpRequestBuilder {
 	MockHttpRequestBuilder cookie(String name, String value);
 
 	/**
-	 * Adds a {@link HttpRequestCookie}.
+	 * <p>
+	 * Adds all the appropriate {@link WritableHttpCookie} instances from the
+	 * {@link MockHttpResponse}.
+	 * <p>
+	 * This is a convenience method to enable sending back
+	 * {@link HttpRequestCookie} instances received on a previous
+	 * {@link MockHttpResponse}.
 	 * 
-	 * @param cookie
-	 *            {@link HttpResponseCookie} to be sent back to server.
+	 * @param response
+	 *            {@link MockHttpResponse}.
 	 * @return <code>this</code>.
 	 */
-	MockHttpRequestBuilder cookie(HttpResponseCookie cookie);
+	MockHttpRequestBuilder cookies(MockHttpResponse response);
 
 	/**
 	 * Sets the HTTP entity.

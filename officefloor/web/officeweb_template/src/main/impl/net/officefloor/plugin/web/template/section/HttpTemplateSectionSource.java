@@ -62,6 +62,8 @@ import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFu
 import net.officefloor.plugin.web.template.HttpTemplateFunction;
 import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
+import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
+import net.officefloor.plugin.web.template.extension.WebTemplateExtensionContext;
 import net.officefloor.plugin.web.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.template.parse.HttpTemplateSection;
@@ -459,14 +461,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		while (extensionClassName != null) {
 
 			// Create an instance of the extension class
-			HttpTemplateSectionExtension extension = (HttpTemplateSectionExtension) context
+			WebTemplateExtension extension = (WebTemplateExtension) context
 					.loadClass(extensionClassName).newInstance();
 
 			// Extend the template
 			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex + ".";
-			HttpTemplateSectionExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
+			WebTemplateExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
 					templateContent, extensionPropertyPrefix, nonRenderTemplateTaskKeys);
-			extension.extendTemplate(extensionContext);
+			extension.extendWebTemplate(extensionContext);
 
 			// Override template details
 			templateContent = extensionContext.getTemplateContent();
@@ -915,9 +917,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * {@link HttpTemplateSectionExtensionContext} implementation.
+	 * {@link WebTemplateExtensionContext} implementation.
 	 */
-	private class HttpTemplateSectionExtensionContextImpl implements HttpTemplateSectionExtensionContext {
+	private class HttpTemplateSectionExtensionContextImpl implements WebTemplateExtensionContext {
 
 		/**
 		 * Raw {@link HttpTemplate} content.
@@ -970,7 +972,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		@Override
-		public Class<?> getTemplateClass() {
+		public Class<?> getLogicClass() {
 			return HttpTemplateSectionSource.this.sectionClass;
 		}
 

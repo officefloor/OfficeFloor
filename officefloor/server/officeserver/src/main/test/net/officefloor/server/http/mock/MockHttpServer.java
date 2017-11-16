@@ -485,6 +485,19 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 		private boolean isStress = false;
 
+		/**
+		 * Obtains the {@link MockNonMaterialisedHttpCookie}.
+		 * 
+		 * @return {@link MockNonMaterialisedHttpCookie}.
+		 */
+		private MockNonMaterialisedHttpCookie getCookieHeader() {
+			if (this.cookie == null) {
+				this.cookie = new MockNonMaterialisedHttpCookie(this);
+				this.headers.add(this.cookie);
+			}
+			return this.cookie;
+		}
+
 		/*
 		 * ================== MockHttpRequestBuilder ========================
 		 */
@@ -521,21 +534,14 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		@Override
 		public MockHttpRequestBuilder cookie(String name, String value) {
-
-			// Lazy create the cookie header
-			if (this.cookie == null) {
-				this.cookie = new MockNonMaterialisedHttpCookie();
-				this.headers.add(this.cookie);
-			}
-
-			// Add the cookie
-			this.cookie.cookies.add(new MockCookie(name, value));
+			this.getCookieHeader().cookies.add(new MockCookie(name, value));
 			return this;
 		}
 
 		@Override
-		public MockHttpRequestBuilder cookie(HttpResponseCookie cookie) {
-			return this.cookie(cookie.getName(), cookie.getValue());
+		public MockHttpRequestBuilder cookies(MockHttpResponse cookies) {
+			this.getCookieHeader().responses.add(cookies);
+			return this;
 		}
 
 		@Override
@@ -651,9 +657,31 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	private static class MockNonMaterialisedHttpCookie implements NonMaterialisedHttpHeader {
 
 		/**
+		 * {@link MockHttpRequestBuilderImpl}.
+		 */
+		private final MockHttpRequestBuilderImpl request;
+
+		/**
 		 * {@link MockCookie} instances.
 		 */
 		private final List<MockCookie> cookies = new LinkedList<>();
+
+		/**
+		 * Listing of {@link MockHttpResponse} instances to have their
+		 * appropriate {@link HttpResponseCookie} instances added as a
+		 * {@link HttpRequestCookie}.
+		 */
+		private final List<MockHttpResponse> responses = new LinkedList<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param request
+		 *            {@link MockHttpRequestBuilderImpl}.
+		 */
+		private MockNonMaterialisedHttpCookie(MockHttpRequestBuilderImpl request) {
+			this.request = request;
+		}
 
 		/*
 		 * ================= NonMaterialisedHttpHeader ========================
@@ -731,12 +759,29 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public String getValue() {
 			StringBuilder value = new StringBuilder();
+
+			// Load the added cookies
 			for (MockCookie cookie : this.header.cookies) {
 				value.append(cookie.name);
 				value.append("=");
 				value.append(cookie.value);
 				value.append(";");
 			}
+
+			// Load appropriate cookies (based on path)
+			for (MockHttpResponse response : this.header.responses) {
+				for (WritableHttpCookie cookie : response.getCookies()) {
+					String path = cookie.getPath();
+					if ((path == null) || (this.header.request.requestUri.startsWith(path))) {
+						value.append(cookie.getName());
+						value.append("=");
+						value.append(cookie.getValue());
+						value.append(";");
+					}
+				}
+			}
+
+			// Return the value
 			return value.toString();
 		}
 	}

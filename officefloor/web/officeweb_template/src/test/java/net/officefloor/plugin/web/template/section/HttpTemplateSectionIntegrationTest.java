@@ -38,10 +38,10 @@ import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
+import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
+import net.officefloor.plugin.web.template.extension.WebTemplateExtensionContext;
 import net.officefloor.plugin.web.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.template.section.HttpTemplateInitialManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.HttpTemplateSectionExtension;
-import net.officefloor.plugin.web.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.web.template.section.PostRedirectGetLogic.Parameters;
 import net.officefloor.server.http.HttpHeader;
@@ -803,7 +803,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to use a {@link HttpTemplateSectionExtension}.
+	 * Ensure able to use a {@link WebTemplateExtension}.
 	 */
 	public void testTemplateSectionExtension() throws Exception {
 
@@ -825,16 +825,16 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link HttpTemplateSectionExtension} for testing.
+	 * Mock {@link WebTemplateExtension} for testing.
 	 */
-	public static class MockHttpTemplateSectionExtension implements HttpTemplateSectionExtension {
+	public static class MockHttpTemplateSectionExtension implements WebTemplateExtension {
 
 		/*
 		 * ================== HttpTemplateSectionExtension ====================
 		 */
 
 		@Override
-		public void extendTemplate(HttpTemplateSectionExtensionContext context) throws Exception {
+		public void extendWebTemplate(WebTemplateExtensionContext context) throws Exception {
 
 			final String TEMPLATE_CONTENT = "Overridden template with ${property} and #{serviceLink}";
 

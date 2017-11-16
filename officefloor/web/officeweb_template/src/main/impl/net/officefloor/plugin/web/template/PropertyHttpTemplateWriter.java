@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import net.officefloor.plugin.web.template.HttpTemplateWriter;
-import net.officefloor.plugin.web.template.UnescapedHtml;
+import net.officefloor.plugin.web.template.NotEscaped;
 import net.officefloor.plugin.web.template.parse.PropertyHttpTemplateSectionContent;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
@@ -79,7 +79,7 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 		}
 
 		// Determine if should be escaped
-		this.isEscaped = !(method.isAnnotationPresent(UnescapedHtml.class));
+		this.isEscaped = !(method.isAnnotationPresent(NotEscaped.class));
 	}
 
 	/*

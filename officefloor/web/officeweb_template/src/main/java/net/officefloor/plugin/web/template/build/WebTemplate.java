@@ -17,7 +17,13 @@
  */
 package net.officefloor.plugin.web.template.build;
 
+import java.nio.charset.Charset;
+
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Web template.
@@ -33,6 +39,93 @@ public interface WebTemplate {
 	 *            Logic {@link Class}.
 	 */
 	void setLogicClass(Class<?> logicClass);
+
+	/**
+	 * Specifies the <code>Content-Type</code> output by this
+	 * {@link WebTemplate}.
+	 * 
+	 * @param contentType
+	 *            <code>Content-Type</code> output by this {@link WebTemplate}.
+	 */
+	void setContentType(String contentType);
+
+	/**
+	 * Allow overriding the default {@link Charset} to render the
+	 * {@link WebTemplate}.
+	 * 
+	 * @param charset
+	 *            {@link Charset} to render the {@link WebTemplate}.
+	 */
+	void setCharset(Charset charset);
+
+	/**
+	 * Flags whether the {@link WebTemplate} may only be rendered over a secure
+	 * connection.
+	 * 
+	 * @param isSecure
+	 *            <code>true</code> to only render the {@link WebTemplate} over
+	 *            a secure connection.
+	 */
+	void setSecure(boolean isSecure);
+
+	/**
+	 * <p>
+	 * Indicate whether a secure connection is required for the link. This
+	 * overrides the default template secure setting for the link.
+	 * <p>
+	 * Example use could be the landing page may be insecure but the login form
+	 * submission link on the page is to be secure.
+	 * 
+	 * @param linkName
+	 *            Name of link to secure.
+	 * @param isSecure
+	 *            <code>true</code> should the link require a secure
+	 *            {@link ServerHttpConnection}.
+	 */
+	void setLinkSecure(String linkName, boolean isSecure);
+
+	/**
+	 * <p>
+	 * Adds a {@link HttpMethod} that will not trigger a redirect on rendering
+	 * the {@link WebTemplate}.
+	 * <p>
+	 * Note that {@link HttpMethod#GET} is always a non-redirect.
+	 * 
+	 * @param method
+	 *            {@link HttpMethod} that will not trigger a redirect on
+	 *            rendering the {@link WebTemplate}.
+	 */
+	void addNonRedirectMethod(HttpMethod method);
+
+	/**
+	 * Specifies the super (parent) {@link WebTemplate}.
+	 * 
+	 * @param superTemplate
+	 *            Super {@link WebTemplate}.
+	 */
+	void setSuperTemplate(WebTemplate superTemplate);
+
+	/**
+	 * Adds a {@link WebTemplateExtension} for this {@link WebTemplate}.
+	 * 
+	 * @param extension
+	 *            {@link WebTemplateExtension} for this {@link WebTemplate}.
+	 */
+	void addExtension(WebTemplateExtension extension);
+
+	/**
+	 * Obtains the {@link OfficeSectionInput} to link to this
+	 * {@link WebTemplate}.
+	 * 
+	 * @param valuesType
+	 *            Type provided as a parameter to the {@link OfficeSectionInput}
+	 *            should the path parameters require being obtained. The type
+	 *            should provide a bean property for each path parameter for the
+	 *            {@link WebTemplate}. May be <code>null</code> if no path
+	 *            parameters are required.
+	 * @return {@link OfficeSectionInput} to link to this {@link WebTemplate}.
+	 */
+	OfficeSectionInput getInput(Class<?> valuesType);
 
 	/**
 	 * Obtains the {@link OfficeSectionOutput} from the {@link WebTemplate}.
