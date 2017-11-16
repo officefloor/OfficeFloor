@@ -29,15 +29,15 @@ import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 
 /**
- * Iterates over the array objects sending them to the {@link HttpTemplate} for
+ * Iterates over the array objects sending them to the {@link ParsedTemplate} for
  * rendering.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
+public class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of property for the array component type.
@@ -90,14 +90,14 @@ public class HttpTemplateArrayIteratorManagedFunctionSource extends AbstractMana
 	}
 
 	/**
-	 * {@link HttpTemplateArrayIteratorManagedFunctionSource} dependency keys.
+	 * {@link WebTemplateArrayIteratorManagedFunctionSource} dependency keys.
 	 */
 	public static enum DependencyKeys {
 		ARRAY
 	}
 
 	/**
-	 * {@link HttpTemplateArrayIteratorManagedFunctionSource} flow keys.
+	 * {@link WebTemplateArrayIteratorManagedFunctionSource} flow keys.
 	 */
 	public static enum FlowKeys {
 		RENDER_ELEMENT

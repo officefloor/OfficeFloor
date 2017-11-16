@@ -17,23 +17,20 @@
  */
 package net.officefloor.plugin.web.template;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import net.officefloor.plugin.web.template.HttpTemplateWriter;
-import net.officefloor.plugin.web.template.parse.BeanHttpTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.BeanParsedTemplateSectionContent;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 
 /**
- * {@link HttpTemplateWriter} to write a bean.
+ * {@link WebTemplateWriter} to write a bean.
  * 
  * @author Daniel Sagenschneider
  */
-public class BeanHttpTemplateWriter implements HttpTemplateWriter {
+public class BeanWebTemplateWriter implements WebTemplateWriter {
 
 	/**
 	 * {@link ValueRetriever}.
@@ -51,27 +48,27 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	private final boolean isArray;
 
 	/**
-	 * {@link HttpTemplateWriter} instances for the bean.
+	 * {@link WebTemplateWriter} instances for the bean.
 	 */
-	private final HttpTemplateWriter[] beanWriters;
+	private final WebTemplateWriter[] beanWriters;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param content
-	 *            {@link BeanHttpTemplateSectionContent}.
+	 *            {@link BeanParsedTemplateSectionContent}.
 	 * @param valueRetriever
 	 *            {@link ValueRetriever}.
 	 * @param isArray
 	 *            Indicates if an array of beans to render.
 	 * @param beanWriters
-	 *            {@link HttpTemplateWriter} instances for the bean.
+	 *            {@link WebTemplateWriter} instances for the bean.
 	 * @throws Exception
 	 *             If {@link Method} to obtain the value to write is not
 	 *             available on the bean type.
 	 */
-	public BeanHttpTemplateWriter(BeanHttpTemplateSectionContent content, ValueRetriever<Object> valueRetriever,
-			boolean isArray, HttpTemplateWriter[] beanWriters) throws Exception {
+	public BeanWebTemplateWriter(BeanParsedTemplateSectionContent content, ValueRetriever<Object> valueRetriever,
+			boolean isArray, WebTemplateWriter[] beanWriters) throws Exception {
 		this.valueRetriever = valueRetriever;
 		this.propertyName = content.getPropertyName();
 		this.isArray = isArray;
@@ -79,12 +76,12 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	}
 
 	/*
-	 * ================= HttpTemplateWriter ===============
+	 * ================= WebTemplateWriter ===============
 	 */
 
 	@Override
 	public void write(ServerWriter writer, boolean isDefaultCharset, Object bean, ServerHttpConnection connection,
-			HttpApplicationState applicationState) throws IOException {
+			String templatePath) throws HttpException {
 
 		// If no bean, then no value to output
 		if (bean == null) {
@@ -92,19 +89,7 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 		}
 
 		// Obtain the bean
-		Object writerBean;
-		try {
-
-			// Obtain the bean
-			writerBean = this.valueRetriever.retrieveValue(bean, this.propertyName);
-
-		} catch (InvocationTargetException ex) {
-			// Propagate cause of method failure
-			throw new IOException(ex.getCause());
-		} catch (Exception ex) {
-			// Propagate failure
-			throw new IOException(ex);
-		}
+		Object writerBean = this.valueRetriever.retrieveValue(bean, this.propertyName);
 
 		// Only write content if have the bean
 		if (writerBean == null) {
@@ -116,15 +101,15 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 			// Write the content for the array of beans
 			Object[] arrayBeans = (Object[]) writerBean;
 			for (Object arrayBean : arrayBeans) {
-				for (HttpTemplateWriter beanWriter : this.beanWriters) {
-					beanWriter.write(writer, isDefaultCharset, arrayBean, connection, applicationState);
+				for (WebTemplateWriter beanWriter : this.beanWriters) {
+					beanWriter.write(writer, isDefaultCharset, arrayBean, connection, templatePath);
 				}
 			}
 
 		} else {
 			// Write the content for the bean
-			for (HttpTemplateWriter beanWriter : this.beanWriters) {
-				beanWriter.write(writer, isDefaultCharset, writerBean, connection, applicationState);
+			for (WebTemplateWriter beanWriter : this.beanWriters) {
+				beanWriter.write(writer, isDefaultCharset, writerBean, connection, templatePath);
 			}
 		}
 	}

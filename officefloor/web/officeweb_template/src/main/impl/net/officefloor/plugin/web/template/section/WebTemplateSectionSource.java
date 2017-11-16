@@ -59,15 +59,15 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
-import net.officefloor.plugin.web.template.HttpTemplateFunction;
-import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.template.WebTemplateFunction;
+import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtensionContext;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.plugin.web.template.parse.HttpTemplateParserImpl;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSection;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialFunction.Flows;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Flows;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.path.HttpApplicationLocation;
@@ -81,12 +81,12 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateSectionSource extends ClassSectionSource {
+public class WebTemplateSectionSource extends ClassSectionSource {
 
 	/**
-	 * Property name for the {@link HttpTemplate} URI path.
+	 * Property name for the {@link ParsedTemplate} URI path.
 	 */
-	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
+	public static final String PROPERTY_TEMPLATE_URI = WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
 
 	/**
 	 * Property name for the {@link Class} providing the backing logic to the
@@ -101,33 +101,33 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_INHERITED_TEMPLATES = "inherited.templates";
 
 	/**
-	 * Property name for the Content-Type for the {@link HttpTemplate}.
+	 * Property name for the Content-Type for the {@link ParsedTemplate}.
 	 */
-	public static final String PROPERTY_CONTENT_TYPE = HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE;
+	public static final String PROPERTY_CONTENT_TYPE = WebTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE;
 
 	/**
-	 * Property name for the {@link Charset} for the {@link HttpTemplate}.
+	 * Property name for the {@link Charset} for the {@link ParsedTemplate}.
 	 */
-	public static final String PROPERTY_CHARSET = HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET;
+	public static final String PROPERTY_CHARSET = WebTemplateInitialManagedFunctionSource.PROPERTY_CHARSET;
 
 	/**
-	 * Prefix on a {@link HttpTemplateSection} name to indicate it is an
+	 * Prefix on a {@link ParsedTemplateSection} name to indicate it is an
 	 * override section.
 	 */
 	public static final String OVERRIDE_SECTION_PREFIX = ":";
 
 	/**
-	 * Removes the comment {@link HttpTemplateSection} instances.
+	 * Removes the comment {@link ParsedTemplateSection} instances.
 	 * 
 	 * @param sections
-	 *            Listing of {@link HttpTemplateSection} instances.
-	 * @return Filtered listing of {@link HttpTemplateSection} instances.
+	 *            Listing of {@link ParsedTemplateSection} instances.
+	 * @return Filtered listing of {@link ParsedTemplateSection} instances.
 	 */
-	public static HttpTemplateSection[] filterCommentHttpTemplateSections(HttpTemplateSection[] sections) {
+	public static ParsedTemplateSection[] filterCommentHttpTemplateSections(ParsedTemplateSection[] sections) {
 
 		// Filter comment sections
-		List<HttpTemplateSection> filteredSections = new LinkedList<HttpTemplateSection>();
-		for (HttpTemplateSection section : sections) {
+		List<ParsedTemplateSection> filteredSections = new LinkedList<ParsedTemplateSection>();
+		for (ParsedTemplateSection section : sections) {
 
 			// Ignore comment section
 			if ("!".equals(section.getSectionName())) {
@@ -139,30 +139,30 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Return the filtered sections
-		return filteredSections.toArray(new HttpTemplateSection[filteredSections.size()]);
+		return filteredSections.toArray(new ParsedTemplateSection[filteredSections.size()]);
 	}
 
 	/**
-	 * Returns the result of inheriting the parent {@link HttpTemplateSection}
-	 * instances with the child {@link HttpTemplateSection} overrides.
+	 * Returns the result of inheriting the parent {@link ParsedTemplateSection}
+	 * instances with the child {@link ParsedTemplateSection} overrides.
 	 * 
 	 * @param parentSections
-	 *            Parent {@link HttpTemplateSection} instances to inherit.
+	 *            Parent {@link ParsedTemplateSection} instances to inherit.
 	 * @param childSections
-	 *            Child {@link HttpTemplateSection} instances to override.
+	 *            Child {@link ParsedTemplateSection} instances to override.
 	 * @param designer
 	 *            {@link SectionDesigner}.
-	 * @return {@link HttpTemplateSection} instances from result of inheritance.
+	 * @return {@link ParsedTemplateSection} instances from result of inheritance.
 	 */
-	public static HttpTemplateSection[] inheritHttpTemplateSections(HttpTemplateSection[] parentSections,
-			HttpTemplateSection[] childSections, SectionDesigner designer) {
+	public static ParsedTemplateSection[] inheritHttpTemplateSections(ParsedTemplateSection[] parentSections,
+			ParsedTemplateSection[] childSections, SectionDesigner designer) {
 
 		// Create the listing of sections for overriding
-		Map<String, List<HttpTemplateSection>> overrideSections = new HashMap<String, List<HttpTemplateSection>>();
+		Map<String, List<ParsedTemplateSection>> overrideSections = new HashMap<String, List<ParsedTemplateSection>>();
 		String overrideSectionName = null;
-		List<HttpTemplateSection> overrideSectionList = new LinkedList<HttpTemplateSection>();
+		List<ParsedTemplateSection> overrideSectionList = new LinkedList<ParsedTemplateSection>();
 		boolean isFirstSection = true;
-		for (HttpTemplateSection section : childSections) {
+		for (ParsedTemplateSection section : childSections) {
 
 			// Obtain the section name
 			String sectionName = section.getSectionName();
@@ -171,7 +171,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			if (sectionName.startsWith(OVERRIDE_SECTION_PREFIX)) {
 				// New override section
 				overrideSectionName = getHttpTemplateSectionName(sectionName);
-				overrideSectionList = new LinkedList<HttpTemplateSection>();
+				overrideSectionList = new LinkedList<ParsedTemplateSection>();
 				overrideSections.put(overrideSectionName, overrideSectionList);
 
 			} else {
@@ -196,19 +196,19 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Obtain the names of all parent sections
 		Set<String> parentSectionNames = new HashSet<String>();
-		for (HttpTemplateSection parentSection : parentSections) {
+		for (ParsedTemplateSection parentSection : parentSections) {
 			parentSectionNames.add(getHttpTemplateSectionName(parentSection.getSectionName()));
 		}
 
 		// Create the listing sections from inheritance
-		List<HttpTemplateSection> inheritanceSections = new LinkedList<HttpTemplateSection>();
-		for (HttpTemplateSection parentSection : parentSections) {
+		List<ParsedTemplateSection> inheritanceSections = new LinkedList<ParsedTemplateSection>();
+		for (ParsedTemplateSection parentSection : parentSections) {
 
 			// Obtain the parent section name
 			String parentSectionName = getHttpTemplateSectionName(parentSection.getSectionName());
 
 			// Determine if overriding parent
-			List<HttpTemplateSection> overridingSections = overrideSections.remove(parentSectionName);
+			List<ParsedTemplateSection> overridingSections = overrideSections.remove(parentSectionName);
 			if (overridingSections == null) {
 				// Parent section not overridden, so include
 				inheritanceSections.add(parentSection);
@@ -216,7 +216,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			} else {
 				// Overridden, so include override and introduced sections
 				boolean isIntroducedSection = false; // first is override
-				for (HttpTemplateSection overrideSection : overridingSections) {
+				for (ParsedTemplateSection overrideSection : overridingSections) {
 
 					// Determine if introduced section already exists in parent
 					String introducedSectionName = getHttpTemplateSectionName(overrideSection.getSectionName());
@@ -243,16 +243,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Return the sections from inheritance
-		return inheritanceSections.toArray(new HttpTemplateSection[inheritanceSections.size()]);
+		return inheritanceSections.toArray(new ParsedTemplateSection[inheritanceSections.size()]);
 	}
 
 	/**
-	 * Obtains the {@link HttpTemplateSection} name (possibly removing override
+	 * Obtains the {@link ParsedTemplateSection} name (possibly removing override
 	 * prefix).
 	 * 
 	 * @param sectionName
-	 *            {@link HttpTemplateSection} raw name.
-	 * @return {@link HttpTemplateSection} name.
+	 *            {@link ParsedTemplateSection} raw name.
+	 * @return {@link ParsedTemplateSection} name.
 	 */
 	private static String getHttpTemplateSectionName(String sectionName) {
 		return sectionName.startsWith(OVERRIDE_SECTION_PREFIX) ? sectionName.substring(OVERRIDE_SECTION_PREFIX.length())
@@ -260,20 +260,20 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Reconstructs the {@link HttpTemplate} raw content from the
-	 * {@link HttpTemplateSection} instances.
+	 * Reconstructs the {@link ParsedTemplate} raw content from the
+	 * {@link ParsedTemplateSection} instances.
 	 * 
 	 * @param sections
-	 *            {@link HttpTemplateSection} instances.
-	 * @return Raw {@link HttpTemplate} content from reconstruction from the
-	 *         {@link HttpTemplateSection} instances.
+	 *            {@link ParsedTemplateSection} instances.
+	 * @return Raw {@link ParsedTemplate} content from reconstruction from the
+	 *         {@link ParsedTemplateSection} instances.
 	 */
-	public static String reconstructHttpTemplateContent(HttpTemplateSection[] sections) {
+	public static String reconstructHttpTemplateContent(ParsedTemplateSection[] sections) {
 
 		// Reconstruct the raw HTTP template content
 		StringBuilder content = new StringBuilder();
 		boolean isFirstSection = true;
-		for (HttpTemplateSection section : sections) {
+		for (ParsedTemplateSection section : sections) {
 
 			// Obtain the template section name
 			String sectionName = getHttpTemplateSectionName(section.getSectionName());
@@ -307,25 +307,25 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Obtains the {@link HttpTemplate}.
+	 * Obtains the {@link ParsedTemplate}.
 	 * 
 	 * @param templateLocation
-	 *            {@link HttpTemplate} location.
+	 *            {@link ParsedTemplate} location.
 	 * @param context
 	 *            {@link SourceContext}.
-	 * @return {@link HttpTemplate}.
+	 * @return {@link ParsedTemplate}.
 	 * @throws IOException
-	 *             If fails to obtain the {@link HttpTemplate}.
+	 *             If fails to obtain the {@link ParsedTemplate}.
 	 */
-	private static HttpTemplate getHttpTemplate(String templateLocation, SourceContext context) throws IOException {
+	private static ParsedTemplate getHttpTemplate(String templateLocation, SourceContext context) throws IOException {
 
 		// Create the context to source the HTTP template
 		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(context);
-		templateProperties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, templateLocation);
+		templateProperties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, templateLocation);
 		SourceContext templateContext = new SourceContextImpl(context.isLoadingType(), context, templateProperties);
 
 		// Obtain the HTTP template
-		HttpTemplate template = HttpTemplateManagedFunctionSource.getHttpTemplate(templateContext);
+		ParsedTemplate template = WebTemplateManagedFunctionSource.getParsedTemplate(templateContext);
 
 		// Return the HTTP template
 		return template;
@@ -343,13 +343,13 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Name of the {@link SectionInput} for rendering this {@link HttpTemplate}.
+	 * Name of the {@link SectionInput} for rendering this {@link ParsedTemplate}.
 	 */
 	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
 
 	/**
 	 * Name of the {@link SectionOutput} for flow after completion of rending
-	 * the {@link HttpTemplate}.
+	 * the {@link ParsedTemplate}.
 	 */
 	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
 
@@ -417,7 +417,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Obtain the template for the highest ancestor in inheritance hierarchy
-		HttpTemplate highestAncestorTemplate = getHttpTemplate(templateInheritanceHierarchy[0], context);
+		ParsedTemplate highestAncestorTemplate = getHttpTemplate(templateInheritanceHierarchy[0], context);
 
 		/*
 		 * Keep track of all link names. This is to allow inherited links to be
@@ -426,20 +426,20 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 */
 		Set<String> knownLinkNames = new HashSet<String>();
 		knownLinkNames.addAll(
-				Arrays.asList(HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(highestAncestorTemplate)));
+				Arrays.asList(WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(highestAncestorTemplate)));
 
 		// Undertake inheritance of the template (first does not inherit)
-		HttpTemplateSection[] sections = highestAncestorTemplate.getSections();
+		ParsedTemplateSection[] sections = highestAncestorTemplate.getSections();
 		sections = filterCommentHttpTemplateSections(sections);
 		for (int i = 1; i < templateInheritanceHierarchy.length; i++) {
 
 			// Obtain the child sections
-			HttpTemplate childTemplate = getHttpTemplate(templateInheritanceHierarchy[i], context);
-			HttpTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate.getSections());
+			ParsedTemplate childTemplate = getHttpTemplate(templateInheritanceHierarchy[i], context);
+			ParsedTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate.getSections());
 
 			// Add the child link names
 			knownLinkNames
-					.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(childTemplate)));
+					.addAll(Arrays.asList(WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(childTemplate)));
 
 			// Obtain the sections from child inheritance
 			sections = inheritHttpTemplateSections(sections, childSections, designer);
@@ -479,7 +479,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Obtain the HTTP template
-		HttpTemplate template = HttpTemplateManagedFunctionSource.getHttpTemplate(new StringReader(templateContent));
+		ParsedTemplate template = WebTemplateManagedFunctionSource.getWebTemplate(new StringReader(templateContent));
 
 		// Create the necessary dependency objects
 		SectionObject connectionObject = this.getOrCreateObject(null, ServerHttpConnection.class.getName());
@@ -493,16 +493,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Load the initial function
 		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
-				HttpTemplateInitialManagedFunctionSource.class.getName());
+				WebTemplateInitialManagedFunctionSource.class.getName());
 		PropertiesUtil.copyProperties(context, initialNamespace,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE,
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET);
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				WebTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				WebTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE,
+				WebTemplateInitialManagedFunctionSource.PROPERTY_CHARSET);
 		SectionFunction initialFunction = initialNamespace.addSectionFunction("_INITIAL_TASK_",
-				HttpTemplateInitialManagedFunctionSource.FUNCTION_NAME);
+				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		designer.link(initialFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), connectionObject);
 		designer.link(initialFunction.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationState);
 		designer.link(initialFunction.getFunctionObject("REQUEST_STATE"), requestStateObject);
@@ -516,21 +516,21 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Load the HTTP template
 		final String TEMPLATE_NAMESPACE_NANE = "TEMPLATE";
 		SectionFunctionNamespace templateNamespace = designer.addSectionFunctionNamespace(TEMPLATE_NAMESPACE_NANE,
-				HttpTemplateManagedFunctionSource.class.getName());
-		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT, templateContent);
+				WebTemplateManagedFunctionSource.class.getName());
+		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT, templateContent);
 
 		// Copy the template configuration
 		PropertiesUtil.copyProperties(context, templateNamespace,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
-				HttpTemplateManagedFunctionSource.PROPERTY_CHARSET);
-		PropertiesUtil.copyPrefixedProperties(context, HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX,
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				WebTemplateManagedFunctionSource.PROPERTY_CHARSET);
+		PropertiesUtil.copyPrefixedProperties(context, WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX,
 				templateNamespace);
 
 		// Create the template functions and ensure registered for logic flows
 		Map<String, SectionFunction> templateFunctions = new HashMap<>();
-		for (HttpTemplateSection templateSection : template.getSections()) {
+		for (ParsedTemplateSection templateSection : template.getSections()) {
 
 			// Obtain the template function name
 			String templateFunctionName = templateSection.getSectionName();
@@ -546,7 +546,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Load the HTTP template functions
 		Map<String, SectionFunction> contentFunctionsByName = new HashMap<>();
 		SectionFunction previousTemplateFunction = initialFunction;
-		for (HttpTemplateSection templateSection : template.getSections()) {
+		for (ParsedTemplateSection templateSection : template.getSections()) {
 
 			// Obtain the template function
 			String templateFunctionName = templateSection.getSectionName();
@@ -576,7 +576,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			nonRenderTemplateTaskKeys.add(beanFunctionKey);
 
 			// Determine if template section requires a bean
-			boolean isRequireBean = HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(templateSection);
+			boolean isRequireBean = WebTemplateManagedFunctionSource.isParsedTemplateSectionRequireBean(templateSection);
 			if ((isRequireBean) && (beanFunction == null)) {
 				// Section method required, determine if just missing method
 				if (!isLogicClass) {
@@ -626,7 +626,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 					// Inform template of bean type
 					templateNamespace.addProperty(
-							HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + templateFunctionName,
+							WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + templateFunctionName,
 							beanType.getName());
 
 					// Flag bean as parameter
@@ -637,21 +637,21 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 						// Provide iterator function if array
 						SectionFunctionNamespace arrayIteratorNamespace = designer.addSectionFunctionNamespace(
 								templateFunctionName + "ArrayIterator",
-								HttpTemplateArrayIteratorManagedFunctionSource.class.getName());
+								WebTemplateArrayIteratorManagedFunctionSource.class.getName());
 						arrayIteratorNamespace.addProperty(
-								HttpTemplateArrayIteratorManagedFunctionSource.PROPERTY_COMPONENT_TYPE_NAME,
+								WebTemplateArrayIteratorManagedFunctionSource.PROPERTY_COMPONENT_TYPE_NAME,
 								beanType.getName());
 						SectionFunction arrayIteratorFunction = arrayIteratorNamespace.addSectionFunction(
 								templateFunctionName + "ArrayIterator",
-								HttpTemplateArrayIteratorManagedFunctionSource.FUNCTION_NAME);
+								WebTemplateArrayIteratorManagedFunctionSource.FUNCTION_NAME);
 						arrayIteratorFunction
-								.getFunctionObject(HttpTemplateArrayIteratorManagedFunctionSource.OBJECT_NAME)
+								.getFunctionObject(WebTemplateArrayIteratorManagedFunctionSource.OBJECT_NAME)
 								.flagAsParameter();
 
 						// Link iteration of array to rendering
 						designer.link(
 								arrayIteratorFunction
-										.getFunctionFlow(HttpTemplateArrayIteratorManagedFunctionSource.FLOW_NAME),
+										.getFunctionFlow(WebTemplateArrayIteratorManagedFunctionSource.FLOW_NAME),
 								templateFunction, false);
 
 						// Iterator is now controller for template
@@ -710,19 +710,19 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Determine if the template is secure
-		boolean isTemplateSecure = HttpTemplateManagedFunctionSource.isHttpTemplateSecure(context);
+		boolean isTemplateSecure = WebTemplateManagedFunctionSource.isWebTemplateSecure(context);
 
 		// Obtain the template URI suffix
-		String templateUriSuffix = context.getProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+		String templateUriSuffix = context.getProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
 				null);
 
 		// Determine if any unknown configured links
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
-			if (propertyName.startsWith(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX)) {
+			if (propertyName.startsWith(WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX)) {
 
 				// Obtain the link name
 				String configuredLinkName = propertyName
-						.substring(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX.length());
+						.substring(WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX.length());
 
 				// Ignore if known link
 				if (knownLinkNames.contains(configuredLinkName)) {
@@ -735,16 +735,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Register the #{link} URL continuation tasks
-		String[] linkNames = HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(template);
+		String[] linkNames = WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkFunctionName : linkNames) {
 
 			// Obtain the link URI path
-			String linkUriPath = HttpTemplateManagedFunctionSource
+			String linkUriPath = WebTemplateManagedFunctionSource
 					.getHttpTemplateLinkUrlContinuationPath(templateUriPath, linkFunctionName, templateUriSuffix);
 
 			// Determine if link is to be secure
-			boolean isLinkSecure = HttpTemplateFunction.isLinkSecure(linkFunctionName, isTemplateSecure, context);
+			boolean isLinkSecure = WebTemplateFunction.isLinkSecure(linkFunctionName, isTemplateSecure, context);
 
 			// Create HTTP URL continuation
 			SectionFunctionNamespace urlContinuationNamespace = designer.addSectionFunctionNamespace(
@@ -922,7 +922,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	private class HttpTemplateSectionExtensionContextImpl implements WebTemplateExtensionContext {
 
 		/**
-		 * Raw {@link HttpTemplate} content.
+		 * Raw {@link ParsedTemplate} content.
 		 */
 		private String templateContent;
 
@@ -942,7 +942,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * Initiate.
 		 * 
 		 * @param templateContent
-		 *            Raw {@link HttpTemplate} content.
+		 *            Raw {@link ParsedTemplate} content.
 		 * @param extensionPropertyPrefix
 		 *            Prefix for a property of this extension.
 		 * @param nonRenderTemplateTaskKeys
@@ -973,7 +973,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		@Override
 		public Class<?> getLogicClass() {
-			return HttpTemplateSectionSource.this.sectionClass;
+			return WebTemplateSectionSource.this.sectionClass;
 		}
 
 		@Override
@@ -985,7 +985,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		public String[] getPropertyNames() {
 
 			// Obtain all the property names
-			String[] contextNames = HttpTemplateSectionSource.this.getContext().getPropertyNames();
+			String[] contextNames = WebTemplateSectionSource.this.getContext().getPropertyNames();
 
 			// Filter to just this extension's properties
 			List<String> extensionNames = new LinkedList<String>();
@@ -1004,13 +1004,13 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		@Override
 		public String getProperty(String name) throws UnknownPropertyError {
 			// Obtain the extension property value
-			return HttpTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name);
+			return WebTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name);
 		}
 
 		@Override
 		public String getProperty(String name, String defaultValue) {
 			// Obtain the extension property value
-			return HttpTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name,
+			return WebTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name,
 					defaultValue);
 		}
 
@@ -1021,12 +1021,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			Properties properties = new Properties();
 
 			// Filter to just this extension's properties
-			String[] contextNames = HttpTemplateSectionSource.this.getContext().getPropertyNames();
+			String[] contextNames = WebTemplateSectionSource.this.getContext().getPropertyNames();
 			for (String contextName : contextNames) {
 				if (contextName.startsWith(this.extensionPropertyPrefix)) {
 					// Add the extension property name
 					String extensionName = contextName.substring(this.extensionPropertyPrefix.length());
-					String value = HttpTemplateSectionSource.this.getContext().getProperty(contextName);
+					String value = WebTemplateSectionSource.this.getContext().getProperty(contextName);
 					properties.setProperty(extensionName, value);
 				}
 			}
@@ -1037,32 +1037,32 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		@Override
 		public SectionSourceContext getSectionSourceContext() {
-			return HttpTemplateSectionSource.this.getContext();
+			return WebTemplateSectionSource.this.getContext();
 		}
 
 		@Override
 		public SectionDesigner getSectionDesigner() {
-			return HttpTemplateSectionSource.this.getDesigner();
+			return WebTemplateSectionSource.this.getDesigner();
 		}
 
 		@Override
 		public SectionManagedObject getTemplateLogicObject() {
-			return HttpTemplateSectionSource.this.sectionClassManagedObject;
+			return WebTemplateSectionSource.this.sectionClassManagedObject;
 		}
 
 		@Override
 		public SectionFunction getFunction(String functionName) {
-			return HttpTemplateSectionSource.this.getFunctionByName(functionName);
+			return WebTemplateSectionSource.this.getFunctionByName(functionName);
 		}
 
 		@Override
 		public SectionObject getOrCreateSectionObject(String typeName) {
-			return HttpTemplateSectionSource.this.getOrCreateObject(null, typeName);
+			return WebTemplateSectionSource.this.getOrCreateObject(null, typeName);
 		}
 
 		@Override
 		public SectionOutput getOrCreateSectionOutput(String name, String argumentType, boolean isEscalationOnly) {
-			return HttpTemplateSectionSource.this.getOrCreateOutput(name, argumentType, isEscalationOnly);
+			return WebTemplateSectionSource.this.getOrCreateOutput(name, argumentType, isEscalationOnly);
 		}
 	}
 

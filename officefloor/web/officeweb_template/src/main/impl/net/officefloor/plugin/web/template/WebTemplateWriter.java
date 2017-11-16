@@ -17,19 +17,19 @@
  */
 package net.officefloor.plugin.web.template;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 
+import net.officefloor.plugin.web.template.build.WebTemplate;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * Interface to write the template content to {@link ServerWriter}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateWriter {
+public interface WebTemplateWriter {
 
 	/**
 	 * Writes the template content to the {@link ServerWriter}.
@@ -49,13 +49,14 @@ public interface HttpTemplateWriter {
 	 *            template contents does not require a bean.
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
-	 * @param applicationState
-	 *            {@link HttpApplicationState} to assist in providing
-	 *            application paths..
-	 * @throws IOException
+	 * @param templatePath
+	 *            Current path for the {@link WebTemplate}. As the path may be
+	 *            dynamic (contain path parameters), this is the path to be used
+	 *            by links in rending of the {@link WebTemplate}.
+	 * @throws HttpException
 	 *             If fails to write content.
 	 */
 	void write(ServerWriter writer, boolean isDefaultCharset, Object bean, ServerHttpConnection connection,
-			HttpApplicationState applicationState) throws IOException;
+			String templatePath) throws HttpException;
 
 }

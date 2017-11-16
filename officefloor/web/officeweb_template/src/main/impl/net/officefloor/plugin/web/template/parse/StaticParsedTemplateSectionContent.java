@@ -18,18 +18,34 @@
 package net.officefloor.plugin.web.template.parse;
 
 /**
- * {@link HttpTemplateSectionContent} that identifies a link.
- * 
+ * {@link ParsedTemplateSectionContent} containing static content.
+ *
  * @author Daniel Sagenschneider
  */
-public interface LinkHttpTemplateSectionContent extends
-		HttpTemplateSectionContent {
+public class StaticParsedTemplateSectionContent {
 
 	/**
-	 * Obtains the name for the link.
-	 * 
-	 * @return Name for the link.
+	 * Static content.
 	 */
-	String getName();
+	private final String staticContent;
+
+	/**
+	 * Initiate.
+	 *
+	 * @param staticContent
+	 *            Static content.
+	 */
+	public StaticParsedTemplateSectionContent(String staticContent) {
+		this.staticContent = staticContent;
+	}
+
+	/**
+	 * Obtains the static content.
+	 *
+	 * @return Static content.
+	 */
+	public String getStaticContent() {
+		return this.staticContent;
+	}
 
 }

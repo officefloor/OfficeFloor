@@ -18,18 +18,9 @@
 package net.officefloor.plugin.web.template.parse;
 
 /**
- * {@link HttpTemplateSectionContent} containing static content.
+ * Content for a {@link ParsedTemplateSection}.
  *
  * @author Daniel Sagenschneider
  */
-public interface StaticHttpTemplateSectionContent extends
-		HttpTemplateSectionContent {
-
-	/**
-	 * Obtains the static content.
-	 *
-	 * @return Static content.
-	 */
-	String getStaticContent();
-
+public interface ParsedTemplateSectionContent {
 }

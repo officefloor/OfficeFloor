@@ -17,64 +17,74 @@
  */
 package net.officefloor.plugin.web.template.parse;
 
-import net.officefloor.plugin.web.template.parse.HttpTemplateSection;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSectionContent;
+import net.officefloor.plugin.web.template.build.WebTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSectionContent;
 
 /**
- * {@link HttpTemplateSection} implementation.
+ * Parsed section of the {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateSectionImpl implements HttpTemplateSection {
+public class ParsedTemplateSection {
 
 	/**
-	 * {@link HttpTemplateSection} name.
+	 * {@link ParsedTemplateSection} name.
 	 */
 	private final String sectionName;
 
 	/**
-	 * Raw {@link HttpTemplateSection} content.
+	 * Raw {@link ParsedTemplateSection} content.
 	 */
 	private final String rawSectionContent;
 
 	/**
-	 * {@link HttpTemplateSectionContent} instances.
+	 * {@link ParsedTemplateSectionContent} instances.
 	 */
-	private final HttpTemplateSectionContent[] content;
+	private final ParsedTemplateSectionContent[] content;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param sectionName
-	 *            {@link HttpTemplateSection} name.
+	 *            {@link ParsedTemplateSection} name.
 	 * @param rawSectionContent
-	 *            Raw {@link HttpTemplateSection} content.
+	 *            Raw {@link ParsedTemplateSection} content.
 	 * @param content
-	 *            {@link HttpTemplateSectionContent} instances.
+	 *            {@link ParsedTemplateSectionContent} instances.
 	 */
-	public HttpTemplateSectionImpl(String sectionName,
-			String rawSectionContent, HttpTemplateSectionContent[] content) {
+	public ParsedTemplateSection(String sectionName, String rawSectionContent, ParsedTemplateSectionContent[] content) {
 		this.sectionName = sectionName;
 		this.rawSectionContent = rawSectionContent;
 		this.content = content;
 	}
 
-	/*
-	 * ================= HttpTemplateSection =========================
+	/**
+	 * Obtains the name of this section.
+	 * 
+	 * @return Name of this section.
 	 */
-
-	@Override
 	public String getSectionName() {
 		return this.sectionName;
 	}
 
-	@Override
+	/**
+	 * Obtains the raw content for this section.
+	 * 
+	 * @return Raw content for this section.
+	 */
 	public String getRawSectionContent() {
 		return this.rawSectionContent;
 	}
 
-	@Override
-	public HttpTemplateSectionContent[] getContent() {
+	/**
+	 * Obtains the {@link ParsedTemplateSectionContent} instances that comprise
+	 * the content for this {@link ParsedTemplateSection}.
+	 * 
+	 * @return {@link ParsedTemplateSectionContent} instances that comprise the
+	 *         content for this {@link ParsedTemplateSection}.
+	 */
+	public ParsedTemplateSectionContent[] getContent() {
 		return this.content;
 	}
 

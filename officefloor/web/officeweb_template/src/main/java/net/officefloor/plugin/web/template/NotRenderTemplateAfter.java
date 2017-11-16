@@ -23,12 +23,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 
 /**
- * Flags that the {@link HttpTemplate} should not be rendered after the method
+ * Flags that the {@link ParsedTemplate} should not be rendered after the method
  * completes. This is to avoid the default behaviour of re-rendering the
- * {@link HttpTemplate}.
+ * {@link ParsedTemplate}.
  * 
  * @author Daniel Sagenschneider
  */

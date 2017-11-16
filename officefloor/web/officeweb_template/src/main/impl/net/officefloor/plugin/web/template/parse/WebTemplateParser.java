@@ -17,38 +17,26 @@
  */
 package net.officefloor.plugin.web.template.parse;
 
-import net.officefloor.plugin.web.template.parse.LinkHttpTemplateSectionContent;
+import java.io.IOException;
 
 /**
- * {@link LinkHttpTemplateSectionContent} implementation.
+ * Parses the template.
  * 
  * @author Daniel Sagenschneider
  */
-public class LinkHttpTemplateSectionContentImpl implements
-		LinkHttpTemplateSectionContent {
+public interface WebTemplateParser {
 
 	/**
-	 * Name.
-	 */
-	private final String name;
-
-	/**
-	 * Initiate.
+	 * <p>
+	 * Parses the {@link ParsedTemplate}.
+	 * <p>
+	 * It is anticipated that the content of the template will be passed to the
+	 * constructor of this implementation.
 	 * 
-	 * @param name
-	 *            Name.
+	 * @return Parsed {@link ParsedTemplate}.
+	 * @throws IOException
+	 *             If fails to parse the {@link ParsedTemplate}.
 	 */
-	public LinkHttpTemplateSectionContentImpl(String name) {
-		this.name = name;
-	}
-
-	/*
-	 * =================== LinkHttpTemplateSectionContent =================
-	 */
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
+	ParsedTemplate parse() throws IOException;
 
 }

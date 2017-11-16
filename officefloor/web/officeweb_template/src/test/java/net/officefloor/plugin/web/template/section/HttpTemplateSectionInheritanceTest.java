@@ -20,12 +20,12 @@ package net.officefloor.plugin.web.template.section;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSection;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSectionImpl;
-import net.officefloor.plugin.web.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
+import net.officefloor.plugin.web.template.section.WebTemplateSectionSource;
 
 /**
- * Tests inheriting {@link HttpTemplateSection} instances.
+ * Tests inheriting {@link ParsedTemplateSection} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -128,29 +128,29 @@ public class HttpTemplateSectionInheritanceTest extends OfficeFrameTestCase {
 	 * Undertakes the inheritance test.
 	 * 
 	 * @param parentSectionNames
-	 *            Parent {@link HttpTemplateSection} names.
+	 *            Parent {@link ParsedTemplateSection} names.
 	 * @param childSectionNames
-	 *            Child {@link HttpTemplateSection} names.
+	 *            Child {@link ParsedTemplateSection} names.
 	 * @param resultingSections
-	 *            Resulting {@link HttpTemplateSection} contents. Allows to
+	 *            Resulting {@link ParsedTemplateSection} contents. Allows to
 	 *            distinguish between parent and child by same name for
 	 *            inheritance.
 	 */
 	private void doTest(String[] parentSectionNames, String[] childSectionNames, String... resultingSections) {
 
 		// Create the list of parent and child sections
-		HttpTemplateSection[] parentSections = createHttpTemplateSections(parentSectionNames, "p:");
-		HttpTemplateSection[] childSections = createHttpTemplateSections(childSectionNames, "c:");
+		ParsedTemplateSection[] parentSections = createHttpTemplateSections(parentSectionNames, "p:");
+		ParsedTemplateSection[] childSections = createHttpTemplateSections(childSectionNames, "c:");
 
 		// Filter out section comments
-		parentSections = HttpTemplateSectionSource.filterCommentHttpTemplateSections(parentSections);
-		childSections = HttpTemplateSectionSource.filterCommentHttpTemplateSections(childSections);
+		parentSections = WebTemplateSectionSource.filterCommentHttpTemplateSections(parentSections);
+		childSections = WebTemplateSectionSource.filterCommentHttpTemplateSections(childSections);
 
 		// Test
 		this.replayMockObjects();
 
 		// Undertake the inheritance
-		HttpTemplateSection[] inheritedSections = HttpTemplateSectionSource.inheritHttpTemplateSections(parentSections,
+		ParsedTemplateSection[] inheritedSections = WebTemplateSectionSource.inheritHttpTemplateSections(parentSections,
 				childSections, this.designer);
 
 		// Verify
@@ -184,30 +184,30 @@ public class HttpTemplateSectionInheritanceTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure the reconstructed template content is as expected
-		String reconstructedTemplateContent = HttpTemplateSectionSource
+		String reconstructedTemplateContent = WebTemplateSectionSource
 				.reconstructHttpTemplateContent(inheritedSections);
 		assertEquals("Incorrect reconstructed inherited template content", expectedTemplateContent.toString(),
 				reconstructedTemplateContent);
 	}
 
 	/**
-	 * Creates the list of {@link HttpTemplateSection} instances.
+	 * Creates the list of {@link ParsedTemplateSection} instances.
 	 * 
 	 * @param sectionNames
-	 *            Names of the {@link HttpTemplateSection} instances.
+	 *            Names of the {@link ParsedTemplateSection} instances.
 	 * @param contentPrefix
-	 *            Prefix for the {@link HttpTemplateSection} content.
-	 * @return {@link HttpTemplateSection} instances.
+	 *            Prefix for the {@link ParsedTemplateSection} content.
+	 * @return {@link ParsedTemplateSection} instances.
 	 */
-	private static HttpTemplateSection[] createHttpTemplateSections(String[] sectionNames, String contentPrefix) {
+	private static ParsedTemplateSection[] createHttpTemplateSections(String[] sectionNames, String contentPrefix) {
 
 		// Create the list of sections
-		HttpTemplateSection[] sections = new HttpTemplateSection[sectionNames.length];
+		ParsedTemplateSection[] sections = new ParsedTemplateSection[sectionNames.length];
 		for (int i = 0; i < sections.length; i++) {
 			String sectionName = sectionNames[i];
 			String sectionContent = contentPrefix
 					+ (sectionName.startsWith(":") ? sectionName.substring(":".length()) : sectionName);
-			sections[i] = new HttpTemplateSectionImpl(sectionName, sectionContent, null);
+			sections[i] = new ParsedTemplateSection(sectionName, sectionContent, null);
 		}
 
 		// Return the list of sections

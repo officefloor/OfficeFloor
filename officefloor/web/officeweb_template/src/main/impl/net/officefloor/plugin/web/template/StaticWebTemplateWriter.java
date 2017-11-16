@@ -20,18 +20,17 @@ package net.officefloor.plugin.web.template;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.web.template.HttpTemplateWriter;
-import net.officefloor.plugin.web.template.parse.StaticHttpTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.StaticParsedTemplateSectionContent;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.web.state.HttpApplicationState;
 
 /**
- * {@link HttpTemplateWriter} to write static content.
+ * {@link WebTemplateWriter} to write static content.
  * 
  * @author Daniel Sagenschneider
  */
-public class StaticHttpTemplateWriter implements HttpTemplateWriter {
+public class StaticWebTemplateWriter implements WebTemplateWriter {
 
 	/**
 	 * Static content as text.
@@ -47,13 +46,13 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 * Initiate.
 	 * 
 	 * @param staticContent
-	 *            {@link StaticHttpTemplateSectionContent} to write.
+	 *            {@link StaticParsedTemplateSectionContent} to write.
 	 * @param charset
 	 *            {@link Charset} for the template.
 	 * @throws IOException
 	 *             If fails to prepare the static content.
 	 */
-	public StaticHttpTemplateWriter(StaticHttpTemplateSectionContent staticContent, Charset charset)
+	public StaticWebTemplateWriter(StaticParsedTemplateSectionContent staticContent, Charset charset)
 			throws IOException {
 		this.textContent = staticContent.getStaticContent();
 
@@ -67,16 +66,21 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 
 	@Override
 	public void write(ServerWriter writer, boolean isDefaultCharset, Object bean, ServerHttpConnection connection,
-			HttpApplicationState applicationState) throws IOException {
+			String templatePath) throws HttpException {
 
-		// Use pre-encoded content if using default charset
-		if (isDefaultCharset) {
-			// Provide pre-encoded content
-			writer.write(this.encodedContent);
+		try {
+			// Use pre-encoded content if using default charset
+			if (isDefaultCharset) {
+				// Provide pre-encoded content
+				writer.write(this.encodedContent);
 
-		} else {
-			// Provide the content (with appropriate charset)
-			writer.write(this.textContent);
+			} else {
+				// Provide the content (with appropriate charset)
+				writer.write(this.textContent);
+			}
+
+		} catch (IOException ex) {
+			throw new HttpException(ex);
 		}
 	}
 

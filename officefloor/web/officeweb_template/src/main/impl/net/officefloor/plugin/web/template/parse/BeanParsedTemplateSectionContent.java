@@ -17,16 +17,15 @@
  */
 package net.officefloor.plugin.web.template.parse;
 
-import net.officefloor.plugin.web.template.parse.BeanHttpTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.BeanParsedTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSectionContent;
 
 /**
- * {@link BeanHttpTemplateSectionContent} implementation.
+ * {@link ParsedTemplateSectionContent} that references a bean to use.
  * 
  * @author Daniel Sagenschneider
  */
-public class BeanHttpTemplateSectionContentImpl implements
-		BeanHttpTemplateSectionContent {
+public class BeanParsedTemplateSectionContent {
 
 	/**
 	 * Property name to obtain the bean.
@@ -34,9 +33,9 @@ public class BeanHttpTemplateSectionContentImpl implements
 	private final String beanName;
 
 	/**
-	 * {@link HttpTemplateSectionContent} instances for the bean.
+	 * {@link ParsedTemplateSectionContent} instances for the bean.
 	 */
-	private final HttpTemplateSectionContent[] contents;
+	private final ParsedTemplateSectionContent[] contents;
 
 	/**
 	 * Initiate.
@@ -44,25 +43,30 @@ public class BeanHttpTemplateSectionContentImpl implements
 	 * @param beanName
 	 *            Property name to obtain the bean.
 	 * @param contents
-	 *            {@link HttpTemplateSectionContent} instances for the bean.
+	 *            {@link ParsedTemplateSectionContent} instances for the bean.
 	 */
-	public BeanHttpTemplateSectionContentImpl(String beanName,
-			HttpTemplateSectionContent[] contents) {
+	public BeanParsedTemplateSectionContent(String beanName, ParsedTemplateSectionContent[] contents) {
 		this.beanName = beanName;
 		this.contents = contents;
 	}
 
-	/*
-	 * =================== BeanHttpTemplateSectionContent =================
+	/**
+	 * Obtains the name of the property to obtain the bean.
+	 * 
+	 * @return Name of the property to obtain the bean.
 	 */
-
-	@Override
 	public String getPropertyName() {
 		return this.beanName;
 	}
 
-	@Override
-	public HttpTemplateSectionContent[] getContent() {
+	/**
+	 * Obtains the {@link ParsedTemplateSectionContent} instances that comprise
+	 * the content for this {@link BeanParsedTemplateSectionContent}.
+	 * 
+	 * @return {@link ParsedTemplateSectionContent} instances that comprise the
+	 *         content for this {@link BeanParsedTemplateSectionContent}.
+	 */
+	public ParsedTemplateSectionContent[] getContent() {
 		return this.contents;
 	}
 

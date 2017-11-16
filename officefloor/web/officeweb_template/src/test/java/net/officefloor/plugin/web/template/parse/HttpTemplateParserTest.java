@@ -26,19 +26,19 @@ import java.util.List;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.ParseException;
-import net.officefloor.plugin.web.template.parse.BeanHttpTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.template.parse.HttpTemplateParser;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSection;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.LinkHttpTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.PropertyHttpTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.StaticHttpTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.BeanParsedTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.plugin.web.template.parse.WebTemplateParser;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.LinkParsedTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.PropertyParsedTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.StaticParsedTemplateSectionContent;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
 /**
- * Tests the {@link HttpTemplateParser}.
+ * Tests the {@link WebTemplateParser}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -204,9 +204,9 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes parsing the template.
 	 * 
-	 * @return {@link HttpTemplate}.
+	 * @return {@link ParsedTemplate}.
 	 */
-	private HttpTemplate doParse() throws IOException {
+	private ParsedTemplate doParse() throws IOException {
 
 		// Obtain the template file name
 		String templateFileName = this.getTemplateFileName();
@@ -214,7 +214,7 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 		// Load the template
 		File templateFile = this.findFile(this.getClass(), templateFileName
 				+ ".ofp");
-		HttpTemplate template = new HttpTemplateParserImpl(new StringReader(
+		ParsedTemplate template = new HttpTemplateParserImpl(new StringReader(
 				this.getFileContents(templateFile))).parse();
 
 		// Return the template
@@ -231,7 +231,7 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			String templateFileName = this.getTemplateFileName();
 
 			// Parse the template
-			HttpTemplate template = this.doParse();
+			ParsedTemplate template = this.doParse();
 
 			// Obtain unmarshaller to expected content
 			File unmarshallerConfigFile = this.findFile(this.getClass(),
@@ -248,13 +248,13 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 					expectedTemplate);
 
 			// Ensure template is as expected
-			HttpTemplateSection[] sections = template.getSections();
+			ParsedTemplateSection[] sections = template.getSections();
 			assertEquals("Incorrect number of sections",
 					expectedTemplate.sections.size(), sections.length);
 			for (int s = 0; s < sections.length; s++) {
 				TemplateSectionConfig expectedSection = expectedTemplate.sections
 						.get(s);
-				HttpTemplateSection section = sections[s];
+				ParsedTemplateSection section = sections[s];
 
 				// Ensure details of section correct
 				assertEquals("Incorrect name for section " + s,
@@ -300,24 +300,24 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validates the {@link HttpTemplateSection} and
-	 * {@link BeanHttpTemplateSectionContent}.
+	 * Validates the {@link ParsedTemplateSection} and
+	 * {@link BeanParsedTemplateSectionContent}.
 	 * 
 	 * @param expectedContents
 	 *            Expected {@link TemplateSectionConfig} instances.
 	 * @param actualContents
-	 *            Actual {@link HttpTemplateSectionContent}.
+	 *            Actual {@link ParsedTemplateSectionContent}.
 	 * @param sectionIndex
 	 *            Index of the section being validated.
 	 * @param beanPath
-	 *            Path of the bean within the {@link HttpTemplateSection}.
+	 *            Path of the bean within the {@link ParsedTemplateSection}.
 	 * @param rawSectionContents
 	 *            {@link StringBuilder} to receive the expected raw section
 	 *            contents.
 	 */
 	private static void validateSectionOrBean(
 			List<TemplateSectionContentConfig> expectedContents,
-			HttpTemplateSectionContent[] actualContents, int sectionIndex,
+			ParsedTemplateSectionContent[] actualContents, int sectionIndex,
 			String beanPath, StringBuilder rawSectionContents) {
 
 		// Ensure section/bean is as expected
@@ -327,7 +327,7 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 		for (int c = 0; c < expectedContents.size(); c++) {
 			TemplateSectionContentConfig expectedContent = expectedContents
 					.get(c);
-			HttpTemplateSectionContent content = actualContents[c];
+			ParsedTemplateSectionContent content = actualContents[c];
 
 			// Obtain the message prefix
 			String contentIdentifier = "Section " + sectionIndex
@@ -337,9 +337,9 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			if (expectedContent instanceof StaticTemplateSectionContentConfig) {
 				// Static content
 				assertTrue(contentIdentifier + " is expected to be static",
-						content instanceof StaticHttpTemplateSectionContent);
+						content instanceof StaticParsedTemplateSectionContent);
 				StaticTemplateSectionContentConfig expectedStaticContent = (StaticTemplateSectionContentConfig) expectedContent;
-				StaticHttpTemplateSectionContent staticContent = (StaticHttpTemplateSectionContent) content;
+				StaticParsedTemplateSectionContent staticContent = (StaticParsedTemplateSectionContent) content;
 				String expectedStaticText = (expectedStaticContent.content == null ? " "
 						: expectedStaticContent.content);
 				assertTextEquals("Incorrect content for " + contentIdentifier,
@@ -351,9 +351,9 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			} else if (expectedContent instanceof BeanTemplateSectionContentConfig) {
 				// Bean content
 				assertTrue(contentIdentifier + " is expected to be bean",
-						content instanceof BeanHttpTemplateSectionContent);
+						content instanceof BeanParsedTemplateSectionContent);
 				BeanTemplateSectionContentConfig expectedBeanContent = (BeanTemplateSectionContentConfig) expectedContent;
-				BeanHttpTemplateSectionContent beanContent = (BeanHttpTemplateSectionContent) content;
+				BeanParsedTemplateSectionContent beanContent = (BeanParsedTemplateSectionContent) content;
 				String beanPropertyName = beanContent.getPropertyName();
 				assertEquals("Incorrect bean property name for "
 						+ contentIdentifier, expectedBeanContent.beanName,
@@ -374,9 +374,9 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			} else if (expectedContent instanceof PropertyTemplateSectionContentConfig) {
 				// Property content
 				assertTrue(contentIdentifier + " is expected to be property",
-						content instanceof PropertyHttpTemplateSectionContent);
+						content instanceof PropertyParsedTemplateSectionContent);
 				PropertyTemplateSectionContentConfig expectedPropertyContent = (PropertyTemplateSectionContentConfig) expectedContent;
-				PropertyHttpTemplateSectionContent propertyContent = (PropertyHttpTemplateSectionContent) content;
+				PropertyParsedTemplateSectionContent propertyContent = (PropertyParsedTemplateSectionContent) content;
 				assertEquals(
 						"Incorrect property name for " + contentIdentifier,
 						expectedPropertyContent.propertyName,
@@ -389,9 +389,9 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			} else if (expectedContent instanceof LinkTemplateSectionContentConfig) {
 				// Link content
 				assertTrue(contentIdentifier + " is expected to be a link",
-						content instanceof LinkHttpTemplateSectionContent);
+						content instanceof LinkParsedTemplateSectionContent);
 				LinkTemplateSectionContentConfig expectedLinkContent = (LinkTemplateSectionContentConfig) expectedContent;
-				LinkHttpTemplateSectionContent linkContent = (LinkHttpTemplateSectionContent) content;
+				LinkParsedTemplateSectionContent linkContent = (LinkParsedTemplateSectionContent) content;
 				assertEquals("Incorrect link name for " + contentIdentifier,
 						expectedLinkContent.name, linkContent.getName());
 

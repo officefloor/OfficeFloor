@@ -25,46 +25,34 @@ import java.util.Set;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.build.WebTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.HttpRouteFunction;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpApplicationState;
-import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Initial {@link ManagedFunction} to ensure appropriate conditions for
- * rendering the {@link HttpTemplate}.
+ * rendering the {@link ParsedTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateInitialFunction
-		extends StaticManagedFunction<HttpTemplateInitialFunction.Dependencies, HttpTemplateInitialFunction.Flows> {
+public class WebTemplateInitialFunction
+		extends StaticManagedFunction<WebTemplateInitialFunction.Dependencies, WebTemplateInitialFunction.Flows> {
 
 	/**
-	 * Keys for the {@link HttpTemplateInitialFunction} dependencies.
+	 * Keys for the {@link WebTemplateInitialFunction} dependencies.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_STATE, REQUEST_STATE, HTTP_SESSION
+		SERVER_HTTP_CONNECTION
 	}
 
 	/**
-	 * Keys for the {@link HttpTemplateInitialFunction} flows.
+	 * Keys for the {@link WebTemplateInitialFunction} flows.
 	 */
 	public static enum Flows {
 		RENDER
 	}
-
-	/**
-	 * Default HTTP methods to redirect before rendering the
-	 * {@link HttpTemplate}.
-	 */
-	public static final String[] DEFAULT_RENDER_REDIRECT_HTTP_METHODS = new String[] { "POST", "PUT" };
-
-	/**
-	 * URI path for the {@link HttpTemplate}.
-	 */
-	private final String templateUriPath;
 
 	/**
 	 * Indicates if a secure {@link ServerHttpConnection} is required.
@@ -72,51 +60,51 @@ public class HttpTemplateInitialFunction
 	private final boolean isRequireSecure;
 
 	/**
-	 * HTTP methods to redirect before rendering the {@link HttpTemplate}.
+	 * {@link HttpMethod} instances to not redirect on rendering the
+	 * {@link WebTemplate}.
 	 */
-	private final Set<String> renderRedirectHttpMethods;
+	private final Set<HttpMethod> nonRedirectHttpMethods;
 
 	/**
-	 * Content-type for the {@link HttpTemplate}. May be <code>null</code>.
+	 * <code>Content-Type</code> for the {@link ParsedTemplate}. May be
+	 * <code>null</code>.
 	 */
-	private final String contentType;
+	private final HttpHeaderValue contentType;
 
 	/**
-	 * {@link Charset} for the {@link HttpTemplate}.
+	 * {@link Charset} for the {@link ParsedTemplate}.
 	 */
 	private final Charset charset;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param templateUriPath
-	 *            URI path for the {@link HttpTemplate}.
 	 * @param isRequireSecure
 	 *            Indicates if a secure {@link ServerHttpConnection} is
 	 *            required.
-	 * @param renderRedirectHttpMethods
-	 *            Listing of HTTP methods that require a redirect before
-	 *            rendering the {@link HttpTemplate}.
+	 * @param nonRedirectHttpMethods
+	 *            Listing of {@link HttpMethod} instances that do not redirect
+	 *            before rendering the {@link ParsedTemplate}.
 	 * @param contentType
-	 *            Content-type for the {@link HttpTemplate}. May be
+	 *            Content-type for the {@link ParsedTemplate}. May be
 	 *            <code>null</code>.
 	 * @param charset
-	 *            {@link Charset} for {@link HttpTemplate}.
+	 *            {@link Charset} for {@link ParsedTemplate}.
 	 */
-	public HttpTemplateInitialFunction(String templateUriPath, boolean isRequireSecure,
-			String[] renderRedirectHttpMethods, String contentType, Charset charset) {
-		this.templateUriPath = templateUriPath;
+	public WebTemplateInitialFunction(boolean isRequireSecure, HttpMethod[] nonRedirectHttpMethods, String contentType,
+			Charset charset) {
 		this.isRequireSecure = isRequireSecure;
-		this.contentType = contentType;
+		this.contentType = contentType == null ? null : new HttpHeaderValue(contentType);
 		this.charset = charset;
 
 		// Add the render redirect HTTP methods
-		Set<String> methods = new HashSet<String>();
-		for (String method : (renderRedirectHttpMethods == null ? DEFAULT_RENDER_REDIRECT_HTTP_METHODS
-				: renderRedirectHttpMethods)) {
-			methods.add(method.trim().toUpperCase());
+		this.nonRedirectHttpMethods = new HashSet<HttpMethod>();
+		if (nonRedirectHttpMethods != null) {
+			for (HttpMethod method : nonRedirectHttpMethods) {
+				this.nonRedirectHttpMethods.add(method);
+			}
 		}
-		this.renderRedirectHttpMethods = methods;
+		this.nonRedirectHttpMethods.add(HttpMethod.GET); // never redirects
 	}
 
 	/*
@@ -128,10 +116,6 @@ public class HttpTemplateInitialFunction
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-		HttpApplicationState applicationState = (HttpApplicationState) context
-				.getObject(Dependencies.HTTP_APPLICATION_STATE);
-		HttpRequestState requestState = (HttpRequestState) context.getObject(Dependencies.REQUEST_STATE);
-		HttpSession session = (HttpSession) context.getObject(Dependencies.HTTP_SESSION);
 
 		// Flag indicating if redirect is required
 		boolean isRedirectRequired = false;
@@ -158,8 +142,8 @@ public class HttpTemplateInitialFunction
 		// Determine if POST/redirect/GET pattern to be applied
 		if (!isRedirectRequired) {
 			// Request likely overridden to POST, so use client HTTP method
-			String method = connection.getClientHttpMethod().getName();
-			if (this.renderRedirectHttpMethods.contains(method.toUpperCase())) {
+			HttpMethod method = connection.getClientRequest().getMethod();
+			if (!this.nonRedirectHttpMethods.contains(method)) {
 				// Flag redirect for POST/redirect/GET pattern
 				isRedirectRequired = true;
 			}
@@ -167,9 +151,9 @@ public class HttpTemplateInitialFunction
 
 		// Undertake the redirect
 		if (isRedirectRequired) {
-			HttpRouteFunction.doRedirect(this.templateUriPath, this.isRequireSecure, connection, applicationState,
-					requestState, session);
-			return null; // redirected, do not render template
+
+			// Need to link to redirect function
+			throw new IOException("TODO need to trigger redirect for rendering template");
 		}
 
 		// Configure the response

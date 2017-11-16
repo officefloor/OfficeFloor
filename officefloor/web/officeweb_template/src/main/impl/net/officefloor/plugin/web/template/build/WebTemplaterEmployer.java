@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.web.template.build;
 
+import java.io.Reader;
+
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.web.build.WebArchitect;
 
@@ -28,6 +30,22 @@ import net.officefloor.web.build.WebArchitect;
 public class WebTemplaterEmployer implements WebTemplater {
 
 	public static WebTemplater employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect) {
+		return null;
+	}
+
+	/*
+	 * ====================== WebTemplater ===========================
+	 */
+
+	@Override
+	public WebTemplate addTemplate(String applicationPath, Reader template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public WebTemplate addTemplate(String applicationPath, String locationOfTemplate) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

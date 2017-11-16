@@ -34,11 +34,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
 import net.officefloor.plugin.web.http.route.HttpRouteFunctionTest;
-import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialFunction;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialFunction.Dependencies;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialFunction.Flows;
+import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialManagedFunctionSource;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Dependencies;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Flows;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.path.HttpApplicationLocation;
@@ -46,7 +46,7 @@ import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 
 /**
- * Tests the {@link HttpTemplateInitialManagedFunctionSource}.
+ * Tests the {@link WebTemplateInitialManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -56,8 +56,8 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(HttpTemplateInitialManagedFunctionSource.class,
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "URI Path");
+		ManagedFunctionLoaderUtil.validateSpecification(WebTemplateInitialManagedFunctionSource.class,
+				WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 			String uriSuffix, String expectedUrlContinuationPath) {
 
 		// Factory
-		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(null, false, null, null, null);
+		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(null, false, null, null, null);
 
 		// Create the expected type
 		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -139,18 +139,18 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 		// Create the listing of properties
 		List<String> properties = new ArrayList<String>(6);
 		properties.addAll(
-				Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, configuredUriPath));
+				Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, configuredUriPath));
 		if (isConfiguredSecure != null) {
-			properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+			properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 					String.valueOf(isConfiguredSecure)));
 		}
 		if (uriSuffix != null) {
-			properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, uriSuffix));
+			properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, uriSuffix));
 		}
 
 		// Validate type (must also convert
 		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.validateManagedFunctionType(type,
-				HttpTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
+				WebTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
 
 		// Ensure correct URI path
 		ManagedFunctionType<?, ?> function = namespace.getManagedFunctionTypes()[0];
@@ -260,27 +260,27 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 
 			// Create the task
 			List<String> properties = new ArrayList<String>(6);
-			properties.addAll(Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+			properties.addAll(Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
 					(redirectUriPath == null ? "/path" : redirectUriPath)));
 			if (isRequireSecure) {
-				properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 						String.valueOf(isRequireSecure)));
 			}
 			if (redirectMethods != null) {
 				properties.addAll(
-						Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+						Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 								redirectMethods));
 			}
 			if (contentType != null) {
 				properties.addAll(
-						Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE, contentType));
+						Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE, contentType));
 			}
 			if (charset != null) {
 				properties.addAll(
-						Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET, charset.name()));
+						Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_CHARSET, charset.name()));
 			}
 			FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.loadManagedFunctionType(
-					HttpTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
+					WebTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
 			ManagedFunction<?, ?> function = namespace.getManagedFunctionTypes()[0].getManagedFunctionFactory()
 					.createManagedFunction();
 

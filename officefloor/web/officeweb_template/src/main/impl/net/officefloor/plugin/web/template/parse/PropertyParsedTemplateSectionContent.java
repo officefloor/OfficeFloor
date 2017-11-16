@@ -18,27 +18,35 @@
 package net.officefloor.plugin.web.template.parse;
 
 /**
- * {@link HttpTemplateSectionContent} that references a bean to use.
+ * {@link ParsedTemplateSectionContent} that references a property of the bean
+ * to render.
  * 
  * @author Daniel Sagenschneider
  */
-public interface BeanHttpTemplateSectionContent extends
-		HttpTemplateSectionContent {
+public class PropertyParsedTemplateSectionContent {
 
 	/**
-	 * Obtains the name of the property to obtain the bean.
-	 * 
-	 * @return Name of the property to obtain the bean.
+	 * Property name.
 	 */
-	String getPropertyName();
+	private final String propertyName;
 
 	/**
-	 * Obtains the {@link HttpTemplateSectionContent} instances that comprise
-	 * the content for this {@link BeanHttpTemplateSectionContent}.
+	 * Initiate.
 	 * 
-	 * @return {@link HttpTemplateSectionContent} instances that comprise the
-	 *         content for this {@link BeanHttpTemplateSectionContent}.
+	 * @param propertyName
+	 *            Property name.
 	 */
-	HttpTemplateSectionContent[] getContent();
+	public PropertyParsedTemplateSectionContent(String propertyName) {
+		this.propertyName = propertyName;
+	}
+
+	/**
+	 * Obtains the name of the property to render.
+	 * 
+	 * @return Name of the property to render.
+	 */
+	public String getPropertyName() {
+		return this.propertyName;
+	}
 
 }

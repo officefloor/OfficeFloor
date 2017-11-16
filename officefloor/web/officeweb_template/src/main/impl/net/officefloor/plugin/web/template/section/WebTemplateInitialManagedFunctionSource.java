@@ -27,10 +27,10 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
-import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialFunction.Dependencies;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialFunction.Flows;
+import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Dependencies;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Flows;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.session.HttpSession;
@@ -38,35 +38,35 @@ import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunctionSource} to provide the
- * {@link HttpTemplateInitialFunction}.
+ * {@link WebTemplateInitialFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
+public class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
-	 * Property name for the {@link HttpTemplate} URI path.
+	 * Property name for the {@link ParsedTemplate} URI path.
 	 */
-	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
+	public static final String PROPERTY_TEMPLATE_URI = WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
 
 	/**
 	 * Property name for a comma separated list of HTTP methods that will
-	 * trigger a redirect before rendering the {@link HttpTemplate}.
+	 * trigger a redirect before rendering the {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_RENDER_REDIRECT_HTTP_METHODS = "http.template.render.redirect.methods";
 
 	/**
-	 * Property name for the Content-Type of the {@link HttpTemplate}.
+	 * Property name for the Content-Type of the {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_CONTENT_TYPE = "http.template.render.content.type";
 
 	/**
-	 * Property name for the {@link Charset} of the {@link HttpTemplate}.
+	 * Property name for the {@link Charset} of the {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_CHARSET = "http.template.charset";
 
 	/**
-	 * Name of the {@link HttpTemplateInitialFunction}.
+	 * Name of the {@link WebTemplateInitialFunction}.
 	 */
 	public static final String FUNCTION_NAME = "FUNCTION";
 
@@ -84,10 +84,10 @@ public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFun
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the template URI path
-		String templateUriPath = HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(context);
+		String templateUriPath = WebTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(context);
 
 		// Determine if the template is secure
-		boolean isSecure = HttpTemplateManagedFunctionSource.isHttpTemplateSecure(context);
+		boolean isSecure = WebTemplateManagedFunctionSource.isWebTemplateSecure(context);
 
 		/*
 		 * Only trigger redirect if not secure. If sent on secure connection but
@@ -116,7 +116,7 @@ public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFun
 		}
 
 		// Create the HTTP Template initial function
-		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(templateUriPath, isSecure,
+		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(templateUriPath, isSecure,
 				renderRedirectHttpMethods, contentType, charset);
 
 		// Configure the function

@@ -31,7 +31,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.template.NotEscaped;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.tokenise.HttpRequestTokeniserImpl;
@@ -238,7 +238,7 @@ public class TemplateLogic {
 	}
 
 	/**
-	 * Flags to not render the {@link HttpTemplate} afterwards.
+	 * Flags to not render the {@link ParsedTemplate} afterwards.
 	 */
 	@NotRenderTemplateAfter
 	public void notRenderTemplateAfter(ServerHttpConnection connection) throws IOException {

@@ -23,14 +23,14 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
- * Ensure integration of {@link HttpTemplateManagedFunctionSource} and
+ * Ensure integration of {@link WebTemplateManagedFunctionSource} and
  * {@link HttpTemplateRouteWorkSource}.
  * 
  * @author Daniel Sagenschneider
@@ -78,7 +78,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	}
 
 	/**
-	 * Ensure that {@link HttpTemplate} link is routed to the handling
+	 * Ensure that {@link ParsedTemplate} link is routed to the handling
 	 * {@link ManagedFunction}.
 	 */
 	public void testRoute() throws Exception {
@@ -99,7 +99,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	}
 
 	/**
-	 * Ensure that root {@link HttpTemplate} link is routed to the handling
+	 * Ensure that root {@link ParsedTemplate} link is routed to the handling
 	 * {@link ManagedFunction}.
 	 */
 	public void testRouteRoot() throws Exception {
@@ -110,7 +110,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	}
 
 	/**
-	 * Ensure that {@link HttpTemplate} link is routed as canonical path.
+	 * Ensure that {@link ParsedTemplate} link is routed as canonical path.
 	 */
 	public void testRouteCanonicalPath() throws Exception {
 

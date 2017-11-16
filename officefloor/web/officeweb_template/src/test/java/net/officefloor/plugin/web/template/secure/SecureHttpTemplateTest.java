@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -41,7 +41,7 @@ import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpTemplateSection;
 
 /**
- * Ensures secure functionality of {@link HttpTemplate}.
+ * Ensures secure functionality of {@link ParsedTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -181,7 +181,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertakes test for secure settings of a {@link HttpTemplateSection}.
+	 * Undertakes test for secure settings of a {@link ParsedTemplateSection}.
 	 */
 	private void doSecureTemplateTest(boolean isTemplateSecure, Boolean isLinkSecure, String requestUrl,
 			String redirectUrl, boolean isEncapsulateLinkWithinBean) throws Exception {
@@ -193,7 +193,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 					(isEncapsulateLinkWithinBean ? "SecureBeanLink.ofp" : "secure.ofp"));
 
 			// Configure the template
-			HttpTemplateSection template = context.getWebArchitect().addHttpTemplate("template", templateLocation,
+			ParsedTemplateSection template = context.getWebArchitect().addHttpTemplate("template", templateLocation,
 					(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class : TemplateLogic.class));
 			template.setTemplateSecure(isTemplateSecure);
 			if (isLinkSecure != null) {

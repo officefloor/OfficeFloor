@@ -36,13 +36,13 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.plugin.web.template.HttpTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtensionContext;
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.template.section.HttpTemplateInitialManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.plugin.web.template.section.WebTemplateInitialManagedFunctionSource;
+import net.officefloor.plugin.web.template.section.WebTemplateSectionSource;
 import net.officefloor.plugin.web.template.section.PostRedirectGetLogic.Parameters;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
@@ -60,7 +60,7 @@ import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpTemplateSection;
 
 /**
- * Tests the integration of the {@link HttpTemplateSectionSource}.
+ * Tests the integration of the {@link WebTemplateSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -185,8 +185,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.isNonMethodLink = true;
 		this.contentType = "text/plain";
 		this.charset = Charset.forName("UTF-16");
-		this.startHttpServer("Template.ofp", TemplateLogic.class, HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE,
-				"text/plain", HttpTemplateSectionSource.PROPERTY_CHARSET, "UTF-16");
+		this.startHttpServer("Template.ofp", TemplateLogic.class, WebTemplateSectionSource.PROPERTY_CONTENT_TYPE,
+				"text/plain", WebTemplateSectionSource.PROPERTY_CHARSET, "UTF-16");
 
 		// Create the expected Content-Type header value
 		String expectedContentType = this.contentType + "; charset=" + this.charset.name();
@@ -204,7 +204,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri.suffix", false);
@@ -221,8 +221,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
-				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(false));
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
+				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(false));
 
 		// Ensure correct rendering of template
 		MockHttpResponse response = this.doRawHttpRequest("/uri-submit", false);
@@ -241,7 +241,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
+				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri-submit", true);
@@ -257,7 +257,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
@@ -273,7 +273,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
+				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
@@ -289,8 +289,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
-				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "nonMethodLink", String.valueOf(false));
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
+				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "nonMethodLink", String.valueOf(false));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
@@ -321,7 +321,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/uri-post?text=TEST")
 				.method(new HttpMethod("OTHER"));
 		this.doPostRedirectGetPatternTest(request, "TEST /uri-post",
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, "OTHER");
+				WebTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, "OTHER");
 	}
 
 	/**
@@ -464,7 +464,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit.suffix", false);
@@ -635,7 +635,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not render {@link HttpTemplate} afterwards.
+	 * Ensure not render {@link ParsedTemplate} afterwards.
 	 */
 	public void testNotRenderTemplateAfter() throws Exception {
 
@@ -752,7 +752,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		String parentTemplateLocation = this.getTemplateLocation("ParentTemplate.ofp");
 		this.startHttpServer("ChildTemplate.ofp", InheritChildLogic.class,
-				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplateLocation);
+				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplateLocation);
 
 		// Ensure can inherit sections
 		this.assertHttpRequest("/uri", false, "Parent VALUE Introduced Two Footer /uri-doExternalFlow");
@@ -781,7 +781,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		String parentTemplateLocation = this.getTemplateLocation("ParentTemplate.ofp");
 		String childTemplateLocation = this.getTemplateLocation("ChildTemplate.ofp");
 		this.startHttpServer("GrandChildTemplate.ofp", InheritGrandChildLogic.class,
-				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
 				parentTemplateLocation + ", " + childTemplateLocation);
 
 		// Ensure can inherit sections
@@ -1089,7 +1089,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 			// Load the template section
 			final String templateLocation = this.getTemplateLocation(templateName);
-			HttpTemplateSection templateSection = web.addHttpTemplate("uri", templateLocation, logicClass);
+			ParsedTemplateSection templateSection = web.addHttpTemplate("uri", templateLocation, logicClass);
 
 			// Load the additional properties
 			for (int i = 0; i < templatePropertyPairs.length; i += 2) {

@@ -17,37 +17,40 @@
  */
 package net.officefloor.plugin.web.template.parse;
 
-import net.officefloor.plugin.web.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.template.parse.HttpTemplateSection;
+import net.officefloor.plugin.web.template.build.WebTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
 
 /**
- * {@link HttpTemplate} implementation.
+ * Parsed {@link WebTemplate} .
  *
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateImpl implements HttpTemplate {
+public class ParsedTemplate {
 
 	/**
-	 * {@link HttpTemplateSection} instances.
+	 * {@link ParsedTemplateSection} instances.
 	 */
-	private final HttpTemplateSection[] sections;
+	private final ParsedTemplateSection[] sections;
 
 	/**
 	 * Initiate.
 	 *
 	 * @param sections
-	 *            {@link HttpTemplateSection} instances.
+	 *            {@link ParsedTemplateSection} instances.
 	 */
-	public HttpTemplateImpl(HttpTemplateSection[] sections) {
+	public ParsedTemplate(ParsedTemplateSection[] sections) {
 		this.sections = sections;
 	}
 
-	/*
-	 * ============== HttpTemplate =======================
+	/**
+	 * Obtains the {@link ParsedTemplateSection} instances for this
+	 * {@link ParsedTemplate}.
+	 *
+	 * @return {@link ParsedTemplateSection} instances for this
+	 *         {@link ParsedTemplate}.
 	 */
-
-	@Override
-	public HttpTemplateSection[] getSections() {
+	public ParsedTemplateSection[] getSections() {
 		return this.sections;
 	}
 

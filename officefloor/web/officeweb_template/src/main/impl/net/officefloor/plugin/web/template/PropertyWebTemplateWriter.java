@@ -18,25 +18,22 @@
 package net.officefloor.plugin.web.template;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
-import net.officefloor.plugin.web.template.HttpTemplateWriter;
-import net.officefloor.plugin.web.template.NotEscaped;
-import net.officefloor.plugin.web.template.parse.PropertyHttpTemplateSectionContent;
+import net.officefloor.plugin.web.template.parse.PropertyParsedTemplateSectionContent;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 
 /**
- * {@link HttpTemplateWriter} to write a bean property.
+ * {@link WebTemplateWriter} to write a bean property.
  * 
  * @author Daniel Sagenschneider
  */
-public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
+public class PropertyWebTemplateWriter implements WebTemplateWriter {
 
 	/**
 	 * {@link ValueRetriever}.
@@ -57,7 +54,7 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 * Initiate.
 	 * 
 	 * @param content
-	 *            {@link PropertyHttpTemplateSectionContent}.
+	 *            {@link PropertyParsedTemplateSectionContent}.
 	 * @param valueRetriever
 	 *            {@link ValueRetriever}.
 	 * @param beanType
@@ -66,14 +63,14 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 *             If {@link Method} to obtain the value to write is not
 	 *             available on the bean type.
 	 */
-	public PropertyHttpTemplateWriter(PropertyHttpTemplateSectionContent content, ValueRetriever<Object> valueRetriever,
-			Class<?> beanType) throws Exception {
+	public PropertyWebTemplateWriter(PropertyParsedTemplateSectionContent content,
+			ValueRetriever<Object> valueRetriever, Class<?> beanType) throws Exception {
 		this.valueRetriever = valueRetriever;
 		this.propertyName = content.getPropertyName();
 
 		// Ensure the property is retrievable
-		Method method = this.valueRetriever.getTypeMethod(this.propertyName);
-		if (method == null) {
+		Class<?> valueType = this.valueRetriever.getValueType(this.propertyName);
+		if (valueType == null) {
 			throw new Exception(
 					"Property '" + this.propertyName + "' can not be sourced from bean type " + beanType.getName());
 		}
@@ -83,43 +80,36 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	}
 
 	/*
-	 * ================= HttpTemplateWriter ===============
+	 * ================= WebTemplateWriter ===============
 	 */
 
 	@Override
 	public void write(ServerWriter writer, boolean isDefaultCharset, Object bean, ServerHttpConnection connection,
-			HttpApplicationState applicationState) throws IOException {
+			String templatePath) throws HttpException {
 
 		// If no bean, then no value to output
 		if (bean == null) {
 			return;
 		}
 
-		// Obtain the property text value
-		String propertyTextValue;
+		// Obtain the property value from bean
+		Object value = this.valueRetriever.retrieveValue(bean, this.propertyName);
+
+		// Obtain the text value to write as content
+		String propertyTextValue = (value == null ? "" : value.toString());
+
 		try {
+			// Write out the value
+			if (this.isEscaped) {
+				// Write the escaped value
+				StringEscapeUtils.ESCAPE_HTML4.translate(propertyTextValue, writer);
+			} else {
+				// Write the raw value
+				writer.write(propertyTextValue);
+			}
 
-			// Obtain the property value from bean
-			Object value = this.valueRetriever.retrieveValue(bean, this.propertyName);
-
-			// Obtain the text value to write as content
-			propertyTextValue = (value == null ? "" : value.toString());
-
-		} catch (InvocationTargetException ex) {
-			// Propagate cause of method failure
-			throw new IOException(ex.getCause());
-		} catch (Exception ex) {
-			// Propagate failure
-			throw new IOException(ex);
-		}
-
-		// Write out the value
-		if (this.isEscaped) {
-			// Write the escaped value
-			StringEscapeUtils.ESCAPE_HTML4.translate(propertyTextValue, writer);
-		} else {
-			// Write the raw value
-			writer.write(propertyTextValue);
+		} catch (IOException ex) {
+			throw new HttpException(ex);
 		}
 	}
 
