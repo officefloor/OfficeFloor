@@ -69,7 +69,7 @@ public class StatefulTemplateLogic implements Serializable {
 	public String increment(ServerHttpConnection connection) throws IOException {
 
 		// Indicate increment
-		Writer writer = connection.getHttpResponse().getEntityWriter();
+		Writer writer = connection.getResponse().getEntityWriter();
 		writer.write("increment");
 		writer.flush();
 

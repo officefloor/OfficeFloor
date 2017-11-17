@@ -61,7 +61,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 					.configureMockHttpServer(context.getDeployedOffice().getDeployedOfficeInput("ROUTE", "route"));
 		});
 		compile.web((context) -> {
-			
+
 		});
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
 
@@ -131,12 +131,12 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 		// Do the request
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(uriPath);
 		MockHttpResponse response = this.server.send(request);
-		int status = response.getHttpStatus().getStatusCode();
+		int status = response.getStatus().getStatusCode();
 		assertEquals("Must be successful", 200, status);
 
 		// Load properties from response
 		Properties properties = new Properties();
-		properties.load(response.getHttpEntity());
+		properties.load(response.getEntity());
 
 		// Return the properties
 		return properties;

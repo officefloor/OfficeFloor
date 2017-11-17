@@ -25,7 +25,7 @@ import net.officefloor.plugin.web.template.parse.ParsedTemplateSectionContent;
  * 
  * @author Daniel Sagenschneider
  */
-public class BeanParsedTemplateSectionContent {
+public class BeanParsedTemplateSectionContent implements ParsedTemplateSectionContent {
 
 	/**
 	 * Property name to obtain the bean.

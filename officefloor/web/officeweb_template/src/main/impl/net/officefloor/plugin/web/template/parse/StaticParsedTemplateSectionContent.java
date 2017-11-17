@@ -22,7 +22,7 @@ package net.officefloor.plugin.web.template.parse;
  *
  * @author Daniel Sagenschneider
  */
-public class StaticParsedTemplateSectionContent {
+public class StaticParsedTemplateSectionContent implements ParsedTemplateSectionContent {
 
 	/**
 	 * Static content.

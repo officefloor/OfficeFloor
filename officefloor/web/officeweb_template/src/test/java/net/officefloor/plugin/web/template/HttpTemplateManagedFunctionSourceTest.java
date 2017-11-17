@@ -41,23 +41,17 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.template.WebTemplateFunction;
-import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.parse.BeanParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.BeanParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.plugin.web.template.parse.LinkParsedTemplateSectionContent;
 import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
 import net.officefloor.plugin.web.template.parse.ParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
-import net.officefloor.plugin.web.template.parse.LinkParsedTemplateSectionContent;
 import net.officefloor.plugin.web.template.parse.PropertyParsedTemplateSectionContent;
 import net.officefloor.plugin.web.template.parse.StaticParsedTemplateSectionContent;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.path.HttpApplicationLocation;
 
 /**
  * Tests the {@link WebTemplateManagedFunctionSource}.
@@ -88,8 +82,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		ManagedFunctionLoaderUtil.validateSpecification(WebTemplateManagedFunctionSource.class,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "Template",
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "URI Path");
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "Template");
 	}
 
 	/**
@@ -108,7 +101,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionTypeBuilder<Indexed, None> template = namespace.addManagedFunctionType("template",
 				httpTemplateFunctionFactory, Indexed.class, None.class);
 		template.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
-		template.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		template.addObject(TemplateBean.class).setLabel("OBJECT");
 		template.addEscalation(IOException.class);
 
@@ -116,7 +108,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionTypeBuilder<Indexed, None> beanTree = namespace.addManagedFunctionType("BeanTree",
 				httpTemplateFunctionFactory, Indexed.class, None.class);
 		beanTree.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
-		beanTree.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		beanTree.addObject(BeanTreeBean.class).setLabel("OBJECT");
 		beanTree.addEscalation(IOException.class);
 
@@ -124,7 +115,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionTypeBuilder<Indexed, None> nullBean = namespace.addManagedFunctionType("NullBean",
 				httpTemplateFunctionFactory, Indexed.class, None.class);
 		nullBean.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
-		nullBean.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		nullBean.addObject(Object.class).setLabel("OBJECT");
 		nullBean.addEscalation(IOException.class);
 
@@ -132,14 +122,12 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionTypeBuilder<Indexed, None> noBean = namespace.addManagedFunctionType("NoBean",
 				httpTemplateFunctionFactory, Indexed.class, None.class);
 		noBean.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
-		noBean.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		noBean.addEscalation(IOException.class);
 
 		// 'List' function
 		ManagedFunctionTypeBuilder<Indexed, None> list = namespace.addManagedFunctionType("List",
 				httpTemplateFunctionFactory, Indexed.class, None.class);
 		list.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
-		list.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		list.addObject(TableRowBean.class).setLabel("OBJECT");
 		list.addEscalation(IOException.class);
 
@@ -147,7 +135,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionTypeBuilder<Indexed, None> tail = namespace.addManagedFunctionType("Tail",
 				httpTemplateFunctionFactory, Indexed.class, None.class);
 		tail.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
-		tail.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		tail.addEscalation(IOException.class);
 
 		// Verify the managed function type
@@ -156,7 +143,8 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure indicates failure on missing bean for {@link ParsedTemplateSection}.
+	 * Ensure indicates failure on missing bean for
+	 * {@link ParsedTemplateSection}.
 	 */
 	public void testMissingBean() {
 
@@ -174,7 +162,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
 		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
 				.setValue(this.missingTemplateFilePath);
-		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
@@ -203,7 +190,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
 		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
 				.setValue(this.missingTemplateFilePath);
-		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 		propertyList.addProperty("bean.template").setValue(Object.class.getName());
 
 		// Test loading ensuring indicates failure
@@ -217,40 +203,25 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Tests generating secure template response.
 	 */
 	public void testSecureTemplate() throws Throwable {
-		this.doTemplateTest(true, null);
-	}
-
-	/**
-	 * Tests generating secure template response with a template URI suffix.
-	 */
-	public void testSecureTemplateWithUriSuffix() throws Throwable {
-		this.doTemplateTest(true, ".suffix");
+		this.doTemplateTest(true);
 	}
 
 	/**
 	 * Tests generating non-secure template response.
 	 */
 	public void testNonSecureTemplate() throws Throwable {
-		this.doTemplateTest(false, null);
-	}
-
-	/**
-	 * Tests generating non-secure template response with a template URI suffix.
-	 */
-	public void testNonSecureTemplateWithUriSuffix() throws Throwable {
-		this.doTemplateTest(false, ".suffix");
+		this.doTemplateTest(false);
 	}
 
 	/**
 	 * Tests running the template to generate response.
 	 */
 	@SuppressWarnings("rawtypes")
-	public void doTemplateTest(boolean isTemplateSecure, String templateUriSuffix) throws Throwable {
+	public void doTemplateTest(boolean isTemplateSecure) throws Throwable {
 
 		// Create the mock objects
 		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
-		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
 		MockHttpResponseBuilder httpResponse = MockHttpServer.mockResponse();
@@ -267,16 +238,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 			// Default non-secure template with secure link
 			additionalProperties.addAll(Arrays.asList(
 					WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true)));
-		}
-
-		// Specify the template URI suffix
-		if (templateUriSuffix == null) {
-			// Provide empty string to not have "null" appended
-			templateUriSuffix = "";
-		} else {
-			// Provide property for template URI suffix
-			additionalProperties.addAll(
-					Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix));
 		}
 
 		// Load the namespace type
@@ -314,22 +275,19 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 			// Obtain the remaining dependencies
 			this.recordReturn(functionContext, functionContext.getObject(0), httpConnection);
-			this.recordReturn(functionContext, functionContext.getObject(1), location);
 
 			// Obtain the HTTP response
-			this.recordReturn(httpConnection, httpConnection.getHttpResponse(), httpResponse);
+			this.recordReturn(httpConnection, httpConnection.getResponse(), httpResponse);
 
 			// Provide link recording
 			switch (i) {
 			case 3:
 				// #{beans} of NullBean section
-				String beansUriPath = "/uri-beans" + templateUriSuffix;
-				this.recordReturn(location, location.transformToClientPath(beansUriPath, false), beansUriPath);
+				String beansUriPath = "/uri-beans";
 				break;
 			case 5:
 				// #{submit} of Tail section
-				String submitUriPath = "/uri-submit" + templateUriSuffix;
-				this.recordReturn(location, location.transformToClientPath(submitUriPath, true), submitUriPath);
+				String submitUriPath = "/uri-submit";
 				break;
 			}
 		}
@@ -364,10 +322,9 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Expected output
 		String expectedOutput = this.getFileContents(this.findFile(this.getClass(), "Template.expected"));
-		expectedOutput = expectedOutput.replace("${URI_SUFFIX}", templateUriSuffix);
 
 		// Validate output
-		assertTextEquals("Incorrect output", expectedOutput, mockResponse.getHttpEntity(null));
+		assertTextEquals("Incorrect output", expectedOutput, mockResponse.getEntity(null));
 	}
 
 	/**
@@ -380,7 +337,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Create the mock objects
 		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
-		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
 		MockHttpResponseBuilder httpResponse = MockHttpServer.mockResponse();
@@ -416,10 +372,9 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 				WebTemplateManagedFunctionSource.class, compiler, this.getProperties(this.templatePath, "uri"));
 
 		// Record undertaking task to use raw content
-		this.recordReturn(functionContext, functionContext.getObject(2), new TemplateBean("TEST"));
+		this.recordReturn(functionContext, functionContext.getObject(1), new TemplateBean("TEST"));
 		this.recordReturn(functionContext, functionContext.getObject(0), httpConnection);
-		this.recordReturn(functionContext, functionContext.getObject(1), location);
-		this.recordReturn(httpConnection, httpConnection.getHttpResponse(), httpResponse);
+		this.recordReturn(httpConnection, httpConnection.getResponse(), httpResponse);
 
 		// Test
 		this.replayMockObjects();
@@ -427,7 +382,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure raw HTTP template content
-		String output = httpResponse.build().getHttpEntity(null);
+		String output = httpResponse.build().getEntity(null);
 		assertTextEquals("Incorrect output", templateContent, output);
 	}
 
@@ -440,7 +395,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Create the mock objects
 		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
-		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
 		MockHttpResponseBuilder httpResponse = MockHttpServer.mockResponse();
@@ -450,11 +404,9 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 				WebTemplateManagedFunctionSource.class, this.getProperties(this.rootTemplatePath, "/"));
 
 		// Record
-		this.recordReturn(functionContext, functionContext.getObject(2), new TemplateBean("TEST"));
+		this.recordReturn(functionContext, functionContext.getObject(1), new TemplateBean("TEST"));
 		this.recordReturn(functionContext, functionContext.getObject(0), httpConnection);
-		this.recordReturn(functionContext, functionContext.getObject(1), location);
-		this.recordReturn(httpConnection, httpConnection.getHttpResponse(), httpResponse);
-		this.recordReturn(location, location.transformToClientPath("/-something", false), "/-something");
+		this.recordReturn(httpConnection, httpConnection.getResponse(), httpResponse);
 
 		// Test
 		this.replayMockObjects();
@@ -466,7 +418,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Obtain the output template
-		String actualOutput = httpResponse.build().getHttpEntity(null);
+		String actualOutput = httpResponse.build().getEntity(null);
 
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(this.getClass(), "RootTemplate.expected"));
@@ -476,8 +428,8 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure appropriately indicates if {@link ParsedTemplateSection} requires a
-	 * bean.
+	 * Ensure appropriately indicates if {@link ParsedTemplateSection} requires
+	 * a bean.
 	 */
 	public void testHttpTemplateSectionRequireBean() {
 
@@ -500,57 +452,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 						new BeanParsedTemplateSectionContent("Bean", new ParsedTemplateSectionContent[0]) });
 		assertTrue("Require bean if have bean in section",
 				WebTemplateManagedFunctionSource.isParsedTemplateSectionRequireBean(beanSection));
-	}
-
-	/**
-	 * Ensure appropriately provides {@link ParsedTemplate} URL continuation path.
-	 */
-	public void testHttpTemplateUrlContinuationPath() throws Exception {
-
-		// Obtain without suffix
-		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				"configured/../non/../canoncial/../path");
-		assertEquals("Incorrect path without suffix", "/path",
-				WebTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
-
-		// Obtain with suffix
-		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
-		assertEquals("Incorrect path with suffix", "/path.suffix",
-				WebTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
-	}
-
-	/**
-	 * Ensure appropriately provides the root {@link ParsedTemplate} URL
-	 * continuation path.
-	 */
-	public void testRootHttpTemplateUrlContinuationPath() throws Exception {
-
-		// Obtain without suffix
-		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "/");
-		assertEquals("Incorrect path without suffix", "/",
-				WebTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
-
-		// Obtain with suffix (should not include suffix)
-		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
-		assertEquals("Incorrect path with suffix", "/",
-				WebTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
-	}
-
-	/**
-	 * Ensure appropriately provides the {@link ParsedTemplate} link URL
-	 * continuation path.
-	 */
-	public void testHttpTemplateLinkUrlContinuationPath() throws Exception {
-
-		// Obtain without suffix
-		assertEquals("Incorrect link path without suffix", "/path-link", WebTemplateManagedFunctionSource
-				.getHttpTemplateLinkUrlContinuationPath("configured/../non/../canonical/../path", "link", null));
-
-		// Obtain with suffix
-		assertEquals("Incorrect link path with suffix", "/path-link.suffix",
-				WebTemplateManagedFunctionSource.getHttpTemplateLinkUrlContinuationPath("/path", "link", ".suffix"));
 	}
 
 	/**
@@ -587,11 +488,12 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 				new ParsedTemplateSectionContent[] {
 						new BeanParsedTemplateSectionContent("STATIC_REPEAT", noBeanSection.getContent()),
 						new StaticParsedTemplateSectionContent("STATIC CONTENT"),
-						new BeanParsedTemplateSectionContent("DYNAMIC_BEAN", new ParsedTemplateSectionContent[] {
-								new LinkParsedTemplateSectionContent("BEAN_LINK"),
-								new StaticParsedTemplateSectionContent("STATIC CONTENT"),
-								new BeanParsedTemplateSectionContent("SUB_BEAN", new ParsedTemplateSectionContent[] {
-										new LinkParsedTemplateSectionContent("SUB_BEAN_LINK") }) }) });
+						new BeanParsedTemplateSectionContent("DYNAMIC_BEAN",
+								new ParsedTemplateSectionContent[] { new LinkParsedTemplateSectionContent("BEAN_LINK"),
+										new StaticParsedTemplateSectionContent("STATIC CONTENT"),
+										new BeanParsedTemplateSectionContent("SUB_BEAN",
+												new ParsedTemplateSectionContent[] {
+														new LinkParsedTemplateSectionContent("SUB_BEAN_LINK") }) }) });
 
 		// Obtain the links
 		String[] links = WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(
@@ -659,7 +561,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Provide the template details
 		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, templatePath));
-		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, templateUri));
 
 		// Provide the beans
 		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",

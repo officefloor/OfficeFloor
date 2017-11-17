@@ -24,16 +24,6 @@ import java.io.StringReader;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
-import net.officefloor.plugin.web.http.template.parse.ParseException;
-import net.officefloor.plugin.web.template.parse.BeanParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.ParsedTemplate;
-import net.officefloor.plugin.web.template.parse.WebTemplateParser;
-import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
-import net.officefloor.plugin.web.template.parse.ParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.LinkParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.PropertyParsedTemplateSectionContent;
-import net.officefloor.plugin.web.template.parse.StaticParsedTemplateSectionContent;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 

@@ -29,12 +29,12 @@ import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
-import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.template.NotEscaped;
+import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.tokenise.HttpRequestTokeniserImpl;
 
 /**
  * Provides logic for the template.
@@ -156,7 +156,7 @@ public class TemplateLogic {
 	public String nextTask(ServerHttpConnection connection) throws IOException {
 
 		// Indicate next task
-		connection.getHttpResponse().getEntityWriter().write("nextTask");
+		connection.getResponse().getEntityWriter().write("nextTask");
 
 		// Return parameter
 		return "NextTask";
@@ -174,14 +174,14 @@ public class TemplateLogic {
 	 * @throws IOException
 	 *             Escalation.
 	 */
-	public void submit(ServerHttpConnection connection, SubmitFlow flow) throws SQLException, IOException {
+	public void submit(@HttpQueryParameter("doFlow") String doFlow, ServerHttpConnection connection, SubmitFlow flow)
+			throws SQLException, IOException {
 
 		// Indicate submit
-		connection.getHttpResponse().getEntityWriter().write("<submit />");
+		connection.getResponse().getEntityWriter().write("<submit />");
 
 		// Obtain whether to invoke flow
-		String doFlowValue = HttpRequestTokeniserImpl.extractParameters(connection.getHttpRequest()).get("doFlow");
-		if ("true".equals(doFlowValue)) {
+		if ("true".equals(doFlow)) {
 			// Trigger flow
 			flow.doInternalFlow(new Integer(1));
 		}
@@ -228,7 +228,7 @@ public class TemplateLogic {
 			ServerHttpConnection httpConnection) throws IOException {
 
 		// Indicate internal flow with its parameter
-		Writer writer = httpConnection.getHttpResponse().getEntityWriter();
+		Writer writer = httpConnection.getResponse().getEntityWriter();
 		writer.write(" - doInternalFlow[");
 		writer.write(String.valueOf(parameter.intValue()));
 		writer.write("]");
@@ -242,7 +242,7 @@ public class TemplateLogic {
 	 */
 	@NotRenderTemplateAfter
 	public void notRenderTemplateAfter(ServerHttpConnection connection) throws IOException {
-		connection.getHttpResponse().getEntityWriter().write("NOT_RENDER_TEMPLATE_AFTER");
+		connection.getResponse().getEntityWriter().write("NOT_RENDER_TEMPLATE_AFTER");
 	}
 
 	/**

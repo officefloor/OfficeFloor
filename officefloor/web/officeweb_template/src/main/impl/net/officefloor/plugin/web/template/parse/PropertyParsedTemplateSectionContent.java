@@ -23,7 +23,7 @@ package net.officefloor.plugin.web.template.parse;
  * 
  * @author Daniel Sagenschneider
  */
-public class PropertyParsedTemplateSectionContent {
+public class PropertyParsedTemplateSectionContent implements ParsedTemplateSectionContent {
 
 	/**
 	 * Property name.

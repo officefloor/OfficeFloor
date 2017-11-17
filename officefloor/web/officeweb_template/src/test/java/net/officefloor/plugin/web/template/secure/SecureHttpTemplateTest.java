@@ -26,9 +26,12 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.plugin.web.template.build.WebTemplate;
+import net.officefloor.plugin.web.template.build.WebTemplater;
+import net.officefloor.plugin.web.template.build.WebTemplaterEmployer;
 import net.officefloor.plugin.web.template.parse.ParsedTemplate;
+import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -36,9 +39,7 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.path.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
-import net.officefloor.web.state.HttpTemplateSection;
 
 /**
  * Ensures secure functionality of {@link ParsedTemplate}.
@@ -50,14 +51,12 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	/**
 	 * Non-secure URL prefix.
 	 */
-	private static final String NON_SECURE_URL_PREFIX = "http://"
-			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":7878";
+	private static final String NON_SECURE_URL_PREFIX = "http://TODO provide redirect host name:7878";
 
 	/**
 	 * Secure URL prefix.
 	 */
-	private static final String SECURE_URL_PREFIX = "https://"
-			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":7979";
+	private static final String SECURE_URL_PREFIX = "https://TODO provide redirect host name:7979";
 
 	/**
 	 * {@link WebCompileOfficeFloor}.
@@ -193,9 +192,11 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 					(isEncapsulateLinkWithinBean ? "SecureBeanLink.ofp" : "secure.ofp"));
 
 			// Configure the template
-			ParsedTemplateSection template = context.getWebArchitect().addHttpTemplate("template", templateLocation,
-					(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class : TemplateLogic.class));
-			template.setTemplateSecure(isTemplateSecure);
+			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
+					context.getOfficeArchitect());
+			WebTemplate template = templater.addTemplate("template", templateLocation);
+			template.setLogicClass(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class : TemplateLogic.class);
+			template.setSecure(isTemplateSecure);
 			if (isLinkSecure != null) {
 				template.setLinkSecure("LINK", isLinkSecure.booleanValue());
 			}
@@ -221,22 +222,19 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 		// Determine if redirecting
 		if (redirectUrl != null) {
-			// Ensure have prefix on redirect URL
-			redirectUrl = redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX;
-
 			// Ensure redirect to appropriately secure URL
-			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
-			assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
+			assertEquals("Should be redirect", 303, response.getStatus().getStatusCode());
+			assertEquals("Incorrect redirect URL", redirectUrl, response.getHeader("Location").getValue());
 
 			// Undertake redirect to ensure parameters and entity are maintained
 			response = this.server.send(MockHttpServer.mockRequest(redirectUrl));
 		}
 
 		// Ensure service request as appropriately secure
-		assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure correct content
-		assertEquals("Incorrect template response", expectedEntity, response.getHttpEntity(null));
+		assertEquals("Incorrect template response", expectedEntity, response.getEntity(null));
 	}
 
 	/**
@@ -249,7 +247,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		}
 
 		public void LINK(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("link-");
+			connection.getResponse().getEntityWriter().write("link-");
 		}
 	}
 
@@ -270,7 +268,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		}
 
 		public void LINK(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("link-");
+			connection.getResponse().getEntityWriter().write("link-");
 		}
 	}
 
@@ -278,8 +276,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * Ensure URI triggers a redirect if not secure.
 	 */
 	public void testSecureUriRedirect() throws Exception {
-		this.doSecureUriTest(true, NON_SECURE_URL_PREFIX + "/uri",
-				SECURE_URL_PREFIX + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX);
+		this.doSecureUriTest(true, NON_SECURE_URL_PREFIX + "/uri", SECURE_URL_PREFIX + "/uri");
 	}
 
 	/**
@@ -293,8 +290,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * Ensure URI triggers a redirect if secure.
 	 */
 	public void testInsecureUriRedirect() throws Exception {
-		this.doSecureUriTest(false, SECURE_URL_PREFIX + "/uri",
-				NON_SECURE_URL_PREFIX + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX);
+		this.doSecureUriTest(false, SECURE_URL_PREFIX + "/uri", NON_SECURE_URL_PREFIX + "/uri");
 	}
 
 	/**
@@ -315,8 +311,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 			// Configure the section for URI
 			OfficeSection section = context.addSection("TEST", UriLogic.class);
-			HttpUrlContinuation uriLink = web.linkUri("uri", section.getOfficeSectionInput("service"));
-			uriLink.setUriSecure(isUriSecure);
+			HttpUrlContinuation uriLink = web.link(isUriSecure, "uri", section.getOfficeSectionInput("service"));
 
 			// Add HTTP parameters (as not loaded by template)
 			OfficeManagedObjectSource parametersMos = context.getOfficeArchitect()
@@ -339,18 +334,18 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		// Determine if redirecting
 		if (redirectUrl != null) {
 			// Ensure redirect to appropriately secure connection
-			assertEquals("Should be redirect", 303, response.getHttpStatus().getStatusCode());
-			assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
+			assertEquals("Should be redirect", 303, response.getStatus().getStatusCode());
+			assertEquals("Incorrect redirect URL", redirectUrl, response.getHeader("Location").getValue());
 
 			// Undertake redirect to ensure parameters and entity are maintained
 			response = this.server.send(MockHttpServer.mockRequest(redirectUrl));
 		}
 
 		// Ensure service request as appropriately secure
-		assertEquals("Should be successful", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure correct content
-		assertEquals("Incorrect template response", "SECURE - Daniel(1)", response.getHttpEntity(null));
+		assertEquals("Incorrect template response", "SECURE - Daniel(1)", response.getEntity(null));
 	}
 
 	/**
@@ -358,7 +353,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public static class UriLogic {
 		public void service(ServerHttpConnection connection, Parameters parameters) throws IOException {
-			connection.getHttpResponse().getEntityWriter()
+			connection.getResponse().getEntityWriter()
 					.write("SECURE - " + parameters.getName() + "(" + parameters.getId() + ")");
 		}
 	}

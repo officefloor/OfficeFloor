@@ -26,15 +26,12 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
 import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Flows;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunctionSource} to provide the
@@ -43,11 +40,6 @@ import net.officefloor.web.state.HttpRequestState;
  * @author Daniel Sagenschneider
  */
 public class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
-
-	/**
-	 * Property name for the {@link ParsedTemplate} URI path.
-	 */
-	public static final String PROPERTY_TEMPLATE_URI = WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
 
 	/**
 	 * Property name for a comma separated list of HTTP methods that will
@@ -76,34 +68,24 @@ public class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunc
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	@Override
 	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
-		// Obtain the template URI path
-		String templateUriPath = WebTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(context);
-
 		// Determine if the template is secure
 		boolean isSecure = WebTemplateManagedFunctionSource.isWebTemplateSecure(context);
 
-		/*
-		 * Only trigger redirect if not secure. If sent on secure connection but
-		 * no need for secure, service anyway. This is to save establishing a
-		 * new connection and a round trip when already have the request.
-		 */
-		Boolean isRequireSecure = (isSecure ? Boolean.TRUE : null);
-
 		// Obtain the listing of render redirect HTTP methods
-		String[] renderRedirectHttpMethods = null;
-		String renderRedirectProperty = context.getProperty(PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null);
-		if (renderRedirectProperty != null) {
+		HttpMethod[] notRedirectHttpMethods = null;
+		String notRedirectProperty = context.getProperty(PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null);
+		if (notRedirectProperty != null) {
 			// Obtain the render redirect HTTP methods
-			renderRedirectHttpMethods = renderRedirectProperty.split(",");
-			for (int i = 0; i < renderRedirectHttpMethods.length; i++) {
-				renderRedirectHttpMethods[i] = renderRedirectHttpMethods[i].trim();
+			String[] notRedirectHttpMethodNames = notRedirectProperty.split(",");
+			notRedirectHttpMethods = new HttpMethod[notRedirectHttpMethodNames.length];
+			for (int i = 0; i < notRedirectHttpMethodNames.length; i++) {
+				notRedirectHttpMethods[i] = HttpMethod.getHttpMethod(notRedirectHttpMethodNames[i].trim());
 			}
 		}
 
@@ -116,19 +98,15 @@ public class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunc
 		}
 
 		// Create the HTTP Template initial function
-		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(templateUriPath, isSecure,
-				renderRedirectHttpMethods, contentType, charset);
+		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(isSecure, notRedirectHttpMethods,
+				contentType, charset);
 
 		// Configure the function
 		ManagedFunctionTypeBuilder<Dependencies, Flows> function = namespaceTypeBuilder.addManagedFunctionType("TASK",
 				factory, Dependencies.class, Flows.class);
 		function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
-		function.addObject(HttpApplicationLocation.class).setKey(Dependencies.HTTP_APPLICATION_STATE);
-		function.addObject(HttpRequestState.class).setKey(Dependencies.REQUEST_STATE);
-		function.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
 		function.addFlow().setKey(Flows.RENDER);
 		function.addEscalation(IOException.class);
-		function.setDifferentiator(new HttpUrlContinuationAnnotationImpl(templateUriPath, isRequireSecure));
 	}
 
 }

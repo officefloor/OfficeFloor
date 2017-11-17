@@ -67,11 +67,11 @@ public class PostRedirectGetLogic {
 	public void post(Parameters parameters, ServerHttpConnection connection) throws IOException {
 
 		// Obtain the response
-		HttpResponse response = connection.getHttpResponse();
+		HttpResponse response = connection.getResponse();
 
 		// Determine if provide header
 		if ("HEADER".equals(parameters.operation)) {
-			response.getHttpHeaders().addHeader("NAME", "VALUE");
+			response.getHeaders().addHeader("NAME", "VALUE");
 
 		} else if ("ENTITY".equals(parameters.operation)) {
 			ServerWriter writer = response.getEntityWriter();

@@ -58,19 +58,17 @@ import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
-import net.officefloor.plugin.web.template.WebTemplateFunction;
-import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.template.NotRenderTemplateAfter;
+import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.template.build.WebTemplate;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtensionContext;
-import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.plugin.web.template.parse.HttpTemplateParserImpl;
+import net.officefloor.plugin.web.template.parse.ParsedTemplate;
 import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
 import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Flows;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpSessionStateful;
-import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationState;
@@ -84,9 +82,9 @@ import net.officefloor.web.state.HttpRequestState;
 public class WebTemplateSectionSource extends ClassSectionSource {
 
 	/**
-	 * Property name for the {@link ParsedTemplate} URI path.
+	 * Path for the {@link WebTemplate}.
 	 */
-	public static final String PROPERTY_TEMPLATE_URI = WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
+	public static final String PROPERTY_TEMPLATE_PATH = "template.path";
 
 	/**
 	 * Property name for the {@link Class} providing the backing logic to the
@@ -152,7 +150,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 *            Child {@link ParsedTemplateSection} instances to override.
 	 * @param designer
 	 *            {@link SectionDesigner}.
-	 * @return {@link ParsedTemplateSection} instances from result of inheritance.
+	 * @return {@link ParsedTemplateSection} instances from result of
+	 *         inheritance.
 	 */
 	public static ParsedTemplateSection[] inheritHttpTemplateSections(ParsedTemplateSection[] parentSections,
 			ParsedTemplateSection[] childSections, SectionDesigner designer) {
@@ -247,8 +246,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Obtains the {@link ParsedTemplateSection} name (possibly removing override
-	 * prefix).
+	 * Obtains the {@link ParsedTemplateSection} name (possibly removing
+	 * override prefix).
 	 * 
 	 * @param sectionName
 	 *            {@link ParsedTemplateSection} raw name.
@@ -343,7 +342,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Name of the {@link SectionInput} for rendering this {@link ParsedTemplate}.
+	 * Name of the {@link SectionInput} for rendering this
+	 * {@link ParsedTemplate}.
 	 */
 	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
 
@@ -381,7 +381,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	@Override
@@ -449,7 +448,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		String templateContent = reconstructHttpTemplateContent(sections);
 
 		// Obtain the template URI path
-		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
+		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_PATH);
 
 		// Keep track of tasks that do not render template on their completion
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
@@ -461,13 +460,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		while (extensionClassName != null) {
 
 			// Create an instance of the extension class
-			WebTemplateExtension extension = (WebTemplateExtension) context
-					.loadClass(extensionClassName).newInstance();
+			WebTemplateExtension extension = (WebTemplateExtension) context.loadClass(extensionClassName).newInstance();
 
 			// Extend the template
 			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex + ".";
-			WebTemplateExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
-					templateContent, extensionPropertyPrefix, nonRenderTemplateTaskKeys);
+			WebTemplateExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(templateContent,
+					extensionPropertyPrefix, nonRenderTemplateTaskKeys);
 			extension.extendWebTemplate(extensionContext);
 
 			// Override template details
@@ -495,8 +493,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
 				WebTemplateInitialManagedFunctionSource.class.getName());
 		PropertiesUtil.copyProperties(context, initialNamespace,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
 				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 				WebTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 				WebTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE,
@@ -521,8 +517,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 		// Copy the template configuration
 		PropertiesUtil.copyProperties(context, templateNamespace,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
 				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 				WebTemplateManagedFunctionSource.PROPERTY_CHARSET);
 		PropertiesUtil.copyPrefixedProperties(context, WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX,
@@ -576,7 +570,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			nonRenderTemplateTaskKeys.add(beanFunctionKey);
 
 			// Determine if template section requires a bean
-			boolean isRequireBean = WebTemplateManagedFunctionSource.isParsedTemplateSectionRequireBean(templateSection);
+			boolean isRequireBean = WebTemplateManagedFunctionSource
+					.isParsedTemplateSectionRequireBean(templateSection);
 			if ((isRequireBean) && (beanFunction == null)) {
 				// Section method required, determine if just missing method
 				if (!isLogicClass) {
@@ -712,10 +707,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		// Determine if the template is secure
 		boolean isTemplateSecure = WebTemplateManagedFunctionSource.isWebTemplateSecure(context);
 
-		// Obtain the template URI suffix
-		String templateUriSuffix = context.getProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-				null);
-
 		// Determine if any unknown configured links
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
 			if (propertyName.startsWith(WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX)) {
@@ -738,45 +729,48 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		String[] linkNames = WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkFunctionName : linkNames) {
-
-			// Obtain the link URI path
-			String linkUriPath = WebTemplateManagedFunctionSource
-					.getHttpTemplateLinkUrlContinuationPath(templateUriPath, linkFunctionName, templateUriSuffix);
-
-			// Determine if link is to be secure
-			boolean isLinkSecure = WebTemplateFunction.isLinkSecure(linkFunctionName, isTemplateSecure, context);
-
-			// Create HTTP URL continuation
-			SectionFunctionNamespace urlContinuationNamespace = designer.addSectionFunctionNamespace(
-					linkUrlContinuationPrefix + linkFunctionName,
-					HttpUrlContinuationManagedFunctionSource.class.getName());
-			urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-					linkUriPath);
-			if (isLinkSecure) {
-				/*
-				 * Only upgrade to secure connection. For non-secure will
-				 * already have the request and no need to close the existing
-				 * secure connection and establish a new non-secure connection.
-				 */
-				urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
-						String.valueOf(isLinkSecure));
-			}
-			SectionFunction urlContinuationFunction = urlContinuationNamespace.addSectionFunction(
-					linkUrlContinuationPrefix + linkFunctionName,
-					HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
-
-			// Obtain the link method function
-			String linkMethodFunctionKey = createFunctionKey(linkFunctionName);
-			TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(linkMethodFunctionKey);
-			if (methodFunction == null) {
-				// No backing method, so output flow from template
-				SectionOutput sectionOutput = this.getOrCreateOutput(linkFunctionName, null, false);
-				designer.link(urlContinuationFunction, sectionOutput);
-				continue; // linked
-			}
-
-			// Link servicing of request to the method
-			designer.link(urlContinuationFunction, methodFunction.function);
+			
+			// TODO links need to drive from configuration by WebArchitect
+			
+//
+//			// Obtain the link URI path
+//			String linkUriPath = WebTemplateManagedFunctionSource
+//					.getHttpTemplateLinkUrlContinuationPath(templateUriPath, linkFunctionName, templateUriSuffix);
+//
+//			// Determine if link is to be secure
+//			boolean isLinkSecure = WebTemplateFunction.isLinkSecure(linkFunctionName, isTemplateSecure, context);
+//
+//			// Create HTTP URL continuation
+//			SectionFunctionNamespace urlContinuationNamespace = designer.addSectionFunctionNamespace(
+//					linkUrlContinuationPrefix + linkFunctionName,
+//					HttpUrlContinuationManagedFunctionSource.class.getName());
+//			urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+//					linkUriPath);
+//			if (isLinkSecure) {
+//				/*
+//				 * Only upgrade to secure connection. For non-secure will
+//				 * already have the request and no need to close the existing
+//				 * secure connection and establish a new non-secure connection.
+//				 */
+//				urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
+//						String.valueOf(isLinkSecure));
+//			}
+//			SectionFunction urlContinuationFunction = urlContinuationNamespace.addSectionFunction(
+//					linkUrlContinuationPrefix + linkFunctionName,
+//					HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+//
+//			// Obtain the link method function
+//			String linkMethodFunctionKey = createFunctionKey(linkFunctionName);
+//			TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(linkMethodFunctionKey);
+//			if (methodFunction == null) {
+//				// No backing method, so output flow from template
+//				SectionOutput sectionOutput = this.getOrCreateOutput(linkFunctionName, null, false);
+//				designer.link(urlContinuationFunction, sectionOutput);
+//				continue; // linked
+//			}
+//
+//			// Link servicing of request to the method
+//			designer.link(urlContinuationFunction, methodFunction.function);
 		}
 
 		// Link bean tasks to re-render template by default

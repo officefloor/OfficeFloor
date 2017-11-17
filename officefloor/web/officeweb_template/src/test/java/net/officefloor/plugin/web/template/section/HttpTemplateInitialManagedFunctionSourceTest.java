@@ -31,17 +31,11 @@ import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotation;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationAnnotationImpl;
-import net.officefloor.plugin.web.http.route.HttpRouteFunctionTest;
 import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction;
-import net.officefloor.plugin.web.template.section.WebTemplateInitialManagedFunctionSource;
 import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.template.section.WebTemplateInitialFunction.Flows;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -56,57 +50,42 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(WebTemplateInitialManagedFunctionSource.class,
-				WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "URI Path");
+		ManagedFunctionLoaderUtil.validateSpecification(WebTemplateInitialManagedFunctionSource.class);
 	}
 
 	/**
 	 * Validate the non-secure type by default.
 	 */
 	public void testDefaultNonSecureType() {
-		this.doTypeTest(null, null, "/path", null, "/path");
+		this.doTypeTest(null, null, "/path", "/path");
 	}
 
 	/**
 	 * Validate the non-secure type.
 	 */
 	public void testNonSecureType() {
-		this.doTypeTest(Boolean.FALSE, null, "/path", null, "/path");
+		this.doTypeTest(Boolean.FALSE, null, "/path", "/path");
 	}
 
 	/**
 	 * Validate the secure type.
 	 */
 	public void testSecureType() {
-		this.doTypeTest(Boolean.TRUE, Boolean.TRUE, "/path", null, "/path");
+		this.doTypeTest(Boolean.TRUE, Boolean.TRUE, "/path", "/path");
 	}
 
 	/**
 	 * Validates uses canonical path for URL continuation.
 	 */
 	public void testNonCanonicalPathType() {
-		this.doTypeTest(null, null, "configured/../non/../canoncial/../path", null, "/path");
-	}
-
-	/**
-	 * Validate includes URI suffix.
-	 */
-	public void testTemplateUriSuffixType() {
-		this.doTypeTest(null, null, "/path", ".suffix", "/path.suffix");
+		this.doTypeTest(null, null, "configured/../non/../canoncial/../path", "/path");
 	}
 
 	/**
 	 * Validate root template type.
 	 */
 	public void testRootTemplateType() {
-		this.doTypeTest(null, null, "/", null, "/");
-	}
-
-	/**
-	 * Validate root template does not have suffix type.
-	 */
-	public void testRootTemplateNoSuffixType() {
-		this.doTypeTest(null, null, "/", ".suffix", "/");
+		this.doTypeTest(null, null, "/", "/");
 	}
 
 	/**
@@ -116,10 +95,10 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 	 *            Whether template should be secure.
 	 */
 	private void doTypeTest(Boolean isConfiguredSecure, Boolean isUrlContinuationSecure, String configuredUriPath,
-			String uriSuffix, String expectedUrlContinuationPath) {
+			String expectedUrlContinuationPath) {
 
 		// Factory
-		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(null, false, null, null, null);
+		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(false, null, null, null);
 
 		// Create the expected type
 		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -128,24 +107,14 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 		ManagedFunctionTypeBuilder<Dependencies, Flows> initial = type.addManagedFunctionType("TASK", factory,
 				Dependencies.class, Flows.class);
 		initial.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
-		initial.addObject(HttpApplicationLocation.class).setKey(Dependencies.HTTP_APPLICATION_STATE);
-		initial.addObject(HttpRequestState.class).setKey(Dependencies.REQUEST_STATE);
-		initial.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
 		initial.addFlow().setKey(Flows.RENDER);
 		initial.addEscalation(IOException.class);
-		initial.setDifferentiator(
-				new HttpUrlContinuationAnnotationImpl(expectedUrlContinuationPath, isUrlContinuationSecure));
 
 		// Create the listing of properties
 		List<String> properties = new ArrayList<String>(6);
-		properties.addAll(
-				Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, configuredUriPath));
 		if (isConfiguredSecure != null) {
 			properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 					String.valueOf(isConfiguredSecure)));
-		}
-		if (uriSuffix != null) {
-			properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, uriSuffix));
 		}
 
 		// Validate type (must also convert
@@ -154,10 +123,6 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 
 		// Ensure correct URI path
 		ManagedFunctionType<?, ?> function = namespace.getManagedFunctionTypes()[0];
-		HttpUrlContinuationAnnotation differentiator = (HttpUrlContinuationAnnotation) function
-				.getDifferentiator();
-		assertEquals("Incorrect URI path", expectedUrlContinuationPath, differentiator.getApplicationUriPath());
-		assertEquals("Incorrectly indentified as secure", isUrlContinuationSecure, differentiator.isSecure());
 	}
 
 	/**
@@ -256,12 +221,9 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 			final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 			final HttpSession session = this.createMock(HttpSession.class);
-			final HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 			// Create the task
 			List<String> properties = new ArrayList<String>(6);
-			properties.addAll(Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-					(redirectUriPath == null ? "/path" : redirectUriPath)));
 			if (isRequireSecure) {
 				properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 						String.valueOf(isRequireSecure)));
@@ -286,9 +248,6 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 
 			// Record obtaining the dependencies
 			this.recordReturn(context, context.getObject(Dependencies.SERVER_HTTP_CONNECTION), connection);
-			this.recordReturn(context, context.getObject(Dependencies.HTTP_APPLICATION_STATE), location);
-			this.recordReturn(context, context.getObject(Dependencies.REQUEST_STATE), requestState);
-			this.recordReturn(context, context.getObject(Dependencies.HTTP_SESSION), session);
 
 			// Record determining if secure connection
 			if (isRequireSecure) {
@@ -297,14 +256,13 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 
 			// Record determining method for POST, redirect, GET pattern
 			if (method != null) {
-				this.recordReturn(connection, connection.getClientHttpMethod(), method);
+				this.recordReturn(connection, connection.getClientRequest(), method);
 			}
 
 			// Record redirect or render
 			if (redirectUriPath != null) {
 				// Record necessary redirect
-				HttpRouteFunctionTest.recordDoRedirect(redirectUriPath, isRequireSecure, connection, requestState,
-						session, location, this);
+				// TODO record redirect
 			} else {
 				// Record triggering the render
 				context.doFlow(Flows.RENDER, null, null);
@@ -313,7 +271,7 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 			// Record content type and charset
 			final HttpResponse response = this.createMock(HttpResponse.class);
 			if (contentType != null) {
-				this.recordReturn(connection, connection.getHttpResponse(), response);
+				this.recordReturn(connection, connection.getResponse(), response);
 				response.setContentType(contentType, charset);
 			}
 

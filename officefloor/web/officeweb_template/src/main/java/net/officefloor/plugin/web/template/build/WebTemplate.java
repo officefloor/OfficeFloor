@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.template.build;
 
 import java.nio.charset.Charset;
 
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.plugin.web.template.extension.WebTemplateExtension;
@@ -30,7 +31,7 @@ import net.officefloor.server.http.ServerHttpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebTemplate {
+public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * Specifies the logic {@link Class}.

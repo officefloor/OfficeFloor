@@ -19,10 +19,8 @@ package net.officefloor.plugin.web.template.section;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
+import net.officefloor.plugin.web.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
-import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
-import net.officefloor.plugin.web.template.section.WebTemplateSectionSource;
 
 /**
  * Tests inheriting {@link ParsedTemplateSection} instances.

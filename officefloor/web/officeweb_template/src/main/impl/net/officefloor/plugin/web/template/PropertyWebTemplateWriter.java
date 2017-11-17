@@ -76,7 +76,8 @@ public class PropertyWebTemplateWriter implements WebTemplateWriter {
 		}
 
 		// Determine if should be escaped
-		this.isEscaped = !(method.isAnnotationPresent(NotEscaped.class));
+		// TODO determine means to obtain annotations from ValueRetriever
+		this.isEscaped = true; // !(method.isAnnotationPresent(NotEscaped.class));
 	}
 
 	/*

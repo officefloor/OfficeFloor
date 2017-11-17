@@ -40,15 +40,10 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.template.WebTemplateManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.WebTemplateArrayIteratorManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.WebTemplateInitialManagedFunctionSource;
-import net.officefloor.plugin.web.template.section.WebTemplateSectionSource;
-import net.officefloor.plugin.web.template.section.WebTemplateSectionSource.NoLogicClass;
 import net.officefloor.plugin.web.template.section.TemplateLogic.RowBean;
+import net.officefloor.plugin.web.template.section.WebTemplateSectionSource.NoLogicClass;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -63,8 +58,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		SectionLoaderUtil.validateSpecification(WebTemplateSectionSource.class,
-				WebTemplateSectionSource.PROPERTY_TEMPLATE_URI, "URI Path");
+		SectionLoaderUtil.validateSpecification(WebTemplateSectionSource.class);
 	}
 
 	/**
@@ -104,8 +98,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionObject connection = expected.addSectionObject(Connection.class.getName(), Connection.class.getName());
 		SectionObject httpConnection = expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
-		SectionObject applicationLocation = expected.addSectionObject(HttpApplicationLocation.class.getName(),
-				HttpApplicationLocation.class.getName());
 		SectionObject requestState = expected.addSectionObject(HttpRequestState.class.getName(),
 				HttpRequestState.class.getName());
 		SectionObject httpSession = expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
@@ -123,12 +115,10 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Initial, Template and Class namespace
 		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
 				WebTemplateInitialManagedFunctionSource.class.getName());
-		initialNamespace.addProperty(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
 		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "Template.ofp"));
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateLogic.class.getName());
 		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List",
@@ -145,7 +135,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
 		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
 		initial.getFunctionFlow("RENDER");
@@ -155,7 +144,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(getTemplate.getFunctionObject("OBJECT"), sectionMo);
 		SectionFunction template = templateNamespace.addSectionFunction("template", "template");
 		expected.link(template.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(template.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		expected.link(template.getFunctionObject("OBJECT"), sectionMo);
 
 		// Methods for beans/properties
@@ -171,7 +159,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(getList.getFunctionObject(HttpSession.class.getName()), httpSession);
 		SectionFunction list = templateNamespace.addSectionFunction("List", "List");
 		expected.link(list.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(list.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		expected.link(list.getFunctionObject("OBJECT"), sectionMo);
 		SectionFunction listArrayIterator = iteratorNamespace.addSectionFunction("ListArrayIterator", "iterate");
 		listArrayIterator.getFunctionObject("ARRAY").flagAsParameter();
@@ -179,15 +166,17 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Tail
 		SectionFunction tail = templateNamespace.addSectionFunction("Tail", "Tail");
 		expected.link(tail.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(tail.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 
 		// nextFunction link URL continuation
-		SectionFunctionNamespace nextFunctionContinuationNamespace = expected.addSectionFunctionNamespace(
-				"HTTP_URL_CONTINUATION_nextFunction", HttpUrlContinuationManagedFunctionSource.class.getName());
-		nextFunctionContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-				"/next");
-		nextFunctionContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nextFunction",
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		fail("TODO configure redirects via WebArchitect");
+		// SectionFunctionNamespace nextFunctionContinuationNamespace =
+		// expected.addSectionFunctionNamespace(
+		// "HTTP_URL_CONTINUATION_nextFunction",
+		// HttpUrlContinuationManagedFunctionSource.class.getName());
+		// nextFunctionContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+		// "/next");
+		// nextFunctionContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nextFunction",
+		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Handle nextFunction function
 		SectionFunction nextFunctionMethod = classNamespace.addSectionFunction("nextFunction", "nextFunction");
@@ -195,11 +184,15 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(nextFunctionMethod.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
 		// submit link URL continuation
-		SectionFunctionNamespace submitContinuationNamespace = expected.addSectionFunctionNamespace(
-				"HTTP_URL_CONTINUATION_submit", HttpUrlContinuationManagedFunctionSource.class.getName());
-		submitContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/submit");
-		submitContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_submit",
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		fail("TODO configure redirects via WebArchitect");
+		// SectionFunctionNamespace submitContinuationNamespace =
+		// expected.addSectionFunctionNamespace(
+		// "HTTP_URL_CONTINUATION_submit",
+		// HttpUrlContinuationManagedFunctionSource.class.getName());
+		// submitContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+		// "/submit");
+		// submitContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_submit",
+		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Handle submit function
 		SectionFunction submitMethod = classNamespace.addSectionFunction("submit", "submit");
@@ -207,12 +200,15 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(submitMethod.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
 		// Route non-method link
-		SectionFunctionNamespace nonMethodContinuationNamespace = expected.addSectionFunctionNamespace(
-				"HTTP_URL_CONTINUATION_nonMethodLink", HttpUrlContinuationManagedFunctionSource.class.getName());
-		nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-				"/nonMethod");
-		nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		fail("TODO configure redirects via WebArchitect");
+		// SectionFunctionNamespace nonMethodContinuationNamespace =
+		// expected.addSectionFunctionNamespace(
+		// "HTTP_URL_CONTINUATION_nonMethodLink",
+		// HttpUrlContinuationManagedFunctionSource.class.getName());
+		// nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+		// "/nonMethod");
+		// nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
+		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Extra function
 		SectionFunction doInternalFlow = classNamespace.addSectionFunction("doInternalFlow", "doInternalFlow");
@@ -222,13 +218,15 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(doInternalFlow.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
 		// Not render template after link
-		SectionFunctionNamespace notRenderTemplateAfterNamespace = expected.addSectionFunctionNamespace(
-				"HTTP_URL_CONTINUATION_notRenderTemplateAfter",
-				HttpUrlContinuationManagedFunctionSource.class.getName());
-		notRenderTemplateAfterNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-				"/notRender");
-		notRenderTemplateAfterNamespace.addSectionFunction("HTTP_URL_CONTINUATION_notRenderTemplateAfter",
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		fail("TODO configure redirects via WebArchitect");
+		// SectionFunctionNamespace notRenderTemplateAfterNamespace =
+		// expected.addSectionFunctionNamespace(
+		// "HTTP_URL_CONTINUATION_notRenderTemplateAfter",
+		// HttpUrlContinuationManagedFunctionSource.class.getName());
+		// notRenderTemplateAfterNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+		// "/notRender");
+		// notRenderTemplateAfterNamespace.addSectionFunction("HTTP_URL_CONTINUATION_notRenderTemplateAfter",
+		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Handle not render template after function
 		SectionFunction notRenderTemplateAfterMethod = classNamespace.addSectionFunction("notRenderTemplateAfter",
@@ -239,8 +237,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, this.getClass(), "Template.ofp",
-				WebTemplateSectionSource.PROPERTY_CLASS_NAME, TemplateLogic.class.getName(),
-				WebTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
+				WebTemplateSectionSource.PROPERTY_CLASS_NAME, TemplateLogic.class.getName());
 	}
 
 	/**
@@ -269,8 +266,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Objects
 		SectionObject httpConnection = expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
-		SectionObject applicationLocation = expected.addSectionObject(HttpApplicationLocation.class.getName(),
-				HttpApplicationLocation.class.getName());
 		SectionObject requestState = expected.addSectionObject(HttpRequestState.class.getName(),
 				HttpRequestState.class.getName());
 		SectionObject httpSession = expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
@@ -285,12 +280,10 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Initial, Template and Class namespace
 		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
 				WebTemplateInitialManagedFunctionSource.class.getName());
-		initialNamespace.addProperty(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
 		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "TemplateData.ofp"));
-		templateNamespace.addProperty(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateDataLogic.class.getName());
 		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "section",
@@ -304,7 +297,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_TASK_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
 		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
 		initial.getFunctionFlow("RENDER");
@@ -314,7 +306,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(getTemplate.getFunctionObject("OBJECT"), sectionMo);
 		SectionFunction template = templateNamespace.addSectionFunction("template", "template");
 		expected.link(template.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(template.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		expected.link(template.getFunctionObject("OBJECT"), sectionMo);
 
 		// Message
@@ -326,7 +317,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(getSection.getFunctionObject("OBJECT"), sectionMo);
 		SectionFunction section = templateNamespace.addSectionFunction("section", "section");
 		expected.link(section.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(section.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		initial.getFunctionObject("REQUEST_STATE");
 		expected.link(section.getFunctionObject("OBJECT"), sectionMo);
 
@@ -340,9 +330,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(doExternalFlow.getFunctionObject("OBJECT"), sectionMo);
 
 		// Validate type
-		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, this.getClass(),
-				"TemplateData.ofp", WebTemplateSectionSource.PROPERTY_CLASS_NAME, TemplateDataLogic.class.getName(),
-				WebTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
+		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, this.getClass(), "TemplateData.ofp",
+				WebTemplateSectionSource.PROPERTY_CLASS_NAME, TemplateDataLogic.class.getName());
 	}
 
 	/**
@@ -365,8 +354,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Objects
 		SectionObject httpConnection = expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
-		SectionObject applicationLocation = expected.addSectionObject(HttpApplicationLocation.class.getName(),
-				HttpApplicationLocation.class.getName());
 		SectionObject requestState = expected.addSectionObject(HttpRequestState.class.getName(),
 				HttpRequestState.class.getName());
 		SectionObject httpSession = expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
@@ -388,18 +375,15 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Initial and Template namespace
 		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
 				WebTemplateInitialManagedFunctionSource.class.getName());
-		initialNamespace.addProperty(WebTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 		SectionFunctionNamespace templateNamspace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
 		templateNamspace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "NoLogicTemplate.ofp"));
-		templateNamspace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 
 		// Initial function
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
 		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
 		initial.getFunctionFlow("RENDER");
@@ -407,27 +391,32 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Section
 		SectionFunction section = templateNamspace.addSectionFunction("Section", "Section");
 		expected.link(section.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(section.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 
 		// nonMethodLink URL continuation
-		SectionFunctionNamespace nonMethodContinuationNamespace = expected.addSectionFunctionNamespace(
-				"HTTP_URL_CONTINUATION_nonMethodLink", HttpUrlContinuationManagedFunctionSource.class.getName());
-		nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-				"nonMethod");
-		nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		fail("TODO configure redirects via WebArchitect");
+		// SectionFunctionNamespace nonMethodContinuationNamespace =
+		// expected.addSectionFunctionNamespace(
+		// "HTTP_URL_CONTINUATION_nonMethodLink",
+		// HttpUrlContinuationManagedFunctionSource.class.getName());
+		// nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+		// "nonMethod");
+		// nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
+		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// doExternalFlow URL continuation
-		SectionFunctionNamespace doExternalFlowContinuationNamespace = expected.addSectionFunctionNamespace(
-				"HTTP_URL_CONTINUATION_doExternalFlow", HttpUrlContinuationManagedFunctionSource.class.getName());
-		doExternalFlowContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-				"doExternalFlow");
-		doExternalFlowContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_doExternalFlow",
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		fail("TODO configure redirects via WebArchitect");
+		// SectionFunctionNamespace doExternalFlowContinuationNamespace =
+		// expected.addSectionFunctionNamespace(
+		// "HTTP_URL_CONTINUATION_doExternalFlow",
+		// HttpUrlContinuationManagedFunctionSource.class.getName());
+		// doExternalFlowContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+		// "doExternalFlow");
+		// doExternalFlowContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_doExternalFlow",
+		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, this.getClass(),
-				"NoLogicTemplate.ofp", WebTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
+				"NoLogicTemplate.ofp");
 	}
 
 	/**
@@ -453,7 +442,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue("/uri");
 		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
 				.setValue(String.valueOf(true));
 
@@ -486,13 +474,11 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Objects
 		expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
-		expected.addSectionObject(HttpApplicationLocation.class.getName(), HttpApplicationLocation.class.getName());
 		expected.addSectionObject(HttpRequestState.class.getName(), HttpRequestState.class.getName());
 		expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
 
 		// Ensure correct type (and no link secure unknown issue)
 		SectionLoaderUtil.validateSectionType(expected, WebTemplateSectionSource.class, childTemplatePath,
-				WebTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri",
 				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplatePath,
 				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "link", String.valueOf(true));
 	}
@@ -549,10 +535,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 		if (templateLogicClass != null) {
-			properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
-					.setValue(templateLogicClass.getName());
+			properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(templateLogicClass.getName());
 		}
 
 		// Test
@@ -587,7 +571,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		PropertyList properties = compiler.createPropertyList();
 		properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
 				.setValue(NextFunctionErrorLogic.class.getName());
-		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 
 		// Test
 		this.replayMockObjects();
