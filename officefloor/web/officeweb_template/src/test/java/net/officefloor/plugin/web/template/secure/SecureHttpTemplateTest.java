@@ -27,11 +27,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.plugin.web.template.build.WebTemplate;
-import net.officefloor.plugin.web.template.build.WebTemplater;
-import net.officefloor.plugin.web.template.build.WebTemplaterEmployer;
-import net.officefloor.plugin.web.template.parse.ParsedTemplate;
-import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -40,6 +35,11 @@ import net.officefloor.web.HttpParameters;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
+import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.build.WebTemplater;
+import net.officefloor.web.template.build.WebTemplaterEmployer;
+import net.officefloor.web.template.parse.ParsedTemplate;
+import net.officefloor.web.template.parse.ParsedTemplateSection;
 
 /**
  * Ensures secure functionality of {@link ParsedTemplate}.

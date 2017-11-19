@@ -263,6 +263,16 @@ public class SectionLoaderUtil {
 					aInput.getSectionInputName());
 			Assert.assertEquals("Incorrect parameter type for input " + i, eInput.getParameterType(),
 					aInput.getParameterType());
+
+			// Validate the input annotations
+			Object[] eAnnotations = eInput.getAnnotations();
+			Object[] aAnnotations = aInput.getAnnotations();
+			Assert.assertEquals("Incorrect number of annoations for input " + eInput.getSectionInputName(),
+					eAnnotations.length, aAnnotations.length);
+			for (int a = 0; a < eAnnotations.length; a++) {
+				Assert.assertEquals("Incorrect annotation " + a + " for input " + eInput.getSectionInputName(),
+						eAnnotations[a].getClass(), aAnnotations[a].getClass());
+			}
 		}
 
 		// Validate the section outputs are as expected

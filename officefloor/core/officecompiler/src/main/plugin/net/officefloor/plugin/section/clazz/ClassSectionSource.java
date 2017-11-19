@@ -226,9 +226,36 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
+	 * {@link SectionInput} instances by name.
+	 */
+	private final Map<String, SectionInput> _inputsByName = new HashMap<>();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SectionInput}.
+	 * <p>
+	 * Should the {@link SectionInput} not yet be added, it is added.
+	 * 
+	 * @param name
+	 *            Name of the {@link SectionInput}.
+	 * @param argumentType
+	 *            Type of the argument. May be <code>null</code> if no argument.
+	 * @return {@link SectionInput}.
+	 */
+	public SectionInput getOrCreateInput(String name, String argumentType) {
+		SectionInput sectionInput = this._inputsByName.get(name);
+		if (sectionInput == null) {
+			// Not yet added, so add section input
+			sectionInput = this.getDesigner().addSectionInput(name, argumentType);
+			this._inputsByName.put(name, sectionInput);
+		}
+		return sectionInput;
+	}
+
+	/**
 	 * {@link SectionOutput} instances by name.
 	 */
-	private final Map<String, SectionOutput> _outputsByName = new HashMap<String, SectionOutput>();
+	private final Map<String, SectionOutput> _outputsByName = new HashMap<>();
 
 	/**
 	 * <p>
@@ -441,7 +468,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		String parameterTypeName = (parameterType == null ? null : parameterType.getName());
 
 		// Add input for function
-		SectionInput sectionInput = this.getDesigner().addSectionInput(inputName, parameterTypeName);
+		SectionInput sectionInput = this.getOrCreateInput(inputName, parameterTypeName);
 		this.getDesigner().link(sectionInput, function);
 	}
 

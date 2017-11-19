@@ -56,10 +56,12 @@
 		<module>core</module>
 		<module>server</module>
 		<module>web</module>
+<!--  
 		<module>plugins</module>
 		<module>eclipse</module>
 		<module>maven</module>
 		<module>tutorials</module>
+-->
 	</modules>
 	<properties>
 		<current.year>2015</current.year>
