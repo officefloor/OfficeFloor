@@ -52,7 +52,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
+public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure correct specification.

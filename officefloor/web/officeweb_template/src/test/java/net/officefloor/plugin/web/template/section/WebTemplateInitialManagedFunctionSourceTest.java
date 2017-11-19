@@ -44,7 +44,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTestCase {
+public class WebTemplateInitialManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.

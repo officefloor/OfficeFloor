@@ -223,33 +223,26 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 
 		@Override
 		public OfficeSubSectionType getParentOfficeSubSectionType() {
-			// TODO implement OfficeSubSectionType.getParentOfficeSubSectionType
-			throw new UnsupportedOperationException(
-					"TODO implement OfficeSubSectionType.getParentOfficeSubSectionType");
-
+			fail("Should not invoke getParentOfficeSubSectionType");
+			return null;
 		}
 
 		@Override
 		public OfficeSubSectionType[] getOfficeSubSectionTypes() {
-			// TODO implement OfficeSubSectionType.getOfficeSubSectionTypes
-			throw new UnsupportedOperationException("TODO implement OfficeSubSectionType.getOfficeSubSectionTypes");
-
+			fail("Should not invoke getOfficeSubSectionTypes");
+			return null;
 		}
 
 		@Override
 		public OfficeFunctionType[] getOfficeFunctionTypes() {
-			// TODO implement OfficeSubSectionType.getOfficeTaskTypes
-			throw new UnsupportedOperationException("TODO implement OfficeSubSectionType.getOfficeTaskTypes");
-
+			fail("Should not invoke getOfficeFunctionTypes");
+			return null;
 		}
 
 		@Override
 		public OfficeSectionManagedObjectType[] getOfficeSectionManagedObjectTypes() {
-			// TODO implement
-			// OfficeSubSectionType.getOfficeSectionManagedObjectSourceTypes
-			throw new UnsupportedOperationException(
-					"TODO implement OfficeSubSectionType.getOfficeSectionManagedObjectSourceTypes");
-
+			fail("Should not invoke getOfficeSectionManagedObjectTypes");
+			return null;
 		}
 	}
 
@@ -339,8 +332,14 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 
 		@Override
 		public String getTypeQualifier() {
-			// TODO implement OfficeSectionObjectType.getTypeQualifier
-			throw new UnsupportedOperationException("TODO implement OfficeSectionObjectType.getTypeQualifier");
+			fail("Should not invoke getTypeQualifier");
+			return null;
+		}
+
+		@Override
+		public Object[] getAnnotations() {
+			fail("Should not invoke getAnnotations");
+			return null;
 		}
 	}
 

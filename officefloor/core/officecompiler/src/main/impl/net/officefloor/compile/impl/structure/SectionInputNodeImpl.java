@@ -127,6 +127,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	private final List<ExecutionExplorer> executionExplorers = new LinkedList<>();
 
 	/**
+	 * Annotations.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param inputName
@@ -220,12 +225,14 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		}
 
 		// Create and return type
-		return new SectionInputTypeImpl(this.inputName, this.state.parameterType);
+		return new SectionInputTypeImpl(this.inputName, this.state.parameterType,
+				this.annotations.toArray(new Object[this.annotations.size()]));
 	}
 
 	@Override
 	public OfficeSectionInputType loadOfficeSectionInputType(CompileContext compileContext) {
-		return new OfficeSectionInputTypeImpl(this.inputName, this.state.parameterType);
+		return new OfficeSectionInputTypeImpl(this.inputName, this.state.parameterType,
+				this.annotations.toArray(new Object[this.annotations.size()]));
 	}
 
 	@Override
@@ -284,6 +291,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	@Override
 	public String getSectionInputName() {
 		return this.inputName;
+	}
+
+	@Override
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
 	}
 
 	/*

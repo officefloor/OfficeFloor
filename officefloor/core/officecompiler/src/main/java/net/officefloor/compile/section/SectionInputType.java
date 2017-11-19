@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.section;
 
+import net.officefloor.compile.spi.section.SectionInput;
+
 /**
  * <code>Type definition</code> of an input for a {@link SectionType}.
  * 
@@ -43,5 +45,12 @@ public interface SectionInputType {
 	 * @return Fully qualified {@link Class} name of the parameter type.
 	 */
 	String getParameterType();
+
+	/**
+	 * Obtains the annotations for the {@link SectionInput}.
+	 * 
+	 * @return Annotations for the {@link SectionInput}.
+	 */
+	Object[] getAnnotations();
 
 }

@@ -27,7 +27,7 @@ import net.officefloor.plugin.web.template.parse.ParsedTemplateSection;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateSectionInheritanceTest extends OfficeFrameTestCase {
+public class WebTemplateSectionInheritanceTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link SectionDesigner}.

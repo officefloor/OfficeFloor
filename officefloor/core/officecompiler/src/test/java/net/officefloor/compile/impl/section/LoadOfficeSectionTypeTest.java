@@ -203,11 +203,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionInput() {
 
 		// Load the office section with an office section input
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionInput("INPUT", String.class.getName());
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionInput("INPUT", String.class.getName());
 		});
 
 		// Validate results
@@ -217,6 +214,27 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect office section input parameter type", String.class.getName(), input.getParameterType());
 		assertEquals("Should be no office section outputs", 0, section.getOfficeSectionOutputTypes().length);
 		assertEquals("Should have no office section objects", 0, section.getOfficeSectionObjectTypes().length);
+	}
+
+	/**
+	 * Ensure can create input with annotations.
+	 */
+	public void testInputWithAnnotations() {
+
+		// Load office section type
+		OfficeSectionType type = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionInput("NO_ANNOTATION", null);
+			context.getBuilder().addSectionInput("ANNOTATION", null).addAnnotation("TEST");
+		});
+
+		// Ensure correct input with annotation
+		assertEquals("Incorrect number of inputs", 2, type.getOfficeSectionInputTypes().length);
+		OfficeSectionInputType annotation = type.getOfficeSectionInputTypes()[0];
+		assertEquals("Incorrect input", "ANNOTATION", annotation.getOfficeSectionInputName());
+		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
+		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		OfficeSectionInputType noAnnotation = type.getOfficeSectionInputTypes()[1];
+		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
 	}
 
 	/**

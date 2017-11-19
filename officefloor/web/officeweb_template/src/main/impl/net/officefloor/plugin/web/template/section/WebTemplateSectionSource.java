@@ -82,6 +82,29 @@ import net.officefloor.web.state.HttpRequestState;
 public class WebTemplateSectionSource extends ClassSectionSource {
 
 	/**
+	 * <p>
+	 * Class to use if no class specified.
+	 * <p>
+	 * Must have a public method for {@link ClassSectionSource}.
+	 */
+	public static final class NoLogicClass {
+		public void notIncludedInput() {
+		}
+	}
+
+	/**
+	 * Name of the {@link SectionInput} for rendering this
+	 * {@link ParsedTemplate}.
+	 */
+	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
+
+	/**
+	 * Name of the {@link SectionOutput} for flow after completion of rending
+	 * the {@link ParsedTemplate}.
+	 */
+	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
+
+	/**
 	 * Path for the {@link WebTemplate}.
 	 */
 	public static final String PROPERTY_TEMPLATE_PATH = "template.path";
@@ -331,29 +354,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * <p>
-	 * Class to use if no class specified.
-	 * <p>
-	 * Must have a public method for {@link ClassSectionSource}.
-	 */
-	public static final class NoLogicClass {
-		public void notIncludedInput() {
-		}
-	}
-
-	/**
-	 * Name of the {@link SectionInput} for rendering this
-	 * {@link ParsedTemplate}.
-	 */
-	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
-
-	/**
-	 * Name of the {@link SectionOutput} for flow after completion of rending
-	 * the {@link ParsedTemplate}.
-	 */
-	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
-
-	/**
 	 * {@link Class} providing the logic for the HTTP template - also the
 	 * {@link Class} for the {@link ClassSectionSource}.
 	 */
@@ -395,7 +395,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			isLogicClass = false; // No logic class
 		}
 
-		// Load the section class work and tasks
+		// Load the section class functions
 		this.sectionClass = context.loadClass(sectionClassName);
 		super.sourceSection(designer, context);
 
@@ -729,48 +729,56 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		String[] linkNames = WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkFunctionName : linkNames) {
-			
+
 			// TODO links need to drive from configuration by WebArchitect
-			
-//
-//			// Obtain the link URI path
-//			String linkUriPath = WebTemplateManagedFunctionSource
-//					.getHttpTemplateLinkUrlContinuationPath(templateUriPath, linkFunctionName, templateUriSuffix);
-//
-//			// Determine if link is to be secure
-//			boolean isLinkSecure = WebTemplateFunction.isLinkSecure(linkFunctionName, isTemplateSecure, context);
-//
-//			// Create HTTP URL continuation
-//			SectionFunctionNamespace urlContinuationNamespace = designer.addSectionFunctionNamespace(
-//					linkUrlContinuationPrefix + linkFunctionName,
-//					HttpUrlContinuationManagedFunctionSource.class.getName());
-//			urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-//					linkUriPath);
-//			if (isLinkSecure) {
-//				/*
-//				 * Only upgrade to secure connection. For non-secure will
-//				 * already have the request and no need to close the existing
-//				 * secure connection and establish a new non-secure connection.
-//				 */
-//				urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
-//						String.valueOf(isLinkSecure));
-//			}
-//			SectionFunction urlContinuationFunction = urlContinuationNamespace.addSectionFunction(
-//					linkUrlContinuationPrefix + linkFunctionName,
-//					HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
-//
-//			// Obtain the link method function
-//			String linkMethodFunctionKey = createFunctionKey(linkFunctionName);
-//			TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(linkMethodFunctionKey);
-//			if (methodFunction == null) {
-//				// No backing method, so output flow from template
-//				SectionOutput sectionOutput = this.getOrCreateOutput(linkFunctionName, null, false);
-//				designer.link(urlContinuationFunction, sectionOutput);
-//				continue; // linked
-//			}
-//
-//			// Link servicing of request to the method
-//			designer.link(urlContinuationFunction, methodFunction.function);
+
+			//
+			// // Obtain the link URI path
+			// String linkUriPath = WebTemplateManagedFunctionSource
+			// .getHttpTemplateLinkUrlContinuationPath(templateUriPath,
+			// linkFunctionName, templateUriSuffix);
+			//
+			// // Determine if link is to be secure
+			// boolean isLinkSecure =
+			// WebTemplateFunction.isLinkSecure(linkFunctionName,
+			// isTemplateSecure, context);
+			//
+			// // Create HTTP URL continuation
+			// SectionFunctionNamespace urlContinuationNamespace =
+			// designer.addSectionFunctionNamespace(
+			// linkUrlContinuationPrefix + linkFunctionName,
+			// HttpUrlContinuationManagedFunctionSource.class.getName());
+			// urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+			// linkUriPath);
+			// if (isLinkSecure) {
+			// /*
+			// * Only upgrade to secure connection. For non-secure will
+			// * already have the request and no need to close the existing
+			// * secure connection and establish a new non-secure connection.
+			// */
+			// urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
+			// String.valueOf(isLinkSecure));
+			// }
+			// SectionFunction urlContinuationFunction =
+			// urlContinuationNamespace.addSectionFunction(
+			// linkUrlContinuationPrefix + linkFunctionName,
+			// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+			//
+			// // Obtain the link method function
+			// String linkMethodFunctionKey =
+			// createFunctionKey(linkFunctionName);
+			// TemplateClassFunction methodFunction =
+			// this.sectionClassMethodFunctionsByName.get(linkMethodFunctionKey);
+			// if (methodFunction == null) {
+			// // No backing method, so output flow from template
+			// SectionOutput sectionOutput =
+			// this.getOrCreateOutput(linkFunctionName, null, false);
+			// designer.link(urlContinuationFunction, sectionOutput);
+			// continue; // linked
+			// }
+			//
+			// // Link servicing of request to the method
+			// designer.link(urlContinuationFunction, methodFunction.function);
 		}
 
 		// Link bean tasks to re-render template by default
