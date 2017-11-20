@@ -33,13 +33,8 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpRequestState;
-import net.officefloor.web.template.WebTemplateManagedFunctionSource;
-import net.officefloor.web.template.section.WebTemplateInitialFunction;
-import net.officefloor.web.template.section.WebTemplateInitialManagedFunctionSource;
-import net.officefloor.web.template.section.WebTemplateInitialFunction.Dependencies;
 import net.officefloor.web.template.section.WebTemplateInitialFunction.Flows;
+import net.officefloor.web.template.section.WebTemplateInitialFunction.WebTemplateInitialDependencies;
 
 /**
  * Tests the {@link WebTemplateInitialManagedFunctionSource}.
@@ -106,16 +101,16 @@ public class WebTemplateInitialManagedFunctionSourceTest extends OfficeFrameTest
 		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
 		// Initial task
-		ManagedFunctionTypeBuilder<Dependencies, Flows> initial = type.addManagedFunctionType("TASK", factory,
-				Dependencies.class, Flows.class);
-		initial.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+		ManagedFunctionTypeBuilder<WebTemplateInitialDependencies, Flows> initial = type.addManagedFunctionType("TASK",
+				factory, WebTemplateInitialDependencies.class, Flows.class);
+		initial.addObject(ServerHttpConnection.class).setKey(WebTemplateInitialDependencies.SERVER_HTTP_CONNECTION);
 		initial.addFlow().setKey(Flows.RENDER);
 		initial.addEscalation(IOException.class);
 
 		// Create the listing of properties
 		List<String> properties = new ArrayList<String>(6);
 		if (isConfiguredSecure != null) {
-			properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+			properties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE,
 					String.valueOf(isConfiguredSecure)));
 		}
 
@@ -221,27 +216,22 @@ public class WebTemplateInitialManagedFunctionSourceTest extends OfficeFrameTest
 
 			final ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
 			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-			final HttpRequestState requestState = this.createMock(HttpRequestState.class);
-			final HttpSession session = this.createMock(HttpSession.class);
 
 			// Create the task
 			List<String> properties = new ArrayList<String>(6);
 			if (isRequireSecure) {
-				properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				properties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE,
 						String.valueOf(isRequireSecure)));
 			}
 			if (redirectMethods != null) {
 				properties.addAll(
-						Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-								redirectMethods));
+						Arrays.asList(WebTemplateSectionSource.PROPERTY_NOT_REDIRECT_HTTP_METHODS, redirectMethods));
 			}
 			if (contentType != null) {
-				properties.addAll(
-						Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE, contentType));
+				properties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_CONTENT_TYPE, contentType));
 			}
 			if (charset != null) {
-				properties.addAll(
-						Arrays.asList(WebTemplateInitialManagedFunctionSource.PROPERTY_CHARSET, charset.name()));
+				properties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_CHARSET, charset.name()));
 			}
 			FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.loadManagedFunctionType(
 					WebTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
@@ -249,7 +239,8 @@ public class WebTemplateInitialManagedFunctionSourceTest extends OfficeFrameTest
 					.createManagedFunction();
 
 			// Record obtaining the dependencies
-			this.recordReturn(context, context.getObject(Dependencies.SERVER_HTTP_CONNECTION), connection);
+			this.recordReturn(context, context.getObject(WebTemplateInitialDependencies.SERVER_HTTP_CONNECTION),
+					connection);
 
 			// Record determining if secure connection
 			if (isRequireSecure) {

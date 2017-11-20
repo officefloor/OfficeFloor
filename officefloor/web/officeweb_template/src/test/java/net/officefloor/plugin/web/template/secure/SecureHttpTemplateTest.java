@@ -193,7 +193,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 			// Configure the template
 			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
-					context.getOfficeArchitect());
+					context.getOfficeArchitect(), context.getOfficeSourceContext());
 			WebTemplate template = templater.addTemplate("template", templateLocation);
 			template.setLogicClass(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class : TemplateLogic.class);
 			template.setSecure(isTemplateSecure);

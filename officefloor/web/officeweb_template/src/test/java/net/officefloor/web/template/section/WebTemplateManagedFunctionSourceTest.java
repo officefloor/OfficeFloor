@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.template;
+package net.officefloor.web.template.section;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -39,52 +40,27 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.ResourceSource;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.template.WebTemplateFunction;
-import net.officefloor.web.template.WebTemplateManagedFunctionSource;
-import net.officefloor.web.template.parse.BeanParsedTemplateSectionContent;
-import net.officefloor.web.template.parse.LinkParsedTemplateSectionContent;
 import net.officefloor.web.template.parse.ParsedTemplate;
 import net.officefloor.web.template.parse.ParsedTemplateSection;
-import net.officefloor.web.template.parse.ParsedTemplateSectionContent;
-import net.officefloor.web.template.parse.PropertyParsedTemplateSectionContent;
-import net.officefloor.web.template.parse.StaticParsedTemplateSectionContent;
 
 /**
  * Tests the {@link WebTemplateManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
-
-	/**
-	 * Path to template for missing items to check errors.
-	 */
-	private final String missingTemplateFilePath = this.getClass().getPackage().getName().replace('.', '/')
-			+ "/TemplateMissing.ofp";
-
-	/**
-	 * Template path.
-	 */
-	private final String templatePath = this.getClass().getPackage().getName().replace('.', '/') + "/Template.ofp";
-
-	/**
-	 * Root template path.
-	 */
-	private final String rootTemplatePath = this.getClass().getPackage().getName().replace('.', '/')
-			+ "/RootTemplate.ofp";
+public class WebTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Verifies the specification.
 	 */
 	public void testSpecification() {
 		ManagedFunctionLoaderUtil.validateSpecification(WebTemplateManagedFunctionSource.class,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "Template");
+				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT, "Template Content");
 	}
 
 	/**
@@ -141,7 +117,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Verify the managed function type
 		ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace, WebTemplateManagedFunctionSource.class,
-				this.getProperties(this.templatePath, "uri"));
+				this.getProperties("Template.ofp"));
 	}
 
 	/**
@@ -162,8 +138,8 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Do not provide bean for template section
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
-		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
-				.setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT)
+				.setValue("TemplateMissing.ofp");
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
@@ -190,8 +166,8 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Provide bean that does not have the required property
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
-		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
-				.setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT)
+				.setValue("TemplateMissing.ofp");
 		propertyList.addProperty("bean.template").setValue(Object.class.getName());
 
 		// Test loading ensuring indicates failure
@@ -232,20 +208,20 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 		List<String> additionalProperties = new LinkedList<String>();
 		if (isTemplateSecure) {
 			// Secure template with non-secure link
-			additionalProperties.addAll(
-					Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true)));
-			additionalProperties.addAll(Arrays.asList(
-					WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "beans", String.valueOf(false)));
+			additionalProperties
+					.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true)));
+			additionalProperties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "beans",
+					String.valueOf(false)));
 		} else {
 			// Default non-secure template with secure link
-			additionalProperties.addAll(Arrays.asList(
-					WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true)));
+			additionalProperties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
+					String.valueOf(true)));
 		}
 
 		// Load the namespace type
 		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil
-				.loadManagedFunctionType(WebTemplateManagedFunctionSource.class, this.getProperties(this.templatePath,
-						"uri", additionalProperties.toArray(new String[additionalProperties.size()])));
+				.loadManagedFunctionType(WebTemplateManagedFunctionSource.class, this.getProperties("Template.ofp",
+						additionalProperties.toArray(new String[additionalProperties.size()])));
 
 		// Record actions for each task:
 		// - 'template'
@@ -363,15 +339,14 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 			@Override
 			public InputStream sourceResource(String location) {
 				// Ensure appropriate template path
-				assertEquals("Incorrect template path", HttpTemplateManagedFunctionSourceTest.this.templatePath,
-						location);
+				assertEquals("Incorrect template path", "Template.ofp", location);
 				return templateInput;
 			}
 		});
 
 		// Load the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
-				WebTemplateManagedFunctionSource.class, compiler, this.getProperties(this.templatePath, "uri"));
+				WebTemplateManagedFunctionSource.class, compiler, this.getProperties("Template.ofp"));
 
 		// Record undertaking task to use raw content
 		this.recordReturn(functionContext, functionContext.getObject(1), new TemplateBean("TEST"));
@@ -403,7 +378,7 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Load the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
-				WebTemplateManagedFunctionSource.class, this.getProperties(this.rootTemplatePath, "/"));
+				WebTemplateManagedFunctionSource.class, this.getProperties("RootTemplate.ofp"));
 
 		// Record
 		this.recordReturn(functionContext, functionContext.getObject(1), new TemplateBean("TEST"));
@@ -427,85 +402,6 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
-	}
-
-	/**
-	 * Ensure appropriately indicates if {@link ParsedTemplateSection} requires
-	 * a bean.
-	 */
-	public void testHttpTemplateSectionRequireBean() {
-
-		// Ensure not require on no properties or beans
-		ParsedTemplateSection staticSection = new ParsedTemplateSection("STATIC", "STATIC CONTENT#{LINK}",
-				new ParsedTemplateSectionContent[] { new StaticParsedTemplateSectionContent("STATIC CONTENT"),
-						new LinkParsedTemplateSectionContent("LINK") });
-		assertFalse("Should not require bean",
-				WebTemplateManagedFunctionSource.isParsedTemplateSectionRequireBean(staticSection));
-
-		// Ensure require bean on property
-		ParsedTemplateSection propertySection = new ParsedTemplateSection("PROPERTY", "${Property}",
-				new ParsedTemplateSectionContent[] { new PropertyParsedTemplateSectionContent("Property") });
-		assertTrue("Require bean if have property in section",
-				WebTemplateManagedFunctionSource.isParsedTemplateSectionRequireBean(propertySection));
-
-		// Ensure require bean on bean
-		ParsedTemplateSection beanSection = new ParsedTemplateSection("BEAN", "${Bean $}",
-				new ParsedTemplateSectionContent[] {
-						new BeanParsedTemplateSectionContent("Bean", new ParsedTemplateSectionContent[0]) });
-		assertTrue("Require bean if have bean in section",
-				WebTemplateManagedFunctionSource.isParsedTemplateSectionRequireBean(beanSection));
-	}
-
-	/**
-	 * Ensure appropriately indicates if secure.
-	 */
-	public void testHttpTemplateSecure() {
-
-		// Ensure by default not secure
-		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		assertFalse("Should default to not be secure",
-				WebTemplateManagedFunctionSource.isWebTemplateSecure(properties));
-
-		// Ensure secure when configured secure
-		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
-		assertTrue("Should be secure", WebTemplateManagedFunctionSource.isWebTemplateSecure(properties));
-	}
-
-	/**
-	 * Ensure appropriately obtains links from {@link ParsedTemplateSection} and
-	 * any {@link BeanParsedTemplateSectionContent}.
-	 */
-	public void testHttpTemplateLinkNames() {
-
-		// Section with no beans but has link
-		ParsedTemplateSection noBeanSection = new ParsedTemplateSection("STATIC",
-				"#{STATIC_LINK}STATIC CONTENT#{STATIC_LINK}",
-				new ParsedTemplateSectionContent[] { new LinkParsedTemplateSectionContent("STATIC_LINK"),
-						new StaticParsedTemplateSectionContent("STATIC CONTENT"),
-						new LinkParsedTemplateSectionContent("STATIC_LINK") });
-
-		// Section where link is within a bean
-		ParsedTemplateSection beanSection = new ParsedTemplateSection("BEAN",
-				"${STATIC_REPEAT $}STATIC CONTENT ${DYNAMIC_BEAN #{BEAN_LINK}STATIC_CONTENT${SUB_BEAN #{SUB_BEAN_LINK}$}$}",
-				new ParsedTemplateSectionContent[] {
-						new BeanParsedTemplateSectionContent("STATIC_REPEAT", noBeanSection.getContent()),
-						new StaticParsedTemplateSectionContent("STATIC CONTENT"),
-						new BeanParsedTemplateSectionContent("DYNAMIC_BEAN",
-								new ParsedTemplateSectionContent[] { new LinkParsedTemplateSectionContent("BEAN_LINK"),
-										new StaticParsedTemplateSectionContent("STATIC CONTENT"),
-										new BeanParsedTemplateSectionContent("SUB_BEAN",
-												new ParsedTemplateSectionContent[] {
-														new LinkParsedTemplateSectionContent("SUB_BEAN_LINK") }) }) });
-
-		// Obtain the links
-		String[] links = WebTemplateManagedFunctionSource.getParsedTemplateLinkNames(
-				new ParsedTemplate(new ParsedTemplateSection[] { noBeanSection, beanSection }));
-
-		// Validate correct links
-		assertEquals("Incorrect number of links", 3, links.length);
-		assertEquals("Incorrect static section link", "STATIC_LINK", links[0]);
-		assertEquals("Incorrect bean link", "BEAN_LINK", links[1]);
-		assertEquals("Incorrect sub bean link", "SUB_BEAN_LINK", links[2]);
 	}
 
 	/**
@@ -548,31 +444,33 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Obtain the properties.
 	 * 
-	 * @param templatePath
-	 *            Path to the {@link ParsedTemplate} file.
-	 * @param templateUri
-	 *            {@link ParsedTemplate} URI path.
+	 * @param templateName
+	 *            Name of the {@link ParsedTemplate} file.
 	 * @param additionalPropertyNameValuePairs
 	 *            Additional {@link Property} name value pairs.
 	 * @return Properties.
 	 */
-	public String[] getProperties(String templatePath, String templateUri, String... additionalPropertyNameValuePairs) {
+	public String[] getProperties(String templateName, String... additionalPropertyNameValuePairs) throws IOException {
 
 		// Create the properties
 		List<String> properties = new LinkedList<String>();
 
+		// Obtain the template content
+		File templateFile = this.findFile(templateName);
+		String templateContent = this.getFileContents(templateFile);
+
 		// Provide the template details
-		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, templatePath));
+		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT, templateContent));
 
 		// Provide the beans
-		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
+		properties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateBean.class.getName()));
-		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "BeanTree",
+		properties.addAll(Arrays.asList(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "BeanTree",
 				BeanTreeBean.class.getName()));
-		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "NullBean",
-				Object.class.getName()));
-		properties.addAll(Arrays.asList(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List",
-				TableRowBean.class.getName()));
+		properties.addAll(
+				Arrays.asList(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "NullBean", Object.class.getName()));
+		properties.addAll(
+				Arrays.asList(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "List", TableRowBean.class.getName()));
 
 		// Provide the additional property values
 		for (int i = 0; i < additionalPropertyNameValuePairs.length; i += 2) {
@@ -583,6 +481,86 @@ public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Return the properties
 		return properties.toArray(new String[properties.size()]);
+	}
+
+	/*
+	 * ============== Beans for rendering template =========================
+	 */
+
+	public static class TemplateBean {
+
+		private String templateName;
+
+		public TemplateBean(String templateName) {
+			this.templateName = templateName;
+		}
+
+		public String getTemplateName() {
+			return this.templateName;
+		}
+	}
+
+	public static class BeanTreeBean {
+
+		public Object getNullBean() {
+			return null;
+		}
+
+		public PropertyBean getBean() {
+			return new PropertyBean("tree");
+		}
+	}
+
+	public static class PropertyBean {
+
+		private final String value;
+
+		public PropertyBean(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return "value=" + this.value;
+		}
+
+		@Override
+		public String toString() {
+			return "toString=" + this.value;
+		}
+	}
+
+	public static class TableRowBean {
+
+		private final String name;
+
+		private final String description;
+
+		private final PropertyBean property;
+
+		public TableRowBean(String name, String description, PropertyBean property) {
+			this.name = name;
+			this.description = description;
+			this.property = property;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public String getDescription() {
+			return this.description;
+		}
+
+		public PropertyBean getProperty() {
+			return this.property;
+		}
+	}
+
+	public static class ChildTableRowBean extends TableRowBean {
+
+		public ChildTableRowBean(String name, String description, PropertyBean property) {
+			super(name, description, property);
+		}
 	}
 
 }

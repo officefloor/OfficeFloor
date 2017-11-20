@@ -103,7 +103,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 				(context, templater) -> templater.addTemplate("/path", new StringReader("TEST")), "TEST");
 
 		// Ensure default values for template
-		assertEquals("Incorrect default content-type", "text/html", response.getHeader("content-type").getValue());
+		assertEquals("Incorrect default content-type", "text/plain", response.getHeader("content-type").getValue());
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	public static class TemplateLogic {
-		public TemplateLogic getData() {
+		public TemplateLogic getTemplate() {
 			return this;
 		}
 
@@ -134,12 +134,12 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	public static class NotEscapedLogic {
-		public NotEscapedLogic getData() {
+		public NotEscapedLogic getTemplate() {
 			return this;
 		}
 
 		@NotEscaped
-		public String getValue() {
+		public String getContent() {
 			return "<body>Hello World</body>";
 		}
 	}
@@ -157,7 +157,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public static class DynamicPathLogic {
 		private String value;
 
-		public DynamicPathLogic getData(@HttpPathParameter("param") String param) {
+		public DynamicPathLogic getTemplate(@HttpPathParameter("param") String param) {
 			this.value = param;
 			return this;
 		}
@@ -438,7 +438,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testSuperTemplate() throws Exception {
 		this.template("/child", (context, templater) -> {
 			WebTemplate parent = templater.addTemplate("/parent", new StringReader("TEST <!-- {section} --> PARENT"));
-			templater.addTemplate("/child", new StringReader("TEST <!-- {:section} -->Child")).setSuperTemplate(parent);
+			templater.addTemplate("/child", new StringReader("<!-- {:section} -->Child")).setSuperTemplate(parent);
 		}, "TEST Child");
 	}
 
@@ -511,8 +511,9 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	private MockHttpResponse template(Initialiser initialiser, MockHttpRequestBuilder request) throws Exception {
 		this.compile.web((context) -> {
 			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
-					context.getOfficeArchitect());
+					context.getOfficeArchitect(), context.getOfficeSourceContext());
 			initialiser.initialise(context, templater);
+			templater.informWebArchitect();
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 		return this.server.send(request);

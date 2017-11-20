@@ -53,6 +53,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.compile.test.util.LoaderUtil;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 
 /**
@@ -255,7 +256,7 @@ public class SectionLoaderUtil {
 		// Validate section inputs are as expected
 		SectionInputType[] eInputs = expectedSection.getSectionInputTypes();
 		SectionInputType[] aInputs = actualSection.getSectionInputTypes();
-		Assert.assertEquals("Incorrect number of inputs", eInputs.length, aInputs.length);
+		LoaderUtil.assertLength("Incorrect number of inputs", eInputs, aInputs, (input) -> input.getSectionInputName());
 		for (int i = 0; i < eInputs.length; i++) {
 			SectionInputType eInput = eInputs[i];
 			SectionInputType aInput = aInputs[i];
@@ -278,7 +279,8 @@ public class SectionLoaderUtil {
 		// Validate the section outputs are as expected
 		SectionOutputType[] eOutputs = expectedSection.getSectionOutputTypes();
 		SectionOutputType[] aOutputs = actualSection.getSectionOutputTypes();
-		Assert.assertEquals("Incorrect number of outputs", eOutputs.length, aOutputs.length);
+		LoaderUtil.assertLength("Incorrect number of outputs", eOutputs, aOutputs,
+				(output) -> output.getSectionOutputName());
 		for (int i = 0; i < eOutputs.length; i++) {
 			SectionOutputType eOutput = eOutputs[i];
 			SectionOutputType aOutput = aOutputs[i];
@@ -293,16 +295,18 @@ public class SectionLoaderUtil {
 		// Validate the section objects are as expected
 		SectionObjectType[] eObjects = expectedSection.getSectionObjectTypes();
 		SectionObjectType[] aObjects = actualSection.getSectionObjectTypes();
-		Assert.assertEquals("Incorrect number of objects", eObjects.length, aObjects.length);
+		LoaderUtil.assertLength("Incorrect number of objects", eObjects, aObjects,
+				(object) -> object.getSectionObjectName());
 		for (int i = 0; i < eObjects.length; i++) {
 			SectionObjectType eObject = eObjects[i];
 			SectionObjectType aObject = aObjects[i];
 			Assert.assertEquals("Incorrect name for object " + i, eObject.getSectionObjectName(),
 					aObject.getSectionObjectName());
-			Assert.assertEquals("Incorrect object type for object " + i, eObject.getObjectType(),
-					aObject.getObjectType());
-			Assert.assertEquals("Incorrect type qualifier for object " + i, eObject.getTypeQualifier(),
-					aObject.getTypeQualifier());
+			String objectName = eObject.getSectionObjectName();
+			Assert.assertEquals("Incorrect object type for object " + i + " (" + objectName + ")",
+					eObject.getObjectType(), aObject.getObjectType());
+			Assert.assertEquals("Incorrect type qualifier for object " + i + " (" + objectName + ")",
+					eObject.getTypeQualifier(), aObject.getTypeQualifier());
 		}
 	}
 

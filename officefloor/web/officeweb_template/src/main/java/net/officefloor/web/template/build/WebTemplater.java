@@ -19,6 +19,8 @@ package net.officefloor.web.template.build;
 
 import java.io.Reader;
 
+import net.officefloor.web.build.WebArchitect;
+
 /**
  * Creates web templates.
  * 
@@ -32,11 +34,11 @@ public interface WebTemplater {
 	 * @param applicationPath
 	 *            Application path to the {@link WebTemplate}. May contain path
 	 *            parameters.
-	 * @param template
+	 * @param templateContent
 	 *            {@link Reader} to the template content.
 	 * @return {@link WebTemplate}.
 	 */
-	WebTemplate addTemplate(String applicationPath, Reader template);
+	WebTemplate addTemplate(String applicationPath, Reader templateContent);
 
 	/**
 	 * Adds a {@link WebTemplate}.
@@ -49,5 +51,11 @@ public interface WebTemplater {
 	 * @return {@link WebTemplate}.
 	 */
 	WebTemplate addTemplate(String applicationPath, String locationOfTemplate);
+
+	/**
+	 * Informs the {@link WebArchitect} of the templates. This is to be invoked
+	 * once all templates are configured.
+	 */
+	void informWebArchitect();
 
 }

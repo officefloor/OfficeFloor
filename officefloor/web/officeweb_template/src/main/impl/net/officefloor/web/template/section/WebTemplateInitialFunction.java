@@ -37,13 +37,13 @@ import net.officefloor.web.template.parse.ParsedTemplate;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebTemplateInitialFunction
-		extends StaticManagedFunction<WebTemplateInitialFunction.Dependencies, WebTemplateInitialFunction.Flows> {
+public class WebTemplateInitialFunction extends
+		StaticManagedFunction<WebTemplateInitialFunction.WebTemplateInitialDependencies, WebTemplateInitialFunction.Flows> {
 
 	/**
 	 * Keys for the {@link WebTemplateInitialFunction} dependencies.
 	 */
-	public static enum Dependencies {
+	public static enum WebTemplateInitialDependencies {
 		SERVER_HTTP_CONNECTION
 	}
 
@@ -112,10 +112,11 @@ public class WebTemplateInitialFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws IOException {
+	public Object execute(ManagedFunctionContext<WebTemplateInitialDependencies, Flows> context) throws IOException {
 
 		// Obtain the dependencies
-		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		ServerHttpConnection connection = (ServerHttpConnection) context
+				.getObject(WebTemplateInitialDependencies.SERVER_HTTP_CONNECTION);
 
 		// Flag indicating if redirect is required
 		boolean isRedirectRequired = false;

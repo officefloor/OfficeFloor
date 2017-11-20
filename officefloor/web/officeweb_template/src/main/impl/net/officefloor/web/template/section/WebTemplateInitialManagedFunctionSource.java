@@ -20,7 +20,6 @@ package net.officefloor.web.template.section;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
@@ -28,10 +27,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.template.WebTemplateManagedFunctionSource;
-import net.officefloor.web.template.parse.ParsedTemplate;
-import net.officefloor.web.template.section.WebTemplateInitialFunction.Dependencies;
 import net.officefloor.web.template.section.WebTemplateInitialFunction.Flows;
+import net.officefloor.web.template.section.WebTemplateInitialFunction.WebTemplateInitialDependencies;
 
 /**
  * {@link ManagedFunctionSource} to provide the
@@ -40,22 +37,6 @@ import net.officefloor.web.template.section.WebTemplateInitialFunction.Flows;
  * @author Daniel Sagenschneider
  */
 public class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
-
-	/**
-	 * Property name for a comma separated list of HTTP methods that will
-	 * trigger a redirect before rendering the {@link ParsedTemplate}.
-	 */
-	public static final String PROPERTY_RENDER_REDIRECT_HTTP_METHODS = "http.template.render.redirect.methods";
-
-	/**
-	 * Property name for the Content-Type of the {@link ParsedTemplate}.
-	 */
-	public static final String PROPERTY_CONTENT_TYPE = "http.template.render.content.type";
-
-	/**
-	 * Property name for the {@link Charset} of the {@link ParsedTemplate}.
-	 */
-	public static final String PROPERTY_CHARSET = "http.template.charset";
 
 	/**
 	 * Name of the {@link WebTemplateInitialFunction}.
@@ -75,36 +56,23 @@ public class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunc
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Determine if the template is secure
-		boolean isSecure = WebTemplateManagedFunctionSource.isWebTemplateSecure(context);
+		boolean isSecure = WebTemplateSectionSource.isTemplateSecure(context);
 
 		// Obtain the listing of render redirect HTTP methods
-		HttpMethod[] notRedirectHttpMethods = null;
-		String notRedirectProperty = context.getProperty(PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null);
-		if (notRedirectProperty != null) {
-			// Obtain the render redirect HTTP methods
-			String[] notRedirectHttpMethodNames = notRedirectProperty.split(",");
-			notRedirectHttpMethods = new HttpMethod[notRedirectHttpMethodNames.length];
-			for (int i = 0; i < notRedirectHttpMethodNames.length; i++) {
-				notRedirectHttpMethods[i] = HttpMethod.getHttpMethod(notRedirectHttpMethodNames[i].trim());
-			}
-		}
+		HttpMethod[] notRedirectHttpMethods = WebTemplateSectionSource.getNotRedirectHttpMethods(context);
 
-		// Obtain the content type and charset
-		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
-		Charset charset = null;
-		String charsetName = context.getProperty(PROPERTY_CHARSET);
-		if (!CompileUtil.isBlank(charsetName)) {
-			charset = Charset.forName(charsetName);
-		}
+		// Obtain the content type and char set
+		String contentType = WebTemplateSectionSource.getWebTemplateContentType(context);
+		Charset charset = WebTemplateSectionSource.getWebTemplateRenderCharset(context);
 
 		// Create the HTTP Template initial function
 		WebTemplateInitialFunction factory = new WebTemplateInitialFunction(isSecure, notRedirectHttpMethods,
 				contentType, charset);
 
 		// Configure the function
-		ManagedFunctionTypeBuilder<Dependencies, Flows> function = namespaceTypeBuilder.addManagedFunctionType("TASK",
-				factory, Dependencies.class, Flows.class);
-		function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+		ManagedFunctionTypeBuilder<WebTemplateInitialDependencies, Flows> function = namespaceTypeBuilder
+				.addManagedFunctionType(FUNCTION_NAME, factory, WebTemplateInitialDependencies.class, Flows.class);
+		function.addObject(ServerHttpConnection.class).setKey(WebTemplateInitialDependencies.SERVER_HTTP_CONNECTION);
 		function.addFlow().setKey(Flows.RENDER);
 		function.addEscalation(IOException.class);
 	}

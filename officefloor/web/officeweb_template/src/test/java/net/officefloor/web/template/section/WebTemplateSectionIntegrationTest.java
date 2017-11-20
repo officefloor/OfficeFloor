@@ -48,15 +48,12 @@ import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.template.NotRenderTemplateAfter;
-import net.officefloor.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplater;
 import net.officefloor.web.template.build.WebTemplaterEmployer;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.extension.WebTemplateExtensionContext;
 import net.officefloor.web.template.parse.ParsedTemplate;
-import net.officefloor.web.template.section.WebTemplateInitialManagedFunctionSource;
-import net.officefloor.web.template.section.WebTemplateSectionSource;
 import net.officefloor.web.template.section.PostRedirectGetLogic.Parameters;
 
 /**
@@ -199,9 +196,9 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start the server
 		this.isNonMethodLink = true;
-		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
-				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(false));
+		this.startHttpServer("Template.ofp", TemplateLogic.class, WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(true), WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
+				String.valueOf(false));
 
 		// Ensure correct rendering of template
 		MockHttpResponse response = this.doRawHttpRequest("/uri-submit", false);
@@ -218,7 +215,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
+				WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri-submit", true);
@@ -233,8 +230,8 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start the server
 		this.isNonMethodLink = true;
-		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
+		this.startHttpServer("Template.ofp", TemplateLogic.class, WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
@@ -250,7 +247,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
+				WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
@@ -265,9 +262,9 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start the server
 		this.isNonMethodLink = true;
-		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
-				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "nonMethodLink", String.valueOf(false));
+		this.startHttpServer("Template.ofp", TemplateLogic.class, WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(true), WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "nonMethodLink",
+				String.valueOf(false));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
@@ -298,7 +295,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/uri-post?text=TEST")
 				.method(new HttpMethod("OTHER"));
 		this.doPostRedirectGetPatternTest(request, "TEST /uri-post",
-				WebTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, "OTHER");
+				WebTemplateSectionSource.PROPERTY_NOT_REDIRECT_HTTP_METHODS, "OTHER");
 	}
 
 	/**
@@ -710,7 +707,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		String parentTemplateLocation = this.getTemplateLocation("ParentTemplate.ofp");
 		this.startHttpServer("ChildTemplate.ofp", InheritChildLogic.class,
-				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplateLocation);
+				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT, parentTemplateLocation);
 
 		// Ensure can inherit sections
 		this.assertHttpRequest("/uri", false, "Parent VALUE Introduced Two Footer /uri-doExternalFlow");
@@ -739,7 +736,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		String parentTemplateLocation = this.getTemplateLocation("ParentTemplate.ofp");
 		String childTemplateLocation = this.getTemplateLocation("ChildTemplate.ofp");
 		this.startHttpServer("GrandChildTemplate.ofp", InheritGrandChildLogic.class,
-				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT,
 				parentTemplateLocation + ", " + childTemplateLocation);
 
 		// Ensure can inherit sections
@@ -1036,7 +1033,8 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();
 			OfficeArchitect office = context.getOfficeArchitect();
-			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(web, office);
+			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(web, office,
+					context.getOfficeSourceContext());
 
 			// Add dependencies
 			Singleton.load(office, this.connection, new AutoWire(Connection.class));

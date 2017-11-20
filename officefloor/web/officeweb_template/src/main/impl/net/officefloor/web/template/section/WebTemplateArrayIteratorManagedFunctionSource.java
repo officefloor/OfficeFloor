@@ -27,13 +27,13 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.web.template.parse.ParsedTemplate;
+import net.officefloor.web.template.section.WebTemplateArrayIteratorFunction.DependencyKeys;
+import net.officefloor.web.template.section.WebTemplateArrayIteratorFunction.FlowKeys;
 
 /**
- * Iterates over the array objects sending them to the {@link ParsedTemplate} for
- * rendering.
+ * Iterates over the array objects sending them to the {@link ParsedTemplate}
+ * for rendering.
  * 
  * @author Daniel Sagenschneider
  */
@@ -78,7 +78,7 @@ public class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManag
 		Class<?> arrayType = Array.newInstance(componentType, 0).getClass();
 
 		// Create the function
-		HttpTemplateArrayIteratorFunction function = new HttpTemplateArrayIteratorFunction();
+		WebTemplateArrayIteratorFunction function = new WebTemplateArrayIteratorFunction();
 
 		// Specify the function
 		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> functionBuilder = namespaceTypeBuilder
@@ -87,48 +87,6 @@ public class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManag
 		ManagedFunctionFlowTypeBuilder<FlowKeys> flow = functionBuilder.addFlow();
 		flow.setKey(FlowKeys.RENDER_ELEMENT);
 		flow.setArgumentType(componentType);
-	}
-
-	/**
-	 * {@link WebTemplateArrayIteratorManagedFunctionSource} dependency keys.
-	 */
-	public static enum DependencyKeys {
-		ARRAY
-	}
-
-	/**
-	 * {@link WebTemplateArrayIteratorManagedFunctionSource} flow keys.
-	 */
-	public static enum FlowKeys {
-		RENDER_ELEMENT
-	}
-
-	/**
-	 * {@link ManagedFunction} implementation.
-	 */
-	public static class HttpTemplateArrayIteratorFunction extends StaticManagedFunction<DependencyKeys, FlowKeys> {
-
-		/*
-		 * ======================== ManagedFunction ========================
-		 */
-
-		@Override
-		public Object execute(ManagedFunctionContext<DependencyKeys, FlowKeys> context) {
-
-			// Obtain the array
-			Object[] array = (Object[]) context.getObject(DependencyKeys.ARRAY);
-			if (array == null) {
-				return null; // no array, no rendering
-			}
-
-			// Iterate over the array rendering the elements
-			for (Object element : array) {
-				context.doFlow(FlowKeys.RENDER_ELEMENT, element, null);
-			}
-
-			// No argument for next task
-			return null;
-		}
 	}
 
 }

@@ -43,10 +43,6 @@ import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
-import net.officefloor.web.template.WebTemplateManagedFunctionSource;
-import net.officefloor.web.template.section.WebTemplateArrayIteratorManagedFunctionSource;
-import net.officefloor.web.template.section.WebTemplateInitialManagedFunctionSource;
-import net.officefloor.web.template.section.WebTemplateSectionSource;
 import net.officefloor.web.template.section.TemplateLogic.RowBean;
 import net.officefloor.web.template.section.WebTemplateSectionSource.NoLogicClass;
 
@@ -101,11 +97,12 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
 
 		// Objects
+		SectionObject doFlowParameter = expected.addSectionObject("HttpQueryParameter_doFlow-java.lang.String",
+				String.class.getName());
+		doFlowParameter.setTypeQualifier("HttpQueryParameter_doFlow");
 		SectionObject connection = expected.addSectionObject(Connection.class.getName(), Connection.class.getName());
 		SectionObject httpConnection = expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
-		SectionObject requestState = expected.addSectionObject(HttpRequestState.class.getName(),
-				HttpRequestState.class.getName());
 		SectionObject httpSession = expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
 
 		// Managed Object Sources
@@ -123,12 +120,11 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				WebTemplateInitialManagedFunctionSource.class.getName());
 		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
+		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "Template.ofp"));
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
+		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateLogic.class.getName());
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List",
-				RowBean.class.getName());
+		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "List", RowBean.class.getName());
 		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
 				SectionClassManagedFunctionSource.class.getName());
 		classNamespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
@@ -141,8 +137,6 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
-		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
 		initial.getFunctionFlow("RENDER");
 
 		// Template
@@ -199,7 +193,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, "/template",
-				WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION,
+				WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT,
 				this.getFileLocation(this.getClass(), "Template.ofp"), WebTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateLogic.class.getName());
 	}
@@ -246,11 +240,11 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				WebTemplateInitialManagedFunctionSource.class.getName());
 		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
+		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "TemplateData.ofp"));
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
+		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateDataLogic.class.getName());
-		templateNamespace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "section",
+		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "section",
 				TemplateDataLogic.class.getName());
 		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
 				SectionClassManagedFunctionSource.class.getName());
@@ -341,7 +335,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				WebTemplateInitialManagedFunctionSource.class.getName());
 		SectionFunctionNamespace templateNamspace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
-		templateNamspace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
+		templateNamspace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "NoLogicTemplate.ofp"));
 
 		// Initial function
@@ -406,7 +400,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
+		properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
 				.setValue(String.valueOf(true));
 
 		// Test
@@ -443,8 +437,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Ensure correct type (and no link secure unknown issue)
 		SectionLoaderUtil.validateSectionType(expected, WebTemplateSectionSource.class, childTemplatePath,
-				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplatePath,
-				WebTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "link", String.valueOf(true));
+				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT, parentTemplatePath,
+				WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "link", String.valueOf(true));
 	}
 
 	/**

@@ -21,15 +21,19 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.template.build.WebTemplate;
-import net.officefloor.web.template.build.WebTemplater;
 import net.officefloor.web.template.extension.WebTemplateExtension;
+import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
  * {@link WebTemplater} implementation.
@@ -45,10 +49,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 	 *            {@link WebArchitect}.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
+	 * @param officeSourceContext
+	 *            {@link OfficeSourceContext}.
 	 * @return {@link WebTemplater}.
 	 */
-	public static WebTemplater employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect) {
-		return null;
+	public static WebTemplater employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect,
+			OfficeSourceContext officeSourceContext) {
+		return new WebTemplaterEmployer(webArchitect, officeArchitect, officeSourceContext);
 	}
 
 	/**
@@ -62,16 +69,30 @@ public class WebTemplaterEmployer implements WebTemplater {
 	private final OfficeArchitect officeArchitect;
 
 	/**
+	 * {@link OfficeSourceContext}.
+	 */
+	private final OfficeSourceContext sourceContext;
+
+	/**
+	 * {@link WebTemplateImpl} instances.
+	 */
+	private final List<WebTemplateImpl> templates = new LinkedList<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param webArchitect
 	 *            {@link WebArchitect}.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
+	 * @param sourceContext
+	 *            {@link OfficeSourceContext}.
 	 */
-	public WebTemplaterEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect) {
+	private WebTemplaterEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect,
+			OfficeSourceContext sourceContext) {
 		this.webArchitect = webArchitect;
 		this.officeArchitect = officeArchitect;
+		this.sourceContext = sourceContext;
 	}
 
 	/*
@@ -79,12 +100,12 @@ public class WebTemplaterEmployer implements WebTemplater {
 	 */
 
 	@Override
-	public WebTemplate addTemplate(String applicationPath, Reader template) {
+	public WebTemplate addTemplate(String applicationPath, Reader templateContent) {
 
 		// Read in the template
 		StringWriter content = new StringWriter();
 		try {
-			for (int character = template.read(); character != -1; character = template.read()) {
+			for (int character = templateContent.read(); character != -1; character = templateContent.read()) {
 				content.write(character);
 			}
 		} catch (IOException ex) {
@@ -92,20 +113,96 @@ public class WebTemplaterEmployer implements WebTemplater {
 			return null; // unable to add the template
 		}
 
+		// Add the section for the template
+		OfficeSection templateSection = this.officeArchitect.addOfficeSection(applicationPath,
+				WebTemplateSectionSource.class.getName(), applicationPath);
+
+		// Configure the template content
+		templateSection.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT, content.toString());
+
 		// Add the template
-		return null;
+		WebTemplateImpl template = new WebTemplateImpl(applicationPath, templateSection);
+		this.templates.add(template);
+
+		// Return the template
+		return template;
 	}
 
 	@Override
 	public WebTemplate addTemplate(String applicationPath, String locationOfTemplate) {
+
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void informWebArchitect() {
+		for (WebTemplateImpl template : this.templates) {
+			template.loadProperties();
+		}
 	}
 
 	/**
 	 * {@link WebTemplate} implementation.
 	 */
-	private static class WebTemplateImpl implements WebTemplate {
+	private class WebTemplateImpl implements WebTemplate {
+
+		/**
+		 * Application path for the {@link WebTemplate}.
+		 */
+		private final String applicationPath;
+
+		/**
+		 * {@link OfficeSection} for the {@link WebTemplate}.
+		 */
+		private final OfficeSection templateSection;
+
+		/**
+		 * Logic {@link Class} for the {@link WebTemplate}.
+		 */
+		private Class<?> logicClass = null;
+
+		/**
+		 * Indicates if the {@link WebTemplate} is secure.
+		 */
+		private boolean isSecure = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param applicationPath
+		 *            Application path for the {@link WebTemplate}.
+		 * @param templateSection
+		 *            {@link OfficeSection} for the {@link WebTemplate}.
+		 */
+		private WebTemplateImpl(String applicationPath, OfficeSection templateSection) {
+			this.applicationPath = applicationPath;
+			this.templateSection = templateSection;
+		}
+
+		/**
+		 * Load the properties.
+		 */
+		private void loadProperties() {
+
+			// Obtain the template input
+			OfficeSectionInput sectionInput = this.templateSection
+					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+
+			// Configure the input
+			HttpUrlContinuation templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure,
+					applicationPath, sectionInput);
+
+			// Configure details for template
+			if (this.logicClass != null) {
+				this.templateSection.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME,
+						this.logicClass.getName());
+			}
+		}
+
+		/*
+		 * ================== WebTemplate ============================
+		 */
 
 		@Override
 		public void addProperty(String name, String value) {
@@ -115,8 +212,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public void setLogicClass(Class<?> logicClass) {
-			// TODO Auto-generated method stub
-
+			this.logicClass = logicClass;
 		}
 
 		@Override
@@ -172,7 +268,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 			// TODO Auto-generated method stub
 			return null;
 		}
-
 	}
 
 }

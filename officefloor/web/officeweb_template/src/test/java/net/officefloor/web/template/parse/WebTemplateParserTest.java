@@ -202,8 +202,7 @@ public class WebTemplateParserTest extends OfficeFrameTestCase {
 
 		// Load the template
 		File templateFile = this.findFile(this.getClass(), templateFileName + ".ofp");
-		ParsedTemplate template = new WebTemplateParserImpl(new StringReader(this.getFileContents(templateFile)))
-				.parse();
+		ParsedTemplate template = WebTemplateParser.parse(new StringReader(this.getFileContents(templateFile)));
 
 		// Return the template
 		return template;

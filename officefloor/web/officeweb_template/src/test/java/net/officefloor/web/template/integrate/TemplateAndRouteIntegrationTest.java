@@ -26,8 +26,8 @@ import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.template.WebTemplateManagedFunctionSource;
 import net.officefloor.web.template.parse.ParsedTemplate;
+import net.officefloor.web.template.section.WebTemplateManagedFunctionSource;
 
 /**
  * Ensure integration of {@link WebTemplateManagedFunctionSource} and
