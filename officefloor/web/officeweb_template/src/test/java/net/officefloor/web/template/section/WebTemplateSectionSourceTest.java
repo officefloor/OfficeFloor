@@ -45,6 +45,9 @@ import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.template.section.TemplateLogic.RowBean;
 import net.officefloor.web.template.section.WebTemplateSectionSource.NoLogicClass;
+import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateArrayIteratorManagedFunctionSource;
+import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateInitialManagedFunctionSource;
+import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateManagedFunctionSource;
 
 /**
  * Tests the {@link WebTemplateSectionSource}.
@@ -130,8 +133,6 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		classNamespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
 		SectionFunctionNamespace iteratorNamespace = expected.addSectionFunctionNamespace("ListArrayIterator",
 				WebTemplateArrayIteratorManagedFunctionSource.class.getName());
-		iteratorNamespace.addProperty(WebTemplateArrayIteratorManagedFunctionSource.PROPERTY_COMPONENT_TYPE_NAME,
-				RowBean.class.getName());
 
 		// Initial function
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
@@ -335,8 +336,6 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				WebTemplateInitialManagedFunctionSource.class.getName());
 		SectionFunctionNamespace templateNamspace = expected.addSectionFunctionNamespace("TEMPLATE",
 				WebTemplateManagedFunctionSource.class.getName());
-		templateNamspace.addProperty(WebTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT,
-				SectionLoaderUtil.getClassPathLocation(this.getClass(), "NoLogicTemplate.ofp"));
 
 		// Initial function
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",

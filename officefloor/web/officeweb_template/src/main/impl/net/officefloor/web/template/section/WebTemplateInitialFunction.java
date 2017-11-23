@@ -27,7 +27,9 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.parse.ParsedTemplate;
 
@@ -77,6 +79,16 @@ public class WebTemplateInitialFunction extends
 	private final Charset charset;
 
 	/**
+	 * {@link HttpInputPath} for the {@link WebTemplate}.
+	 */
+	private final HttpInputPath inputPath;
+
+	/**
+	 * {@link Character} to use to terminate the path.
+	 */
+	private final int terminatingPathCharacter;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param isRequireSecure
@@ -90,12 +102,18 @@ public class WebTemplateInitialFunction extends
 	 *            <code>null</code>.
 	 * @param charset
 	 *            {@link Charset} for {@link ParsedTemplate}.
+	 * @param inputPath
+	 *            {@link HttpInputPath} for the {@link WebTemplate}.
+	 * @param terminatingPathCharacter
+	 *            {@link Character} to use to terminate the path.
 	 */
 	public WebTemplateInitialFunction(boolean isRequireSecure, HttpMethod[] nonRedirectHttpMethods, String contentType,
-			Charset charset) {
+			Charset charset, HttpInputPath inputPath, int terminatingPathCharacter) {
 		this.isRequireSecure = isRequireSecure;
 		this.contentType = contentType == null ? null : new HttpHeaderValue(contentType);
 		this.charset = charset;
+		this.inputPath = inputPath;
+		this.terminatingPathCharacter = terminatingPathCharacter;
 
 		// Add the render redirect HTTP methods
 		this.nonRedirectHttpMethods = new HashSet<HttpMethod>();
@@ -140,7 +158,16 @@ public class WebTemplateInitialFunction extends
 			}
 		}
 
+		// Ensure URL for template is correct (otherwise redirect GET)
+		HttpRequest request = connection.getRequest();
+		String uri = request.getUri();
+		if (!(this.inputPath.isMatchPath(uri, this.terminatingPathCharacter))) {
+			// Not matching template path, so redirect GET the template
+			isRedirectRequired = true;
+		}
+
 		// Determine if POST/redirect/GET pattern to be applied
+		// TODO reconsider this (in just establishing request state only)
 		if (!isRedirectRequired) {
 			// Request likely overridden to POST, so use client HTTP method
 			HttpMethod method = connection.getClientRequest().getMethod();

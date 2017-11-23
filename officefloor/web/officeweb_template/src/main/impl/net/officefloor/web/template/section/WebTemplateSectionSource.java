@@ -20,6 +20,7 @@ package net.officefloor.web.template.section;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -37,8 +38,15 @@ import java.util.function.Function;
 import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
@@ -49,6 +57,8 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -61,6 +71,7 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.template.NotRenderTemplateAfter;
@@ -75,7 +86,10 @@ import net.officefloor.web.template.parse.ParsedTemplateSectionContent;
 import net.officefloor.web.template.parse.PropertyParsedTemplateSectionContent;
 import net.officefloor.web.template.parse.StaticParsedTemplateSectionContent;
 import net.officefloor.web.template.parse.WebTemplateParser;
+import net.officefloor.web.template.section.WebTemplateArrayIteratorFunction.DependencyKeys;
+import net.officefloor.web.template.section.WebTemplateArrayIteratorFunction.FlowKeys;
 import net.officefloor.web.template.section.WebTemplateInitialFunction.Flows;
+import net.officefloor.web.template.section.WebTemplateInitialFunction.WebTemplateInitialDependencies;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 import net.officefloor.web.value.retrieve.ValueRetrieverSource;
 
@@ -116,69 +130,66 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String OVERRIDE_SECTION_PREFIX = ":";
 
 	/**
-	 * Property name for the number of inherited templates.
+	 * Name of {@link Property} for the number of inherited templates.
 	 */
-	public static final String PROPERTY_INHERITED_TEMPLATES_COUNT = "inherited.templates";
+	public static final String PROPERTY_INHERITED_TEMPLATES_COUNT = "template.inherit.count";
 
 	/**
-	 * Property to obtain the raw {@link ParsedTemplate} content.
+	 * Name of {@link Property} to obtain the raw {@link ParsedTemplate}
+	 * content.
 	 */
 	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
 
 	/**
-	 * Property name for the {@link Class} providing the backing logic to the
-	 * template.
+	 * Name of {@link Property} for the {@link Class} providing the backing
+	 * logic to the template.
 	 */
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
-	 * Property prefix to obtain the bean for the {@link ParsedTemplateSection}.
+	 * {@link Property} prefix to obtain the bean for the
+	 * {@link ParsedTemplateSection}.
 	 */
 	public static final String PROPERTY_BEAN_PREFIX = "bean.";
 
 	/**
-	 * Property to indicate if the {@link ParsedTemplate} requires a secure
-	 * {@link ServerHttpConnection}.
+	 * Name of {@link Property} to indicate if the {@link ParsedTemplate}
+	 * requires a secure {@link ServerHttpConnection}.
 	 */
 	public static final String PROPERTY_TEMPLATE_SECURE = "template.secure";
 
 	/**
-	 * Property prefix to obtain whether the link is to be secure.
+	 * {@link Property} prefix to obtain whether the link is to be secure.
 	 */
-	public static final String PROPERTY_LINK_SECURE_PREFIX = "link.secure.";
+	public static final String PROPERTY_LINK_SECURE_PREFIX = "template.link.secure.";
 
 	/**
-	 * Property name for a comma separated list of HTTP methods that will
-	 * trigger a redirect before rendering the {@link ParsedTemplate}.
+	 * Name of {@link Property} to obtain the link separator.
+	 */
+	public static final String PROPERTY_LINK_SEPARATOR = "template.link.separator";
+
+	/**
+	 * Default link separator {@link Character}.
+	 */
+	private static final char DEFAULT_LINK_SEPARATOR = '+';
+
+	/**
+	 * Name of {@link Property} for a comma separated list of HTTP methods that
+	 * will trigger a redirect before rendering the {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_NOT_REDIRECT_HTTP_METHODS = "template.not.redirect.methods";
 
 	/**
-	 * Property name for the Content-Type of the {@link ParsedTemplate}.
+	 * Name of {@link Property} for the <code>Content-Type</code> of the
+	 * {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_CONTENT_TYPE = "template.content.type";
 
 	/**
-	 * Property name for the {@link Charset} of the {@link ParsedTemplate}.
+	 * Name of {@link Property} for the {@link Charset} of the
+	 * {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_CHARSET = "template.charset";
-
-	/**
-	 * Determines if the {@link WebTemplate} is secure.
-	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @return <code>true</code> should the {@link ParsedTemplate} be secure.
-	 */
-	public static boolean isTemplateSecure(SourceProperties properties) {
-
-		// Determine if template is secure
-		boolean isTemplateSecure = Boolean
-				.valueOf(properties.getProperty(PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
-
-		// Return whether secure
-		return isTemplateSecure;
-	}
 
 	/**
 	 * Determines if the link should be secure.
@@ -282,244 +293,26 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Obtains the <code>Content-Type</code> for the {@link WebTemplate}.
+	 * Determine if the section class is stateful - annotated with
+	 * {@link HttpSessionStateful}.
 	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @return <code>Content-Type</code> for the {@link WebTemplate}.
+	 * @param sectionClass
+	 *            Section class.
+	 * @return <code>true</code> if stateful.
 	 */
-	public static String getWebTemplateContentType(SourceProperties properties) {
-		return properties.getProperty(PROPERTY_CONTENT_TYPE, null);
+	private static boolean isHttpSessionStateful(Class<?> sectionClass) {
+
+		// Determine if stateful
+		boolean isStateful = sectionClass.isAnnotationPresent(HttpSessionStateful.class);
+
+		// Return indicating if stateful
+		return isStateful;
 	}
 
 	/**
-	 * Obtains the {@link Charset} to render the {@link WebTemplate}.
-	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @return {@link Charset} to render the {@link WebTemplate}.
+	 * {@link HttpInputPath}.
 	 */
-	public static Charset getWebTemplateRenderCharset(SourceProperties properties) {
-
-		// Obtain the details of the template
-		String charsetName = properties.getProperty(PROPERTY_CHARSET, null);
-		if (!CompileUtil.isBlank(charsetName)) {
-			// Use the specified char set
-			return Charset.forName(charsetName);
-
-		} else {
-			// Use default char set
-			return ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
-		}
-	}
-
-	/**
-	 * Obtains the not redirct {@link HttpMethod} instances.
-	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @return Not redirect {@link HttpMethod}.
-	 */
-	public static HttpMethod[] getNotRedirectHttpMethods(SourceProperties properties) {
-
-		// Determine if configured
-		String notRedirectProperty = properties.getProperty(PROPERTY_NOT_REDIRECT_HTTP_METHODS, null);
-		if (notRedirectProperty == null) {
-			return new HttpMethod[0];
-		}
-
-		// Obtain the render redirect HTTP methods
-		String[] notRedirectHttpMethodNames = notRedirectProperty.split(",");
-		HttpMethod[] notRedirectHttpMethods = new HttpMethod[notRedirectHttpMethodNames.length];
-		for (int i = 0; i < notRedirectHttpMethodNames.length; i++) {
-			notRedirectHttpMethods[i] = HttpMethod.getHttpMethod(notRedirectHttpMethodNames[i].trim());
-		}
-		return notRedirectHttpMethods;
-	}
-
-	/**
-	 * Section {@link WebTemplateWriter} struct.
-	 */
-	public static class SectionWriterStruct {
-
-		/**
-		 * {@link WebTemplateWriter} instances.
-		 */
-		public final WebTemplateWriter[] writers;
-
-		/**
-		 * Bean class. <code>null</code> indicates no bean required.
-		 */
-		public final Class<?> beanClass;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param writers
-		 *            {@link WebTemplateWriter} instances.
-		 * @param beanClass
-		 *            Bean class.
-		 */
-		public SectionWriterStruct(WebTemplateWriter[] writers, Class<?> beanClass) {
-			this.writers = writers;
-			this.beanClass = beanClass;
-		}
-	}
-
-	/**
-	 * Obtains the {@link SectionWriterStruct}.
-	 * 
-	 * @param contents
-	 *            {@link ParsedTemplateSectionContent} instances.
-	 * @param beanClass
-	 *            Bean {@link Class}.
-	 * @param sectionAndFunctionName
-	 *            Section and function name.
-	 * @param linkFunctionNames
-	 *            List function names.
-	 * @param charset
-	 *            {@link Charset} for the template.
-	 * @param isTemplateSecure
-	 *            Indicates if the template is to be secure.
-	 * @param context
-	 *            {@link ManagedFunctionSourceContext}.
-	 * @return {@link SectionWriterStruct}.
-	 * @throws Exception
-	 *             If fails to create the {@link SectionWriterStruct}.
-	 */
-	public static SectionWriterStruct createWebTemplateWriters(ParsedTemplateSectionContent[] contents,
-			Class<?> beanClass, String sectionAndFunctionName, Set<String> linkFunctionNames, Charset charset,
-			boolean isTemplateSecure, ManagedFunctionSourceContext context) throws Exception {
-
-		// Obtain the value retriever
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		Function<Class<?>, ValueRetriever<Object>> createValueRetriever = (beanClazz) -> {
-			ValueRetrieverSource source = new ValueRetrieverSource(true);
-			return (ValueRetriever) source.sourceValueRetriever(beanClazz);
-		};
-
-		// Create the content writers for the section
-		List<WebTemplateWriter> contentWriterList = new LinkedList<WebTemplateWriter>();
-		ValueRetriever<Object> valueRetriever = null;
-		for (ParsedTemplateSectionContent content : contents) {
-
-			// Handle based on type
-			if (content instanceof StaticParsedTemplateSectionContent) {
-				// Add the static template writer
-				StaticParsedTemplateSectionContent staticContent = (StaticParsedTemplateSectionContent) content;
-				contentWriterList.add(new StaticWebTemplateWriter(staticContent, charset));
-
-			} else if (content instanceof BeanParsedTemplateSectionContent) {
-				// Add the bean template writer
-				BeanParsedTemplateSectionContent beanContent = (BeanParsedTemplateSectionContent) content;
-
-				// Ensure have bean class
-				if (beanClass == null) {
-					beanClass = getBeanClass(sectionAndFunctionName, true, context);
-				}
-
-				// Ensure have the value loader for the bean
-				if (valueRetriever == null) {
-					valueRetriever = createValueRetriever.apply(beanClass);
-				}
-
-				// Obtain the bean method
-				String beanPropertyName = beanContent.getPropertyName();
-				Class<?> beanType = valueRetriever.getValueType(beanPropertyName);
-				if (beanType == null) {
-					throw new Exception(
-							"Bean '" + beanPropertyName + "' can not be sourced from bean type " + beanClass.getName());
-				}
-
-				// Determine if an array of beans
-				boolean isArray = false;
-				if (beanType.isArray()) {
-					isArray = true;
-					beanType = beanType.getComponentType();
-				}
-
-				// Obtain the writers for the bean
-				SectionWriterStruct beanStruct = createWebTemplateWriters(beanContent.getContent(), beanType, null,
-						linkFunctionNames, charset, isTemplateSecure, context);
-
-				// Add the content writer
-				contentWriterList
-						.add(new BeanWebTemplateWriter(beanContent, valueRetriever, isArray, beanStruct.writers));
-
-			} else if (content instanceof PropertyParsedTemplateSectionContent) {
-				// Add the property template writer
-				PropertyParsedTemplateSectionContent propertyContent = (PropertyParsedTemplateSectionContent) content;
-
-				// Ensure have bean class
-				if (beanClass == null) {
-					beanClass = getBeanClass(sectionAndFunctionName, true, context);
-				}
-
-				// Ensure have the value loader for the bean
-				if (valueRetriever == null) {
-					valueRetriever = createValueRetriever.apply(beanClass);
-				}
-
-				// Add the content writer
-				contentWriterList.add(new PropertyWebTemplateWriter(propertyContent, valueRetriever, beanClass));
-
-			} else if (content instanceof LinkParsedTemplateSectionContent) {
-				// Add the link template writer
-				LinkParsedTemplateSectionContent linkContent = (LinkParsedTemplateSectionContent) content;
-
-				// Determine if the link is to be secure
-				String linkName = linkContent.getName();
-				boolean isLinkSecure = WebTemplateSectionSource.isLinkSecure(linkName, isTemplateSecure, context);
-
-				// Add the content writer
-				contentWriterList.add(new LinkWebTemplateWriter(linkContent, isLinkSecure));
-
-				// Track the link tasks
-				linkFunctionNames.add(linkName);
-
-			} else {
-				// Unknown content
-				throw new IllegalStateException("Unknown content type '" + content.getClass().getName());
-			}
-		}
-
-		// Return the HTTP Template writers
-		return new SectionWriterStruct(contentWriterList.toArray(new WebTemplateWriter[contentWriterList.size()]),
-				beanClass);
-	}
-
-	/**
-	 * Obtains the bean {@link Class}.
-	 * 
-	 * @param sectionAndFunctionName
-	 *            Section and function name.
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @return Bean {@link Class}.
-	 */
-	public static Class<?> getBeanClass(String sectionAndFunctionName, boolean isRequired, SourceContext context) {
-
-		// Obtain the bean class name
-		String beanClassPropertyName = PROPERTY_BEAN_PREFIX + sectionAndFunctionName;
-		String beanClassName;
-		if (isRequired) {
-			// Must provide bean class name
-			beanClassName = context.getProperty(beanClassPropertyName);
-
-		} else {
-			// Optionally provide bean class name
-			beanClassName = context.getProperty(beanClassPropertyName, null);
-			if (beanClassName == null) {
-				return null; // No class name, no bean
-			}
-		}
-
-		// Obtain the class
-		Class<?> beanClass = context.loadClass(beanClassName);
-
-		// Return the class
-		return beanClass;
-	}
+	private final HttpInputPath inputPath;
 
 	/**
 	 * {@link Class} providing the logic for the HTTP template - also the
@@ -542,6 +335,16 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * Listing of the {@link TemplateFlowLink} instances.
 	 */
 	private final List<TemplateFlowLink> flowLinks = new LinkedList<TemplateFlowLink>();
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param inputPath
+	 *            {@link HttpInputPath}.
+	 */
+	public WebTemplateSectionSource(HttpInputPath inputPath) {
+		this.inputPath = inputPath;
+	}
 
 	/*
 	 * ===================== SectionSource =========================
@@ -773,11 +576,47 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		SectionOutput ioEscalation = this.getOrCreateOutput(IOException.class.getName(), IOException.class.getName(),
 				true);
 
+		// Obtain configuration details for template
+		boolean isTemplateSecure = Boolean
+				.valueOf(context.getProperty(PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
+
+		// Obtain the render redirect HTTP methods
+		HttpMethod[] notRedirectHttpMethods;
+		String notRedirectProperty = context.getProperty(PROPERTY_NOT_REDIRECT_HTTP_METHODS, null);
+		if (notRedirectProperty == null) {
+			// No non-redirect HTTP methods
+			notRedirectHttpMethods = new HttpMethod[0];
+		} else {
+			// Obtain the non-redirect HTTP methods
+			String[] notRedirectHttpMethodNames = notRedirectProperty.split(",");
+			notRedirectHttpMethods = new HttpMethod[notRedirectHttpMethodNames.length];
+			for (int i = 0; i < notRedirectHttpMethodNames.length; i++) {
+				notRedirectHttpMethods[i] = HttpMethod.getHttpMethod(notRedirectHttpMethodNames[i].trim());
+			}
+		}
+
+		// Obtain the template content-type
+		String templateContentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
+
+		// Obtain the template char set
+		Charset templateCharset;
+		String charsetName = context.getProperty(PROPERTY_CHARSET, null);
+		if (!CompileUtil.isBlank(charsetName)) {
+			// Use the specified char set
+			templateCharset = Charset.forName(charsetName);
+		} else {
+			// Use default char set
+			templateCharset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
+		}
+
+		// Obtain the ending path parameter terminating character
+		char terminatingCharacter = context.getProperty(PROPERTY_LINK_SEPARATOR, String.valueOf(DEFAULT_LINK_SEPARATOR))
+				.charAt(0);
+
 		// Load the initial function
 		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
-				WebTemplateInitialManagedFunctionSource.class.getName());
-		PropertiesUtil.copyProperties(context, initialNamespace, PROPERTY_TEMPLATE_SECURE,
-				PROPERTY_NOT_REDIRECT_HTTP_METHODS, PROPERTY_CONTENT_TYPE, PROPERTY_CHARSET);
+				new WebTemplateInitialManagedFunctionSource(isTemplateSecure, notRedirectHttpMethods,
+						templateContentType, templateCharset, this.inputPath, terminatingCharacter));
 		SectionFunction initialFunction = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		designer.link(initialFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), connectionObject);
@@ -911,10 +750,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 						// Provide iterator function if array
 						SectionFunctionNamespace arrayIteratorNamespace = designer.addSectionFunctionNamespace(
 								templateFunctionName + "ArrayIterator",
-								WebTemplateArrayIteratorManagedFunctionSource.class.getName());
-						arrayIteratorNamespace.addProperty(
-								WebTemplateArrayIteratorManagedFunctionSource.PROPERTY_COMPONENT_TYPE_NAME,
-								beanType.getName());
+								new WebTemplateArrayIteratorManagedFunctionSource(beanType));
 						SectionFunction arrayIteratorFunction = arrayIteratorNamespace.addSectionFunction(
 								templateFunctionName + "ArrayIterator",
 								WebTemplateArrayIteratorManagedFunctionSource.FUNCTION_NAME);
@@ -982,9 +818,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 						flowLink.flowMethod, flowLink.flowArgumentType);
 			}
 		}
-
-		// Determine if the template is secure
-		boolean isTemplateSecure = isTemplateSecure(context);
 
 		// Determine if any unknown configured links
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
@@ -1067,23 +900,23 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * {@link SectionFunction}.
 		 */
-		public final SectionFunction function;
+		private final SectionFunction function;
 
 		/**
 		 * {@link ManagedFunctionType}.
 		 */
-		public final ManagedFunctionType<?, ?> type;
+		private final ManagedFunctionType<?, ?> type;
 
 		/**
 		 * {@link Method} for the {@link SectionFunction}.
 		 */
-		public final Method method;
+		private final Method method;
 
 		/**
 		 * Type of parameter for {@link SectionFunction}. <code>null</code>
 		 * indicates no parameter.
 		 */
-		public final Class<?> parameter;
+		private final Class<?> parameter;
 
 		/**
 		 * Initiate.
@@ -1098,7 +931,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 *            Type of parameter for {@link SectionFunction}.
 		 *            <code>null</code> indicates no parameter.
 		 */
-		public TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Method method,
+		private TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Method method,
 				Class<?> parameter) {
 			this.function = function;
 			this.type = type;
@@ -1115,28 +948,28 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * {@link FunctionFlow} to be linked.
 		 */
-		public final FunctionFlow functionFlow;
+		private final FunctionFlow functionFlow;
 
 		/**
 		 * {@link ManagedFunctionType} of the {@link ManagedFunction} for the
 		 * {@link SectionFlow}.
 		 */
-		public final ManagedFunctionType<?, ?> functionType;
+		private final ManagedFunctionType<?, ?> functionType;
 
 		/**
 		 * Flow interface type.
 		 */
-		public final Class<?> flowInterfaceType;
+		private final Class<?> flowInterfaceType;
 
 		/**
 		 * Flow interface method.
 		 */
-		public final Method flowMethod;
+		private final Method flowMethod;
 
 		/**
 		 * Flow interface method argument type.
 		 */
-		public final Class<?> flowArgumentType;
+		private final Class<?> flowArgumentType;
 
 		/**
 		 * Initiate.
@@ -1153,7 +986,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * @param flowArgumentType
 		 *            Flow interface method argument type.
 		 */
-		public TemplateFlowLink(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
+		private TemplateFlowLink(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
 				Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
 			this.functionFlow = functionFlow;
 			this.functionType = functionType;
@@ -1197,7 +1030,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 *            {@link ManagedFunction} instances that are not to have the
 		 *            template rendered on their completion.
 		 */
-		public WebTemplateSectionExtensionContextImpl(String templateContent, String extensionPropertyPrefix,
+		private WebTemplateSectionExtensionContextImpl(String templateContent, String extensionPropertyPrefix,
 				Set<String> nonRenderTemplateTaskKeys) {
 			this.templateContent = templateContent;
 			this.extensionPropertyPrefix = extensionPropertyPrefix;
@@ -1314,20 +1147,435 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Determine if the section class is stateful - annotated with
-	 * {@link HttpSessionStateful}.
-	 * 
-	 * @param sectionClass
-	 *            Section class.
-	 * @return <code>true</code> if stateful.
+	 * {@link ManagedFunctionSource} to provide the
+	 * {@link WebTemplateInitialFunction}.
 	 */
-	private boolean isHttpSessionStateful(Class<?> sectionClass) {
+	static class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
 
-		// Determine if stateful
-		boolean isStateful = sectionClass.isAnnotationPresent(HttpSessionStateful.class);
+		/**
+		 * Name of the {@link WebTemplateInitialFunction}.
+		 */
+		public static final String FUNCTION_NAME = "FUNCTION";
 
-		// Return indicating if stateful
-		return isStateful;
+		/**
+		 * Indicates if {@link WebTemplate} is secure.
+		 */
+		private final boolean isSecure;
+
+		/**
+		 * {@link HttpMethod} instances to not trigger redirect for GET request
+		 * to template.
+		 */
+		private final HttpMethod[] notRedirectHttpMethods;
+
+		/**
+		 * <code>Content-Type</code> for {@link WebTemplate}.
+		 */
+		private final String contentType;
+
+		/**
+		 * {@link Charset} for the {@link WebTemplate}.
+		 */
+		private final Charset charset;
+
+		/**
+		 * {@link HttpInputPath}.
+		 */
+		private final HttpInputPath inputPath;
+
+		/**
+		 * Terminating character for path ending with parameter.
+		 */
+		private final char endingPathParameterTerminatingCharacter;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param isSecure
+		 *            Indicates if {@link WebTemplate} is secure.
+		 * @param notRedirectHttpMethods
+		 *            {@link HttpMethod} instances to not trigger redirect for
+		 *            GET request to template.
+		 * @param contentType
+		 *            <code>Content-Type</code> for {@link WebTemplate}.
+		 * @param charset
+		 *            {@link Charset} for the {@link WebTemplate}.
+		 * @param inputPath
+		 *            {@link HttpInputPath}.
+		 * @param endingPathParameterTerminatingCharacter
+		 *            Terminating character for path ending with parameter.
+		 */
+		private WebTemplateInitialManagedFunctionSource(boolean isSecure, HttpMethod[] notRedirectHttpMethods,
+				String contentType, Charset charset, HttpInputPath inputPath,
+				char endingPathParameterTerminatingCharacter) {
+			this.isSecure = isSecure;
+			this.notRedirectHttpMethods = notRedirectHttpMethods;
+			this.contentType = contentType;
+			this.charset = charset;
+			this.inputPath = inputPath;
+			this.endingPathParameterTerminatingCharacter = endingPathParameterTerminatingCharacter;
+		}
+
+		/*
+		 * ================== ManagedFunctionSource ==================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Create the HTTP Template initial function
+			WebTemplateInitialFunction factory = new WebTemplateInitialFunction(this.isSecure,
+					this.notRedirectHttpMethods, this.contentType, this.charset, this.inputPath,
+					this.endingPathParameterTerminatingCharacter);
+
+			// Configure the function
+			ManagedFunctionTypeBuilder<WebTemplateInitialDependencies, Flows> function = namespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, factory, WebTemplateInitialDependencies.class, Flows.class);
+			function.addObject(ServerHttpConnection.class)
+					.setKey(WebTemplateInitialDependencies.SERVER_HTTP_CONNECTION);
+			function.addFlow().setKey(Flows.RENDER);
+			function.addEscalation(IOException.class);
+		}
+	}
+
+	/**
+	 * Section {@link WebTemplateWriter} struct.
+	 */
+	public static class SectionWriterStruct {
+
+		/**
+		 * {@link WebTemplateWriter} instances.
+		 */
+		public final WebTemplateWriter[] writers;
+
+		/**
+		 * Bean class. <code>null</code> indicates no bean required.
+		 */
+		public final Class<?> beanClass;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param writers
+		 *            {@link WebTemplateWriter} instances.
+		 * @param beanClass
+		 *            Bean class.
+		 */
+		public SectionWriterStruct(WebTemplateWriter[] writers, Class<?> beanClass) {
+			this.writers = writers;
+			this.beanClass = beanClass;
+		}
+	}
+
+	/**
+	 * {@link ManagedFunctionSource} for the HTTP template.
+	 * 
+	 * @author Daniel Sagenschneider
+	 */
+	static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * Indicates if the {@link WebTemplate} is secure.
+		 */
+		private final boolean isSecure;
+
+		/**
+		 * {@link ParsedTemplate}.
+		 */
+		private final ParsedTemplate template;
+
+		/**
+		 * Default {@link Charset} to render the {@link WebTemplate}.
+		 */
+		private final Charset charset;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param isSecure
+		 *            Indicates if the {@link WebTemplate} is secure.
+		 * @param template
+		 *            {@link ParsedTemplate}.
+		 * @param charset
+		 *            Default {@link Charset} to render the {@link WebTemplate}.
+		 */
+		private WebTemplateManagedFunctionSource(boolean isSecure, ParsedTemplate template, Charset charset) {
+			this.isSecure = isSecure;
+			this.template = template;
+			this.charset = charset;
+		}
+
+		/**
+		 * Obtains the {@link SectionWriterStruct}.
+		 * 
+		 * @param contents
+		 *            {@link ParsedTemplateSectionContent} instances.
+		 * @param beanClass
+		 *            Bean {@link Class}.
+		 * @param sectionAndFunctionName
+		 *            Section and function name.
+		 * @param linkFunctionNames
+		 *            List function names.
+		 * @param charset
+		 *            {@link Charset} for the template.
+		 * @param isTemplateSecure
+		 *            Indicates if the template is to be secure.
+		 * @param context
+		 *            {@link ManagedFunctionSourceContext}.
+		 * @return {@link SectionWriterStruct}.
+		 * @throws Exception
+		 *             If fails to create the {@link SectionWriterStruct}.
+		 */
+		private SectionWriterStruct createWebTemplateWriters(ParsedTemplateSectionContent[] contents,
+				Class<?> beanClass, String sectionAndFunctionName, Set<String> linkFunctionNames, Charset charset,
+				boolean isTemplateSecure, ManagedFunctionSourceContext context) throws Exception {
+
+			// Obtain the value retriever
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Function<Class<?>, ValueRetriever<Object>> createValueRetriever = (beanClazz) -> {
+				ValueRetrieverSource source = new ValueRetrieverSource(true);
+				return (ValueRetriever) source.sourceValueRetriever(beanClazz);
+			};
+
+			// Create the content writers for the section
+			List<WebTemplateWriter> contentWriterList = new LinkedList<WebTemplateWriter>();
+			ValueRetriever<Object> valueRetriever = null;
+			for (ParsedTemplateSectionContent content : contents) {
+
+				// Handle based on type
+				if (content instanceof StaticParsedTemplateSectionContent) {
+					// Add the static template writer
+					StaticParsedTemplateSectionContent staticContent = (StaticParsedTemplateSectionContent) content;
+					contentWriterList.add(new StaticWebTemplateWriter(staticContent, charset));
+
+				} else if (content instanceof BeanParsedTemplateSectionContent) {
+					// Add the bean template writer
+					BeanParsedTemplateSectionContent beanContent = (BeanParsedTemplateSectionContent) content;
+
+					// Ensure have bean class
+					if (beanClass == null) {
+						beanClass = this.getBeanClass(sectionAndFunctionName, true, context);
+					}
+
+					// Ensure have the value loader for the bean
+					if (valueRetriever == null) {
+						valueRetriever = createValueRetriever.apply(beanClass);
+					}
+
+					// Obtain the bean method
+					String beanPropertyName = beanContent.getPropertyName();
+					Class<?> beanType = valueRetriever.getValueType(beanPropertyName);
+					if (beanType == null) {
+						throw new Exception("Bean '" + beanPropertyName + "' can not be sourced from bean type "
+								+ beanClass.getName());
+					}
+
+					// Determine if an array of beans
+					boolean isArray = false;
+					if (beanType.isArray()) {
+						isArray = true;
+						beanType = beanType.getComponentType();
+					}
+
+					// Obtain the writers for the bean
+					SectionWriterStruct beanStruct = this.createWebTemplateWriters(beanContent.getContent(), beanType,
+							null, linkFunctionNames, charset, isTemplateSecure, context);
+
+					// Add the content writer
+					contentWriterList
+							.add(new BeanWebTemplateWriter(beanContent, valueRetriever, isArray, beanStruct.writers));
+
+				} else if (content instanceof PropertyParsedTemplateSectionContent) {
+					// Add the property template writer
+					PropertyParsedTemplateSectionContent propertyContent = (PropertyParsedTemplateSectionContent) content;
+
+					// Ensure have bean class
+					if (beanClass == null) {
+						beanClass = this.getBeanClass(sectionAndFunctionName, true, context);
+					}
+
+					// Ensure have the value loader for the bean
+					if (valueRetriever == null) {
+						valueRetriever = createValueRetriever.apply(beanClass);
+					}
+
+					// Add the content writer
+					contentWriterList.add(new PropertyWebTemplateWriter(propertyContent, valueRetriever, beanClass));
+
+				} else if (content instanceof LinkParsedTemplateSectionContent) {
+					// Add the link template writer
+					LinkParsedTemplateSectionContent linkContent = (LinkParsedTemplateSectionContent) content;
+
+					// Determine if the link is to be secure
+					String linkName = linkContent.getName();
+					boolean isLinkSecure = isLinkSecure(linkName, isTemplateSecure, context);
+
+					// Add the content writer
+					contentWriterList.add(new LinkWebTemplateWriter(linkContent, isLinkSecure));
+
+					// Track the link tasks
+					linkFunctionNames.add(linkName);
+
+				} else {
+					// Unknown content
+					throw new IllegalStateException("Unknown content type '" + content.getClass().getName());
+				}
+			}
+
+			// Return the HTTP Template writers
+			return new SectionWriterStruct(contentWriterList.toArray(new WebTemplateWriter[contentWriterList.size()]),
+					beanClass);
+		}
+
+		/**
+		 * Obtains the bean {@link Class}.
+		 * 
+		 * @param sectionAndFunctionName
+		 *            Section and function name.
+		 * @param context
+		 *            {@link SourceContext}.
+		 * @return Bean {@link Class}.
+		 */
+		private Class<?> getBeanClass(String sectionAndFunctionName, boolean isRequired, SourceContext context) {
+
+			// Obtain the bean class name
+			String beanClassPropertyName = PROPERTY_BEAN_PREFIX + sectionAndFunctionName;
+			String beanClassName;
+			if (isRequired) {
+				// Must provide bean class name
+				beanClassName = context.getProperty(beanClassPropertyName);
+
+			} else {
+				// Optionally provide bean class name
+				beanClassName = context.getProperty(beanClassPropertyName, null);
+				if (beanClassName == null) {
+					return null; // No class name, no bean
+				}
+			}
+
+			// Obtain the class
+			Class<?> beanClass = context.loadClass(beanClassName);
+
+			// Return the class
+			return beanClass;
+		}
+
+		/*
+		 * =================== AbstractWorkSource =========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Define the functions
+			for (ParsedTemplateSection section : this.template.getSections()) {
+
+				// Obtain the section and function name
+				String sectionAndFunctionName = section.getSectionName();
+
+				// Set of link function names
+				Set<String> linkFunctionNames = new HashSet<String>();
+
+				// Optional bean class
+				Class<?> beanClass = this.getBeanClass(sectionAndFunctionName, false, context);
+
+				// Create the content writers for the section
+				SectionWriterStruct writerStruct = this.createWebTemplateWriters(section.getContent(), beanClass,
+						sectionAndFunctionName, linkFunctionNames, this.charset, this.isSecure, context);
+
+				// Determine if bean
+				boolean isBean = (writerStruct.beanClass != null);
+
+				// Create the function factory
+				WebTemplateFunction function = new WebTemplateFunction(writerStruct.writers, isBean, charset);
+
+				// Define the function to write the section
+				ManagedFunctionTypeBuilder<Indexed, None> functionBuilder = namespaceTypeBuilder
+						.addManagedFunctionType(sectionAndFunctionName, function, Indexed.class, None.class);
+				functionBuilder.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
+				if (isBean) {
+					functionBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT");
+				}
+				functionBuilder.addEscalation(IOException.class);
+			}
+		}
+	}
+
+	/**
+	 * Iterates over the array objects sending them to the
+	 * {@link ParsedTemplate} for rendering.
+	 * 
+	 * @author Daniel Sagenschneider
+	 */
+	static class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * Name of the {@link ManagedFunction}.
+		 */
+		private static final String FUNCTION_NAME = "iterate";
+
+		/**
+		 * Name of the {@link FunctionObject} providing array.
+		 */
+		private static final String OBJECT_NAME = DependencyKeys.ARRAY.name();
+
+		/**
+		 * Name of the {@link FunctionFlow} for rendering.
+		 */
+		private static final String FLOW_NAME = FlowKeys.RENDER_ELEMENT.name();
+
+		/**
+		 * Component type of the array.
+		 */
+		private final Class<?> componentType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param componentType
+		 *            Component type of the array.
+		 */
+		private WebTemplateArrayIteratorManagedFunctionSource(Class<?> componentType) {
+			this.componentType = componentType;
+		}
+
+		/*
+		 * ====================== ManagedFunctionSource ======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Obtain the array type (from component type)
+			Class<?> arrayType = Array.newInstance(this.componentType, 0).getClass();
+
+			// Create the function
+			WebTemplateArrayIteratorFunction function = new WebTemplateArrayIteratorFunction();
+
+			// Specify the function
+			ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> functionBuilder = namespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, function, DependencyKeys.class, FlowKeys.class);
+			functionBuilder.addObject(arrayType).setKey(DependencyKeys.ARRAY);
+			ManagedFunctionFlowTypeBuilder<FlowKeys> flow = functionBuilder.addFlow();
+			flow.setKey(FlowKeys.RENDER_ELEMENT);
+			flow.setArgumentType(this.componentType);
+		}
+
 	}
 
 	/*
@@ -1353,7 +1601,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Determine if stateful
-		boolean isStateful = this.isHttpSessionStateful(sectionClass);
+		boolean isStateful = isHttpSessionStateful(sectionClass);
 
 		// Default behaviour if not stateful
 		if (!isStateful) {
@@ -1392,7 +1640,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		DependencyMetaData[] metaData = super.extractClassManagedObjectDependencies(objectName, sectionClass);
 
 		// Determine if stateful
-		boolean isStateful = this.isHttpSessionStateful(sectionClass);
+		boolean isStateful = isHttpSessionStateful(sectionClass);
 
 		// If not stateful, return meta-data for default behaviour
 		if (!isStateful) {

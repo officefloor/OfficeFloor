@@ -125,6 +125,13 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if {@link WebTemplate} missing bean.
+	 */
+	public void testTemplateMissingBean() throws Exception {
+		fail("TODO implement test");
+	}
+
+	/**
 	 * Ensure render {@link NotEscaped}.
 	 */
 	public void testNotEscapedValue() throws Exception {
@@ -200,10 +207,15 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 						.setLogicClass(LinkRerenderTemplateLogic.class),
 				"Template /path+link");
 
-		// Ensure can GET link
+		// Ensure can GET link triggers redirect to template
 		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
+		assertEquals("Should be redirect to template", 303, response.getStatus().getStatusCode());
+		response.assertHeader("location", "/path");
+
+		// Ensure on GET redirect that able to load template
+		response = this.server.send(MockHttpServer.mockRequest(response.getHeader("location").getValue()));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "LINK Template /path+link", response.getEntity(null));
+		assertEquals("Incorrect template", "Template /path+link", response.getEntity(null));
 	}
 
 	public static class LinkRerenderTemplateLogic {
@@ -434,6 +446,19 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect template", "SECURE", response.getEntity(null));
 	}
 
+	/**
+	 * Ensure can render insecure {@link WebTemplate} over a secure connection.
+	 */
+	public void testInsecureTemplateOnSecureLink() throws Exception {
+		MockHttpResponse response = this.template(
+				(context, templater) -> templater.addTemplate("/path", new StringReader("INSECURE")),
+				this.mockRequest("/path").secure(true));
+
+		// Should obtain insecure template on secure connection
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Inorrect template", "INSECURE", response.getEntity(null));
+	}
+
 	/*
 	 * Ensure only accepts link request over a secure connection.
 	 */
@@ -452,6 +477,20 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure able to obtain link over secure connection
 		response = this.server.send(this.mockRequest("/path+link").secure(true));
+	}
+
+	/**
+	 * Ensure can render a secure link for a insecure {@link WebTemplate}.
+	 */
+	public void testRenderSecureLink() throws Exception {
+		fail("TODO implement test to render secure link");
+	}
+
+	/**
+	 * Ensure can render insecure link on a secure {@link WebTemplate}.
+	 */
+	public void testRenderInsecureLinkOnSecureTemplate() throws Exception {
+		fail("TODO implement test to render insecure link on secure template");
 	}
 
 	/**
