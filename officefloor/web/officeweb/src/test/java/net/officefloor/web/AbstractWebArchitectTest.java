@@ -52,7 +52,6 @@ import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.route.WebPathException;
 import net.officefloor.web.session.HttpSession;
 
 /**
@@ -369,12 +368,12 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testConstructStaticPath() throws Exception {
 
 		// Configure the server
-		Closure<HttpInput> input = new Closure<>();
+		Closure<HttpInputPath> input = new Closure<>();
 		this.compile.web((context) -> {
 			OfficeSectionInput servicer = context.addSection("SECTION", MockSection.class)
 					.getOfficeSectionInput("service");
 			WebArchitect web = context.getWebArchitect();
-			input.value = web.link(false, "/static/path", servicer);
+			input.value = web.link(false, "/static/path", servicer).getPath();
 		});
 		this.compile.compileAndOpenOfficeFloor();
 
@@ -383,6 +382,15 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 				input.value.createHttpPathFactory(null).createApplicationClientPath(null));
 		assertEquals("Incorrect path ignoring values", this.contextUrl("", "/static/path"),
 				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()));
+
+		// Ensure indicate if match on paths
+		assertFalse("Should not match root", input.value.isMatchPath(this.contextUrl("", "/"), -1));
+		assertFalse("Should not match partial path", input.value.isMatchPath(this.contextUrl("", "/static"), -1));
+		assertTrue("Should match same static path", input.value.isMatchPath(this.contextUrl("", "/static/path"), -1));
+		assertTrue("Should ignore terminating character on static path",
+				input.value.isMatchPath(this.contextUrl("", "/static/path"), '/'));
+		assertFalse("Should not match with longer path",
+				input.value.isMatchPath(this.contextUrl("", "/static/path/extra"), -1));
 	}
 
 	public static class PathValues {
@@ -397,12 +405,12 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testConstructDynamicPath() throws Exception {
 
 		// Configure the server
-		Closure<HttpInput> input = new Closure<>();
+		Closure<HttpInputPath> input = new Closure<>();
 		this.compile.web((context) -> {
 			OfficeSectionInput servicer = context.addSection("SECTION", MockSection.class)
 					.getOfficeSectionInput("service");
 			WebArchitect web = context.getWebArchitect();
-			input.value = web.link(false, "/dynamic/{param}", servicer);
+			input.value = web.link(false, "/dynamic/{param}", servicer).getPath();
 		});
 		this.compile.compileAndOpenOfficeFloor();
 
@@ -415,11 +423,23 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		try {
 			input.value.createHttpPathFactory(Exception.class);
 			fail("Should not be successful");
-		} catch (WebPathException ex) {
+		} catch (HttpException ex) {
 			assertEquals("Incorrect cause",
 					"For path '/dynamic/{param}', no property 'param' on object " + Exception.class.getName(),
-					ex.getMessage());
+					ex.getEntity());
 		}
+
+		// Ensure indicate if match on paths
+		assertFalse("Should not match root", input.value.isMatchPath(this.contextUrl("", "/"), -1));
+		assertFalse("Should not match partial path", input.value.isMatchPath(this.contextUrl("", "/dynamic"), -1));
+		assertTrue("Should match same dynamic path",
+				input.value.isMatchPath(this.contextUrl("", "/dynamic/value"), -1));
+		assertTrue("Should match same dynamic path (without terminating character)",
+				input.value.isMatchPath(this.contextUrl("", "/dynamic/value"), '+'));
+		assertTrue("Should match same dynamic path (consuming rest of path)",
+				input.value.isMatchPath(this.contextUrl("", "/dynamic/value+link"), -1));
+		assertFalse("Should not match with longer path",
+				input.value.isMatchPath(this.contextUrl("", "/dynamic/value+link"), '+'));
 	}
 
 	/**

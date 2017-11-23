@@ -53,7 +53,7 @@ public class LinkWebTemplateWriter implements WebTemplateWriter {
 	 */
 	public LinkWebTemplateWriter(LinkParsedTemplateSectionContent content, boolean isLinkSecure) {
 		this.isLinkSecure = isLinkSecure;
-		this.linkPathSuffix = "-" + content.getName();
+		this.linkPathSuffix = "+" + content.getName();
 	}
 
 	/*
@@ -64,12 +64,14 @@ public class LinkWebTemplateWriter implements WebTemplateWriter {
 	public void write(ServerWriter writer, boolean isDefaultCharset, Object bean, ServerHttpConnection connection,
 			String templatePath) throws HttpException {
 
-		// Obtain the link path
-		String clientLinkPath = connection.getServerLocation().createClientUrl(this.isLinkSecure, templatePath);
+		// Obtain the link path (determining if require secure link)
+		if (this.isLinkSecure && (!connection.isSecure())) {
+			templatePath = connection.getServerLocation().createClientUrl(this.isLinkSecure, templatePath);
+		}
 
 		try {
 			// Write the content
-			writer.write(clientLinkPath);
+			writer.write(templatePath);
 			writer.write(this.linkPathSuffix);
 
 		} catch (IOException ex) {

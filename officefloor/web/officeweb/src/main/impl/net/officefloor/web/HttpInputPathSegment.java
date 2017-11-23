@@ -15,23 +15,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.route;
+package net.officefloor.web;
 
 /**
- * Web path failure.
+ * Segment of the {@link HttpInputPath}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebPathException extends Exception {
+public class HttpInputPathSegment {
+
+	/**
+	 * Types of {@link HttpInputPathSegment}.
+	 */
+	public static enum HttpInputPathSegmentEnum {
+		STATIC, PARAMETER
+	}
+
+	/**
+	 * {@link HttpInputPathSegmentEnum}.
+	 */
+	public final HttpInputPathSegmentEnum type;
+
+	/**
+	 * Static path or parameter name.
+	 */
+	public final String value;
+
+	/**
+	 * Next {@link HttpInputPathSegment}.
+	 */
+	public HttpInputPathSegment next = null;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param type
+	 *            {@link HttpInputPathSegmentEnum}.
+	 * @param value
+	 *            Static path or parameter name.
 	 */
-	public WebPathException(String message) {
-		super(message);
+	public HttpInputPathSegment(HttpInputPathSegmentEnum type, String value) {
+		this.type = type;
+		this.value = value;
 	}
-
 }

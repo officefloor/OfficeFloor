@@ -579,7 +579,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 					.getProperty(PROPERTY_TEMPLATE_CONTENT + ".inherit." + inheritanceIndex);
 		}
 		templateInheritanceHierarchy[templateInheritanceHierarchy.length - 1] = context
-				.getProperty(PROPERTY_TEMPLATE_CONTENT, null);
+				.getProperty(PROPERTY_TEMPLATE_CONTENT);
 
 		// Obtain the template for the highest ancestor in inheritance hierarchy
 		ParsedTemplate highestAncestorTemplate = WebTemplateParser
@@ -1054,8 +1054,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Link last template task to output
-//		SectionOutput output = this.getOrCreateOutput(ON_COMPLETION_OUTPUT_NAME, null, false);
-//		designer.link(previousTemplateFunction, output);
+		// SectionOutput output =
+		// this.getOrCreateOutput(ON_COMPLETION_OUTPUT_NAME, null, false);
+		// designer.link(previousTemplateFunction, output);
 	}
 
 	/**

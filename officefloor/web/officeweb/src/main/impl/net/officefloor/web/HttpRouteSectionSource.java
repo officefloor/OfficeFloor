@@ -52,7 +52,6 @@ import net.officefloor.web.NotFoundFunction.NotFoundDependencies;
 import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.escalation.NotFoundHttpException;
-import net.officefloor.web.route.WebPathFactory;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.route.WebRouterBuilder;
 import net.officefloor.web.session.HttpSession;
@@ -164,14 +163,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		private final String path;
 
 		/**
-		 * {@link WebPathFactory}.
+		 * {@link HttpInputPath}.
 		 */
-		private final WebPathFactory webPathFactory;
-
-		/**
-		 * Indicates if path parameters for the route.
-		 */
-		// private final boolean isPathParameters;
+		private final HttpInputPath inputPath;
 
 		/**
 		 * Instantiate.
@@ -182,14 +176,14 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		 *            {@link HttpMethod} for the route.
 		 * @param path
 		 *            Path for the route.
-		 * @param webPathFactory
-		 *            {@link WebPathFactory}.
+		 * @param inputPath
+		 *            {@link HttpInputPath}.
 		 */
-		private RouteInput(int flowIndex, HttpMethod method, String path, WebPathFactory webPathFactory) {
+		private RouteInput(int flowIndex, HttpMethod method, String path, HttpInputPath inputPath) {
 			this.flowIndex = flowIndex;
 			this.method = method;
 			this.path = path;
-			this.webPathFactory = webPathFactory;
+			this.inputPath = inputPath;
 		}
 
 		/**
@@ -202,12 +196,12 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		}
 
 		/**
-		 * Obtains the {@link WebPathFactory} for this route.
+		 * Obtains the {@link HttpInputPath} for this route.
 		 * 
-		 * @return {@link WebPathFactory} for this route.
+		 * @return {@link HttpInputPath} for this route.
 		 */
-		public WebPathFactory getWebPathFactory() {
-			return this.webPathFactory;
+		public HttpInputPath getHttpInputPath() {
+			return this.inputPath;
 		}
 	}
 
@@ -332,10 +326,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		int flowIndex = this.routes.size();
 
 		// Add the route
-		WebPathFactory webPathFactory = this.builder.addRoute(method, path, new WebRouteHandlerImpl(flowIndex));
+		HttpInputPath inputPath = this.builder.addRoute(method, path, new WebRouteHandlerImpl(flowIndex));
 
 		// Track route information for configuration
-		RouteInput input = new RouteInput(flowIndex, method, path, webPathFactory);
+		RouteInput input = new RouteInput(flowIndex, method, path, inputPath);
 		this.routes.add(input);
 
 		// Return the route input
@@ -364,7 +358,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 		// Create the HTTP path factory (defaulting type to object)
 		parameterType = (parameterType == null) ? Object.class : parameterType;
-		HttpPathFactory<?> httpPathFactory = routeInput.webPathFactory.createHttpPathFactory(parameterType);
+		HttpPathFactory<?> httpPathFactory = routeInput.inputPath.createHttpPathFactory(parameterType);
 
 		// Create the redirect input name
 		String inputName = "REDIRECT_" + redirectIndex + (isSecure ? "_SECURE_" : "_") + routeInput.path
@@ -452,7 +446,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 			// Determine if path parameters
 			FunctionFlow routeFlow = route.getFunctionFlow(outputName);
-			if (!routeConfig.webPathFactory.isPathParameters()) {
+			if (!routeConfig.inputPath.isPathParameters()) {
 				// No path parameters, so link directly
 				designer.link(routeFlow, output, false);
 

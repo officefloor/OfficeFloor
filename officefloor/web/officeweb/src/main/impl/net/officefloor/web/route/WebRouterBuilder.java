@@ -30,13 +30,10 @@ import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
-import net.officefloor.web.HttpPathFactoryImpl;
-import net.officefloor.web.HttpPathFactoryImpl.ParameterSegment;
-import net.officefloor.web.HttpPathFactoryImpl.Segment;
-import net.officefloor.web.HttpPathFactoryImpl.StaticSegment;
-import net.officefloor.web.build.HttpPathFactory;
-import net.officefloor.web.value.retrieve.ValueRetriever;
-import net.officefloor.web.value.retrieve.ValueRetrieverSource;
+import net.officefloor.web.HttpInputPath;
+import net.officefloor.web.HttpInputPathImpl;
+import net.officefloor.web.HttpInputPathSegment;
+import net.officefloor.web.HttpInputPathSegment.HttpInputPathSegmentEnum;
 
 /**
  * Builds the {@link WebRouter}.
@@ -74,9 +71,9 @@ public class WebRouterBuilder {
 	 *            Path. Use <code>{param}</code> to signify path parameters.
 	 * @param handler
 	 *            {@link WebRouteHandler} for the route.
-	 * @return {@link WebPathFactory}.
+	 * @return {@link HttpInputPath} for the route.
 	 */
-	public WebPathFactory addRoute(HttpMethod method, String path, WebRouteHandler handler) {
+	public HttpInputPath addRoute(HttpMethod method, String path, WebRouteHandler handler) {
 
 		// Keep track of input path
 		final String inputPath = path;
@@ -92,7 +89,7 @@ public class WebRouterBuilder {
 		}
 
 		// Parse out the static segments and parameters from path
-		List<PathSegment> segments = new ArrayList<>();
+		List<HttpInputPathSegment> segments = new ArrayList<>();
 		int currentIndex = 0;
 		do {
 
@@ -101,7 +98,7 @@ public class WebRouterBuilder {
 			if (nextParamStart < 0) {
 				// No further parameters
 				String staticContent = path.substring(currentIndex);
-				segments.add(new PathSegment(PathTypeEnum.STATIC, staticContent));
+				segments.add(new HttpInputPathSegment(HttpInputPathSegmentEnum.STATIC, staticContent));
 				currentIndex = path.length();
 
 			} else {
@@ -112,7 +109,7 @@ public class WebRouterBuilder {
 
 				// Include the static content
 				String staticContent = path.substring(currentIndex, nextParamStart);
-				segments.add(new PathSegment(PathTypeEnum.STATIC, staticContent));
+				segments.add(new HttpInputPathSegment(HttpInputPathSegmentEnum.STATIC, staticContent));
 
 				// Find the end of the parameter
 				int nextParamEnd = path.indexOf('}', nextParamStart);
@@ -120,7 +117,7 @@ public class WebRouterBuilder {
 					throw new IllegalArgumentException("No terminating '}' for parameter");
 				}
 				String parameterName = path.substring(nextParamStart + 1, nextParamEnd);
-				segments.add(new PathSegment(PathTypeEnum.PARAMETER, parameterName));
+				segments.add(new HttpInputPathSegment(HttpInputPathSegmentEnum.PARAMETER, parameterName));
 
 				// Move to after parameter
 				currentIndex = nextParamEnd + "}".length();
@@ -136,8 +133,8 @@ public class WebRouterBuilder {
 		WebRoute route = new WebRoute(method, inputPath, segments.get(0), handler);
 		this.routes.add(route);
 
-		// Return web path factory
-		return route;
+		// Return HTTP input path
+		return route.createHttpInputPath();
 	}
 
 	/**
@@ -218,9 +215,9 @@ public class WebRouterBuilder {
 			Map<WebRoute, String[]> routeParameterNames = new HashMap<>();
 			for (WebRoute route : choice.routes) {
 				List<String> parameterNames = new LinkedList<>();
-				PathSegment segment = route.segmentHead;
+				HttpInputPathSegment segment = route.segmentHead;
 				while (segment != null) {
-					if (segment.type == PathTypeEnum.PARAMETER) {
+					if (segment.type == HttpInputPathSegmentEnum.PARAMETER) {
 						parameterNames.add(segment.value);
 					}
 					segment = segment.next;
@@ -396,9 +393,9 @@ public class WebRouterBuilder {
 	}
 
 	/**
-	 * Route for {@link WebRouter}.
+	 * Web route.
 	 */
-	private static class WebRoute implements WebPathFactory {
+	private static class WebRoute {
 
 		/**
 		 * {@link HttpMethod}.
@@ -411,10 +408,10 @@ public class WebRouterBuilder {
 		private final String routePath;
 
 		/**
-		 * Head {@link PathSegment} of linked list of {@link PathSegment}
-		 * instances.
+		 * Head {@link HttpInputPathSegment} of linked list of
+		 * {@link HttpInputPathSegment} instances.
 		 */
-		private final PathSegment segmentHead;
+		private final HttpInputPathSegment segmentHead;
 
 		/**
 		 * Number of static path characters for sorting routes.
@@ -432,13 +429,13 @@ public class WebRouterBuilder {
 		private final WebRouteHandler handler;
 
 		/**
-		 * Current {@link PathSegment}.
+		 * Current {@link HttpInputPathSegment}.
 		 */
-		private PathSegment currentSegment;
+		private HttpInputPathSegment currentSegment;
 
 		/**
 		 * Indicates index into the static characters for current
-		 * {@link PathSegment}.
+		 * {@link HttpInputPathSegment}.
 		 */
 		private int staticIndex = -1; // before start
 
@@ -450,12 +447,13 @@ public class WebRouterBuilder {
 		 * @param routePath
 		 *            Route path.
 		 * @param segmentHead
-		 *            Head {@link PathSegment} of linked list of
-		 *            {@link PathSegment} instances.
+		 *            Head {@link HttpInputPathSegment} of linked list of
+		 *            {@link HttpInputPathSegment} instances.
 		 * @param handler
 		 *            {@link WebRouteHandler}.
 		 */
-		public WebRoute(HttpMethod method, String routePath, PathSegment segmentHead, WebRouteHandler handler) {
+		public WebRoute(HttpMethod method, String routePath, HttpInputPathSegment segmentHead,
+				WebRouteHandler handler) {
 			this.method = method;
 			this.routePath = routePath;
 			this.segmentHead = segmentHead;
@@ -464,7 +462,7 @@ public class WebRouterBuilder {
 			// Determine the sort metrics
 			int staticCharacterCount = 0;
 			int parameterCount = 0;
-			PathSegment segment = this.segmentHead;
+			HttpInputPathSegment segment = this.segmentHead;
 			while (segment != null) {
 				switch (segment.type) {
 				case STATIC:
@@ -486,57 +484,21 @@ public class WebRouterBuilder {
 			this.currentSegment = this.segmentHead;
 		}
 
-		/*
-		 * ================== WebPathFactory ======================
+		/**
+		 * Creates the {@link HttpInputPath}.
+		 * 
+		 * @return {@link HttpInputPath}.
 		 */
-
-		@Override
-		public boolean isPathParameters() {
-			return this.parameterCount > 0;
+		public HttpInputPath createHttpInputPath() {
+			return new HttpInputPathImpl(this.routePath, this.segmentHead, this.parameterCount);
 		}
+	}
 
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException {
-
-			// Ensure have type
-			if (valuesType == null) {
-				valuesType = (Class<T>) Void.TYPE;
-			}
-
-			// Create the value retriever
-			ValueRetrieverSource source = new ValueRetrieverSource(true);
-			ValueRetriever<T> valueRetriever = source.sourceValueRetriever(valuesType);
-
-			// Create the segments
-			List<Segment<T>> segments = new ArrayList<>();
-			PathSegment segment = this.segmentHead;
-			while (segment != null) {
-				switch (segment.type) {
-				case STATIC:
-					// Add the static part of path
-					segments.add(new StaticSegment<T>(segment.value));
-					break;
-				case PARAMETER:
-					// Ensure parameter value is available
-					if (valueRetriever.getValueType(segment.value) == null) {
-						throw new WebPathException("For path '" + this.routePath + "', no property '" + segment.value
-								+ "' on object " + valuesType.getName());
-					}
-
-					// Add the parameter
-					segments.add(new ParameterSegment<T>(segment.value, valueRetriever));
-					break;
-				default:
-					throw new IllegalStateException(
-							WebRoute.class.getSimpleName() + " should not have segment of type " + segment.type);
-				}
-				segment = segment.next;
-			}
-
-			// Create the HTTP path factory
-			return new HttpPathFactoryImpl<T>(valuesType, segments.toArray(new Segment[segments.size()]));
-		}
+	/**
+	 * Type of {@link WebRouteChoice}.
+	 */
+	private static enum WebRouteChoiceEnum {
+		STATIC, PARAMETER, LEAF
 	}
 
 	/**
@@ -545,9 +507,9 @@ public class WebRouterBuilder {
 	private static class WebRouteChoice {
 
 		/**
-		 * {@link PathTypeEnum}.
+		 * {@link WebRouteChoiceEnum}.
 		 */
-		private final PathTypeEnum type;
+		private final WebRouteChoiceEnum type;
 
 		/**
 		 * Static path or parameter name.
@@ -571,7 +533,7 @@ public class WebRouterBuilder {
 			route.staticIndex++;
 
 			// Determine if exceed static path length
-			if ((route.currentSegment != null) && (route.currentSegment.type == PathTypeEnum.STATIC)) {
+			if ((route.currentSegment != null) && (route.currentSegment.type == HttpInputPathSegmentEnum.STATIC)) {
 				if (route.staticIndex >= route.currentSegment.value.length()) {
 					// Move to next segment
 					route.currentSegment = route.currentSegment.next;
@@ -582,68 +544,35 @@ public class WebRouterBuilder {
 			// Configure choice based on current segment
 			if (route.currentSegment == null) {
 				// End of route
-				this.type = PathTypeEnum.LEAF;
+				this.type = WebRouteChoiceEnum.LEAF;
 				this.value = null;
 
 			} else {
 				// Load static or parameter
-				this.type = route.currentSegment.type;
-				if (this.type == PathTypeEnum.STATIC) {
+				switch (route.currentSegment.type) {
+				case STATIC:
 					// Add the static route
+					this.type = WebRouteChoiceEnum.STATIC;
 					this.value = String.valueOf(route.currentSegment.value.charAt(route.staticIndex));
-				} else {
+					break;
+
+				case PARAMETER:
 					// Add the parameter route
+					this.type = WebRouteChoiceEnum.PARAMETER;
 					this.value = route.currentSegment.value;
 
 					// Move past parameter segment
 					route.currentSegment = route.currentSegment.next;
 					route.staticIndex = -1;
+					break;
+
+				default:
+					throw new Error("Unknown input path segment type " + route.currentSegment.type.name());
 				}
 			}
 
 			// Include the route
 			this.routes.add(route);
-		}
-	}
-
-	/**
-	 * Types of {@link PathSegment}.
-	 */
-	private static enum PathTypeEnum {
-		STATIC, PARAMETER, LEAF
-	}
-
-	/**
-	 * Path segment.
-	 */
-	private static class PathSegment {
-
-		/**
-		 * {@link PathTypeEnum}.
-		 */
-		private final PathTypeEnum type;
-
-		/**
-		 * Static path or parameter name.
-		 */
-		private final String value;
-
-		/**
-		 * Next {@link PathSegment}.
-		 */
-		private PathSegment next = null;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param type
-		 *            {@link PathTypeEnum}.
-		 * @param value
-		 *            Static path or parameter name.
-		 */
-		public PathSegment(PathTypeEnum type, String value) {
-			this.type = type;
-			this.value = value;
 		}
 	}
 

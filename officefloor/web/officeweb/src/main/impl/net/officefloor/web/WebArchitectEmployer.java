@@ -49,12 +49,10 @@ import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponderFactory;
-import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource;
-import net.officefloor.web.route.WebPathException;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
@@ -728,8 +726,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		 */
 
 		@Override
-		public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException {
-			return this.routeInput.getWebPathFactory().createHttpPathFactory(valuesType);
+		public HttpInputPath getPath() {
+			return this.routeInput.getHttpInputPath();
 		}
 	}
 

@@ -60,6 +60,15 @@ public interface WebTemplate extends PropertyConfigurable {
 	void setCharset(Charset charset);
 
 	/**
+	 * Allows overriding the default separator character between the path and
+	 * link.
+	 * 
+	 * @param separator
+	 *            Separator to use to separate path and link.
+	 */
+	void setLinkSeparatorCharacter(char separator);
+
+	/**
 	 * Flags whether the {@link WebTemplate} may only be rendered over a secure
 	 * connection.
 	 * 

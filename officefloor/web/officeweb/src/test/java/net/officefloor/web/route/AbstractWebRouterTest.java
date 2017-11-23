@@ -20,11 +20,13 @@ package net.officefloor.web.route;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
+import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.state.HttpArgument;
 
@@ -293,10 +295,9 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	public void testPathMissingParameter() throws Exception {
 		try {
 			this.pathFactory("/{missing}", null, null);
-		} catch (WebPathException ex) {
+		} catch (HttpException ex) {
 			assertEquals("Incorrect cause",
-					"For path '/{missing}', no property 'missing' on object " + Object.class.getName(),
-					ex.getMessage());
+					"For path '/{missing}', no property 'missing' on object " + Object.class.getName(), ex.getEntity());
 		}
 	}
 
@@ -306,10 +307,10 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	public void testPathMissingSomeParameters() throws Exception {
 		try {
 			this.pathFactory("/{param}/{missing}", new Values(), null);
-		} catch (WebPathException ex) {
+		} catch (HttpException ex) {
 			assertEquals("Incorrect cause",
 					"For path '/{param}/{missing}', no property 'missing' on object " + Values.class.getName(),
-					ex.getMessage());
+					ex.getEntity());
 		}
 	}
 
@@ -340,10 +341,10 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 
 		// Create the builder and build route
 		WebRouterBuilder builder = new WebRouterBuilder(this.getContextPath());
-		WebPathFactory webPathFactory = builder.addRoute(HttpMethod.GET, routePath, null);
+		HttpInputPath inputPath = builder.addRoute(HttpMethod.GET, routePath, null);
 
 		// Create the path factory
-		HttpPathFactory<T> httpPathFactory = webPathFactory
+		HttpPathFactory<T> httpPathFactory = inputPath
 				.createHttpPathFactory((Class<T>) ((values == null) ? Object.class : values.getClass()));
 		String path = httpPathFactory.createApplicationClientPath(values);
 
@@ -374,10 +375,10 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 		String contextPath = this.getContextPath();
 		WebRouterBuilder builder = new WebRouterBuilder(contextPath);
 		for (MockWebRoute route : routes) {
-			WebPathFactory webPathFactory = builder.addRoute(route.method, route.path, route);
+			HttpInputPath inputPath = builder.addRoute(route.method, route.path, route);
 			boolean isParameter = route.path.contains("{");
 			assertEquals("Route " + route.path + " incorrect indication of path parameters", isParameter,
-					webPathFactory.isPathParameters());
+					inputPath.isPathParameters());
 		}
 		WebRouter router = builder.build();
 

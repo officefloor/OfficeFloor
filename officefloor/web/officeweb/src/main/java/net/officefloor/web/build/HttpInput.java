@@ -17,7 +17,7 @@
  */
 package net.officefloor.web.build;
 
-import net.officefloor.web.route.WebPathException;
+import net.officefloor.web.HttpInputPath;
 
 /**
  * HTTP input.
@@ -27,16 +27,10 @@ import net.officefloor.web.route.WebPathException;
 public interface HttpInput {
 
 	/**
-	 * Creates the {@link HttpPathFactory}.
+	 * Obtains the {@link HttpInputPath} for this {@link HttpInput}.
 	 * 
-	 * @param valuesType
-	 *            Optional type to use for obtaining values to construct the
-	 *            path.
-	 * @return {@link HttpPathFactory}.
-	 * @throws WebPathException
-	 *             If required path parameters are not available on the values
-	 *             type.
+	 * @return {@link HttpInputPath} for this {@link HttpInput}.
 	 */
-	<T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws WebPathException;
+	HttpInputPath getPath();
 
 }

@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.web.route.WebPathException;
-
 /**
  * Sources the {@link ValueRetriever}.
  * 
@@ -78,8 +76,6 @@ public class ValueRetrieverSource {
 	 *            recursive properties (bean or its downstream property
 	 *            returning same type as the bean).
 	 * @return {@link PropertyMetaData} instances for the type.
-	 * @throws WebPathException
-	 *             If fails to obtain the {@link PropertyMetaData} instances.
 	 */
 	private static PropertyMetaData[] createPropertyMetaData(Class<?> type, boolean isCaseInsensitive,
 			Map<Class<?>, PropertyMetaData[]> metaDataByType) {
@@ -185,8 +181,6 @@ public class ValueRetrieverSource {
 	 * @param type
 	 *            Type.
 	 * @return {@link ValueRetriever} for the <code>type</code>.
-	 * @throws WebPathException
-	 *             If fails to obtain the {@link ValueRetriever}.
 	 */
 	public <T> ValueRetriever<T> sourceValueRetriever(Class<T> type) {
 

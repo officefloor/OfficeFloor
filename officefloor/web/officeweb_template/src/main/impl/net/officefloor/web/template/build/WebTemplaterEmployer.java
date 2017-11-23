@@ -24,6 +24,9 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -33,6 +36,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.extension.WebTemplateExtension;
+import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
@@ -118,10 +122,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 				WebTemplateSectionSource.class.getName(), applicationPath);
 
 		// Configure the template content
-		templateSection.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT, content.toString());
+		PropertyList properties = this.sourceContext.createPropertyList();
+		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString());
 
 		// Add the template
-		WebTemplateImpl template = new WebTemplateImpl(applicationPath, templateSection);
+		WebTemplateImpl template = new WebTemplateImpl(applicationPath, templateSection, properties);
 		this.templates.add(template);
 
 		// Return the template
@@ -155,7 +160,12 @@ public class WebTemplaterEmployer implements WebTemplater {
 		/**
 		 * {@link OfficeSection} for the {@link WebTemplate}.
 		 */
-		private final OfficeSection templateSection;
+		private final OfficeSection section;
+
+		/**
+		 * {@link PropertyList}.
+		 */
+		private final PropertyList properties;
 
 		/**
 		 * Logic {@link Class} for the {@link WebTemplate}.
@@ -174,10 +184,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 *            Application path for the {@link WebTemplate}.
 		 * @param templateSection
 		 *            {@link OfficeSection} for the {@link WebTemplate}.
+		 * @param properties
+		 *            {@link PropertyList}.
 		 */
-		private WebTemplateImpl(String applicationPath, OfficeSection templateSection) {
+		private WebTemplateImpl(String applicationPath, OfficeSection templateSection, PropertyList properties) {
 			this.applicationPath = applicationPath;
-			this.templateSection = templateSection;
+			this.section = templateSection;
+			this.properties = properties;
 		}
 
 		/**
@@ -185,19 +198,42 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 */
 		private void loadProperties() {
 
-			// Obtain the template input
-			OfficeSectionInput sectionInput = this.templateSection
-					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
-
 			// Configure the input
+			OfficeSectionInput sectionInput = this.section
+					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 			HttpUrlContinuation templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure,
 					applicationPath, sectionInput);
 
-			// Configure details for template
+			// Configure properties for template
 			if (this.logicClass != null) {
-				this.templateSection.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME,
-						this.logicClass.getName());
+				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
+						.setValue(this.logicClass.getName());
 			}
+
+			// Load the type
+			OfficeSectionType type = WebTemplaterEmployer.this.sourceContext.loadOfficeSectionType(this.applicationPath,
+					WebTemplateSectionSource.class.getName(), this.applicationPath, this.properties);
+
+			// Load the link inputs
+			for (OfficeSectionInputType inputType : type.getOfficeSectionInputTypes()) {
+				for (Object annotation : inputType.getAnnotations()) {
+					if (annotation instanceof WebTemplateLinkAnnotation) {
+						WebTemplateLinkAnnotation link = (WebTemplateLinkAnnotation) annotation;
+
+						// Obtain the input
+						String linkName = link.getLinkName();
+						OfficeSectionInput linkInput = this.section.getOfficeSectionInput(linkName);
+
+						// Create the input for the link
+						boolean isLinkSecure = link.isLinkSecure();
+						String linkPath = this.applicationPath + "+" + linkName;
+						WebTemplaterEmployer.this.webArchitect.link(isLinkSecure, linkPath, linkInput);
+					}
+				}
+			}
+
+			// Configure the section
+			this.properties.configureProperties(this.section);
 		}
 
 		/*
@@ -223,6 +259,12 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public void setCharset(Charset charset) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setLinkSeparatorCharacter(char separator) {
 			// TODO Auto-generated method stub
 
 		}
@@ -265,8 +307,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public OfficeSectionOutput getOutput(String outputName) {
-			// TODO Auto-generated method stub
-			return null;
+			return this.section.getOfficeSectionOutput(outputName);
 		}
 	}
 

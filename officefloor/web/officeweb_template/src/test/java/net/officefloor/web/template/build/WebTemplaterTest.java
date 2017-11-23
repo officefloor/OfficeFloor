@@ -173,21 +173,21 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testLink() throws Exception {
 		this.template("/path", (context, templater) -> {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
-			WebTemplate template = templater.addTemplate("/link", new StringReader("Link=#{link}"));
+			WebTemplate template = templater.addTemplate("/path", new StringReader("Link=#{link}"));
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
-		}, "Link=/path-link");
+		}, "Link=/path+link");
 
 		// Ensure can GET link
-		MockHttpResponse response = this.server.send(this.mockRequest("/path-link"));
+		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section GET /path-link", response.getEntity(null));
+		assertEquals("Incorrect link response", "section GET /path+link", response.getEntity(null));
 	}
 
 	public static class MockSection {
 		public void service(ServerHttpConnection connection) throws IOException {
 			HttpRequest request = connection.getRequest();
 			connection.getResponse().getEntityWriter()
-					.write("section  " + request.getMethod().getName() + " " + request.getUri());
+					.write("section " + request.getMethod().getName() + " " + request.getUri());
 		}
 	}
 
@@ -198,7 +198,12 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater.addTemplate("/path", new StringReader("Template #{link}"))
 						.setLogicClass(LinkRerenderTemplateLogic.class),
-				"LINK Template /path-link");
+				"Template /path+link");
+
+		// Ensure can GET link
+		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect link response", "LINK Template /path+link", response.getEntity(null));
 	}
 
 	public static class LinkRerenderTemplateLogic {
@@ -232,12 +237,29 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			WebTemplate template = templater.addTemplate("/{param}", new StringReader("Link=#{link}"));
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
-		}, "Link=/dynamic-link");
+		}, "Link=/dynamic+link");
 
 		// Ensure can GET link (use different path parameter)
-		MockHttpResponse response = this.server.send(this.mockRequest("/another-link"));
+		MockHttpResponse response = this.server.send(this.mockRequest("/another+link"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section GET /another-link");
+		assertEquals("Incorrect link response", "section GET /another+link", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can configure a different separator character for links.
+	 */
+	public void testDynamicLinkWithDifferentPathSeparator() throws Exception {
+		this.template("/dynamic", (context, templater) -> {
+			OfficeSection section = context.addSection("SECTION", MockSection.class);
+			WebTemplate template = templater.addTemplate("/{param}", new StringReader("Link=#{link}"));
+			template.setLinkSeparatorCharacter('|');
+			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
+		}, "Link=/dynamic|link");
+
+		// Ensure can GET link (use different path parameter)
+		MockHttpResponse response = this.server.send(this.mockRequest("/another|link"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect link response", "section GET /another|link", response.getEntity(null));
 	}
 
 	/**
@@ -249,17 +271,17 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			WebTemplate template = templater.addTemplate("/link", new StringReader("Link=#{link}"));
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
-		}, "Link=/default-link");
+		}, "Link=/default+link");
 
 		// Ensure can GET link
-		MockHttpResponse response = this.server.send(this.mockRequest("/default-link").method(HttpMethod.GET));
+		MockHttpResponse response = this.server.send(this.mockRequest("/default+link").method(HttpMethod.GET));
 		assertEquals("GET link should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect GET response", "section GET /default-link", response.getEntity(null));
+		assertEquals("Incorrect GET response", "section GET /default+link", response.getEntity(null));
 
 		// Ensure can POST link
-		response = this.server.send(this.mockRequest("/default-link").method(HttpMethod.POST));
+		response = this.server.send(this.mockRequest("/default+link").method(HttpMethod.POST));
 		assertEquals("POST link should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect POST resposne", "section POST /default-link", response.getEntity(null));
+		assertEquals("Incorrect POST resposne", "section POST /default+link", response.getEntity(null));
 	}
 
 	/**
@@ -270,15 +292,15 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			WebTemplate template = templater.addTemplate("/post", new StringReader("Link=#{POST:link}"));
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
-		}, "Link=/post-link");
+		}, "Link=/post+link");
 
 		// Ensure can POST link
-		MockHttpResponse response = this.server.send(this.mockRequest("/post-link").method(HttpMethod.POST));
+		MockHttpResponse response = this.server.send(this.mockRequest("/post+link").method(HttpMethod.POST));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section POST /post-link");
+		assertEquals("Incorrect link response", "section POST /post+link");
 
 		// Ensure can not GET link (as specifies only POST)
-		response = this.server.send(this.mockRequest("/post-link").method(HttpMethod.GET));
+		response = this.server.send(this.mockRequest("/post+link").method(HttpMethod.GET));
 		assertEquals("Should not support GET", 406, response.getStatus().getStatusCode());
 	}
 
@@ -290,12 +312,12 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			WebTemplate template = templater.addTemplate("/post", new StringReader("Link=#{PUT:link}"));
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
-		}, "Link=/put-link");
+		}, "Link=/put+link");
 
 		// Ensure can POST link
-		MockHttpResponse response = this.server.send(this.mockRequest("/put-link").method(HttpMethod.PUT));
+		MockHttpResponse response = this.server.send(this.mockRequest("/put+link").method(HttpMethod.PUT));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section PUT /put-link");
+		assertEquals("Incorrect link response", "section PUT /put+link");
 	}
 
 	/**
@@ -416,7 +438,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure only accepts link request over a secure connection.
 	 */
 	public void testSecureLink() throws Exception {
-		MockHttpResponse response = this.template("/path-link", (context, templater) -> {
+		MockHttpResponse response = this.template("/path+link", (context, templater) -> {
 			WebTemplate template = templater.addTemplate("/path", new StringReader("Link=#{link}"));
 			template.setLinkSecure("link", true);
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
@@ -425,11 +447,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Not-secure request should a have a redirect to secure connection
 		assertEquals("Should redirect for secure connection", 307, response.getStatus().getStatusCode());
-		assertEquals("Should be secure redirect URL", this.contextUrl("https://mock.officefloor.net", "/path-link"),
+		assertEquals("Should be secure redirect URL", this.contextUrl("https://mock.officefloor.net", "/path+link"),
 				response.getHeader("location").getValue());
 
 		// Ensure able to obtain link over secure connection
-		response = this.server.send(this.mockRequest("/path-link").secure(true));
+		response = this.server.send(this.mockRequest("/path+link").secure(true));
 	}
 
 	/**
