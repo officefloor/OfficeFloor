@@ -434,6 +434,26 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create output with annotations.
+	 */
+	public void testOutputWithAnnotations() {
+		// Load section type
+		SectionType type = this.loadSectionType(true, (section, context) -> {
+			section.addSectionOutput("NO_ANNOTATION", null, false);
+			section.addSectionOutput("ANNOTATION", null, false).addAnnotation("TEST");
+		});
+
+		// Ensure correct output with annotation
+		assertEquals("Incorrect number of outputs", 2, type.getSectionOutputTypes().length);
+		SectionOutputType annotation = type.getSectionOutputTypes()[0];
+		assertEquals("Incorrect input", "ANNOTATION", annotation.getSectionOutputName());
+		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
+		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		SectionOutputType noAnnotation = type.getSectionOutputTypes()[1];
+		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+	}
+
+	/**
 	 * Ensure issue if <code>null</code> {@link SectionObjectNodeImpl} name.
 	 */
 	public void testNullObjectName() {
@@ -537,9 +557,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				new SectionInputTypeImpl("INPUT_B", String.class.getName(), new Object[0]),
 				new SectionInputTypeImpl("INPUT_C", null, new Object[0]));
 		assertList(new String[] { "getSectionOutputName", "getArgumentType", "isEscalationOnly" },
-				type.getSectionOutputTypes(), new SectionOutputTypeImpl("OUTPUT_A", Exception.class.getName(), true),
-				new SectionOutputTypeImpl("OUTPUT_B", Double.class.getName(), false),
-				new SectionOutputTypeImpl("OUTPUT_C", null, false));
+				type.getSectionOutputTypes(),
+				new SectionOutputTypeImpl("OUTPUT_A", Exception.class.getName(), true, new Object[0]),
+				new SectionOutputTypeImpl("OUTPUT_B", Double.class.getName(), false, new Object[0]),
+				new SectionOutputTypeImpl("OUTPUT_C", null, false, new Object[0]));
 		assertList(new String[] { "getSectionObjectName", "getObjectType", "getTypeQualifier" },
 				type.getSectionObjectTypes(), new SectionObjectTypeImpl("OBJECT_A", Object.class.getName(), null),
 				new SectionObjectTypeImpl("OBJECT_B", Connection.class.getName(), "TYPE"));

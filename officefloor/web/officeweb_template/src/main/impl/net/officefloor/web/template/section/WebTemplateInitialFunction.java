@@ -53,7 +53,7 @@ public class WebTemplateInitialFunction extends
 	 * Keys for the {@link WebTemplateInitialFunction} flows.
 	 */
 	public static enum Flows {
-		RENDER
+		REDIRECT, RENDER
 	}
 
 	/**
@@ -159,11 +159,13 @@ public class WebTemplateInitialFunction extends
 		}
 
 		// Ensure URL for template is correct (otherwise redirect GET)
-		HttpRequest request = connection.getRequest();
-		String uri = request.getUri();
-		if (!(this.inputPath.isMatchPath(uri, this.terminatingPathCharacter))) {
-			// Not matching template path, so redirect GET the template
-			isRedirectRequired = true;
+		if (!isRedirectRequired) {
+			HttpRequest request = connection.getRequest();
+			String uri = request.getUri();
+			if (!(this.inputPath.isMatchPath(uri, this.terminatingPathCharacter))) {
+				// Not matching template path, so redirect GET the template
+				isRedirectRequired = true;
+			}
 		}
 
 		// Determine if POST/redirect/GET pattern to be applied
@@ -179,9 +181,8 @@ public class WebTemplateInitialFunction extends
 
 		// Undertake the redirect
 		if (isRedirectRequired) {
-
-			// Need to link to redirect function
-			throw new IOException("TODO need to trigger redirect for rendering template");
+			context.doFlow(Flows.REDIRECT, null, null);
+			return null;
 		}
 
 		// Configure the response

@@ -19,6 +19,7 @@ package net.officefloor.compile.section;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -53,13 +54,20 @@ public interface SectionOutputType {
 	 * Indicates if this {@link SectionOutputType} is used only to handle
 	 * {@link ManagedFunctionEscalationType} instances.
 	 * <p>
-	 * A {@link ManagedFunctionFlowType} must be connected to an {@link SectionInputType},
-	 * however a {@link ManagedFunctionEscalationType} may be generically handled by the
-	 * {@link Office}.
+	 * A {@link ManagedFunctionFlowType} must be connected to an
+	 * {@link SectionInputType}, however a {@link ManagedFunctionEscalationType}
+	 * may be generically handled by the {@link Office}.
 	 * 
 	 * @return <code>true</code> if this {@link SectionOutputType} is
 	 *         {@link ManagedFunctionEscalationType} instances only.
 	 */
 	boolean isEscalationOnly();
+
+	/**
+	 * Obtains the annotations for the {@link SectionOutput}.
+	 * 
+	 * @return Annotations for the {@link SectionOutput}.
+	 */
+	Object[] getAnnotations();
 
 }

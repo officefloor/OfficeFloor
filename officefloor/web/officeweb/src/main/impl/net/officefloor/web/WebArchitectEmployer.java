@@ -478,7 +478,11 @@ public class WebArchitectEmployer implements WebArchitect {
 						this.officeArchitect.link(continuation.output, redirectInput);
 
 					} catch (Exception ex) {
-						this.officeArchitect.addIssue("Failed to create redirect", ex);
+						this.officeArchitect.addIssue("Failed to create redirect to " + input.applicationPath
+								+ (continuation.parameterType == null ? " with null value type"
+										: " with values type " + continuation.parameterType.getName())
+								+ " from section " + routeOutput.getOfficeSection().getOfficeSectionName() + " output "
+								+ routeOutput.getOfficeSectionOutputName(), ex);
 					}
 				}
 			}

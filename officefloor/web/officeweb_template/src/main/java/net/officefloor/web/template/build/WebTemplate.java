@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.template.build;
 
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
@@ -38,8 +39,25 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * 
 	 * @param logicClass
 	 *            Logic {@link Class}.
+	 * @return <code>this</code>.
 	 */
-	void setLogicClass(Class<?> logicClass);
+	WebTemplate setLogicClass(Class<?> logicClass);
+
+	/**
+	 * <p>
+	 * Specifies the {@link Method} name on the logic {@link Class} to provide
+	 * the values for redirect path parameters to this {@link WebTemplate}. The
+	 * returned type from the {@link Method} will be used to source values for
+	 * parameters in constructing the path to this {@link WebTemplate}.
+	 * <p>
+	 * Should the path to the template be static (i.e. has no path parameters),
+	 * no {@link Method} need be specified.
+	 * 
+	 * @param functionName
+	 *            Logic {@link Class} {@link Method} name.
+	 * @return <code>this</code>.
+	 */
+	WebTemplate setRedirectValuesFunction(String functionName);
 
 	/**
 	 * Specifies the <code>Content-Type</code> output by this
@@ -47,8 +65,9 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * 
 	 * @param contentType
 	 *            <code>Content-Type</code> output by this {@link WebTemplate}.
+	 * @return <code>this</code>.
 	 */
-	void setContentType(String contentType);
+	WebTemplate setContentType(String contentType);
 
 	/**
 	 * Allow overriding the default {@link Charset} to render the
@@ -56,8 +75,9 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * 
 	 * @param charset
 	 *            {@link Charset} to render the {@link WebTemplate}.
+	 * @return <code>this</code>.
 	 */
-	void setCharset(Charset charset);
+	WebTemplate setCharset(Charset charset);
 
 	/**
 	 * Allows overriding the default separator character between the path and
@@ -65,8 +85,9 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * 
 	 * @param separator
 	 *            Separator to use to separate path and link.
+	 * @return <code>this</code>.
 	 */
-	void setLinkSeparatorCharacter(char separator);
+	WebTemplate setLinkSeparatorCharacter(char separator);
 
 	/**
 	 * Flags whether the {@link WebTemplate} may only be rendered over a secure
@@ -75,8 +96,9 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * @param isSecure
 	 *            <code>true</code> to only render the {@link WebTemplate} over
 	 *            a secure connection.
+	 * @return <code>this</code>.
 	 */
-	void setSecure(boolean isSecure);
+	WebTemplate setSecure(boolean isSecure);
 
 	/**
 	 * <p>
@@ -91,8 +113,9 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * @param isSecure
 	 *            <code>true</code> should the link require a secure
 	 *            {@link ServerHttpConnection}.
+	 * @return <code>this</code>.
 	 */
-	void setLinkSecure(String linkName, boolean isSecure);
+	WebTemplate setLinkSecure(String linkName, boolean isSecure);
 
 	/**
 	 * <p>
@@ -104,24 +127,27 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * @param method
 	 *            {@link HttpMethod} that will not trigger a redirect on
 	 *            rendering the {@link WebTemplate}.
+	 * @return <code>this</code>.
 	 */
-	void addNonRedirectMethod(HttpMethod method);
+	WebTemplate addNonRedirectMethod(HttpMethod method);
 
 	/**
 	 * Specifies the super (parent) {@link WebTemplate}.
 	 * 
 	 * @param superTemplate
 	 *            Super {@link WebTemplate}.
+	 * @return <code>this</code>.
 	 */
-	void setSuperTemplate(WebTemplate superTemplate);
+	WebTemplate setSuperTemplate(WebTemplate superTemplate);
 
 	/**
 	 * Adds a {@link WebTemplateExtension} for this {@link WebTemplate}.
 	 * 
 	 * @param extension
 	 *            {@link WebTemplateExtension} for this {@link WebTemplate}.
+	 * @return <code>this</code>.
 	 */
-	void addExtension(WebTemplateExtension extension);
+	WebTemplate addExtension(WebTemplateExtension extension);
 
 	/**
 	 * Obtains the {@link OfficeSectionInput} to link to this

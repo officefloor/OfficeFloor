@@ -20,12 +20,14 @@ package net.officefloor.web.template.build;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -37,6 +39,7 @@ import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
+import net.officefloor.web.template.section.WebTemplateRedirectAnnotation;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
@@ -118,15 +121,17 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		// Add the section for the template
-		OfficeSection templateSection = this.officeArchitect.addOfficeSection(applicationPath,
-				WebTemplateSectionSource.class.getName(), applicationPath);
+		WebTemplateSectionSource webTemplateSectionSource = new WebTemplateSectionSource();
+		OfficeSection templateSection = this.officeArchitect.addOfficeSection(applicationPath, webTemplateSectionSource,
+				applicationPath);
 
 		// Configure the template content
 		PropertyList properties = this.sourceContext.createPropertyList();
 		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString());
 
 		// Add the template
-		WebTemplateImpl template = new WebTemplateImpl(applicationPath, templateSection, properties);
+		WebTemplateImpl template = new WebTemplateImpl(applicationPath, webTemplateSectionSource, templateSection,
+				properties);
 		this.templates.add(template);
 
 		// Return the template
@@ -158,6 +163,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private final String applicationPath;
 
 		/**
+		 * {@link WebTemplateSectionSource}.
+		 */
+		private final WebTemplateSectionSource webTemplateSectionSource;
+
+		/**
 		 * {@link OfficeSection} for the {@link WebTemplate}.
 		 */
 		private final OfficeSection section;
@@ -173,6 +183,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private Class<?> logicClass = null;
 
 		/**
+		 * Name of {@link Method} on the logic {@link Class} to return the
+		 * values for path parameters in redirecting to this
+		 * {@link WebTemplate}.
+		 */
+		private String redirectValuesFunctionName = null;
+
+		/**
 		 * Indicates if the {@link WebTemplate} is secure.
 		 */
 		private boolean isSecure = false;
@@ -182,13 +199,17 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 * 
 		 * @param applicationPath
 		 *            Application path for the {@link WebTemplate}.
+		 * @param webTemplateSectionSource
+		 *            {@link WebTemplateSectionSource}.
 		 * @param templateSection
 		 *            {@link OfficeSection} for the {@link WebTemplate}.
 		 * @param properties
 		 *            {@link PropertyList}.
 		 */
-		private WebTemplateImpl(String applicationPath, OfficeSection templateSection, PropertyList properties) {
+		private WebTemplateImpl(String applicationPath, WebTemplateSectionSource webTemplateSectionSource,
+				OfficeSection templateSection, PropertyList properties) {
 			this.applicationPath = applicationPath;
+			this.webTemplateSectionSource = webTemplateSectionSource;
 			this.section = templateSection;
 			this.properties = properties;
 		}
@@ -203,11 +224,16 @@ public class WebTemplaterEmployer implements WebTemplater {
 					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 			HttpUrlContinuation templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure,
 					applicationPath, sectionInput);
+			this.webTemplateSectionSource.setHttpInputPath(templateInput.getPath());
 
 			// Configure properties for template
 			if (this.logicClass != null) {
 				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
 						.setValue(this.logicClass.getName());
+			}
+			if (this.redirectValuesFunctionName != null) {
+				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_REDIRECT_VALUES_FUNCTION)
+						.setValue(this.redirectValuesFunctionName);
 			}
 
 			// Load the type
@@ -232,6 +258,23 @@ public class WebTemplaterEmployer implements WebTemplater {
 				}
 			}
 
+			// Load the redirect to template
+			for (OfficeSectionOutputType outputType : type.getOfficeSectionOutputTypes()) {
+				for (Object annotation : outputType.getAnnotations()) {
+					if (annotation instanceof WebTemplateRedirectAnnotation) {
+						WebTemplateRedirectAnnotation redirect = (WebTemplateRedirectAnnotation) annotation;
+
+						// Obtain the values type for redirect
+						Class<?> valuesType = redirect.getValuesType();
+
+						// Configure the redirect
+						OfficeSectionOutput redirectOutput = this.section
+								.getOfficeSectionOutput(WebTemplateSectionSource.REDIRECT_TEMPLATE_OUTPUT_NAME);
+						WebTemplaterEmployer.this.webArchitect.link(redirectOutput, templateInput, valuesType);
+					}
+				}
+			}
+
 			// Configure the section
 			this.properties.configureProperties(this.section);
 		}
@@ -247,56 +290,63 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public void setLogicClass(Class<?> logicClass) {
+		public WebTemplate setLogicClass(Class<?> logicClass) {
 			this.logicClass = logicClass;
+			return this;
 		}
 
 		@Override
-		public void setContentType(String contentType) {
-			// TODO Auto-generated method stub
-
+		public WebTemplate setRedirectValuesFunction(String functionName) {
+			this.redirectValuesFunctionName = functionName;
+			return null;
 		}
 
 		@Override
-		public void setCharset(Charset charset) {
+		public WebTemplate setContentType(String contentType) {
 			// TODO Auto-generated method stub
-
+			return this;
 		}
 
 		@Override
-		public void setLinkSeparatorCharacter(char separator) {
+		public WebTemplate setCharset(Charset charset) {
 			// TODO Auto-generated method stub
-
+			return this;
 		}
 
 		@Override
-		public void setSecure(boolean isSecure) {
+		public WebTemplate setLinkSeparatorCharacter(char separator) {
 			// TODO Auto-generated method stub
-
+			return this;
 		}
 
 		@Override
-		public void setLinkSecure(String linkName, boolean isSecure) {
+		public WebTemplate setSecure(boolean isSecure) {
 			// TODO Auto-generated method stub
-
+			return this;
 		}
 
 		@Override
-		public void addNonRedirectMethod(HttpMethod method) {
+		public WebTemplate setLinkSecure(String linkName, boolean isSecure) {
 			// TODO Auto-generated method stub
-
+			return this;
 		}
 
 		@Override
-		public void setSuperTemplate(WebTemplate superTemplate) {
+		public WebTemplate addNonRedirectMethod(HttpMethod method) {
 			// TODO Auto-generated method stub
-
+			return this;
 		}
 
 		@Override
-		public void addExtension(WebTemplateExtension extension) {
+		public WebTemplate setSuperTemplate(WebTemplate superTemplate) {
 			// TODO Auto-generated method stub
+			return this;
+		}
 
+		@Override
+		public WebTemplate addExtension(WebTemplateExtension extension) {
+			// TODO Auto-generated method stub
+			return this;
 		}
 
 		@Override

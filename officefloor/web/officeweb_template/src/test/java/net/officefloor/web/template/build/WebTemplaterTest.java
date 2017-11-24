@@ -157,7 +157,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testDynamicPath() throws Exception {
 		this.template("/dynamic/value",
 				(context, templater) -> templater.addTemplate("/dynamic/{param}", new StringReader("Data=${value}"))
-						.setLogicClass(DynamicPathLogic.class),
+						.setLogicClass(DynamicPathLogic.class).setRedirectValuesFunction("getPath"),
 				"Data=value");
 	}
 
@@ -166,6 +166,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		public DynamicPathLogic getTemplate(@HttpPathParameter("param") String param) {
 			this.value = param;
+			return this;
+		}
+
+		public DynamicPathLogic getPath() {
 			return this;
 		}
 
@@ -501,6 +505,29 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			WebTemplate parent = templater.addTemplate("/parent", new StringReader("TEST <!-- {section} --> PARENT"));
 			templater.addTemplate("/child", new StringReader("<!-- {:section} -->Child")).setSuperTemplate(parent);
 		}, "TEST Child");
+	}
+
+	/**
+	 * Ensure can specify multiple {@link WebTemplate} instances for
+	 * inheritance.
+	 */
+	public void testGrandSuperTemplate() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can load {@link WebTemplate} from a resource.
+	 */
+	public void testLoadTemplateFromResource() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can load {@link WebTemplate} and it's super {@link WebTemplate}
+	 * from a resource.
+	 */
+	public void testLoadSuperFromResource() throws Exception {
+		fail("TODO implement");
 	}
 
 	/**

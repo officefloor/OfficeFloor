@@ -118,6 +118,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
 
 	/**
+	 * Name of the {@link SectionOutput} for redirect to the
+	 * {@link WebTemplate}.
+	 */
+	public static final String REDIRECT_TEMPLATE_OUTPUT_NAME = "redirectToTemplate";
+
+	/**
 	 * Name of the {@link SectionOutput} for flow after completion of rending
 	 * the {@link ParsedTemplate}.
 	 */
@@ -145,6 +151,13 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * logic to the template.
 	 */
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
+
+	/**
+	 * Name of {@link Property} for the {@link Method} name on the logic
+	 * {@link Class} that will return an object containing the values for the
+	 * path parameters in redirecting to this {@link WebTemplate}.
+	 */
+	public static final String PROPERTY_REDIRECT_VALUES_FUNCTION = "template.redirect.values.function";
 
 	/**
 	 * {@link Property} prefix to obtain the bean for the
@@ -310,11 +323,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * {@link HttpInputPath}.
-	 */
-	private final HttpInputPath inputPath;
-
-	/**
 	 * {@link Class} providing the logic for the HTTP template - also the
 	 * {@link Class} for the {@link ClassSectionSource}.
 	 */
@@ -337,12 +345,17 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	private final List<TemplateFlowLink> flowLinks = new LinkedList<TemplateFlowLink>();
 
 	/**
-	 * Instantiate.
+	 * {@link HttpInputPath}.
+	 */
+	private HttpInputPath inputPath;
+
+	/**
+	 * Specifies the {@link HttpInputPath}.
 	 * 
 	 * @param inputPath
 	 *            {@link HttpInputPath}.
 	 */
-	public WebTemplateSectionSource(HttpInputPath inputPath) {
+	public void setHttpInputPath(HttpInputPath inputPath) {
 		this.inputPath = inputPath;
 	}
 
@@ -614,9 +627,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				.charAt(0);
 
 		// Load the initial function
+		WebTemplateInitialFunction initialFunctionFactory = new WebTemplateInitialFunction(isTemplateSecure,
+				notRedirectHttpMethods, templateContentType, templateCharset, this.inputPath, terminatingCharacter);
 		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
-				new WebTemplateInitialManagedFunctionSource(isTemplateSecure, notRedirectHttpMethods,
-						templateContentType, templateCharset, this.inputPath, terminatingCharacter));
+				new WebTemplateInitialManagedFunctionSource(initialFunctionFactory));
 		SectionFunction initialFunction = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		designer.link(initialFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), connectionObject);
@@ -626,10 +640,44 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		SectionInput sectionInput = designer.addSectionInput(RENDER_TEMPLATE_INPUT_NAME, null);
 		designer.link(sectionInput, initialFunction);
 
+		// Create and link redirect of template
+		SectionOutput redirectOutput = designer.addSectionOutput(REDIRECT_TEMPLATE_OUTPUT_NAME, null, false);
+		FunctionFlow templateRedirectFlow = initialFunction.getFunctionFlow(Flows.REDIRECT.name());
+		String redirectValuesFunctionName = context.getProperty(PROPERTY_REDIRECT_VALUES_FUNCTION, null);
+		SectionFunction redirectValuesFunction = null;
+		Class<?> redirectValuesType = null;
+		if (redirectValuesFunctionName != null) {
+			redirectValuesFunction = this.getFunctionByName(redirectValuesFunctionName);
+			if (redirectValuesFunction == null) {
+				// Indicate issues, as configured function is not available
+				designer.addIssue(
+						"No method by name '" + redirectValuesFunctionName + "' on logic class " + sectionClassName);
+			} else {
+				// Obtain the redirect values type
+				redirectValuesType = this.getFunctionTypeByName(redirectValuesFunctionName).getReturnType();
+			}
+		}
+		if (redirectValuesFunction == null) {
+			// Ensure indicating issue if require values
+			if ((this.inputPath != null) && (this.inputPath.isPathParameters())) {
+				designer.addIssue(WebTemplate.class.getSimpleName()
+						+ " has path parameters but no redirect values function configured");
+			}
+
+			// No redirect function so link directly to redirect
+			designer.link(templateRedirectFlow, redirectOutput, false);
+
+		} else {
+			// Redirect values function, so link to it then redirect
+			designer.link(templateRedirectFlow, redirectValuesFunction, false);
+			designer.link(redirectValuesFunction, redirectOutput);
+		}
+		redirectOutput.addAnnotation(new WebTemplateRedirectAnnotation(redirectValuesType));
+
 		// Load the HTTP template
 		final String TEMPLATE_NAMESPACE_NANE = "TEMPLATE";
 		SectionFunctionNamespace templateNamespace = designer.addSectionFunctionNamespace(TEMPLATE_NAMESPACE_NANE,
-				WebTemplateManagedFunctionSource.class.getName());
+				new WebTemplateManagedFunctionSource(isTemplateSecure, template, templateCharset));
 		templateNamespace.addProperty(PROPERTY_TEMPLATE_CONTENT, templateContent);
 
 		// Copy the template configuration
@@ -719,7 +767,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 					designer.addIssue("Template bean method '" + method.getName() + "' (task " + beanFunctionKey
 							+ ") must not be annotated with " + NextFunction.class.getSimpleName());
 
-					// As NextTask annotation, do not render section
+					// As NextFunction annotation, do not render section
 					continue;
 				}
 
@@ -1158,62 +1206,18 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		public static final String FUNCTION_NAME = "FUNCTION";
 
 		/**
-		 * Indicates if {@link WebTemplate} is secure.
+		 * {@link WebTemplateInitialFunction}.
 		 */
-		private final boolean isSecure;
-
-		/**
-		 * {@link HttpMethod} instances to not trigger redirect for GET request
-		 * to template.
-		 */
-		private final HttpMethod[] notRedirectHttpMethods;
-
-		/**
-		 * <code>Content-Type</code> for {@link WebTemplate}.
-		 */
-		private final String contentType;
-
-		/**
-		 * {@link Charset} for the {@link WebTemplate}.
-		 */
-		private final Charset charset;
-
-		/**
-		 * {@link HttpInputPath}.
-		 */
-		private final HttpInputPath inputPath;
-
-		/**
-		 * Terminating character for path ending with parameter.
-		 */
-		private final char endingPathParameterTerminatingCharacter;
+		private final WebTemplateInitialFunction function;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isSecure
-		 *            Indicates if {@link WebTemplate} is secure.
-		 * @param notRedirectHttpMethods
-		 *            {@link HttpMethod} instances to not trigger redirect for
-		 *            GET request to template.
-		 * @param contentType
-		 *            <code>Content-Type</code> for {@link WebTemplate}.
-		 * @param charset
-		 *            {@link Charset} for the {@link WebTemplate}.
-		 * @param inputPath
-		 *            {@link HttpInputPath}.
-		 * @param endingPathParameterTerminatingCharacter
-		 *            Terminating character for path ending with parameter.
+		 * @param function
+		 *            {@link WebTemplateInitialFunction}.
 		 */
-		private WebTemplateInitialManagedFunctionSource(boolean isSecure, HttpMethod[] notRedirectHttpMethods,
-				String contentType, Charset charset, HttpInputPath inputPath,
-				char endingPathParameterTerminatingCharacter) {
-			this.isSecure = isSecure;
-			this.notRedirectHttpMethods = notRedirectHttpMethods;
-			this.contentType = contentType;
-			this.charset = charset;
-			this.inputPath = inputPath;
-			this.endingPathParameterTerminatingCharacter = endingPathParameterTerminatingCharacter;
+		private WebTemplateInitialManagedFunctionSource(WebTemplateInitialFunction function) {
+			this.function = function;
 		}
 
 		/*
@@ -1228,16 +1232,13 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
-			// Create the HTTP Template initial function
-			WebTemplateInitialFunction factory = new WebTemplateInitialFunction(this.isSecure,
-					this.notRedirectHttpMethods, this.contentType, this.charset, this.inputPath,
-					this.endingPathParameterTerminatingCharacter);
-
 			// Configure the function
 			ManagedFunctionTypeBuilder<WebTemplateInitialDependencies, Flows> function = namespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION_NAME, factory, WebTemplateInitialDependencies.class, Flows.class);
+					.addManagedFunctionType(FUNCTION_NAME, this.function, WebTemplateInitialDependencies.class,
+							Flows.class);
 			function.addObject(ServerHttpConnection.class)
 					.setKey(WebTemplateInitialDependencies.SERVER_HTTP_CONNECTION);
+			function.addFlow().setKey(Flows.REDIRECT);
 			function.addFlow().setKey(Flows.RENDER);
 			function.addEscalation(IOException.class);
 		}

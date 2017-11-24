@@ -118,7 +118,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * {@link SectionFunction} instances by name.
 	 */
-	private final Map<String, SectionFunction> _functionsByName = new HashMap<String, SectionFunction>();
+	private final Map<String, SectionFunction> _functionsByName = new HashMap<>();
 
 	/**
 	 * Obtains the {@link SectionFunction} by its name.
@@ -133,9 +133,28 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
+	 * {@link ManagedFunctionType} instances for the {@link SectionFunction}
+	 * instances by name.
+	 */
+	private final Map<String, ManagedFunctionType<?, ?>> _functionTypesByName = new HashMap<>();
+
+	/**
+	 * Obtains the {@link ManagedFunctionType} for the {@link SectionFunction}
+	 * by its name.
+	 * 
+	 * @param functionName
+	 *            Name of the {@link SectionFunction}.
+	 * @return {@link ManagedFunctionType} or <code>null</code> if no
+	 *         {@link SectionFunction} by the name.
+	 */
+	public ManagedFunctionType<?, ?> getFunctionTypeByName(String functionName) {
+		return this._functionTypesByName.get(functionName);
+	}
+
+	/**
 	 * {@link SectionFunction} instances by {@link ManagedFunctionType} name.
 	 */
-	private final Map<String, SectionFunction> _functionsByTypeName = new HashMap<String, SectionFunction>();
+	private final Map<String, SectionFunction> _functionsByTypeName = new HashMap<>();
 
 	/**
 	 * Obtains the {@link SectionFunction} by its {@link ManagedFunctionType}
@@ -855,6 +874,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			// Add function (both by name and type name for internal linking)
 			SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
 			this._functionsByName.put(functionName, function);
+			this._functionTypesByName.put(functionName, functionType);
 			this.registerFunctionByTypeName(functionTypeName, function);
 
 			// Obtain the parameter for the function

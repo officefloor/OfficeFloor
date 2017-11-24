@@ -44,6 +44,11 @@ public class SectionOutputTypeImpl implements SectionOutputType {
 	private final boolean isEscalationOnly;
 
 	/**
+	 * Annotations.
+	 */
+	private final Object[] annotations;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param outputName
@@ -51,13 +56,16 @@ public class SectionOutputTypeImpl implements SectionOutputType {
 	 * @param argumentType
 	 *            Argument type of the {@link SectionOutput}.
 	 * @param isEscalationOnly
-	 *            Flag indicaating if {@link Escalation} only.
+	 *            Flag indicating if {@link Escalation} only.
+	 * @param annotations
+	 *            Annotations.
 	 */
-	public SectionOutputTypeImpl(String outputName, String argumentType,
-			boolean isEscalationOnly) {
+	public SectionOutputTypeImpl(String outputName, String argumentType, boolean isEscalationOnly,
+			Object[] annotations) {
 		this.outputName = outputName;
 		this.argumentType = argumentType;
 		this.isEscalationOnly = isEscalationOnly;
+		this.annotations = annotations;
 	}
 
 	/*
@@ -78,4 +86,10 @@ public class SectionOutputTypeImpl implements SectionOutputType {
 	public boolean isEscalationOnly() {
 		return this.isEscalationOnly;
 	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations;
+	}
+
 }

@@ -45,6 +45,11 @@ public class OfficeSectionOutputTypeImpl implements OfficeSectionOutputType {
 	private final boolean isEscalationOnly;
 
 	/**
+	 * Annotations.
+	 */
+	private final Object[] annotations;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param outputName
@@ -54,12 +59,15 @@ public class OfficeSectionOutputTypeImpl implements OfficeSectionOutputType {
 	 * @param isEscalationOnly
 	 *            Flag indicating if {@link OfficeSectionOutput} is
 	 *            {@link Escalation} only.
+	 * @param annotations
+	 *            Annotations.
 	 */
-	public OfficeSectionOutputTypeImpl(String outputName, String argumentType,
-			boolean isEscalationOnly) {
+	public OfficeSectionOutputTypeImpl(String outputName, String argumentType, boolean isEscalationOnly,
+			Object[] annotations) {
 		this.outputName = outputName;
 		this.argumentType = argumentType;
 		this.isEscalationOnly = isEscalationOnly;
+		this.annotations = annotations;
 	}
 
 	/*
@@ -79,6 +87,11 @@ public class OfficeSectionOutputTypeImpl implements OfficeSectionOutputType {
 	@Override
 	public boolean isEscalationOnly() {
 		return this.isEscalationOnly;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations;
 	}
 
 }

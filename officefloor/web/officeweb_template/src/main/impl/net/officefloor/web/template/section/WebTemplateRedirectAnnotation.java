@@ -17,55 +17,43 @@
  */
 package net.officefloor.web.template.section;
 
-import net.officefloor.web.build.HttpInput;
+import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.template.build.WebTemplate;
 
 /**
- * Annotation identifying a {@link HttpInput} link for the {@link WebTemplate}.
+ * Annotation identifying a redirect to the {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebTemplateLinkAnnotation {
+public class WebTemplateRedirectAnnotation {
 
 	/**
-	 * Indicates if the link is secure.
+	 * Type provided to the redirect to source values to construct the
+	 * {@link HttpInputPath}.
 	 */
-	private final boolean isLinkSecure;
-
-	/**
-	 * Name of link.
-	 */
-	private final String linkName;
+	private final Class<?> valuesType;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isLinkSecure
-	 *            Indicates if the link is secure.
-	 * @param linkName
-	 *            Name of link.
+	 * @param valuesType
+	 *            Type provided to the redirect to source values to construct
+	 *            the {@link HttpInputPath}. May be <code>null</code> if no
+	 *            values are required.
 	 */
-	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName) {
-		this.isLinkSecure = isLinkSecure;
-		this.linkName = linkName;
+	public WebTemplateRedirectAnnotation(Class<?> valuesType) {
+		this.valuesType = valuesType;
 	}
 
 	/**
-	 * Indicates if the link is secure.
+	 * Obtains the type provided to the redirect to source values to construct
+	 * the {@link HttpInputPath}.
 	 * 
-	 * @return <code>true</code> if link is secure.
+	 * @return Type provided to the redirect to source values to construct the
+	 *         {@link HttpInputPath}. May be <code>null</code>.
 	 */
-	public boolean isLinkSecure() {
-		return this.isLinkSecure;
-	}
-
-	/**
-	 * Obtains the link name.
-	 * 
-	 * @return Link name.
-	 */
-	public String getLinkName() {
-		return this.linkName;
+	public Class<?> getValuesType() {
+		return this.valuesType;
 	}
 
 }

@@ -262,6 +262,27 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure can create output with annotations.
+	 */
+	public void testOutputWithAnnotations() {
+
+		// Load office section type
+		OfficeSectionType type = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionOutput("NO_ANNOTATION", null, false);
+			context.getBuilder().addSectionOutput("ANNOTATION", null, false).addAnnotation("TEST");
+		});
+
+		// Ensure correct output with annotation
+		assertEquals("Incorrect number of outputs", 2, type.getOfficeSectionOutputTypes().length);
+		OfficeSectionOutputType annotation = type.getOfficeSectionOutputTypes()[0];
+		assertEquals("Incorrect input", "ANNOTATION", annotation.getOfficeSectionOutputName());
+		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
+		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		OfficeSectionOutputType noAnnotation = type.getOfficeSectionOutputTypes()[1];
+		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+	}
+
+	/**
 	 * Ensure can add an {@link OfficeSectionObject}.
 	 */
 	public void testLoadOfficeSectionObject() {

@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.section.OfficeSectionOutputTypeImpl;
 import net.officefloor.compile.impl.section.SectionOutputTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -86,6 +89,11 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 			this.isEscalationOnly = isEscalationOnly;
 		}
 	}
+
+	/**
+	 * Annotations.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -162,12 +170,14 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 		}
 
 		// Create and return type
-		return new SectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly);
+		return new SectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly,
+				this.annotations.toArray(new Object[this.annotations.size()]));
 	}
 
 	@Override
 	public OfficeSectionOutputType loadOfficeSectionOutputType(CompileContext compileContext) {
-		return new OfficeSectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly);
+		return new OfficeSectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly,
+				this.annotations.toArray(new Object[this.annotations.size()]));
 	}
 
 	/*
@@ -177,6 +187,11 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	@Override
 	public String getSectionOutputName() {
 		return this.outputName;
+	}
+
+	@Override
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
 	}
 
 	/*
