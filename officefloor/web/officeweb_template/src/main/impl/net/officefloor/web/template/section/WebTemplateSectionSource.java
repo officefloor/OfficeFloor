@@ -906,7 +906,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			}
 		}
 
-		// Link bean tasks to re-render template by default
+		// Link bean functions to re-render template by default
 		List<String> sectionClassMethodTaskNames = new ArrayList<String>(
 				this.sectionClassMethodFunctionsByName.keySet());
 		Collections.sort(sectionClassMethodTaskNames);
@@ -918,6 +918,11 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				// Potentially rendering so obtain the class method
 				TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(beanTaskKey);
 				Method method = methodFunction.method;
+
+				// Determine if the redirect values function
+				if ((redirectValuesFunctionName != null) && (redirectValuesFunctionName.equals(method.getName()))) {
+					continue; // not render (as redirect)
+				}
 
 				// Determine if not render template after
 				if (method.isAnnotationPresent(NotRenderTemplateAfter.class)) {

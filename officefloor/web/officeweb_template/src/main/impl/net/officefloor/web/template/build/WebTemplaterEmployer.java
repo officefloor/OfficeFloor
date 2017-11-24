@@ -269,7 +269,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 						// Configure the redirect
 						OfficeSectionOutput redirectOutput = this.section
-								.getOfficeSectionOutput(WebTemplateSectionSource.REDIRECT_TEMPLATE_OUTPUT_NAME);
+								.getOfficeSectionOutput(outputType.getOfficeSectionOutputName());
 						WebTemplaterEmployer.this.webArchitect.link(redirectOutput, templateInput, valuesType);
 					}
 				}
@@ -298,7 +298,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 		@Override
 		public WebTemplate setRedirectValuesFunction(String functionName) {
 			this.redirectValuesFunctionName = functionName;
-			return null;
+			return this;
 		}
 
 		@Override

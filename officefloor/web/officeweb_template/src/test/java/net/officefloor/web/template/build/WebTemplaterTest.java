@@ -157,19 +157,23 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testDynamicPath() throws Exception {
 		this.template("/dynamic/value",
 				(context, templater) -> templater.addTemplate("/dynamic/{param}", new StringReader("Data=${value}"))
-						.setLogicClass(DynamicPathLogic.class).setRedirectValuesFunction("getPath"),
+						.setLogicClass(DynamicPathLogic.class).setRedirectValuesFunction("getPathValues"),
 				"Data=value");
 	}
 
 	public static class DynamicPathLogic {
 		private String value;
 
-		public DynamicPathLogic getTemplate(@HttpPathParameter("param") String param) {
-			this.value = param;
+		public DynamicPathLogic getPathValues() {
 			return this;
 		}
 
-		public DynamicPathLogic getPath() {
+		public String getParam() {
+			return this.value;
+		}
+
+		public DynamicPathLogic getTemplate(@HttpPathParameter("param") String param) {
+			this.value = param;
 			return this;
 		}
 
@@ -214,10 +218,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		// Ensure can GET link triggers redirect to template
 		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
 		assertEquals("Should be redirect to template", 303, response.getStatus().getStatusCode());
-		response.assertHeader("location", "/path");
+		response.assertHeader("location", this.contextUrl("http://mock.officefloor.net", "/path"));
 
 		// Ensure on GET redirect that able to load template
-		response = this.server.send(MockHttpServer.mockRequest(response.getHeader("location").getValue()));
+		response = this.server.send(this.mockRequest("/path"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect template", "Template /path+link", response.getEntity(null));
 	}
@@ -232,7 +236,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure not re-render template after handling link.
 	 */
 	public void testLinkNotRerenderTemplate() throws Exception {
-		this.template("/path",
+		this.template("/path+link",
 				(context, templater) -> templater.addTemplate("/path", new StringReader("Template #{link}"))
 						.setLogicClass(LinkNotRerenderTemplateLogic.class),
 				"LINK");
@@ -251,7 +255,8 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testDynamicLink() throws Exception {
 		this.template("/dynamic", (context, templater) -> {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
-			WebTemplate template = templater.addTemplate("/{param}", new StringReader("Link=#{link}"));
+			WebTemplate template = templater.addTemplate("/{param}", new StringReader("Link=#{link}"))
+					.setLogicClass(DynamicLinkLogic.class).setRedirectValuesFunction("getPathValues");
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
 		}, "Link=/dynamic+link");
 
@@ -259,6 +264,19 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(this.mockRequest("/another+link"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect link response", "section GET /another+link", response.getEntity(null));
+	}
+
+	public static class DynamicLinkLogic {
+		private String value;
+
+		public DynamicLinkLogic getPathValues(@HttpPathParameter("param") String value) {
+			this.value = value;
+			return this;
+		}
+
+		public String getParam() {
+			return this.value;
+		}
 	}
 
 	/**
