@@ -68,8 +68,14 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 
 	@Override
 	public Class<?> getValueType(String name) throws HttpException {
-		// Delegate to obtain type method
+		// Delegate to obtain value type
 		return this.delegate.getValueType(name);
+	}
+
+	@Override
+	public <A> A getValueAnnotation(String name, Class<A> annotationType) throws HttpException {
+		// Delegate to obtain value annotation
+		return this.delegate.getValueAnnotation(name, annotationType);
 	}
 
 	@Override

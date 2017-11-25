@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.value.retrieve;
 
+import net.officefloor.web.HttpPathParameter;
+
 /**
  * <p>
  * Property object type.
@@ -32,6 +34,7 @@ public interface PropertyObject {
 	 * 
 	 * @return String value as per testing.
 	 */
+	@HttpPathParameter("test")
 	String getText();
 
 	/**

@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.value.retrieve;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,6 +84,27 @@ public class PropertyMetaData {
 	 */
 	public Class<?> getValueType() {
 		return this.typeMethod.getReturnType();
+	}
+
+	/**
+	 * <p>
+	 * Obtains the value {@link Annotation}.
+	 * 
+	 * @param annotationType
+	 *            {@link Annotation}.
+	 * @return {@link Annotation} or <code>null</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public <A> A getValueAnnotation(Class<A> annotationType) {
+
+		// Ensure annotation type
+		if (!(Annotation.class.isAssignableFrom(annotationType))) {
+			return null; // must be annoation type
+		}
+
+		// Obtain the annotation
+		Class<? extends Annotation> annotationClass = (Class<? extends Annotation>) annotationType;
+		return (A) this.typeMethod.getAnnotation(annotationClass);
 	}
 
 	/**

@@ -20,6 +20,7 @@ package net.officefloor.web.value.retrieve;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.web.HttpPathParameter;
 
 /**
  * Tests determine if value is retrievable via the {@link ValueRetriever}.
@@ -112,6 +113,23 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
+	}
+
+	/**
+	 * Ensure able to obtain annotation.
+	 */
+	public void testAnnotation() {
+
+		// Create the retriever
+		ValueRetrieverSource source = new ValueRetrieverSource(this.isCaseSensitive);
+		ValueRetriever<RootObject> retriever = source.sourceValueRetriever(RootObject.class);
+
+		// Ensure have annotation
+		HttpPathParameter annotation = retriever.getValueAnnotation("Property.text", HttpPathParameter.class);
+		assertEquals("Incorrect annotation", "test", annotation.value());
+
+		// Ensure null if not find annotation
+		assertNull("Should not have annotation", retriever.getValueAnnotation("Property", HttpPathParameter.class));
 	}
 
 }

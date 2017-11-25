@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.web.template.NotEscaped;
 import net.officefloor.web.template.parse.PropertyParsedTemplateSectionContent;
 import net.officefloor.web.value.retrieve.ValueRetriever;
 
@@ -76,8 +77,8 @@ public class PropertyWebTemplateWriter implements WebTemplateWriter {
 		}
 
 		// Determine if should be escaped
-		// TODO determine means to obtain annotations from ValueRetriever
-		this.isEscaped = true; // !(method.isAnnotationPresent(NotEscaped.class));
+		NotEscaped annotation = this.valueRetriever.getValueAnnotation(this.propertyName, NotEscaped.class);
+		this.isEscaped = (annotation == null);
 	}
 
 	/*

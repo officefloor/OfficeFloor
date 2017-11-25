@@ -51,4 +51,22 @@ public interface ValueRetriever<T> {
 	 */
 	Class<?> getValueType(String name) throws HttpException;
 
+	/**
+	 * Obtains the value annotation for the property on the object graph. It may
+	 * be <code>null</code> indicating either:
+	 * <ul>
+	 * <li>the path does not exist on the bean graph, or</li>
+	 * <li>no annotation by type for property</li>
+	 * </ul>
+	 * 
+	 * @param name
+	 *            Property name.
+	 * @param annotationType
+	 *            Annotation type.
+	 * @return Annotation. May be <code>null</code>.
+	 * @throws HttpException
+	 *             If fails to obtain annotation.
+	 */
+	<A> A getValueAnnotation(String name, Class<A> annotationType) throws HttpException;
+
 }

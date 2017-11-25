@@ -745,10 +745,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				if (!isLogicClass) {
 					// No template logic
 					designer.addIssue("Must provide template logic class for template " + templatePath);
+					return;
 				} else {
 					// Have template logic, so missing method
 					designer.addIssue("Missing method '" + beanMethodName + "' on class " + this.sectionClass.getName()
 							+ " to provide bean for template " + templatePath);
+					return;
 				}
 			}
 
@@ -1283,7 +1285,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
-	static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
+	public static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
 		 * Indicates if the {@link WebTemplate} is secure.

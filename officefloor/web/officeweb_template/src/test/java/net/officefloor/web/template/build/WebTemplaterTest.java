@@ -20,9 +20,15 @@ package net.officefloor.web.template.build;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
+import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextFunction;
@@ -43,6 +49,8 @@ import net.officefloor.web.template.NotRenderTemplateAfter;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplater;
 import net.officefloor.web.template.build.WebTemplaterEmployer;
+import net.officefloor.web.template.section.WebTemplateSectionSource;
+import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateManagedFunctionSource;
 
 /**
  * Tests the {@link WebTemplater}.
@@ -127,8 +135,19 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if {@link WebTemplate} missing bean.
 	 */
-	public void testTemplateMissingBean() throws Exception {
-		fail("TODO implement test");
+	public void testMissingTemplateLogicClass() throws Exception {
+		this.templateIssue((issues) -> {
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("/path", SectionNodeImpl.class, "Must provide template logic class for template /path");
+			issues.recordIssue("TEMPLATE", FunctionNamespaceNodeImpl.class,
+					"Missing property 'bean.template' for ManagedFunctionSource "
+							+ WebTemplateManagedFunctionSource.class.getName());
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
+		}, (context, templater) -> {
+			templater.addTemplate("/path", new StringReader("Data=${value}"));
+		});
 	}
 
 	/**
@@ -303,7 +322,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testGetAndPostDefaults() throws Exception {
 		this.template("/default", (context, templater) -> {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
-			WebTemplate template = templater.addTemplate("/link", new StringReader("Link=#{link}"));
+			WebTemplate template = templater.addTemplate("/default", new StringReader("Link=#{link}"));
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
 		}, "Link=/default+link");
 
@@ -626,7 +645,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Runs s {@link WebTemplate} and validates the {@link HttpResponse}
+	 * Runs a {@link WebTemplate} and validates the {@link HttpResponse}
 	 * content.
 	 * 
 	 * @param path
@@ -643,6 +662,36 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.template(initialiser, this.mockRequest(path));
 		assertEquals("Incorrect template response", expectedTemplate, response.getEntity(null));
 		return response;
+	}
+
+	/**
+	 * Attempts to load {@link WebTemplater}, however should have
+	 * {@link CompilerIssues}.
+	 * 
+	 * @param configureIssues
+	 *            {@link Consumer} to configure the {@link CompilerIssues}.
+	 * @param initialiser
+	 *            {@link Initialiser} to initialise the {@link WebTemplate}.
+	 */
+	private void templateIssue(Consumer<MockCompilerIssues> configureIssues, Initialiser initialiser) throws Exception {
+
+		// Load mock issues
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+
+		// Record the issue
+		configureIssues.accept(issues);
+
+		// Test
+		this.replayMockObjects();
+		this.compile.web((context) -> {
+			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
+					context.getOfficeArchitect(), context.getOfficeSourceContext());
+			initialiser.initialise(context, templater);
+			templater.informWebArchitect();
+		});
+		this.compile.compileOfficeFloor();
+		this.verifyMockObjects();
 	}
 
 }

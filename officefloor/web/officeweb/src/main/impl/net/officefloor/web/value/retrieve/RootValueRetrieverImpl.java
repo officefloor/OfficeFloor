@@ -90,57 +90,69 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 */
 
 	/**
-	 * {@link Processor} to determine if value is retrievable.
+	 * {@link Processor} to obtain value type.
 	 */
-	private static Processor<Class<?>> retrievable = new Processor<Class<?>>() {
-		@Override
-		public Class<?> process(RetrieveStruct propertyRetriever, Object object, String remainingName)
-				throws HttpException {
+	private static Processor<Class<?>> valueTypeRetriever = (propertyRetriever, object, remainingName) -> {
 
-			// Must be retriever to obtain value
-			if (propertyRetriever == null) {
-				return null; // property not retrievable
-			}
-
-			// Determine if further property
-			if (remainingName.length() == 0) {
-				// No further properties, so provide type method
-				return propertyRetriever.metaData.getValueType();
-			}
-
-			// Delegate to obtain type method
-			return propertyRetriever.retriever.getValueType(remainingName);
+		// Must be retriever to obtain value
+		if (propertyRetriever == null) {
+			return null; // property not retrievable
 		}
+
+		// Determine if further property
+		if (remainingName.length() == 0) {
+			// No further properties, so provide value type
+			return propertyRetriever.metaData.getValueType();
+		}
+
+		// Delegate to obtain type method
+		return propertyRetriever.retriever.getValueType(remainingName);
 	};
 
 	@Override
 	public Class<?> getValueType(String name) throws HttpException {
 		// Return type method
-		return this.process(name, null, retrievable);
+		return this.process(name, null, valueTypeRetriever);
+	}
+
+	@Override
+	public <A> A getValueAnnotation(String name, Class<A> annotationType) throws HttpException {
+		return this.process(name, null, (propertyRetriever, object, remainingName) -> {
+
+			// Must be retriever to obtain value
+			if (propertyRetriever == null) {
+				return null; // no property, no annotation
+			}
+
+			// Determine if further property
+			if (remainingName.length() == 0) {
+				// No further properties, so provide value annotation
+				return propertyRetriever.metaData.getValueAnnotation(annotationType);
+			}
+
+			// Delegate to obtain value annoation
+			return propertyRetriever.retriever.getValueAnnotation(remainingName, annotationType);
+		});
 	}
 
 	/**
 	 * {@link Processor} to retrieve the value.
 	 */
-	private static Processor<Object> retriever = new Processor<Object>() {
-		@Override
-		public Object process(RetrieveStruct propertyRetriever, Object object, String remainingName)
-				throws HttpException {
+	private static Processor<Object> valueRetriever = (propertyRetriever, object, remainingName) -> {
 
-			// Ensure able to retrieve value
-			if (propertyRetriever == null) {
-				return null; // Unknown value
-			}
-
-			// Return the retrieved value
-			return propertyRetriever.retriever.retrieveValue(object, remainingName);
+		// Ensure able to retrieve value
+		if (propertyRetriever == null) {
+			return null; // Unknown value
 		}
+
+		// Return the retrieved value
+		return propertyRetriever.retriever.retrieveValue(object, remainingName);
 	};
 
 	@Override
 	public Object retrieveValue(T object, String name) throws HttpException {
 		// Return the retrieved value
-		return this.process(name, object, retriever);
+		return this.process(name, object, valueRetriever);
 	}
 
 	/**
