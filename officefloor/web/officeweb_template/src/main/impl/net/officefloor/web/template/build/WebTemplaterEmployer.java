@@ -195,6 +195,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private boolean isSecure = false;
 
 		/**
+		 * Link separator character.
+		 */
+		private char linkSeparatorCharacter = '+';
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param applicationPath
@@ -235,6 +240,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_REDIRECT_VALUES_FUNCTION)
 						.setValue(this.redirectValuesFunctionName);
 			}
+			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SEPARATOR)
+					.setValue(String.valueOf(this.linkSeparatorCharacter));
 
 			// Load the type
 			OfficeSectionType type = WebTemplaterEmployer.this.sourceContext.loadOfficeSectionType(this.applicationPath,
@@ -250,10 +257,14 @@ public class WebTemplaterEmployer implements WebTemplater {
 						String linkName = link.getLinkName();
 						OfficeSectionInput linkInput = this.section.getOfficeSectionInput(linkName);
 
-						// Create the input for the link
+						// Obtain the link details
 						boolean isLinkSecure = link.isLinkSecure();
-						String linkPath = this.applicationPath + "+" + linkName;
-						WebTemplaterEmployer.this.webArchitect.link(isLinkSecure, linkPath, linkInput);
+						String linkPath = this.applicationPath + String.valueOf(this.linkSeparatorCharacter) + linkName;
+
+						// Configure the link inputs for each method supported
+						for (HttpMethod method : link.getMethods()) {
+							WebTemplaterEmployer.this.webArchitect.link(isLinkSecure, method, linkPath, linkInput);
+						}
 					}
 				}
 			}
@@ -315,7 +326,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public WebTemplate setLinkSeparatorCharacter(char separator) {
-			// TODO Auto-generated method stub
+			this.linkSeparatorCharacter = separator;
 			return this;
 		}
 

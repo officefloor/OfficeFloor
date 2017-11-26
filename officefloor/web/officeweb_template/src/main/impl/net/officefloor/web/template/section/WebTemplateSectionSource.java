@@ -24,7 +24,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -230,18 +229,18 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * 
 	 * @param template
 	 *            {@link ParsedTemplate}.
-	 * @return Link names.
+	 * @return {@link ParsedLink} instances.
 	 */
-	private static String[] getParsedTemplateLinkNames(ParsedTemplate template) {
+	private static ParsedLink[] getParsedTemplateLinkNames(ParsedTemplate template) {
 
 		// Obtain the listing of link names
-		List<String> linkNames = new LinkedList<String>();
+		List<ParsedLink> linkNames = new LinkedList<ParsedLink>();
 		for (ParsedTemplateSection section : template.getSections()) {
 			loadLinkNames(section.getContent(), linkNames);
 		}
 
-		// Return the link names
-		return linkNames.toArray(new String[linkNames.size()]);
+		// Return the links
+		return linkNames.toArray(new ParsedLink[linkNames.size()]);
 	}
 
 	/**
@@ -250,10 +249,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * 
 	 * @param contents
 	 *            {@link ParsedTemplateSectionContent} instances.
-	 * @param linkNames
-	 *            {@link List} to receive the unique link names.
+	 * @param links
+	 *            {@link ParsedLink} listing to receive the unique links.
 	 */
-	private static void loadLinkNames(ParsedTemplateSectionContent[] contents, List<String> linkNames) {
+	private static void loadLinkNames(ParsedTemplateSectionContent[] contents, List<ParsedLink> links) {
 
 		// Interrogate contents for links
 		for (ParsedTemplateSectionContent content : contents) {
@@ -264,17 +263,45 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 				// Obtain the link name
 				String linkName = link.getName();
+				List<HttpMethod> linkMethods = new LinkedList<>();
+				if (linkName.contains(":")) {
+					String[] parts = linkName.split(":");
 
-				// Add the link name
-				if (!linkNames.contains(linkName)) {
-					linkNames.add(linkName);
+					// Link follows methods
+					linkName = parts[1];
+
+					// Supported methods listed first
+					for (String methodName : parts[0].split(",")) {
+						HttpMethod method = HttpMethod.getHttpMethod(methodName);
+						linkMethods.add(method);
+					}
+				}
+
+				// Add the link
+				ParsedLink parsedLink = null;
+				FOUND_LINK: for (ParsedLink checkLink : links) {
+					if (checkLink.linkName.equals(linkName)) {
+						parsedLink = checkLink;
+						break FOUND_LINK;
+					}
+				}
+				if (parsedLink == null) {
+					parsedLink = new ParsedLink(linkName);
+					links.add(parsedLink);
+				}
+
+				// Add the methods to the link
+				for (HttpMethod linkMethod : linkMethods) {
+					if (!(parsedLink.methods.contains(linkMethod))) {
+						parsedLink.methods.add(linkMethod);
+					}
 				}
 			}
 
 			// Recursively check bean content for links
 			if (content instanceof BeanParsedTemplateSectionContent) {
 				BeanParsedTemplateSectionContent beanContent = (BeanParsedTemplateSectionContent) content;
-				loadLinkNames(beanContent.getContent(), linkNames);
+				loadLinkNames(beanContent.getContent(), links);
 			}
 		}
 	}
@@ -407,7 +434,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * (i.e. containing sections have been overridden).
 		 */
 		Set<String> knownLinkNames = new HashSet<String>();
-		knownLinkNames.addAll(Arrays.asList(getParsedTemplateLinkNames(highestAncestorTemplate)));
+		for (ParsedLink link : getParsedTemplateLinkNames(highestAncestorTemplate)) {
+			knownLinkNames.add(link.linkName);
+		}
 
 		// Filter the comments from the parsed template sections
 		Function<ParsedTemplateSection[], ParsedTemplateSection[]> filterCommentParsedTemplateSections = (
@@ -440,7 +469,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 					.apply(childTemplate.getSections());
 
 			// Add the child link names
-			knownLinkNames.addAll(Arrays.asList(getParsedTemplateLinkNames(childTemplate)));
+			for (ParsedLink link : getParsedTemplateLinkNames(childTemplate)) {
+				knownLinkNames.add(link.linkName);
+			}
 
 			// Create the listing of sections for overriding
 			Map<String, List<ParsedTemplateSection>> overrideSections = new HashMap<String, List<ParsedTemplateSection>>();
@@ -623,12 +654,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Obtain the ending path parameter terminating character
-		char terminatingCharacter = context.getProperty(PROPERTY_LINK_SEPARATOR, String.valueOf(DEFAULT_LINK_SEPARATOR))
-				.charAt(0);
+		char linkSeparatorCharacter = context
+				.getProperty(PROPERTY_LINK_SEPARATOR, String.valueOf(DEFAULT_LINK_SEPARATOR)).charAt(0);
 
 		// Load the initial function
 		WebTemplateInitialFunction initialFunctionFactory = new WebTemplateInitialFunction(isTemplateSecure,
-				notRedirectHttpMethods, templateContentType, templateCharset, this.inputPath, terminatingCharacter);
+				notRedirectHttpMethods, templateContentType, templateCharset, this.inputPath, linkSeparatorCharacter);
 		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
 				new WebTemplateInitialManagedFunctionSource(initialFunctionFactory));
 		SectionFunction initialFunction = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
@@ -677,7 +708,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		// Load the HTTP template
 		final String TEMPLATE_NAMESPACE_NANE = "TEMPLATE";
 		SectionFunctionNamespace templateNamespace = designer.addSectionFunctionNamespace(TEMPLATE_NAMESPACE_NANE,
-				new WebTemplateManagedFunctionSource(isTemplateSecure, template, templateCharset));
+				new WebTemplateManagedFunctionSource(isTemplateSecure, template, templateCharset,
+						linkSeparatorCharacter));
 		templateNamespace.addProperty(PROPERTY_TEMPLATE_CONTENT, templateContent);
 
 		// Copy the template configuration
@@ -857,10 +889,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			String flowName = functionFlow.getFunctionFlowName();
 
 			// Determine if linking to content function
-			SectionFunction contentTask = contentFunctionsByName.get(createFunctionKey(flowName));
-			if (contentTask != null) {
+			SectionFunction contentFunction = contentFunctionsByName.get(createFunctionKey(flowName));
+			if (contentFunction != null) {
 				// Link to content function
-				designer.link(functionFlow, contentTask, false);
+				designer.link(functionFlow, contentFunction, false);
 
 			} else {
 				// Not linked to content function, so use default behaviour
@@ -887,23 +919,30 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Register the #{link} URL continuation tasks
-		String[] linkNames = getParsedTemplateLinkNames(template);
-		for (String linkName : linkNames) {
+		ParsedLink[] links = getParsedTemplateLinkNames(template);
+		for (ParsedLink link : links) {
 
 			// Obtain the link input
-			SectionInput linkInput = this.getOrCreateInput(linkName, null);
+			SectionInput linkInput = this.getOrCreateInput(link.linkName, null);
 
 			// Determine if link is to be secure
-			boolean isLinkSecure = isLinkSecure(linkName, isTemplateSecure, context);
+			boolean isLinkSecure = isLinkSecure(link.linkName, isTemplateSecure, context);
+
+			// Obtain the methods for the link
+			HttpMethod[] linkMethods = link.methods.toArray(new HttpMethod[link.methods.size()]);
+			if (linkMethods.length == 0) {
+				// Use default link methods
+				linkMethods = new HttpMethod[] { HttpMethod.GET, HttpMethod.POST };
+			}
 
 			// Add the link annotation
-			linkInput.addAnnotation(new WebTemplateLinkAnnotation(isLinkSecure, linkName));
+			linkInput.addAnnotation(new WebTemplateLinkAnnotation(isLinkSecure, link.linkName, linkMethods));
 
 			// Determine if linked to a function
-			SectionFunction function = this.getFunctionByName(linkName);
+			SectionFunction function = this.getFunctionByName(link.linkName);
 			if (function == null) {
 				// No function, so link to output
-				SectionOutput linkOutput = this.getOrCreateOutput(linkName, null, false);
+				SectionOutput linkOutput = this.getOrCreateOutput(link.linkName, null, false);
 				this.getDesigner().link(linkInput, linkOutput);
 			}
 		}
@@ -992,6 +1031,32 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			this.type = type;
 			this.method = method;
 			this.parameter = parameter;
+		}
+	}
+
+	/**
+	 * Parsed link.
+	 */
+	private static class ParsedLink {
+
+		/**
+		 * Link name.
+		 */
+		private final String linkName;
+
+		/**
+		 * {@link HttpMethod} instances.
+		 */
+		private final List<HttpMethod> methods = new LinkedList<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param linkName
+		 *            Link name.
+		 */
+		private ParsedLink(String linkName) {
+			this.linkName = linkName;
 		}
 	}
 
@@ -1303,6 +1368,11 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private final Charset charset;
 
 		/**
+		 * Link separator {@link Character}.
+		 */
+		private char linkSeparatorCharacter;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param isSecure
@@ -1311,11 +1381,15 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 *            {@link ParsedTemplate}.
 		 * @param charset
 		 *            Default {@link Charset} to render the {@link WebTemplate}.
+		 * @param linkSeparatorCharacter
+		 *            Link separator {@link Character}.
 		 */
-		private WebTemplateManagedFunctionSource(boolean isSecure, ParsedTemplate template, Charset charset) {
+		private WebTemplateManagedFunctionSource(boolean isSecure, ParsedTemplate template, Charset charset,
+				char linkSeparatorCharacter) {
 			this.isSecure = isSecure;
 			this.template = template;
 			this.charset = charset;
+			this.linkSeparatorCharacter = linkSeparatorCharacter;
 		}
 
 		/**
@@ -1419,12 +1493,18 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 					// Add the link template writer
 					LinkParsedTemplateSectionContent linkContent = (LinkParsedTemplateSectionContent) content;
 
-					// Determine if the link is to be secure
+					// Obtain the link name
 					String linkName = linkContent.getName();
+					if (linkName.contains(":")) {
+						linkName = linkName.split(":")[1];
+					}
+
+					// Determine if the link is to be secure
 					boolean isLinkSecure = isLinkSecure(linkName, isTemplateSecure, context);
 
 					// Add the content writer
-					contentWriterList.add(new LinkWebTemplateWriter(linkContent, isLinkSecure));
+					contentWriterList
+							.add(new LinkWebTemplateWriter(linkName, isLinkSecure, this.linkSeparatorCharacter));
 
 					// Track the link tasks
 					linkFunctionNames.add(linkName);

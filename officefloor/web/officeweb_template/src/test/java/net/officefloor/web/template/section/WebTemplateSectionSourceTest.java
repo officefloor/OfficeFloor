@@ -40,6 +40,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
@@ -84,13 +85,15 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("getBeanProperty", null);
 		expected.addSectionInput("getBeanArray", null);
 		expected.addSectionInput("getList", null);
-		expected.addSectionInput("nextFunction", null).addAnnotation(new WebTemplateLinkAnnotation(false, "next"));
-		expected.addSectionInput("submit", null).addAnnotation(new WebTemplateLinkAnnotation(false, "submit"));
+		expected.addSectionInput("nextFunction", null)
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "next", new HttpMethod[0]));
+		expected.addSectionInput("submit", null)
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "submit", new HttpMethod[0]));
 		expected.addSectionInput("doInternalFlow", Integer.class.getName());
 		expected.addSectionInput("notRenderTemplateAfter", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "notRenderTemplateAfter"));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "notRenderTemplateAfter", new HttpMethod[0]));
 		expected.addSectionInput("nonMethodLink", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink"));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink", new HttpMethod[0]));
 
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(), false);

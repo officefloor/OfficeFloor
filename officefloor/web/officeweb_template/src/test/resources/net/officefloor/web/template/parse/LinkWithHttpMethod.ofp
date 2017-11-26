@@ -1,0 +1,5 @@
+<html>
+<body>
+Page containing a single link #{PUT:link_name}.
+</body>
+</html>

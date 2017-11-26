@@ -26,6 +26,7 @@ import java.util.List;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
+import net.officefloor.server.http.HttpMethod;
 
 /**
  * Tests the {@link WebTemplateParser}.
@@ -164,6 +165,21 @@ public class WebTemplateParserTest extends OfficeFrameTestCase {
 	 * Ensure can load multiple links.
 	 */
 	public void testMultipleLinks() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure can load link with configured {@link HttpMethod}.
+	 */
+	public void testLinkWithHttpMethod() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure can load link with multiple configured {@link HttpMethod}
+	 * instances.
+	 */
+	public void testLinkWithMultipleHttpMethods() {
 		this.doTest();
 	}
 

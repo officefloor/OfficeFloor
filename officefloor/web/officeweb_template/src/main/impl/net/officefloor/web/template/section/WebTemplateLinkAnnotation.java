@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.template.section;
 
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.template.build.WebTemplate;
 
@@ -38,16 +39,24 @@ public class WebTemplateLinkAnnotation {
 	private final String linkName;
 
 	/**
+	 * {@link HttpMethod} instances supported by the link.
+	 */
+	private final HttpMethod[] methods;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param isLinkSecure
 	 *            Indicates if the link is secure.
 	 * @param linkName
 	 *            Name of link.
+	 * @param methods
+	 *            {@link HttpMethod} instances supported by the link.
 	 */
-	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName) {
+	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName, HttpMethod[] methods) {
 		this.isLinkSecure = isLinkSecure;
 		this.linkName = linkName;
+		this.methods = methods;
 	}
 
 	/**
@@ -66,6 +75,15 @@ public class WebTemplateLinkAnnotation {
 	 */
 	public String getLinkName() {
 		return this.linkName;
+	}
+
+	/**
+	 * Obtains the {@link HttpMethod} instances for the link.
+	 * 
+	 * @return {@link HttpMethod} instances for the link.
+	 */
+	public HttpMethod[] getMethods() {
+		return this.methods;
 	}
 
 }

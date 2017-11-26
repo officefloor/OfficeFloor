@@ -22,7 +22,6 @@ import java.io.IOException;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.web.template.parse.LinkParsedTemplateSectionContent;
 
 /**
  * {@link WebTemplateWriter} to write the link.
@@ -45,15 +44,17 @@ public class LinkWebTemplateWriter implements WebTemplateWriter {
 	/**
 	 * Initiate.
 	 * 
-	 * @param content
-	 *            {@link LinkParsedTemplateSectionContent}.
+	 * @param linkName
+	 *            Link name.
 	 * @param isLinkSecure
 	 *            Indicates if the link is to be submitted over a secure
 	 *            {@link ServerHttpConnection}.
+	 * @param linkSeparator
+	 *            Link separator {@link Character}.
 	 */
-	public LinkWebTemplateWriter(LinkParsedTemplateSectionContent content, boolean isLinkSecure) {
+	public LinkWebTemplateWriter(String linkName, boolean isLinkSecure, char linkSeparator) {
 		this.isLinkSecure = isLinkSecure;
-		this.linkPathSuffix = "+" + content.getName();
+		this.linkPathSuffix = String.valueOf(linkSeparator) + linkName;
 	}
 
 	/*
