@@ -119,17 +119,16 @@ public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * <p>
-	 * Adds a {@link HttpMethod} that will not trigger a redirect on rendering
-	 * the {@link WebTemplate}.
+	 * Adds a {@link HttpMethod} that will rendering the {@link WebTemplate}.
 	 * <p>
-	 * Note that {@link HttpMethod#GET} is always a non-redirect.
+	 * Note that {@link HttpMethod#GET} is added by default.
 	 * 
 	 * @param method
-	 *            {@link HttpMethod} that will not trigger a redirect on
-	 *            rendering the {@link WebTemplate}.
+	 *            {@link HttpMethod} that will rendering the
+	 *            {@link WebTemplate}.
 	 * @return <code>this</code>.
 	 */
-	WebTemplate addNonRedirectMethod(HttpMethod method);
+	WebTemplate addRenderMethod(HttpMethod method);
 
 	/**
 	 * Specifies the super (parent) {@link WebTemplate}.
@@ -150,18 +149,20 @@ public interface WebTemplate extends PropertyConfigurable {
 	WebTemplate addExtension(WebTemplateExtension extension);
 
 	/**
-	 * Obtains the {@link OfficeSectionInput} to link to this
-	 * {@link WebTemplate}.
+	 * Links the {@link OfficeSectionOutput} to this {@link WebTemplate}.
 	 * 
+	 * @param sectionOutput
+	 *            {@link OfficeSectionOutput} to link to the
+	 *            {@link WebTemplate}.
 	 * @param valuesType
 	 *            Type provided as a parameter to the {@link OfficeSectionInput}
 	 *            should the path parameters require being obtained. The type
 	 *            should provide a bean property for each path parameter for the
 	 *            {@link WebTemplate}. May be <code>null</code> if no path
 	 *            parameters are required.
-	 * @return {@link OfficeSectionInput} to link to this {@link WebTemplate}.
+	 * @return <code>this</code>.
 	 */
-	OfficeSectionInput getInput(Class<?> valuesType);
+	WebTemplate link(OfficeSectionOutput sectionOutput, Class<?> valuesType);
 
 	/**
 	 * Obtains the {@link OfficeSectionOutput} from the {@link WebTemplate}.

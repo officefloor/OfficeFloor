@@ -294,8 +294,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testPostRedirectGet_AlternateMethod() throws Exception {
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/uri-post?text=TEST")
 				.method(new HttpMethod("OTHER"));
-		this.doPostRedirectGetPatternTest(request, "TEST /uri-post",
-				WebTemplateSectionSource.PROPERTY_NOT_REDIRECT_HTTP_METHODS, "OTHER");
+		this.doPostRedirectGetPatternTest(request, "TEST /uri-post");
 	}
 
 	/**
@@ -1071,7 +1070,7 @@ public class WebTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 			// Link service method link
 			if (this.isServiceMethodLink) {
-				office.link(template.getOutput("serviceLink"), template.getInput(null));
+				template.link(template.getOutput("serviceLink"), null);
 			}
 		});
 

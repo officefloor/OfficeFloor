@@ -26,7 +26,6 @@ import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -46,9 +45,6 @@ import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.NotEscaped;
 import net.officefloor.web.template.NotRenderTemplateAfter;
-import net.officefloor.web.template.build.WebTemplate;
-import net.officefloor.web.template.build.WebTemplater;
-import net.officefloor.web.template.build.WebTemplaterEmployer;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
 import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateManagedFunctionSource;
 
@@ -392,19 +388,15 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * <p>
-	 * Ensure can flag for a {@link HttpMethod} to not trigger a redirect to
-	 * render the {@link WebTemplate}.
-	 * <p>
-	 * This allows templating responses to {@link HttpMethod} values other than
+	 * Ensure allows template responses to {@link HttpMethod} values other than
 	 * GET.
 	 */
-	public void testNonRedirectMethod() throws Exception {
+	public void testOtherMethod() throws Exception {
 		final HttpMethod method = HttpMethod.getHttpMethod("TEST");
 		MockHttpResponse response = this.template((context, templater) -> templater
-				.addTemplate("/path", new StringReader("TEMPLATE")).addNonRedirectMethod(method),
+				.addTemplate("/path", new StringReader("TEMPLATE")).addRenderMethod(method),
 				this.mockRequest("/path").method(method));
-		assertEquals("Should render without redirect", 200, response.getStatus().getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect template", "TEMPLATE", response.getEntity(null));
 	}
 
@@ -412,19 +404,19 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure can link to template.
 	 */
 	public void testLinkToTemplate() throws Exception {
-		MockHttpResponse redirect = this.template("/redirect", (context, templater) -> {
+		MockHttpResponse response = this.template("/redirect+link", (context, templater) -> {
+			WebTemplate redirect = templater.addTemplate("/redirect", new StringReader("#{link}"));
 			WebTemplate template = templater.addTemplate("/template", new StringReader("TEMPLATE"));
-			WebArchitect web = context.getWebArchitect();
-			web.link(false, "/redirect", template.getInput(null));
+			template.link(redirect.getOutput("link"), null);
 		}, "");
 
 		// Ensure redirect
-		assertEquals("Should be redirect", HttpStatus.SEE_OTHER, redirect.getStatus());
-		String location = redirect.getHeader("location").getValue();
+		assertEquals("Should be redirect", HttpStatus.SEE_OTHER, response.getStatus());
+		String location = response.getHeader("location").getValue();
 		assertEquals("Incorrect location", this.contextUrl("", "/template"), location);
 
 		// Fire redirect to then get the template
-		MockHttpResponse response = this.server.send(this.mockRequest(location).cookies(redirect));
+		response = this.server.send(this.mockRequest(location).cookies(response));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Should have template", "TEMPLATE", response.getEntity(null));
 	}
@@ -435,11 +427,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testLinkToTemplateWithDynamicPath() throws Exception {
 		MockHttpResponse redirect = this.template("/redirect", (context, templater) -> {
 			WebArchitect web = context.getWebArchitect();
-			OfficeArchitect office = context.getOfficeArchitect();
 			OfficeSection section = context.addSection("SECTION", DynamicPathSection.class);
 			web.link(false, "/redirect", section.getOfficeSectionInput("service"));
 			WebTemplate template = templater.addTemplate("/{param}", new StringReader("TEMPLATE"));
-			office.link(section.getOfficeSectionOutput("template"), template.getInput(DynamicPathSection.class));
+			template.link(section.getOfficeSectionOutput("template"), DynamicPathSection.class);
 		}, "");
 
 		// Ensure redirect

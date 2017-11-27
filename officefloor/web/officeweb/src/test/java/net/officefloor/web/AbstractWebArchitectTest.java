@@ -821,7 +821,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			// Provide continuation
-			HttpUrlContinuation continuation = context.link(true, "/path", MockQueryParameter.class);
+			HttpUrlContinuation continuation = context.link(false, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			WebArchitect web = context.getWebArchitect();
@@ -837,10 +837,46 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Send request that provides redirect
 		MockHttpResponse response = this.server.send(this.mockRequest("/redirect?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status", 303, response.getStatus().getStatusCode());
+		assertEquals("Incorrect redirect location", this.contextUrl("", "/path"),
+				response.getHeader("location").getValue());
+		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", String.valueOf(nextSerialisableIdentifier))
+				.setPath(this.contextUrl("", "/path")).setHttpOnly(true));
+
+		// Ensure can redirect
+		MockHttpRequestBuilder redirectRequest = this.mockRequest("/path").cookies(response);
+		response = this.server.send(redirectRequest);
+		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
+		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can redirect (remembering original request).
+	 */
+	public void testRedirectToSecureTemplate() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			// Provide continuation
+			HttpUrlContinuation continuation = context.link(true, "/path", MockQueryParameter.class);
+
+			// Configure to redirect to continuation
+			WebArchitect web = context.getWebArchitect();
+			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
+			web.link(false, HttpMethod.POST, "/redirect", section.getOfficeSectionInput("service"));
+			web.link(section.getOfficeSectionOutput("redirect"), continuation, null);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Obtain the expected serialisable identifier
+		int nextSerialisableIdentifier = new SerialisedRequestState(null).identifier + 1;
+
+		// Send request that provides redirect (to secure URL)
+		MockHttpResponse response = this.server.send(this.mockRequest("/redirect?param=value").method(HttpMethod.POST));
+		assertEquals("Incorrect status", 303, response.getStatus().getStatusCode());
 		assertEquals("Incorrect redirect location", this.contextUrl("https://mock.officefloor.net", "/path"),
 				response.getHeader("location").getValue());
 		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", String.valueOf(nextSerialisableIdentifier))
-				.setPath(this.contextUrl("", "/path")));
+				.setPath(this.contextUrl("", "/path")).setSecure(true).setHttpOnly(true));
 
 		// Ensure can redirect
 		MockHttpRequestBuilder redirectRequest = this.mockRequest("/path").secure(true).cookies(response);
@@ -886,7 +922,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Send request that provides redirect
 		MockHttpResponse response = this.server.send(this.mockRequest("/redirect?param=value").method(HttpMethod.POST));
 		assertEquals("Incorrect status: " + response.getEntity(null), 303, response.getStatus().getStatusCode());
-		assertEquals("Incorrect redirect location", this.contextUrl("http://mock.officefloor.net", "/path/value"),
+		assertEquals("Incorrect redirect location", this.contextUrl("", "/path/value"),
 				response.getHeader("location").getValue());
 
 		// Ensure can redirect

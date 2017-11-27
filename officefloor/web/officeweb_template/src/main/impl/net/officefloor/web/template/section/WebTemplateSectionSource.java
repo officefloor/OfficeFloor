@@ -186,12 +186,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	private static final char DEFAULT_LINK_SEPARATOR = '+';
 
 	/**
-	 * Name of {@link Property} for a comma separated list of HTTP methods that
-	 * will trigger a redirect before rendering the {@link ParsedTemplate}.
-	 */
-	public static final String PROPERTY_NOT_REDIRECT_HTTP_METHODS = "template.not.redirect.methods";
-
-	/**
 	 * Name of {@link Property} for the <code>Content-Type</code> of the
 	 * {@link ParsedTemplate}.
 	 */
@@ -624,21 +618,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		boolean isTemplateSecure = Boolean
 				.valueOf(context.getProperty(PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
 
-		// Obtain the render redirect HTTP methods
-		HttpMethod[] notRedirectHttpMethods;
-		String notRedirectProperty = context.getProperty(PROPERTY_NOT_REDIRECT_HTTP_METHODS, null);
-		if (notRedirectProperty == null) {
-			// No non-redirect HTTP methods
-			notRedirectHttpMethods = new HttpMethod[0];
-		} else {
-			// Obtain the non-redirect HTTP methods
-			String[] notRedirectHttpMethodNames = notRedirectProperty.split(",");
-			notRedirectHttpMethods = new HttpMethod[notRedirectHttpMethodNames.length];
-			for (int i = 0; i < notRedirectHttpMethodNames.length; i++) {
-				notRedirectHttpMethods[i] = HttpMethod.getHttpMethod(notRedirectHttpMethodNames[i].trim());
-			}
-		}
-
 		// Obtain the template content-type
 		String templateContentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
 
@@ -659,7 +638,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 		// Load the initial function
 		WebTemplateInitialFunction initialFunctionFactory = new WebTemplateInitialFunction(isTemplateSecure,
-				notRedirectHttpMethods, templateContentType, templateCharset, this.inputPath, linkSeparatorCharacter);
+				templateContentType, templateCharset, this.inputPath, linkSeparatorCharacter);
 		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
 				new WebTemplateInitialManagedFunctionSource(initialFunctionFactory));
 		SectionFunction initialFunction = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",

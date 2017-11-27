@@ -19,14 +19,11 @@ package net.officefloor.web.template.section;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpHeaderValue;
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
@@ -62,12 +59,6 @@ public class WebTemplateInitialFunction extends
 	private final boolean isRequireSecure;
 
 	/**
-	 * {@link HttpMethod} instances to not redirect on rendering the
-	 * {@link WebTemplate}.
-	 */
-	private final Set<HttpMethod> nonRedirectHttpMethods;
-
-	/**
 	 * <code>Content-Type</code> for the {@link ParsedTemplate}. May be
 	 * <code>null</code>.
 	 */
@@ -94,9 +85,6 @@ public class WebTemplateInitialFunction extends
 	 * @param isRequireSecure
 	 *            Indicates if a secure {@link ServerHttpConnection} is
 	 *            required.
-	 * @param nonRedirectHttpMethods
-	 *            Listing of {@link HttpMethod} instances that do not redirect
-	 *            before rendering the {@link ParsedTemplate}.
 	 * @param contentType
 	 *            Content-type for the {@link ParsedTemplate}. May be
 	 *            <code>null</code>.
@@ -107,22 +95,13 @@ public class WebTemplateInitialFunction extends
 	 * @param terminatingPathCharacter
 	 *            {@link Character} to use to terminate the path.
 	 */
-	public WebTemplateInitialFunction(boolean isRequireSecure, HttpMethod[] nonRedirectHttpMethods, String contentType,
-			Charset charset, HttpInputPath inputPath, int terminatingPathCharacter) {
+	public WebTemplateInitialFunction(boolean isRequireSecure, String contentType, Charset charset,
+			HttpInputPath inputPath, int terminatingPathCharacter) {
 		this.isRequireSecure = isRequireSecure;
 		this.contentType = contentType == null ? null : new HttpHeaderValue(contentType);
 		this.charset = charset;
 		this.inputPath = inputPath;
 		this.terminatingPathCharacter = terminatingPathCharacter;
-
-		// Add the render redirect HTTP methods
-		this.nonRedirectHttpMethods = new HashSet<HttpMethod>();
-		if (nonRedirectHttpMethods != null) {
-			for (HttpMethod method : nonRedirectHttpMethods) {
-				this.nonRedirectHttpMethods.add(method);
-			}
-		}
-		this.nonRedirectHttpMethods.add(HttpMethod.GET); // never redirects
 	}
 
 	/*
@@ -164,17 +143,6 @@ public class WebTemplateInitialFunction extends
 			String uri = request.getUri();
 			if (!(this.inputPath.isMatchPath(uri, this.terminatingPathCharacter))) {
 				// Not matching template path, so redirect GET the template
-				isRedirectRequired = true;
-			}
-		}
-
-		// Determine if POST/redirect/GET pattern to be applied
-		// TODO reconsider this (in just establishing request state only)
-		if (!isRedirectRequired) {
-			// Request likely overridden to POST, so use client HTTP method
-			HttpMethod method = connection.getClientRequest().getMethod();
-			if (!this.nonRedirectHttpMethods.contains(method)) {
-				// Flag redirect for POST/redirect/GET pattern
 				isRedirectRequired = true;
 			}
 		}

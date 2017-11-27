@@ -112,9 +112,15 @@ public class HttpRedirectFunction<T>
 		HttpRequestState requestState = (HttpRequestState) context.getObject(HttpRedirectDependencies.REQUEST_STATE);
 		HttpSession session = (HttpSession) context.getObject(HttpRedirectDependencies.SESSION_STATE);
 
-		// Obtain the redirect location (and application path)
+		// Obtain the application path on server for redirect
 		String applicationPath = this.pathFactory.createApplicationClientPath(pathValues);
-		String redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure, applicationPath);
+
+		// Determine if require upgrade to secure connection
+		String redirectLocation = applicationPath;
+		if (this.isSecure && (!connection.isSecure())) {
+			// Upgrade redirect to secure path
+			redirectLocation = connection.getServerLocation().createClientUrl(this.isSecure, redirectLocation);
+		}
 
 		// Send the redirect
 		HttpResponse response = connection.getResponse();
@@ -132,7 +138,7 @@ public class HttpRedirectFunction<T>
 
 		// Load cookie indicating redirect
 		response.getCookies().setCookie(REDIRECT_COOKIE_NAME, String.valueOf(serialisable.identifier),
-				(cookie) -> cookie.setPath(applicationPath));
+				(cookie) -> cookie.setPath(applicationPath).setSecure(this.isSecure).setHttpOnly(true));
 
 		// No further functions
 		return null;

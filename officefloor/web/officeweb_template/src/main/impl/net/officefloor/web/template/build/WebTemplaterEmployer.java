@@ -200,6 +200,16 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private char linkSeparatorCharacter = '+';
 
 		/**
+		 * Render {@link HttpMethod} instances.
+		 */
+		private final List<HttpMethod> renderMethods = new LinkedList<>();
+
+		/**
+		 * Listing of {@link LinkToTemplate} instances.
+		 */
+		private final List<LinkToTemplate> linkToTemplates = new LinkedList<>();
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param applicationPath
@@ -228,8 +238,20 @@ public class WebTemplaterEmployer implements WebTemplater {
 			OfficeSectionInput sectionInput = this.section
 					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 			HttpUrlContinuation templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure,
-					applicationPath, sectionInput);
+					this.applicationPath, sectionInput);
 			this.webTemplateSectionSource.setHttpInputPath(templateInput.getPath());
+
+			// Load other methods
+			for (HttpMethod method : this.renderMethods) {
+
+				// Ignore GET, as added with continuation
+				if (method == HttpMethod.GET) {
+					continue;
+				}
+
+				// Route to template for method
+				WebTemplaterEmployer.this.webArchitect.link(this.isSecure, method, this.applicationPath, sectionInput);
+			}
 
 			// Configure properties for template
 			if (this.logicClass != null) {
@@ -284,6 +306,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 						WebTemplaterEmployer.this.webArchitect.link(redirectOutput, templateInput, valuesType);
 					}
 				}
+			}
+
+			// Link to template (redirect - should be different URL always)
+			for (LinkToTemplate link : this.linkToTemplates) {
+				WebTemplaterEmployer.this.webArchitect.link(link.sectionOutput, templateInput, link.valuesType);
 			}
 
 			// Configure the section
@@ -343,8 +370,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate addNonRedirectMethod(HttpMethod method) {
-			// TODO Auto-generated method stub
+		public WebTemplate addRenderMethod(HttpMethod method) {
+			this.renderMethods.add(method);
 			return this;
 		}
 
@@ -361,14 +388,44 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public OfficeSectionInput getInput(Class<?> valuesType) {
-			// TODO Auto-generated method stub
-			return null;
+		public WebTemplate link(OfficeSectionOutput sectionOutput, Class<?> valuesType) {
+			this.linkToTemplates.add(new LinkToTemplate(sectionOutput, valuesType));
+			return this;
 		}
 
 		@Override
 		public OfficeSectionOutput getOutput(String outputName) {
 			return this.section.getOfficeSectionOutput(outputName);
+		}
+
+	}
+
+	/**
+	 * Link to the {@link WebTemplate}.
+	 */
+	private static class LinkToTemplate {
+
+		/**
+		 * {@link OfficeSectionOutput}.
+		 */
+		private final OfficeSectionOutput sectionOutput;
+
+		/**
+		 * Values type.
+		 */
+		private final Class<?> valuesType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sectionOutput
+		 *            {@link OfficeSectionOutput}.
+		 * @param valuesType
+		 *            Values type.
+		 */
+		public LinkToTemplate(OfficeSectionOutput sectionOutput, Class<?> valuesType) {
+			this.sectionOutput = sectionOutput;
+			this.valuesType = valuesType;
 		}
 	}
 
