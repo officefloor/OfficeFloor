@@ -201,6 +201,15 @@ public abstract interface WebArchitect {
 	OfficeManagedObject addHttpObject(Class<?> objectClass, String... acceptedContentTypes);
 
 	/**
+	 * Indicates if the path contains path parameters.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @return <code>true</code> if path contains parameters.
+	 */
+	boolean isPathParameters(String path);
+
+	/**
 	 * Links a URL to an {@link OfficeSectionInput}. This will always be a
 	 * {@link HttpMethod#GET} due to redirection required for the
 	 * {@link HttpUrlContinuation}.

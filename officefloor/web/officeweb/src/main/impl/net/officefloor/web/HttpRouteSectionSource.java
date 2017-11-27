@@ -312,6 +312,17 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Indicates if the path contains parameters.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @return <code>true</code> should the path contain parameters.
+	 */
+	public boolean isPathParameters(String path) {
+		return this.builder.isPathParameters(path);
+	}
+
+	/**
 	 * Adds a route.
 	 * 
 	 * @param method

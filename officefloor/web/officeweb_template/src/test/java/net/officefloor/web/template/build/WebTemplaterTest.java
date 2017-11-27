@@ -22,9 +22,11 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -198,6 +200,56 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure reports issue if no logic class when dynamic path to
+	 * {@link WebTemplate}.
+	 */
+	public void testDynamicPathWithoutLogicClass() throws Exception {
+		this.templateIssue((issues) -> {
+			// Record more user friendly message
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Must provide template logic class for template /{param}, as has dynamic path");
+
+			// Ensure the web template also indicates issue
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("/{param}", SectionNodeImpl.class,
+					"Must provide logic class, as template has path parameters");
+
+			// Redirect for template, therefore not connected
+			issues.recordIssue("REDIRECT", FunctionFlowNodeImpl.class,
+					"Function Flow REDIRECT is not linked to a ManagedFunctionNode");
+			issues.recordIssue("RENDER", FunctionFlowNodeImpl.class,
+					"Function Flow RENDER is not linked to a ManagedFunctionNode");
+
+		}, (context, templater) -> {
+			templater.addTemplate("/{param}", new StringReader("TEMPLATE"));
+		});
+	}
+
+	/**
+	 * Ensure reports issue if no redirect values function when dynamic path to
+	 * {@link WebTemplate}.
+	 */
+	public void testDynamicPathWithoutRedirectValuesFunction() throws Exception {
+		this.templateIssue((issues) -> {
+			// Record more user friendly message
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Must provide redirect values function for template /{param}, as has dynamic path");
+
+			// Ensure the web template also indicates issue
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("/{param}", SectionNodeImpl.class,
+					"WebTemplate has path parameters but no redirect values function configured");
+
+			// Redirect for template, therefore not connected
+			issues.recordIssue("redirectToTemplate", SectionOutputNodeImpl.class,
+					"Section Output redirectToTemplate is not linked to a ManagedFunctionNode");
+
+		}, (context, templater) -> {
+			templater.addTemplate("/{param}", new StringReader("TEMPLATE")).setLogicClass(DynamicPathLogic.class);
+		});
+	}
+
+	/**
 	 * Ensure can invoke link from template.
 	 */
 	public void testLink() throws Exception {
@@ -233,7 +285,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		// Ensure can GET link triggers redirect to template
 		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
 		assertEquals("Should be redirect to template", 303, response.getStatus().getStatusCode());
-		response.assertHeader("location", this.contextUrl("http://mock.officefloor.net", "/path"));
+		response.assertHeader("location", this.contextUrl("", "/path"));
 
 		// Ensure on GET redirect that able to load template
 		response = this.server.send(this.mockRequest("/path"));
@@ -429,7 +481,8 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("SECTION", DynamicPathSection.class);
 			web.link(false, "/redirect", section.getOfficeSectionInput("service"));
-			WebTemplate template = templater.addTemplate("/{param}", new StringReader("TEMPLATE"));
+			WebTemplate template = templater.addTemplate("/{param}", new StringReader("TEMPLATE"))
+					.setLogicClass(LinkDynamicPathLogic.class).setRedirectValuesFunction("getPathValues");
 			template.link(section.getOfficeSectionOutput("template"), DynamicPathSection.class);
 		}, "");
 
@@ -442,6 +495,16 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(this.mockRequest(location).cookies(redirect));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Should have template", "TEMPLATE", response.getEntity(null));
+	}
+
+	public static class LinkDynamicPathLogic {
+		public LinkDynamicPathLogic getPathValues() {
+			return this;
+		}
+
+		public String getParam() {
+			return "value";
+		}
 	}
 
 	public static class DynamicPathSection {

@@ -364,6 +364,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	public boolean isPathParameters(String path) {
+		return this.routing.isPathParameters(path);
+	}
+
+	@Override
 	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
 		HttpInputImpl continuation = new HttpInputImpl(isSecure, applicationPath, sectionInput);
 		this.inputs.add(continuation);

@@ -71,6 +71,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
+import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.template.NotRenderTemplateAfter;
@@ -150,6 +151,16 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * logic to the template.
 	 */
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
+
+	/**
+	 * <p>
+	 * Name of {@link Property} to indicate if this {@link WebTemplate} contains
+	 * {@link HttpPathParameter} instances (dynamic path).
+	 * <p>
+	 * Note that specifying the {@link HttpInputPath} overrides this configured
+	 * value.
+	 */
+	public static final String PROPERTY_IS_PATH_PARAMETERS = "template.is.path.parameters";
 
 	/**
 	 * Name of {@link Property} for the {@link Method} name on the logic
@@ -650,6 +661,14 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		SectionInput sectionInput = designer.addSectionInput(RENDER_TEMPLATE_INPUT_NAME, null);
 		designer.link(sectionInput, initialFunction);
 
+		// Must provide logic class if path parameters
+		boolean isPathParameters = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_IS_PATH_PARAMETERS, String.valueOf(false)));
+		if (isPathParameters && (!isLogicClass)) {
+			designer.addIssue("Must provide logic class, as template has path parameters");
+			return;
+		}
+
 		// Create and link redirect of template
 		SectionOutput redirectOutput = designer.addSectionOutput(REDIRECT_TEMPLATE_OUTPUT_NAME, null, false);
 		FunctionFlow templateRedirectFlow = initialFunction.getFunctionFlow(Flows.REDIRECT.name());
@@ -669,7 +688,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		}
 		if (redirectValuesFunction == null) {
 			// Ensure indicating issue if require values
-			if ((this.inputPath != null) && (this.inputPath.isPathParameters())) {
+			if (isPathParameters) {
 				designer.addIssue(WebTemplate.class.getSimpleName()
 						+ " has path parameters but no redirect values function configured");
 			}

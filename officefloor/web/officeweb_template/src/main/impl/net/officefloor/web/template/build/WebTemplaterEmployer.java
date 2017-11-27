@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
@@ -35,6 +36,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.extension.WebTemplateExtension;
@@ -125,9 +127,14 @@ public class WebTemplaterEmployer implements WebTemplater {
 		OfficeSection templateSection = this.officeArchitect.addOfficeSection(applicationPath, webTemplateSectionSource,
 				applicationPath);
 
-		// Configure the template content
+		// Determine if dynamic path
+		boolean isPathParameters = this.webArchitect.isPathParameters(applicationPath);
+
+		// Configure the template properties
 		PropertyList properties = this.sourceContext.createPropertyList();
 		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString());
+		properties.addProperty(WebTemplateSectionSource.PROPERTY_IS_PATH_PARAMETERS)
+				.setValue(String.valueOf(isPathParameters));
 
 		// Add the template
 		WebTemplateImpl template = new WebTemplateImpl(applicationPath, webTemplateSectionSource, templateSection,
@@ -239,19 +246,10 @@ public class WebTemplaterEmployer implements WebTemplater {
 					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 			HttpUrlContinuation templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure,
 					this.applicationPath, sectionInput);
-			this.webTemplateSectionSource.setHttpInputPath(templateInput.getPath());
 
-			// Load other methods
-			for (HttpMethod method : this.renderMethods) {
-
-				// Ignore GET, as added with continuation
-				if (method == HttpMethod.GET) {
-					continue;
-				}
-
-				// Route to template for method
-				WebTemplaterEmployer.this.webArchitect.link(this.isSecure, method, this.applicationPath, sectionInput);
-			}
+			// Provide the input path to template section
+			HttpInputPath templateInputPath = templateInput.getPath();
+			this.webTemplateSectionSource.setHttpInputPath(templateInputPath);
 
 			// Configure properties for template
 			if (this.logicClass != null) {
@@ -264,10 +262,41 @@ public class WebTemplaterEmployer implements WebTemplater {
 			}
 			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SEPARATOR)
 					.setValue(String.valueOf(this.linkSeparatorCharacter));
+			this.properties.configureProperties(this.section);
+
+			// Ensure appropriately configured
+			if (templateInputPath.isPathParameters()) {
+
+				// Must have logic class
+				if (this.logicClass == null) {
+					WebTemplaterEmployer.this.officeArchitect.addIssue("Must provide template logic class for template "
+							+ this.applicationPath + ", as has dynamic path");
+					return;
+				}
+
+				// Must have redirect values function
+				if (CompileUtil.isBlank(this.redirectValuesFunctionName)) {
+					WebTemplaterEmployer.this.officeArchitect.addIssue(
+							"Must provide redirect values function for template /{param}, as has dynamic path");
+					return;
+				}
+			}
 
 			// Load the type
 			OfficeSectionType type = WebTemplaterEmployer.this.sourceContext.loadOfficeSectionType(this.applicationPath,
 					WebTemplateSectionSource.class.getName(), this.applicationPath, this.properties);
+
+			// Load other methods
+			for (HttpMethod method : this.renderMethods) {
+
+				// Ignore GET, as added with continuation
+				if (method == HttpMethod.GET) {
+					continue;
+				}
+
+				// Route to template for method
+				WebTemplaterEmployer.this.webArchitect.link(this.isSecure, method, this.applicationPath, sectionInput);
+			}
 
 			// Load the link inputs
 			for (OfficeSectionInputType inputType : type.getOfficeSectionInputTypes()) {
@@ -312,9 +341,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 			for (LinkToTemplate link : this.linkToTemplates) {
 				WebTemplaterEmployer.this.webArchitect.link(link.sectionOutput, templateInput, link.valuesType);
 			}
-
-			// Configure the section
-			this.properties.configureProperties(this.section);
 		}
 
 		/*

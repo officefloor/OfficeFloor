@@ -63,6 +63,17 @@ public class WebRouterBuilder {
 	}
 
 	/**
+	 * Indicates if the path contains parameters.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @return <code>true</code> should the path contain parameters.
+	 */
+	public boolean isPathParameters(String path) {
+		return path.contains("{");
+	}
+
+	/**
 	 * Adds a route.
 	 *
 	 * @param method
