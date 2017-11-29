@@ -155,7 +155,7 @@ public class LeafWebRouteNode implements WebRouteNode {
 			}
 
 			// Handle request
-			handler.handle(namedArguments, context);
+			handler.handle(namedArguments, connection, context);
 
 		} else {
 			// Method not allowed

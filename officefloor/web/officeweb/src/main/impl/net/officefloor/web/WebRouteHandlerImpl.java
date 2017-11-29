@@ -20,6 +20,10 @@ package net.officefloor.web;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.server.http.HttpHeaderName;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.route.WebRouteHandler;
 import net.officefloor.web.state.HttpArgument;
 
@@ -31,6 +35,16 @@ import net.officefloor.web.state.HttpArgument;
 public class WebRouteHandlerImpl implements WebRouteHandler {
 
 	/**
+	 * <code>Location</code> {@link HttpHeaderName}.
+	 */
+	private static final HttpHeaderName LOCATION = new HttpHeaderName("location");
+
+	/**
+	 * Indicates if a secure connection is required.
+	 */
+	private final boolean isRequireSecure;
+
+	/**
 	 * {@link Flow} index for handling.
 	 */
 	private final int flowIndex;
@@ -38,10 +52,13 @@ public class WebRouteHandlerImpl implements WebRouteHandler {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param isRequireSecure
+	 *            Indicates if a secure connection is required.
 	 * @param flowIndex
 	 *            {@link Flow} index for handling.
 	 */
-	public WebRouteHandlerImpl(int flowIndex) {
+	public WebRouteHandlerImpl(boolean isRequireSecure, int flowIndex) {
+		this.isRequireSecure = isRequireSecure;
 		this.flowIndex = flowIndex;
 	}
 
@@ -50,7 +67,23 @@ public class WebRouteHandlerImpl implements WebRouteHandler {
 	 */
 
 	@Override
-	public void handle(HttpArgument pathArguments, ManagedFunctionContext<?, Indexed> context) {
+	public void handle(HttpArgument pathArguments, ServerHttpConnection connection,
+			ManagedFunctionContext<?, Indexed> context) {
+
+		// Determine if secure connection is required
+		if (this.isRequireSecure && (!connection.isSecure())) {
+			// Non-secure, requiring secure - so redirect
+			String path = connection.getRequest().getUri();
+			String securePath = connection.getServerLocation().createClientUrl(this.isRequireSecure, path);
+
+			// Send redirect response to secure path
+			HttpResponse response = connection.getResponse();
+			response.setStatus(HttpStatus.TEMPORARY_REDIRECT);
+			response.getHeaders().addHeader(LOCATION, securePath);
+			return;
+		}
+
+		// Undertake flow to service route
 		context.doFlow(this.flowIndex, pathArguments, null);
 	}
 

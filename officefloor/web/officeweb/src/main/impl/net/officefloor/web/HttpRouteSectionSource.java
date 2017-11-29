@@ -325,19 +325,21 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * Adds a route.
 	 * 
+	 * @param isSecure
+	 *            Indicates if a secure connection is required for the route.
 	 * @param method
 	 *            {@link HttpMethod}.
 	 * @param path
 	 *            Route path.
 	 * @return {@link RouteInput} for the route.
 	 */
-	public RouteInput addRoute(HttpMethod method, String path) {
+	public RouteInput addRoute(boolean isSecure, HttpMethod method, String path) {
 
 		// Obtain the flow index for the route
 		int flowIndex = this.routes.size();
 
 		// Add the route
-		HttpInputPath inputPath = this.builder.addRoute(method, path, new WebRouteHandlerImpl(flowIndex));
+		HttpInputPath inputPath = this.builder.addRoute(method, path, new WebRouteHandlerImpl(isSecure, flowIndex));
 
 		// Track route information for configuration
 		RouteInput input = new RouteInput(flowIndex, method, path, inputPath);

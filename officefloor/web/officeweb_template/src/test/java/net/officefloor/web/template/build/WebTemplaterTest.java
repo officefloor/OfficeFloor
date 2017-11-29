@@ -18,7 +18,9 @@
 package net.officefloor.web.template.build;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
@@ -31,6 +33,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
@@ -44,6 +47,7 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.NotEscaped;
 import net.officefloor.web.template.NotRenderTemplateAfter;
@@ -113,6 +117,14 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to render {@link WebTemplate} with sections.
+	 */
+	public void testTemplateSection() throws Exception {
+		this.template("/path", (context, templater) -> templater.addTemplate("/path",
+				new StringReader("Template<!-- {section} -->Section")), "TemplateSection");
+	}
+
+	/**
 	 * Ensure can add template with logic.
 	 */
 	public void testTemplateLogic() throws Exception {
@@ -127,6 +139,178 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		public String getValue() {
 			return "<value>";
+		}
+	}
+
+	/**
+	 * Ensure able to render properties for a bean.
+	 */
+	public void testRenderBeanProperty() throws Exception {
+		this.template("/path", (context, templater) -> templater
+				.addTemplate("/path", new StringReader("Bean=${bean ${property} $}")).setLogicClass(BeanLogic.class),
+				"Bean=value");
+	}
+
+	public static class BeanLogic {
+		public BeanLogic getTemplate() {
+			return this;
+		}
+
+		public BeanLogic getBean() {
+			return this;
+		}
+
+		public String getProperty() {
+			return "value";
+		}
+	}
+
+	/**
+	 * Ensure issue if missing bean property.
+	 */
+	public void testMissingBeanProperty() throws Exception {
+		this.templateIssue((issues) -> {
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("TEMPLATE", FunctionNamespaceNodeImpl.class,
+					"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
+							+ WebTemplateManagedFunctionSource.class.getName(),
+					new Exception("Property 'missing' can not be sourced from bean type " + BeanLogic.class.getName()));
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
+		}, (context, templater) -> templater.addTemplate("/path", new StringReader("Bean=${bean ${missing} $}"))
+				.setLogicClass(BeanLogic.class));
+	}
+
+	/**
+	 * Ensure can render an array of bean values.
+	 */
+	public void testRenderArrayOfBeans() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater.addTemplate("/path", new StringReader("Bean=${beans  ${property} $}"))
+						.setLogicClass(ArrayBeanLogic.class),
+				"Bean= 1 2");
+	}
+
+	public static class ArrayBeanLogic {
+		private final String value;
+
+		public ArrayBeanLogic() {
+			this(null);
+		}
+
+		public ArrayBeanLogic(String value) {
+			this.value = value;
+		}
+
+		public ArrayBeanLogic getTemplate() {
+			return this;
+		}
+
+		public ArrayBeanLogic[] getBeans() {
+			return new ArrayBeanLogic[] { new ArrayBeanLogic("1"), new ArrayBeanLogic("2") };
+		}
+
+		public String getProperty() {
+			return this.value;
+		}
+	}
+
+	/**
+	 * Ensure can render section with bean property.
+	 */
+	public void testTemplateSectionProperty() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate("/path", new StringReader("Template <!-- {section} -->${property}"))
+						.setLogicClass(TemplateSectionPropertyLogic.class),
+				"Template value");
+	}
+
+	public static class TemplateSectionPropertyLogic {
+		public TemplateSectionPropertyLogic getSection() {
+			return this;
+		}
+
+		public String getProperty() {
+			return "value";
+		}
+	}
+
+	/**
+	 * Ensure handle <code>null</code> bean.
+	 */
+	public void testNotRenderNullBean() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate("/path", new StringReader("${bean ignored ${property} $}${property}"))
+						.setLogicClass(NullBeanLogic.class),
+				"");
+	}
+
+	public static class NullBeanLogic {
+		public NullBeanLogic getTemplate() {
+			return this;
+		}
+
+		public NullBeanLogic getBean() {
+			return null;
+		}
+
+		public String getProperty() {
+			return null;
+		}
+	}
+
+	/**
+	 * Ensure section logic {@link Method} can have <code>void</code> return if
+	 * no properties are required.
+	 */
+	public void testSectionWithVoidMethod() throws Exception {
+		VoidBeanLogic.isInvoked = false;
+		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("TEMPLATE")),
+				"TEMPLATE");
+		assertTrue("Should invoke void template method", VoidBeanLogic.isInvoked);
+	}
+
+	public static class VoidBeanLogic {
+		private static boolean isInvoked = false;
+
+		public void getTemplate() {
+			isInvoked = true;
+		}
+	}
+
+	/**
+	 * Ensure able to trigger section rendering by {@link Flow}.
+	 */
+	public void testSectionInvokedByFlow() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure issue if section {@link Method} is annotated with
+	 * {@link NextFunction}.
+	 */
+	public void testSectionMethodNotAllowedNextFunction() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure not render {@link WebTemplate} section if <code>null</code> bean.
+	 */
+	public void testNotRenderSectionForNullData() throws Exception {
+		this.template("/path", (context, templater) -> templater.addTemplate("/path",
+				new StringReader("Template <!-- {section} --> Section")), "");
+	}
+
+	public static class NullDataLogic {
+		public Object getTemplate() {
+			return null;
+		}
+
+		public Object getSection() {
+			return null;
 		}
 	}
 
@@ -525,12 +709,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.template("/path", (context, templater) -> templater
 				.addTemplate("/path", new StringReader("{value: JSON}")).setContentType("application/json"),
 				"{value: JSON}");
-		assertEquals("Incorrect default content-type", "application/json",
-				response.getHeader("content-type").getValue());
+		response.assertHeader("content-type", "application/json");
 	}
 
 	/**
-	 * ENsure can change the {@link Charset} for rendering the template.
+	 * Ensure can change the {@link Charset} for rendering the template.
 	 */
 	public void testCharset() throws Exception {
 		Charset charset = Charset.forName("UTF-16");
@@ -585,25 +768,49 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Not-secure request should a have a redirect to secure connection
 		assertEquals("Should redirect for secure connection", 307, response.getStatus().getStatusCode());
-		assertEquals("Should be secure redirect URL", this.contextUrl("https://mock.officefloor.net", "/path+link"),
-				response.getHeader("location").getValue());
+		response.assertHeader("location", this.contextUrl("https://mock.officefloor.net", "/path+link"));
 
 		// Ensure able to obtain link over secure connection
 		response = this.server.send(this.mockRequest("/path+link").secure(true));
+		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect content", "section GET /path+link", response.getEntity(null));
 	}
 
 	/**
-	 * Ensure can render a secure link for a insecure {@link WebTemplate}.
+	 * Ensure can render a secure link for an insecure {@link WebTemplate}.
 	 */
 	public void testRenderSecureLink() throws Exception {
-		fail("TODO implement test to render secure link");
+		this.template("/path", (context, templater) -> {
+			WebTemplate template = templater.addTemplate("/path", new StringReader("Link=#{link}"));
+			template.setLinkSecure("link", true);
+			OfficeSection section = context.addSection("SECTION", MockSection.class);
+			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
+		}, "Link=https://mock.officefloor.net/path+link");
 	}
 
 	/**
 	 * Ensure can render insecure link on a secure {@link WebTemplate}.
 	 */
 	public void testRenderInsecureLinkOnSecureTemplate() throws Exception {
-		fail("TODO implement test to render insecure link on secure template");
+		MockHttpResponse response = this.template((context, templater) -> {
+			WebTemplate template = templater.addTemplate("/path", new StringReader("Link=#{link}")).setSecure(true);
+			template.setLinkSecure("link", false);
+			OfficeSection section = context.addSection("SECTION", MockSection.class);
+			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
+		}, this.mockRequest("/path").secure(true));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+
+		// Keep link secure (to avoid browser warning issues)
+		// (Also, avoids another connection needing to be established)
+		assertEquals("Incorrect content", "Link=/path+link", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can load {@link WebTemplate} from a resource.
+	 */
+	public void testLoadTemplateFromResource() throws Exception {
+		this.template("/path", (context, templater) -> templater.addTemplate("/path", this.location("Resource.ofp")),
+				"Resource loaded");
 	}
 
 	/**
@@ -617,26 +824,49 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can specify multiple {@link WebTemplate} instances for
-	 * inheritance.
-	 */
-	public void testGrandSuperTemplate() throws Exception {
-		fail("TODO implement");
-	}
-
-	/**
-	 * Ensure can load {@link WebTemplate} from a resource.
-	 */
-	public void testLoadTemplateFromResource() throws Exception {
-		fail("TODO implement");
-	}
-
-	/**
 	 * Ensure can load {@link WebTemplate} and it's super {@link WebTemplate}
 	 * from a resource.
 	 */
 	public void testLoadSuperFromResource() throws Exception {
-		fail("TODO implement");
+		this.template("/child", (context, templater) -> {
+			WebTemplate parent = templater.addTemplate("/parent", this.location("Parent.ofp"));
+			WebTemplate child = templater.addTemplate("/child", new StringReader("<!-- {:override} -->Child"));
+			child.setSuperTemplate(parent);
+		}, "Parent Child");
+	}
+
+	/**
+	 * Ensure can specify multiple {@link WebTemplate} instances for
+	 * inheritance.
+	 */
+	public void testGrandSuperTemplate() throws Exception {
+		this.template("/grandchild", (context, templater) -> {
+			WebTemplate grand = templater.addTemplate("/grand", new StringReader("Grand <!-- {section} --> Parent"));
+			WebTemplate parent = templater.addTemplate("/parent",
+					new StringReader("<!-- {:secction} --> Override, but overridden"));
+			parent.setSuperTemplate(grand);
+			WebTemplate child = templater.addTemplate("/child", new StringReader("<!-- {:section} -->Child"));
+			child.setSuperTemplate(parent);
+		}, "Grand Child");
+	}
+
+	/**
+	 * Ensure issue if inheritance cycle.
+	 */
+	public void testInheritanceCycle() throws Exception {
+		this.templateIssue((issues) -> {
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"WebTemplate inheritance cycle /child :: /parent :: /grand :: /child ...");
+		}, (context, templater) -> {
+			WebTemplate grand = templater.addTemplate("/grand", new StringReader("Grand"));
+			WebTemplate parent = templater.addTemplate("/parent", new StringReader("<!-- {:section} -->"));
+			WebTemplate child = templater.addTemplate("/child", new StringReader("<!-- {:section} -->"));
+
+			// Create cycle
+			child.setSuperTemplate(parent);
+			parent.setSuperTemplate(grand);
+			grand.setSuperTemplate(child);
+		});
 	}
 
 	/**
@@ -647,6 +877,59 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			WebTemplate template = templater.addTemplate("/extend", new StringReader("original"));
 			template.addExtension((extension) -> extension.setTemplateContent("extended"));
 		}, "extended");
+	}
+
+	/**
+	 * Ensure can provide <code>Data</code> suffix to section {@link Method}
+	 * name.
+	 */
+	public void testDataSuffix() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate("/path", new StringReader("${property}=<!-- {section} -->${property}"))
+						.setLogicClass(DataSuffixLogic.class),
+				"value=value");
+	}
+
+	public static class DataSuffixLogic {
+		public DataSuffixLogic getTemplateData() {
+			return this;
+		}
+
+		public DataSuffixLogic getSectionData() {
+			return this;
+		}
+
+		public String getProperty() {
+			return "value";
+		}
+	}
+
+	/**
+	 * Ensure can make the {@link WebTemplate} logic class
+	 * {@link HttpSessionStateful}.
+	 */
+	public void testStatefulTemplate() throws Exception {
+		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("${count}"))
+				.setLogicClass(StatefulLogic.class), "1");
+		for (int i = 2; i < 10; i++) {
+			assertEquals("Should stateful increment call count to " + i, String.valueOf(i),
+					this.server.send(this.mockRequest("/path")).getEntity(null));
+		}
+	}
+
+	@HttpSessionStateful
+	public static class StatefulLogic implements Serializable {
+		private int count = 0;
+
+		public StatefulLogic getTemplate() {
+			return this;
+		}
+
+		public int getCount() {
+			this.count++;
+			return this.count;
+		}
 	}
 
 	/**
@@ -663,6 +946,17 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			path = this.contextPath + path;
 		}
 		return server + path;
+	}
+
+	/**
+	 * Obtains the location for the file.
+	 * 
+	 * @param fileName
+	 *            Name of file.
+	 * @return Location of the file.
+	 */
+	private String location(String fileName) {
+		return this.getFileLocation(this.getClass(), fileName);
 	}
 
 	/**

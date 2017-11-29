@@ -727,7 +727,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			this.method = method;
 			this.applicationPath = applicationPath;
 			this.sectionInput = sectionInput;
-			this.routeInput = WebArchitectEmployer.this.routing.addRoute(this.method, this.applicationPath);
+			this.routeInput = WebArchitectEmployer.this.routing.addRoute(isSecure, this.method, this.applicationPath);
 		}
 
 		/*

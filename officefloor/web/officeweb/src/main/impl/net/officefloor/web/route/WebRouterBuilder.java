@@ -349,7 +349,7 @@ public class WebRouterBuilder {
 		WebRouteChoice paramChoice = null;
 
 		// Load the route choices
-		for (WebRoute route : routes) {
+		NEXT_ROUTE: for (WebRoute route : routes) {
 
 			// Create the choice
 			WebRouteChoice choice = new WebRouteChoice(route);
@@ -375,7 +375,7 @@ public class WebRouterBuilder {
 				for (WebRouteChoice staticChoice : staticChoices) {
 					if (staticChoice.value.charAt(0) == choice.value.charAt(0)) {
 						staticChoice.routes.add(choice.routes.get(0));
-						break;
+						continue NEXT_ROUTE;
 					}
 				}
 

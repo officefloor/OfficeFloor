@@ -22,8 +22,11 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
@@ -122,6 +125,30 @@ public class WebTemplaterEmployer implements WebTemplater {
 			return null; // unable to add the template
 		}
 
+		// Add the template
+		return this.addTemplate(applicationPath, (properties) -> properties
+				.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString()));
+	}
+
+	@Override
+	public WebTemplate addTemplate(String applicationPath, String locationOfTemplate) {
+
+		// Add the template
+		return this.addTemplate(applicationPath, (properties) -> properties
+				.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION).setValue(locationOfTemplate));
+	}
+
+	/**
+	 * Adds the {@link WebTemplate}.
+	 * 
+	 * @param applicationPath
+	 *            Application path.
+	 * @param configurer
+	 *            {@link Consumer} to configure the {@link PropertyList}.
+	 * @return {@link WebTemplate}.
+	 */
+	private WebTemplate addTemplate(String applicationPath, Consumer<PropertyList> configurer) {
+
 		// Add the section for the template
 		WebTemplateSectionSource webTemplateSectionSource = new WebTemplateSectionSource();
 		OfficeSection templateSection = this.officeArchitect.addOfficeSection(applicationPath, webTemplateSectionSource,
@@ -132,9 +159,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		// Configure the template properties
 		PropertyList properties = this.sourceContext.createPropertyList();
-		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString());
 		properties.addProperty(WebTemplateSectionSource.PROPERTY_IS_PATH_PARAMETERS)
 				.setValue(String.valueOf(isPathParameters));
+		configurer.accept(properties);
 
 		// Add the template
 		WebTemplateImpl template = new WebTemplateImpl(applicationPath, webTemplateSectionSource, templateSection,
@@ -143,13 +170,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		// Return the template
 		return template;
-	}
-
-	@Override
-	public WebTemplate addTemplate(String applicationPath, String locationOfTemplate) {
-
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -202,9 +222,24 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private boolean isSecure = false;
 
 		/**
+		 * Secure links.
+		 */
+		private Map<String, Boolean> secureLinks = new HashMap<>();
+
+		/**
 		 * Link separator character.
 		 */
 		private char linkSeparatorCharacter = '+';
+
+		/**
+		 * <code>Content-Type</code> for the {@link WebTemplate}.
+		 */
+		private String contentType = null;
+
+		/**
+		 * {@link Charset}.
+		 */
+		private Charset charset = null;
 
 		/**
 		 * Render {@link HttpMethod} instances.
@@ -262,6 +297,19 @@ public class WebTemplaterEmployer implements WebTemplater {
 			}
 			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SEPARATOR)
 					.setValue(String.valueOf(this.linkSeparatorCharacter));
+			if (this.contentType != null) {
+				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CONTENT_TYPE).setValue(this.contentType);
+			}
+			if (this.charset != null) {
+				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CHARSET).setValue(this.charset.name());
+			}
+			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE)
+					.setValue(String.valueOf(this.isSecure));
+			for (String linkName : this.secureLinks.keySet()) {
+				Boolean isLinkSecure = this.secureLinks.get(linkName);
+				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + linkName)
+						.setValue(String.valueOf(isLinkSecure));
+			}
 			this.properties.configureProperties(this.section);
 
 			// Ensure appropriately configured
@@ -367,13 +415,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public WebTemplate setContentType(String contentType) {
-			// TODO Auto-generated method stub
+			this.contentType = contentType;
 			return this;
 		}
 
 		@Override
 		public WebTemplate setCharset(Charset charset) {
-			// TODO Auto-generated method stub
+			this.charset = charset;
 			return this;
 		}
 
@@ -385,13 +433,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public WebTemplate setSecure(boolean isSecure) {
-			// TODO Auto-generated method stub
+			this.isSecure = isSecure;
 			return this;
 		}
 
 		@Override
 		public WebTemplate setLinkSecure(String linkName, boolean isSecure) {
-			// TODO Auto-generated method stub
+			this.secureLinks.put(linkName, isSecure);
 			return this;
 		}
 

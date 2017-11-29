@@ -154,9 +154,7 @@ public class WebTemplateInitialFunction extends
 		}
 
 		// Configure the response
-		if (this.contentType != null) {
-			connection.getResponse().setContentType(this.contentType, this.charset);
-		}
+		connection.getResponse().setContentType(this.contentType, this.charset);
 
 		// Render the template
 		context.doFlow(Flows.RENDER, null, null);

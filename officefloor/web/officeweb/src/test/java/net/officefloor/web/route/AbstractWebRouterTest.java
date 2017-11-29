@@ -22,6 +22,7 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -189,6 +190,30 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchMoreStaticParameterPath() {
 		this.route("/path/value-static", R("/path/{param}"), T("/path/{param}-static", "param", "value"));
+	}
+
+	/**
+	 * Ensure parameter can fill the remaining path (with not matching static
+	 * suffixes).
+	 */
+	public void testNotMatchStaticSuffixWithMultipleMethods() {
+		this.route("/path", T("/{param}", "param", "path"), R(HttpMethod.POST, "/{param}+link"), R("/{param}+link"));
+	}
+
+	/**
+	 * Ensure can match with static suffix.
+	 */
+	public void testMatchStaticSuffixWithMultipleMethods() {
+		this.route("/path+link", R("/{param}"), R(HttpMethod.POST, "/{param}+link"),
+				T("/{param}+link", "param", "path"));
+	}
+
+	/**
+	 * Ensure can match different {@link HttpMethod} with static suffix.
+	 */
+	public void testMatchMethodStaticSuffixWithMultipleMethods() {
+		this.route(HttpMethod.POST, "/path+link", R("/{param}"), T(HttpMethod.POST, "/{param}+link", "param", "path"),
+				R("/{param}+link"));
 	}
 
 	/**
@@ -454,7 +479,8 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public void handle(HttpArgument pathArguments, ManagedFunctionContext<?, Indexed> context) {
+		public void handle(HttpArgument pathArguments, ServerHttpConnection connection,
+				ManagedFunctionContext<?, Indexed> context) {
 
 			// Ensure should be handling route
 			assertTrue("Should not handle route (" + this.path + ")", this.isHandler);

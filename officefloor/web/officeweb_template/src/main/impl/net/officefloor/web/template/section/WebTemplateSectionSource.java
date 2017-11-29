@@ -18,8 +18,12 @@
 package net.officefloor.web.template.section;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -147,6 +151,19 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
 
 	/**
+	 * Name of {@link Property} providing the location of the
+	 * {@link WebTemplate} content.
+	 */
+	public static final String PROPERTY_TEMPLATE_LOCATION = "template.location";
+
+	/**
+	 * Name of {@link Property} providing the {@link Charset} to read in the
+	 * {@link WebTemplate} content at the configured
+	 * {@link #PROPERTY_TEMPLATE_LOCATION}.
+	 */
+	public static final String PROPERTY_TEMPLATE_LOCATION_CHARSET = "template.location.charset";
+
+	/**
 	 * Name of {@link Property} for the {@link Class} providing the backing
 	 * logic to the template.
 	 */
@@ -207,6 +224,53 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_CHARSET = "template.charset";
+
+	/**
+	 * Obtains the {@link WebTemplate} content.
+	 * 
+	 * @param inheritanceIndex
+	 *            Index within the inheritance. <code>-1</code> for this
+	 *            {@link WebTemplate}.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param context
+	 *            {@link SourceContext}.
+	 * @return {@link WebTemplate} content.
+	 * @throws IOException
+	 *             If fails to read in the {@link WebTemplate} content.
+	 */
+	private static String getTemplateContent(int inheritanceIndex, SectionDesigner designer, SourceContext context)
+			throws IOException {
+
+		// Calculate the inheritance suffix
+		String inheritanceSuffix = (inheritanceIndex == -1 ? "" : "." + inheritanceIndex);
+
+		// Obtain as content first
+		String content = context.getProperty(PROPERTY_TEMPLATE_CONTENT + inheritanceSuffix, null);
+		if (content != null) {
+			return content;
+		}
+
+		// Obtain as location (requiring location to be configured)
+		String location = context.getProperty(PROPERTY_TEMPLATE_LOCATION + inheritanceSuffix);
+		String locationCharset = context.getProperty(PROPERTY_TEMPLATE_LOCATION_CHARSET + inheritanceSuffix, null);
+		InputStream locationStream = context.getResource(location);
+		StringWriter buffer = new StringWriter();
+		try (Reader locationReader = (locationCharset == null ? new InputStreamReader(locationStream)
+				: new InputStreamReader(locationStream, Charset.forName(locationCharset)))) {
+			for (int character = locationReader.read(); character != -1; character = locationReader.read()) {
+				buffer.write(character);
+			}
+		} catch (IOException ex) {
+			// Indicate failed to read in template
+			designer.addIssue("Failed to read in template at location '" + location + "' with charset '"
+					+ (locationCharset == null ? "<default>" : locationCharset + ")"), ex);
+
+			// Propagate the failure (as must load template content)
+			throw ex;
+		}
+		return buffer.toString();
+	}
 
 	/**
 	 * Determines if the link should be secure.
@@ -423,11 +487,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				.parseInt(context.getProperty(PROPERTY_INHERITED_TEMPLATES_COUNT, String.valueOf(0)));
 		String[] templateInheritanceHierarchy = new String[inheritedTemplatesCount + 1];
 		for (int inheritanceIndex = 0; inheritanceIndex < inheritedTemplatesCount; inheritanceIndex++) {
-			templateInheritanceHierarchy[inheritanceIndex] = context
-					.getProperty(PROPERTY_TEMPLATE_CONTENT + ".inherit." + inheritanceIndex);
+			templateInheritanceHierarchy[inheritanceIndex] = getTemplateContent(inheritanceIndex, designer, context);
 		}
-		templateInheritanceHierarchy[templateInheritanceHierarchy.length - 1] = context
-				.getProperty(PROPERTY_TEMPLATE_CONTENT);
+		templateInheritanceHierarchy[templateInheritanceHierarchy.length - 1] = getTemplateContent(-1, designer,
+				context);
 
 		// Obtain the template for the highest ancestor in inheritance hierarchy
 		ParsedTemplate highestAncestorTemplate = WebTemplateParser

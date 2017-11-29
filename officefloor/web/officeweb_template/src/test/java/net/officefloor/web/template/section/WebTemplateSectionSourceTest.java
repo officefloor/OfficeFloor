@@ -538,4 +538,18 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 	}
 
+	public static class NextFunctionErrorLogic {
+
+		/**
+		 * Section method with disallowed {@link NextFunction}.
+		 * 
+		 * @return Should not be called as invalid to have {@link NextFunction}
+		 *         annotation.
+		 */
+		@NextFunction("NotAllowed")
+		public Object getSection() {
+			return null;
+		}
+	}
+
 }

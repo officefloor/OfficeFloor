@@ -119,6 +119,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to GET secure root.
+	 */
+	public void testSecureGetRoot() throws Exception {
+		this.secureService(HttpMethod.GET, "/", MockSection.class, "/", "TEST");
+	}
+
+	/**
 	 * Ensure sends 404 if resource not found.
 	 */
 	public void testResourceNotFound() throws Exception {
@@ -139,6 +146,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to POST secure root.
+	 */
+	public void testSecurePostRoot() throws Exception {
+		this.secureService(HttpMethod.POST, "/", MockSection.class, "/", "TEST");
+	}
+
+	/**
 	 * Ensure appropriately indicates {@link HttpMethod} not allowed.
 	 */
 	public void testPostNotAllowed() throws Exception {
@@ -156,6 +170,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 				this.mockRequest("/path/to/resource"));
 		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure redirect on secure path.
+	 */
+	public void testSecurePath() throws Exception {
+		this.secureService(HttpMethod.GET, "/path/to/resource", MockSection.class, "/path/to/resource", "TEST");
 	}
 
 	/**
@@ -196,6 +217,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 				throws IOException {
 			connection.getResponse().getEntityWriter().write("Value=" + param);
 		}
+	}
+
+	/**
+	 * Ensure able to provide value via secure path.
+	 */
+	public void testSecurePathValue() throws Exception {
+		this.secureService(HttpMethod.GET, "/path/{param}/{two}", MockPathValue.class, "/path/value/2", "Value=value");
 	}
 
 	/**
@@ -1060,9 +1088,56 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 */
 	private MockHttpResponse service(HttpMethod httpMethod, String applicationPath, Class<?> servicer,
 			MockHttpRequestBuilder request) throws Exception {
-		this.compile.web((context) -> context.link(false, httpMethod, applicationPath, servicer));
+		return this.service(false, httpMethod, applicationPath, servicer, request);
+	}
+
+	/**
+	 * Services the {@link MockHttpRequestBuilder}.
+	 * 
+	 * @param isSecure
+	 *            Indicates if route is secure.
+	 * @param httpMethod
+	 *            {@link HttpMethod}.
+	 * @param applicationPath
+	 *            Application path.
+	 * @param servicer
+	 *            {@link Class} of the servicer.
+	 * @param request
+	 *            {@link MockHttpRequestBuilder}.
+	 * @return {@link MockHttpResponse}.
+	 */
+	private MockHttpResponse service(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> servicer,
+			MockHttpRequestBuilder request) throws Exception {
+		this.compile.web((context) -> context.link(isSecure, httpMethod, applicationPath, servicer));
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 		return this.server.send(request);
+	}
+
+	/**
+	 * Validates the redirect for requiring a secure connection.
+	 * 
+	 * @param httpMethod
+	 *            {@link HttpMethod}.
+	 * @param applicationPath
+	 *            Application path. May contain parameters.
+	 * @param servicer
+	 *            {@link Class} of the servicer.
+	 * @param requestPath
+	 *            Path for the {@link MockHttpRequestBuilder}.
+	 * @param expectedEntity
+	 *            Expected secure entity.
+	 */
+	private void secureService(HttpMethod httpMethod, String applicationPath, Class<?> servicer, String requestPath,
+			String expectedEntity) throws Exception {
+		MockHttpResponse response = this.service(true, httpMethod, applicationPath, servicer,
+				this.mockRequest(requestPath).method(httpMethod));
+		assertEquals("Incorrect status", 307, response.getStatus().getStatusCode());
+		response.assertHeader("location", this.contextUrl("https://mock.officefloor.net", requestPath));
+
+		// Ensure able to GET over secure connection
+		response = this.server.send(this.mockRequest(requestPath).method(httpMethod).secure(true));
+		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", expectedEntity, response.getEntity(null));
 	}
 
 }
