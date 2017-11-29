@@ -35,6 +35,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
@@ -285,7 +286,22 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure able to trigger section rendering by {@link Flow}.
 	 */
 	public void testSectionInvokedByFlow() throws Exception {
-		fail("TODO implement");
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate("/path", new StringReader("First <!-- {second} -->second <!-- {last} -->last"))
+						.setLogicClass(FlowLogic.class),
+				"First last");
+	}
+
+	@FlowInterface
+	public static interface Flows {
+		void last();
+	}
+
+	public static class FlowLogic {
+		public void getTemplate(Flows flows) {
+			flows.last();
+		}
 	}
 
 	/**
@@ -293,7 +309,18 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * {@link NextFunction}.
 	 */
 	public void testSectionMethodNotAllowedNextFunction() throws Exception {
-		fail("TODO implement");
+		this.templateIssue((issues) -> {
+			issues.recordIssue("TODO NextFunction not allowed");
+		}, (context, templater) -> {
+			templater.addTemplate("/path", new StringReader("TEMPLATE"));
+		});
+	}
+
+	public static class IllegalNextFunctionLogic {
+		@NextFunction("illegal")
+		public IllegalNextFunctionLogic getTemplate() {
+			return this;
+		}
 	}
 
 	/**

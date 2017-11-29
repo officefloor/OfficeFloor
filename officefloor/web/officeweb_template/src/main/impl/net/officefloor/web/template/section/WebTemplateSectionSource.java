@@ -1349,7 +1349,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * @param function
 		 *            {@link WebTemplateInitialFunction}.
 		 */
-		private WebTemplateInitialManagedFunctionSource(WebTemplateInitialFunction function) {
+		WebTemplateInitialManagedFunctionSource(WebTemplateInitialFunction function) {
 			this.function = function;
 		}
 
@@ -1445,7 +1445,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * @param linkSeparatorCharacter
 		 *            Link separator {@link Character}.
 		 */
-		private WebTemplateManagedFunctionSource(boolean isSecure, ParsedTemplate template, Charset charset,
+		WebTemplateManagedFunctionSource(boolean isSecure, ParsedTemplate template, Charset charset,
 				char linkSeparatorCharacter) {
 			this.isSecure = isSecure;
 			this.template = template;
@@ -1694,7 +1694,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * @param componentType
 		 *            Component type of the array.
 		 */
-		private WebTemplateArrayIteratorManagedFunctionSource(Class<?> componentType) {
+		WebTemplateArrayIteratorManagedFunctionSource(Class<?> componentType) {
 			this.componentType = componentType;
 		}
 

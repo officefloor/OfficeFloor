@@ -663,15 +663,15 @@ public class SectionNodeImpl implements SectionNode {
 		}
 
 		// Add the office context for the functions
-		OfficeFunctionType[] taskTypes = CompileUtil.loadTypes(this.functionNodes,
+		OfficeFunctionType[] functionTypes = CompileUtil.loadTypes(this.functionNodes,
 				(function) -> function.getOfficeFunctionName(),
 				function -> function.loadOfficeFunctionType(sectionType, compileContext), OfficeFunctionType[]::new);
-		if (taskTypes == null) {
+		if (functionTypes == null) {
 			return false;
 		}
 
 		// Initialise the sub section state
-		sectionType.initialiseAsOfficeSubSectionType(parentSectionType, subSections, taskTypes, managedObjectTypes);
+		sectionType.initialiseAsOfficeSubSectionType(parentSectionType, subSections, functionTypes, managedObjectTypes);
 		return true;
 	}
 

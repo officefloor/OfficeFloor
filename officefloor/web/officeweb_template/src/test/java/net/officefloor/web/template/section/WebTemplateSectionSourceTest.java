@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.template.section;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,6 +45,8 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.template.parse.ParsedTemplate;
+import net.officefloor.web.template.parse.WebTemplateParser;
 import net.officefloor.web.template.section.TemplateLogic.RowBean;
 import net.officefloor.web.template.section.WebTemplateSectionSource.NoLogicClass;
 import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateArrayIteratorManagedFunctionSource;
@@ -67,7 +70,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct type.
 	 */
-	public void testType() {
+	public void testType() throws IOException {
 
 		// Create the expected type
 		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
@@ -98,7 +101,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(), false);
 		expected.addSectionOutput("nonMethodLink", null, false);
-		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput("redirectToTemplate", null, false);
 		expected.addSectionOutput(SQLException.class.getName(), SQLException.class.getName(), true);
 		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
 
@@ -121,11 +124,17 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		injectMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, RowBean.class.getName());
 		injectMos.addSectionManagedObject("managedObject", ManagedObjectScope.THREAD);
 
+		// Obtain the parsed content
+		ParsedTemplate parsedTemplate = WebTemplateParser
+				.parse(new FileReader(this.findFile(this.getClass(), "Template.ofp")));
+
 		// Initial, Template and Class namespace
 		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
-				WebTemplateInitialManagedFunctionSource.class.getName());
+				new WebTemplateInitialManagedFunctionSource(
+						new WebTemplateInitialFunction(false, null, null, null, '+')));
 		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
-				WebTemplateManagedFunctionSource.class.getName());
+				new WebTemplateManagedFunctionSource(false, parsedTemplate,
+						ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET, '+'));
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "Template.ofp"));
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "template",
@@ -135,7 +144,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				SectionClassManagedFunctionSource.class.getName());
 		classNamespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
 		SectionFunctionNamespace iteratorNamespace = expected.addSectionFunctionNamespace("ListArrayIterator",
-				WebTemplateArrayIteratorManagedFunctionSource.class.getName());
+				new WebTemplateArrayIteratorManagedFunctionSource(RowBean.class));
 
 		// Initial function
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
@@ -178,6 +187,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Handle submit function
 		SectionFunction submitMethod = classNamespace.addSectionFunction("submit", "submit");
+		expected.link(submitMethod.getFunctionObject("HttpQueryParameter_doFlow-java.lang.String"), sectionMo);
 		expected.link(submitMethod.getFunctionObject("OBJECT"), sectionMo);
 		expected.link(submitMethod.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
@@ -197,7 +207,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, "/template",
-				WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT,
+				WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION,
 				this.getFileLocation(this.getClass(), "Template.ofp"), WebTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateLogic.class.getName());
 	}
