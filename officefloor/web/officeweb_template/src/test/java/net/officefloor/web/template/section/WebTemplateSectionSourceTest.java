@@ -44,7 +44,6 @@ import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.template.parse.ParsedTemplate;
 import net.officefloor.web.template.parse.WebTemplateParser;
 import net.officefloor.web.template.section.TemplateLogic.RowBean;
@@ -140,7 +139,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateLogic.class.getName());
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "List", RowBean.class.getName());
-		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
+		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("RENDER",
 				SectionClassManagedFunctionSource.class.getName());
 		classNamespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
 		SectionFunctionNamespace iteratorNamespace = expected.addSectionFunctionNamespace("ListArrayIterator",
@@ -215,7 +214,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure find methods with Data suffix.
 	 */
-	public void testTypeWithDataSuffix() {
+	public void testTypeWithDataSuffix() throws IOException {
 
 		// Create the expected type
 		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
@@ -231,16 +230,13 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("requiredForIntegration", null);
 
 		// Outputs
-		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput("redirectToTemplate", null, false);
 		expected.addSectionOutput("doExternalFlow", null, false);
 		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
 
 		// Objects
 		SectionObject httpConnection = expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
-		SectionObject requestState = expected.addSectionObject(HttpRequestState.class.getName(),
-				HttpRequestState.class.getName());
-		SectionObject httpSession = expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
 
 		// Managed Object Sources
 		SectionManagedObjectSource sectionMos = expected.addSectionManagedObjectSource("OBJECT",
@@ -249,28 +245,32 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				TemplateDataLogic.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 
+		// Obtain the parsed template
+		ParsedTemplate parsedTemplate = WebTemplateParser
+				.parse(new FileReader(this.findFile(this.getClass(), "TemplateData.ofp")));
+
 		// Initial, Template and Class namespace
 		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
-				WebTemplateInitialManagedFunctionSource.class.getName());
+				new WebTemplateInitialManagedFunctionSource(
+						new WebTemplateInitialFunction(false, null, null, null, '+')));
 		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
-				WebTemplateManagedFunctionSource.class.getName());
+				new WebTemplateManagedFunctionSource(false, parsedTemplate,
+						ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET, '+'));
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "TemplateData.ofp"));
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateDataLogic.class.getName());
 		templateNamespace.addProperty(WebTemplateSectionSource.PROPERTY_BEAN_PREFIX + "section",
 				TemplateDataLogic.class.getName());
-		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
+		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("RENDER",
 				SectionClassManagedFunctionSource.class.getName());
 		classNamespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				TemplateDataLogic.class.getName());
 
 		// Initial function
-		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_TASK_",
+		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
-		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
 		initial.getFunctionFlow("RENDER");
 
 		// Template
@@ -289,7 +289,6 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(getSection.getFunctionObject("OBJECT"), sectionMo);
 		SectionFunction section = templateNamespace.addSectionFunction("section", "section");
 		expected.link(section.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		initial.getFunctionObject("REQUEST_STATE");
 		expected.link(section.getFunctionObject("OBJECT"), sectionMo);
 
 		// Description
@@ -302,33 +301,36 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.link(doExternalFlow.getFunctionObject("OBJECT"), sectionMo);
 
 		// Validate type
-		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, this.getClass(), "TemplateData.ofp",
-				WebTemplateSectionSource.PROPERTY_CLASS_NAME, TemplateDataLogic.class.getName());
+		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, "/path",
+				WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION,
+				this.getFileLocation(this.getClass(), "TemplateData.ofp"), WebTemplateSectionSource.PROPERTY_CLASS_NAME,
+				TemplateDataLogic.class.getName());
 	}
 
 	/**
 	 * Ensure can use {@link WebTemplateSectionSource} without a logic class.
 	 */
-	public void testTypeWithNoLogicClass() {
+	public void testTypeWithNoLogicClass() throws IOException {
 
 		// Create the expected type
 		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
 
 		// Input (for HTTP Template rending)
+		expected.addSectionInput("doExternalFlow", null)
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "doExternalFlow", new HttpMethod[0]));
+		expected.addSectionInput("nonMethodLink", null)
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink", new HttpMethod[0]));
 		expected.addSectionInput("renderTemplate", null);
 
 		// Outputs
-		expected.addSectionOutput("output", null, false);
 		expected.addSectionOutput("nonMethodLink", null, false);
 		expected.addSectionOutput("doExternalFlow", null, false);
+		expected.addSectionOutput("redirectToTemplate", null, false);
 		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
 
 		// Objects
 		SectionObject httpConnection = expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
-		SectionObject requestState = expected.addSectionObject(HttpRequestState.class.getName(),
-				HttpRequestState.class.getName());
-		SectionObject httpSession = expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
 
 		// Managed Object Sources
 		SectionManagedObjectSource sectionMos = expected.addSectionManagedObjectSource("OBJECT",
@@ -337,56 +339,39 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 
 		// Add the no logic class (with internal function)
-		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
+		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("RENDER",
 				SectionClassManagedFunctionSource.class.getName());
 		classNamespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				NoLogicClass.class.getName());
 		SectionFunction getTemplate = classNamespace.addSectionFunction("notIncludedInput", "notIncludedInput");
 		expected.link(getTemplate.getFunctionObject("OBJECT"), sectionMo);
 
+		// Obtain the parsed template
+		ParsedTemplate parsedTemplate = WebTemplateParser
+				.parse(new FileReader(this.findFile(this.getClass(), "NoLogicTemplate.ofp")));
+
 		// Initial and Template namespace
 		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
-				WebTemplateInitialManagedFunctionSource.class.getName());
+				new WebTemplateInitialManagedFunctionSource(
+						new WebTemplateInitialFunction(false, null, null, null, '+')));
 		SectionFunctionNamespace templateNamspace = expected.addSectionFunctionNamespace("TEMPLATE",
-				WebTemplateManagedFunctionSource.class.getName());
+				new WebTemplateManagedFunctionSource(false, parsedTemplate,
+						ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET, '+'));
 
 		// Initial function
 		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
 				WebTemplateInitialManagedFunctionSource.FUNCTION_NAME);
 		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
-		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
 		initial.getFunctionFlow("RENDER");
 
 		// Section
 		SectionFunction section = templateNamspace.addSectionFunction("Section", "Section");
 		expected.link(section.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
 
-		// nonMethodLink URL continuation
-		fail("TODO configure redirects via WebArchitect");
-		// SectionFunctionNamespace nonMethodContinuationNamespace =
-		// expected.addSectionFunctionNamespace(
-		// "HTTP_URL_CONTINUATION_nonMethodLink",
-		// HttpUrlContinuationManagedFunctionSource.class.getName());
-		// nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-		// "nonMethod");
-		// nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
-		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
-
-		// doExternalFlow URL continuation
-		fail("TODO configure redirects via WebArchitect");
-		// SectionFunctionNamespace doExternalFlowContinuationNamespace =
-		// expected.addSectionFunctionNamespace(
-		// "HTTP_URL_CONTINUATION_doExternalFlow",
-		// HttpUrlContinuationManagedFunctionSource.class.getName());
-		// doExternalFlowContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-		// "doExternalFlow");
-		// doExternalFlowContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_doExternalFlow",
-		// HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
-
 		// Validate type
-		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, this.getClass(),
-				"NoLogicTemplate.ofp");
+		SectionLoaderUtil.validateSection(expected, WebTemplateSectionSource.class, "/path",
+				WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION,
+				this.getFileLocation(this.getClass(), "NoLogicTemplate.ofp"));
 	}
 
 	/**
@@ -403,7 +388,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Record errors
-		issues.recordIssue("Type", SectionNodeImpl.class, "Link 'LINK' does not exist on template /uri");
+		issues.recordIssue("<type>", SectionNodeImpl.class, "Link 'LINK' does not exist on template /path");
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -412,12 +397,13 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION).setValue(templatePath);
 		properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
 				.setValue(String.valueOf(true));
 
 		// Test
 		this.replayMockObjects();
-		loader.loadSectionType(WebTemplateSectionSource.class, templatePath, properties);
+		loader.loadSectionType(WebTemplateSectionSource.class, "/path", properties);
 		this.verifyMockObjects();
 	}
 
@@ -439,17 +425,17 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("renderTemplate", null);
 
 		// Outputs
-		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput("redirectToTemplate", null, false);
 		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
 
 		// Objects
 		expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
-		expected.addSectionObject(HttpRequestState.class.getName(), HttpRequestState.class.getName());
-		expected.addSectionObject(HttpSession.class.getName(), HttpSession.class.getName());
 
 		// Ensure correct type (and no link secure unknown issue)
-		SectionLoaderUtil.validateSectionType(expected, WebTemplateSectionSource.class, childTemplatePath,
-				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT, parentTemplatePath,
+		SectionLoaderUtil.validateSectionType(expected, WebTemplateSectionSource.class, "/path",
+				WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION, childTemplatePath,
+				WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT, "1",
+				WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION + ".0", parentTemplatePath,
 				WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + "link", String.valueOf(true));
 	}
 
@@ -458,7 +444,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMissingSectionMethodOnTemplateLogic() {
 		this.doMissingSectionMethodTest(MissingSectionTemplateLogic.class, "Missing method 'getsection' on class "
-				+ MissingSectionTemplateLogic.class.getName() + " to provide bean for template uri");
+				+ MissingSectionTemplateLogic.class.getName() + " to provide bean for template /path");
 	}
 
 	/**
@@ -474,7 +460,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	 * required.
 	 */
 	public void testMissingSectionMethodAsNoTemplateLogic() {
-		this.doMissingSectionMethodTest(null, "Must provide template logic class for template uri");
+		this.doMissingSectionMethodTest(null, "Must provide template logic class for template /path");
 	}
 
 	/**
@@ -496,7 +482,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Record errors
-		issues.recordIssue("Type", SectionNodeImpl.class, issueDescription);
+		issues.recordIssue("<type>", SectionNodeImpl.class, issueDescription);
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -505,13 +491,14 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION).setValue(templatePath);
 		if (templateLogicClass != null) {
 			properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(templateLogicClass.getName());
 		}
 
 		// Test
 		this.replayMockObjects();
-		loader.loadSectionType(WebTemplateSectionSource.class, templatePath, properties);
+		loader.loadSectionType(WebTemplateSectionSource.class, "/path", properties);
 		this.verifyMockObjects();
 	}
 
@@ -529,7 +516,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Record errors
-		issues.recordIssue("Type", SectionNodeImpl.class,
+		issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Template bean method 'getSection' (task GETSECTION) must not be annotated with NextFunction");
 
 		// Create loader
@@ -539,12 +526,13 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION).setValue(templatePath);
 		properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
 				.setValue(NextFunctionErrorLogic.class.getName());
 
 		// Test
 		this.replayMockObjects();
-		loader.loadSectionType(WebTemplateSectionSource.class, templatePath, properties);
+		loader.loadSectionType(WebTemplateSectionSource.class, "/path", properties);
 		this.verifyMockObjects();
 	}
 
