@@ -320,7 +320,20 @@ public class WebTemplaterEmployer implements WebTemplater {
 			// Configure inheritance properties
 			Deque<WebTemplateImpl> inheritanceHeirarchy = new LinkedList<>();
 			WebTemplateImpl parent = this.superTemplate;
+			StringBuilder cycle = new StringBuilder();
+			cycle.append(this.applicationPath + " ::");
 			while (parent != null) {
+
+				// Determine if inheritance cycle
+				if (inheritanceHeirarchy.contains(parent)) {
+					throw WebTemplaterEmployer.this.officeArchitect.addIssue(
+							WebTemplate.class.getSimpleName() + " inheritance cycle " + cycle.toString() + " ...");
+				}
+
+				// Include parent on report for cycle
+				cycle.append(" " + parent.applicationPath + " ::");
+
+				// Include in inheritance hierarchy
 				inheritanceHeirarchy.push(parent);
 				parent = parent.superTemplate;
 			}

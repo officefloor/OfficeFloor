@@ -860,17 +860,13 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure issue if inheritance cycle.
 	 */
 	public void testInheritanceCycle() throws Exception {
-
-		// TODO REMOVE when implemented cycle detection
-		fail("TODO remove this to run cycle detection once implemented - this currently avoids infinite loop");
-
 		this.templateIssue((issues) -> {
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
-					"WebTemplate inheritance cycle /child :: /parent :: /grand :: /child ...");
+					"WebTemplate inheritance cycle /child :: /parent :: /grand :: /child :: ...");
 		}, (context, templater) -> {
-			WebTemplate grand = templater.addTemplate("/grand", new StringReader("Grand"));
-			WebTemplate parent = templater.addTemplate("/parent", new StringReader("<!-- {:section} -->"));
 			WebTemplate child = templater.addTemplate("/child", new StringReader("<!-- {:section} -->"));
+			WebTemplate parent = templater.addTemplate("/parent", new StringReader("<!-- {:section} -->"));
+			WebTemplate grand = templater.addTemplate("/grand", new StringReader("Grand"));
 
 			// Create cycle
 			child.setSuperTemplate(parent);
