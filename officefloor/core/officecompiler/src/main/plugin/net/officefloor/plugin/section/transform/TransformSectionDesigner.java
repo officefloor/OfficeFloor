@@ -20,6 +20,7 @@ package net.officefloor.plugin.section.transform;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
@@ -313,13 +314,13 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void addIssue(String issueDescription) {
-		this.delegate.addIssue(issueDescription);
+	public CompileError addIssue(String issueDescription) {
+		return this.delegate.addIssue(issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause) {
-		this.delegate.addIssue(issueDescription, cause);
+	public CompileError addIssue(String issueDescription, Throwable cause) {
+		return this.delegate.addIssue(issueDescription, cause);
 	}
 
 }

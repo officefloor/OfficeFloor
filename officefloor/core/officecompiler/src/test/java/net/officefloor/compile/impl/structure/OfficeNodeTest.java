@@ -106,7 +106,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the issue
 		this.replayMockObjects();
-		this.node.addIssue("TEST_ISSUE");
+		assertNotNull("Should be provided compile error", this.node.addIssue("TEST_ISSUE"));
 		this.verifyMockObjects();
 	}
 
@@ -123,7 +123,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the issue
 		this.replayMockObjects();
-		this.node.addIssue("TEST_ISSUE", failure);
+		assertNotNull("Should be provided compile error", this.node.addIssue("TEST_ISSUE", failure));
 		this.verifyMockObjects();
 	}
 

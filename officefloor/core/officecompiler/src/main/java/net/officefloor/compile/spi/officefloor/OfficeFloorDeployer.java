@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
@@ -317,8 +319,11 @@ public interface OfficeFloorDeployer {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code> statement
+	 *         when adding {@link CompilerIssue} to avoid further compiling of
+	 *         the {@link OfficeFloor}.
 	 */
-	void addIssue(String issueDescription);
+	CompileError addIssue(String issueDescription);
 
 	/**
 	 * <p>
@@ -332,7 +337,10 @@ public interface OfficeFloorDeployer {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code> statement
+	 *         when adding {@link CompilerIssue} to avoid further compiling of
+	 *         the {@link OfficeFloor}.
 	 */
-	void addIssue(String issueDescription, Throwable cause);
+	CompileError addIssue(String issueDescription, Throwable cause);
 
 }

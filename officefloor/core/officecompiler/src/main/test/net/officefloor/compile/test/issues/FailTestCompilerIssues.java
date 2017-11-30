@@ -22,6 +22,7 @@ import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
 import net.officefloor.compile.impl.issues.CompileException;
 import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
 
 /**
@@ -37,7 +38,7 @@ public class FailTestCompilerIssues extends AbstractCompilerIssues {
 	 */
 
 	@Override
-	public void addIssue(Node node, String issueDescription, Throwable cause) {
+	public CompileError addIssue(Node node, String issueDescription, Throwable cause) {
 
 		// Enable test failures to bubble up
 		if (cause instanceof AssertionError) {
@@ -45,7 +46,7 @@ public class FailTestCompilerIssues extends AbstractCompilerIssues {
 		}
 
 		// Handle non-test failure issue
-		super.addIssue(node, issueDescription, cause);
+		return super.addIssue(node, issueDescription, cause);
 	}
 
 	@Override

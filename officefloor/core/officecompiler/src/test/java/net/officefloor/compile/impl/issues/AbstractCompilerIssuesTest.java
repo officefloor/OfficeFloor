@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.IssueCapture;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -45,6 +46,16 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 * Mock {@link Node}.
 	 */
 	private final Node node = this.createMock(Node.class);
+
+	/**
+	 * Ensure a {@link CompileError} is returned for <code>throw</code>
+	 * statements in adding a {@link CompilerIssue}.
+	 */
+	public void testReturnCompileError() {
+		assertNotNull("Should be provided error to throw", this.issues.addIssue(null, "ignored"));
+		assertNotNull("Should again be provided error to throw",
+				this.issues.addIssue(null, "ignored", new Exception("TEST")));
+	}
 
 	/**
 	 * Ensure handle issue.
@@ -72,8 +83,7 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 			return "TEST";
 		});
 		assertEquals("Incorrect return value", "TEST", capture.getReturnValue());
-		assertCompilerIssues(capture.getCompilerIssues(), new Issue(
-				"TEST ISSUE"));
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue("TEST ISSUE"));
 	}
 
 	/**
@@ -86,8 +96,7 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 			return null;
 		});
 		assertNull("Should not have return value", capture.getReturnValue());
-		assertCompilerIssues(capture.getCompilerIssues(), new Issue(
-				"TEST FAILURE", cause));
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue("TEST FAILURE", cause));
 	}
 
 	/**
@@ -100,8 +109,7 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 			this.issues.addIssue(this.node, "TEST FAILURE", cause);
 			return null;
 		});
-		assertCompilerIssues(capture.getCompilerIssues(), new Issue(
-				"TEST ISSUE"), new Issue("TEST FAILURE", cause));
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue("TEST ISSUE"), new Issue("TEST FAILURE", cause));
 	}
 
 	/**
@@ -113,20 +121,17 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 			return null;
 		};
 		Supplier<Object> secondLevel = () -> {
-			this.issues.addIssue(this.node, "SECOND", this.issues
-					.captureIssues(thirdLevel)
+			this.issues.addIssue(this.node, "SECOND", this.issues.captureIssues(thirdLevel)
 
 					.getCompilerIssues());
 			return null;
 		};
 		Supplier<Object> topLevel = () -> {
-			this.issues.addIssue(this.node, "TOP",
-					this.issues.captureIssues(secondLevel).getCompilerIssues());
+			this.issues.addIssue(this.node, "TOP", this.issues.captureIssues(secondLevel).getCompilerIssues());
 			return null;
 		};
 		IssueCapture<Object> capture = this.issues.captureIssues(topLevel);
-		assertCompilerIssues(capture.getCompilerIssues(), new Issue("TOP",
-				new Issue("SECOND", new Issue("THIRD"))));
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue("TOP", new Issue("SECOND", new Issue("THIRD"))));
 	}
 
 	/**
@@ -136,9 +141,7 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 *            Expected issues.
 	 */
 	private void assertCompilerIssues(Issue... issues) {
-		assertCompilerIssues(
-				this.issues.reportedIssues.toArray(new CompilerIssue[0]),
-				issues);
+		assertCompilerIssues(this.issues.reportedIssues.toArray(new CompilerIssue[0]), issues);
 	}
 
 	/**
@@ -149,14 +152,12 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 * @param issues
 	 *            Expected issues.
 	 */
-	private void assertCompilerIssues(CompilerIssue[] compilerIssues,
-			Issue... issues) {
+	private void assertCompilerIssues(CompilerIssue[] compilerIssues, Issue... issues) {
 		assertEquals(compilerIssues.length, issues.length);
 		for (int i = 0; i < issues.length; i++) {
 			CompilerIssue compilerIssue = compilerIssues[i];
 			Issue issue = issues[i];
-			assertCompilerIssue(compilerIssues[i], issue.issueDescription,
-					issue.failure);
+			assertCompilerIssue(compilerIssues[i], issue.issueDescription, issue.failure);
 			DefaultCompilerIssue defaultIssue = (DefaultCompilerIssue) compilerIssue;
 			assertCompilerIssues(defaultIssue.getCauses(), issue.causes);
 		}
@@ -172,8 +173,7 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 * @param cause
 	 *            Expected cause.
 	 */
-	private void assertCompilerIssue(CompilerIssue issue, String description,
-			Throwable cause) {
+	private void assertCompilerIssue(CompilerIssue issue, String description, Throwable cause) {
 		assertEquals(DefaultCompilerIssue.class, issue.getClass());
 		DefaultCompilerIssue defaultIssue = (DefaultCompilerIssue) issue;
 		assertSame(this.node, defaultIssue.getNode());

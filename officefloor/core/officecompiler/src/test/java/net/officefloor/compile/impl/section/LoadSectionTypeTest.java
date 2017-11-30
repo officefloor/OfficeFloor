@@ -33,6 +33,7 @@ import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
@@ -719,6 +720,20 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			// Ensure failed
 			TestCase.fail("Should not successfully obtain a missing property");
 		}
+	}
+
+	/**
+	 * Ensure can handle {@link CompileError}.
+	 */
+	public void testHandleCompileError() {
+
+		// Record issue
+		this.issues.recordIssue("<type>", SectionNodeImpl.class, "test");
+
+		// Ensure handle compile error
+		this.loadSectionType(false, (section, context) -> {
+			throw section.addIssue("test");
+		});
 	}
 
 	/**

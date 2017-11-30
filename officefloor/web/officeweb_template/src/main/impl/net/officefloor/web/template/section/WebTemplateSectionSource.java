@@ -601,12 +601,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 					boolean isIntroducedSection = false; // first is override
 					for (ParsedTemplateSection overrideSection : overridingSections) {
 
-						// Determine if introduced section already exists in
-						// parent
+						// Determine if introduced section already exists
 						String introducedSectionName = getParsedTemplateSectionName(overrideSection.getSectionName());
 						if ((isIntroducedSection) && (parentSectionNames.contains(introducedSectionName))) {
-							// Must override to include the child introduced
-							// section
+							// Must override to include child introduced section
 							designer.addIssue("Section '" + introducedSectionName
 									+ "' already exists by inheritance and not flagged for overriding (with '"
 									+ OVERRIDE_SECTION_PREFIX + "' prefix)");

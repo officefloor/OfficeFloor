@@ -18,6 +18,8 @@
 package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -446,8 +448,11 @@ public interface SectionDesigner {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code> statement
+	 *         when adding {@link CompilerIssue} to avoid further compiling of
+	 *         the {@link SectionNode}.
 	 */
-	void addIssue(String issueDescription);
+	CompileError addIssue(String issueDescription);
 
 	/**
 	 * <p>
@@ -462,7 +467,10 @@ public interface SectionDesigner {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code> statement
+	 *         when adding {@link CompilerIssue} to avoid further compiling of
+	 *         the {@link SectionNode}.
 	 */
-	void addIssue(String issueDescription, Throwable cause);
+	CompileError addIssue(String issueDescription, Throwable cause);
 
 }

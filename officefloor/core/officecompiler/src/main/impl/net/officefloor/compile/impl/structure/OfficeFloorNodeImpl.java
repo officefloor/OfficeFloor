@@ -50,6 +50,7 @@ import net.officefloor.compile.internal.structure.OfficeTeamRegistry;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
@@ -442,13 +443,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription);
+	public CompileError addIssue(String issueDescription) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
+	public CompileError addIssue(String issueDescription, Throwable cause) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
 	}
 
 	/*
@@ -536,6 +537,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
+
+		} catch (CompileError ex) {
+			return false; // issue already reported
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + OfficeFloor.class.getSimpleName() + " from "

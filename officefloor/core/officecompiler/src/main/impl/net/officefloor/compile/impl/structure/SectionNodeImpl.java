@@ -54,6 +54,7 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -421,6 +422,9 @@ public class SectionNodeImpl implements SectionNode {
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
+
+		} catch (CompileError ex) {
+			return false; // issue already reported
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + SectionType.class.getSimpleName() + " definition from "
@@ -1137,13 +1141,13 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription);
+	public CompileError addIssue(String issueDescription) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
+	public CompileError addIssue(String issueDescription, Throwable cause) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
 	}
 
 	/*

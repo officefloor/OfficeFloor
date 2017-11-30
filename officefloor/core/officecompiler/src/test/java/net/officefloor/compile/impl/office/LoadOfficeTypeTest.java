@@ -40,6 +40,7 @@ import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeTeamNodeImpl;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -152,11 +153,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure obtain the correct {@link Office} location.
 	 */
 	public void testOfficeLocation() {
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				assertEquals("Incorrect office location", OFFICE_LOCATION, context.getOfficeLocation());
-			}
+		this.loadOfficeType(true, (office, context) -> {
+			assertEquals("Incorrect office location", OFFICE_LOCATION, context.getOfficeLocation());
 		});
 	}
 
@@ -170,11 +168,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Missing property 'missing' for OfficeSource " + MockOfficeSource.class.getName());
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				context.getProperty("missing");
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			context.getProperty("missing");
 		});
 	}
 
@@ -184,21 +179,18 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testGetProperties() {
 
 		// Attempt to load office type
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				String[] names = context.getPropertyNames();
-				assertEquals("Incorrect number of property names", 2, names.length);
-				assertEquals("Incorrect property name 0", "ONE", names[0]);
-				assertEquals("Incorrect property name 1", "TWO", names[1]);
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
-			}
+		this.loadOfficeType(true, (office, context) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			String[] names = context.getPropertyNames();
+			assertEquals("Incorrect number of property names", 2, names.length);
+			assertEquals("Incorrect property name 0", "ONE", names[0]);
+			assertEquals("Incorrect property name 1", "TWO", names[1]);
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
 	}
 
@@ -212,11 +204,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Can not load class 'missing' for OfficeSource " + MockOfficeSource.class.getName());
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				context.loadClass("missing");
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			context.loadClass("missing");
 		});
 	}
 
@@ -231,11 +220,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Can not obtain resource at location 'missing' for OfficeSource " + MockOfficeSource.class.getName());
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				context.getResource("missing");
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			context.getResource("missing");
 		});
 	}
 
@@ -251,11 +237,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
 
 		// Obtain the configuration item
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				assertSame("Incorrect resource", resource, context.getResource(location));
-			}
+		this.loadOfficeType(true, (office, context) -> {
+			assertSame("Incorrect resource", resource, context.getResource(location));
 		});
 	}
 
@@ -269,11 +252,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue("Type", OfficeNodeImpl.class, "Can not obtain ConfigurationItem at location 'missing'");
 
 		// Attempt to load office
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				context.getConfigurationItem("missing", null);
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			context.getConfigurationItem("missing", null);
 		});
 	}
 
@@ -289,11 +269,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Can not obtain ConfigurationItem at location 'configuration' as missing property 'missing'");
 
 		// Attempt to load office
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				context.getConfigurationItem("configuration", null);
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			context.getConfigurationItem("configuration", null);
 		});
 	}
 
@@ -309,12 +286,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
 
 		// Obtain the configuration item
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				Reader configuration = context.getConfigurationItem(location, null).getReader();
-				assertContents(new StringReader("content"), configuration);
-			}
+		this.loadOfficeType(true, (office, context) -> {
+			Reader configuration = context.getConfigurationItem(location, null).getReader();
+			assertContents(new StringReader("content"), configuration);
 		});
 	}
 
@@ -330,12 +304,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
 
 		// Obtain the configuration item
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				Reader configuration = context.getConfigurationItem(location, null).getReader();
-				assertContents(new StringReader("replace"), configuration);
-			}
+		this.loadOfficeType(true, (office, context) -> {
+			Reader configuration = context.getConfigurationItem(location, null).getReader();
+			assertContents(new StringReader("replace"), configuration);
 		}, "tag", "replace");
 	}
 
@@ -359,12 +330,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Failed to obtain ConfigurationItem at location 'LOCATION': TEST", failure);
 
 		// Obtain the configuration item
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				context.getConfigurationItem(location, null);
-				fail("Should not be successful");
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			context.getConfigurationItem(location, null);
+			fail("Should not be successful");
 		});
 	}
 
@@ -374,12 +342,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testGetClassLoader() {
 
 		// Attempt to load office type
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				assertEquals("Incorrect class loader", LoadOfficeTypeTest.class.getClassLoader(),
-						context.getClassLoader());
-			}
+		this.loadOfficeType(true, (office, context) -> {
+			assertEquals("Incorrect class loader", LoadOfficeTypeTest.class.getClassLoader(), context.getClassLoader());
 		});
 	}
 
@@ -396,11 +360,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				failure);
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				throw failure;
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			throw failure;
 		});
 	}
 
@@ -410,11 +371,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testInputType_Asynchronous() {
 
 		// Load the type
-		OfficeType type = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeInput("INPUT", Integer.class.getName());
-			}
+		OfficeType type = this.loadOfficeType(true, (office, context) -> {
+			office.addOfficeInput("INPUT", Integer.class.getName());
 		});
 
 		// Validate the type
@@ -432,13 +390,10 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue("TEST", OfficeInputNodeImpl.class, "Office Input TEST already added");
 
 		// Load the type
-		OfficeType type = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				OfficeInput inputOne = office.addOfficeInput("TEST", String.class.getName());
-				OfficeInput inputTwo = office.addOfficeInput("TEST", Integer.class.getName());
-				assertSame("Should be the same object", inputOne, inputTwo);
-			}
+		OfficeType type = this.loadOfficeType(true, (office, context) -> {
+			OfficeInput inputOne = office.addOfficeInput("TEST", String.class.getName());
+			OfficeInput inputTwo = office.addOfficeInput("TEST", Integer.class.getName());
+			assertSame("Should be the same object", inputOne, inputTwo);
 		});
 
 		// Validate the type
@@ -454,11 +409,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testOutputType_Asynchronous() {
 
 		// Load the type
-		OfficeType type = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeOutput("OUTPUT", Long.class.getName());
-			}
+		OfficeType type = this.loadOfficeType(true, (office, context) -> {
+			office.addOfficeOutput("OUTPUT", Long.class.getName());
 		});
 
 		// Validate the type
@@ -476,13 +428,10 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue("TEST", OfficeOutputNodeImpl.class, "Office Output TEST already added");
 
 		// Load the type
-		OfficeType type = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				OfficeOutput outputOne = office.addOfficeOutput("TEST", String.class.getName());
-				OfficeOutput outputTwo = office.addOfficeOutput("TEST", Integer.class.getName());
-				assertSame("Should be the same object", outputOne, outputTwo);
-			}
+		OfficeType type = this.loadOfficeType(true, (office, context) -> {
+			OfficeOutput outputOne = office.addOfficeOutput("TEST", String.class.getName());
+			OfficeOutput outputTwo = office.addOfficeOutput("TEST", Integer.class.getName());
+			assertSame("Should be the same object", outputOne, outputTwo);
 		});
 
 		// Validate the type
@@ -501,11 +450,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue(null, OfficeObjectNodeImpl.class, "Null name for Office Object");
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeObject(null, Connection.class.getName());
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			office.addOfficeObject(null, Connection.class.getName());
 		});
 	}
 
@@ -519,11 +465,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue("MO", OfficeObjectNodeImpl.class, "Null type for managed object (name=MO)");
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeObject("MO", null);
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			office.addOfficeObject("MO", null);
 		});
 	}
 
@@ -534,24 +477,20 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testManagedObjectType() {
 
 		// Load office type with office floor managed object
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
 
-				final String MANAGED_OBJECT_NAME = "MO";
+			final String MANAGED_OBJECT_NAME = "MO";
 
-				// Add the office object
-				OfficeObject officeObject = office.addOfficeObject(MANAGED_OBJECT_NAME, Connection.class.getName());
+			// Add the office object
+			OfficeObject officeObject = office.addOfficeObject(MANAGED_OBJECT_NAME, Connection.class.getName());
 
-				// Ensure the office object is correct
-				assertEquals("Incorrect office object name", MANAGED_OBJECT_NAME, officeObject.getOfficeObjectName());
-				assertEquals("Incorrect dependent name", MANAGED_OBJECT_NAME,
-						officeObject.getDependentManagedObjectName());
-				assertEquals("Incorrect administerable name", MANAGED_OBJECT_NAME,
-						officeObject.getAdministerableManagedObjectName());
-				assertEquals("Incorrect governerable name", MANAGED_OBJECT_NAME,
-						officeObject.getGovernerableManagedObjectName());
-			}
+			// Ensure the office object is correct
+			assertEquals("Incorrect office object name", MANAGED_OBJECT_NAME, officeObject.getOfficeObjectName());
+			assertEquals("Incorrect dependent name", MANAGED_OBJECT_NAME, officeObject.getDependentManagedObjectName());
+			assertEquals("Incorrect administerable name", MANAGED_OBJECT_NAME,
+					officeObject.getAdministerableManagedObjectName());
+			assertEquals("Incorrect governerable name", MANAGED_OBJECT_NAME,
+					officeObject.getGovernerableManagedObjectName());
 		});
 
 		// Validate type
@@ -570,14 +509,11 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testQualifiedManagedObjectType() {
 
 		// Load office type with office floor managed object
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
 
-				// Add the office object
-				OfficeObject officeObject = office.addOfficeObject("MO", Connection.class.getName());
-				officeObject.setTypeQualifier("QUALIFIED");
-			}
+			// Add the office object
+			OfficeObject officeObject = office.addOfficeObject("MO", Connection.class.getName());
+			officeObject.setTypeQualifier("QUALIFIED");
 		});
 
 		// Validate type
@@ -596,14 +532,11 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		// Load office type with administered OfficeFloor managed object
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				OfficeObject mo = office.addOfficeObject("MO", Connection.class.getName());
-				OfficeAdministration admin = LoadOfficeTypeTest.this.addAdministration(office, "ADMIN",
-						XAResource.class, factory, null);
-				admin.administerManagedObject(mo);
-			}
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
+			OfficeObject mo = office.addOfficeObject("MO", Connection.class.getName());
+			OfficeAdministration admin = LoadOfficeTypeTest.this.addAdministration(office, "ADMIN", XAResource.class,
+					factory, null);
+			admin.administerManagedObject(mo);
 		});
 
 		// Validate type
@@ -623,19 +556,16 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testGovernedManagedObjectType() {
 
 		// Load office type with governed OfficeFloor managed object
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				OfficeObject mo = office.addOfficeObject("MO", Connection.class.getName());
-				OfficeGovernance governance = LoadOfficeTypeTest.this.addGovernance(office, "GOVERNANCE",
-						new GovernanceMaker() {
-							@Override
-							public void make(GovernanceMakerContext context) {
-								context.setExtensionInterface(XAResource.class);
-							}
-						});
-				governance.governManagedObject(mo);
-			}
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
+			OfficeObject mo = office.addOfficeObject("MO", Connection.class.getName());
+			OfficeGovernance governance = LoadOfficeTypeTest.this.addGovernance(office, "GOVERNANCE",
+					new GovernanceMaker() {
+						@Override
+						public void make(GovernanceMakerContext context) {
+							context.setExtensionInterface(XAResource.class);
+						}
+					});
+			governance.governManagedObject(mo);
 		});
 
 		// Validate type
@@ -657,11 +587,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue(null, OfficeTeamNodeImpl.class, "Null name for Office Team");
 
 		// Attempt to load office type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeTeam(null);
-			}
+		this.loadOfficeType(false, (office, context) -> {
+			office.addOfficeTeam(null);
 		});
 	}
 
@@ -671,11 +598,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testTeamType() {
 
 		// Load office type
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeTeam("TEAM");
-			}
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
+			office.addOfficeTeam("TEAM");
 		});
 
 		// Validate type
@@ -691,11 +615,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testTeamTypeWithTypeQualification() {
 
 		// Load office type
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				office.addOfficeTeam("TEAM").addTypeQualification("QUALIFIED", "TYPE");
-			}
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
+			office.addOfficeTeam("TEAM").addTypeQualification("QUALIFIED", "TYPE");
 		});
 
 		// Validate type
@@ -714,17 +635,14 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testSectionInputType() {
 
 		// Load office type
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
-				// Add section with an input
-				LoadOfficeTypeTest.this.addSection(office, "SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionInput("INPUT", String.class.getName());
-					}
-				});
-			}
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
+			// Add section with an input
+			LoadOfficeTypeTest.this.addSection(office, "SECTION", new SectionMaker() {
+				@Override
+				public void make(SectionMakerContext context) {
+					context.getBuilder().addSectionInput("INPUT", String.class.getName());
+				}
+			});
 		});
 
 		// Validate type
@@ -745,20 +663,17 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordCaptureIssues(false);
 
 		// Load the type
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
+		this.loadOfficeType(true, (office, context) -> {
 
-				// Load the managed object type
-				PropertyList properties = context.createPropertyList();
-				properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
-						.setValue(MockLoadManagedObject.class.getName());
-				ManagedObjectType<?> managedObjectType = context.loadManagedObjectType("MOS",
-						ClassManagedObjectSource.class.getName(), properties);
+			// Load the managed object type
+			PropertyList properties = context.createPropertyList();
+			properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+					.setValue(MockLoadManagedObject.class.getName());
+			ManagedObjectType<?> managedObjectType = context.loadManagedObjectType("MOS",
+					ClassManagedObjectSource.class.getName(), properties);
 
-				// Ensure correct managed object type
-				MockLoadManagedObject.assertManagedObjectType(managedObjectType);
-			}
+			// Ensure correct managed object type
+			MockLoadManagedObject.assertManagedObjectType(managedObjectType);
 		});
 	}
 
@@ -774,17 +689,14 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), causes);
 
 		// Fail to load the managed object type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
+		this.loadOfficeType(false, (office, context) -> {
 
-				// Do not specify class causing failure to load type
-				PropertyList properties = context.createPropertyList();
-				context.loadManagedObjectType("MOS", ClassManagedObjectSource.class.getName(), properties);
+			// Do not specify class causing failure to load type
+			PropertyList properties = context.createPropertyList();
+			context.loadManagedObjectType("MOS", ClassManagedObjectSource.class.getName(), properties);
 
-				// Should not reach this point
-				fail("Should not successfully load managed object type");
-			}
+			// Should not reach this point
+			fail("Should not successfully load managed object type");
 		});
 	}
 
@@ -797,20 +709,17 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordCaptureIssues(false);
 
 		// Load the office type
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
+		this.loadOfficeType(true, (office, context) -> {
 
-				// Load the governance type
-				PropertyList properties = context.createPropertyList();
-				properties.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME)
-						.setValue(MockLoadGovernance.class.getName());
-				GovernanceType<?, ?> governanceType = context.loadGovernanceType("GOVERNANCE",
-						ClassGovernanceSource.class.getName(), properties);
+			// Load the governance type
+			PropertyList properties = context.createPropertyList();
+			properties.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME)
+					.setValue(MockLoadGovernance.class.getName());
+			GovernanceType<?, ?> governanceType = context.loadGovernanceType("GOVERNANCE",
+					ClassGovernanceSource.class.getName(), properties);
 
-				// Ensure correct governance type
-				MockLoadGovernance.assertGovernanceType(governanceType);
-			}
+			// Ensure correct governance type
+			MockLoadGovernance.assertGovernanceType(governanceType);
 		});
 	}
 
@@ -826,17 +735,14 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Failure loading GovernanceType from source " + ClassGovernanceSource.class.getName(), causes);
 
 		// Fail to load the governance type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
+		this.loadOfficeType(false, (office, context) -> {
 
-				// Do not specify class causing failure to load type
-				PropertyList properties = context.createPropertyList();
-				context.loadGovernanceType("GOVERNANCE", ClassGovernanceSource.class.getName(), properties);
+			// Do not specify class causing failure to load type
+			PropertyList properties = context.createPropertyList();
+			context.loadGovernanceType("GOVERNANCE", ClassGovernanceSource.class.getName(), properties);
 
-				// Should not reach this point
-				fail("Should not successfully load governance type");
-			}
+			// Should not reach this point
+			fail("Should not successfully load governance type");
 		});
 	}
 
@@ -849,20 +755,17 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordCaptureIssues(false);
 
 		// Load Office type
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
+		this.loadOfficeType(true, (office, context) -> {
 
-				// Load the administrator type
-				PropertyList properties = context.createPropertyList();
-				properties.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME)
-						.setValue(MockLoadAdministration.class.getName());
-				AdministrationType<?, ?, ?> administrationType = context.loadAdministrationType("ADMINISTRATION",
-						ClassAdministrationSource.class.getName(), properties);
+			// Load the administrator type
+			PropertyList properties = context.createPropertyList();
+			properties.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME)
+					.setValue(MockLoadAdministration.class.getName());
+			AdministrationType<?, ?, ?> administrationType = context.loadAdministrationType("ADMINISTRATION",
+					ClassAdministrationSource.class.getName(), properties);
 
-				// Ensure correct administration type
-				MockLoadAdministration.assertAdministrationType(administrationType);
-			}
+			// Ensure correct administration type
+			MockLoadAdministration.assertAdministrationType(administrationType);
 		});
 	}
 
@@ -878,17 +781,14 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Failure loading AdministrationType from source " + ClassAdministrationSource.class.getName(), causes);
 
 		// Fail to load the administrator type
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
+		this.loadOfficeType(false, (office, context) -> {
 
-				// Do not specify class causing failure to load type
-				PropertyList properties = context.createPropertyList();
-				context.loadAdministrationType("ADMINISTRATION", ClassAdministrationSource.class.getName(), properties);
+			// Do not specify class causing failure to load type
+			PropertyList properties = context.createPropertyList();
+			context.loadAdministrationType("ADMINISTRATION", ClassAdministrationSource.class.getName(), properties);
 
-				// Should not reach this point
-				fail("Should not successfully load administration type");
-			}
+			// Should not reach this point
+			fail("Should not successfully load administration type");
 		});
 	}
 
@@ -901,25 +801,22 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.issues.recordCaptureIssues(false);
 
 		// Load office type with office managed object
-		OfficeType officeType = this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
 
-				// Add the office managed object
-				OfficeManagedObjectSource source = office.addOfficeManagedObjectSource("MOS",
-						ClassManagedObjectSource.class.getName());
-				source.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-						MockOfficeManagedObject.class.getName());
-				OfficeManagedObject mo = source.addOfficeManagedObject("MO", ManagedObjectScope.PROCESS);
+			// Add the office managed object
+			OfficeManagedObjectSource source = office.addOfficeManagedObjectSource("MOS",
+					ClassManagedObjectSource.class.getName());
+			source.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					MockOfficeManagedObject.class.getName());
+			OfficeManagedObject mo = source.addOfficeManagedObject("MO", ManagedObjectScope.PROCESS);
 
-				// Add section
-				OfficeSection section = office.addOfficeSection("SECTION", ClassSectionSource.class.getName(),
-						MockOfficeSection.class.getName());
+			// Add section
+			OfficeSection section = office.addOfficeSection("SECTION", ClassSectionSource.class.getName(),
+					MockOfficeSection.class.getName());
 
-				// Link section object to office managed object
-				OfficeSectionObject object = section.getOfficeSectionObject(MockOfficeManagedObject.class.getName());
-				office.link(object, mo);
-			}
+			// Link section object to office managed object
+			OfficeSectionObject object = section.getOfficeSectionObject(MockOfficeManagedObject.class.getName());
+			office.link(object, mo);
 		});
 
 		// Validate type (not shows office managed object)
@@ -936,6 +833,19 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 		public void task(MockOfficeManagedObject mo) {
 		}
+	}
+
+	/**
+	 * Ensure can handle {@link CompileError}.
+	 */
+	public void testHandleCompileError() {
+
+		// Record issue
+		this.issues.recordIssue("Type", OfficeNodeImpl.class, "test");
+
+		this.loadOfficeType(false, (office, context) -> {
+			throw office.addIssue("test");
+		});
 	}
 
 	/**

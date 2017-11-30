@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.TeamNodeImpl;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
@@ -93,13 +94,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure obtain the correct {@link OfficeFloor} location.
 	 */
 	public void testOfficeFloorLocation() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				assertEquals("Incorrect office floor location", OFFICE_FLOOR_LOCATION,
-						context.getOfficeFloorLocation());
-			}
+		this.loadType((officeFloor, context) -> {
+			assertEquals("Incorrect office floor location", OFFICE_FLOOR_LOCATION, context.getOfficeFloorLocation());
 		}, new LoadedValidator());
 	}
 
@@ -113,12 +109,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 				"Missing property 'missing' for OfficeFloorSource " + MockOfficeFloorSource.class.getName());
 
 		// Attempt to load office floor type
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				context.getProperty("missing");
-			}
+		this.loadType((officeFloor, context) -> {
+			context.getProperty("missing");
 		}, null);
 	}
 
@@ -126,24 +118,17 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure includes required properties.
 	 */
 	public void testSpecificationAndRequiredProperties() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				// Do nothing as testing specification of properties
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorPropertyType[] properties = type.getOfficeFloorPropertyTypes();
-				assertEquals("Incorrect number of properties", 2, properties.length);
-				OfficeFloorPropertyType propertyOne = properties[0];
-				assertEquals("Incorrect property one name", "ONE", propertyOne.getName());
-				assertEquals("Incorrect property one label", "A", propertyOne.getLabel());
-				OfficeFloorPropertyType propertyTwo = properties[1];
-				assertEquals("Incorrect property two name", "TWO", propertyTwo.getName());
-				assertEquals("Incorrect property two label", "B", propertyTwo.getLabel());
-			}
+		this.loadType((officeFloor, context) -> {
+			// Do nothing as testing specification of properties
+		}, (type) -> {
+			OfficeFloorPropertyType[] properties = type.getOfficeFloorPropertyTypes();
+			assertEquals("Incorrect number of properties", 2, properties.length);
+			OfficeFloorPropertyType propertyOne = properties[0];
+			assertEquals("Incorrect property one name", "ONE", propertyOne.getName());
+			assertEquals("Incorrect property one label", "A", propertyOne.getLabel());
+			OfficeFloorPropertyType propertyTwo = properties[1];
+			assertEquals("Incorrect property two name", "TWO", propertyTwo.getName());
+			assertEquals("Incorrect property two label", "B", propertyTwo.getLabel());
 		});
 	}
 
@@ -151,36 +136,29 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure able to get properties.
 	 */
 	public void testGetProperties() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				String[] names = context.getPropertyNames();
-				assertEquals("Incorrect number of property names", 2, names.length);
-				assertEquals("Incorrect property name 0", "ONE", names[0]);
-				assertEquals("Incorrect proeprty name 1", "TWO", names[1]);
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.getProperty("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.getProperty("TWO"));
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorPropertyType[] properties = type.getOfficeFloorPropertyTypes();
-				assertEquals("Incorrect number of properties", 2, properties.length);
-				OfficeFloorPropertyType propertyOne = properties[0];
-				assertEquals("Incorrect property one name", "ONE", propertyOne.getName());
-				assertEquals("Incorrect property one label", "A", propertyOne.getLabel());
-				assertEquals("Incorrect property one default value", "1", propertyOne.getDefaultValue());
-				OfficeFloorPropertyType propertyTwo = properties[1];
-				assertEquals("Incorrect property two name", "TWO", propertyTwo.getName());
-				assertEquals("Incorrect property two label", "B", propertyTwo.getLabel());
-				assertEquals("Incorrect property two default value", "2", propertyTwo.getDefaultValue());
-			}
+		this.loadType((officeFloor, context) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			String[] names = context.getPropertyNames();
+			assertEquals("Incorrect number of property names", 2, names.length);
+			assertEquals("Incorrect property name 0", "ONE", names[0]);
+			assertEquals("Incorrect proeprty name 1", "TWO", names[1]);
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.getProperty("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.getProperty("TWO"));
+		}, (type) -> {
+			OfficeFloorPropertyType[] properties = type.getOfficeFloorPropertyTypes();
+			assertEquals("Incorrect number of properties", 2, properties.length);
+			OfficeFloorPropertyType propertyOne = properties[0];
+			assertEquals("Incorrect property one name", "ONE", propertyOne.getName());
+			assertEquals("Incorrect property one label", "A", propertyOne.getLabel());
+			assertEquals("Incorrect property one default value", "1", propertyOne.getDefaultValue());
+			OfficeFloorPropertyType propertyTwo = properties[1];
+			assertEquals("Incorrect property two name", "TWO", propertyTwo.getName());
+			assertEquals("Incorrect property two label", "B", propertyTwo.getLabel());
+			assertEquals("Incorrect property two default value", "2", propertyTwo.getDefaultValue());
 		}, "ONE", "1", "TWO", "2");
 	}
 
@@ -190,12 +168,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	public void testMissingClass() {
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Can not load class 'missing' for OfficeFloorSource " + MockOfficeFloorSource.class.getName());
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				context.loadClass("missing");
-			}
+		this.loadType((officeFloor, context) -> {
+			context.loadClass("missing");
 		}, null);
 	}
 
@@ -207,12 +181,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Can not obtain resource at location 'missing' for OfficeFloorSource "
 						+ MockOfficeFloorSource.class.getName());
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				context.getResource("missing");
-			}
+		this.loadType((officeFloor, context) -> {
+			context.getResource("missing");
 		}, null);
 	}
 
@@ -223,12 +193,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		final String location = "LOCATION";
 		final InputStream resource = new ByteArrayInputStream(new byte[0]);
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				assertSame("Incorrect resource", resource, context.getResource(location));
-			}
+		this.loadType((officeFloor, context) -> {
+			assertSame("Incorrect resource", resource, context.getResource(location));
 		}, new LoadedValidator());
 	}
 
@@ -236,13 +202,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure able to get the {@link ClassLoader}.
 	 */
 	public void testGetClassLoader() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				assertEquals("Incorrect class loader", LoadOfficeFloorTypeTest.class.getClassLoader(),
-						context.getClassLoader());
-			}
+		this.loadType((officeFloor, context) -> {
+			assertEquals("Incorrect class loader", LoadOfficeFloorTypeTest.class.getClassLoader(),
+					context.getClassLoader());
 		}, new LoadedValidator());
 	}
 
@@ -256,12 +218,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 						"Failed to source OfficeFloor from OfficeFloorSource (source="
 								+ MockOfficeFloorSource.class.getName() + ", location=" + OFFICE_FLOOR_LOCATION + ")",
 						failure);
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				throw failure;
-			}
+		this.loadType((officeFloor, context) -> {
+			throw failure;
 		}, null);
 	}
 
@@ -271,12 +229,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 */
 	public void testNullManagedObjectSourceName() {
 		this.issues.recordIssue(null, ManagedObjectSourceNodeImpl.class, "Null name for Managed Object Source");
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				officeFloor.addManagedObjectSource(null, TestManagedObjectSource.class.getName());
-			}
+		this.loadType((officeFloor, context) -> {
+			officeFloor.addManagedObjectSource(null, TestManagedObjectSource.class.getName());
 		}, null);
 	}
 
@@ -285,12 +239,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 */
 	public void testNullManagedObjectSourceType() {
 		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class, "Null source for Managed Object Source MO");
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				officeFloor.addManagedObjectSource("MO", (String) null);
-			}
+		this.loadType((officeFloor, context) -> {
+			officeFloor.addManagedObjectSource("MO", (String) null);
 		}, null);
 	}
 
@@ -298,30 +248,23 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure provide properties of {@link ManagedObjectSource} type.
 	 */
 	public void testManagedObjectSourceType() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				officeFloor.addManagedObjectSource("MO", TestManagedObjectSource.class.getName())
-						.addProperty("example.test", "DEFAULT_VALUE");
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorManagedObjectSourceType[] mos = type.getOfficeFloorManagedObjectSourceTypes();
-				assertNotNull("Should have types", mos);
-				assertEquals("Incorrect number of managed object sources", 1, mos.length);
-				OfficeFloorManagedObjectSourceType mosType = mos[0];
-				assertEquals("Incorrect name", "MO", mosType.getOfficeFloorManagedObjectSourceName());
-				OfficeFloorManagedObjectSourcePropertyType[] properties = mosType
-						.getOfficeFloorManagedObjectSourcePropertyTypes();
-				assertNotNull("Should have properties", properties);
-				assertEquals("Incorrect number of properties", 1, properties.length);
-				OfficeFloorManagedObjectSourcePropertyType property = properties[0];
-				assertEquals("Incorrect property name", "example.test", property.getName());
-				assertEquals("Incorrect property label", "Test Property", property.getLabel());
-				assertEquals("Incorrect default value", "DEFAULT_VALUE", property.getDefaultValue());
-			}
+		this.loadType((officeFloor, context) -> {
+			officeFloor.addManagedObjectSource("MO", TestManagedObjectSource.class.getName())
+					.addProperty("example.test", "DEFAULT_VALUE");
+		}, (type) -> {
+			OfficeFloorManagedObjectSourceType[] mos = type.getOfficeFloorManagedObjectSourceTypes();
+			assertNotNull("Should have types", mos);
+			assertEquals("Incorrect number of managed object sources", 1, mos.length);
+			OfficeFloorManagedObjectSourceType mosType = mos[0];
+			assertEquals("Incorrect name", "MO", mosType.getOfficeFloorManagedObjectSourceName());
+			OfficeFloorManagedObjectSourcePropertyType[] properties = mosType
+					.getOfficeFloorManagedObjectSourcePropertyTypes();
+			assertNotNull("Should have properties", properties);
+			assertEquals("Incorrect number of properties", 1, properties.length);
+			OfficeFloorManagedObjectSourcePropertyType property = properties[0];
+			assertEquals("Incorrect property name", "example.test", property.getName());
+			assertEquals("Incorrect property label", "Test Property", property.getLabel());
+			assertEquals("Incorrect default value", "DEFAULT_VALUE", property.getDefaultValue());
 		});
 	}
 
@@ -353,12 +296,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 */
 	public void testNullTeamSourceName() {
 		this.issues.recordIssue(null, TeamNodeImpl.class, "Null name for Team");
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				officeFloor.addTeam(null, TestTeamSource.class.getName());
-			}
+		this.loadType((officeFloor, context) -> {
+			officeFloor.addTeam(null, TestTeamSource.class.getName());
 		}, null);
 	}
 
@@ -367,12 +306,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 */
 	public void testNullTeamSourceType() {
 		this.issues.recordIssue("TEAM", TeamNodeImpl.class, "Null source for Team TEAM");
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				officeFloor.addTeam("TEAM", (String) null);
-			}
+		this.loadType((officeFloor, context) -> {
+			officeFloor.addTeam("TEAM", (String) null);
 		}, null);
 	}
 
@@ -380,28 +315,20 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure obtain the {@link OfficeFloorTeamSourceType}.
 	 */
 	public void testTeamSourceType() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context)
-					throws Exception {
-				officeFloor.addTeam("TEAM", TestTeamSource.class.getName()).addProperty("example.test",
-						"DEFAULT_VALUE");
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorTeamSourceType[] teams = type.getOfficeFloorTeamSourceTypes();
-				assertEquals("Incorrect number of teams", 1, teams.length);
-				OfficeFloorTeamSourceType team = teams[0];
-				assertEquals("Incorrect team source name", "TEAM", team.getOfficeFloorTeamSourceName());
-				OfficeFloorTeamSourcePropertyType[] properties = team.getOfficeFloorTeamSourcePropertyTypes();
-				assertNotNull("Ensure have properties", properties);
-				assertEquals("Incorrect number of properties", 1, properties.length);
-				OfficeFloorTeamSourcePropertyType property = properties[0];
-				assertEquals("Incorrect property name", "example.test", property.getName());
-				assertEquals("Incorrect property label", "Test Property", property.getLabel());
-				assertEquals("Incorrect property default value", "DEFAULT_VALUE", property.getDefaultValue());
-			}
+		this.loadType((officeFloor, context) -> {
+			officeFloor.addTeam("TEAM", TestTeamSource.class.getName()).addProperty("example.test", "DEFAULT_VALUE");
+		}, (type) -> {
+			OfficeFloorTeamSourceType[] teams = type.getOfficeFloorTeamSourceTypes();
+			assertEquals("Incorrect number of teams", 1, teams.length);
+			OfficeFloorTeamSourceType team = teams[0];
+			assertEquals("Incorrect team source name", "TEAM", team.getOfficeFloorTeamSourceName());
+			OfficeFloorTeamSourcePropertyType[] properties = team.getOfficeFloorTeamSourcePropertyTypes();
+			assertNotNull("Ensure have properties", properties);
+			assertEquals("Incorrect number of properties", 1, properties.length);
+			OfficeFloorTeamSourcePropertyType property = properties[0];
+			assertEquals("Incorrect property name", "example.test", property.getName());
+			assertEquals("Incorrect property label", "Test Property", property.getLabel());
+			assertEquals("Incorrect property default value", "DEFAULT_VALUE", property.getDefaultValue());
 		});
 	}
 
@@ -420,6 +347,20 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		public Team createTeam(TeamSourceContext context) throws Exception {
 			return null; // Team is ignored
 		}
+	}
+
+	/**
+	 * Ensure can handle {@link CompileError}.
+	 */
+	public void testHandleCompileError() {
+
+		// Record issue
+		this.issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "test");
+
+		// Ensure handle compile error
+		this.loadType((officeFloor, context) -> {
+			throw officeFloor.addIssue("test");
+		}, null);
 	}
 
 	/**
@@ -492,7 +433,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Implemented to validate the {@link OfficeFloorType}.
 	 */
-	private abstract class Validator {
+	private interface Validator {
 
 		/**
 		 * Implemented to validate the {@link OfficeFloorType}.
@@ -500,15 +441,15 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		 * @param type
 		 *            {@link OfficeFloorType} to validate.
 		 */
-		abstract void validate(OfficeFloorType type);
+		void validate(OfficeFloorType type);
 	}
 
 	/**
 	 * {@link Validator} to ensure type is loaded.
 	 */
-	private class LoadedValidator extends Validator {
+	private class LoadedValidator implements Validator {
 		@Override
-		void validate(OfficeFloorType type) {
+		public void validate(OfficeFloorType type) {
 			assertNotNull("Ensure type loaded", type);
 		}
 	}

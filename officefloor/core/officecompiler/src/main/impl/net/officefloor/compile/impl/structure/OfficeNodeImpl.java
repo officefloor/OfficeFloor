@@ -63,6 +63,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -582,6 +583,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
+
+		} catch (CompileError ex) {
+			return false; // issue already reported
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + OfficeType.class.getSimpleName() + " definition from "
@@ -1281,13 +1285,13 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
-	public void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription);
+	public CompileError addIssue(String issueDescription) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
+	public CompileError addIssue(String issueDescription, Throwable cause) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
 	}
 
 	/*

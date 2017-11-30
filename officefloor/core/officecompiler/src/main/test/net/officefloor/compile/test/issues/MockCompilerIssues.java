@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
@@ -163,14 +164,15 @@ public class MockCompilerIssues implements CompilerIssues {
 	}
 
 	@Override
-	public void addIssue(Node node, String issueDescription, CompilerIssue... causes) {
+	public CompileError addIssue(Node node, String issueDescription, CompilerIssue... causes) {
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
 		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockCompilerIssuesArray(causes));
+		return new CompileError(issueDescription);
 	}
 
 	@Override
-	public void addIssue(Node node, String issueDescription, Throwable cause) {
+	public CompileError addIssue(Node node, String issueDescription, Throwable cause) {
 
 		// Determine if assertion failure
 		if (cause instanceof AssertionError) {
@@ -181,6 +183,9 @@ public class MockCompilerIssues implements CompilerIssues {
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
 		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockThrowable(cause));
+
+		// Return the error
+		return new CompileError(issueDescription);
 	}
 
 	/**

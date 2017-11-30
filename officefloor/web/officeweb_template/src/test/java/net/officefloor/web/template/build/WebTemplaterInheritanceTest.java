@@ -20,6 +20,7 @@ package net.officefloor.web.template.build;
 import java.io.StringReader;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
@@ -83,8 +84,15 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	 * Ensure issue as first section is not an override.
 	 */
 	public void testFirstSectionNotOverriding() throws Exception {
-		this.doInvalid(new String[] { "override" }, new String[] { "override" }, (issues) -> issues.recordIssue(
-				"Section 'override' can not be introduced, as no previous override section (section prefixed with ':') to identify where to inherit"));
+		this.doInvalid(new String[] { "override" }, new String[] { "override" }, (issues) -> {
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("/child", SectionNodeImpl.class,
+					"Section 'override' can not be introduced, as no previous override section (section prefixed with ':') to identify where to inherit");
+			issues.recordCaptureIssues(false);
+		});
 	}
 
 	/**
@@ -205,6 +213,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 		// Create the server
 		Closure<MockHttpServer> server = new Closure<>();
 		WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+		compile.getOfficeFloorCompiler().setCompilerIssues(issues);
 		compile.officeFloor((context) -> {
 			server.value = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
 					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));

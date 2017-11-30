@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
@@ -252,6 +254,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private final List<LinkToTemplate> linkToTemplates = new LinkedList<>();
 
 		/**
+		 * Super {@link WebTemplate}.
+		 */
+		private WebTemplateImpl superTemplate = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param applicationPath
@@ -310,6 +317,39 @@ public class WebTemplaterEmployer implements WebTemplater {
 				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + linkName)
 						.setValue(String.valueOf(isLinkSecure));
 			}
+
+			// Configure inheritance properties
+			Deque<WebTemplateImpl> inheritanceHeirarchy = new LinkedList<>();
+			WebTemplateImpl parent = this.superTemplate;
+			while (parent != null) {
+				inheritanceHeirarchy.push(parent);
+				parent = parent.superTemplate;
+			}
+			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT)
+					.setValue(String.valueOf(inheritanceHeirarchy.size()));
+			int inheritanceIndex = 0;
+			while (inheritanceHeirarchy.size() > 0) {
+				parent = inheritanceHeirarchy.pop();
+
+				// Attempt to load content
+				Property parentContent = parent.properties
+						.getProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT);
+				if (parentContent != null) {
+					this.properties.addProperty(
+							WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT + "." + String.valueOf(inheritanceIndex))
+							.setValue(parentContent.getValue());
+				} else {
+					Property parentLocation = parent.properties
+							.getProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION);
+					this.properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION + "."
+							+ String.valueOf(inheritanceIndex)).setValue(parentLocation.getValue());
+				}
+
+				// Next parent
+				inheritanceIndex++;
+			}
+
+			// Configure the properties into the section
 			this.properties.configureProperties(this.section);
 
 			// Ensure appropriately configured
@@ -451,7 +491,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public WebTemplate setSuperTemplate(WebTemplate superTemplate) {
-			// TODO Auto-generated method stub
+			this.superTemplate = (WebTemplateImpl) superTemplate;
 			return this;
 		}
 
@@ -471,7 +511,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 		public OfficeSectionOutput getOutput(String outputName) {
 			return this.section.getOfficeSectionOutput(outputName);
 		}
-
 	}
 
 	/**

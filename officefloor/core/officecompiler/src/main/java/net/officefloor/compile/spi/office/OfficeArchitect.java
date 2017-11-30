@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
@@ -449,8 +451,11 @@ public interface OfficeArchitect {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code> statement
+	 *         when adding {@link CompilerIssue} to avoid further compiling of
+	 *         the {@link Office}.
 	 */
-	void addIssue(String issueDescription);
+	CompileError addIssue(String issueDescription);
 
 	/**
 	 * <p>
@@ -464,7 +469,10 @@ public interface OfficeArchitect {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code> statement
+	 *         when adding {@link CompilerIssue} to avoid further compiling of
+	 *         the {@link Office}.
 	 */
-	void addIssue(String issueDescription, Throwable cause);
+	CompileError addIssue(String issueDescription, Throwable cause);
 
 }

@@ -28,6 +28,7 @@ import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
@@ -584,14 +585,16 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		final Throwable[] adaptedCause = new Throwable[1];
 		final CompilerIssues issues = new CompilerIssues() {
 			@Override
-			public void addIssue(Node node, String issueDescription, Throwable cause) {
+			public CompileError addIssue(Node node, String issueDescription, Throwable cause) {
 				// Register the adapted cause
 				adaptedCause[0] = cause;
+				return new CompileError(issueDescription);
 			}
 
 			@Override
-			public void addIssue(Node node, String issueDescription, CompilerIssue... causes) {
+			public CompileError addIssue(Node node, String issueDescription, CompilerIssue... causes) {
 				fail("Should not be invoked - " + issueDescription);
+				return new CompileError(issueDescription);
 			}
 
 			@Override
