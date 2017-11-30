@@ -226,6 +226,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_CHARSET = "template.charset";
 
 	/**
+	 * Name of {@link Property} prefix for the {@link WebTemplateExtension}
+	 * {@link Property} instances.
+	 */
+	public static final String PROPERTY_TEMPLATE_EXTENSION_PREFIX = "template.extension.";
+
+	/**
 	 * Obtains the {@link WebTemplate} content.
 	 * 
 	 * @param inheritanceIndex
@@ -648,16 +654,15 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
 
 		// Extend the template content as necessary
-		final String EXTENSION_PREFIX = "extension.";
 		int extensionIndex = 1;
-		String extensionClassName = context.getProperty(EXTENSION_PREFIX + extensionIndex, null);
+		String extensionClassName = context.getProperty(PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex, null);
 		while (extensionClassName != null) {
 
 			// Create an instance of the extension class
 			WebTemplateExtension extension = (WebTemplateExtension) context.loadClass(extensionClassName).newInstance();
 
 			// Extend the template
-			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex + ".";
+			String extensionPropertyPrefix = PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex + ".";
 			WebTemplateExtensionContext extensionContext = new WebTemplateSectionExtensionContextImpl(templateContent,
 					extensionPropertyPrefix, nonRenderTemplateTaskKeys);
 			extension.extendWebTemplate(extensionContext);
@@ -667,7 +672,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 			// Initiate for next extension
 			extensionIndex++;
-			extensionClassName = context.getProperty(EXTENSION_PREFIX + extensionIndex, null);
+			extensionClassName = context.getProperty(PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex, null);
 		}
 
 		// Obtain the HTTP template

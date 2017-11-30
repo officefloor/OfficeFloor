@@ -258,6 +258,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private WebTemplateImpl superTemplate = null;
 
 		/**
+		 * Next {@link WebTemplateExtension} index.
+		 */
+		private int nextExtensionIndex = 0;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param applicationPath
@@ -292,28 +297,30 @@ public class WebTemplaterEmployer implements WebTemplater {
 			HttpInputPath templateInputPath = templateInput.getPath();
 			this.webTemplateSectionSource.setHttpInputPath(templateInputPath);
 
-			// Configure properties for template
+			// Configure properties for the template
 			if (this.logicClass != null) {
-				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
+				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
 						.setValue(this.logicClass.getName());
 			}
 			if (this.redirectValuesFunctionName != null) {
-				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_REDIRECT_VALUES_FUNCTION)
+				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_REDIRECT_VALUES_FUNCTION)
 						.setValue(this.redirectValuesFunctionName);
 			}
-			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SEPARATOR)
+			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_LINK_SEPARATOR)
 					.setValue(String.valueOf(this.linkSeparatorCharacter));
 			if (this.contentType != null) {
-				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CONTENT_TYPE).setValue(this.contentType);
+				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CONTENT_TYPE)
+						.setValue(this.contentType);
 			}
 			if (this.charset != null) {
-				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_CHARSET).setValue(this.charset.name());
+				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CHARSET)
+						.setValue(this.charset.name());
 			}
-			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE)
+			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE)
 					.setValue(String.valueOf(this.isSecure));
 			for (String linkName : this.secureLinks.keySet()) {
 				Boolean isLinkSecure = this.secureLinks.get(linkName);
-				this.properties.addProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + linkName)
+				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + linkName)
 						.setValue(String.valueOf(isLinkSecure));
 			}
 
@@ -337,7 +344,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 				inheritanceHeirarchy.push(parent);
 				parent = parent.superTemplate;
 			}
-			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT)
+			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT)
 					.setValue(String.valueOf(inheritanceHeirarchy.size()));
 			int inheritanceIndex = 0;
 			while (inheritanceHeirarchy.size() > 0) {
@@ -347,13 +354,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 				Property parentContent = parent.properties
 						.getProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT);
 				if (parentContent != null) {
-					this.properties.addProperty(
+					this.properties.getOrAddProperty(
 							WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT + "." + String.valueOf(inheritanceIndex))
 							.setValue(parentContent.getValue());
 				} else {
 					Property parentLocation = parent.properties
 							.getProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION);
-					this.properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION + "."
+					this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION + "."
 							+ String.valueOf(inheritanceIndex)).setValue(parentLocation.getValue());
 				}
 
@@ -448,8 +455,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 		@Override
 		public void addProperty(String name, String value) {
-			// TODO Auto-generated method stub
-
+			this.properties.addProperty(name).setValue(value);
 		}
 
 		@Override
@@ -507,9 +513,21 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate addExtension(WebTemplateExtension extension) {
-			// TODO Auto-generated method stub
-			return this;
+		public WebTemplateExtensionBuilder addExtension(String extensionClassName) {
+
+			// Obtain the next extension index
+			this.nextExtensionIndex++;
+			int extensionIndex = this.nextExtensionIndex;
+
+			// Add the extension
+			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex)
+					.setValue(extensionClassName);
+
+			// Create and return the builder for the extension
+			return (name, value) -> this.properties
+					.addProperty(
+							WebTemplateSectionSource.PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex + "." + name)
+					.setValue(value);
 		}
 
 		@Override

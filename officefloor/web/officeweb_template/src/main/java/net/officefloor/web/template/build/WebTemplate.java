@@ -142,11 +142,12 @@ public interface WebTemplate extends PropertyConfigurable {
 	/**
 	 * Adds a {@link WebTemplateExtension} for this {@link WebTemplate}.
 	 * 
-	 * @param extension
-	 *            {@link WebTemplateExtension} for this {@link WebTemplate}.
-	 * @return <code>this</code>.
+	 * @param extensionClassName
+	 *            {@link Class} name of the {@link WebTemplateExtension}.
+	 * @return {@link WebTemplateExtensionBuilder} to build the
+	 *         {@link WebTemplateExtension}.
 	 */
-	WebTemplate addExtension(WebTemplateExtension extension);
+	WebTemplateExtensionBuilder addExtension(String extensionClassName);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to this {@link WebTemplate}.

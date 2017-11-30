@@ -50,6 +50,8 @@ import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.NotEscaped;
 import net.officefloor.web.template.NotRenderTemplateAfter;
+import net.officefloor.web.template.extension.WebTemplateExtension;
+import net.officefloor.web.template.extension.WebTemplateExtensionContext;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
 import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateManagedFunctionSource;
 
@@ -879,16 +881,6 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can extend the {@link WebTemplate}.
-	 */
-	public void testExtendTemplate() throws Exception {
-		this.template("/extend", (context, templater) -> {
-			WebTemplate template = templater.addTemplate("/extend", new StringReader("original"));
-			template.addExtension((extension) -> extension.setTemplateContent("extended"));
-		}, "extended");
-	}
-
-	/**
 	 * Ensure can provide <code>Data</code> suffix to section {@link Method}
 	 * name.
 	 */
@@ -938,6 +930,24 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		public int getCount() {
 			this.count++;
 			return this.count;
+		}
+	}
+
+	/**
+	 * Ensure can extend the {@link WebTemplate}.
+	 */
+	public void testExtendTemplate() throws Exception {
+		this.template("/extend", (context, templater) -> {
+			WebTemplate template = templater.addTemplate("/extend", new StringReader("original"));
+			template.addExtension(MockWebTemplateExtension.class.getName()).addProperty("test", "available");
+		}, "extended");
+	}
+
+	public static class MockWebTemplateExtension implements WebTemplateExtension {
+		@Override
+		public void extendWebTemplate(WebTemplateExtensionContext context) throws Exception {
+			assertEquals("Should obtain configured property", "available", context.getProperty("test"));
+			context.setTemplateContent("extended");
 		}
 	}
 
