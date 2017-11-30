@@ -517,7 +517,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record errors
 		issues.recordIssue("<type>", SectionNodeImpl.class,
-				"Template bean method 'getSection' (task GETSECTION) must not be annotated with NextFunction");
+				"Template bean method 'getSection' (function GETSECTION) must not be annotated with @NextFunction (next function is always rendering template section)");
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);

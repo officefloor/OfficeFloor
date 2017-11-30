@@ -20,6 +20,7 @@ package net.officefloor.web.template.build;
 import java.io.StringReader;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -31,6 +32,7 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.parse.ParsedTemplateSection;
 import net.officefloor.web.template.parse.WebTemplateParser;
+import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
  * Tests inheriting {@link ParsedTemplateSection} instances.
@@ -60,8 +62,16 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	 */
 	public void testOverrideWithIntroducedSectionExisting() throws Exception {
 		this.doInvalid(new String[] { "start", "override", "introduced", "end" },
-				new String[] { ":override", "introduced" }, (issues) -> issues.recordIssue(
-						"Section 'introduced' already exists by inheritance and not flagged for overriding (with ':' prefix)"));
+				new String[] { ":override", "introduced" }, (issues) -> {
+					issues.recordCaptureIssues(false);
+					issues.recordCaptureIssues(false);
+					issues.recordCaptureIssues(false);
+					issues.recordCaptureIssues(false);
+					issues.recordIssue("/child", SectionNodeImpl.class,
+							"Section 'introduced' already exists by inheritance and not flagged for overriding (with ':' prefix)");
+					issues.recordIssue("OFFICE", OfficeNodeImpl.class, "Failure loading OfficeSectionType from source "
+							+ WebTemplateSectionSource.class.getName());
+				});
 	}
 
 	/**
@@ -91,7 +101,8 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 			issues.recordCaptureIssues(false);
 			issues.recordIssue("/child", SectionNodeImpl.class,
 					"Section 'override' can not be introduced, as no previous override section (section prefixed with ':') to identify where to inherit");
-			issues.recordCaptureIssues(false);
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		});
 	}
 
@@ -99,8 +110,16 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	 * Ensure issue if section not overriding.
 	 */
 	public void testSectionNotOverriding() throws Exception {
-		this.doInvalid(new String[] { "template" }, new String[] { "template", ":override" },
-				(issues) -> issues.recordIssue("No inherited section exists for overriding by section 'override'"));
+		this.doInvalid(new String[] { "template" }, new String[] { "template", ":override" }, (issues) -> {
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("/child", SectionNodeImpl.class,
+					"No inherited section exists for overriding by section 'override'");
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
+		});
 	}
 
 	/**

@@ -236,11 +236,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * @param context
 	 *            {@link SourceContext}.
 	 * @return {@link WebTemplate} content.
-	 * @throws IOException
-	 *             If fails to read in the {@link WebTemplate} content.
 	 */
-	private static String getTemplateContent(int inheritanceIndex, SectionDesigner designer, SourceContext context)
-			throws IOException {
+	private static String getTemplateContent(int inheritanceIndex, SectionDesigner designer, SourceContext context) {
 
 		// Calculate the inheritance suffix
 		String inheritanceSuffix = (inheritanceIndex == -1 ? "" : "." + inheritanceIndex);
@@ -263,11 +260,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			}
 		} catch (IOException ex) {
 			// Indicate failed to read in template
-			designer.addIssue("Failed to read in template at location '" + location + "' with charset '"
+			throw designer.addIssue("Failed to read in template at location '" + location + "' with charset '"
 					+ (locationCharset == null ? "<default>" : locationCharset + ")"), ex);
-
-			// Propagate the failure (as must load template content)
-			throw ex;
 		}
 		return buffer.toString();
 	}
@@ -565,7 +559,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 						// Invalid introduced if not the default first section
 						if (!((isFirstSection) && (WebTemplateParser.DEFAULT_FIRST_SECTION_NAME.equals(sectionName)))) {
 							// Invalid introduced section
-							designer.addIssue("Section '" + sectionName
+							throw designer.addIssue("Section '" + sectionName
 									+ "' can not be introduced, as no previous override section (section prefixed with '"
 									+ OVERRIDE_SECTION_PREFIX + "') to identify where to inherit");
 						}
@@ -605,7 +599,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 						String introducedSectionName = getParsedTemplateSectionName(overrideSection.getSectionName());
 						if ((isIntroducedSection) && (parentSectionNames.contains(introducedSectionName))) {
 							// Must override to include child introduced section
-							designer.addIssue("Section '" + introducedSectionName
+							throw designer.addIssue("Section '" + introducedSectionName
 									+ "' already exists by inheritance and not flagged for overriding (with '"
 									+ OVERRIDE_SECTION_PREFIX + "' prefix)");
 
@@ -622,7 +616,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 			// Provide issues for any child sections not overriding
 			for (String notOverrideSectionName : overrideSections.keySet()) {
-				designer.addIssue(
+				throw designer.addIssue(
 						"No inherited section exists for overriding by section '" + notOverrideSectionName + "'");
 			}
 
@@ -726,8 +720,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		boolean isPathParameters = Boolean
 				.parseBoolean(context.getProperty(PROPERTY_IS_PATH_PARAMETERS, String.valueOf(false)));
 		if (isPathParameters && (!isLogicClass)) {
-			designer.addIssue("Must provide logic class, as template has path parameters");
-			return;
+			throw designer.addIssue("Must provide logic class, as template has path parameters");
 		}
 
 		// Create and link redirect of template
@@ -740,7 +733,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			redirectValuesFunction = this.getFunctionByName(redirectValuesFunctionName);
 			if (redirectValuesFunction == null) {
 				// Indicate issues, as configured function is not available
-				designer.addIssue(
+				throw designer.addIssue(
 						"No method by name '" + redirectValuesFunctionName + "' on logic class " + sectionClassName);
 			} else {
 				// Obtain the redirect values type
@@ -750,7 +743,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		if (redirectValuesFunction == null) {
 			// Ensure indicating issue if require values
 			if (isPathParameters) {
-				designer.addIssue(WebTemplate.class.getSimpleName()
+				throw designer.addIssue(WebTemplate.class.getSimpleName()
 						+ " has path parameters but no redirect values function configured");
 			}
 
@@ -835,13 +828,11 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				// Section method required, determine if just missing method
 				if (!isLogicClass) {
 					// No template logic
-					designer.addIssue("Must provide template logic class for template " + templatePath);
-					return;
+					throw designer.addIssue("Must provide template logic class for template " + templatePath);
 				} else {
 					// Have template logic, so missing method
-					designer.addIssue("Missing method '" + beanMethodName + "' on class " + this.sectionClass.getName()
-							+ " to provide bean for template " + templatePath);
-					return;
+					throw designer.addIssue("Missing method '" + beanMethodName + "' on class "
+							+ this.sectionClass.getName() + " to provide bean for template " + templatePath);
 				}
 			}
 
@@ -850,18 +841,16 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 				// Ensure bean task does not have a @Parameter
 				if (beanFunction.parameter != null) {
-					designer.addIssue("Template bean method '" + beanMethodName + "' must not have a "
+					throw designer.addIssue("Template bean method '" + beanMethodName + "' must not have a @"
 							+ Parameter.class.getSimpleName() + " annotation");
 				}
 
 				// Ensure no next function (as must render section next)
 				Method method = beanFunction.method;
 				if (method.isAnnotationPresent(NextFunction.class)) {
-					designer.addIssue("Template bean method '" + method.getName() + "' (task " + beanFunctionKey
-							+ ") must not be annotated with " + NextFunction.class.getSimpleName());
-
-					// As NextFunction annotation, do not render section
-					continue;
+					throw designer.addIssue("Template bean method '" + method.getName() + "' (function "
+							+ beanFunctionKey + ") must not be annotated with @" + NextFunction.class.getSimpleName()
+							+ " (next function is always rendering template section)");
 				}
 
 				// Obtain the return type for the template
@@ -869,7 +858,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				if ((returnType == null) || (Void.class.equals(returnType))) {
 					// Must provide return if require a bean
 					if (isRequireBean) {
-						designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
+						throw designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
 					}
 
 				} else {
@@ -973,7 +962,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Link not exist so provide issue as invalid configuration
-				designer.addIssue("Link '" + configuredLinkName + "' does not exist on template " + templatePath);
+				throw designer.addIssue("Link '" + configuredLinkName + "' does not exist on template " + templatePath);
 			}
 		}
 
@@ -1758,7 +1747,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		} else {
 			// As stateful, the class must be serialisable
 			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
-				this.getDesigner()
+				throw this.getDesigner()
 						.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
 								+ HttpSessionStateful.class.getSimpleName() + " but is not "
 								+ Serializable.class.getSimpleName());
@@ -1796,7 +1785,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 		// As stateful, must not have any dependencies into object
 		if (metaData.length > 0) {
-			this.getDesigner()
+			throw this.getDesigner()
 					.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
 							+ HttpSessionStateful.class.getSimpleName()
 							+ " and therefore can not have dependencies injected into the object (only its methods)");

@@ -24,11 +24,9 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
-import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
-import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -299,7 +297,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	public static class FlowLogic {
-		public void getTemplate(Flows flows) {
+		public void getSecond(Flows flows) {
 			flows.last();
 		}
 	}
@@ -310,9 +308,14 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 */
 	public void testSectionMethodNotAllowedNextFunction() throws Exception {
 		this.templateIssue((issues) -> {
-			issues.recordIssue("TODO NextFunction not allowed");
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("/path", SectionNodeImpl.class,
+					"Template bean method 'getTemplate' (function GETTEMPLATE) must not be annotated with @NextFunction (next function is always rendering template section)");
+			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		}, (context, templater) -> {
-			templater.addTemplate("/path", new StringReader("TEMPLATE"));
+			templater.addTemplate("/path", new StringReader("TEMPLATE")).setLogicClass(IllegalNextFunctionLogic.class);
 		});
 	}
 
@@ -349,9 +352,6 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
 			issues.recordIssue("/path", SectionNodeImpl.class, "Must provide template logic class for template /path");
-			issues.recordIssue("TEMPLATE", FunctionNamespaceNodeImpl.class,
-					"Missing property 'bean.template' for ManagedFunctionSource "
-							+ WebTemplateManagedFunctionSource.class.getName());
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		}, (context, templater) -> {
@@ -419,18 +419,6 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			// Record more user friendly message
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Must provide template logic class for template /{param}, as has dynamic path");
-
-			// Ensure the web template also indicates issue
-			issues.recordCaptureIssues(false);
-			issues.recordIssue("/{param}", SectionNodeImpl.class,
-					"Must provide logic class, as template has path parameters");
-
-			// Redirect for template, therefore not connected
-			issues.recordIssue("REDIRECT", FunctionFlowNodeImpl.class,
-					"Function Flow REDIRECT is not linked to a ManagedFunctionNode");
-			issues.recordIssue("RENDER", FunctionFlowNodeImpl.class,
-					"Function Flow RENDER is not linked to a ManagedFunctionNode");
-
 		}, (context, templater) -> {
 			templater.addTemplate("/{param}", new StringReader("TEMPLATE"));
 		});
@@ -445,15 +433,6 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			// Record more user friendly message
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Must provide redirect values function for template /{param}, as has dynamic path");
-
-			// Ensure the web template also indicates issue
-			issues.recordCaptureIssues(false);
-			issues.recordIssue("/{param}", SectionNodeImpl.class,
-					"WebTemplate has path parameters but no redirect values function configured");
-
-			// Redirect for template, therefore not connected
-			issues.recordIssue("redirectToTemplate", SectionOutputNodeImpl.class,
-					"Section Output redirectToTemplate is not linked to a ManagedFunctionNode");
 
 		}, (context, templater) -> {
 			templater.addTemplate("/{param}", new StringReader("TEMPLATE")).setLogicClass(DynamicPathLogic.class);
@@ -867,10 +846,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * inheritance.
 	 */
 	public void testGrandSuperTemplate() throws Exception {
-		this.template("/grandchild", (context, templater) -> {
+		this.template("/child", (context, templater) -> {
 			WebTemplate grand = templater.addTemplate("/grand", new StringReader("Grand <!-- {section} --> Parent"));
 			WebTemplate parent = templater.addTemplate("/parent",
-					new StringReader("<!-- {:secction} --> Override, but overridden"));
+					new StringReader("<!-- {:section} --> Override, but overridden"));
 			parent.setSuperTemplate(grand);
 			WebTemplate child = templater.addTemplate("/child", new StringReader("<!-- {:section} -->Child"));
 			child.setSuperTemplate(parent);
@@ -881,6 +860,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure issue if inheritance cycle.
 	 */
 	public void testInheritanceCycle() throws Exception {
+
+		// TODO REMOVE when implemented cycle detection
+		fail("TODO remove this to run cycle detection once implemented - this currently avoids infinite loop");
+
 		this.templateIssue((issues) -> {
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"WebTemplate inheritance cycle /child :: /parent :: /grand :: /child ...");
@@ -937,11 +920,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * {@link HttpSessionStateful}.
 	 */
 	public void testStatefulTemplate() throws Exception {
-		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("${count}"))
-				.setLogicClass(StatefulLogic.class), "1");
+		MockHttpResponse response = this.template("/path", (context, templater) -> templater
+				.addTemplate("/path", new StringReader("${count}")).setLogicClass(StatefulLogic.class), "1");
 		for (int i = 2; i < 10; i++) {
 			assertEquals("Should stateful increment call count to " + i, String.valueOf(i),
-					this.server.send(this.mockRequest("/path")).getEntity(null));
+					this.server.send(this.mockRequest("/path").cookies(response)).getEntity(null));
 		}
 	}
 

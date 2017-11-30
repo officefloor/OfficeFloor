@@ -123,8 +123,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 				content.write(character);
 			}
 		} catch (IOException ex) {
-			this.officeArchitect.addIssue("Failed to read in template content for " + applicationPath, ex);
-			return null; // unable to add the template
+			throw this.officeArchitect.addIssue("Failed to read in template content for " + applicationPath, ex);
 		}
 
 		// Add the template
@@ -357,16 +356,15 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 				// Must have logic class
 				if (this.logicClass == null) {
-					WebTemplaterEmployer.this.officeArchitect.addIssue("Must provide template logic class for template "
-							+ this.applicationPath + ", as has dynamic path");
-					return;
+					throw WebTemplaterEmployer.this.officeArchitect
+							.addIssue("Must provide template logic class for template " + this.applicationPath
+									+ ", as has dynamic path");
 				}
 
 				// Must have redirect values function
 				if (CompileUtil.isBlank(this.redirectValuesFunctionName)) {
-					WebTemplaterEmployer.this.officeArchitect.addIssue(
+					throw WebTemplaterEmployer.this.officeArchitect.addIssue(
 							"Must provide redirect values function for template /{param}, as has dynamic path");
-					return;
 				}
 			}
 
