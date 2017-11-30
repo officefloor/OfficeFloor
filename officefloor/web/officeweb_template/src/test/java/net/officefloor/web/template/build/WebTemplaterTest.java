@@ -267,8 +267,8 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 */
 	public void testSectionWithVoidMethod() throws Exception {
 		VoidBeanLogic.isInvoked = false;
-		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("TEMPLATE")),
-				"TEMPLATE");
+		this.template("/path", (context, templater) -> templater.addTemplate("/path", new StringReader("TEMPLATE"))
+				.setLogicClass(VoidBeanLogic.class), "TEMPLATE");
 		assertTrue("Should invoke void template method", VoidBeanLogic.isInvoked);
 	}
 
@@ -327,19 +327,22 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not render {@link WebTemplate} section if <code>null</code> bean.
+	 * Ensure not render section for <code>null</code> data.
 	 */
 	public void testNotRenderSectionForNullData() throws Exception {
-		this.template("/path", (context, templater) -> templater.addTemplate("/path",
-				new StringReader("Template <!-- {section} --> Section")), "");
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate("/path", new StringReader("Template <!-- {section} --> Section"))
+						.setLogicClass(NullDataLogic.class),
+				"");
 	}
 
 	public static class NullDataLogic {
-		public Object getTemplate() {
+		public NullDataLogic getTemplate() {
 			return null;
 		}
 
-		public Object getSection() {
+		public NullDataLogic getSection() {
 			return null;
 		}
 	}
