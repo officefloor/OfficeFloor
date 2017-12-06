@@ -88,9 +88,9 @@ public interface WebApplicationArchitect {
 	 *            Name of the {@link HttpSecuritySource}.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} {@link Class}.
-	 * @return {@link HttpSecuritySection}.
+	 * @return {@link HttpSecurity}.
 	 */
-	HttpSecuritySection addHttpSecurity(String securityName,
+	HttpSecurity addHttpSecurity(String securityName,
 			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
 
 	/**

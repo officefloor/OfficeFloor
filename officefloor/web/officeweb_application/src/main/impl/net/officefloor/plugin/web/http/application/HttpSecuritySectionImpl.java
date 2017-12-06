@@ -31,7 +31,7 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
  * @author Daniel Sagenschneider
  */
 public class HttpSecuritySectionImpl<S, C, D extends Enum<D>, F extends Enum<F>>
-		implements HttpSecuritySection, HttpSecurityConfiguration<S, C, D, F> {
+		implements HttpSecurity, HttpSecurityConfiguration<S, C, D, F> {
 
 	/**
 	 * Default timeout is 10 seconds.
@@ -69,7 +69,7 @@ public class HttpSecuritySectionImpl<S, C, D extends Enum<D>, F extends Enum<F>>
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 * @param securityName
-	 *            Name of the {@link HttpSecuritySection}.
+	 *            Name of the {@link HttpSecurity}.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource} instance.
 	 * @param properties

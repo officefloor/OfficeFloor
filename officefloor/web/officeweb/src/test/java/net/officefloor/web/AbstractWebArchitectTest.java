@@ -880,7 +880,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can redirect (remembering original request).
 	 */
-	public void testRedirectToSecureTemplate() throws Exception {
+	public void testRedirectToSecurePath() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {

@@ -164,7 +164,7 @@ public class WebApplicationArchitectEmployer implements WebArchitect {
 	private final Map<String, OfficeManagedObject> httpRequestObjects = new HashMap<>();
 
 	/**
-	 * {@link HttpSecuritySection} instances.
+	 * {@link HttpSecurity} instances.
 	 */
 	private final List<HttpSecuritySectionImpl<?, ?, ?, ?>> httpSecurities = new LinkedList<>();
 
@@ -312,7 +312,7 @@ public class WebApplicationArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpSecuritySection addHttpSecurity(String securityName,
+	public HttpSecurity addHttpSecurity(String securityName,
 			final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
 
 		// Instantiate the HTTP security source
