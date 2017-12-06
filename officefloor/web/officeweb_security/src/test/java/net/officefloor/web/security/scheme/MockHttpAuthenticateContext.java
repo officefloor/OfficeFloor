@@ -39,12 +39,27 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements HttpAuthenticateContext<S, C, D> {
+public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpAuthenticateContext<AC, O> {
 
 	/**
-	 * Credentials.
+	 * Creates the {@link ServerHttpConnection} with authorization
+	 * {@link HttpHeader} value.
+	 * 
+	 * @param authorizationHeaderValue
+	 *            Authorization {@link HttpHeader} value.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	private final C credentials;
+	public static ServerHttpConnection createRequestWithAuthorizationHeader(String authorizationHeaderValue) {
+
+		// Create the HTTP request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+		if (authorizationHeaderValue != null) {
+			request.header("Authorization", authorizationHeaderValue);
+		}
+
+		// Return the connection with request
+		return MockHttpServer.mockConnection(request);
+	}
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -64,32 +79,31 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements Htt
 	/**
 	 * Dependencies.
 	 */
-	private final Map<D, Object> dependencies = new HashMap<D, Object>();
+	private final Map<O, Object> dependencies = new HashMap<O, Object>();
 
 	/**
-	 * HTTP security.
+	 * Access control.
 	 */
-	private S httpSecurity = null;
+	private AC accessControl = null;
 
 	/**
-	 * {@link HttpAccessControl} registered with the {@link HttpSession}.
+	 * Access control bound to {@link HttpSession}.
 	 */
-	private S sessionHttpSecurity = null;
+	private AC sessionAccessControl = null;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param credentials
-	 *            Credentials. May be <code>null</code>.
 	 * @param testCase
 	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
+	 * @param authorizationHeaderValue
+	 *            <code>authorization</code> {@link HttpHeader} value.
 	 */
-	public MockHttpAuthenticateContext(C credentials, OfficeFrameTestCase testCase) {
-		this.credentials = credentials;
+	public MockHttpAuthenticateContext(OfficeFrameTestCase testCase, String authorizationHeaderValue) {
 		this.testCase = testCase;
 
 		// Create the necessary mock objects
-		this.connection = testCase.createMock(ServerHttpConnection.class);
+		this.connection = createRequestWithAuthorizationHeader(authorizationHeaderValue);
 		this.session = testCase.createMock(HttpSession.class);
 	}
 
@@ -101,62 +115,45 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements Htt
 	 * @param dependency
 	 *            Dependency object.
 	 */
-	public void registerObject(D key, Object dependency) {
+	public void registerObject(O key, Object dependency) {
 		this.dependencies.put(key, dependency);
 	}
 
 	/**
-	 * Obtains the registered HTTP security.
+	 * Obtains the registered access control.
 	 * 
-	 * @return HTTP security.
+	 * @return Access control.
 	 */
-	public S getHttpSecurity() {
-		return this.httpSecurity;
+	public AC getAccessControl() {
+		return this.accessControl;
 	}
 
 	/**
-	 * Obtains the registered HTTP security with the {@link HttpSession}.
+	 * Obtains the registered access control with the {@link HttpSession}.
 	 * 
-	 * @return Registered HTTP security with the {@link HttpSession}.
+	 * @return Registered access control with the {@link HttpSession}.
 	 */
-	public S getRegisteredHttpSecurityWithHttpSession() {
-		return this.sessionHttpSecurity;
+	public AC getRegisteredAccessControlWithHttpSession() {
+		return this.sessionAccessControl;
 	}
 
 	/**
-	 * Records the Authorization {@link HttpHeader} value.
-	 * 
-	 * @param authorizationHeaderValue
-	 *            Authorization {@link HttpHeader} value.
-	 */
-	public void recordHttpRequestWithAuthorizationHeader(String authorizationHeaderValue) {
-
-		// Create the HTTP request
-		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		if (authorizationHeaderValue != null) {
-			request.header("Authorization", authorizationHeaderValue);
-		}
-
-		// Record return the HTTP request
-		this.testCase.recordReturn(this.connection, this.connection.getRequest(), request.build());
-	}
-
-	/**
-	 * Records registering {@link HttpAccessControl} with the {@link HttpSession}.
+	 * Records registering {@link HttpAccessControl} with the
+	 * {@link HttpSession}.
 	 * 
 	 * @param attributeName
-	 *            Name of attribute to register the {@link HttpAccessControl} with
-	 *            the {@link HttpSession}.
+	 *            Name of attribute to register the {@link HttpAccessControl}
+	 *            with the {@link HttpSession}.
 	 */
-	public void recordRegisterHttpSecurityWithHttpSession(String attributeName) {
+	public void recordRegisterAccessControlWithHttpSession(String attributeName) {
 		this.session.setAttribute(attributeName, null);
 		this.testCase.control(this.session).setMatcher(new AbstractMatcher() {
 			@Override
 			@SuppressWarnings("unchecked")
 			public boolean matches(Object[] expected, Object[] actual) {
-				Assert.assertEquals("Incorrect HTTP Security session attribute name", expected[0], actual[0]);
-				Assert.assertNotNull("Must have HTTP Security if registering with HTTP Session", actual[0]);
-				MockHttpAuthenticateContext.this.sessionHttpSecurity = (S) actual[1];
+				Assert.assertEquals("Incorrect access control session attribute name", expected[0], actual[0]);
+				Assert.assertNotNull("Must have access control if registering with HTTP Session", actual[0]);
+				MockHttpAuthenticateContext.this.sessionAccessControl = (AC) actual[1];
 				return true;
 			}
 		});
@@ -165,11 +162,6 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements Htt
 	/*
 	 * ==================== HttpAuthenticateContext =========================
 	 */
-
-	@Override
-	public C getCredentials() {
-		return this.credentials;
-	}
 
 	@Override
 	public ServerHttpConnection getConnection() {
@@ -182,13 +174,13 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements Htt
 	}
 
 	@Override
-	public Object getObject(D key) {
+	public Object getObject(O key) {
 		return this.dependencies.get(key);
 	}
 
 	@Override
-	public void setAccessControl(S security) {
-		this.httpSecurity = security;
+	public void setAccessControl(AC accessControl) {
+		this.accessControl = accessControl;
 	}
 
 }

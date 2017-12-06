@@ -21,13 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpResponseHeaders;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
@@ -37,7 +34,8 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> implements HttpChallengeContext<D, F> {
+public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
+		implements HttpChallengeContext<O, F>, HttpChallenge {
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -50,14 +48,9 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	private final HttpSession session;
 
 	/**
-	 * {@link OfficeFrameTestCase}.
-	 */
-	private final OfficeFrameTestCase testCase;
-
-	/**
 	 * Dependencies.
 	 */
-	private final Map<D, Object> dependencies = new HashMap<D, Object>();
+	private final Map<O, Object> dependencies = new HashMap<O, Object>();
 
 	/**
 	 * Flows.
@@ -65,9 +58,26 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	private final MockHttpChallengeContextFlows<F> flows;
 
 	/**
-	 * {@link HttpRequest}.
+	 * Challenge.
 	 */
-	private HttpRequest request;
+	private final StringBuilder challenge = new StringBuilder();
+
+	/**
+	 * Initiate.
+	 *
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @param testCase
+	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
+	 */
+	@SuppressWarnings("unchecked")
+	public MockHttpChallengeContext(ServerHttpConnection connection, OfficeFrameTestCase testCase) {
+		this.connection = connection;
+
+		// Create the necessary mock objects
+		this.session = testCase.createMock(HttpSession.class);
+		this.flows = testCase.createMock(MockHttpChallengeContextFlows.class);
+	}
 
 	/**
 	 * Initiate.
@@ -75,14 +85,8 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	 * @param testCase
 	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 */
-	@SuppressWarnings("unchecked")
 	public MockHttpChallengeContext(OfficeFrameTestCase testCase) {
-		this.testCase = testCase;
-
-		// Create the necessary mock objects
-		this.connection = testCase.createMock(ServerHttpConnection.class);
-		this.session = testCase.createMock(HttpSession.class);
-		this.flows = testCase.createMock(MockHttpChallengeContextFlows.class);
+		this(MockHttpServer.mockConnection(), testCase);
 	}
 
 	/**
@@ -93,40 +97,8 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	 * @param dependency
 	 *            Dependency object.
 	 */
-	public void registerObject(D key, Object dependency) {
+	public void registerObject(O key, Object dependency) {
 		this.dependencies.put(key, dependency);
-	}
-
-	/**
-	 * Records obtaining the {@link HttpRequest}.
-	 * 
-	 * @return {@link HttpRequest}.
-	 */
-	public HttpRequest recordGetHttpRequest() {
-		this.request = this.testCase.createMock(HttpRequest.class);
-		this.testCase.recordReturn(this.connection, this.connection.getRequest(), this.request);
-		return this.request;
-	}
-
-	/**
-	 * Records the authenticate challenge.
-	 * 
-	 * @param authenticateHeaderValue
-	 *            Authenticate {@link HttpHeader} value.
-	 */
-	public void recordAuthenticateChallenge(String authenticateHeaderValue) {
-
-		HttpHeader header = this.testCase.createMock(HttpHeader.class);
-
-		// Record obtaining the HTTP response
-		HttpResponse response = this.testCase.createMock(HttpResponse.class);
-		this.testCase.recordReturn(this.connection, this.connection.getResponse(), response);
-
-		// Record the challenge
-		response.setStatus(HttpStatus.UNAUTHORIZED);
-		HttpResponseHeaders headers = this.testCase.createMock(HttpResponseHeaders.class);
-		this.testCase.recordReturn(response, response.getHeaders(), headers);
-		this.testCase.recordReturn(headers, headers.addHeader("WWW-Authenticate", authenticateHeaderValue), header);
 	}
 
 	/**
@@ -139,9 +111,24 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 		this.doFlow(key);
 	}
 
+	/**
+	 * Obtains the <code>WWW-Authenticate</code> challenge.
+	 * 
+	 * @return Challenge.
+	 */
+	public String getChallenge() {
+		return this.challenge.toString();
+	}
+
 	/*
 	 * =================== HttpChallengeContext =====================
 	 */
+
+	@Override
+	public HttpChallenge setChallenge(String authenticationScheme, String realm) {
+		this.challenge.append(authenticationScheme + " realm=\"" + realm + "\"");
+		return this;
+	}
 
 	@Override
 	public ServerHttpConnection getConnection() {
@@ -154,7 +141,7 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 	}
 
 	@Override
-	public Object getObject(D key) {
+	public Object getObject(O key) {
 		return this.dependencies.get(key);
 	}
 
@@ -175,6 +162,15 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>> impl
 		 *            Key for the flow.
 		 */
 		void doFlow(F key);
+	}
+
+	/*
+	 * ===================== HttpChallenge ===========================
+	 */
+
+	@Override
+	public void addParameter(String name, String value) {
+		this.challenge.append(", " + name + "=" + value);
 	}
 
 }

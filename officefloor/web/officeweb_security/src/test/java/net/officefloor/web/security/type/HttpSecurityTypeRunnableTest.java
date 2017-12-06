@@ -17,22 +17,22 @@
  */
 package net.officefloor.web.security.type;
 
-import java.io.IOException;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
-import net.officefloor.web.security.type.HttpSecurityType;
-import net.officefloor.web.security.type.HttpSecurityTypeRunnable;
 import net.officefloor.web.spi.security.HttpAuthenticateContext;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpLogoutContext;
 import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
@@ -54,12 +54,13 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
 		// Load the type
-		HttpSecurityType<?, ?, ?, ?> type = compiler.run(HttpSecurityTypeRunnable.class,
+		HttpSecurityType<?, ?, ?, ?, ?> type = compiler.run(HttpSecurityTypeRunnable.class,
 				BasicHttpSecuritySource.class.getName(), BasicHttpSecuritySource.PROPERTY_REALM, "TEST");
 
 		// Ensure have type
 		assertNotNull("Should have type", type);
-		assertEquals("Incorrect security class", HttpAccessControl.class.getName(), type.getSecurityClass().getName());
+		assertEquals("Incorrect authentication class", HttpAuthentication.class, type.getAuthenticationClass());
+		assertEquals("Incorrect access control class", HttpAccessControl.class, type.getAccessControlClass());
 	}
 
 	/**
@@ -75,12 +76,13 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		properties.addProperty(BasicHttpSecuritySource.PROPERTY_REALM).setValue("TEST");
 
 		// Load the type
-		HttpSecurityType<?, ?, ?, ?> type = HttpSecurityTypeRunnable
+		HttpSecurityType<?, ?, ?, ?, ?> type = HttpSecurityTypeRunnable
 				.loadHttpSecurityType(BasicHttpSecuritySource.class.getName(), properties, compiler);
 
 		// Ensure have type
 		assertNotNull("Should have type", type);
-		assertEquals("Incorrect security class", HttpAccessControl.class.getName(), type.getSecurityClass().getName());
+		assertEquals("Incorrect authentication class", HttpAuthentication.class, type.getAuthenticationClass());
+		assertEquals("Incorrect access control class", HttpAccessControl.class, type.getAccessControlClass());
 	}
 
 	/**
@@ -101,7 +103,7 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Ensure not obtain properties
-		HttpSecurityType<?, ?, ?, ?> type = compiler.run(HttpSecurityTypeRunnable.class,
+		HttpSecurityType<?, ?, ?, ?, ?> type = compiler.run(HttpSecurityTypeRunnable.class,
 				MockHttpSecuritySource.class.getName());
 		assertNull("Should not have type", type);
 
@@ -114,7 +116,8 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 	 * {@link HttpSecurityType}.
 	 */
 	@TestSource
-	public static class MockHttpSecuritySource implements HttpSecuritySource<Object, Object, Indexed, Indexed> {
+	public static class MockHttpSecuritySource implements HttpSecuritySource<Object, Object, Object, Indexed, Indexed>,
+			HttpSecurity<Object, Object, Object, Indexed, Indexed> {
 
 		/*
 		 * =========== HttpSecuritySource ====================
@@ -127,30 +130,46 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public HttpSecuritySourceMetaData<Object, Object, Indexed, Indexed> init(HttpSecuritySourceContext context)
-				throws Exception {
+		public HttpSecuritySourceMetaData<Object, Object, Object, Indexed, Indexed> init(
+				HttpSecuritySourceContext context) throws Exception {
 			// No meta-data causing type load failure
 			return null;
 		}
 
 		@Override
-		public boolean ratify(HttpRatifyContext<Object, Object> context) {
+		public HttpSecurity<Object, Object, Object, Indexed, Indexed> sourceHttpSecurity(HttpSecurityContext context)
+				throws HttpException {
+			return this;
+		}
+
+		/*
+		 * ============ HttpSecurity ==========================
+		 */
+
+		@Override
+		public Object createAuthentication() {
+			fail("Should not be invoked for loading type");
+			return null;
+		}
+
+		@Override
+		public boolean ratify(Object credentials, HttpRatifyContext<Object> context) {
 			fail("Should not be invoked for loading type");
 			return false;
 		}
 
 		@Override
-		public void authenticate(HttpAuthenticateContext<Object, Object, Indexed> context) throws IOException {
+		public void authenticate(Object credentials, HttpAuthenticateContext<Object, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<Indexed, Indexed> context) throws IOException {
+		public void challenge(HttpChallengeContext<Indexed, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<Indexed> context) throws IOException {
+		public void logout(HttpLogoutContext<Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}

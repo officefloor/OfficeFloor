@@ -19,10 +19,7 @@ package net.officefloor.web.security.scheme;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockHttpRequestBuilder;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpRatifyContext;
@@ -34,17 +31,7 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
-
-	/**
-	 * Credentials.
-	 */
-	private final C credentials;
-
-	/**
-	 * {@link OfficeFrameTestCase}.
-	 */
-	private final OfficeFrameTestCase testCase;
+public class MockHttpRatifyContext<AC> implements HttpRatifyContext<AC> {
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -57,79 +44,37 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	private final HttpSession session;
 
 	/**
-	 * {@link HttpResponse}.
-	 */
-	private HttpResponse response;
-
-	/**
 	 * {@link HttpAccessControl}.
 	 */
-	private S security = null;
+	private AC accessControl = null;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param credentials
-	 *            Credentials.
 	 * @param testCase
 	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
+	 * @param authorizationHeaderValue
+	 *            <code>authorization</code> {@link HttpHeader} value.
 	 */
-	public MockHttpRatifyContext(C credentials, OfficeFrameTestCase testCase) {
-		this.credentials = credentials;
-		this.testCase = testCase;
+	public MockHttpRatifyContext(OfficeFrameTestCase testCase, String authorizationHeaderValue) {
 
 		// Create the necessary mock objects
-		this.connection = testCase.createMock(ServerHttpConnection.class);
+		this.connection = MockHttpAuthenticateContext.createRequestWithAuthorizationHeader(authorizationHeaderValue);
 		this.session = testCase.createMock(HttpSession.class);
 	}
 
 	/**
-	 * Records obtaining the {@link HttpResponse}.
+	 * Obtains the access control.
 	 * 
-	 * @return {@link HttpResponse}.
+	 * @return Access control.
 	 */
-	public HttpResponse recordGetHttpResponse() {
-		this.response = this.testCase.createMock(HttpResponse.class);
-		this.testCase.recordReturn(this.connection, this.connection.getResponse(), this.response);
-		return this.response;
-	}
-
-	/**
-	 * Records the Authorization {@link HttpHeader} value.
-	 * 
-	 * @param authorizationHeaderValue
-	 *            Authorization {@link HttpHeader} value.
-	 * @return {@link MockHttpRequestBuilder}.
-	 */
-	public void recordHttpRequestWithAuthorizationHeader(String authorizationHeaderValue) {
-
-		// Create the request
-		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		if (authorizationHeaderValue != null) {
-			request.header("Authorization", authorizationHeaderValue);
-		}
-
-		// Record obtaining the request
-		this.testCase.recordReturn(this.connection, this.connection.getRequest(), request.build());
-	}
-
-	/**
-	 * Obtains the HTTP security.
-	 * 
-	 * @return HTTP security.
-	 */
-	public S getHttpSecurity() {
-		return this.security;
+	public AC getAccessControl() {
+		return this.accessControl;
 	}
 
 	/*
 	 * ===================== HttpRatifyContext ===============================
 	 */
-
-	@Override
-	public C getCredentials() {
-		return this.credentials;
-	}
 
 	@Override
 	public ServerHttpConnection getConnection() {
@@ -142,8 +87,8 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 	}
 
 	@Override
-	public void setAccessControl(S security) {
-		this.security = security;
+	public void setAccessControl(AC accessControl) {
+		this.accessControl = accessControl;
 	}
 
 }

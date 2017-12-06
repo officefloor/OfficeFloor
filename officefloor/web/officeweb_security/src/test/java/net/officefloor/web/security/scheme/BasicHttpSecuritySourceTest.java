@@ -24,16 +24,18 @@ import java.util.HashSet;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
-import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource.Dependencies;
 import net.officefloor.web.security.store.CredentialEntry;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
+import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
  * Tests the {@link BasicHttpSecuritySource}.
@@ -48,12 +50,6 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	private static final String REALM = "WallyWorld";
 
 	/**
-	 * {@link HttpAuthenticateContext}.
-	 */
-	private final MockHttpAuthenticateContext<HttpAccessControl, Void, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpAccessControl, Void, Dependencies>(
-			null, this);
-
-	/**
 	 * {@link CredentialStore}.
 	 */
 	private final CredentialStore store = this.createMock(CredentialStore.class);
@@ -62,11 +58,6 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 * {@link CredentialEntry}.
 	 */
 	private final CredentialEntry entry = this.createMock(CredentialEntry.class);
-
-	@Override
-	protected void setUp() throws Exception {
-		this.authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
-	}
 
 	/**
 	 * Ensure correct specification.
@@ -83,7 +74,10 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Create the expected type
 		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil.createHttpSecurityTypeBuilder();
-		type.setSecurityClass(HttpAccessControl.class);
+		type.setAuthenticationClass(HttpAuthentication.class);
+		type.setAccessControlClass(HttpAccessControl.class);
+		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
+		type.addDependency(Dependencies.SESSION, HttpSession.class, null);
 		type.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class, null);
 
 		// Validate type
@@ -96,24 +90,24 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl, Void> ratifyContext = new MockHttpRatifyContext<HttpAccessControl, Void>(
-				null, this);
-		final HttpAccessControl security = this.createMock(HttpAccessControl.class);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
+				this, null);
+		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.source.basic.http.security"), security);
+		this.recordReturn(session, session.getAttribute("http.security.basic"), accessControl);
 
 		// Test
 		this.replayMockObjects();
 
 		// Create and initialise the source
-		BasicHttpSecuritySource source = HttpSecurityLoaderUtil.loadHttpSecuritySource(BasicHttpSecuritySource.class,
-				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Undertake ratify
-		assertFalse("Should not need to authenticate as cached", source.ratify(ratifyContext));
-		assertSame("Incorrect security", security, ratifyContext.getHttpSecurity());
+		assertFalse("Should not need to authenticate as cached", security.ratify(null, ratifyContext));
+		assertSame("Incorrect security", accessControl, ratifyContext.getAccessControl());
 
 		// Verify
 		this.verifyMockObjects();
@@ -124,24 +118,23 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyWithAuthorizationHeader() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl, Void> ratifyContext = new MockHttpRatifyContext<HttpAccessControl, Void>(
-				null, this);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
+				this, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.source.basic.http.security"), null);
-		ratifyContext.recordHttpRequestWithAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+		this.recordReturn(session, session.getAttribute("http.security.basic"), null);
 
 		// Test
 		this.replayMockObjects();
 
 		// Create and initialise the source
-		BasicHttpSecuritySource source = HttpSecurityLoaderUtil.loadHttpSecuritySource(BasicHttpSecuritySource.class,
-				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Undertake ratify
-		assertTrue("Should indicate that may attempt to authenticate", source.ratify(ratifyContext));
-		assertNull("Should not yet have security", ratifyContext.getHttpSecurity());
+		assertTrue("Should indicate that may attempt to authenticate", security.ratify(null, ratifyContext));
+		assertNull("Should not yet have security", ratifyContext.getAccessControl());
 
 		// Verify
 		this.verifyMockObjects();
@@ -152,24 +145,23 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoAuthentication() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl, Void> ratifyContext = new MockHttpRatifyContext<HttpAccessControl, Void>(
-				null, this);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
+				this, null);
 
 		// Record obtaining HTTP security from HTTP session
 		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.source.basic.http.security"), null);
-		ratifyContext.recordHttpRequestWithAuthorizationHeader(null);
+		this.recordReturn(session, session.getAttribute("http.security.basic"), null);
 
 		// Test
 		this.replayMockObjects();
 
 		// Create and initialise the source
-		BasicHttpSecuritySource source = HttpSecurityLoaderUtil.loadHttpSecuritySource(BasicHttpSecuritySource.class,
-				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Undertake ratify
-		assertFalse("Should not attempt authentication", source.ratify(ratifyContext));
-		assertNull("Should not yet have security", ratifyContext.getHttpSecurity());
+		assertFalse("Should not attempt authentication", security.ratify(null, ratifyContext));
+		assertNull("Should not yet have security", ratifyContext.getAccessControl());
 
 		// Verify
 		this.verifyMockObjects();
@@ -184,57 +176,42 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 				this);
 		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
-		// Record the challenge
-		challengeContext.recordAuthenticateChallenge("Basic realm=\"" + REALM + "\"");
-
 		// Test
 		this.replayMockObjects();
 
 		// Create and initialise the source
-		BasicHttpSecuritySource source = HttpSecurityLoaderUtil.loadHttpSecuritySource(BasicHttpSecuritySource.class,
-				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Undertake the challenge
-		source.challenge(challengeContext);
+		security.challenge(challengeContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
+
+		// Ensure correct challenge
+		assertEquals("Incorrect challenge", "Basic realm=\"" + REALM + "\"", challengeContext.getChallenge());
 	}
 
 	/**
 	 * Ensure not authenticated with no authorization header.
 	 */
 	public void testNoAuthorizationHeader() throws Exception {
-
-		// Record no authorization header
-		this.authenticationContext.recordHttpRequestWithAuthorizationHeader(null);
-
-		// Test
-		this.doAuthenticate(null);
+		this.doAuthenticate(null, false, null);
 	}
 
 	/**
 	 * Ensure handle incorrect authentication scheme.
 	 */
 	public void testIncorrectAuthenticationScheme() throws Exception {
-
-		// Record authenticate
-		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Incorrect QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
-
-		// Test
-		this.doAuthenticate(null);
+		this.doAuthenticate("Incorrect QWxhZGRpbjpvcGVuIHNlc2FtZQ==", false, null);
 	}
 
 	/**
 	 * Ensure handle invalid Base64 encoding.
 	 */
 	public void testInvalidAuthorizationHeader() throws Exception {
-
-		// Record authenticate
-		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic wrong");
-
-		// Test
-		this.doAuthenticate(null);
+		this.doAuthenticate("Basic wrong", false, null);
 	}
 
 	/**
@@ -243,17 +220,14 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testSimpleAuthenticate() throws Exception {
 
 		// Record simple authenticate
-		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		this.recordReturn(this.store, this.store.retrieveCredentialEntry("Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
 				"open sesame".getBytes(AbstractHttpSecuritySource.UTF_8));
 		this.recordReturn(this.store, this.store.getAlgorithm(), null);
 		this.recordReturn(this.entry, this.entry.retrieveRoles(), new HashSet<String>(Arrays.asList("prince")));
-		this.authenticationContext
-				.recordRegisterHttpSecurityWithHttpSession("http.security.source.basic.http.security");
 
 		// Test
-		this.doAuthenticate("Aladdin", "prince");
+		this.doAuthenticate("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", true, "Aladdin", "prince");
 	}
 
 	/**
@@ -267,16 +241,13 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		byte[] credentials = digest.digest();
 
 		// Record authentication with algorithm
-		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		this.recordReturn(this.store, this.store.retrieveCredentialEntry("Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(), credentials);
 		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
 		this.recordReturn(this.entry, this.entry.retrieveRoles(), new HashSet<String>(Arrays.asList("prince")));
-		this.authenticationContext
-				.recordRegisterHttpSecurityWithHttpSession("http.security.source.basic.http.security");
 
 		// Test
-		this.doAuthenticate("Aladdin", "prince");
+		this.doAuthenticate("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", true, "Aladdin", "prince");
 	}
 
 	/**
@@ -285,17 +256,14 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testExtraSpacing() throws Exception {
 
 		// Record authenticate
-		this.authenticationContext.recordHttpRequestWithAuthorizationHeader("  Basic    QWxhZGRpbjpvcGVuIHNlc2FtZQ==  ");
 		this.recordReturn(this.store, this.store.retrieveCredentialEntry("Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
 				"open sesame".getBytes(AbstractHttpSecuritySource.UTF_8));
 		this.recordReturn(this.store, this.store.getAlgorithm(), CredentialStore.NO_ALGORITHM);
 		this.recordReturn(this.entry, this.entry.retrieveRoles(), new HashSet<String>(Arrays.asList("prince")));
-		this.authenticationContext
-				.recordRegisterHttpSecurityWithHttpSession("http.security.source.basic.http.security");
 
 		// Test
-		this.doAuthenticate("Aladdin", "prince");
+		this.doAuthenticate("  Basic    QWxhZGRpbjpvcGVuIHNlc2FtZQ==  ", true, "Aladdin", "prince");
 	}
 
 	/**
@@ -307,17 +275,17 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Record logging out
 		HttpSession session = logoutContext.getSession();
-		session.removeAttribute("http.security.source.basic.http.security");
+		session.removeAttribute("http.security.basic");
 
 		// Replay mock objects
 		this.replayMockObjects();
 
-		// Create and initialise the source
-		BasicHttpSecuritySource source = HttpSecurityLoaderUtil.loadHttpSecuritySource(BasicHttpSecuritySource.class,
-				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		// Create and initialise the security
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Logout
-		source.logout(logoutContext);
+		security.logout(logoutContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
@@ -326,44 +294,58 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
+	 * @param authorizationHttpHeaderValue
+	 *            <code>authorize</code> {@link HttpHeader} value.
+	 * @param isLoadSession
+	 *            Indicates if load {@link HttpSession} with access control.
 	 * @param userName
 	 *            User name if authenticated. <code>null</code> if not
 	 *            authenticated.
 	 * @param roles
 	 *            Expected roles.
 	 */
-	private void doAuthenticate(String userName, String... roles) throws IOException {
+	private void doAuthenticate(String authorizationHttpHeaderValue, boolean isLoadSession, String userName,
+			String... roles) {
 
-		// Replay mock objects
+		// Create the mock authenticate context
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<>(
+				this, authorizationHttpHeaderValue);
+		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
+
+		// Record specifying session
+		if (isLoadSession) {
+			authenticationContext.recordRegisterAccessControlWithHttpSession("http.security.basic");
+		}
+
+		// Test
 		this.replayMockObjects();
 
-		// Create and initialise the source
-		BasicHttpSecuritySource source = HttpSecurityLoaderUtil.loadHttpSecuritySource(BasicHttpSecuritySource.class,
-				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		// Create and initialise the security
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Undertake the authenticate
-		source.authenticate(this.authenticationContext);
+		security.authenticate(null, authenticationContext);
 
-		// Verify mock objects
+		// Verify
 		this.verifyMockObjects();
 
 		// Validate authentication
-		HttpAccessControl security = this.authenticationContext.getHttpSecurity();
+		HttpAccessControl accessControl = authenticationContext.getAccessControl();
 		if (userName == null) {
-			assertNull("Should not be authenticated", security);
+			assertNull("Should not be authenticated", accessControl);
 			assertNull("Should not register HTTP Security with HTTP Session",
-					this.authenticationContext.getRegisteredHttpSecurityWithHttpSession());
+					authenticationContext.getRegisteredAccessControlWithHttpSession());
 
 		} else {
-			assertNotNull("Should be authenticated", security);
-			assertEquals("Incorrect authentication scheme", "Basic", security.getAuthenticationScheme());
-			assertEquals("Incorrect user name", userName, security.getRemoteUser());
-			assertEquals("Incorrect principle", userName, security.getPrincipal().getName());
+			assertNotNull("Should be authenticated", accessControl);
+			assertEquals("Incorrect authentication scheme", "Basic", accessControl.getAuthenticationScheme());
+			assertEquals("Incorrect principle", userName, accessControl.getPrincipal().getName());
 			for (String role : roles) {
-				assertTrue("Should have role: " + role, security.inRole(role));
+				assertTrue("Should have role: " + role, accessControl.inRole(role));
 			}
-			assertSame("Same HTTP Security should be registered with HTTP Session", security,
-					this.authenticationContext.getRegisteredHttpSecurityWithHttpSession());
+			assertSame("Same HTTP Security should be registered with HTTP Session", accessControl,
+					authenticationContext.getRegisteredAccessControlWithHttpSession());
 		}
 	}
 

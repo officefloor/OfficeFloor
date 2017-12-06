@@ -17,8 +17,6 @@
  */
 package net.officefloor.web.security.type;
 
-import java.io.IOException;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -29,15 +27,16 @@ import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
-import net.officefloor.web.security.type.HttpSecurityLoader;
-import net.officefloor.web.security.type.HttpSecurityLoaderImpl;
-import net.officefloor.web.security.type.HttpSecurityManagedObjectAdapterSource;
+import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.spi.security.HttpAuthenticateContext;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpCredentials;
 import net.officefloor.web.spi.security.HttpLogoutContext;
 import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
@@ -304,8 +303,9 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	 * Mock {@link HttpSecuritySource} for testing.
 	 */
 	@TestSource
-	public static class MockHttpSecuritySource
-			implements HttpSecuritySource<HttpAccessControl, HttpCredentials, None, None> {
+	public static class MockHttpSecuritySource implements
+			HttpSecuritySource<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None>,
+			HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> {
 
 		/**
 		 * Failure to obtain the {@link HttpSecuritySourceSpecification}.
@@ -344,30 +344,47 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		}
 
 		@Override
-		public HttpSecuritySourceMetaData<HttpAccessControl, HttpCredentials, None, None> init(
+		public HttpSecuritySourceMetaData<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> init(
 				HttpSecuritySourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}
 
 		@Override
-		public boolean ratify(HttpRatifyContext<HttpAccessControl, HttpCredentials> context) {
+		public HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> sourceHttpSecurity(
+				HttpSecurityContext context) throws HttpException {
+			return this;
+		}
+
+		/*
+		 * =================== HttpSecurity ====================================
+		 */
+
+		@Override
+		public HttpAuthentication<HttpCredentials> createAuthentication() {
+			fail("Should not be invoked for obtaining specification");
+			return null;
+		}
+
+		@Override
+		public boolean ratify(HttpCredentials credentials, HttpRatifyContext<HttpAccessControl> context) {
 			fail("Should not be invoked for obtaining specification");
 			return false;
 		}
 
 		@Override
-		public void authenticate(HttpAuthenticateContext<HttpAccessControl, HttpCredentials, None> context) {
+		public void authenticate(HttpCredentials credentials,
+				HttpAuthenticateContext<HttpAccessControl, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context) throws IOException {
+		public void challenge(HttpChallengeContext<None, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<None> context) throws IOException {
+		public void logout(HttpLogoutContext<None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 	}

@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpLogoutContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -32,8 +33,7 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpLogoutContext<D extends Enum<D>> implements
-		HttpLogoutContext<D> {
+public class MockHttpLogoutContext<D extends Enum<D>> implements HttpLogoutContext<D> {
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -59,7 +59,7 @@ public class MockHttpLogoutContext<D extends Enum<D>> implements
 	public MockHttpLogoutContext(OfficeFrameTestCase testCase) {
 
 		// Create the necessary mock objects
-		this.connection = testCase.createMock(ServerHttpConnection.class);
+		this.connection = MockHttpServer.mockConnection();
 		this.session = testCase.createMock(HttpSession.class);
 	}
 

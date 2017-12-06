@@ -31,12 +31,20 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
 public interface HttpSecurityTypeBuilder {
 
 	/**
-	 * Specifies the security class.
+	 * Specifies the authentication class.
 	 * 
-	 * @param securityClass
-	 *            Class of the security.
+	 * @param authenticationClass
+	 *            Class of the authentication.
 	 */
-	void setSecurityClass(Class<?> securityClass);
+	void setAuthenticationClass(Class<?> authenticationClass);
+
+	/**
+	 * Specifies the access control class.
+	 * 
+	 * @param accessControlClass
+	 *            Class of the access control.
+	 */
+	void setAccessControlClass(Class<?> accessControlClass);
 
 	/**
 	 * <p>
@@ -65,6 +73,14 @@ public interface HttpSecurityTypeBuilder {
 	 *            Key identifying the {@link HttpSecurityDependencyType}.
 	 */
 	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
+
+	/**
+	 * Indicates if input.
+	 * 
+	 * @param isInput
+	 *            <code>true</code> if input.
+	 */
+	void setInput(boolean isInput);
 
 	/**
 	 * <p>

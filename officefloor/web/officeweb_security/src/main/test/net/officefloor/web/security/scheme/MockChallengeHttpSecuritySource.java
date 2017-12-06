@@ -26,7 +26,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
@@ -87,11 +86,6 @@ public class MockChallengeHttpSecuritySource
 	public static final String IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC = "Basic";
 
 	/**
-	 * <code>www-authenticate</code> {@link HttpHeaderName}.
-	 */
-	private static final HttpHeaderName CHALLENGE_HEADER_NAME = new HttpHeaderName("WWW-Authenticate");
-
-	/**
 	 * Name of attribute to register the {@link HttpAccessControl} within the
 	 * {@link HttpSession}.
 	 */
@@ -112,6 +106,12 @@ public class MockChallengeHttpSecuritySource
 		this.realm = realm;
 	}
 
+	/**
+	 * Default constructor.
+	 */
+	public MockChallengeHttpSecuritySource() {
+	}
+
 	/*
 	 * ==================== HttpSecuritySource =========================
 	 */
@@ -119,11 +119,12 @@ public class MockChallengeHttpSecuritySource
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		if (this.realm == null) {
-			context.addProperty(PROPERTY_REALM);
+			context.addProperty(PROPERTY_REALM, "Realm");
 		}
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(MetaDataContext<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> context)
 			throws Exception {
 
@@ -133,6 +134,7 @@ public class MockChallengeHttpSecuritySource
 		}
 
 		// Specify the access control
+		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass(HttpAccessControl.class);
 	}
 

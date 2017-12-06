@@ -83,6 +83,7 @@ public class BasicHttpSecuritySource extends
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(
 			MetaDataContext<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> context)
 			throws Exception {
@@ -92,7 +93,10 @@ public class BasicHttpSecuritySource extends
 		this.realm = securityContext.getProperty(PROPERTY_REALM);
 
 		// Provide meta-data
+		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass(HttpAccessControl.class);
+		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
+		context.addDependency(Dependencies.SESSION, HttpSession.class);
 		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 	}
 
@@ -164,9 +168,8 @@ public class BasicHttpSecuritySource extends
 				throws HttpException {
 
 			// Obtain the connection and session
-			ServerHttpConnection connection = (ServerHttpConnection) context
-					.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			ServerHttpConnection connection = context.getConnection();
+			HttpSession session = context.getSession();
 
 			// Obtain the authentication scheme
 			HttpAuthenticationScheme scheme = HttpAuthenticationScheme
@@ -216,7 +219,7 @@ public class BasicHttpSecuritySource extends
 		public void logout(HttpLogoutContext<Dependencies> context) throws HttpException {
 
 			// Obtain the session
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
 			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);

@@ -121,6 +121,7 @@ public class FormHttpSecuritySource extends
 		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass(HttpAccessControl.class);
 		context.setCredentialsClass(HttpCredentials.class);
+		context.addDependency(Dependencies.SESSION, HttpSession.class);
 		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 		context.addFlow(Flows.FORM_LOGIN_PAGE, null);
 	}
@@ -189,8 +190,8 @@ public class FormHttpSecuritySource extends
 		public void authenticate(HttpCredentials credentials,
 				HttpAuthenticateContext<HttpAccessControl, Dependencies> context) throws HttpException {
 
-			// Obtain the connection and session
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			// Obtain the session
+			HttpSession session = context.getSession();
 
 			// Obtain the credentials
 			if (credentials == null) {
@@ -234,8 +235,8 @@ public class FormHttpSecuritySource extends
 		@Override
 		public void logout(HttpLogoutContext<Dependencies> context) throws HttpException {
 
-			// Obtain the connection and session
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			// Obtain the session
+			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
 			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);

@@ -30,6 +30,7 @@ import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 
 /**
  * {@link HttpSecurityLoader} implementation.
@@ -131,12 +132,19 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 			return null; // failed to obtain type
 		}
 
-		// Obtain the credentials type
+		// Obtain the meta-data
 		@SuppressWarnings("unchecked")
-		Class<C> credentialsType = (Class<C>) adapter.getHttpSecuritySourceMetaData().getCredentialsClass();
+		HttpSecuritySourceMetaData<A, AC, C, O, F> metaData = (HttpSecuritySourceMetaData<A, AC, C, O, F>) adapter
+				.getHttpSecuritySourceMetaData();
+
+		// Obtain the authentication type
+		Class<A> authenticationType = metaData.getAuthenticationClass();
+
+		// Obtain the credentials type
+		Class<C> credentialsType = metaData.getCredentialsClass();
 
 		// Return the adapted type
-		return new ManagedObjectHttpSecurityType<A, AC, C, O, F>(moType, credentialsType);
+		return new ManagedObjectHttpSecurityType<A, AC, C, O, F>(moType, authenticationType, credentialsType);
 	}
 
 	/**
@@ -181,6 +189,11 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		private final ManagedObjectType<O> moType;
 
 		/**
+		 * Authentication type.
+		 */
+		private final Class<A> authenticationType;
+
+		/**
 		 * Credentials type.
 		 */
 		private final Class<C> credentialsType;
@@ -190,11 +203,15 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 * 
 		 * @param moType
 		 *            {@link ManagedObjectType}.
+		 * @param authenticationType
+		 *            Authentication type.
 		 * @param credentialsType
 		 *            Credentials type.
 		 */
-		public ManagedObjectHttpSecurityType(ManagedObjectType<O> moType, Class<C> credentialsType) {
+		private ManagedObjectHttpSecurityType(ManagedObjectType<O> moType, Class<A> authenticationType,
+				Class<C> credentialsType) {
 			this.moType = moType;
+			this.authenticationType = authenticationType;
 			this.credentialsType = credentialsType;
 		}
 
@@ -204,8 +221,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 
 		@Override
 		public Class<A> getAuthenticationClass() {
-			// TODO Auto-generated method stub
-			return null;
+			return this.authenticationType;
 		}
 
 		@Override

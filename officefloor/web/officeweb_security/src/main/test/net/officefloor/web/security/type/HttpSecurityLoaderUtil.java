@@ -147,6 +147,8 @@ public class HttpSecurityLoaderUtil {
 
 		// Ensure correct credentials class
 		HttpSecurityType<A, AC, C, O, F> securityType = loadHttpSecurityType(httpSecuritySource, propertyNameValues);
+		Assert.assertEquals("Incorrect authentication class", builder.authenticationClass,
+				securityType.getAuthenticationClass());
 		TestCase.assertEquals("Incorrect credentials class", builder.credentialsClass,
 				securityType.getCredentialsClass());
 
@@ -188,6 +190,41 @@ public class HttpSecurityLoaderUtil {
 
 		// Return the HTTP security source
 		return httpSecuritySource;
+	}
+
+	/**
+	 * Convenience method to load the {@link HttpSecurity} initialised ready for
+	 * testing.
+	 * 
+	 * @param <A>
+	 *            Authentication type.
+	 * @param <AC>
+	 *            Access control type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <O>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
+	 * @param <HS>
+	 *            {@link HttpSecuritySource} type.
+	 * @param <S>
+	 *            {@link HttpSecurity} type.
+	 * @param httpSecuritySourceClass
+	 *            {@link HttpSecuritySource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value pairs to initialise the
+	 *            {@link HttpSecuritySource}.
+	 * @return Initialised {@link HttpSecuritySource}.
+	 */
+	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurity<A, AC, C, O, F> loadHttpSecurity(
+			Class<HS> httpSecuritySourceClass, String... propertyNameValues) {
+
+		// Load the HTTP security source
+		HS httpSecuritySource = loadHttpSecuritySource(httpSecuritySourceClass, propertyNameValues);
+
+		// Return the HTTP security
+		return httpSecuritySource.sourceHttpSecurity(null);
 	}
 
 	/**
@@ -385,6 +422,11 @@ public class HttpSecurityLoaderUtil {
 		private final ManagedObjectTypeBuilder moTypeBuilder;
 
 		/**
+		 * Authentication {@link Class}.
+		 */
+		private Class<?> authenticationClass;
+
+		/**
 		 * Credentials {@link Class}.
 		 */
 		private Class<?> credentialsClass;
@@ -404,13 +446,23 @@ public class HttpSecurityLoaderUtil {
 		 */
 
 		@Override
-		public void setSecurityClass(Class<?> securityClass) {
+		public void setAuthenticationClass(Class<?> authenticationClass) {
+			this.authenticationClass = authenticationClass;
+		}
+
+		@Override
+		public void setAccessControlClass(Class<?> securityClass) {
 			this.moTypeBuilder.setObjectClass(securityClass);
 		}
 
 		@Override
 		public void setCredentialsClass(Class<?> credentialsClass) {
 			this.credentialsClass = credentialsClass;
+		}
+
+		@Override
+		public void setInput(boolean isInput) {
+			this.moTypeBuilder.setInput(isInput);
 		}
 
 		@Override

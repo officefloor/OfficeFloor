@@ -277,6 +277,7 @@ public class DigestHttpSecuritySource extends
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void loadMetaData(
 			MetaDataContext<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> context)
 			throws Exception {
@@ -287,7 +288,10 @@ public class DigestHttpSecuritySource extends
 		this.privateKey = securityContext.getProperty(PROPERTY_PRIVATE_KEY);
 
 		// Provide meta-data
+		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass(HttpAccessControl.class);
+		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
+		context.addDependency(Dependencies.SESSION, HttpSession.class);
 		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 	}
 
@@ -359,9 +363,8 @@ public class DigestHttpSecuritySource extends
 				throws HttpException {
 
 			// Obtain the connection and session
-			ServerHttpConnection connection = (ServerHttpConnection) context
-					.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			ServerHttpConnection connection = context.getConnection();
+			HttpSession session = context.getSession();
 
 			// Obtain the dependencies
 			HttpRequest request = connection.getRequest();
@@ -521,9 +524,8 @@ public class DigestHttpSecuritySource extends
 		public void challenge(HttpChallengeContext<Dependencies, None> context) throws HttpException {
 
 			// Obtain the connection and session
-			ServerHttpConnection connection = (ServerHttpConnection) context
-					.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			ServerHttpConnection connection = context.getConnection();
+			HttpSession session = context.getSession();
 
 			// Obtain the dependencies
 			HttpRequest request = connection.getRequest();
@@ -573,8 +575,8 @@ public class DigestHttpSecuritySource extends
 		@Override
 		public void logout(HttpLogoutContext<Dependencies> context) throws HttpException {
 
-			// Obtain the connection and session
-			HttpSession session = (HttpSession) context.getObject(Dependencies.SESSION);
+			// Obtain the session
+			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
 			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
