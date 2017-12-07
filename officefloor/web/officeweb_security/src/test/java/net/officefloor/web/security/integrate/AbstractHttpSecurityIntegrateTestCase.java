@@ -37,12 +37,16 @@ import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.spi.security.HttpCredentials;
+import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Abstract functionality for integration testing of the
@@ -74,6 +78,11 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	private boolean isDigestHttpClientCookieBug = false;
 
 	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
@@ -85,26 +94,32 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		// Configure the application
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			// TODO extract security into own project to test
-			// HttpServerTestUtil.configureTestHttpServer(context, PORT,
-			// "SERVICE", "service");
+			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
 		});
 		compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();
 
+			// Employ security architect
+			HttpSecurityArchitect securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web,
+					context.getOfficeArchitect());
+
 			// Configure the HTTP Security
-			HttpSecuritySection security = this.configureHttpSecurity(context);
+			HttpSecurityBuilder security = this.configureHttpSecurity(context, securityArchitect);
 
 			// Add servicing methods
 			OfficeSection section = context.addSection("SERVICE", Servicer.class);
-			web.linkUri("service", section.getOfficeSectionInput("service"));
-			web.linkUri("logout", section.getOfficeSectionInput("logout"));
+			web.link(false, "service", section.getOfficeSectionInput("service"));
+			web.link(false, "logout", section.getOfficeSectionInput("logout"));
 
 			// Determine if security configured
 			if (security != null) {
-				context.getOfficeArchitect().link(security.getOfficeSection().getOfficeSectionOutput("Failure"),
+				context.getOfficeArchitect().link(security.getOutput("Failure"),
 						section.getOfficeSectionInput("handleFailure"));
 			}
+
+			// Inform web architect of security
+			securityArchitect.informWebArchitect();
 		});
 
 		// Start the office
@@ -112,13 +127,16 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	}
 
 	/**
-	 * Configures the {@link HttpSecuritySection}.
+	 * Configures the {@link HttpSecurity}.
 	 * 
 	 * @param context
 	 *            {@link CompileWebContext}.
-	 * @return Configured {@link HttpSecuritySection}.
+	 * @param securityArchitect
+	 *            {@link HttpSecurityArchitect}
+	 * @return Configured {@link HttpSecurity}.
 	 */
-	protected abstract HttpSecuritySection configureHttpSecurity(CompileWebContext context);
+	protected abstract HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect);
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -232,17 +250,17 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		/**
 		 * Services the {@link HttpRequest}.
 		 * 
-		 * @param security
-		 *            {@link HttpAccessControl} dependency ensures authentication
-		 *            before servicing.
+		 * @param acessControl
+		 *            {@link HttpAccessControl} dependency ensures
+		 *            authentication before servicing.
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 * @throws IOException
 		 *             If fails.
 		 */
-		public void service(HttpAccessControl security, ServerHttpConnection connection) throws IOException {
+		public void service(HttpAccessControl acessControl, ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter()
-					.write("Serviced for " + (security == null ? "guest" : security.getRemoteUser()));
+					.write("Serviced for " + (acessControl == null ? "guest" : acessControl.getPrincipal().getName()));
 		}
 
 		/**
@@ -255,8 +273,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		 * @throws IOException
 		 *             If fails.
 		 */
-		public void logout(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication,
-				ServerHttpConnection connection) throws IOException {
+		public void logout(HttpAuthentication<HttpCredentials> authentication, ServerHttpConnection connection)
+				throws IOException {
 
 			// Log out
 			authentication.logout(null);

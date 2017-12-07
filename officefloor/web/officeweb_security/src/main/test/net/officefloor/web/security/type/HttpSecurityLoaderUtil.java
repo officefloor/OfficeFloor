@@ -30,7 +30,6 @@ import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
-import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
@@ -331,24 +330,7 @@ public class HttpSecurityLoaderUtil {
 				propertyNameValues);
 
 		// Create and return the HTTP security configuration
-		return new HttpSecurityConfiguration<A, AC, C, O, F>() {
-
-			@Override
-			public HttpSecurity<A, AC, C, O, F> getHttpSecurity() {
-				return httpSecurity;
-			}
-
-			@Override
-			public HttpAccessControlFactory<AC> getAccessControlFactory() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public HttpSecurityType<A, AC, C, O, F> getHttpSecurityType() {
-				return securityType;
-			}
-		};
+		return new HttpSecurityConfigurationImpl<>(httpSecurity, null, securityType);
 	}
 
 	/**

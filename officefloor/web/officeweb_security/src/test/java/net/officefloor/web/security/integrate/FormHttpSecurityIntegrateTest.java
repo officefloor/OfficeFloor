@@ -27,11 +27,12 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.FormHttpSecuritySource;
 import net.officefloor.web.security.scheme.HttpCredentialsImpl;
 import net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource;
 import net.officefloor.web.spi.security.HttpCredentials;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.
@@ -41,21 +42,20 @@ import net.officefloor.web.state.HttpSecuritySection;
 public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect) {
 		WebArchitect web = context.getWebArchitect();
 		OfficeArchitect office = context.getOfficeArchitect();
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = web.addHttpSecurity("SECURITY", FormHttpSecuritySource.class);
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY", FormHttpSecuritySource.class);
 		security.addProperty(FormHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 
 		// Provide the form login page
 		OfficeSection form = context.addSection("FORM", LoginPage.class);
-		office.link(security.getOfficeSection().getOfficeSectionOutput("FORM_LOGIN_PAGE"),
-				form.getOfficeSectionInput("form"));
-		web.linkUri("login", form.getOfficeSectionInput("login"));
-		office.link(form.getOfficeSectionOutput("authenticate"),
-				security.getOfficeSection().getOfficeSectionInput("Authenticate"));
+		office.link(security.getOutput("FORM_LOGIN_PAGE"), form.getOfficeSectionInput("form"));
+		web.link(false, "login", form.getOfficeSectionInput("login"));
+		office.link(form.getOfficeSectionOutput("authenticate"), security.getInput("Authenticate"));
 
 		// Provide parameters for login form
 		web.addHttpRequestObject(LoginForm.class, true);
@@ -92,7 +92,7 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	public static class LoginPage {
 
 		public void form(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("LOGIN");
+			connection.getResponse().getEntityWriter().write("LOGIN");
 		}
 
 		@NextFunction("authenticate")

@@ -18,6 +18,8 @@
 package net.officefloor.web.security.build;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -36,5 +38,23 @@ public interface HttpSecurityBuilder extends PropertyConfigurable {
 	 *            {@link HttpSecurity}.
 	 */
 	void addContentType(String contentType);
+
+	/**
+	 * Obtains the {@link OfficeSectionInput} from the {@link HttpSecurity}.
+	 * 
+	 * @param inputName
+	 *            {@link OfficeSectionInput} name.
+	 * @return {@link OfficeSectionInput} for the name.
+	 */
+	OfficeSectionInput getInput(String inputName);
+
+	/**
+	 * Obtains the {@link OfficeSectionOutput} from the {@link HttpSecurity}.
+	 * 
+	 * @param outputName
+	 *            {@link OfficeSectionOutput} name.
+	 * @return {@link OfficeSectionOutput} for the name.
+	 */
+	OfficeSectionOutput getOutput(String outputName);
 
 }

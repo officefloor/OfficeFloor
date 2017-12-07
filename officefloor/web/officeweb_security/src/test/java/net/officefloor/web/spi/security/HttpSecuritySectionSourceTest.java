@@ -154,10 +154,10 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 	 * @param propertyNameValuePairs
 	 *            {@link Property} name/value pairs.
 	 */
-	private static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> void validateType(
+	private static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> void validateType(
 			SectionDesigner expectedType, Class<HS> httpSecuritySourceClass, String... propertyNameValuePairs) {
 		HS source = HttpSecurityLoaderUtil.newHttpSecuritySource(httpSecuritySourceClass);
-		HttpSecurityConfiguration<S, C, D, F> configuration = HttpSecurityLoaderUtil
+		HttpSecurityConfiguration<A, AC, C, O, F> configuration = HttpSecurityLoaderUtil
 				.loadHttpSecurityConfiguration(source, propertyNameValuePairs);
 		SectionLoaderUtil.validateSectionType(expectedType, new HttpSecuritySectionSource(configuration), null);
 	}

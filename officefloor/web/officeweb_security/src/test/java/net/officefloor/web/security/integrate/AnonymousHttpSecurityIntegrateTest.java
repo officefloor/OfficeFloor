@@ -21,9 +21,10 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.impl.AnonymousHttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecurityManagedObjectSource;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Enables overriding the {@link HttpSecurityManagedObjectSource} and use the
@@ -35,13 +36,15 @@ import net.officefloor.web.state.HttpSecuritySection;
 public class AnonymousHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect) {
 
 		// Override the HTTP Security
 		OfficeManagedObjectSource object = context.getOfficeArchitect().addOfficeManagedObjectSource("SECURITY",
 				new HttpSecurityManagedObjectSource());
 		object.setTimeout(1000);
-		object.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, HttpAccessControl.class.getName());
+		object.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+				HttpAccessControl.class.getName());
 		object.addProperty(HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
 				String.valueOf(false));
 

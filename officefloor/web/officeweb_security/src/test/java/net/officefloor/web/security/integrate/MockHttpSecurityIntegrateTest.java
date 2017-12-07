@@ -20,8 +20,9 @@ package net.officefloor.web.security.integrate;
 import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate tests the {@link MockChallengeHttpSecuritySource}.
@@ -31,10 +32,11 @@ import net.officefloor.web.state.HttpSecuritySection;
 public class MockHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect) {
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = context.getWebArchitect().addHttpSecurity("SECURITY",
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY",
 				MockChallengeHttpSecuritySource.class);
 
 		// Return the HTTP Security

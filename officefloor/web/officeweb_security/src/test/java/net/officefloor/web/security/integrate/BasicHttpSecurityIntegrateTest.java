@@ -22,11 +22,11 @@ import org.apache.http.client.CredentialsProvider;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
-import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.PasswordFileManagedObjectSource;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate tests the {@link BasicHttpSecuritySource}.
@@ -36,11 +36,11 @@ import net.officefloor.web.state.HttpSecuritySection;
 public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
-		WebArchitect web = context.getWebArchitect();
+	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect) {
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = web.addHttpSecurity("BASIC", BasicHttpSecuritySource.class);
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("BASIC", BasicHttpSecuritySource.class);
 		security.addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 
 		// Obtain the password file

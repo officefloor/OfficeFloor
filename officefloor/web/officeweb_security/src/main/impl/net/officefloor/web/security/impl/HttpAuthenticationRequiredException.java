@@ -26,8 +26,8 @@ import net.officefloor.web.build.WebArchitect;
  * <p>
  * {@link Escalation} indicating authentication is required.
  * <p>
- * This may be thrown by any functionality as the {@link WebArchitect}
- * is expected to catch this {@link Escalation} at the {@link Office} level and
+ * This may be thrown by any functionality as the {@link WebArchitect} is
+ * expected to catch this {@link Escalation} at the {@link Office} level and
  * issue a challenge to the client.
  * 
  * @author Daniel Sagenschneider
@@ -58,7 +58,7 @@ public class HttpAuthenticationRequiredException extends Exception {
 	 *            Indicates whether to save request for
 	 *            {@link HttpUrlContinuation} after authentication completes.
 	 */
-	HttpAuthenticationRequiredException(boolean isSaveRequest) {
+	public HttpAuthenticationRequiredException(boolean isSaveRequest) {
 		this.isSaveRequest = isSaveRequest;
 	}
 

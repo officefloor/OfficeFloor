@@ -64,17 +64,17 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends OfficeFr
 	@SuppressWarnings("unchecked")
 	public void testAuthenticate() throws Throwable {
 
-		final HttpAuthenticateCallback<Void> request = this.createMock(HttpAuthenticateCallback.class);
+		final HttpAuthenticateCallback callback = this.createMock(HttpAuthenticateCallback.class);
 
 		// Record request completing immediately
-		request.authenticationComplete();
+		callback.authenticationComplete();
 
 		// Test
 		this.replayMockObjects();
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		AnonymousHttpAuthenticationManagedObjectSource<?, ?> source = loader
+		AnonymousHttpAuthenticationManagedObjectSource<?> source = loader
 				.loadManagedObjectSource(AnonymousHttpAuthenticationManagedObjectSource.class);
 
 		// Source the managed object
@@ -82,16 +82,16 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends OfficeFr
 		ManagedObject managedObject = user.sourceManagedObject(source);
 
 		// Obtain the authentication
-		HttpAuthentication<HttpAccessControl, Void> authentication = (HttpAuthentication<HttpAccessControl, Void>) managedObject
+		HttpAuthentication<HttpAccessControl> authentication = (HttpAuthentication<HttpAccessControl>) managedObject
 				.getObject();
 		assertNotNull("Should have authentication", authentication);
 
 		// Trigger authentication
-		authentication.authenticate(request);
-		assertNull("Should not provide HTTP Security as anonymous", authentication.getAccessControl());
+		authentication.authenticate(null, callback);
+		assertNull("Should not provide access control as anonymous", authentication.getAccessControl());
 
-		// Trigger authentication again without request
-		authentication.authenticate(null);
+		// Trigger authentication again without callback
+		authentication.authenticate(null, null);
 		assertNull("Should again be anonymous", authentication.getAccessControl());
 
 		// Verify functionality
@@ -114,7 +114,7 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends OfficeFr
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		AnonymousHttpAuthenticationManagedObjectSource<?, ?> source = loader
+		AnonymousHttpAuthenticationManagedObjectSource<?> source = loader
 				.loadManagedObjectSource(AnonymousHttpAuthenticationManagedObjectSource.class);
 
 		// Source the managed object
@@ -122,7 +122,7 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends OfficeFr
 		ManagedObject managedObject = user.sourceManagedObject(source);
 
 		// Obtain the authentication
-		HttpAuthentication<HttpAccessControl, Void> authentication = (HttpAuthentication<HttpAccessControl, Void>) managedObject
+		HttpAuthentication<HttpAccessControl> authentication = (HttpAuthentication<HttpAccessControl>) managedObject
 				.getObject();
 		assertNotNull("Should have authentication", authentication);
 

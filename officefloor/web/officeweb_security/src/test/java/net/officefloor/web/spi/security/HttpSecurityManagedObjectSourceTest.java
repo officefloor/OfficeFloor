@@ -44,7 +44,7 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * {@link HttpAuthentication}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final HttpAuthentication<HttpAccessControl, Void> authentication = this.createMock(HttpAuthentication.class);
+	private final HttpAuthentication<HttpAccessControl> authentication = this.createMock(HttpAuthentication.class);
 
 	/**
 	 * Validate specification.
@@ -120,27 +120,26 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	 *            Indicates whether will allow <code>null</code> HTTP Security.
 	 * @return {@link HttpAccessControl} from {@link ManagedObject}.
 	 */
-	@SuppressWarnings("unchecked")
 	private HttpAccessControl loadHttpSecurity(HttpAccessControl httpSecurity, final boolean isAuthenticatedImmediately,
 			boolean isAllowNullHttpSecurity) throws Throwable {
 
 		final AsynchronousContext async = this.createMock(AsynchronousContext.class);
-		final HttpAuthenticateCallback<Void> request = this.createMock(HttpAuthenticateCallback.class);
+		final HttpAuthenticateCallback callback = this.createMock(HttpAuthenticateCallback.class);
 
 		// Record authenticating
 		async.start(null);
-		this.authentication.authenticate(request);
+		this.authentication.authenticate(null, callback);
 		this.control(authentication).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 
 				// Ensure always have request (for asynchronous listener)
-				HttpAuthenticateCallback<Void> actualRequest = (HttpAuthenticateCallback<Void>) actual[0];
-				assertNotNull("Should always have request to wrap asynchronous listener functionality", actualRequest);
+				HttpAuthenticateCallback actualCallback = (HttpAuthenticateCallback) actual[1];
+				assertNotNull("Should always have request to wrap asynchronous listener functionality", actualCallback);
 
 				// Trigger that completed authentication
 				if (isAuthenticatedImmediately) {
-					actualRequest.authenticationComplete();
+					actualCallback.authenticationComplete();
 				}
 
 				// As here, matched

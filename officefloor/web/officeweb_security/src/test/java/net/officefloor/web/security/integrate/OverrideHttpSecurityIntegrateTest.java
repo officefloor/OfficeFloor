@@ -20,10 +20,11 @@ package net.officefloor.web.security.integrate;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.impl.HttpAuthenticationRequiredException;
 import net.officefloor.web.security.impl.HttpSecurityManagedObjectSource;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * <p>
@@ -38,7 +39,8 @@ import net.officefloor.web.state.HttpSecuritySection;
 public class OverrideHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect) {
 
 		// Override the HTTP Security
 		OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("SECURITY",
@@ -49,7 +51,7 @@ public class OverrideHttpSecurityIntegrateTest extends AbstractHttpSecurityInteg
 				String.valueOf(false));
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = context.getWebArchitect().addHttpSecurity("SECURITY",
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY",
 				MockChallengeHttpSecuritySource.class);
 
 		// Return the HTTP Security

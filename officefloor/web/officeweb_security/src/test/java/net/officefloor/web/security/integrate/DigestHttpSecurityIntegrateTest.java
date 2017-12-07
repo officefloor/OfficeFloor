@@ -22,9 +22,10 @@ import org.apache.http.client.CredentialsProvider;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.web.security.store.PasswordFileManagedObjectSource;
-import net.officefloor.web.state.HttpSecuritySection;
 
 /**
  * Integrate the {@link DigestHttpSecuritySource}.
@@ -39,11 +40,11 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 	private static final String REALM = "TestRealm";
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
+			HttpSecurityArchitect securityArchitect) {
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = context.getWebArchitect().addHttpSecurity("SECURITY",
-				DigestHttpSecuritySource.class);
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY", DigestHttpSecuritySource.class);
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_REALM, REALM);
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY, "PrivateKey");
 

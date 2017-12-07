@@ -32,6 +32,7 @@ import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.FunctionAuthenticateContext;
@@ -40,14 +41,8 @@ import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource.Dependencies;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource.Flows;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
-import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.security.type.HttpSecurityConfigurationImpl;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpAuthenticateCallback;
-import net.officefloor.web.spi.security.HttpCredentials;
-import net.officefloor.web.spi.security.HttpLogoutRequest;
-import net.officefloor.web.spi.security.HttpRatifyContext;
-import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
  * Tests the {@link HttpAuthenticationManagedObjectSource}.
@@ -57,25 +52,22 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
 public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpSecuritySource}.
+	 * {@link HttpSecurity}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final HttpSecuritySource<HttpAccessControl, HttpCredentials, Indexed, Indexed> source = this
-			.createMock(HttpSecuritySource.class);
-
-	/**
-	 * {@link HttpSecurityType}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final HttpSecurityType<HttpAccessControl, HttpCredentials, Indexed, Indexed> securityType = this
-			.createMock(HttpSecurityType.class);
+	private final HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, Indexed, Indexed> security = this
+			.createMock(HttpSecurity.class);
 
 	/**
 	 * {@link HttpSecurityConfiguration}.
 	 */
-	@SuppressWarnings("unchecked")
-	private final HttpSecurityConfiguration<HttpAccessControl, HttpCredentials, Indexed, Indexed> securityConfiguration = this
-			.createMock(HttpSecurityConfiguration.class);
+	private final HttpSecurityConfiguration<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, Indexed, Indexed> securityConfiguration = new HttpSecurityConfigurationImpl<>(
+			this.security, null, null);
+
+	/**
+	 * Mock {@link ServerHttpConnection}.
+	 */
+	private final ServerHttpConnection connection = MockHttpServer.mockConnection();
 
 	/**
 	 * {@link HttpSession}.
@@ -98,9 +90,10 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpAuthentication.class);
+		type.setInput(true);
 		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 		type.addDependency(Dependencies.HTTP_SESSION, HttpSession.class, null);
-		type.addFlow(Flows.AUTHENTICATE, HttpAuthenticateContext.class);
+		type.addFlow(Flows.AUTHENTICATE, FunctionAuthenticateContext.class);
 		type.addFlow(Flows.LOGOUT, FunctionLogoutContext.class);
 
 		// Validate type
@@ -112,8 +105,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 * Ensure can load immediately from {@link HttpSession}.
 	 */
 	public void testLoad_FromHttpSession() throws Throwable {
-		final HttpAccessControl security = this.createMock(HttpAccessControl.class);
-		this.loadAuthentication(security, null, true, null, null, false, new SameCheck(security));
+		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+		this.loadAuthentication(accessControl, null, true, null, null, false, new SameCheck(accessControl));
 	}
 
 	/**
@@ -140,8 +133,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 * Ensure can load with authentication.
 	 */
 	public void testLoad_Authenticating() throws Throwable {
-		final HttpAccessControl security = this.createMock(HttpAccessControl.class);
-		this.loadAuthentication(null, null, true, security, null, false, new SameCheck(security));
+		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+		this.loadAuthentication(null, null, true, accessControl, null, false, new SameCheck(accessControl));
 	}
 
 	/**
@@ -156,17 +149,15 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testLoad_WithAuthenticatingIoException() throws Throwable {
 		final IOException exception = new IOException("TEST");
-		this.loadAuthentication(null, null, true, null, exception, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (HttpException ex) {
-					assertSame("Incorrect exception", exception, ex.getCause());
-				}
+		this.loadAuthentication(null, null, true, null, exception, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (HttpException ex) {
+				assertSame("Incorrect exception", exception, ex.getCause());
 			}
 		});
+
 	}
 
 	/**
@@ -177,17 +168,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testLoad_WithAuthenticatingCheckedException() throws Throwable {
 		final Exception failure = new Exception("TEST");
-		this.loadAuthentication(null, null, true, null, failure, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (IllegalStateException ex) {
-					assertEquals("Incorrect exception", "Authentication error: TEST (java.lang.Exception)",
-							ex.getMessage());
-					assertSame("Incorrect cause", failure, ex.getCause());
-				}
+		this.loadAuthentication(null, null, true, null, failure, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (IllegalStateException ex) {
+				assertEquals("Incorrect exception", "Authentication error: TEST (java.lang.Exception)",
+						ex.getMessage());
+				assertSame("Incorrect cause", failure, ex.getCause());
 			}
 		});
 	}
@@ -197,15 +185,12 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testLoad_WithAuthenticatingFailure() throws Throwable {
 		final RuntimeException failure = new RuntimeException("TEST");
-		this.loadAuthentication(null, null, true, null, failure, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (RuntimeException ex) {
-					assertSame("Incorrect cause", failure, ex);
-				}
+		this.loadAuthentication(null, null, true, null, failure, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (RuntimeException ex) {
+				assertSame("Incorrect cause", failure, ex);
 			}
 		});
 	}
@@ -215,15 +200,12 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testLoad_WithAuthenticatingError() throws Throwable {
 		final Error error = new Error("TEST");
-		this.loadAuthentication(null, null, true, null, error, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (Error ex) {
-					assertSame("Incorrect cause", error, ex);
-				}
+		this.loadAuthentication(null, null, true, null, error, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (Error ex) {
+				assertSame("Incorrect cause", error, ex);
 			}
 		});
 	}
@@ -232,8 +214,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 * Ensure can manually obtain from {@link HttpSession}.
 	 */
 	public void testManual_FromHttpSession() throws Throwable {
-		HttpAccessControl security = this.createMock(HttpAccessControl.class);
-		this.manualAuthentication(security, null, true, null, null, false, new SameCheck(security));
+		HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+		this.manualAuthentication(accessControl, null, true, null, null, false, new SameCheck(accessControl));
 	}
 
 	/**
@@ -260,8 +242,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 * Ensure can manually authentication.
 	 */
 	public void testManual_Authenticating() throws Throwable {
-		final HttpAccessControl security = this.createMock(HttpAccessControl.class);
-		this.manualAuthentication(null, null, true, security, null, false, new SameCheck(security));
+		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+		this.manualAuthentication(null, null, true, accessControl, null, false, new SameCheck(accessControl));
 	}
 
 	/**
@@ -276,15 +258,12 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testManual_WithAuthenticatingIoException() throws Throwable {
 		final IOException exception = new IOException("TEST");
-		this.manualAuthentication(null, null, true, null, exception, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (HttpException ex) {
-					assertSame("Incorrect exception", exception, ex.getCause());
-				}
+		this.manualAuthentication(null, null, true, null, exception, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (HttpException ex) {
+				assertSame("Incorrect exception", exception, ex.getCause());
 			}
 		});
 	}
@@ -297,17 +276,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testManual_WithAuthenticatingCheckedException() throws Throwable {
 		final Exception failure = new Exception("TEST");
-		this.manualAuthentication(null, null, true, null, failure, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (IllegalStateException ex) {
-					assertEquals("Incorrect exception", "Authentication error: TEST (java.lang.Exception)",
-							ex.getMessage());
-					assertSame("Incorrect cause", failure, ex.getCause());
-				}
+		this.manualAuthentication(null, null, true, null, failure, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (IllegalStateException ex) {
+				assertEquals("Incorrect exception", "Authentication error: TEST (java.lang.Exception)",
+						ex.getMessage());
+				assertSame("Incorrect cause", failure, ex.getCause());
 			}
 		});
 	}
@@ -317,15 +293,12 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testManual_WithAuthenticatingFailure() throws Throwable {
 		final RuntimeException failure = new RuntimeException("TEST");
-		this.manualAuthentication(null, null, true, null, failure, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (RuntimeException ex) {
-					assertSame("Incorrect cause", failure, ex);
-				}
+		this.manualAuthentication(null, null, true, null, failure, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (RuntimeException ex) {
+				assertSame("Incorrect cause", failure, ex);
 			}
 		});
 	}
@@ -335,15 +308,12 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 	 */
 	public void testManual_WithAuthenticatingError() throws Throwable {
 		final Error error = new Error("TEST");
-		this.manualAuthentication(null, null, true, null, error, false, new Check() {
-			@Override
-			public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-				try {
-					authentication.getAccessControl();
-					fail("Should not be successful");
-				} catch (Error ex) {
-					assertSame("Incorrect cause", error, ex);
-				}
+		this.manualAuthentication(null, null, true, null, error, false, (authentication) -> {
+			try {
+				authentication.getAccessControl();
+				fail("Should not be successful");
+			} catch (Error ex) {
+				assertSame("Incorrect cause", error, ex);
 			}
 		});
 	}
@@ -460,26 +430,27 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 		 * @param authentication
 		 *            {@link HttpAuthentication}.
 		 */
-		void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable;
+		void check(HttpAuthentication<HttpAccessControl> authentication) throws Throwable;
 	}
 
 	/**
-	 * Ensures the HTTP Security is the same.
+	 * Ensures the access control is the same.
 	 */
 	private class SameCheck implements Check {
 
 		/**
 		 * {@link HttpAccessControl}.
 		 */
-		private final HttpAccessControl security;
+		private final HttpAccessControl accessControl;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param security
+		 * @param accessControl
+		 *            Access control.
 		 */
-		public SameCheck(HttpAccessControl security) {
-			this.security = security;
+		public SameCheck(HttpAccessControl accessControl) {
+			this.accessControl = accessControl;
 		}
 
 		/*
@@ -487,19 +458,19 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 		 */
 
 		@Override
-		public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-			assertSame("Incorrect HTTP security", this.security, authentication.getAccessControl());
+		public void check(HttpAuthentication<HttpAccessControl> authentication) throws Throwable {
+			assertSame("Incorrect access control", this.accessControl, authentication.getAccessControl());
 		}
 	}
 
 	/**
-	 * Ensures the HTTP Security is <code>null</code>.
+	 * Ensures the access control is <code>null</code>.
 	 */
 	private class NullCheck implements Check {
 
 		@Override
-		public void check(HttpAuthentication<HttpAccessControl, HttpCredentials> authentication) throws Throwable {
-			assertNull("Should not load HTTP security", authentication.getAccessControl());
+		public void check(HttpAuthentication<HttpAccessControl> authentication) throws Throwable {
+			assertNull("Should not load access control", authentication.getAccessControl());
 		}
 	}
 
@@ -520,16 +491,13 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 
 		final ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 
-		// Authentication request (if manually authenticating)
-		HttpAuthenticateCallback<HttpCredentials> authenticationRequest = null;
+		// Authentication callback (if manually authenticating)
+		HttpAuthenticateCallback authenticationCallback = null;
 
 		// Record ratifying ability to authenticate
-		final HttpRatifyContext<HttpAccessControl, HttpCredentials> loadRatifyContext = this
-				.createMock(HttpRatifyContext.class);
-		final HttpRatifyContext<HttpAccessControl, HttpCredentials> manualRatifyContext = this
-				.createMock(HttpRatifyContext.class);
-		final HttpRatifyContext<HttpAccessControl, HttpCredentials> obtainRatifyContext = this
-				.createMock(HttpRatifyContext.class);
+		final HttpRatifyContext<HttpAccessControl> loadRatifyContext = this.createMock(HttpRatifyContext.class);
+		final HttpRatifyContext<HttpAccessControl> manualRatifyContext = this.createMock(HttpRatifyContext.class);
+		final HttpRatifyContext<HttpAccessControl> obtainRatifyContext = this.createMock(HttpRatifyContext.class);
 		AbstractMatcher ratifyMatcher = new AbstractMatcher() {
 
 			/**
@@ -546,41 +514,42 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				HttpRatifyContext<HttpAccessControl, HttpCredentials> context = (HttpRatifyContext<HttpAccessControl, HttpCredentials>) actual[0];
+				HttpCredentials credentialsArgument = (HttpCredentials) actual[0];
+				HttpRatifyContext<HttpAccessControl> contextArgument = (HttpRatifyContext<HttpAccessControl>) actual[1];
 				assertSame("Incorrect connection", HttpAuthenticationManagedObjectSourceTest.this.connection,
-						context.getConnection());
+						contextArgument.getConnection());
 				assertSame("Incorrect session", HttpAuthenticationManagedObjectSourceTest.this.session,
-						context.getSession());
-				HttpRatifyContext<HttpAccessControl, HttpCredentials> expectedContext = (HttpRatifyContext<HttpAccessControl, HttpCredentials>) expected[0];
+						contextArgument.getSession());
+				HttpRatifyContext<HttpAccessControl> expectedContext = (HttpRatifyContext<HttpAccessControl>) expected[0];
 				if (expectedContext == loadRatifyContext) {
 					// Validate loading ratification
-					if (context.getCredentials() != null) {
+					if (credentials != null) {
 						// Should be no credentials on load
 						return false;
 					}
 
 					// Only take action once
 					if ((this.isRatifyLoad) && (loadRatifiedSecurity != null)) {
-						context.setAccessControl(loadRatifiedSecurity);
+						contextArgument.setAccessControl(loadRatifiedSecurity);
 						this.isRatifyLoad = false;
 					}
 
 				} else if (expectedContext == manualRatifyContext) {
 					// Validate manual ratification
-					if (context.getCredentials() != credentials) {
+					if (credentialsArgument != credentials) {
 						// Incorrect credentials
 						return false;
 					}
 
 					// Only take action once
 					if ((this.isRatifyManual) && (manualRatifiedSecurity != null)) {
-						context.setAccessControl(manualRatifiedSecurity);
+						contextArgument.setAccessControl(manualRatifiedSecurity);
 						this.isRatifyManual = false;
 					}
 
 				} else if (expectedContext == obtainRatifyContext) {
 					// Validate loading ratification
-					if (context.getCredentials() != null) {
+					if (credentials != null) {
 						// No credentials on obtaining HTTP Security
 						return false;
 					}
@@ -593,15 +562,15 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 		};
 
 		// Undertake load ratify
-		this.source.ratify(loadRatifyContext);
-		this.control(this.source).setDefaultMatcher(ratifyMatcher);
+		this.security.ratify(null, loadRatifyContext);
+		this.control(this.security).setDefaultMatcher(ratifyMatcher);
 		if (loadRatifyFailure != null) {
 			// Failure on ratify (no further authentication)
-			this.control(this.source).setThrowable(loadRatifyFailure);
+			this.control(this.security).setThrowable(loadRatifyFailure);
 
 		} else {
 			// Load ratify successful returns
-			this.control(this.source).setReturnValue(isLoadRatified);
+			this.control(this.security).setReturnValue(isLoadRatified);
 
 			// Trigger authentication if ratified (but no HTTP security)
 			if (isLoadRatified && (loadRatifiedSecurity == null)) {
@@ -643,26 +612,25 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 			if (credentials != null) {
 
 				// Record manual authentication
-				authenticationRequest = this.createMock(HttpAuthenticateCallback.class);
-				this.recordReturn(authenticationRequest, authenticationRequest.getCredentials(), credentials);
+				authenticationCallback = this.createMock(HttpAuthenticateCallback.class);
 
 				// Record ratifying (matching logic is above)
-				this.source.ratify(manualRatifyContext);
+				this.security.ratify(credentials, manualRatifyContext);
 				if (manualRatifyFailure != null) {
-					this.control(this.source).setThrowable(manualRatifyFailure);
+					this.control(this.security).setThrowable(manualRatifyFailure);
 
 					// Authentication completed immediately
-					authenticationRequest.authenticationComplete();
+					authenticationCallback.authenticationComplete();
 
 				} else {
 					// Manual ratify successful returns
-					this.control(this.source).setReturnValue(isManuallyRatified);
+					this.control(this.security).setReturnValue(isManuallyRatified);
 
 					// Determine if authentication
 					boolean isUndertakeManualAuthentication = isManuallyRatified && (manualRatifiedSecurity == null);
 					if (!isUndertakeManualAuthentication) {
 						// Not undertaking authentication, flag request complete
-						authenticationRequest.authenticationComplete();
+						authenticationCallback.authenticationComplete();
 
 					} else {
 						// Trigger authentication
@@ -697,7 +665,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 
 						// Authentication completing
 						async.complete(null);
-						authenticationRequest.authenticationComplete();
+						authenticationCallback.authenticationComplete();
 					}
 				}
 			}
@@ -737,7 +705,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 
 			// Determine if ratify on obtaining HTTP Security
 			if (isRatifyOnObtainingHttpSecurity) {
-				this.recordReturn(this.source, this.source.ratify(obtainRatifyContext), false);
+				this.recordReturn(this.security, this.security.ratify(null, obtainRatifyContext), false);
 			}
 		}
 
@@ -757,12 +725,12 @@ public class HttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCa
 			ManagedObject managedObject = user.sourceManagedObject(source);
 
 			// Obtain the HTTP authentication
-			HttpAuthentication<HttpAccessControl, HttpCredentials> authentication = (HttpAuthentication<HttpAccessControl, HttpCredentials>) managedObject
+			HttpAuthentication<HttpAccessControl> authentication = (HttpAuthentication<HttpAccessControl>) managedObject
 					.getObject();
 
 			// Determine if undertake manual authentication
-			if (authenticationRequest != null) {
-				authentication.authenticate(authenticationRequest);
+			if (authenticationCallback != null) {
+				authentication.authenticate(null, authenticationCallback);
 			}
 
 			// Determine if undertake logout
