@@ -54,13 +54,13 @@ public class HttpAuthenticationManagedObjectSource extends
 	 * {@link HttpSecuritySource}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private HttpSecurity httpSecurity;
+	private final HttpSecurity httpSecurity;
 
 	/**
 	 * {@link HttpAccessControlFactory}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private HttpAccessControlFactory httpAccessControlFactory;
+	private final HttpAccessControlFactory httpAccessControlFactory;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -68,18 +68,17 @@ public class HttpAuthenticationManagedObjectSource extends
 	private ManagedObjectExecuteContext<Flows> executeContext;
 
 	/**
-	 * {@link HttpSecurityConfiguration}.
-	 */
-	private final HttpSecurityConfiguration<?, ?, ?, ?, ?> httpSecurityConfiguration;
-
-	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurityConfiguration
-	 *            {@link HttpSecurityConfiguration}.
+	 * @param httpSecurity
+	 *            {@link HttpSecurity}.
+	 * @param httpAccessControlFactory
+	 *            {@link HttpAccessControlFactory}.
 	 */
-	public HttpAuthenticationManagedObjectSource(HttpSecurityConfiguration<?, ?, ?, ?, ?> httpSecurityConfiguration) {
-		this.httpSecurityConfiguration = httpSecurityConfiguration;
+	public HttpAuthenticationManagedObjectSource(HttpSecurity<?, ?, ?, ?, ?> httpSecurity,
+			HttpAccessControlFactory<?> httpAccessControlFactory) {
+		this.httpSecurity = httpSecurity;
+		this.httpAccessControlFactory = httpAccessControlFactory;
 	}
 
 	/*
@@ -92,12 +91,6 @@ public class HttpAuthenticationManagedObjectSource extends
 
 	@Override
 	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context) throws Exception {
-
-		// Retrieve the HTTP Security
-		this.httpSecurity = this.httpSecurityConfiguration.getHttpSecurity();
-
-		// Obtain the access control factory
-		this.httpAccessControlFactory = this.httpSecurityConfiguration.getAccessControlFactory();
 
 		// Provide the meta-data
 		context.setObjectClass(HttpAuthentication.class);

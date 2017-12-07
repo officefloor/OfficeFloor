@@ -169,18 +169,22 @@ public class HttpAuthenticationManagedObject<A, AC, C> implements ProcessAwareMa
 
 					@Override
 					public void setAccessControl(AC accessControl) {
-						HttpAuthenticationManagedObject.this.accessControl = accessControl;
-						authenticationCallback.authenticationComplete();
+						HttpAuthenticationManagedObject.this.processAwareContext.run(() -> {
+							HttpAuthenticationManagedObject.this.accessControl = accessControl;
+							return null;
+						});
 					}
 
 					@Override
 					public ServerHttpConnection getConnection() {
-						return HttpAuthenticationManagedObject.this.connection;
+						return HttpAuthenticationManagedObject.this.processAwareContext
+								.run(() -> HttpAuthenticationManagedObject.this.connection);
 					}
 
 					@Override
 					public HttpSession getSession() {
-						return HttpAuthenticationManagedObject.this.session;
+						return HttpAuthenticationManagedObject.this.processAwareContext
+								.run(() -> HttpAuthenticationManagedObject.this.session);
 					}
 				});
 
@@ -266,8 +270,9 @@ public class HttpAuthenticationManagedObject<A, AC, C> implements ProcessAwareMa
 	public void logout(HttpLogoutRequest logoutRequest) {
 		this.processAwareContext.run(() -> {
 
-			// Clear the security
+			// Clear the access control
 			this.accessControl = null;
+			this.httpAccessControl = null;
 
 			// New managed object (stop overwrite of asynchronous listener)
 			// (Not used for execution but need to provide an instance)
@@ -342,16 +347,14 @@ public class HttpAuthenticationManagedObject<A, AC, C> implements ProcessAwareMa
 
 		@Override
 		public ServerHttpConnection getConnection() {
-			synchronized (HttpAuthenticationManagedObject.this) {
-				return HttpAuthenticationManagedObject.this.connection;
-			}
+			return HttpAuthenticationManagedObject.this.processAwareContext
+					.run(() -> HttpAuthenticationManagedObject.this.connection);
 		}
 
 		@Override
 		public HttpSession getSession() {
-			synchronized (HttpAuthenticationManagedObject.this) {
-				return HttpAuthenticationManagedObject.this.session;
-			}
+			return HttpAuthenticationManagedObject.this.processAwareContext
+					.run(() -> HttpAuthenticationManagedObject.this.session);
 		}
 
 		@Override
