@@ -19,7 +19,7 @@ package net.officefloor.web.security.integrate;
 
 import org.apache.http.client.CredentialsProvider;
 
-import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;

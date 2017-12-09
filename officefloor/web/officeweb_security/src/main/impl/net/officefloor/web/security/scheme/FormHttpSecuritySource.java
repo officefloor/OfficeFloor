@@ -47,7 +47,7 @@ public class FormHttpSecuritySource extends
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		SESSION, CREDENTIAL_STORE
+		CREDENTIAL_STORE
 	}
 
 	/**
@@ -121,7 +121,6 @@ public class FormHttpSecuritySource extends
 		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass(HttpAccessControl.class);
 		context.setCredentialsClass(HttpCredentials.class);
-		context.addDependency(Dependencies.SESSION, HttpSession.class);
 		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 		context.addFlow(Flows.FORM_LOGIN_PAGE, null);
 	}

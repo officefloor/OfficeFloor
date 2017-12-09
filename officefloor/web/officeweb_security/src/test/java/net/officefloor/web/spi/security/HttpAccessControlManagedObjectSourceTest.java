@@ -29,16 +29,16 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.HttpAuthenticationRequiredException;
-import net.officefloor.web.security.impl.HttpSecurityManagedObjectSource;
-import net.officefloor.web.security.impl.HttpSecurityManagedObjectSource.Dependencies;
+import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
+import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource.Dependencies;
 import net.officefloor.web.spi.security.HttpAuthenticateCallback;
 
 /**
- * Tests the {@link HttpSecurityManagedObjectSource}.
+ * Tests the {@link HttpAccessControlManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
+public class HttpAccessControlManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link HttpAuthentication}.
@@ -50,8 +50,8 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(HttpSecurityManagedObjectSource.class,
-				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, "HTTP Security Type");
+		ManagedObjectLoaderUtil.validateSpecification(HttpAccessControlManagedObjectSource.class,
+				HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE, "HTTP Security Type");
 	}
 
 	/**
@@ -65,8 +65,8 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 		type.addDependency(Dependencies.HTTP_AUTHENTICATION, HttpAuthentication.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpSecurityManagedObjectSource.class,
-				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, HttpAccessControl.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpAccessControlManagedObjectSource.class,
+				HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE, HttpAccessControl.class.getName());
 	}
 
 	/**
@@ -157,14 +157,14 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			// Load the source
 			ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-			loader.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+			loader.addProperty(HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE,
 					HttpAccessControl.class.getName());
 			if (isAllowNullHttpSecurity) {
-				loader.addProperty(HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
+				loader.addProperty(HttpAccessControlManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
 						String.valueOf(false));
 			}
-			HttpSecurityManagedObjectSource source = loader
-					.loadManagedObjectSource(HttpSecurityManagedObjectSource.class);
+			HttpAccessControlManagedObjectSource source = loader
+					.loadManagedObjectSource(HttpAccessControlManagedObjectSource.class);
 
 			// Source the managed object
 			ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

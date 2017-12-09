@@ -24,13 +24,13 @@ import java.util.Base64.Encoder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.test.CompileWebContext;
-import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
@@ -76,10 +76,28 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can make request as guest.
+	 */
+	public void testGuest() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", GuestLogic.class);
+
+		// Ensure service request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+	}
+
+	public static class GuestLogic {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("TEST");
+		}
+	}
+
+	/**
 	 * Ensure can check not authenticated.
 	 */
 	public void testCheckNotAuthenticated() throws Exception {
-		this.initialiseMockHttpSecurity("/path", CheckNotAuthenticatedServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", CheckNotAuthenticatedServicer.class);
 
 		// Ensure indicate not logged in
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
@@ -112,7 +130,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can check that authenticated.
 	 */
 	public void testCheckAuthenticated() throws Exception {
-		this.initialiseMockHttpSecurity("/path", CheckAuthenticatedServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", CheckAuthenticatedServicer.class);
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -137,7 +155,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure disallows access if not authenticated.
 	 */
 	public void testNoAccessAsNotAuthenticated() throws Exception {
-		this.initialiseMockHttpSecurity("/path", NoAccessAsNotAuthenticatedServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", NoAccessAsNotAuthenticatedServicer.class);
 
 		// Ensure not allowed access
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
@@ -155,7 +173,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can check {@link HttpAccessControl}.
 	 */
 	public void testAccessControl() throws Exception {
-		this.initialiseMockHttpSecurity("/path", AccessControlServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", AccessControlServicer.class);
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -184,7 +202,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * role.
 	 */
 	public void testHttpAccess() throws Exception {
-		this.initialiseMockHttpSecurity("/path", HttpAccessServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure able to access
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -203,7 +221,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure disallow request as no authentication.
 	 */
 	public void testHttpAccessNoAuthentication() throws Exception {
-		this.initialiseMockHttpSecurity("/path", HttpAccessServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure not allowed access (with a challenge to authenticate)
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
@@ -215,7 +233,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure disallow as not in role.
 	 */
 	public void testHttpAccessNotInRole() throws Exception {
-		this.initialiseMockHttpSecurity("/path", HttpAccessServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure not allowed access (with a challenge to authenticate)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "not", "not"));
@@ -227,7 +245,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure authentication/access to be cached in {@link HttpSession}.
 	 */
 	public void testHttpAccessViaSession() throws Exception {
-		this.initialiseMockHttpSecurity("/path", HttpAccessServicer.class);
+		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure able to access
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -351,9 +369,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Initialises with {@link MockChallengeHttpSecuritySource}.
 	 */
-	private void initialiseMockHttpSecurity(String path, Class<?> sectionClass) throws Exception {
+	private void initialiseMockHttpSecurity(String path, String realm, Class<?> sectionClass) throws Exception {
 		this.compile((context, security) -> {
-			security.addHttpSecurity("TEST", MockChallengeHttpSecuritySource.class);
+			security.addHttpSecurity(realm, new MockChallengeHttpSecuritySource(realm));
 			context.link(false, path, sectionClass);
 		});
 	}
@@ -382,8 +400,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	private void compile(Initialiser initialiser) throws Exception {
 		this.compile.web((context) -> {
-			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
-					.employHttpSecurityArchitect(context.getWebArchitect(), context.getOfficeArchitect());
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
+					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
 			initialiser.initialise(context, security);
 			security.informWebArchitect();
 		});

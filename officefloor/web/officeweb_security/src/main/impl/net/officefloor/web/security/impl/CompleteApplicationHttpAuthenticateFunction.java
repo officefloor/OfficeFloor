@@ -61,7 +61,7 @@ public class CompleteApplicationHttpAuthenticateFunction extends
 
 		// Obtain the HTTP authentication to check on authentication
 		HttpAuthentication authentication = (HttpAuthentication) context.getObject(Dependencies.HTTP_AUTHENTICATION);
-
+		
 		// Determine if security obtained from application authentication
 		Object security;
 		try {

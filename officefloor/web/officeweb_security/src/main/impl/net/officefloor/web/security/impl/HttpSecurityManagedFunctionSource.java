@@ -148,7 +148,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 		ManagedFunctionTypeBuilder<Indexed, None> moAuthenticate = namespaceTypeBuilder.addManagedFunctionType(
 				FUNCTION_MANAGED_OBJECT_AUTHENTICATE, new ManagedObjectHttpAuthenticateFunction(httpSecurity),
 				Indexed.class, None.class);
-		moAuthenticate.addObject(FunctionAuthenticateContext.class).setLabel("TASK_AUTHENTICATE_CONTEXT");
+		moAuthenticate.addObject(FunctionAuthenticateContext.class).setLabel("FUNCTION_AUTHENTICATE_CONTEXT");
 		for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
 			moAuthenticate.addObject(dependencyType.getDependencyType())
 					.setLabel("DEPENDENCY_" + dependencyType.getDependencyName());
@@ -158,7 +158,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 		ManagedFunctionTypeBuilder<Indexed, None> logout = namespaceTypeBuilder.addManagedFunctionType(
 				FUNCTION_MANAGED_OBJECT_LOGOUT, new ManagedObjectHttpLogoutFunction(httpSecurity), Indexed.class,
 				None.class);
-		logout.addObject(FunctionLogoutContext.class).setLabel("TASK_LOGOUT_CONTEXT");
+		logout.addObject(FunctionLogoutContext.class).setLabel("FUNCTION_LOGOUT_CONTEXT");
 		for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
 			logout.addObject(dependencyType.getDependencyType())
 					.setLabel("DEPENDENCY_" + dependencyType.getDependencyName());
@@ -185,7 +185,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 			flow.setLabel("FLOW_" + flowType.getFlowName());
 		}
 
-		// Add the start application authentication task
+		// Add the start application authentication function
 		ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> appStart = namespaceTypeBuilder
 				.addManagedFunctionType(FUNCTION_START_APPLICATION_AUTHENTICATE,
 						new StartApplicationHttpAuthenticateFunction(),
@@ -199,7 +199,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 		appStartFailureFlow.setKey(StartApplicationHttpAuthenticateFunction.Flows.FAILURE);
 		appStartFailureFlow.setArgumentType(Throwable.class);
 
-		// Add the complete application authentication task
+		// Add the complete application authentication function
 		ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateFunction.Dependencies, CompleteApplicationHttpAuthenticateFunction.Flows> appComplete = namespaceTypeBuilder
 				.addManagedFunctionType(FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE,
 						new CompleteApplicationHttpAuthenticateFunction(),

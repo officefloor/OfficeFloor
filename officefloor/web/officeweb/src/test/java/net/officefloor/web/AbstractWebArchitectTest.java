@@ -33,7 +33,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
@@ -52,6 +51,7 @@ import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.session.HttpSession;
 
 /**

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.test;
+package net.officefloor.web.compile;
 
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.server.http.HttpMethod;

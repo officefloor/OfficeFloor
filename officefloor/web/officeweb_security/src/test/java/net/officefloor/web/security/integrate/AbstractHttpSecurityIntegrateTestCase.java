@@ -31,14 +31,14 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.web.http.test.CompileWebContext;
-import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -102,7 +102,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 			// Employ security architect
 			HttpSecurityArchitect securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web,
-					context.getOfficeArchitect());
+					context.getOfficeArchitect(), context.getOfficeSourceContext());
 
 			// Configure the HTTP Security
 			HttpSecurityBuilder security = this.configureHttpSecurity(context, securityArchitect);

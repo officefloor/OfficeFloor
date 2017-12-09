@@ -18,17 +18,17 @@
 package net.officefloor.web.security.integrate;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.impl.HttpAuthenticationRequiredException;
-import net.officefloor.web.security.impl.HttpSecurityManagedObjectSource;
+import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 
 /**
  * <p>
- * Enables overriding the {@link HttpSecurityManagedObjectSource}.
+ * Enables overriding the {@link HttpAccessControlManagedObjectSource}.
  * <p>
  * This is typically to enable providing a <code>null</code>
  * {@link HttpAccessControl} (rather than escalating
@@ -44,10 +44,10 @@ public class OverrideHttpSecurityIntegrateTest extends AbstractHttpSecurityInteg
 
 		// Override the HTTP Security
 		OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("SECURITY",
-				HttpSecurityManagedObjectSource.class.getName());
+				HttpAccessControlManagedObjectSource.class.getName());
 		mos.setTimeout(1000);
-		mos.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, HttpAccessControl.class.getName());
-		mos.addProperty(HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
+		mos.addProperty(HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE, HttpAccessControl.class.getName());
+		mos.addProperty(HttpAccessControlManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
 				String.valueOf(false));
 
 		// Configure the HTTP Security

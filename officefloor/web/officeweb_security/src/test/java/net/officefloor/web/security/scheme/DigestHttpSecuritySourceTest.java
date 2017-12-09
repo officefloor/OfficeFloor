@@ -93,8 +93,6 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil.createHttpSecurityTypeBuilder();
 		type.setAuthenticationClass(HttpAuthentication.class);
 		type.setAccessControlClass(HttpAccessControl.class);
-		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
-		type.addDependency(Dependencies.SESSION, HttpSession.class, null);
 		type.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class, null);
 
 		// Validate type

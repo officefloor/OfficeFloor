@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.spi.security.HttpAuthenticateCallback;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -37,13 +38,13 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedObjectSource
-		extends AbstractManagedObjectSource<HttpSecurityManagedObjectSource.Dependencies, None> {
+public class HttpAccessControlManagedObjectSource
+		extends AbstractManagedObjectSource<HttpAccessControlManagedObjectSource.Dependencies, None> {
 
 	/**
-	 * Name of {@link Property} for the HTTP security type.
+	 * Name of {@link Property} for the access control type.
 	 */
-	public static final String PROPERTY_HTTP_SECURITY_TYPE = "http.security.type";
+	public static final String PROPERTY_ACCESS_CONTROL_TYPE = "access.control.type";
 
 	/**
 	 * <p>
@@ -51,7 +52,8 @@ public class HttpSecurityManagedObjectSource
 	 * {@link HttpAuthenticationRequiredException} if not authenticated.
 	 * <p>
 	 * By default, it will escalate. Specifying <code>false</code> for this
-	 * property will allow a <code>null</code> HTTP Security to be provided.
+	 * property will allow a <code>null</code> {@link HttpAccessControl} to be
+	 * provided.
 	 */
 	public static final String PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED = "http.security.escalate.authentication.required";
 
@@ -63,9 +65,9 @@ public class HttpSecurityManagedObjectSource
 	}
 
 	/**
-	 * Indicates if escalate on <code>null</code> HTTP Security.
+	 * Indicates if escalate on <code>null</code> access control.
 	 */
-	private boolean isEscalateNullHttpSecurity;
+	private boolean isEscalateNullAccessControl;
 
 	/*
 	 * ======================= ManagedObjectSource =======================
@@ -73,24 +75,24 @@ public class HttpSecurityManagedObjectSource
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_HTTP_SECURITY_TYPE, "HTTP Security Type");
+		context.addProperty(PROPERTY_ACCESS_CONTROL_TYPE, "Access Control Type");
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Obtain the security type
-		String securityTypeName = mosContext.getProperty(PROPERTY_HTTP_SECURITY_TYPE);
-		Class<?> securityType = mosContext.loadClass(securityTypeName);
+		// Obtain the access control type
+		String accessControlTypeName = mosContext.getProperty(PROPERTY_ACCESS_CONTROL_TYPE);
+		Class<?> accessControlType = mosContext.loadClass(accessControlTypeName);
 
-		// Determine if allowing null HTTP Security
-		this.isEscalateNullHttpSecurity = Boolean.parseBoolean(
+		// Determine if allowing null access control
+		this.isEscalateNullAccessControl = Boolean.parseBoolean(
 				mosContext.getProperty(PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED, String.valueOf(true)));
 
 		// Specify the meta-data
-		context.setObjectClass(securityType);
-		context.setManagedObjectClass(HttpSecurityManagedObject.class);
+		context.setObjectClass(accessControlType);
+		context.setManagedObjectClass(HttpAccessControlManagedObject.class);
 
 		// Add the dependency
 		context.addDependency(Dependencies.HTTP_AUTHENTICATION, HttpAuthentication.class);
@@ -98,19 +100,19 @@ public class HttpSecurityManagedObjectSource
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSecurityManagedObject<Object, Object>(this.isEscalateNullHttpSecurity);
+		return new HttpAccessControlManagedObject<Object, Object>(this.isEscalateNullAccessControl);
 	}
 
 	/**
-	 * {@link ManagedObject} for the HTTP security.
+	 * {@link ManagedObject} for the {@link HttpAccessControl}.
 	 */
-	public static class HttpSecurityManagedObject<AC, C>
+	public static class HttpAccessControlManagedObject<AC, C>
 			implements AsynchronousManagedObject, CoordinatingManagedObject<Dependencies> {
 
 		/**
-		 * Indicates if escalate <code>null</code> HTTP Security.
+		 * Indicates if escalate <code>null</code> access control.
 		 */
-		private final boolean isEscalateNullHttpSecurity;
+		private final boolean isEscalateNullAccessControl;
 
 		/**
 		 * {@link AsynchronousContext}.
@@ -125,17 +127,17 @@ public class HttpSecurityManagedObjectSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param isEscalateNullHttpSecurity
-		 *            Indicates if escalate <code>null</code> HTTP Security.
+		 * @param isEscalateNullAccessControl
+		 *            Indicates if escalate <code>null</code> access control.
 		 */
-		public HttpSecurityManagedObject(boolean isEscalateNullHttpSecurity) {
-			this.isEscalateNullHttpSecurity = isEscalateNullHttpSecurity;
+		public HttpAccessControlManagedObject(boolean isEscalateNullAccessControl) {
+			this.isEscalateNullAccessControl = isEscalateNullAccessControl;
 		}
 
 		/**
 		 * Flags authentication complete.
 		 */
-		private synchronized void flagAuthenticationComplete() {
+		private void flagAuthenticationComplete() {
 			this.asynchronousContext.complete(null);
 		}
 
@@ -150,7 +152,7 @@ public class HttpSecurityManagedObjectSource
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public synchronized void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
+		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the HTTP authentication
 			this.authentication = (HttpAuthentication<C>) registry.getObject(Dependencies.HTTP_AUTHENTICATION);
@@ -165,16 +167,16 @@ public class HttpSecurityManagedObjectSource
 		@Override
 		public Object getObject() throws Throwable {
 
-			// Obtain the security
-			Object security = this.authentication.getAccessControl();
+			// Obtain the access control
+			HttpAccessControl accessControl = this.authentication.getAccessControl();
 
-			// Ensure have the security if escalate on null HTTP Security
-			if ((security == null) && (this.isEscalateNullHttpSecurity)) {
+			// Ensure have the access control if escalate on null access control
+			if ((accessControl == null) && (this.isEscalateNullAccessControl)) {
 				throw new HttpAuthenticationRequiredException();
 			}
 
-			// Return the security
-			return security;
+			// Return the access control
+			return accessControl;
 		}
 	}
 
@@ -184,17 +186,17 @@ public class HttpSecurityManagedObjectSource
 	private static class HttpAuthenticateRequestImpl<AC, C> implements HttpAuthenticateCallback {
 
 		/**
-		 * {@link HttpSecurityManagedObject}.
+		 * {@link HttpAccessControlManagedObject}.
 		 */
-		private final HttpSecurityManagedObject<AC, C> managedObject;
+		private final HttpAccessControlManagedObject<AC, C> managedObject;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param managedObject
-		 *            {@link HttpSecurityManagedObject}.
+		 *            {@link HttpAccessControlManagedObject}.
 		 */
-		public HttpAuthenticateRequestImpl(HttpSecurityManagedObject<AC, C> managedObject) {
+		public HttpAuthenticateRequestImpl(HttpAccessControlManagedObject<AC, C> managedObject) {
 			this.managedObject = managedObject;
 		}
 

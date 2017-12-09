@@ -49,7 +49,7 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 	 * Validates specification.
 	 */
 	public void testSpecification() {
-		SectionLoaderUtil.validateSpecification(HttpSecuritySectionSource.class);
+		SectionLoaderUtil.validateSpecification(new HttpSecuritySectionSource(null));
 	}
 
 	/**

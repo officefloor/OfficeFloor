@@ -40,8 +40,8 @@ public interface HttpSecurityArchitect {
 	 *            {@link HttpSecuritySource} {@link Class}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
-	HttpSecurityBuilder addHttpSecurity(String securityName,
-			Class<? extends HttpSecuritySource<?, ?, ?, ?, ?>> httpSecuritySourceClass);
+	<A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(String securityName,
+			Class<? extends HttpSecuritySource<A, AC, C, O, F>> httpSecuritySourceClass);
 
 	/**
 	 * Adds a {@link HttpSecurity}.
@@ -54,7 +54,8 @@ public interface HttpSecurityArchitect {
 	 *            {@link HttpSecuritySource}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
-	HttpSecurityBuilder addHttpSecurity(String securityName, HttpSecuritySource<?, ?, ?, ?, ?> httpSecuritySource);
+	<A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(String securityName,
+			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be

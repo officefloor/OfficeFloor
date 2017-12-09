@@ -88,7 +88,7 @@ public class DigestHttpSecuritySource extends
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, SESSION, CREDENTIAL_STORE
+		CREDENTIAL_STORE
 	}
 
 	/**
@@ -290,8 +290,6 @@ public class DigestHttpSecuritySource extends
 		// Provide meta-data
 		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass(HttpAccessControl.class);
-		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
-		context.addDependency(Dependencies.SESSION, HttpSession.class);
 		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 	}
 

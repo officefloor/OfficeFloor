@@ -25,7 +25,6 @@ import java.util.HashSet;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
@@ -76,8 +75,6 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil.createHttpSecurityTypeBuilder();
 		type.setAuthenticationClass(HttpAuthentication.class);
 		type.setAccessControlClass(HttpAccessControl.class);
-		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
-		type.addDependency(Dependencies.SESSION, HttpSession.class, null);
 		type.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class, null);
 
 		// Validate type

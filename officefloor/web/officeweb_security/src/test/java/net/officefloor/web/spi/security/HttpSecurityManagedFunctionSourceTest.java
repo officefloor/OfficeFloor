@@ -20,7 +20,6 @@ package net.officefloor.web.spi.security;
 import java.io.IOException;
 
 import org.easymock.AbstractMatcher;
-import org.junit.Assert;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -37,6 +36,8 @@ import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
@@ -55,6 +56,7 @@ import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
 /**
  * Tests the {@link HttpSecurityManagedFunctionSource}.
@@ -95,12 +97,12 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerHttpConnection}.
 	 */
-	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+	private final ServerHttpConnection connection = MockHttpServer.mockConnection();
 
 	/**
 	 * {@link HttpSession}.
 	 */
-	private final HttpSession session = this.createMock(HttpSession.class);
+	private final HttpSession session = MockWebApp.mockSession(this.connection);
 
 	/**
 	 * {@link CredentialStore}.
@@ -110,12 +112,12 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpRequestState}.
 	 */
-	private final HttpRequestState requestState = this.createMock(HttpRequestState.class);
+	private final HttpRequestState requestState = MockWebApp.mockRequestState(this.connection);
 
 	/**
 	 * {@link HttpAccessControl}.
 	 */
-	private final HttpAccessControl security = this.createMock(HttpAccessControl.class);
+	private final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 	/**
 	 * Validate specification.
@@ -207,10 +209,10 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * {@link HttpAuthenticationManagedObjectSource}.
 	 */
 	public void testManagedObjectAuthenticate() throws Throwable {
-		final HttpAccessControl security = this.createMock(HttpAccessControl.class);
+		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 		this.recordManagedObjectAuthenticationDependencies();
-		this.source.security = security;
-		this.authenticateContext.setAccessControl(security);
+		this.source.accessControl = accessControl;
+		this.authenticateContext.setAccessControl(accessControl);
 		this.doManagedObjectAuthentication();
 	}
 
@@ -228,7 +230,7 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure informs of {@link IOException} for the
 	 * {@link HttpAuthenticationManagedObjectSource}.
 	 */
-	public void testManagedObjectAuthenticateIoException() {
+	public void testManagedObjectAuthenticateHttpException() {
 		final HttpException exception = new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null, "TEST");
 		this.recordManagedObjectAuthenticationDependencies();
 		this.source.httpException = exception;
@@ -308,9 +310,9 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure handle {@link IOException} on challenge.
+	 * Ensure handle {@link HttpException} on challenge.
 	 */
-	public void testChallengeIoException() throws Exception {
+	public void testChallengeHttpException() throws Exception {
 		HttpException httpException = new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null, "TEST");
 		this.source.httpException = httpException;
 		this.doChallengeTest(true, false, httpException);
@@ -355,11 +357,6 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.functionContext, this.functionContext.getObject(2), this.session);
 		this.recordReturn(this.functionContext, this.functionContext.getObject(3), this.requestState);
 
-		// Record saving request state (if saving request)
-		if (isSaveRequest) {
-			Assert.fail("Should record save state");
-		}
-
 		// Record remaining challenge dependencies
 		this.recordReturn(this.functionContext, this.functionContext.getObject(4), this.store);
 
@@ -383,6 +380,13 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 			throw fail(ex);
 		}
 		this.verifyMockObjects();
+
+		// Record saving request state (if saving request)
+		if (isSaveRequest) {
+			assertNotNull("Should have saved request state",
+					this.session.getAttribute(HttpChallengeFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO));
+		}
+
 	}
 
 	/**
@@ -462,7 +466,7 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure reinstates request on successful authentication.
 	 */
 	public void testCompleteApplicationAuthenticated() throws Throwable {
-		this.doCompleteApplicationAuthentication(this.security, null, true);
+		this.doCompleteApplicationAuthentication(this.accessControl, null, true);
 	}
 
 	/**
@@ -475,8 +479,9 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure triggers flow for {@link IOException}.
 	 */
-	public void testCompleteApplicationAuthenticationIoException() throws Throwable {
-		this.doCompleteApplicationAuthentication(null, new IOException("TEST"), false);
+	public void testCompleteApplicationAuthenticationHttpException() throws Throwable {
+		this.doCompleteApplicationAuthentication(null,
+				new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null, "TEST"), false);
 	}
 
 	/**
@@ -497,14 +502,14 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure triggers flow for no continuation.
 	 */
 	public void testCompleteApplicationAuthenticationWithNoContinuation() throws Throwable {
-		this.doCompleteApplicationAuthentication(this.security, null, false);
+		this.doCompleteApplicationAuthentication(this.accessControl, null, false);
 	}
 
 	/**
 	 * Undertakes starting application authentication.
 	 */
 	@SuppressWarnings("unchecked")
-	private void doCompleteApplicationAuthentication(final HttpAccessControl security, Throwable failure,
+	private void doCompleteApplicationAuthentication(final HttpAccessControl accessControl, Throwable failure,
 			boolean isRequestReinstated) throws Throwable {
 
 		// Record obtaining dependencies
@@ -521,11 +526,11 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 			this.functionContext.doFlow(CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE, failure, null);
 
 		} else {
-			// Return the security
-			this.recordReturn(this.authentication, this.authentication.getAccessControl(), security);
+			// Return the access control
+			this.recordReturn(this.authentication, this.authentication.getAccessControl(), accessControl);
 
 			// Handle authenticated
-			if (security != null) {
+			if (accessControl != null) {
 
 				// Reinstate request
 				this.recordReturn(this.functionContext, this.functionContext.getObject(
@@ -538,7 +543,10 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 					this.functionContext.doFlow(CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE, null, null);
 					this.control(this.functionContext)
 							.setMatcher(new TypeMatcher(CompleteApplicationHttpAuthenticateFunction.Flows.class,
-									HttpAuthenticationContinuationException.class));
+									HttpAuthenticationContinuationException.class, null));
+				} else {
+					this.session.setAttribute(HttpChallengeFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO,
+							HttpRequestStateManagedObjectSource.exportHttpRequestState(this.requestState));
 				}
 			}
 		}
@@ -556,7 +564,7 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure propagated authentication required if no security
-		if ((security == null) && (failure == null)) {
+		if ((accessControl == null) && (failure == null)) {
 			assertNotNull("Should be authentication required exception", exception);
 			assertFalse("Should not save request for further challenges", exception.isSaveRequest());
 		}
@@ -704,7 +712,7 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 		/**
 		 * {@link HttpAccessControl} to return.
 		 */
-		public HttpAccessControl security = null;
+		public HttpAccessControl accessControl = null;
 
 		/**
 		 * {@link HttpException} to throw.
@@ -791,8 +799,8 @@ public class HttpSecurityManagedFunctionSourceTest extends OfficeFrameTestCase {
 			}
 
 			// Load the HTTP security
-			if (this.security != null) {
-				context.setAccessControl(this.security);
+			if (this.accessControl != null) {
+				context.setAccessControl(this.accessControl);
 			}
 		}
 

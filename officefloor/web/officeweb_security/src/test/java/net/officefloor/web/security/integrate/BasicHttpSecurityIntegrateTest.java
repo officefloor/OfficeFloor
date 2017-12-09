@@ -21,7 +21,7 @@ import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;

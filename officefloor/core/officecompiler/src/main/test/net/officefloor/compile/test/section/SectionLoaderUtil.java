@@ -90,6 +90,29 @@ public class SectionLoaderUtil {
 	}
 
 	/**
+	 * Validates the {@link SectionSourceSpecification} for the
+	 * {@link SectionSource}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource}.
+	 * @param propertyNameLabels
+	 *            Listing of name/label pairs for the {@link Property}
+	 *            instances.
+	 * @return Loaded {@link PropertyList}.
+	 */
+	public static PropertyList validateSpecification(SectionSource sectionSource, String... propertyNameLabels) {
+
+		// Load the specification
+		PropertyList propertyList = getOfficeFloorCompiler().getSectionLoader().loadSpecification(sectionSource);
+
+		// Verify the properties
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
+
+		// Return the property list
+		return propertyList;
+	}
+
+	/**
 	 * Convenience method to obtain the class path location.
 	 * 
 	 * @param offsetClass
