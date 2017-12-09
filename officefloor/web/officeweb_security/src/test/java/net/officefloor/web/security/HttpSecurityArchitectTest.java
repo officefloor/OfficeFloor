@@ -104,8 +104,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure indicate not logged in
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 	}
 
 	public static class CheckNotAuthenticatedServicer {
@@ -119,7 +119,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			// Logout should be no operation
 			Closure<Boolean> isLogout = new Closure<>(false);
 			authentication.logout((failure) -> {
-				assertNull("Should not be failure in no operation logout");
+				assertNull("Should not be failure in no operation logout", failure);
 				isLogout.value = true;
 			});
 			assertTrue("Logout callback should be called immediately", isLogout.value);
@@ -188,7 +188,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(HttpAccessControl accessControl, ServerHttpConnection connection) throws IOException {
 
 			// Ensure correct authentication scheme
-			assertEquals("Incorrect authentication scheme", "Basic", accessControl.getAuthenticationScheme());
+			assertEquals("Incorrect authentication scheme", "Mock", accessControl.getAuthenticationScheme());
 			assertEquals("Incorrect principal", "test", accessControl.getPrincipal().getName());
 
 			// Ensure in role
@@ -383,7 +383,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class HandleSection {
-		public void handle(@Parameter Exception exception) {
+		public void handle(@Parameter Throwable exception) {
 			exception.printStackTrace();
 		}
 	}

@@ -160,10 +160,15 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			// Load the security
 			security.security = (HttpSecurity) security.source.sourceHttpSecurity(security);
 
+			// TODO provide custom specific HTTP access control factory
+			security.httpAccessControlFactory = (HttpAccessControlFactory) (
+					accessControl) -> (HttpAccessControl) accessControl;
+
 			// Add the HTTP Authentication Managed Object
 			String authenticationName = security.name + "_Authentication";
 			OfficeManagedObjectSource httpAuthenticationMos = this.officeArchitect.addOfficeManagedObjectSource(
-					authenticationName, new HttpAuthenticationManagedObjectSource(security.security, null));
+					authenticationName,
+					new HttpAuthenticationManagedObjectSource(security.security, security.httpAccessControlFactory));
 			httpAuthenticationMos.setTimeout(security.timeout);
 			this.officeArchitect.link(httpAuthenticationMos.getManagedObjectFlow("AUTHENTICATE"),
 					security.section.getOfficeSectionInput("ManagedObjectAuthenticate"));
@@ -211,12 +216,17 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Timeout.
 		 */
-		private int timeout = -1;
+		private int timeout = 10 * 1000;
 
 		/**
 		 * {@link HttpSecurityType}.
 		 */
 		private HttpSecurityType<A, AC, C, O, F> type = null;
+
+		/**
+		 * {@link HttpAccessControlFactory}.
+		 */
+		private HttpAccessControlFactory<AC> httpAccessControlFactory = null;
 
 		/**
 		 * {@link HttpSecurity}.
@@ -284,8 +294,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		@Override
 		public HttpAccessControlFactory<AC> getAccessControlFactory() {
-			// TODO Auto-generated method stub
-			return null;
+			return this.httpAccessControlFactory;
 		}
 
 		@Override

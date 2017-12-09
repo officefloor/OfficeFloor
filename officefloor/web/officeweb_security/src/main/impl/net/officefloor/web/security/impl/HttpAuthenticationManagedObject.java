@@ -270,6 +270,12 @@ public class HttpAuthenticationManagedObject<A, AC, C> implements ProcessAwareMa
 	public void logout(HttpLogoutRequest logoutRequest) {
 		this.processAwareContext.run(() -> {
 
+			// Determine if already logged out
+			if (this.accessControl == null) {
+				logoutRequest.logoutComplete(null);
+				return null;
+			}
+
 			// Clear the access control
 			this.accessControl = null;
 			this.httpAccessControl = null;
