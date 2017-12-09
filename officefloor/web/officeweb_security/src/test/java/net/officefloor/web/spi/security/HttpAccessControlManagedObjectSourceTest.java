@@ -51,7 +51,7 @@ public class HttpAccessControlManagedObjectSourceTest extends OfficeFrameTestCas
 	 */
 	public void testSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(HttpAccessControlManagedObjectSource.class,
-				HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE, "HTTP Security Type");
+				HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE, "Access Control Type");
 	}
 
 	/**

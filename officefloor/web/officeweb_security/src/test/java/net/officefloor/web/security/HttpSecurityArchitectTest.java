@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -33,6 +35,7 @@ import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpCredentials;
@@ -371,9 +374,18 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	private void initialiseMockHttpSecurity(String path, String realm, Class<?> sectionClass) throws Exception {
 		this.compile((context, security) -> {
-			security.addHttpSecurity(realm, new MockChallengeHttpSecuritySource(realm));
+			HttpSecurityBuilder builder = security.addHttpSecurity(realm, new MockChallengeHttpSecuritySource(realm));
 			context.link(false, path, sectionClass);
+
+			OfficeSection handler = context.addSection("HANDLE", HandleSection.class);
+			context.getOfficeArchitect().link(builder.getOutput("Failure"), handler.getOfficeSectionInput("handle"));
 		});
+	}
+
+	public static class HandleSection {
+		public void handle(@Parameter Exception exception) {
+			exception.printStackTrace();
+		}
 	}
 
 	/**

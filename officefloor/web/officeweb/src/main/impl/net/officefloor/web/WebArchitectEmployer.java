@@ -125,6 +125,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final HttpRouteSectionSource routing;
 
 	/**
+	 * Routing {@link OfficeSection}.
+	 */
+	private final OfficeSection routingSection;
+
+	/**
 	 * Registry of HTTP arguments to its {@link OfficeManagedObject}.
 	 */
 	private final Map<String, OfficeManagedObject> httpArguments = new HashMap<>();
@@ -196,6 +201,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		this.officeArchitect = officeArchitect;
 		this.contextPath = contextPath;
 		this.routing = new HttpRouteSectionSource(this.contextPath);
+		this.routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
 	}
 
 	/**
@@ -390,6 +396,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	public void reroute(OfficeSectionOutput output) {
+		this.officeArchitect.link(output, this.routingSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
+	}
+
+	@Override
 	public void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
 		this.interceptors.add(new Interceptor(sectionInput, sectionOutput));
 	}
@@ -433,9 +444,6 @@ public class WebArchitectEmployer implements WebArchitect {
 			this.routing.setHttpEscalationHandler(objectResponseMos);
 		}
 
-		// Create the routing source
-		OfficeSection routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
-
 		// Determine if intercept
 		if (this.interceptors.size() > 0) {
 
@@ -443,7 +451,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			Interception interception = routing.getInterception();
 
 			// Obtain the section output
-			OfficeSectionOutput interceptionOutput = routingSection
+			OfficeSectionOutput interceptionOutput = this.routingSection
 					.getOfficeSectionOutput(interception.getOutputName());
 			for (Interceptor interceptor : this.interceptors) {
 
@@ -455,7 +463,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			}
 
 			// Link interception back to routing
-			OfficeSectionInput routingInput = routingSection.getOfficeSectionInput(interception.getInputName());
+			OfficeSectionInput routingInput = this.routingSection.getOfficeSectionInput(interception.getInputName());
 			this.officeArchitect.link(interceptionOutput, routingInput);
 		}
 
@@ -463,7 +471,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		for (HttpInputImpl input : this.inputs) {
 
 			// Link route output to handling section input
-			OfficeSectionOutput routeOutput = routingSection.getOfficeSectionOutput(input.routeInput.getOutputName());
+			OfficeSectionOutput routeOutput = this.routingSection
+					.getOfficeSectionOutput(input.routeInput.getOutputName());
 			this.officeArchitect.link(routeOutput, input.sectionInput);
 
 			// Determine if URL continuation
@@ -476,7 +485,7 @@ public class WebArchitectEmployer implements WebArchitect {
 						// Create the redirect
 						Redirect redirect = this.routing.addRedirect(input.isSecure, input.routeInput,
 								continuation.parameterType);
-						OfficeSectionInput redirectInput = routingSection
+						OfficeSectionInput redirectInput = this.routingSection
 								.getOfficeSectionInput(redirect.getInputName());
 
 						// Link the continuation to redirect
@@ -565,7 +574,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		});
 
 		// Chain in the servicer instances
-		OfficeSectionOutput chainOutput = routingSection
+		OfficeSectionOutput chainOutput = this.routingSection
 				.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME);
 		NEXT_CHAINED_SERVICER: for (ChainedServicer servicer : this.chainedServicers) {
 
@@ -584,7 +593,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		// Configure not handled
 		if (chainOutput != null) {
 			this.officeArchitect.link(chainOutput,
-					routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+					this.routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
 		}
 	}
 

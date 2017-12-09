@@ -30,8 +30,10 @@ import lombok.Data;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
@@ -189,7 +191,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect response", "Parameter=value", response.getEntity(null));
 	}
 
-	@Data // simplified object declaration
+	@Data
 	@HttpParameters
 	public static class PathParameter implements Serializable {
 		@HttpPathParameter("") // default to field property name
@@ -957,6 +959,54 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		response = this.server.send(this.mockRequest("/path/value").cookies(response));
 		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
 		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can re-route.
+	 */
+	public void testReroute() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+
+			// Configure section and its state
+			OfficeSection reroute = context.addSection("REROUTE", RerouteSection.class);
+			context.addManagedObject("REROUTE_STATE", RerouteState.class, ManagedObjectScope.PROCESS);
+
+			// Configure reroute
+			WebArchitect web = context.getWebArchitect();
+			web.reroute(reroute.getOfficeSectionOutput("routeAgain"));
+
+			// Provide HTTP input to service
+			web.link(false, "/reroute", reroute.getOfficeSectionInput("reroute"));
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send request that should re-route multiple times
+		MockHttpResponse response = this.server.send(this.mockRequest("/reroute"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect number of re-routes", "10", response.getEntity(null));
+	}
+
+	public static class RerouteState {
+		private int iteration = 0;
+	}
+
+	@FlowInterface
+	public static interface RerouteFlows {
+		void routeAgain();
+	}
+
+	public static class RerouteSection {
+		public void reroute(RerouteState state, RerouteFlows flows, ServerHttpConnection connection)
+				throws IOException {
+			state.iteration++;
+			if (state.iteration < 10) {
+				flows.routeAgain();
+			} else {
+				connection.getResponse().getEntityWriter().write(String.valueOf(state.iteration));
+			}
+		}
 	}
 
 	/**

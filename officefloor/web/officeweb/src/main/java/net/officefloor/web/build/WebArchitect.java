@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;
@@ -252,6 +253,19 @@ public abstract interface WebArchitect {
 	 *            {@link HttpUrlContinuation} path contains no parameters.
 	 */
 	void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType);
+
+	/**
+	 * <p>
+	 * Runs the {@link ServerHttpConnection} through routing again.
+	 * <p>
+	 * Typically, this is used on importing previous state into the
+	 * {@link ServerHttpConnection} and then have it serviced.
+	 * 
+	 * @param output
+	 *            {@link OfficeSectionOutput} to trigger re-routing the
+	 *            {@link ServerHttpConnection}.
+	 */
+	void reroute(OfficeSectionOutput output);
 
 	/**
 	 * <p>
