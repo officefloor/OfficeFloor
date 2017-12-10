@@ -163,7 +163,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure not allowed access
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		assertEquals("Should not be allowed access", 401, response.getStatus().getStatusCode());
-		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("test"));
+		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"),
+				response.getHeader("www-authenticate").getValue());
 	}
 
 	public static class NoAccessAsNotAuthenticatedServicer {

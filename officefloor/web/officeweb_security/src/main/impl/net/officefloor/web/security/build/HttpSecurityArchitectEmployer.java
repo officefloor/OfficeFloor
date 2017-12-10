@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -33,6 +34,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
+import net.officefloor.web.security.impl.HttpAuthenticationRequiredException;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
 import net.officefloor.web.security.type.HttpSecurityLoader;
@@ -148,6 +150,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void informWebArchitect() {
 
+		// Add the not authenticated handler
+		OfficeEscalation notAuthenticatedHandler = this.officeArchitect
+				.addOfficeEscalation(HttpAuthenticationRequiredException.class.getName());
+
 		// Configure the HTTP security
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : this.securities) {
 
@@ -163,6 +169,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			// TODO provide custom specific HTTP access control factory
 			security.httpAccessControlFactory = (HttpAccessControlFactory) (
 					accessControl) -> (HttpAccessControl) accessControl;
+
+			// TODO provide single section input to handle all added securities
+			this.officeArchitect.link(notAuthenticatedHandler,
+					security.section.getOfficeSectionInput(HttpSecuritySectionSource.INPUT_CHALLENGE));
 
 			// Add the HTTP Authentication Managed Object
 			String authenticationName = security.name + "_Authentication";

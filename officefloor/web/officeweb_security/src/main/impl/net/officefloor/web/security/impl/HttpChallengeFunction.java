@@ -23,6 +23,9 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.server.http.HttpHeaderName;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallenge;
@@ -42,6 +45,21 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 	 * {@link HttpSession} attribute for the challenge request state.
 	 */
 	public static final String ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO = "CHALLENGE_REQUEST_MOMENTO";
+
+	/**
+	 * <code>WWW-Authenticate</code> {@link HttpHeaderName}.
+	 */
+	private static final HttpHeaderName CHALLENGE_NAME = new HttpHeaderName("WWW-Authenticate");
+
+	/**
+	 * {@link ThreadLocal} {@link StringBuilder} to reduce GC.
+	 */
+	private static final ThreadLocal<StringBuilder> stringBuilder = new ThreadLocal<StringBuilder>() {
+		@Override
+		protected StringBuilder initialValue() {
+			return new StringBuilder();
+		}
+	};
 
 	/**
 	 * {@link HttpSecurity}.
@@ -78,8 +96,13 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 			session.setAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, momento);
 		}
 
+		// Obtain the challenge string builder
+		StringBuilder challenge = stringBuilder.get();
+		challenge.setLength(0); // reset for use
+
 		// Undertake challenge
-		HttpChallengeContextImpl challengeContext = new HttpChallengeContextImpl(connection, session, context);
+		HttpChallengeContextImpl challengeContext = new HttpChallengeContextImpl(connection, session, context,
+				challenge);
 		try {
 			this.httpSecurity.challenge(challengeContext);
 		} catch (Throwable ex) {
@@ -87,7 +110,14 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 			context.doFlow(0, ex, null);
 		}
 
-		// No further tasks
+		// Determine if challenge
+		if (challenge.length() > 0) {
+			HttpResponse response = connection.getResponse();
+			response.setStatus(HttpStatus.UNAUTHORIZED);
+			response.getHeaders().addHeader(CHALLENGE_NAME, challenge.toString());
+		}
+
+		// No further functions
 		return null;
 	}
 
@@ -95,7 +125,7 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 	 * {@link HttpChallengeContext} implementation.
 	 */
 	private static class HttpChallengeContextImpl<O extends Enum<O>, F extends Enum<F>>
-			implements HttpChallengeContext<O, F> {
+			implements HttpChallengeContext<O, F>, HttpChallenge {
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -113,6 +143,11 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 		private final ManagedFunctionContext<Indexed, Indexed> context;
 
 		/**
+		 * {@link StringBuilder} to load the {@link HttpChallenge}.
+		 */
+		private final StringBuilder challenge;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param connection
@@ -121,12 +156,16 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 		 *            {@link HttpSession}.
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
+		 * @param challenge
+		 *            {@link StringBuilder} to be loaded with the
+		 *            {@link HttpChallenge}.
 		 */
 		public HttpChallengeContextImpl(ServerHttpConnection connection, HttpSession session,
-				ManagedFunctionContext<Indexed, Indexed> context) {
+				ManagedFunctionContext<Indexed, Indexed> context, StringBuilder challenge) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;
+			this.challenge = challenge;
 		}
 
 		/*
@@ -135,7 +174,13 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 
 		@Override
 		public HttpChallenge setChallenge(String authenticationScheme, String realm) {
-			// TODO Auto-generated method stub
+			if (this.challenge.length() > 0) {
+				this.challenge.append(", ");
+			}
+			this.challenge.append(authenticationScheme);
+			this.challenge.append(" realm=\"");
+			this.challenge.append(realm);
+			this.challenge.append("\"");
 			return null;
 		}
 
@@ -161,6 +206,18 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 			// Obtain the index (offset by challenge flows)
 			int index = key.ordinal() + 1;
 			this.context.doFlow(index, null, null);
+		}
+
+		/*
+		 * ==================== HttpChallenge ===========================
+		 */
+
+		@Override
+		public void addParameter(String name, String value) {
+			this.challenge.append(", ");
+			this.challenge.append(name);
+			this.challenge.append("=");
+			this.challenge.append(value);
 		}
 	}
 
