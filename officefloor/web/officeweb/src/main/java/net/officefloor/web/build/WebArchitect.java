@@ -29,6 +29,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
+import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpRequestState;
@@ -303,6 +304,15 @@ public abstract interface WebArchitect {
 	 *            this will therefore not be used).
 	 */
 	void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput);
+
+	/**
+	 * Creates the {@link AcceptNegotiatorBuilder} to build an
+	 * {@link AcceptNegotiator}.
+	 * 
+	 * @return {@link AcceptNegotiatorBuilder} to build an
+	 *         {@link AcceptNegotiator}.
+	 */
+	<H> AcceptNegotiatorBuilder<H> createAcceptNegotiator();
 
 	/**
 	 * Informs the {@link OfficeArchitect} of the web architect. This is to be

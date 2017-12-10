@@ -33,17 +33,18 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.server.http.HttpEscalationContext;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.accept.AcceptNegotiator;
+import net.officefloor.web.accept.AcceptNegotiatorBuilderImpl;
+import net.officefloor.web.build.AcceptNegotiatorBuilder;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.build.NoAcceptHandlersException;
 
 /**
  * {@link ManagedObjectSource} for the {@link ObjectResponse}.
@@ -53,12 +54,6 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
 public class ObjectResponseManagedObjectSource
 		extends AbstractManagedObjectSource<ObjectResponseManagedObjectSource.ObjectResponseDependencies, None>
 		implements HttpEscalationHandler {
-
-	/**
-	 * {@link AcceptType} linked list to use should there be no
-	 * <code>accept</code> {@link HttpHeader} values.
-	 */
-	private static final AcceptType MATCH_ANY = new AnyAcceptType("1", 0);
 
 	/**
 	 * Dependency keys.
@@ -73,16 +68,15 @@ public class ObjectResponseManagedObjectSource
 	private final List<HttpObjectResponderFactory> objectResponderFactoriesList;
 
 	/**
-	 * {@link ContentTypeCache} instances for each {@link Object}
-	 * {@link HttpObjectResponderFactory}.
+	 * {@link AcceptNegotiator} for the {@link Object} {@link ContentTypeCache}.
 	 */
-	private ContentTypeCache[] objectCache;
+	private AcceptNegotiator<ContentTypeCache> objectNegotiator;
 
 	/**
-	 * {@link ContentTypeCache} instances for each {@link Escalation}
-	 * {@link HttpObjectResponderFactory}.
+	 * {@link AcceptNegotiator} for the {@link Escalation}
+	 * {@link ContentTypeCache}.
 	 */
-	private ContentTypeCache[] escalationCache;
+	private AcceptNegotiator<ContentTypeCache> escalationNegotiator;
 
 	/**
 	 * {@link WritableHttpHeader} instances when not acceptable type requested.
@@ -115,30 +109,36 @@ public class ObjectResponseManagedObjectSource
 		context.setManagedObjectClass(ObjectResponseManagedObject.class);
 		context.addDependency(ObjectResponseDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 
-		// Create the cache of factories
-		this.objectCache = new ContentTypeCache[this.objectResponderFactoriesList.size()];
-		this.escalationCache = new ContentTypeCache[this.objectResponderFactoriesList.size()];
-		for (int i = 0; i < this.objectCache.length; i++) {
-			HttpObjectResponderFactory factory = this.objectResponderFactoriesList.get(i);
+		// Create the not acceptable headers
+		StringBuilder accept = new StringBuilder();
+		boolean isFirst = true;
+
+		// Create the negotiators
+		AcceptNegotiatorBuilder<ContentTypeCache> objectBuilder = new AcceptNegotiatorBuilderImpl<>();
+		AcceptNegotiatorBuilder<ContentTypeCache> escalationBuilder = new AcceptNegotiatorBuilderImpl<>();
+		for (HttpObjectResponderFactory factory : this.objectResponderFactoriesList) {
 			String contentType = factory.getContentType();
-			this.objectCache[i] = new ContentTypeCache(contentType, factory);
-			this.escalationCache[i] = new ContentTypeCache(contentType, factory);
+
+			// Add content-type for negotiator
+			objectBuilder.addHandler(contentType, new ContentTypeCache(factory));
+			escalationBuilder.addHandler(contentType, new ContentTypeCache(factory));
+
+			// Include in accept header response
+			if (!isFirst) {
+				accept.append(", ");
+			}
+			isFirst = false;
+			accept.append(contentType);
 		}
-		if (this.objectCache.length == 0) {
+		try {
+			this.objectNegotiator = objectBuilder.build();
+			this.escalationNegotiator = escalationBuilder.build();
+		} catch (NoAcceptHandlersException ex) {
 			throw new Exception(
 					"Must have at least one " + HttpObjectResponderFactory.class.getSimpleName() + " configured");
 		}
 
 		// Create the not acceptable headers
-		StringBuilder accept = new StringBuilder();
-		boolean isFirst = true;
-		for (ContentTypeCache item : this.objectCache) {
-			if (!isFirst) {
-				accept.append(", ");
-			}
-			isFirst = false;
-			accept.append(item.contentType);
-		}
 		this.notAcceptableHeaders = new WritableHttpHeader[] {
 				new WritableHttpHeader(new HttpHeaderName("accept"), new HttpHeaderValue(accept.toString())) };
 	}
@@ -165,10 +165,9 @@ public class ObjectResponseManagedObjectSource
 		private ServerHttpConnection connection;
 
 		/**
-		 * Head {@link AcceptType} of the linked list of {@link AcceptType}
-		 * instances.
+		 * Accepted {@link ContentTypeCache}.
 		 */
-		private AcceptType head = null;
+		private ContentTypeCache contentTypeCache = null;
 
 		/*
 		 * ==================== ManagedObject =======================
@@ -200,21 +199,21 @@ public class ObjectResponseManagedObjectSource
 		public void send(T object) throws HttpException {
 			this.context.run(() -> {
 
-				// Lazy parse out the accept types from request
-				if (this.head == null) {
-					this.head = parseAccept(this.connection);
+				// Lazy obtain the content type cache
+				if (this.contentTypeCache == null) {
+					this.contentTypeCache = ObjectResponseManagedObjectSource.this.objectNegotiator
+							.getHandler(this.connection.getRequest());
 				}
 
-				// Attempt to handle the object
-				boolean isHandled = handleObject(object, this.head, ObjectResponseManagedObjectSource.this.objectCache,
-						OBJECT_RESPONDER_FACTORY, this.connection);
-				if (isHandled) {
-					return null; // handled the object
+				// Ensure have acceptable content type
+				if (this.contentTypeCache == null) {
+					throw new HttpException(HttpStatus.NOT_ACCEPTABLE,
+							ObjectResponseManagedObjectSource.this.notAcceptableHeaders, null);
 				}
 
-				// As here, not able to send acceptable content type
-				throw new HttpException(HttpStatus.NOT_ACCEPTABLE,
-						ObjectResponseManagedObjectSource.this.notAcceptableHeaders, null);
+				// Handle the object
+				handleObject(object, this.contentTypeCache, OBJECT_RESPONDER_FACTORY, this.connection);
+				return null;
 			});
 		}
 	}
@@ -226,15 +225,21 @@ public class ObjectResponseManagedObjectSource
 	@Override
 	public boolean handle(HttpEscalationContext context) throws IOException {
 
-		// Parse out the accept linked list
-		AcceptType head = parseAccept(context.getServerHttpConnection());
-
-		// Obtain the escalation details
-		Throwable escalation = context.getEscalation();
+		// Obtain the connection
 		ServerHttpConnection connection = context.getServerHttpConnection();
 
-		// Attempt to handle escalation
-		return handleObject(escalation, head, this.escalationCache, ESCALATION_RESPONDER_FACTORY, connection);
+		// Obtain the acceptable content type
+		ContentTypeCache contentTypeCache = this.escalationNegotiator.getHandler(connection.getRequest());
+		if (contentTypeCache == null) {
+			return false; // not able to handle escalation
+		}
+
+		// Obtain the escalation
+		Throwable escalation = context.getEscalation();
+
+		// Handle escalation
+		handleObject(escalation, contentTypeCache, ESCALATION_RESPONDER_FACTORY, connection);
+		return true; // handled
 	}
 
 	/**
@@ -295,117 +300,45 @@ public class ObjectResponseManagedObjectSource
 	 * @return <code>true</code> if object sent.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T> boolean handleObject(T object, AcceptType head, ContentTypeCache[] cache,
-			ResponderFactory responderFactory, ServerHttpConnection connection) {
+	private static <T> void handleObject(T object, ContentTypeCache contentTypeCache, ResponderFactory responderFactory,
+			ServerHttpConnection connection) {
 
 		// Obtain the object type
 		Class<T> objectType = (Class<T>) object.getClass();
 
-		// Attempt to find match
-		AcceptType accept = head;
-		while (accept != null) {
-
-			// Attempt to obtain matching responder
-			for (int i = 0; i < cache.length; i++) {
-				ContentTypeCache item = cache[i];
-				if (accept.isMatch(item.contentType)) {
-
-					// Find the corresponding type
-					HttpObjectResponder<T> objectResponder = null;
-					FIND_RESPONDER: for (int j = 0; j < item.responders.length; j++) {
-						ObjectResponderCache<?> responder = item.responders[j];
-						if (responder.objectType == objectType) {
-							objectResponder = (HttpObjectResponder<T>) responder.objectResponder;
-							break FIND_RESPONDER;
-						}
-					}
-					if (objectResponder == null) {
-						// Need to create object responder for type
-						objectResponder = responderFactory.createHttpObjectResponder(objectType, item.factory);
-						ObjectResponderCache<T> responder = new ObjectResponderCache<>(objectType, objectResponder);
-
-						// Append the object responder to cache
-						ObjectResponderCache<?>[] responders = Arrays.copyOf(item.responders,
-								item.responders.length + 1);
-						responders[responders.length - 1] = responder;
-						item.responders = responders;
-					}
-
-					// Send the response
-					try {
-						objectResponder.send(object, connection);
-					} catch (IOException ex) {
-						throw new HttpException(ex);
-					}
-
-					// Response sent
-					return true;
-				}
-			}
-
-			// Attempt next accept
-			accept = accept.next;
-		}
-
-		// As here, response not sent
-		return false;
-	}
-
-	/**
-	 * Parses the {@link AcceptType} linked list from the
-	 * {@link ServerHttpConnection}.
-	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @return Head {@link AcceptType} of the linked list.
-	 */
-	private static AcceptType parseAccept(ServerHttpConnection connection) {
-
-		// Accept type
-		AcceptType head = null;
-
-		// Load the accept types
-		HttpRequestHeaders headers = connection.getRequest().getHeaders();
-		for (HttpHeader header : headers.getHeaders("accept")) {
-			head = parseAccept(header.getValue(), head);
-		}
-
-		// Determine if only wild card match
-		// - no head, so will match any type
-		// - only one head that is any match, so will match any type
-		boolean isOnlyWildcard = ((head == null) || ((head.next == null) && (head.getClass() == AnyAcceptType.class)));
-
-		// Default to content-type if wild card only
-		if (isOnlyWildcard) {
-
-			// Attempt to match first on input content type
-			// (e.g. if JSON sent then respond with JSON)
-			HttpHeader contentTypeHeader = headers.getHeader("content-type");
-			if (contentTypeHeader != null) {
-				head = new SubTypeAcceptType(contentTypeHeader.getValue(), "1", 0);
-			}
-
-			// Now match any
-			if (head == null) {
-				head = MATCH_ANY;
-			} else {
-				head.next = MATCH_ANY;
+		// Find the corresponding type
+		HttpObjectResponder<T> objectResponder = null;
+		FIND_RESPONDER: for (int j = 0; j < contentTypeCache.responders.length; j++) {
+			ObjectResponderCache<?> responder = contentTypeCache.responders[j];
+			if (responder.objectType == objectType) {
+				objectResponder = (HttpObjectResponder<T>) responder.objectResponder;
+				break FIND_RESPONDER;
 			}
 		}
+		if (objectResponder == null) {
+			// Need to create object responder for type
+			objectResponder = responderFactory.createHttpObjectResponder(objectType, contentTypeCache.factory);
+			ObjectResponderCache<T> responder = new ObjectResponderCache<>(objectType, objectResponder);
 
-		// Return the head of the linked list
-		return head;
+			// Append the object responder to cache
+			ObjectResponderCache<?>[] responders = Arrays.copyOf(contentTypeCache.responders,
+					contentTypeCache.responders.length + 1);
+			responders[responders.length - 1] = responder;
+			contentTypeCache.responders = responders;
+		}
+
+		// Send the response
+		try {
+			objectResponder.send(object, connection);
+		} catch (IOException ex) {
+			throw new HttpException(ex);
+		}
 	}
 
 	/**
 	 * <code>content-type</code> cache object.
 	 */
 	private static class ContentTypeCache {
-
-		/**
-		 * <code>content-type</code>.
-		 */
-		private final String contentType;
 
 		/**
 		 * {@link HttpObjectResponderFactory}.
@@ -420,14 +353,11 @@ public class ObjectResponseManagedObjectSource
 		/**
 		 * Instantiate.
 		 * 
-		 * @param contentType
-		 *            <code>content-type</code>.
 		 * @param factory
 		 *            {@link HttpObjectResponderFactory} for the
 		 *            <code>content-type</code>.
 		 */
-		private ContentTypeCache(String contentType, HttpObjectResponderFactory factory) {
-			this.contentType = contentType;
+		private ContentTypeCache(HttpObjectResponderFactory factory) {
 			this.factory = factory;
 		}
 	}
@@ -458,544 +388,6 @@ public class ObjectResponseManagedObjectSource
 		private ObjectResponderCache(Class<T> objectType, HttpObjectResponder<T> objectResponder) {
 			this.objectType = objectType;
 			this.objectResponder = objectResponder;
-		}
-	}
-
-	/**
-	 * State of parsing.
-	 */
-	private static enum ParseState {
-		NEW_ACCEPT, TYPE, SUB_TYPE, PARAMETER_START, PARAMETER_NAME, PARAMETER_VALUE_START, PARAMETER_VALUE
-	}
-
-	/**
-	 * Indicates if the character is a white space.
-	 * 
-	 * @param character
-	 *            Character.
-	 * @return <code>true</code> if character is white space.
-	 */
-	private static final boolean isWhiteSpace(char character) {
-		return (character == ' ') || (character == '\t');
-	}
-
-	/**
-	 * Parses the <code>accept</code> {@link HttpHeader} value returning the
-	 * head {@link AcceptType} of the linked list of {@link AcceptType}
-	 * instances.
-	 * 
-	 * @param accept
-	 *            <code>accept</code> {@link HttpHeader} value.
-	 * @param head
-	 *            Head {@link AcceptType} from another
-	 *            <code>accept<code> {@link HttpHeader} should there be multiple <code>accept</code>
-	 *            {@link HttpHeader} values. Will be <code>null</code> if no
-	 *            other <code>accept</code> {@link HttpHeader}.
-	 * @return Head {@link AcceptType} for parsed out linked list of
-	 *         {@link AcceptType} instances. The values are sorted with highest
-	 *         weighted first.
-	 * @throws HttpException
-	 *             If invalid <code>accept</code> value.
-	 */
-	private static final AcceptType parseAccept(String accept, AcceptType head) throws HttpException {
-
-		// State for parsing
-		ParseState state = ParseState.NEW_ACCEPT;
-		int typeStart = -1;
-		int typeSeparatorPosition = -1;
-		int subTypeEnd = -1;
-		int paramStart = -1;
-		int paramEnd = -1;
-		boolean isParamEnd = false;
-		boolean isQ = false;
-		String q = "0";
-		int parameterCount = 0;
-
-		// Parse out the accept types
-		NEXT_CHARACTER: for (int index = 0; index < accept.length(); index++) {
-			char character = accept.charAt(index);
-
-			// Handle based on state
-			switch (state) {
-			case NEW_ACCEPT:
-
-				// Determine if load previous accept type
-				if (typeStart != -1) {
-					// Load the previous accept type
-					head = loadAcceptType(accept, typeStart, typeSeparatorPosition, subTypeEnd, q, parameterCount,
-							head);
-
-					// Reset if multiple spaces
-					typeStart = -1;
-				}
-
-				// Ignore leading space
-				if (isWhiteSpace(character)) {
-					continue NEXT_CHARACTER;
-				}
-
-				// Start of type
-				typeStart = index;
-				subTypeEnd = -1; // reset to find
-				q = "0";
-				parameterCount = 0; // reset for new accept type
-				state = ParseState.TYPE;
-				break;
-
-			case TYPE:
-				// Look for end of type
-				if (character == '/') {
-					// Separator between type/sub-type
-					typeSeparatorPosition = index;
-					state = ParseState.SUB_TYPE;
-				}
-				break;
-
-			case SUB_TYPE:
-				// Determine if terminated by space
-				if (isWhiteSpace(character)) {
-					// Ensure not multiple spaces
-					if (subTypeEnd == -1) {
-						subTypeEnd = index;
-					}
-				} else if (character == ';') {
-					// Starting parameter
-					if (subTypeEnd == -1) {
-						subTypeEnd = index;
-					}
-					state = ParseState.PARAMETER_START;
-				} else if (character == ',') {
-					// No parameters for accept type
-					if (subTypeEnd == -1) {
-						subTypeEnd = index;
-					}
-
-					// Start new accept
-					state = ParseState.NEW_ACCEPT;
-				}
-				break;
-
-			case PARAMETER_START:
-				// Ignore leading space
-				if (isWhiteSpace(character)) {
-					continue NEXT_CHARACTER;
-				}
-
-				// Start of parameter name
-				paramStart = index;
-				paramEnd = -1; // reset to find
-				isQ = false; // reset to determine
-				state = ParseState.PARAMETER_NAME;
-				break;
-
-			case PARAMETER_NAME:
-				// Determine if terminated by space
-				isParamEnd = false;
-				if (isWhiteSpace(character)) {
-					// Ensure not multiple spaces
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-
-				} else if (character == '=') {
-					// Parameter with value
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-					state = ParseState.PARAMETER_VALUE_START;
-
-				} else if (character == ';') {
-					// Parameter without value
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-					state = ParseState.PARAMETER_START;
-
-				} else if (character == ',') {
-					// Parameter without value, and no more parameters
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-					state = ParseState.NEW_ACCEPT;
-				}
-				if (isParamEnd) {
-					// Have another parameter
-					parameterCount++;
-
-					// Found end of parameter name, so determine if q
-					if ((paramEnd - paramStart) == 1) { // "q"
-						isQ = accept.charAt(paramStart) == 'q';
-					}
-				}
-				break;
-
-			case PARAMETER_VALUE_START:
-				// Ignore leading space
-				if (isWhiteSpace(character)) {
-					continue NEXT_CHARACTER;
-				}
-
-				// Start of parameter name
-				paramStart = index;
-				paramEnd = -1; // reset to find
-				state = ParseState.PARAMETER_VALUE;
-				break;
-
-			case PARAMETER_VALUE:
-				// Determine if terminated by space
-				isParamEnd = false;
-				if (isWhiteSpace(character)) {
-					// Ensure not multiple spaces
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-
-				} else if (character == ';') {
-					// Another parameter
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-					state = ParseState.PARAMETER_START;
-
-				} else if (character == ',') {
-					// No more parameters
-					if (paramEnd == -1) {
-						paramEnd = index;
-						isParamEnd = true;
-					}
-					state = ParseState.NEW_ACCEPT;
-				}
-				if (isParamEnd && isQ) {
-					// Found q value
-					q = accept.substring(paramStart, paramEnd);
-					if (q.length() == 0) {
-						// No value, so assume lowest
-						q = "0";
-					} else if (q.charAt(0) == '.') {
-						// Prefix with 0 to allow string sorting
-						q = "0" + q;
-					}
-				}
-				break;
-			}
-		}
-
-		// Handle reached end of accept value
-		switch (state) {
-		case NEW_ACCEPT:
-		case TYPE:
-			break;
-		case SUB_TYPE:
-			// Load the default accept type
-			head = loadAcceptType(accept, typeStart, typeSeparatorPosition, accept.length(), "0", 0, head);
-			break;
-		case PARAMETER_NAME:
-			parameterCount++; // include last parameter
-			// carry on to load accept type
-
-		case PARAMETER_START:
-		case PARAMETER_VALUE_START:
-			// Just parameter name, so no check for q ending parameter
-			head = loadAcceptType(accept, typeStart, typeSeparatorPosition, subTypeEnd, q, parameterCount, head);
-			break;
-		case PARAMETER_VALUE:
-			// Check if last parameter is q
-			if ((paramEnd == -1) && isQ) {
-				q = accept.substring(paramStart, accept.length());
-			}
-			head = loadAcceptType(accept, typeStart, typeSeparatorPosition, subTypeEnd, q, parameterCount, head);
-			break;
-		}
-
-		return head;
-	}
-
-	/**
-	 * Loads the {@link AcceptType} to the linked list, returning the head of
-	 * the linked list.
-	 * 
-	 * @param accept
-	 *            <code>accept</code> {@link HttpHeader} value.
-	 * @param typeStart
-	 *            Start of type.
-	 * @param typeSeparatorPosition
-	 *            Position of / separating type and sub-type.
-	 * @param subTypeEnd
-	 *            End of sub-type.
-	 * @param q
-	 *            <code>q</code> value.
-	 * @param parameterCount
-	 *            Number of parameters.
-	 * @param head
-	 *            Previous head {@link AcceptType} of the linked list.
-	 * @return Potentially new head {@link AcceptType} of the linked list.
-	 */
-	private static final AcceptType loadAcceptType(String accept, int typeStart, int typeSeparatorPosition,
-			int subTypeEnd, String q, int parameterCount, AcceptType head) {
-
-		// Determine if wild card match
-		if ((subTypeEnd - typeStart) == 3) { // "*/*"
-			// Potentially wild card match
-			boolean isTypeWild = accept.charAt(typeStart) == '*';
-			boolean isSubTypeWild = accept.charAt(subTypeEnd - 1) == '*';
-			if (isTypeWild && isSubTypeWild) {
-				// Accept any content type
-				return appendAcceptType(head, new AnyAcceptType(q, parameterCount));
-			} else if (isSubTypeWild) {
-				// Accept specific type and any sub type
-				String typePrefix = accept.substring(typeStart, typeSeparatorPosition);
-				return appendAcceptType(head, new TypeAcceptType(typePrefix, q, parameterCount));
-			}
-
-		} else if ((subTypeEnd - (typeSeparatorPosition + 1)) == 1) { // "*"
-			// Potentially sub type wild card match
-			boolean isSubTypeWild = accept.charAt(subTypeEnd - 1) == '*';
-			if (isSubTypeWild) {
-				// Accept specific type and any sub type (+1 to include /)
-				String typePrefix = accept.substring(typeStart, (typeSeparatorPosition + 1));
-				return appendAcceptType(head, new TypeAcceptType(typePrefix, q, parameterCount));
-			}
-		}
-
-		// Accept specific type and specific sub type
-		String contentType = accept.substring(typeStart, subTypeEnd);
-		return appendAcceptType(head, new SubTypeAcceptType(contentType, q, parameterCount));
-	}
-
-	/**
-	 * Appends the {@link AcceptType} into the linked list.
-	 * 
-	 * @param head
-	 *            Previous head {@link AcceptType} of the linked list.
-	 * @param newAccept
-	 *            {@link AcceptType} to add.
-	 * @return Potentially new head {@link AcceptType} of the linked list.
-	 */
-	private static final AcceptType appendAcceptType(AcceptType head, AcceptType newAccept) {
-
-		// Determine if head
-		if (head == null) {
-			return newAccept; // only entry in list
-		}
-
-		// Determine if should be head
-		if (head.compare(newAccept) < 0) {
-			// Accept is to be new head
-			newAccept.next = head;
-			return newAccept;
-		}
-
-		// Insert somewhere in the list
-		AcceptType current = head;
-		while (current.next != null) {
-
-			// Determine if should come before next value
-			if (current.next.compare(newAccept) < 0) {
-				// Insert before next value
-				newAccept.next = current.next;
-				current.next = newAccept;
-				return head; // inserted
-			}
-
-			// Move to next position
-			current = current.next;
-		}
-
-		// As here, did not insert, so append to list
-		current.next = newAccept;
-		return head;
-	}
-
-	/**
-	 * Abstract <code>accept</code> <code>content-type</code> value from the
-	 * {@link HttpRequest}.
-	 */
-	private static abstract class AcceptType {
-
-		/**
-		 * <code>q</code> value. Used for sorting results.
-		 */
-		private String q;
-
-		/**
-		 * Weight of wild card. Used for sorting results, with:
-		 * <ul>
-		 * <li><code>0</code>: * /*</li>
-		 * <li><code>1</code>: content\/*</li>
-		 * <li><code>2</code>: content/type</li>
-		 * </ul>
-		 */
-		private int wildcardWeight;
-
-		/**
-		 * Number of parameters. Used for sorting results.
-		 */
-		private int parameterCount;
-
-		/**
-		 * Next {@link AcceptType}.
-		 */
-		private AcceptType next = null;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param q
-		 *            <code>q</code> value.
-		 * @param wildcardWeight
-		 *            Wild card weight.
-		 * @param parameterCount
-		 *            Parameter count.
-		 */
-		protected AcceptType(String q, int wildcardWeight, int parameterCount) {
-			this.q = q;
-			this.wildcardWeight = wildcardWeight;
-			this.parameterCount = parameterCount;
-		}
-
-		/**
-		 * Indicates if matches the <code>content-type</code>.
-		 * 
-		 * @param contentType
-		 *            <code>content-type</code>.
-		 * @return <code>true</code> if matches the <code>content-type</code>.
-		 */
-		protected abstract boolean isMatch(String contentType);
-
-		/**
-		 * Compares this against another {@link AcceptType}.
-		 * 
-		 * @param other
-		 *            Other {@link AcceptType}.
-		 * @return Compare -X / 0 / +X based on lesser, equal or greater
-		 *         matching weight.
-		 */
-		private int compare(AcceptType other) {
-
-			// Compare first on 'q' value
-			int compare = this.q.compareTo(other.q);
-			if (compare != 0) {
-				return compare;
-			}
-
-			// Next compare on wild card weight
-			compare = this.wildcardWeight - other.wildcardWeight;
-			if (compare != 0) {
-				return compare;
-			}
-
-			// Next compare on parameter count
-			compare = this.parameterCount - other.parameterCount;
-			if (compare != 0) {
-				return compare;
-			}
-
-			// As here, equal in sorting weight
-			return 0;
-		}
-	}
-
-	/**
-	 * {@link AcceptType} for * /*.
-	 */
-	private static class AnyAcceptType extends AcceptType {
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param q
-		 *            <code>q</code> value.
-		 * @param parameterCount
-		 *            Parameter count.
-		 */
-		protected AnyAcceptType(String q, int parameterCount) {
-			super(q, 0, parameterCount);
-		}
-
-		/*
-		 * =============== AcceptType ===============
-		 */
-
-		@Override
-		protected boolean isMatch(String contentType) {
-			// Matches any content type
-			return true;
-		}
-	}
-
-	/**
-	 * {@link AcceptType} for type/*.
-	 */
-	private static class TypeAcceptType extends AcceptType {
-
-		/**
-		 * <code>content-type</code> prefix.
-		 */
-		private final String contentPrefix;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param contentPrefix
-		 *            <code>content-type</code> prefix.
-		 * @param q
-		 *            <code>q</code> value.
-		 * @param parameterCount
-		 *            Parameter count.
-		 */
-		protected TypeAcceptType(String contentPrefix, String q, int parameterCount) {
-			super(q, 1, parameterCount);
-			this.contentPrefix = contentPrefix;
-		}
-
-		/*
-		 * =============== AcceptType ===============
-		 */
-
-		@Override
-		protected boolean isMatch(String contentType) {
-			return contentType.startsWith(this.contentPrefix);
-		}
-	}
-
-	/**
-	 * {@link AcceptType} for type/sub-type.
-	 */
-	private static class SubTypeAcceptType extends AcceptType {
-
-		/**
-		 * <code>content-type</code>.
-		 */
-		private final String contentType;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param contentType
-		 *            <code>content-type</code>.
-		 * @param q
-		 *            <code>q</code> value.
-		 * @param parameterCount
-		 *            Parameter count.
-		 */
-		protected SubTypeAcceptType(String contentType, String q, int parameterCount) {
-			super(q, 2, parameterCount);
-			this.contentType = contentType;
-		}
-
-		/*
-		 * =============== AcceptType ===============
-		 */
-
-		@Override
-		protected boolean isMatch(String contentType) {
-			return this.contentType.equals(contentType);
 		}
 	}
 

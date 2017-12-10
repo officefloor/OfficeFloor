@@ -124,6 +124,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testNotMatchAccept() throws Throwable {
 		try {
 			this.doObjectResponse("not/match", new MockObject("TEST"), "application/json", "application/xml");
+			fail("Should not be successful");
 		} catch (HttpException ex) {
 			assertEquals("Should not accept", 406, ex.getHttpStatus().getStatusCode());
 			HttpHeader[] headers = ex.getHttpHeaders();

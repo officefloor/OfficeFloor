@@ -45,6 +45,8 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
 import net.officefloor.web.HttpRouteSectionSource.Redirect;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
+import net.officefloor.web.accept.AcceptNegotiatorBuilderImpl;
+import net.officefloor.web.build.AcceptNegotiatorBuilder;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpObjectParserFactory;
@@ -408,6 +410,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	@Override
 	public void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
 		this.chainedServicers.add(new ChainedServicer(sectionInput, notHandledOutput));
+	}
+
+	@Override
+	public <H> AcceptNegotiatorBuilder<H> createAcceptNegotiator() {
+		return new AcceptNegotiatorBuilderImpl<>();
 	}
 
 	@Override
