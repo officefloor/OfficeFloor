@@ -304,7 +304,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			assertNode(mo, "MO", "Managed Object", null, null);
 			assertEquals("Incorrect office name", "MO", mo.getOfficeManagedObjectName());
 			assertEquals("Incorrect section name", "MO", mo.getSectionManagedObjectName());
-			assertEquals("Incorrect augmented name", "MO", mo.getAugmentedManagedObjectName());
 			assertEquals("Incorrect administerable name", "MO", mo.getAdministerableManagedObjectName());
 			assertEquals("Incorrect dependency name", "MO", mo.getDependentManagedObjectName());
 			assertEquals("Incorrect governerable name", "MO", mo.getGovernerableManagedObjectName());
@@ -344,7 +343,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			// Validate correct details
 			assertNode(mo, "MO", "Managed Object", null, null);
 			assertEquals("Incorrect section name", "MO", mo.getSectionManagedObjectName());
-			assertEquals("Incorrect augmented name", "MO", mo.getAugmentedManagedObjectName());
 			assertEquals("Incorrect office name", "MO", mo.getOfficeManagedObjectName());
 			assertEquals("Incorrect office section name", "MO", mo.getOfficeSectionManagedObjectName());
 			assertNull("Should not have bound name until initialised", mo.getBoundManagedObjectName());
@@ -374,7 +372,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			// Ensure uninitialised that provides values
 			assertNode(mo, "MO", "Managed Object", null, null);
 			assertEquals("Incorrect section name", "MO", mo.getSectionManagedObjectName());
-			assertEquals("Incorrect augmented name", "MO", mo.getAugmentedManagedObjectName());
 			assertEquals("Incorrect office name", "MO", mo.getOfficeManagedObjectName());
 			assertEquals("Incorrect office section name", "MO", mo.getOfficeSectionManagedObjectName());
 			assertNull("Should not have bound name until initialised", mo.getBoundManagedObjectName());
@@ -408,8 +405,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeFloorManagedObjectSourceName());
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertEquals("Incorrect office managed object source name", "MOS", node.getOfficeManagedObjectSourceName());
-		assertEquals("Incorrect augmented managed object source name", "MOS",
-				node.getAugmentedManagedObjectSourceName());
 		assertSame("Incorrect containing office", this.office, node.getOfficeNode());
 		assertEquals("Incorrect office section managed object source name", "MOS",
 				node.getOfficeSectionManagedObjectSourceName());
@@ -438,8 +433,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeFloorManagedObjectSourceName());
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertEquals("Incorrect office managed object source name", "MOS", node.getOfficeManagedObjectSourceName());
-		assertEquals("Incorrect augmented managed object source name", "MOS",
-				node.getAugmentedManagedObjectSourceName());
 		assertSame("Incorrect containing office", this.office, node.getOfficeNode());
 		assertNull("Should not have office section name, as not contained in section",
 				node.getOfficeSectionManagedObjectSourceName());
@@ -473,8 +466,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeFloorManagedObjectSourceName());
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertNull("Should not have office name, as not contained in office", node.getOfficeManagedObjectSourceName());
-		assertNull("Should not have augmented name, as not contained in office",
-				node.getAugmentedManagedObjectSourceName());
 		assertNull("Should not have parent office, as not contained in office", node.getOfficeNode());
 		assertNull("Should not have office section name, as not contained in section",
 				node.getOfficeSectionManagedObjectSourceName());
@@ -505,8 +496,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeFloorManagedObjectSourceName());
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertEquals("Incorrect Office managed object source name", "MOS", node.getOfficeManagedObjectSourceName());
-		assertEquals("Incorrect augmented managed object source name", "MOS",
-				node.getAugmentedManagedObjectSourceName());
 		assertSame("Incorrect containing Office", this.office, node.getOfficeNode());
 		assertNull("Should not have office section name, as not contained in section",
 				node.getOfficeSectionManagedObjectSourceName());
@@ -531,8 +520,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeFloorManagedObjectSourceName());
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertNull("Should not have office name, as not contained in office", node.getOfficeManagedObjectSourceName());
-		assertNull("Should not have augmented name, as not contained in office",
-				node.getAugmentedManagedObjectSourceName());
 		assertNull("Should not have parent office, as not contained in office", node.getOfficeNode());
 		assertNull("Should not have office section name, as not contained in section",
 				node.getOfficeSectionManagedObjectSourceName());

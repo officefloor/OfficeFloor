@@ -17,19 +17,24 @@
  */
 package net.officefloor.compile.integrate.office;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
-import net.officefloor.compile.spi.office.AugmentedManagedObject;
+import net.officefloor.compile.spi.office.OfficeAdministration;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 
@@ -56,6 +61,12 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		// Compile the OfficeFloor with augmented managed function
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add the managed object
+			OfficeManagedObject managedObject = architect
+					.addOfficeManagedObjectSource("OBJECT", new Singleton(mockObject))
+					.addOfficeManagedObject("OBJECT", ManagedObjectScope.PROCESS);
 
 			// Augment the function object
 			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
@@ -67,11 +78,6 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
 					Class<?> objectType = type.getObjectType();
 					if (objectType.isAnnotationPresent(MockAnnotation.class)) {
-
-						// Add the managed object
-						AugmentedManagedObject managedObject = augment
-								.addManagedObjectSource("OBJECT", new Singleton(mockObject))
-								.addAugmentedManagedObject("OBJECT", ManagedObjectScope.PROCESS);
 
 						// Obtain the function object
 						AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
@@ -113,6 +119,79 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	public static class MockFunction {
 		public void function(MockObject object) {
 			AugmentManagedFunctionTest.object = object;
+		}
+	}
+
+	/**
+	 * Ensure can augment {@link ManagedFunction} by adding
+	 * {@link Administration}.
+	 */
+	public void testAugmentManagedFunctionWithAdministration() throws Exception {
+
+		StringBuilder content = new StringBuilder();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Register the content
+			OfficeManagedObject managedObject = architect.addOfficeManagedObjectSource("OBJECT", new Singleton(content))
+					.addOfficeManagedObject("OBJECT", ManagedObjectScope.PROCESS);
+
+			// Create the administration
+			OfficeAdministration administration = architect.addOfficeAdministration("ADMIN",
+					ClassAdministrationSource.class.getName());
+			administration.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
+					MockAdministration.class.getName());
+			administration.administerManagedObject(managedObject);
+
+			// Augment the function object
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+
+				// Ensure have managed function name (identify function)
+				assertEquals("Incorrect managed function name", "SECTION.function", augment.getManagedFunctionName());
+
+				// Add administration
+				augment.addPreAdministration(administration);
+				augment.addPostAdministration(administration);
+
+				// Add the managed object
+				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
+					AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
+					augment.link(object, managedObject);
+				}
+
+			});
+		});
+		compile.section((context) -> {
+			SectionFunctionNamespace namespace = context.getSectionDesigner().addSectionFunctionNamespace("NAMESPACE",
+					ClassManagedFunctionSource.class.getName());
+			namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+					MockAdministeredFunction.class.getName());
+			namespace.addSectionFunction("function", "function");
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Execute the method (with augmented administration)
+		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+		function.invokeProcess(null, null);
+
+		// Should run both pre/post administration
+		assertEquals("Should run augmented administration", "ADMIN FUNCTION ADMIN ", content.toString());
+	}
+
+	public static class MockAdministration {
+		public void admin(Appendable[] writers) throws IOException {
+			for (Appendable writer : writers) {
+				writer.append("ADMIN ");
+			}
+		}
+	}
+
+	public static class MockAdministeredFunction {
+		public void function(StringBuilder writer) {
+			writer.append("FUNCTION ");
 		}
 	}
 

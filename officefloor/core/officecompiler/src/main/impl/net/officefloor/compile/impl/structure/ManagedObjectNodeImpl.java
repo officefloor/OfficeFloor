@@ -520,15 +520,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	/*
-	 * ===================== AugmentedManagedObject ===========================
-	 */
-
-	@Override
-	public String getAugmentedManagedObjectName() {
-		return this.managedObjectName;
-	}
-
-	/*
 	 * ==================== OfficeFloorManagedObject ===========================
 	 */
 

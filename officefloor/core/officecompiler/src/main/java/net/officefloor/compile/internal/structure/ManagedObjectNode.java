@@ -20,7 +20,6 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.office.AugmentedManagedObject;
 import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -35,7 +34,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObjectNode, SectionManagedObject,
-		AugmentedManagedObject, OfficeSectionManagedObject, OfficeManagedObject, OfficeFloorManagedObject {
+		OfficeSectionManagedObject, OfficeManagedObject, OfficeFloorManagedObject {
 
 	/**
 	 * {@link Node} type.

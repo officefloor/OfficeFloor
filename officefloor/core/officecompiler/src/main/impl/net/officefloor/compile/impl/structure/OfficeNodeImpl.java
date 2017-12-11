@@ -79,8 +79,6 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
-import net.officefloor.compile.spi.office.AugmentedManagedObject;
-import net.officefloor.compile.spi.office.AugmentedManagedObjectSource;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentor;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeAdministration;
@@ -453,20 +451,17 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			}
 
 			@Override
-			public AugmentedManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-					String managedObjectSourceClassName) {
-				return OfficeNodeImpl.this.addManagedObjectSource(managedObjectSourceName,
-						managedObjectSourceClassName);
+			public void addPreAdministration(OfficeAdministration administration) {
+				managedFunctionNode.addPreAdministration(administration);
 			}
 
 			@Override
-			public AugmentedManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-					ManagedObjectSource<?, ?> managedObjectSource) {
-				return OfficeNodeImpl.this.addManagedObjectSource(managedObjectSourceName, managedObjectSource);
+			public void addPostAdministration(OfficeAdministration administration) {
+				managedFunctionNode.addPostAdministration(administration);
 			}
 
 			@Override
-			public void link(AugmentedFunctionObject object, AugmentedManagedObject managedObject) {
+			public void link(AugmentedFunctionObject object, OfficeManagedObject managedObject) {
 				LinkUtil.linkObject(object, managedObject, OfficeNodeImpl.this.context.getCompilerIssues(),
 						managedFunctionNode);
 			}

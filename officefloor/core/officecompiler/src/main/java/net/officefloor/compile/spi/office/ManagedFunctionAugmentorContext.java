@@ -20,7 +20,6 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Context for the {@link ManagedFunctionAugmentor}.
@@ -44,6 +43,34 @@ public interface ManagedFunctionAugmentorContext {
 	ManagedFunctionType<?, ?> getManagedFunctionType();
 
 	/**
+	 * Adds an {@link OfficeAdministration} to be done before attempting this
+	 * {@link ManagedFunction}.
+	 * <p>
+	 * The order that the {@link OfficeAdministration} instances are added is
+	 * the order they will be done before this {@link ManagedFunction}.
+	 * 
+	 * @param administration
+	 *            {@link OfficeAdministration} to be done before attempting this
+	 *            {@link ManagedFunction}.
+	 */
+	void addPreAdministration(OfficeAdministration administration);
+
+	/**
+	 * <p>
+	 * Adds an {@link OfficeAdministration} to be done after completing this
+	 * {@link ManagedFunction}.
+	 * <p>
+	 * The order that the {@link OfficeAdministration} instances are added is
+	 * the order they will be done after this {@link ManagedFunction} is
+	 * complete.
+	 * 
+	 * @param duty
+	 *            {@link OfficeAdministration} to be done after completing this
+	 *            {@link ManagedFunction}.
+	 */
+	void addPostAdministration(OfficeAdministration administration);
+
+	/**
 	 * Obtains the {@link AugmentedFunctionObject} for the
 	 * {@link ManagedFunction}.
 	 * 
@@ -55,38 +82,14 @@ public interface ManagedFunctionAugmentorContext {
 	AugmentedFunctionObject getFunctionObject(String objectName);
 
 	/**
-	 * Adds a {@link AugmentedManagedObjectSource}.
-	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link AugmentedManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            Fully qualified class name of the {@link ManagedObjectSource}.
-	 * @return Added {@link AugmentedManagedObjectSource}.
-	 */
-	AugmentedManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-			String managedObjectSourceClassName);
-
-	/**
-	 * Adds a {@link AugmentedManagedObjectSource}.
-	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link AugmentedManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance to use.
-	 * @return Added {@link AugmentedManagedObjectSource}.
-	 */
-	AugmentedManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-			ManagedObjectSource<?, ?> managedObjectSource);
-
-	/**
-	 * Links the {@link AugmentedManagedObject} to the
-	 * {@link AugmentedFunctionObject}.
+	 * Links the {@link AugmentedFunctionObject} to the
+	 * {@link OfficeManagedObject}.
 	 * 
 	 * @param object
 	 *            {@link AugmentedFunctionObject}.
 	 * @param managedObject
-	 *            {@link AugmentedManagedObject}.
+	 *            {@link OfficeManagedObject}.
 	 */
-	void link(AugmentedFunctionObject object, AugmentedManagedObject managedObject);
+	void link(AugmentedFunctionObject object, OfficeManagedObject managedObject);
 
 }
