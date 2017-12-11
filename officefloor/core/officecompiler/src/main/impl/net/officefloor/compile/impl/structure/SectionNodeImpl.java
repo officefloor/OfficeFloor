@@ -1248,7 +1248,19 @@ public class SectionNodeImpl implements SectionNode {
 		this.state = new InitialisedState(sectionSourceClassName, null, sectionLocation);
 		this.propertyList.clear();
 		for (Property property : sectionProperties) {
-			this.propertyList.addProperty(property.getName()).setValue(property.getValue());
+			this.propertyList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
+		}
+	}
+
+	@Override
+	public void setTransformedOfficeSection(SectionSource sectionSource, String sectionLocation,
+			PropertyList sectionProperties) {
+
+		// Load the transformation
+		this.state = new InitialisedState(sectionSource.getClass().getName(), sectionSource, sectionLocation);
+		this.propertyList.clear();
+		for (Property property : sectionProperties) {
+			this.propertyList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
 		}
 	}
 
