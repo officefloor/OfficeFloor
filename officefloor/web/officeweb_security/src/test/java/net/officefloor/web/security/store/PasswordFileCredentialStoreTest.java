@@ -24,12 +24,12 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.web.security.store.CredentialEntry;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.PasswordEntry;
 import net.officefloor.web.security.store.PasswordFile;
 import net.officefloor.web.security.store.PasswordFileCredentialStore;
+import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
  * Tests the {@link PasswordFileCredentialStore}.

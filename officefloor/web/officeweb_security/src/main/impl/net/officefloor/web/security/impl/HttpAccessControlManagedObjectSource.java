@@ -85,6 +85,13 @@ public class HttpAccessControlManagedObjectSource
 		// Obtain the access control type
 		String accessControlTypeName = mosContext.getProperty(PROPERTY_ACCESS_CONTROL_TYPE);
 		Class<?> accessControlType = mosContext.loadClass(accessControlTypeName);
+		context.addManagedObjectExtensionInterface(HttpAccessControl.class, (managedObject) -> {
+			try {
+				return (HttpAccessControl) managedObject.getObject();
+			} catch (Throwable e) {
+				return null;
+			}
+		});
 
 		// Determine if allowing null access control
 		this.isEscalateNullAccessControl = Boolean.parseBoolean(
@@ -165,7 +172,7 @@ public class HttpAccessControlManagedObjectSource
 		}
 
 		@Override
-		public Object getObject() throws Throwable {
+		public Object getObject() throws HttpAuthenticationRequiredException {
 
 			// Obtain the access control
 			HttpAccessControl accessControl = this.authentication.getAccessControl();

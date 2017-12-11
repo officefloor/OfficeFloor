@@ -27,7 +27,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource.Dependencies;
 import net.officefloor.web.security.store.CredentialEntry;
 import net.officefloor.web.security.store.CredentialStore;
@@ -35,6 +34,7 @@ import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
  * Tests the {@link BasicHttpSecuritySource}.

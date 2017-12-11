@@ -230,7 +230,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure not allowed access (with a challenge to authenticate)
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		assertEquals("Should not be allowed access", 401, response.getStatus().getStatusCode());
-		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("test"));
+		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"),
+				response.getHeader("www-authenticate").getValue());
 	}
 
 	/**
@@ -366,8 +367,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	private MockHttpRequestBuilder mockRequest(String path, String userName, String password) {
 		Encoder encoder = Base64.getEncoder();
-		return MockHttpServer.mockRequest("/path").header("authorization",
-				"Basic " + encoder.encodeToString("test:test".getBytes(ServerHttpConnection.HTTP_CHARSET)));
+		return MockHttpServer.mockRequest("/path").header("authorization", "Basic "
+				+ encoder.encodeToString((userName + ":" + password).getBytes(ServerHttpConnection.HTTP_CHARSET)));
 	}
 
 	/**

@@ -28,7 +28,6 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpAuthenticateContext;
 import net.officefloor.web.spi.security.HttpChallengeContext;
@@ -37,6 +36,7 @@ import net.officefloor.web.spi.security.HttpRatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
  * <p>

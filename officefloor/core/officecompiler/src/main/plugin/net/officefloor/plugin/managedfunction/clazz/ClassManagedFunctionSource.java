@@ -233,6 +233,12 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 					functionTypeBuilder.setReturnType(returnType);
 				}
 
+				// Load the function annotations
+				Annotation[] methodAnnotations = method.getAnnotations();
+				for (Annotation annotation : methodAnnotations) {
+					functionTypeBuilder.addAnnotation(annotation);
+				}
+
 				// Obtain the parameter annotations (for qualifying)
 				Annotation[][] methodParamAnnotations = method.getParameterAnnotations();
 

@@ -24,7 +24,6 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.CredentialStoreUtil;
 import net.officefloor.web.session.HttpSession;
@@ -36,6 +35,7 @@ import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
+import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
  * {@link HttpSecuritySource} for <code>Basic</code> HTTP security.

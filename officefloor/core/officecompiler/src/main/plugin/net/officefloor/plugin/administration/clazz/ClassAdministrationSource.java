@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import net.officefloor.compile.AdministrationSourceService;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
-import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministrationSource;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
@@ -47,7 +47,7 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassAdministrationSource extends AbstractAdministratorSource<Object, Indexed, Indexed>
+public class ClassAdministrationSource extends AbstractAdministrationSource<Object, Indexed, Indexed>
 		implements AdministrationSourceService<Object, Indexed, Indexed, ClassAdministrationSource> {
 
 	/**

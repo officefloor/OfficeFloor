@@ -240,6 +240,41 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure {@link Annotation} instances on the {@link Method} are included in
+	 * {@link ManagedFunctionType}.
+	 */
+	public void testMethodAnnotations() throws Exception {
+
+		// Create the namespace type builder
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+
+		// Function
+		namespace.addManagedFunctionType("function", new ClassFunctionFactory(null, null, null), Indexed.class,
+				Indexed.class).addAnnotation(this.createMock(MockFunctionAnnotation.class));
+
+		// Validate the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
+				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				MockAnnotateMethodClass.class.getName());
+
+		// Ensure appropriate annotation on method
+		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
+		Object[] annotations = functionType.getAnnotations();
+		assertEquals("Incorrect number of annotations", 1, annotations.length);
+		assertTrue("Incorrect annoation", annotations[0] instanceof MockFunctionAnnotation);
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface MockFunctionAnnotation {
+	}
+
+	public static class MockAnnotateMethodClass {
+		@MockFunctionAnnotation
+		public void function() {
+		}
+	}
+
+	/**
 	 * Ensure {@link Annotation} instances on the parameter type are included in
 	 * the object annotations.
 	 */

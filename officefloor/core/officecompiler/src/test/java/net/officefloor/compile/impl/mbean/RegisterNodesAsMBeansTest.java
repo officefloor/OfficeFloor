@@ -36,7 +36,7 @@ import javax.management.ReflectionException;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.mbean.MBeanFactory;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
-import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -524,7 +524,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	}
 
 	@TestSource
-	public static class TestAdministrationSource extends AbstractAdministratorSource<Object, None, None>
+	public static class TestAdministrationSource extends AbstractAdministrationSource<Object, None, None>
 			implements AdministrationFactory<Object, None, None>, TestAdministrationSourceMBean {
 
 		private String mbeanValue = "Administration Test";

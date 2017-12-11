@@ -31,7 +31,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
-import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
+import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
  * {@link CredentialStore} for {@link DirContext}.

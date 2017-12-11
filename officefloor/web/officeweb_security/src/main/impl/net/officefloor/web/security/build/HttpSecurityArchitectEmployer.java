@@ -21,9 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -31,7 +34,9 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.impl.HttpAccessAdministrationSource;
 import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationRequiredException;
@@ -155,6 +160,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				.addOfficeEscalation(HttpAuthenticationRequiredException.class.getName());
 
 		// Configure the HTTP security
+		OfficeManagedObject accessControlManagedObject = null;
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : this.securities) {
 
 			// Create the HTTP Security loader
@@ -193,8 +199,28 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			httpSecurityMos.setTimeout(security.timeout);
 			httpSecurityMos.addProperty(HttpAccessControlManagedObjectSource.PROPERTY_ACCESS_CONTROL_TYPE,
 					HttpAccessControl.class.getName());
-			httpSecurityMos.addOfficeManagedObject(accessControlName, ManagedObjectScope.PROCESS);
+			accessControlManagedObject = httpSecurityMos.addOfficeManagedObject(accessControlName,
+					ManagedObjectScope.PROCESS);
 		}
+
+		// Augment functions with HTTP access administration
+		final OfficeManagedObject finalAccessControlManagedObject = accessControlManagedObject;
+		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
+
+			// Determine if HTTP Access annotation
+			ManagedFunctionType<?, ?> type = context.getManagedFunctionType();
+			for (Object annotation : type.getAnnotations()) {
+				if (annotation instanceof HttpAccess) {
+					HttpAccess httpAccess = (HttpAccess) annotation;
+
+					// Configure access administration
+					OfficeAdministration administration = this.officeArchitect.addOfficeAdministration("HttpAccess",
+							new HttpAccessAdministrationSource(httpAccess));
+					context.addPreAdministration(administration);
+					administration.administerManagedObject(finalAccessControlManagedObject);
+				}
+			}
+		});
 	}
 
 	/**

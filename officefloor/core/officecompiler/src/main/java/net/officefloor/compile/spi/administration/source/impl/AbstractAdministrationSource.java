@@ -39,7 +39,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extends Enum<G>>
+public abstract class AbstractAdministrationSource<E, F extends Enum<F>, G extends Enum<G>>
 		implements AdministrationSource<E, F, G> {
 
 	/*
@@ -65,7 +65,7 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 	protected abstract void loadSpecification(SpecificationContext context);
 
 	/**
-	 * Context for the {@link AbstractAdministratorSource#getSpecification()}.
+	 * Context for the {@link AbstractAdministrationSource#getSpecification()}.
 	 */
 	public static interface SpecificationContext {
 

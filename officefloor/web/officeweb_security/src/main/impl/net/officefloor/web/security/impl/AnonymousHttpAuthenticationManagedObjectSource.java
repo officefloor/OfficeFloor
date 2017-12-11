@@ -38,6 +38,7 @@ import net.officefloor.web.spi.security.HttpLogoutRequest;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // HTTP Security added as required
 public class AnonymousHttpAuthenticationManagedObjectSource<C> extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject, HttpAuthentication<C> {
 

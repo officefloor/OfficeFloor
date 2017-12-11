@@ -40,7 +40,6 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.web.security.impl.CompleteApplicationHttpAuthenticateFunction;
 import net.officefloor.web.security.impl.FunctionAuthenticateContext;
 import net.officefloor.web.security.impl.FunctionLogoutContext;
@@ -55,6 +54,7 @@ import net.officefloor.web.security.impl.StartApplicationHttpAuthenticateFunctio
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 

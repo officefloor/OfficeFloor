@@ -40,7 +40,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
-import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -1613,7 +1613,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link AdministrationSource}.
 	 */
 	@TestSource
-	public static class MakerAdministrationSource extends AbstractAdministratorSource<Object, Indexed, Indexed>
+	public static class MakerAdministrationSource extends AbstractAdministrationSource<Object, Indexed, Indexed>
 			implements AdministrationMakerContext {
 
 		/**
