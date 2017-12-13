@@ -17,9 +17,9 @@
  */
 package net.officefloor.web.security.scheme;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpRatifyContext;
@@ -51,16 +51,14 @@ public class MockHttpRatifyContext<AC> implements HttpRatifyContext<AC> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param testCase
-	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 * @param authorizationHeaderValue
 	 *            <code>authorization</code> {@link HttpHeader} value.
 	 */
-	public MockHttpRatifyContext(OfficeFrameTestCase testCase, String authorizationHeaderValue) {
+	public MockHttpRatifyContext(String authorizationHeaderValue) {
 
 		// Create the necessary mock objects
 		this.connection = MockHttpAuthenticateContext.createRequestWithAuthorizationHeader(authorizationHeaderValue);
-		this.session = testCase.createMock(HttpSession.class);
+		this.session = MockWebApp.mockSession(this.connection);
 	}
 
 	/**

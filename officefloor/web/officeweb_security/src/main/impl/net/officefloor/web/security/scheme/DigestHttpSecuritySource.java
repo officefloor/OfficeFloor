@@ -599,7 +599,7 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Provides access to a mock {@link SecurityState} for testing.
 		 */
-		protected static final Object MOCK_SECURITY_STATE = new SecurityState(MOCK_NONCE, MOCK_OPAQUE);
+		protected static final SecurityState MOCK_SECURITY_STATE = new SecurityState(MOCK_NONCE, MOCK_OPAQUE);
 	}
 
 	/**

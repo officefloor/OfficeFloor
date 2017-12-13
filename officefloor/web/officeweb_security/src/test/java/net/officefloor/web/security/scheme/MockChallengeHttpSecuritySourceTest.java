@@ -23,10 +23,8 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.web.security.HttpAccessControl;
-import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
-import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -50,8 +48,8 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Create the expected type
 		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil.createHttpSecurityTypeBuilder();
-		type.setAuthenticationClass(HttpAuthentication.class);
-		type.setAccessControlClass(HttpAccessControl.class);
+		type.setAuthenticationClass(MockAuthentication.class);
+		type.setAccessControlClass(MockAccessControl.class);
 
 		// Validate type
 		HttpSecurityLoaderUtil.validateHttpSecurityType(type, MockChallengeHttpSecuritySource.class, "realm", "test");
@@ -62,27 +60,20 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				this, null);
-		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
+		new MockAccessControl("scheme", "user", null);
 
-		// Record obtaining HTTP security from HTTP session
-		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.mock"), accessControl);
-
-		// Test
-		this.replayMockObjects();
+		// Make access control available in session
+		final MockAccessControl accessControl = new MockAccessControl("test", "test");
+		ratifyContext.getSession().setAttribute("http.security.mock.challenge", accessControl);
 
 		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
 				.loadHttpSecurity(MockChallengeHttpSecuritySource.class, "realm", "test");
 
 		// Undertake ratify
 		assertFalse("Should not need to authenticate as cached", security.ratify(null, ratifyContext));
 		assertSame("Incorrect access control", accessControl, ratifyContext.getAccessControl());
-
-		// Verify
-		this.verifyMockObjects();
 	}
 
 	/**
@@ -90,26 +81,16 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyWithAuthorizationHeader() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				this, "Basic ZGFuaWVsOmRhbmllbA");
-
-		// Record obtaining HTTP security from HTTP session
-		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.mock"), null);
-
-		// Test
-		this.replayMockObjects();
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(
+				"Mock daniel,daniel");
 
 		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
 				.loadHttpSecurity(MockChallengeHttpSecuritySource.class, "realm", "test");
 
 		// Undertake ratify
 		assertTrue("Should indicate that may attempt to authenticate", security.ratify(null, ratifyContext));
 		assertNull("Should not yet have security", ratifyContext.getAccessControl());
-
-		// Verify
-		this.verifyMockObjects();
 	}
 
 	/**
@@ -117,26 +98,15 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoAuthentication() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				this, null);
-
-		// Record obtaining HTTP security from HTTP session
-		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.mock"), null);
-
-		// Test
-		this.replayMockObjects();
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
 
 		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
 				.loadHttpSecurity(MockChallengeHttpSecuritySource.class, "realm", "test");
 
 		// Undertake ratify
 		assertFalse("Should not attempt authentication", security.ratify(null, ratifyContext));
 		assertNull("Should not yet have security", ratifyContext.getAccessControl());
-
-		// Verify
-		this.verifyMockObjects();
 	}
 
 	/**
@@ -150,7 +120,7 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
 				.loadHttpSecurity(MockChallengeHttpSecuritySource.class, "realm", "Test");
 
 		// Undertake the challenge
@@ -160,50 +130,49 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure correct challenge
-		assertEquals("Incorrect challenge", "Basic realm=\"Test\"", challengeContext.getChallenge());
+		assertEquals("Incorrect challenge", "Mock realm=\"Test\"", challengeContext.getChallenge());
 	}
 
 	/**
 	 * Ensure not authenticated with no authorization header.
 	 */
 	public void testNoAuthorizationHeader() throws Exception {
-		this.doAuthenticate(null, false, null);
+		this.doAuthenticate(null, null);
 	}
 
 	/**
 	 * Ensure handle incorrect authentication scheme.
 	 */
 	public void testIncorrectAuthenticationScheme() throws Exception {
-		this.doAuthenticate("Incorrect ZGFuaWVsOmRhbmllbA", false, null);
+		this.doAuthenticate("Incorrect scheme", null);
 	}
 
 	/**
 	 * Ensure handle invalid Base64 encoding.
 	 */
 	public void testInvalidAuthorizationHeader() throws Exception {
-		this.doAuthenticate("Basic wrong", false, null);
+		this.doAuthenticate("Mock wrong", null);
 	}
 
 	/**
 	 * Ensure can authenticate.
 	 */
 	public void testSimpleAuthenticate() throws Exception {
-		this.doAuthenticate("Basic ZGFuaWVsOmRhbmllbA", true, "daniel", "daniel");
+		this.doAuthenticate("Mock daniel,daniel", "daniel", "daniel");
 	}
 
 	/**
 	 * Ensure can authenticate with multiple roles.
 	 */
 	public void testMultipleRoleAuthenticate() throws Exception {
-		this.doAuthenticate("Basic ZGFuaWVsLCBmb3VuZGVyOmRhbmllbCwgZm91bmRlcg==", true, "daniel, founder", "daniel",
-				"founder");
+		this.doAuthenticate("Mock daniel,daniel,founder,another", "daniel", "daniel", "founder", "another");
 	}
 
 	/**
 	 * Ensure can extra spacing.
 	 */
 	public void testExtraSpacing() throws Exception {
-		this.doAuthenticate("  Basic    ZGFuaWVsOmRhbmllbA  ", true, "daniel", "daniel");
+		this.doAuthenticate("  Mock    daniel , daniel  ", "daniel", "daniel");
 	}
 
 	/**
@@ -211,24 +180,21 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<None>(this);
+		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<None>();
 
-		// Record logging out
-		HttpSession session = logoutContext.getSession();
-		session.removeAttribute("http.security.mock");
-
-		// Replay mock objects
-		this.replayMockObjects();
+		// Provide access control in session
+		logoutContext.getSession().setAttribute("http.security.mock.challenge", new MockAccessControl("test"));
 
 		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
 				.loadHttpSecurity(MockChallengeHttpSecuritySource.class, "realm", "test");
 
 		// Logout
 		security.logout(logoutContext);
 
-		// Verify mock objects
-		this.verifyMockObjects();
+		// Ensure access control removed from session
+		assertNull("Should clear access control",
+				logoutContext.getSession().getAttribute("http.security.mock.challenge"));
 	}
 
 	/**
@@ -236,55 +202,41 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param authoriseHttpHeaderValue
 	 *            <code>Authorize</code> {@link HttpHeader} value.
-	 * @param isLoadSession
-	 *            Indicates if load {@link HttpSession}.
 	 * @param userName
 	 *            User name if authenticated. <code>null</code> if not
 	 *            authenticated.
 	 * @param roles
 	 *            Expected roles.
 	 */
-	private void doAuthenticate(String authoriseHttpHeaderValue, boolean isLoadSession, String userName,
-			String... roles) throws IOException {
+	private void doAuthenticate(String authoriseHttpHeaderValue, String userName, String... roles) throws IOException {
 
 		// Create the authentication context
-		MockHttpAuthenticateContext<HttpAccessControl, None> authenticationContext = new MockHttpAuthenticateContext<HttpAccessControl, None>(
-				this, authoriseHttpHeaderValue);
-
-		// Load to session
-		if (isLoadSession) {
-			authenticationContext.recordRegisterAccessControlWithHttpSession("http.security.mock");
-		}
-
-		// Replay mock objects
-		this.replayMockObjects();
+		MockHttpAuthenticateContext<MockAccessControl, None> authenticationContext = new MockHttpAuthenticateContext<MockAccessControl, None>(
+				authoriseHttpHeaderValue);
 
 		// Create and initialise the source
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
 				.loadHttpSecurity(MockChallengeHttpSecuritySource.class, "realm", "test");
 
 		// Undertake the authenticate
 		security.authenticate(null, authenticationContext);
 
-		// Verify mock objects
-		this.verifyMockObjects();
-
 		// Validate authentication
-		HttpAccessControl accessControl = authenticationContext.getAccessControl();
+		MockAccessControl accessControl = authenticationContext.getAccessControl();
+		MockAccessControl sessionAccessControl = (MockAccessControl) authenticationContext.getSession()
+				.getAttribute("http.security.mock.challenge");
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
-			assertNull("Should not register HTTP Security with HTTP Session",
-					authenticationContext.getRegisteredAccessControlWithHttpSession());
+			assertNull("Should not load session", sessionAccessControl);
 
 		} else {
 			assertNotNull("Should be authenticated", accessControl);
 			assertEquals("Incorrect authentication scheme", "Mock", accessControl.getAuthenticationScheme());
-			assertEquals("Incorrect principle", userName, accessControl.getPrincipal().getName());
+			assertEquals("Incorrect user", userName, accessControl.getUserName());
 			for (String role : roles) {
-				assertTrue("Should have role: " + role, accessControl.inRole(role));
+				assertTrue("Should have role: " + role, accessControl.getRoles().contains(role));
 			}
-			assertSame("Same access control should be registered with HTTP Session", accessControl,
-					authenticationContext.getRegisteredAccessControlWithHttpSession());
+			assertSame("Incorrect session access control", accessControl, sessionAccessControl);
 		}
 	}
 

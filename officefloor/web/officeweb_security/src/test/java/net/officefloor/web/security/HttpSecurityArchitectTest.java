@@ -36,6 +36,8 @@ import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
+import net.officefloor.web.security.scheme.MockAccessControl;
+import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpCredentials;
@@ -97,10 +99,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can check not authenticated.
+	 * Ensure can check not authenticated with custom authentication.
 	 */
-	public void testCheckNotAuthenticated() throws Exception {
-		this.initialiseMockHttpSecurity("/path", "REALM", CheckNotAuthenticatedServicer.class);
+	public void testCustom_CheckNotAuthenticated() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Custom_CheckNotAuthenticatedServicer.class);
 
 		// Ensure indicate not logged in
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
@@ -108,7 +110,39 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 	}
 
-	public static class CheckNotAuthenticatedServicer {
+	public static class Custom_CheckNotAuthenticatedServicer {
+		public void service(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
+
+			// Ensure indicate not logged in
+			assertFalse("Should not be authenticated", authentication.isAuthenticated());
+			assertNull("Should not have access control", authentication.getAccessControl());
+
+			// Logout should be no operation
+			Closure<Boolean> isLogout = new Closure<>(false);
+			authentication.logout((failure) -> {
+				assertNull("Should not be failure in no operation logout", failure);
+				isLogout.value = true;
+			});
+			assertTrue("Logout callback should be called immediately", isLogout.value);
+
+			// Send response
+			connection.getResponse().getEntityWriter().write("TEST");
+		}
+	}
+
+	/**
+	 * Ensure can check not authenticated with {@link HttpAuthentication}.
+	 */
+	public void testStandard_CheckNotAuthenticated() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Standard_CheckNotAuthenticatedServicer.class);
+
+		// Ensure indicate not logged in
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+	}
+
+	public static class Standard_CheckNotAuthenticatedServicer {
 		public void service(HttpAuthentication<HttpCredentials> authentication, ServerHttpConnection connection)
 				throws IOException {
 
@@ -130,10 +164,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can check that authenticated.
+	 * Ensure can check that authenticated with custom authentication.
 	 */
-	public void testCheckAuthenticated() throws Exception {
-		this.initialiseMockHttpSecurity("/path", "REALM", CheckAuthenticatedServicer.class);
+	public void testCustom_CheckAuthenticated() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Custom_CheckAuthenticatedServicer.class);
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -141,7 +175,31 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect response", "TEST", response.getEntity(null));
 	}
 
-	public static class CheckAuthenticatedServicer {
+	public static class Custom_CheckAuthenticatedServicer {
+		public void service(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
+
+			// Ensure indicate logged in
+			assertTrue("Should be authenticated", authentication.isAuthenticated());
+			assertNotNull("Should have access control", authentication.getAccessControl());
+
+			// Send response
+			connection.getResponse().getEntityWriter().write("TEST");
+		}
+	}
+
+	/**
+	 * Ensure can check that authenticated with {@link HttpAuthentication}.
+	 */
+	public void testStandard_CheckAuthenticated() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Standard_CheckAuthenticatedServicer.class);
+
+		// Send request (with authentication)
+		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+	}
+
+	public static class Standard_CheckAuthenticatedServicer {
 		public void service(HttpAuthentication<HttpCredentials> authentication, ServerHttpConnection connection)
 				throws IOException {
 
@@ -155,10 +213,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure disallows access if not authenticated.
+	 * Ensure disallows access if not authenticated with custom authentication.
 	 */
-	public void testNoAccessAsNotAuthenticated() throws Exception {
-		this.initialiseMockHttpSecurity("/path", "REALM", NoAccessAsNotAuthenticatedServicer.class);
+	public void testCustom_NoAccessAsNotAuthenticated() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Custom_NoAccessAsNotAuthenticatedServicer.class);
 
 		// Ensure not allowed access
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
@@ -167,14 +225,34 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				response.getHeader("www-authenticate").getValue());
 	}
 
-	public static class NoAccessAsNotAuthenticatedServicer {
+	public static class Custom_NoAccessAsNotAuthenticatedServicer {
+		public void service(MockAccessControl accessControl) {
+			fail("Should not gain access to method, as not authenticated");
+		}
+	}
+
+	/**
+	 * Ensure disallows access if not authenticated with
+	 * {@link HttpAccessControl}.
+	 */
+	public void testStandard_NoAccessAsNotAuthenticated() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Standard_NoAccessAsNotAuthenticatedServicer.class);
+
+		// Ensure not allowed access
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should not be allowed access", 401, response.getStatus().getStatusCode());
+		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"),
+				response.getHeader("www-authenticate").getValue());
+	}
+
+	public static class Standard_NoAccessAsNotAuthenticatedServicer {
 		public void service(HttpAccessControl accessControl) {
 			fail("Should not gain access to method, as not authenticated");
 		}
 	}
 
 	/**
-	 * Ensure can check {@link HttpAccessControl}.
+	 * Ensure can check {@link HttpAccess}.
 	 */
 	public void testAccessControl() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", AccessControlServicer.class);

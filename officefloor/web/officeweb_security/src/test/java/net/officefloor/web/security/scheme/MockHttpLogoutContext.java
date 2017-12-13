@@ -20,9 +20,9 @@ package net.officefloor.web.security.scheme;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpLogoutContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -52,15 +52,10 @@ public class MockHttpLogoutContext<D extends Enum<D>> implements HttpLogoutConte
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param testCase
-	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 */
-	public MockHttpLogoutContext(OfficeFrameTestCase testCase) {
-
-		// Create the necessary mock objects
+	public MockHttpLogoutContext() {
 		this.connection = MockHttpServer.mockConnection();
-		this.session = testCase.createMock(HttpSession.class);
+		this.session = MockWebApp.mockSession(this.connection);
 	}
 
 	/**

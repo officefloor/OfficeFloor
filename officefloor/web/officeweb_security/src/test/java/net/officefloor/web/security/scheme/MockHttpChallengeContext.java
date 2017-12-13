@@ -23,6 +23,7 @@ import java.util.Map;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpChallengeContext;
@@ -73,9 +74,9 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 	@SuppressWarnings("unchecked")
 	public MockHttpChallengeContext(ServerHttpConnection connection, OfficeFrameTestCase testCase) {
 		this.connection = connection;
+		this.session = MockWebApp.mockSession(this.connection);
 
 		// Create the necessary mock objects
-		this.session = testCase.createMock(HttpSession.class);
 		this.flows = testCase.createMock(MockHttpChallengeContextFlows.class);
 	}
 

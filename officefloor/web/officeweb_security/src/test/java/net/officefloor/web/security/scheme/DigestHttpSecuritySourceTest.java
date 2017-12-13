@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Hex;
-import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -107,12 +106,11 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testRatifyFromSession() throws IOException {
 
 		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				this, null);
+				null);
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
-		// Record obtaining HTTP security from HTTP session
-		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.digest"), accessControl);
+		// Load access control to session
+		ratifyContext.getSession().setAttribute("http.security.digest", accessControl);
 
 		// Test
 		this.replayMockObjects();
@@ -136,11 +134,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testRatifyWithAuthorizationHeader() throws IOException {
 
 		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				this, "Digest credentials");
-
-		// Record obtaining HTTP security from HTTP session
-		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.digest"), null);
+				"Digest credentials");
 
 		// Test
 		this.replayMockObjects();
@@ -164,11 +158,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testRatifyNoAuthentication() throws IOException {
 
 		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				this, null);
-
-		// Record obtaining HTTP security from HTTP session
-		HttpSession session = ratifyContext.getSession();
-		this.recordReturn(session, session.getAttribute("http.security.digest"), null);
+				null);
 
 		// Test
 		this.replayMockObjects();
@@ -218,15 +208,6 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Record
 		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
-		session.setAttribute("#" + DigestHttpSecuritySource.class.getName() + "#", "SecurityStore");
-		this.control(session).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect key", expected[0], actual[0]);
-				assertNotNull("Expecting security store", actual[1]);
-				return true;
-			}
-		});
 
 		// Test
 		this.replayMockObjects();
@@ -247,27 +228,31 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				"Incorrect challenge", "Digest realm=\"" + REALM + "\", qop=\"auth,auth-int\"," + " nonce=\"" + nonce
 						+ "\"," + " opaque=\"" + opaque + "\"," + " algorithm=\"" + ALGORITHM + "\"",
 				challengeContext.getChallenge());
+
+		// Ensure loaded security store
+		assertNotNull("Should have security store",
+				session.getAttribute("#" + DigestHttpSecuritySource.class.getName() + "#"));
 	}
 
 	/**
 	 * Ensure not authenticated if no authorization header.
 	 */
 	public void testNoAuthorizationHeader() throws Exception {
-		this.doAuthenticate(null, false, null, null);
+		this.doAuthenticate(null, null, null);
 	}
 
 	/**
 	 * Ensure handle incorrect authentication scheme.
 	 */
 	public void testIncorrectAuthenticationScheme() throws Exception {
-		this.doAuthenticate("Incorrect parameters=\"should no be used\"", false, null, null);
+		this.doAuthenticate("Incorrect parameters=\"should no be used\"", null, null);
 	}
 
 	/**
 	 * Ensure handle invalid Base64 encoding.
 	 */
 	public void testInvalidAuthorizationHeader() throws Exception {
-		this.doAuthenticate("Basic wrong", false, null, null);
+		this.doAuthenticate("Basic wrong", null, null);
 	}
 
 	/**
@@ -277,16 +262,16 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.doAuthenticate("Digest username=\"Mufasa\", realm=\"" + REALM
 				+ "\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\"," + " uri=\"/dir/index.html\","
 				+ " qop=auth, nc=00000001, cnonce=\"0a4f113b\"," + " response=\"6629fae49393a05397450978507c4ef1\","
-				+ " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"", true, "Mufasa", (context) -> {
+				+ " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"", "Mufasa", (context) -> {
+
+					// Load session with digest session key
+					context.getSession().setAttribute(DigestHttpSecuritySource.SECURITY_STATE_SESSION_KEY,
+							DigestHttpSecuritySource.Mock.MOCK_SECURITY_STATE);
 
 					// Mock values
 					final byte[] digest = this.createDigest(ALGORITHM, "Mufasa", REALM, "Circle Of Life");
-					final HttpSession session = context.getSession();
 
 					// Record authentication
-					this.recordReturn(session,
-							session.getAttribute(DigestHttpSecuritySource.SECURITY_STATE_SESSION_KEY),
-							DigestHttpSecuritySource.Mock.MOCK_SECURITY_STATE);
 					this.recordReturn(this.store, this.store.retrieveCredentialEntry("Mufasa", REALM), this.entry);
 					this.recordReturn(this.entry, this.entry.retrieveCredentials(), digest);
 					this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
@@ -300,11 +285,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>(this);
-
-		// Record logging out
-		HttpSession session = logoutContext.getSession();
-		session.removeAttribute("http.security.digest");
+		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
+		logoutContext.getSession().setAttribute("http.security.digest", this.createMock(HttpAccessControl.class));
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -319,6 +301,9 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Verify mock objects
 		this.verifyMockObjects();
+
+		// Ensure clear session
+		assertNull("Should clear access control", logoutContext.getSession().getAttribute("http.security.digest"));
 	}
 
 	/**
@@ -360,8 +345,6 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param authorizationHttpHeaderValue
 	 *            <code>Authenticate</code> {@link HttpHeader} value.
-	 * @param isLoadSession
-	 *            Indicates if load to {@link HttpSession}.
 	 * @param userName
 	 *            User name if authenticated. <code>null</code> if not
 	 *            authenticated.
@@ -370,23 +353,18 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 * @param roles
 	 *            Expected roles.
 	 */
-	private void doAuthenticate(String authorizationHttpHeaderValue, boolean isLoadSession, String userName,
+	private void doAuthenticate(String authorizationHttpHeaderValue, String userName,
 			Consumer<MockHttpAuthenticateContext<HttpAccessControl, Dependencies>> initialiser, String... roles)
 			throws IOException {
 
 		// Create the authenticate context
 		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpAccessControl, Dependencies>(
-				this, authorizationHttpHeaderValue);
+				authorizationHttpHeaderValue);
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Determine if initialise
 		if (initialiser != null) {
 			initialiser.accept(authenticationContext);
-		}
-
-		// Determine if load session
-		if (isLoadSession) {
-			authenticationContext.recordRegisterAccessControlWithHttpSession("http.security.digest");
 		}
 
 		// Replay mock objects
@@ -405,8 +383,11 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Validate authentication
 		HttpAccessControl accessControl = authenticationContext.getAccessControl();
+		HttpAccessControl sessionAccessControl = (HttpAccessControl) authenticationContext.getSession()
+				.getAttribute("http.security.digest");
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
+			assertNull("Should not load session", sessionAccessControl);
 
 		} else {
 			assertNotNull("Should be authenticated", accessControl);
@@ -415,6 +396,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 			for (String role : roles) {
 				assertTrue("Should have role: " + role, accessControl.inRole(role));
 			}
+			assertSame("Should load session", accessControl, sessionAccessControl);
 		}
 	}
 

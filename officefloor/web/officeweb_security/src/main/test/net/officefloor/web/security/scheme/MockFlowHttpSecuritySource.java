@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ package net.officefloor.web.security.scheme;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpException;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpAuthenticateContext;
@@ -33,32 +33,18 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
- * <p>
- * Mock {@link HttpSecuritySource} to use for testing with challenges.
- * <p>
- * It provides a {@link MockAuthentication} and {@link MockAccessControl} by the
- * following <code>Basic</code> authentication scheme, except that:
- * <ul>
- * <li>authentication is obtained by user name and password being the same</li>
- * <li>the {@link MockAccessControl} is provided the user name as a role (allows
- * logging in with various roles for testing). Multiple roles can be specified
- * by the user name being a comma separate list.</li>
- * </ul>
+ * Mock {@link HttpSecuritySource} that challenges with a HTML form.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockChallengeHttpSecuritySource
-		extends AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, Void, None, None> {
+public class MockFlowHttpSecuritySource extends
+		AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, MockCredentials, None, MockFlowHttpSecuritySource.Flows> {
 
 	/**
-	 * Obtains the <code>WWW-Authenticate</code> {@link HttpHeader} value.
-	 * 
-	 * @param realm
-	 *            Realm.
-	 * @return <code>WWW-Authenticate</code> {@link HttpHeader} value.
+	 * {@link Flow} keys.
 	 */
-	public static String getHeaderChallengeValue(String realm) {
-		return AUTHENTICATION_SCHEME + " realm=\"" + realm + "\"";
+	public static enum Flows {
+		CHALLENGE
 	}
 
 	/**
@@ -76,7 +62,7 @@ public class MockChallengeHttpSecuritySource
 	 * Name of attribute to register the {@link HttpAccessControl} within the
 	 * {@link HttpSession}.
 	 */
-	private static final String SESSION_ATTRIBUTE_HTTP_SECURITY = "http.security.mock.challenge";
+	private static final String SESSION_ATTRIBUTE_HTTP_SECURITY = "http.security.mock.form";
 
 	/**
 	 * Realm.
@@ -89,18 +75,18 @@ public class MockChallengeHttpSecuritySource
 	 * @param realm
 	 *            Realm.
 	 */
-	public MockChallengeHttpSecuritySource(String realm) {
+	public MockFlowHttpSecuritySource(String realm) {
 		this.realm = realm;
 	}
 
 	/**
 	 * Default constructor.
 	 */
-	public MockChallengeHttpSecuritySource() {
+	public MockFlowHttpSecuritySource() {
 	}
 
 	/*
-	 * ==================== HttpSecuritySource =========================
+	 * =================== HttpSecuritySource ==========================
 	 */
 
 	@Override
@@ -111,7 +97,8 @@ public class MockChallengeHttpSecuritySource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<MockAuthentication, MockAccessControl, Void, None, None> context)
+	protected void loadMetaData(
+			MetaDataContext<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> context)
 			throws Exception {
 
 		// Ensure have the realm
@@ -122,26 +109,23 @@ public class MockChallengeHttpSecuritySource
 		// Specify the access control
 		context.setAuthenticationClass(MockAuthentication.class);
 		context.setAccessControlClass(MockAccessControl.class);
+		context.setCredentialsClass(MockCredentials.class);
+		context.addFlow(Flows.CHALLENGE, null);
 	}
 
 	@Override
-	public HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> sourceHttpSecurity(
+	public HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> sourceHttpSecurity(
 			HttpSecurityContext context) throws HttpException {
 
 		// Create and return the mock HTTP security
-		return new MockChallengeHttpSecurity(this.realm);
+		return new MockFlowHttpSecurity(this.realm);
 	}
 
 	/**
 	 * Mock {@link HttpSecurity}.
 	 */
-	private class MockChallengeHttpSecurity
-			implements HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> {
-
-		/**
-		 * Realm.
-		 */
-		private final String realm;
+	private class MockFlowHttpSecurity
+			implements HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> {
 
 		/**
 		 * Instantiate.
@@ -149,8 +133,7 @@ public class MockChallengeHttpSecuritySource
 		 * @param realm
 		 *            Realm.
 		 */
-		private MockChallengeHttpSecurity(String realm) {
-			this.realm = realm;
+		private MockFlowHttpSecurity(String realm) {
 		}
 
 		/*
@@ -164,7 +147,7 @@ public class MockChallengeHttpSecuritySource
 		}
 
 		@Override
-		public boolean ratify(Void credentials, HttpRatifyContext<MockAccessControl> context) {
+		public boolean ratify(MockCredentials credentials, HttpRatifyContext<MockAccessControl> context) {
 
 			// Attempt to obtain from session
 			MockAccessControl accessControl = (MockAccessControl) context.getSession()
@@ -175,42 +158,26 @@ public class MockChallengeHttpSecuritySource
 				return false;
 			}
 
-			// Determine if basic credentials on request
-			HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-					.getHttpAuthenticationScheme(context.getConnection().getRequest());
-			if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
-				return false; // must be basic authentication
+			// Determine if credentials
+			if (credentials != null) {
+				return true;
 			}
 
-			// As here, then have basic authentication details
-			return true;
+			// As here, then not able to authenticate
+			return false;
 		}
 
 		@Override
-		public void authenticate(Void credentials, HttpAuthenticateContext<MockAccessControl, None> context)
+		public void authenticate(MockCredentials credentials, HttpAuthenticateContext<MockAccessControl, None> context)
 				throws HttpException {
 
-			// Obtain the authentication scheme
-			HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-					.getHttpAuthenticationScheme(context.getConnection().getRequest());
-			if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
-				return; // no/incorrect authentication scheme
-			}
-
-			// Parse out user and roles
-			String[] parameters = scheme.getParameters().split(",");
-			String userName = parameters[0].trim();
-			String password = parameters.length > 1 ? parameters[1].trim() : null;
-			if (!(userName.equals(password))) {
-				return; // must match to authenticate
-			}
-			String[] roles = new String[parameters.length - 1];
-			for (int i = 1; i < parameters.length; i++) {
-				roles[i - 1] = parameters[i].trim();
+			// Ensure have credentials
+			if (credentials != null) {
+				return;
 			}
 
 			// Create the access control
-			MockAccessControl accessControl = new MockAccessControl(userName, roles);
+			MockAccessControl accessControl = new MockAccessControl(credentials);
 
 			// Remember access control for further requests
 			context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
@@ -220,9 +187,10 @@ public class MockChallengeHttpSecuritySource
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context) throws HttpException {
-			// Load the challenge
-			context.setChallenge(AUTHENTICATION_SCHEME, this.realm);
+		public void challenge(HttpChallengeContext<None, Flows> context) throws HttpException {
+
+			// Trigger flow for challenge
+			context.doFlow(Flows.CHALLENGE);
 		}
 
 		@Override

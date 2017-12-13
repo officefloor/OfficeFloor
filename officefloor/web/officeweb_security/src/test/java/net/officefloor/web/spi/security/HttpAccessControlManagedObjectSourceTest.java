@@ -63,6 +63,7 @@ public class HttpAccessControlManagedObjectSourceTest extends OfficeFrameTestCas
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpAccessControl.class);
 		type.addDependency(Dependencies.HTTP_AUTHENTICATION, HttpAuthentication.class, null);
+		type.addExtensionInterface(HttpAccessControl.class);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpAccessControlManagedObjectSource.class,

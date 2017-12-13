@@ -20,15 +20,11 @@ package net.officefloor.web.security.scheme;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.easymock.AbstractMatcher;
-import org.junit.Assert;
-
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpAuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -72,11 +68,6 @@ public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpA
 	private final HttpSession session;
 
 	/**
-	 * {@link OfficeFrameTestCase}.
-	 */
-	private final OfficeFrameTestCase testCase;
-
-	/**
 	 * Dependencies.
 	 */
 	private final Map<O, Object> dependencies = new HashMap<O, Object>();
@@ -87,24 +78,14 @@ public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpA
 	private AC accessControl = null;
 
 	/**
-	 * Access control bound to {@link HttpSession}.
-	 */
-	private AC sessionAccessControl = null;
-
-	/**
 	 * Initiate.
 	 * 
-	 * @param testCase
-	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 * @param authorizationHeaderValue
 	 *            <code>authorization</code> {@link HttpHeader} value.
 	 */
-	public MockHttpAuthenticateContext(OfficeFrameTestCase testCase, String authorizationHeaderValue) {
-		this.testCase = testCase;
-
-		// Create the necessary mock objects
+	public MockHttpAuthenticateContext(String authorizationHeaderValue) {
 		this.connection = createRequestWithAuthorizationHeader(authorizationHeaderValue);
-		this.session = testCase.createMock(HttpSession.class);
+		this.session = MockWebApp.mockSession(this.connection);
 	}
 
 	/**
@@ -126,37 +107,6 @@ public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpA
 	 */
 	public AC getAccessControl() {
 		return this.accessControl;
-	}
-
-	/**
-	 * Obtains the registered access control with the {@link HttpSession}.
-	 * 
-	 * @return Registered access control with the {@link HttpSession}.
-	 */
-	public AC getRegisteredAccessControlWithHttpSession() {
-		return this.sessionAccessControl;
-	}
-
-	/**
-	 * Records registering {@link HttpAccessControl} with the
-	 * {@link HttpSession}.
-	 * 
-	 * @param attributeName
-	 *            Name of attribute to register the {@link HttpAccessControl}
-	 *            with the {@link HttpSession}.
-	 */
-	public void recordRegisterAccessControlWithHttpSession(String attributeName) {
-		this.session.setAttribute(attributeName, null);
-		this.testCase.control(this.session).setMatcher(new AbstractMatcher() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public boolean matches(Object[] expected, Object[] actual) {
-				Assert.assertEquals("Incorrect access control session attribute name", expected[0], actual[0]);
-				Assert.assertNotNull("Must have access control if registering with HTTP Session", actual[0]);
-				MockHttpAuthenticateContext.this.sessionAccessControl = (AC) actual[1];
-				return true;
-			}
-		});
 	}
 
 	/*
