@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.spi.security;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.security.HttpAccessControl;
@@ -27,7 +29,23 @@ import net.officefloor.web.security.HttpAuthentication;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecuritySourceMetaData<A, AC, C, D extends Enum<D>, F extends Enum<F>> {
+public interface HttpSecuritySourceMetaData<A, AC extends Serializable, C, D extends Enum<D>, F extends Enum<F>> {
+
+	/**
+	 * Obtains the {@link Class} of the authentication object.
+	 * 
+	 * @return {@link Class} of the authentication object.
+	 */
+	Class<A> getAuthenticationType();
+
+	/**
+	 * Obtains the {@link HttpAuthenticationFactory} to adapt the custom
+	 * authentication into a {@link HttpAuthentication}.
+	 * 
+	 * @return {@link HttpAuthenticationFactory} to adapt the custom
+	 *         authentication into a {@link HttpAuthentication}.
+	 */
+	HttpAuthenticationFactory<A, C> getHttpAuthenticationFactory();
 
 	/**
 	 * <p>
@@ -45,25 +63,14 @@ public interface HttpSecuritySourceMetaData<A, AC, C, D extends Enum<D>, F exten
 	 * @return {@link Class} of the credentials object or <code>null</code> if
 	 *         no application specific behaviour.
 	 */
-	Class<C> getCredentialsClass();
-
-	Class<A> getAuthenticationClass();
-
-	/**
-	 * Obtains the {@link HttpAuthenticationFactory} to adapt the custom
-	 * authentication into a {@link HttpAuthentication}.
-	 * 
-	 * @return {@link HttpAuthenticationFactory} to adapt the custom
-	 *         authentication into a {@link HttpAuthentication}.
-	 */
-	HttpAuthenticationFactory<A, C> getHttpAuthenticationFactory();
+	Class<C> getCredentialsType();
 
 	/**
 	 * Obtains the {@link Class} of the access control object.
 	 * 
 	 * @return {@link Class} of the access control object.
 	 */
-	Class<AC> getAccessControlClass();
+	Class<AC> getAccessControlType();
 
 	/**
 	 * Obtains the {@link HttpAccessControlFactory} to adapt the custom access

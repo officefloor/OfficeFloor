@@ -17,7 +17,13 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.spi.security.HttpAccessControlFactory;
+import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
@@ -25,21 +31,43 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurityType<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
+public interface HttpSecurityType<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the type for authentication.
 	 * 
 	 * @return Type for authentication.
 	 */
-	Class<A> getAuthenticationClass();
+	Class<A> getAuthenticationType();
+
+	/**
+	 * Should the custom authentication not implement
+	 * {@link HttpAuthentication}, then this factory provides a wrapping
+	 * {@link HttpAuthentication} implementation.
+	 * 
+	 * @return {@link HttpAuthenticationFactory} to create wrapping
+	 *         {@link HttpAuthentication}, or <code>null</code> if custom
+	 *         already implements {@link HttpAuthentication}.
+	 */
+	HttpAuthenticationFactory<A, C> getHttpAuthenticationFactory();
 
 	/**
 	 * Obtains the type for access control.
 	 * 
 	 * @return Type for access control.
 	 */
-	Class<AC> getAccessControlClass();
+	Class<AC> getAccessControlType();
+
+	/**
+	 * Should the custom access control not implement {@link HttpAccessControl},
+	 * then this factory provides a wrapping {@link HttpAccessControl}
+	 * implementation.
+	 * 
+	 * @return {@link HttpAccessControlFactory} to create wrapping
+	 *         {@link HttpAccessControl}, or <code>null</code> if custom already
+	 *         implements {@link HttpAccessControl}.
+	 */
+	HttpAccessControlFactory<AC> getHttpAccessControlFactory();
 
 	/**
 	 * Obtains the type for credentials.
@@ -47,7 +75,7 @@ public interface HttpSecurityType<A, AC, C, O extends Enum<O>, F extends Enum<F>
 	 * @return Type for credentials. May be <code>null</code> if no application
 	 *         specific behaviour is required to provide credentials.
 	 */
-	Class<C> getCredentialsClass();
+	Class<C> getCredentialsType();
 
 	/**
 	 * Obtains the {@link HttpSecurityDependencyType} definitions of the

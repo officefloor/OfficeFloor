@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.spi.security;
 
+import java.io.Serializable;
+
 import net.officefloor.server.http.HttpException;
 
 /**
@@ -28,7 +30,7 @@ import net.officefloor.server.http.HttpException;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecuritySource<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
+public interface HttpSecuritySource<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * <p>

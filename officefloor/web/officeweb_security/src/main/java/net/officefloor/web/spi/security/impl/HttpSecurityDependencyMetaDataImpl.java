@@ -24,13 +24,12 @@ import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityDependencyMetaDataImpl<D extends Enum<D>> implements
-		HttpSecurityDependencyMetaData<D> {
+public class HttpSecurityDependencyMetaDataImpl<O extends Enum<O>> implements HttpSecurityDependencyMetaData<O> {
 
 	/**
 	 * Key identifying the dependency.
 	 */
-	private final D key;
+	private final O key;
 
 	/**
 	 * Type of dependency required.
@@ -55,7 +54,7 @@ public class HttpSecurityDependencyMetaDataImpl<D extends Enum<D>> implements
 	 * @param type
 	 *            Type of dependency.
 	 */
-	public HttpSecurityDependencyMetaDataImpl(D key, Class<?> type) {
+	public HttpSecurityDependencyMetaDataImpl(O key, Class<?> type) {
 		this.key = key;
 		this.type = type;
 	}
@@ -85,7 +84,7 @@ public class HttpSecurityDependencyMetaDataImpl<D extends Enum<D>> implements
 	 */
 
 	@Override
-	public D getKey() {
+	public O getKey() {
 		return this.key;
 	}
 

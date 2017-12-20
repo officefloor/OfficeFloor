@@ -22,9 +22,8 @@ import java.io.Serializable;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticationContinuationException;
+import net.officefloor.web.spi.security.AuthenticationContinuationError;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
@@ -34,14 +33,14 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompleteApplicationHttpAuthenticateFunction extends
+public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable> extends
 		StaticManagedFunction<CompleteApplicationHttpAuthenticateFunction.Dependencies, CompleteApplicationHttpAuthenticateFunction.Flows> {
 
 	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		HTTP_AUTHENTICATION, HTTP_SESSION, REQUEST_STATE
+		ACCESS_CONTROL, HTTP_SESSION, REQUEST_STATE
 	}
 
 	/**
@@ -56,30 +55,12 @@ public class CompleteApplicationHttpAuthenticateFunction extends
 	 */
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
 
-		// Obtain the HTTP authentication to check on authentication
-		HttpAuthentication authentication = (HttpAuthentication) context.getObject(Dependencies.HTTP_AUTHENTICATION);
-		
-		// Determine if security obtained from application authentication
-		Object security;
-		try {
-			security = authentication.getAccessControl();
-		} catch (Throwable ex) {
-			// Handle the failure
-			context.doFlow(Flows.FAILURE, ex, null);
-			return null; // failed to authenticate
-		}
+		// Obtain the access control (handles not logged in)
+		context.getObject(Dependencies.ACCESS_CONTROL);
 
-		// Ensure have security
-		if (security == null) {
-			// Not authenticated, so trigger challenge again.
-			// (Continue with old saved request)
-			throw new HttpAuthenticationRequiredException(false);
-		}
-
-		// Reinstate the request for servicing before authentication required
+		// Reinstate request for servicing prior to authentication required
 		HttpSession session = (HttpSession) context.getObject(Dependencies.HTTP_SESSION);
 		HttpRequestState requestState = (HttpRequestState) context.getObject(Dependencies.REQUEST_STATE);
 		Serializable momento = session.getAttribute(HttpChallengeFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO);
@@ -88,7 +69,7 @@ public class CompleteApplicationHttpAuthenticateFunction extends
 			HttpRequestStateManagedObjectSource.importHttpRequestState(momento, requestState);
 		} else {
 			// Failure as must reinstate request
-			context.doFlow(Flows.FAILURE, new HttpAuthenticationContinuationException(), null);
+			context.doFlow(Flows.FAILURE, new AuthenticationContinuationError(), null);
 			return null; // continuation failure
 		}
 

@@ -17,25 +17,37 @@
  */
 package net.officefloor.web.spi.security;
 
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
+
 /**
- * Portable interface for {@link HttpSecuritySource} credentials.
+ * Context for logging out.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpCredentials {
+public interface LogoutContext<O extends Enum<O>> {
 
 	/**
-	 * Obtains the username.
+	 * Obtains the {@link ServerHttpConnection}.
 	 * 
-	 * @return Username.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	String getUsername();
+	ServerHttpConnection getConnection();
 
 	/**
-	 * Obtains the password.
+	 * Obtains the {@link HttpSession}.
 	 * 
-	 * @return Password.
+	 * @return {@link HttpSession}.
 	 */
-	byte[] getPassword();
+	HttpSession getSession();
+
+	/**
+	 * Obtains a dependency.
+	 * 
+	 * @param key
+	 *            Key for the dependency.
+	 * @return Dependency.
+	 */
+	Object getObject(O key);
 
 }

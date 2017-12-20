@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,17 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.web.security.type.HttpSecurityType;
-import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
- * {@link HttpSecurity} configuration.
+ * Configuration for {@link HttpSecuritySectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurityConfiguration<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
+public interface HttpSecurityConfiguration<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link HttpSecurity}.
@@ -34,13 +35,6 @@ public interface HttpSecurityConfiguration<A, AC, C, O extends Enum<O>, F extend
 	 * @return {@link HttpSecurity}.
 	 */
 	HttpSecurity<A, AC, C, O, F> getHttpSecurity();
-
-	/**
-	 * Obtains the {@link HttpAccessControlFactory}.
-	 * 
-	 * @return {@link HttpAccessControlFactory}.
-	 */
-	HttpAccessControlFactory<AC> getAccessControlFactory();
 
 	/**
 	 * Obtains the {@link HttpSecurityType}.

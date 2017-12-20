@@ -17,10 +17,12 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
 import org.junit.Assert;
 
-import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -29,7 +31,6 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.web.security.impl.HttpSecurityConfiguration;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
@@ -64,7 +65,7 @@ public class HttpSecurityLoaderUtil {
 	 *            instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> PropertyList validateSpecification(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> PropertyList validateSpecification(
 			Class<HS> httpSecuritySourceClass, String... propertyNameLabels) {
 
 		// Create an instance of the HTTP security source
@@ -122,13 +123,13 @@ public class HttpSecurityLoaderUtil {
 	 * @return Validated {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurityType<A, AC, C, O, F> validateHttpSecurityType(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurityType<A, AC, C, O, F> validateHttpSecurityType(
 			HttpSecurityTypeBuilder expectedHttpSecurityType, Class<HS> httpSecuritySourceClass,
 			final String... propertyNameValues) {
 
 		// Cast to obtain expected HTTP security type
 		if (!(expectedHttpSecurityType instanceof HttpSecurityTypeBuilderImpl)) {
-			TestCase.fail("builder must be created from createHttpSecurityTypeBuilder");
+			Assert.fail("builder must be created from createHttpSecurityTypeBuilder");
 		}
 		final HttpSecurityTypeBuilderImpl builder = (HttpSecurityTypeBuilderImpl) expectedHttpSecurityType;
 
@@ -147,9 +148,10 @@ public class HttpSecurityLoaderUtil {
 		// Ensure correct credentials class
 		HttpSecurityType<A, AC, C, O, F> securityType = loadHttpSecurityType(httpSecuritySource, propertyNameValues);
 		Assert.assertEquals("Incorrect authentication class", builder.authenticationClass,
-				securityType.getAuthenticationClass());
-		TestCase.assertEquals("Incorrect credentials class", builder.credentialsClass,
-				securityType.getCredentialsClass());
+				securityType.getAuthenticationType());
+		Assert.assertEquals("Incorrect access control class", builder.accessControlClass,
+				securityType.getAccessControlType());
+		Assert.assertEquals("Incorrect credentials class", builder.credentialsClass, securityType.getCredentialsType());
 
 		// Return the HTTP security type
 		return securityType;
@@ -178,7 +180,7 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link HttpSecuritySource}.
 	 * @return Initialised {@link HttpSecuritySource}.
 	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HS loadHttpSecuritySource(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HS loadHttpSecuritySource(
 			Class<HS> httpSecuritySourceClass, String... propertyNameValues) {
 
 		// Create an instance of HTTP security source
@@ -216,7 +218,7 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link HttpSecuritySource}.
 	 * @return Initialised {@link HttpSecuritySource}.
 	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurity<A, AC, C, O, F> loadHttpSecurity(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurity<A, AC, C, O, F> loadHttpSecurity(
 			Class<HS> httpSecuritySourceClass, String... propertyNameValues) {
 
 		// Load the HTTP security source
@@ -245,7 +247,7 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link HttpSecuritySource} class.
 	 * @return New {@link HttpSecuritySource} instance.
 	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HS newHttpSecuritySource(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HS newHttpSecuritySource(
 			Class<HS> httpSecuritySourceClass) {
 
 		// Create an instance of the HTTP security source
@@ -280,11 +282,11 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link Property} name/value pairs.
 	 * @return {@link HttpSecurityType}.
 	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource, String... propertyNameValues) {
 
 		// Create the properties
-		PropertyList propertyList = getOfficeFloorCompiler(null).createPropertyList();
+		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
@@ -301,39 +303,6 @@ public class HttpSecurityLoaderUtil {
 	}
 
 	/**
-	 * Loads the {@link HttpSecurityConfiguration}.
-	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param httpSecuritySource
-	 *            {@link HttpSecuritySource}.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs.
-	 * @return {@link HttpSecurityConfiguration}.
-	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityConfiguration<A, AC, C, O, F> loadHttpSecurityConfiguration(
-			final HttpSecuritySource<A, AC, C, O, F> httpSecuritySource, String... propertyNameValues) {
-
-		// Obtain the HTTP security
-		HttpSecurity<A, AC, C, O, F> httpSecurity = httpSecuritySource.sourceHttpSecurity(null);
-
-		// Load the HTTP security type
-		final HttpSecurityType<A, AC, C, O, F> securityType = loadHttpSecurityType(httpSecuritySource,
-				propertyNameValues);
-
-		// Create and return the HTTP security configuration
-		return new HttpSecurityConfigurationImpl<>(httpSecurity, null, securityType);
-	}
-
-	/**
 	 * Obtains the {@link HttpSecurityLoader}.
 	 * 
 	 * @param classLoader
@@ -341,50 +310,12 @@ public class HttpSecurityLoaderUtil {
 	 * @return {@link HttpSecurityLoader}.
 	 */
 	private static HttpSecurityLoader getHttpSecurityLoader(ClassLoader classLoader) {
-		ManagedObjectLoader managedObjectLoader = getOfficeFloorCompiler(classLoader).getManagedObjectLoader();
-		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
+		CompilerIssues issues = new FailTestCompilerIssues();
+		compiler.setCompilerIssues(issues);
+		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
+		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler, issues);
 		return securityLoader;
-	}
-
-	/**
-	 * {@link OfficeFloorCompiler} for the next operation.
-	 */
-	private static OfficeFloorCompiler nextOfficeFloorCompiler = null;
-
-	/**
-	 * Specifies the {@link OfficeFloorCompiler} for the next operation.
-	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler} for the next operation.
-	 */
-	public static void setNextOfficeFloorCompiler(OfficeFloorCompiler compiler) {
-		nextOfficeFloorCompiler = compiler;
-	}
-
-	/**
-	 * Obtains the {@link OfficeFloorCompiler} setup for use.
-	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @return {@link OfficeFloorCompiler}.
-	 */
-	private static OfficeFloorCompiler getOfficeFloorCompiler(ClassLoader classLoader) {
-
-		OfficeFloorCompiler compiler;
-
-		// Determine if OfficeFloorCompiler for this operation
-		if (nextOfficeFloorCompiler != null) {
-			// Use next OfficeFloorCompiler
-			compiler = nextOfficeFloorCompiler;
-			nextOfficeFloorCompiler = null; // clear for further operations
-		} else {
-			// Create the office floor compiler that fails on first issue
-			compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
-			compiler.setCompilerIssues(new FailTestCompilerIssues());
-		}
-
-		// Return the OfficeFloorCompiler
-		return compiler;
 	}
 
 	/**
@@ -409,6 +340,11 @@ public class HttpSecurityLoaderUtil {
 		private Class<?> authenticationClass;
 
 		/**
+		 * Access Control {@link Class}.
+		 */
+		private Class<?> accessControlClass;
+
+		/**
 		 * Credentials {@link Class}.
 		 */
 		private Class<?> credentialsClass;
@@ -421,6 +357,7 @@ public class HttpSecurityLoaderUtil {
 		 */
 		public HttpSecurityTypeBuilderImpl(ManagedObjectTypeBuilder moTypeBuilder) {
 			this.moTypeBuilder = moTypeBuilder;
+			this.moTypeBuilder.setObjectClass(Void.class);
 		}
 
 		/*
@@ -433,8 +370,8 @@ public class HttpSecurityLoaderUtil {
 		}
 
 		@Override
-		public void setAccessControlClass(Class<?> securityClass) {
-			this.moTypeBuilder.setObjectClass(securityClass);
+		public void setAccessControlClass(Class<?> accessControlClass) {
+			this.accessControlClass = accessControlClass;
 		}
 
 		@Override

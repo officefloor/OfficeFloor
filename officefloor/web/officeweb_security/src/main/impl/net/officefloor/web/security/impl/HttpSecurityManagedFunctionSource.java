@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,36 +33,22 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.security.HttpAccessControl;
-import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.type.HttpSecurityDependencyType;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.state.HttpRequestState;
 
 /**
- * {@link ManagedFunctionSource} for {@link HttpAccessControl}.
+ * {@link ManagedFunctionSource} for {@link HttpSecurity}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSource {
-
-	/**
-	 * Obtains the credentials class for the {@link HttpSecurityType}.
-	 * 
-	 * @param type
-	 *            {@link HttpSecurityType}.
-	 * @return Credentials class.
-	 */
-	public static Class<?> getCredentialsClass(HttpSecurityType<?, ?, ?, ?, ?> type) {
-		Class<?> credentialsType = type.getCredentialsClass();
-		if (credentialsType == null) {
-			credentialsType = Void.class;
-		}
-		return credentialsType;
-	}
+public class HttpSecurityManagedFunctionSource<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
+		extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of the {@link HttpChallengeFunction}.
@@ -69,12 +56,12 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 	public static final String FUNCTION_CHALLENGE = "CHALLENGE";
 
 	/**
-	 * Name of the {@link ManagedObjectHttpAuthenticateFunction}.
+	 * Name of the {@link ManagedObjectAuthenticateFunction}.
 	 */
 	public static final String FUNCTION_MANAGED_OBJECT_AUTHENTICATE = "MANAGED_OBJECT_AUTHENTICATE";
 
 	/**
-	 * Name of the {@link ManagedObjectHttpLogoutFunction}.
+	 * Name of the {@link ManagedObjectLogoutFunction}.
 	 */
 	public static final String FUNCTION_MANAGED_OBJECT_LOGOUT = "MANAGED_OBJECT_LOGOUT";
 
@@ -89,18 +76,27 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 	public static final String FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE = "COMPLETE_APPLICATION_AUTHENTICATE";
 
 	/**
-	 * {@link HttpSecurityConfiguration}.
+	 * {@link HttpSecurity}.
 	 */
-	private final HttpSecurityConfiguration<?, ?, ?, ?, ?> httpSecurityConfiguration;
+	private final HttpSecurity<A, AC, C, O, F> httpSecurity;
+
+	/**
+	 * {@link HttpSecurityType}.
+	 */
+	private final HttpSecurityType<A, AC, C, O, F> httpSecurityType;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurityConfiguration
-	 *            {@link HttpSecurityConfiguration}.
+	 * @param httpSecurity
+	 *            {@link HttpSecurity}.
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType}.
 	 */
-	public HttpSecurityManagedFunctionSource(HttpSecurityConfiguration<?, ?, ?, ?, ?> httpSecurityConfiguration) {
-		this.httpSecurityConfiguration = httpSecurityConfiguration;
+	public HttpSecurityManagedFunctionSource(HttpSecurity<A, AC, C, O, F> httpSecurity,
+			HttpSecurityType<A, AC, C, O, F> httpSecurityType) {
+		this.httpSecurity = httpSecurity;
+		this.httpSecurityType = httpSecurityType;
 	}
 
 	/*
@@ -115,14 +111,9 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
-		// Obtain the HTTP security
-		HttpSecurity<?, ?, ?, ?, ?> httpSecurity = this.httpSecurityConfiguration.getHttpSecurity();
-
-		// Obtain the HTTP Security Type
-		HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType = this.httpSecurityConfiguration.getHttpSecurityType();
-
-		// Obtain the credentials type
-		Class<?> credentialsType = getCredentialsClass(httpSecurityType);
+		// Obtain the type information
+		Class<AC> accessControlType = this.httpSecurityType.getAccessControlType();
+		Class<C> credentialsType = this.httpSecurityType.getCredentialsType();
 
 		// Obtain the index order list of dependency types
 		List<HttpSecurityDependencyType<?>> dependencyTypes = new ArrayList<HttpSecurityDependencyType<?>>(
@@ -146,7 +137,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 
 		// Add the managed object authentication function
 		ManagedFunctionTypeBuilder<Indexed, None> moAuthenticate = namespaceTypeBuilder.addManagedFunctionType(
-				FUNCTION_MANAGED_OBJECT_AUTHENTICATE, new ManagedObjectHttpAuthenticateFunction(httpSecurity),
+				FUNCTION_MANAGED_OBJECT_AUTHENTICATE, new ManagedObjectAuthenticateFunction<>(this.httpSecurity),
 				Indexed.class, None.class);
 		moAuthenticate.addObject(FunctionAuthenticateContext.class).setLabel("FUNCTION_AUTHENTICATE_CONTEXT");
 		for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
@@ -156,7 +147,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 
 		// Add the managed object logout function
 		ManagedFunctionTypeBuilder<Indexed, None> logout = namespaceTypeBuilder.addManagedFunctionType(
-				FUNCTION_MANAGED_OBJECT_LOGOUT, new ManagedObjectHttpLogoutFunction(httpSecurity), Indexed.class,
+				FUNCTION_MANAGED_OBJECT_LOGOUT, new ManagedObjectLogoutFunction<>(this.httpSecurity), Indexed.class,
 				None.class);
 		logout.addObject(FunctionLogoutContext.class).setLabel("FUNCTION_LOGOUT_CONTEXT");
 		for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
@@ -166,9 +157,8 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 
 		// Add the challenge function
 		ManagedFunctionTypeBuilder<Indexed, Indexed> challenge = namespaceTypeBuilder.addManagedFunctionType(
-				FUNCTION_CHALLENGE, new HttpChallengeFunction(httpSecurity), Indexed.class, Indexed.class);
-		challenge.addObject(HttpAuthenticationRequiredException.class)
-				.setLabel("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION");
+				FUNCTION_CHALLENGE, new HttpChallengeFunction<>(this.httpSecurity), Indexed.class, Indexed.class);
+		challenge.addObject(AuthenticationRequiredException.class).setLabel("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION");
 		challenge.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		challenge.addObject(HttpSession.class).setLabel("HTTP_SESSION");
 		challenge.addObject(HttpRequestState.class).setLabel("HTTP_REQUEST_STATE");
@@ -186,27 +176,30 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 		}
 
 		// Add the start application authentication function
-		ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> appStart = namespaceTypeBuilder
-				.addManagedFunctionType(FUNCTION_START_APPLICATION_AUTHENTICATE,
-						new StartApplicationHttpAuthenticateFunction(),
-						StartApplicationHttpAuthenticateFunction.Dependencies.class,
-						StartApplicationHttpAuthenticateFunction.Flows.class);
-		appStart.addObject(credentialsType).setKey(StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS);
-		appStart.addObject(HttpAuthentication.class)
-				.setKey(StartApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION);
-		ManagedFunctionFlowTypeBuilder<StartApplicationHttpAuthenticateFunction.Flows> appStartFailureFlow = appStart
-				.addFlow();
-		appStartFailureFlow.setKey(StartApplicationHttpAuthenticateFunction.Flows.FAILURE);
-		appStartFailureFlow.setArgumentType(Throwable.class);
+		if (credentialsType != null) {
+			ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> appStart = namespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_START_APPLICATION_AUTHENTICATE,
+							new StartApplicationHttpAuthenticateFunction<>(),
+							StartApplicationHttpAuthenticateFunction.Dependencies.class,
+							StartApplicationHttpAuthenticateFunction.Flows.class);
+			appStart.addObject(AuthenticationContext.class)
+					.setKey(StartApplicationHttpAuthenticateFunction.Dependencies.AUTHENTICATION_CONTEXT);
+			appStart.addObject(credentialsType)
+					.setKey(StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS);
+			ManagedFunctionFlowTypeBuilder<StartApplicationHttpAuthenticateFunction.Flows> appStartFailureFlow = appStart
+					.addFlow();
+			appStartFailureFlow.setKey(StartApplicationHttpAuthenticateFunction.Flows.FAILURE);
+			appStartFailureFlow.setArgumentType(Throwable.class);
+		}
 
 		// Add the complete application authentication function
 		ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateFunction.Dependencies, CompleteApplicationHttpAuthenticateFunction.Flows> appComplete = namespaceTypeBuilder
 				.addManagedFunctionType(FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE,
-						new CompleteApplicationHttpAuthenticateFunction(),
+						new CompleteApplicationHttpAuthenticateFunction<>(),
 						CompleteApplicationHttpAuthenticateFunction.Dependencies.class,
 						CompleteApplicationHttpAuthenticateFunction.Flows.class);
-		appComplete.addObject(HttpAuthentication.class)
-				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION);
+		appComplete.addObject(accessControlType)
+				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.ACCESS_CONTROL);
 		appComplete.addObject(HttpSession.class)
 				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION);
 		appComplete.addObject(HttpRequestState.class)

@@ -17,12 +17,13 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.spi.security.HttpAuthenticateCallback;
+import net.officefloor.web.spi.security.AuthenticationContext;
 
 /**
  * {@link ManagedFunction} and {@link ManagedFunctionFactory} for triggering
@@ -30,14 +31,14 @@ import net.officefloor.web.spi.security.HttpAuthenticateCallback;
  * 
  * @author Daniel Sagenschneider
  */
-public class StartApplicationHttpAuthenticateFunction extends
+public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C> extends
 		StaticManagedFunction<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> {
 
 	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		CREDENTIALS, HTTP_AUTHENTICATION
+		AUTHENTICATION_CONTEXT, CREDENTIALS
 	}
 
 	/**
@@ -52,38 +53,27 @@ public class StartApplicationHttpAuthenticateFunction extends
 	 */
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
 
 		// Obtain the dependencies
-		Object credentials = context.getObject(Dependencies.CREDENTIALS);
-		HttpAuthentication authentication = (HttpAuthentication) context.getObject(Dependencies.HTTP_AUTHENTICATION);
+		AuthenticationContext<AC, C> authenticationContext = (AuthenticationContext<AC, C>) context
+				.getObject(Dependencies.AUTHENTICATION_CONTEXT);
+		C credentials = (C) context.getObject(Dependencies.CREDENTIALS);
 
 		// Trigger authentication
 		try {
-			authentication.authenticate(credentials, new HttpAuthenticateCallbackImpl());
+			authenticationContext.authenticate(credentials, (failure) -> {
+				if (failure != null) {
+					context.doFlow(Flows.FAILURE, failure, null);
+				}
+			});
 		} catch (Throwable ex) {
-			// Trigger failure
 			context.doFlow(Flows.FAILURE, ex, null);
 		}
 
-		// No further tasks
+		// Nothing further
 		return null;
-	}
-
-	/**
-	 * {@link HttpAuthenticateCallback} implementation.
-	 */
-	private static class HttpAuthenticateCallbackImpl<C> implements HttpAuthenticateCallback {
-
-		/*
-		 * ==================== HttpAuthenticateRequest ====================
-		 */
-
-		@Override
-		public void authenticationComplete() {
-			// Do nothing as complete only run when authentication complete
-		}
 	}
 
 }

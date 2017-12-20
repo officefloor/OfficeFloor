@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.build;
 
+import java.io.Serializable;
+
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -40,8 +42,8 @@ public interface HttpSecurityArchitect {
 	 *            {@link HttpSecuritySource} {@link Class}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
-	<A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(String securityName,
-			Class<? extends HttpSecuritySource<A, AC, C, O, F>> httpSecuritySourceClass);
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(
+			String securityName, Class<? extends HttpSecuritySource<A, AC, C, O, F>> httpSecuritySourceClass);
 
 	/**
 	 * Adds a {@link HttpSecurity}.
@@ -54,8 +56,8 @@ public interface HttpSecurityArchitect {
 	 *            {@link HttpSecuritySource}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
-	<A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(String securityName,
-			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(
+			String securityName, HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be

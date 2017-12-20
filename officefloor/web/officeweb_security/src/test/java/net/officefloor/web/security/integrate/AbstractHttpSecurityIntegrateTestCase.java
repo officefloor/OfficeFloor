@@ -41,10 +41,10 @@ import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
-import net.officefloor.web.spi.security.HttpCredentials;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 

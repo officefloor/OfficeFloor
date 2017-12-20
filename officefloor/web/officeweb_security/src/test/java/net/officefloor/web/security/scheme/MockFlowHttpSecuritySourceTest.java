@@ -21,10 +21,10 @@ import java.io.IOException;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource.Flows;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
-import net.officefloor.web.spi.security.HttpCredentials;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -164,7 +164,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<>();
 
 		// Provide state in session (that should be cleared)
-		logoutContext.getSession().setAttribute("http.security.form", new MockAccessControl("mock", "user", null));
+		logoutContext.getSession().setAttribute("http.security.mock.form", new MockAccessControl("mock", "user", null));
 
 		// Create and initialise the security
 		HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> security = HttpSecurityLoaderUtil
@@ -175,7 +175,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Ensure session cleared
 		assertNull("Should clear session of access control",
-				logoutContext.getSession().getAttribute("http.security.form"));
+				logoutContext.getSession().getAttribute("http.security.mock.form"));
 	}
 
 	/**

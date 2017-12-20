@@ -26,12 +26,13 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpChallengeContext;
-import net.officefloor.web.spi.security.HttpCredentials;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -146,30 +147,30 @@ public class HttpSecuritySourceSpecificationRunnableTest extends OfficeFrameTest
 		 */
 
 		@Override
-		public HttpAuthentication<HttpCredentials> createAuthentication() {
+		public HttpAuthentication<HttpCredentials> createAuthentication(
+				AuthenticationContext<HttpAccessControl, HttpCredentials> context) {
 			fail("Should not be required for loading specification");
 			return null;
 		}
 
 		@Override
-		public boolean ratify(HttpCredentials credentials, HttpRatifyContext<HttpAccessControl> context) {
+		public boolean ratify(HttpCredentials credentials, RatifyContext<HttpAccessControl> context) {
 			fail("Should not be required for loading specification");
 			return false;
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials,
-				HttpAuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
 			fail("Should not be required for loading specification");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context) {
+		public void challenge(ChallengeContext<None, None> context) {
 			fail("Should not be required for loading specification");
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<None> context) {
+		public void logout(LogoutContext<None> context) {
 			fail("Should not be required for loading specification");
 		}
 	}

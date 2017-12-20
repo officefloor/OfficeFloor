@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.spi.security;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.server.http.HttpException;
@@ -28,14 +30,14 @@ import net.officefloor.web.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurity<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
+public interface HttpSecurity<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Creates the custom authentication.
 	 * 
 	 * @return Custom authentication.
 	 */
-	A createAuthentication();
+	A createAuthentication(AuthenticationContext<AC, C> context);
 
 	/**
 	 * <p>
@@ -54,12 +56,12 @@ public interface HttpSecurity<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
 	 * @param credentials
 	 *            Credentials.
 	 * @param context
-	 *            {@link HttpRatifyContext}.
+	 *            {@link RatifyContext}.
 	 * @return <code>true</code> should enough information be available to
 	 *         undertake authentication. <code>false</code> if not enough
 	 *         information is available for authentication.
 	 */
-	boolean ratify(C credentials, HttpRatifyContext<AC> context);
+	boolean ratify(C credentials, RatifyContext<AC> context);
 
 	/**
 	 * Undertakes authentication.
@@ -67,30 +69,30 @@ public interface HttpSecurity<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
 	 * @param credentials
 	 *            Credentials.
 	 * @param context
-	 *            {@link HttpAuthenticateContext}.
+	 *            {@link AuthenticateContext}.
 	 * @throws HttpException
 	 *             If failure in communicating to necessary security services.
 	 */
-	void authenticate(C credentials, HttpAuthenticateContext<AC, O> context) throws HttpException;
+	void authenticate(C credentials, AuthenticateContext<AC, O> context) throws HttpException;
 
 	/**
 	 * Triggers the authentication challenge to the client.
 	 * 
 	 * @param context
-	 *            {@link HttpChallengeContext}.
+	 *            {@link ChallengeContext}.
 	 * @throws HttpException
 	 *             If failure in communicating to necessary security services.
 	 */
-	void challenge(HttpChallengeContext<O, F> context) throws HttpException;
+	void challenge(ChallengeContext<O, F> context) throws HttpException;
 
 	/**
 	 * Logs out.
 	 * 
 	 * @param context
-	 *            {@link HttpLogoutContext}.
+	 *            {@link LogoutContext}.
 	 * @throws HttpException
 	 *             If failure in communicating to necessary security services.
 	 */
-	void logout(HttpLogoutContext<O> context) throws HttpException;
+	void logout(LogoutContext<O> context) throws HttpException;
 
 }

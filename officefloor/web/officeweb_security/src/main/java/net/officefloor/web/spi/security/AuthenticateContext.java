@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2017 Daniel Sagenschneider
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,17 @@
  */
 package net.officefloor.web.spi.security;
 
+import java.io.Serializable;
+
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 
 /**
- * HTTP ratify context.
+ * Context for authentication.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpRatifyContext<AC> extends AccessControlLoader<AC> {
+public interface AuthenticateContext<AC extends Serializable, O extends Enum<O>> extends AccessControlListener<AC> {
 
 	/**
 	 * Obtains the {@link ServerHttpConnection}.
@@ -40,5 +42,14 @@ public interface HttpRatifyContext<AC> extends AccessControlLoader<AC> {
 	 * @return {@link HttpSession}.
 	 */
 	HttpSession getSession();
+
+	/**
+	 * Obtains a dependency.
+	 * 
+	 * @param key
+	 *            Key for the dependency.
+	 * @return Dependency.
+	 */
+	Object getObject(O key);
 
 }

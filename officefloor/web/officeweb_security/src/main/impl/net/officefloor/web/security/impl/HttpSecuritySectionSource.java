@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -28,12 +30,14 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.AuthenticationRequiredException;
+import net.officefloor.web.security.LogoutRequest;
 import net.officefloor.web.security.type.HttpSecurityDependencyType;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpLogoutRequest;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -42,7 +46,8 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySectionSource extends AbstractSectionSource {
+public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
+		extends AbstractSectionSource {
 
 	/**
 	 * Name of the {@link SectionInput} for challenging.
@@ -69,16 +74,16 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 	/**
 	 * {@link HttpSecurityConfiguration}.
 	 */
-	private final HttpSecurityConfiguration<?, ?, ?, ?, ?> httpSecurityConfiguration;
+	private final HttpSecurityConfiguration<A, AC, C, O, F> configuration;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurityConfiguration
+	 * @param configuration
 	 *            {@link HttpSecurityConfiguration}.
 	 */
-	public HttpSecuritySectionSource(HttpSecurityConfiguration<?, ?, ?, ?, ?> httpSecurityConfiguration) {
-		this.httpSecurityConfiguration = httpSecurityConfiguration;
+	public HttpSecuritySectionSource(HttpSecurityConfiguration<A, AC, C, O, F> configuration) {
+		this.configuration = configuration;
 	}
 
 	/*
@@ -93,20 +98,27 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 	@Override
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-		// Obtain the HTTP Security Type
-		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.httpSecurityConfiguration.getHttpSecurityType();
+		// Obtain the security and it's type
+		HttpSecurity<A, AC, C, O, F> security = this.configuration.getHttpSecurity();
+		HttpSecurityType<A, AC, C, O, F> securityType = this.configuration.getHttpSecurityType();
 
-		// Obtain the credentials type
-		Class<?> credentialsType = HttpSecurityManagedFunctionSource.getCredentialsClass(securityType);
+		// Obtain the type details
+		final Class<AC> accessControlType = securityType.getAccessControlType();
+		final Class<C> credentialsType = securityType.getCredentialsType();
 
-		// Create the dependent objects
+		// Create the dependent objects (from web application)
 		SectionObject serverHttpConnection = designer.addSectionObject("SERVER_HTTP_CONNECTION",
 				ServerHttpConnection.class.getName());
 		SectionObject httpSession = designer.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
 		SectionObject httpRequestState = designer.addSectionObject("HTTP_REQUEST_STATE",
 				HttpRequestState.class.getName());
-		SectionObject httpAuthentication = designer.addSectionObject("HTTP_AUTHENTICATION",
-				HttpAuthentication.class.getName());
+
+		// Create the authentication dependencies
+		SectionObject authenticationContext = designer.addSectionObject("AUTHENTICATION_CONTEXT",
+				AuthenticationContext.class.getName());
+		SectionObject accessControl = designer.addSectionObject("ACCESS_CONTROL", accessControlType.getName());
+
+		// Load the dynamic dependencies
 		HttpSecurityDependencyType<?>[] dependencyTypes = securityType.getDependencyTypes();
 		SectionObject[] dependencyObjects = new SectionObject[dependencyTypes.length];
 		for (int i = 0; i < dependencyObjects.length; i++) {
@@ -121,7 +133,7 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 
 		// Configure the HTTP Security Managed Function Source
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("HttpSecuritySource",
-				new HttpSecurityManagedFunctionSource(this.httpSecurityConfiguration));
+				new HttpSecurityManagedFunctionSource<>(security, securityType));
 
 		// Configure the challenge handling
 		SectionFunction challengeFunction = namespace.addSectionFunction(
@@ -167,52 +179,58 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 			designer.link(moLogoutFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
 
-		// Configure the application authentication start
-		SectionFunction startAuthFunction = namespace.addSectionFunction(
-				HttpSecurityManagedFunctionSource.FUNCTION_START_APPLICATION_AUTHENTICATE,
-				HttpSecurityManagedFunctionSource.FUNCTION_START_APPLICATION_AUTHENTICATE);
-		startAuthFunction.getFunctionObject(StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS.name())
-				.flagAsParameter();
-		designer.link(
-				startAuthFunction.getFunctionObject(
-						StartApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION.name()),
-				httpAuthentication);
-		designer.link(startAuthFunction.getFunctionFlow(StartApplicationHttpAuthenticateFunction.Flows.FAILURE.name()),
-				failureOutput, false);
+		// Determine if application credential login
+		if (credentialsType != null) {
 
-		// Configure the application authentication completion
-		SectionFunction completeAuthFunction = namespace.addSectionFunction(
-				HttpSecurityManagedFunctionSource.FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE,
-				HttpSecurityManagedFunctionSource.FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE);
-		designer.link(
-				completeAuthFunction.getFunctionObject(
-						CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION.name()),
-				httpAuthentication);
-		designer.link(completeAuthFunction.getFunctionObject(
-				CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION.name()), httpSession);
-		designer.link(
-				completeAuthFunction.getFunctionObject(
-						CompleteApplicationHttpAuthenticateFunction.Dependencies.REQUEST_STATE.name()),
-				httpRequestState);
-		designer.link(
-				completeAuthFunction.getFunctionFlow(CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE.name()),
-				failureOutput, false);
+			// Configure the application authentication start
+			SectionFunction startAuthFunction = namespace.addSectionFunction(
+					HttpSecurityManagedFunctionSource.FUNCTION_START_APPLICATION_AUTHENTICATE,
+					HttpSecurityManagedFunctionSource.FUNCTION_START_APPLICATION_AUTHENTICATE);
+			startAuthFunction
+					.getFunctionObject(StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS.name())
+					.flagAsParameter();
+			designer.link(
+					startAuthFunction.getFunctionObject(
+							StartApplicationHttpAuthenticateFunction.Dependencies.AUTHENTICATION_CONTEXT.name()),
+					authenticationContext);
+			designer.link(
+					startAuthFunction.getFunctionFlow(StartApplicationHttpAuthenticateFunction.Flows.FAILURE.name()),
+					failureOutput, false);
 
-		// Link completion for started authentication
-		designer.link(startAuthFunction, completeAuthFunction);
+			// Configure the application authentication completion
+			SectionFunction completeAuthFunction = namespace.addSectionFunction(
+					HttpSecurityManagedFunctionSource.FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE,
+					HttpSecurityManagedFunctionSource.FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE);
+			designer.link(
+					completeAuthFunction.getFunctionObject(
+							CompleteApplicationHttpAuthenticateFunction.Dependencies.ACCESS_CONTROL.name()),
+					accessControl);
+			designer.link(completeAuthFunction.getFunctionObject(
+					CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION.name()), httpSession);
+			designer.link(
+					completeAuthFunction.getFunctionObject(
+							CompleteApplicationHttpAuthenticateFunction.Dependencies.REQUEST_STATE.name()),
+					httpRequestState);
+			designer.link(completeAuthFunction.getFunctionFlow(
+					CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE.name()), failureOutput, false);
 
-		// Link re-continue for completed authentication
-		designer.link(completeAuthFunction, designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
+			// Link completion for started authentication
+			designer.link(startAuthFunction, completeAuthFunction);
+
+			// Link re-continue for completed authentication
+			designer.link(completeAuthFunction, designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
+
+			// Link input for application login
+			designer.link(designer.addSectionInput(INPUT_AUTHENTICATE, credentialsType.getName()), startAuthFunction);
+		}
 
 		// Link inputs
-		designer.link(designer.addSectionInput(INPUT_CHALLENGE, HttpAuthenticationRequiredException.class.getName()),
+		designer.link(designer.addSectionInput(INPUT_CHALLENGE, AuthenticationRequiredException.class.getName()),
 				challengeFunction);
-		designer.link(designer.addSectionInput(INPUT_AUTHENTICATE, credentialsType.getName()), startAuthFunction);
 		designer.link(
 				designer.addSectionInput("ManagedObjectAuthenticate", FunctionAuthenticateContext.class.getName()),
 				moAuthFunction);
-		designer.link(designer.addSectionInput("ManagedObjectLogout", HttpLogoutRequest.class.getName()),
-				moLogoutFunction);
+		designer.link(designer.addSectionInput("ManagedObjectLogout", LogoutRequest.class.getName()), moLogoutFunction);
 	}
 
 }

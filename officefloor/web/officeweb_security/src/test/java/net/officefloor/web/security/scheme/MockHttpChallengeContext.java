@@ -26,17 +26,17 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallenge;
-import net.officefloor.web.spi.security.HttpChallengeContext;
+import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
- * Mock {@link HttpChallengeContext} for testing {@link HttpSecuritySource}
+ * Mock {@link ChallengeContext} for testing {@link HttpSecuritySource}
  * instances.
  * 
  * @author Daniel Sagenschneider
  */
 public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
-		implements HttpChallengeContext<O, F>, HttpChallenge {
+		implements ChallengeContext<O, F>, HttpChallenge {
 
 	/**
 	 * {@link ServerHttpConnection}.

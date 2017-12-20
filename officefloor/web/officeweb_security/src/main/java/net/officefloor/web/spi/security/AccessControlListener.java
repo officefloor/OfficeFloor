@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,31 @@
  */
 package net.officefloor.web.spi.security;
 
+import java.io.Serializable;
+
+import net.officefloor.frame.api.escalate.Escalation;
+
 /**
- * Request for logging out.
+ * Listens for change in access control (or {@link Escalation} in failing to
+ * authenticate).
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpLogoutRequest {
+public interface AccessControlListener<AC extends Serializable> {
 
 	/**
-	 * Notifies the requester that the log out has completed.
+	 * Notified of a change to access control.
 	 * 
-	 * @param failure
-	 *            On a successful logout this will be <code>null</code>. On
-	 *            failure to logout it will be the cause of the failure.
+	 * @param accessControl
+	 *            Access control. May be <code>null</code> if
+	 *            <ul>
+	 *            <li>logging out</li>
+	 *            <li>failure in authenticating</li>
+	 *            </ul>
+	 * @param escalation
+	 *            Possible {@link Escalation}. Will be <code>null</code> if
+	 *            successfully obtain access control or logout.
 	 */
-	void logoutComplete(Throwable failure);
+	void accessControlChange(AC accessControl, Throwable escalation);
 
 }

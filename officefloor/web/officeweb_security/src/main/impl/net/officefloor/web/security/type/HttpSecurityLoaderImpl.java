@@ -17,18 +17,25 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.web.security.type.HttpSecurityDependencyType;
-import net.officefloor.web.security.type.HttpSecurityFlowType;
-import net.officefloor.web.security.type.HttpSecurityLoader;
-import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.spi.security.HttpAccessControlFactory;
+import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 
@@ -49,8 +56,12 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * 
 	 * @param managedObjectLoader
 	 *            {@link ManagedObjectLoader}.
+	 * @param node
+	 *            {@link Node} context for {@link CompilerIssues}.
+	 * @param compilerIssues
+	 *            {@link CompilerIssues}.
 	 */
-	public HttpSecurityLoaderImpl(final ManagedObjectLoader managedObjectLoader) {
+	public HttpSecurityLoaderImpl(ManagedObjectLoader managedObjectLoader, Node node, CompilerIssues compilerIssues) {
 		this.loader = new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -64,18 +75,26 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 					HttpSecurityManagedObjectAdapterSource<D> source, PropertyList properties) {
 				return managedObjectLoader.loadManagedObjectType(source, properties);
 			}
+
+			@Override
+			public CompileError addIssue(String issueDescription) {
+				return compilerIssues.addIssue(node, issueDescription);
+			}
 		};
 	}
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
 	 *            {@link OfficeFloorSourceContext}.
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource}.
 	 */
-	public HttpSecurityLoaderImpl(final OfficeSourceContext officeSourceContext, final String managedObjectSourceName) {
+	public HttpSecurityLoaderImpl(OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext,
+			final String managedObjectSourceName) {
 		this.loader = new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
@@ -92,6 +111,11 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 				return (ManagedObjectType<D>) officeSourceContext.loadManagedObjectType(managedObjectSourceName, source,
 						properties);
 			}
+
+			@Override
+			public CompileError addIssue(String issueDescription) {
+				return officeArchitect.addIssue(issueDescription);
+			}
 		};
 	}
 
@@ -100,7 +124,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 */
 
 	@Override
-	public <A, AC, C, O extends Enum<O>, F extends Enum<F>> PropertyList loadSpecification(
+	public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> PropertyList loadSpecification(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource) {
 
 		// Obtain the specification
@@ -119,32 +143,64 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	}
 
 	@Override
-	public <A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
+	@SuppressWarnings("unchecked")
+	public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource, PropertyList propertyList) {
 
 		// Create the adaptation over the security source
 		HttpSecurityManagedObjectAdapterSource<O> adapter = new HttpSecurityManagedObjectAdapterSource<>(
 				httpSecuritySource);
 
-		// Load the managed object type
-		ManagedObjectType<O> moType = this.loader.loadManagedObjectType(adapter, propertyList);
-		if (moType == null) {
+		// Load the managed object access control type
+		ManagedObjectType<O> moAccessControlType = this.loader.loadManagedObjectType(adapter, propertyList);
+		if (moAccessControlType == null) {
 			return null; // failed to obtain type
 		}
 
 		// Obtain the meta-data
-		@SuppressWarnings("unchecked")
 		HttpSecuritySourceMetaData<A, AC, C, O, F> metaData = (HttpSecuritySourceMetaData<A, AC, C, O, F>) adapter
 				.getHttpSecuritySourceMetaData();
 
-		// Obtain the authentication type
-		Class<A> authenticationType = metaData.getAuthenticationClass();
+		// Obtain the authentication type and factory
+		Class<A> authenticationType = metaData.getAuthenticationType();
+		if (authenticationType == null) {
+			this.loader.addIssue("No Authentication type provided");
+			return null;
+		}
+		HttpAuthenticationFactory<A, C> httpAuthenticationFactory = null;
+		if (!(HttpAuthentication.class.isAssignableFrom(authenticationType))) {
+			httpAuthenticationFactory = metaData.getHttpAuthenticationFactory();
+			if (httpAuthenticationFactory == null) {
+				this.loader.addIssue("Must provide " + HttpAuthenticationFactory.class.getSimpleName()
+						+ ", as Authentication does not implement " + HttpAuthentication.class.getSimpleName()
+						+ " (Authentication Type: " + authenticationType.getName() + ")");
+				return null; // must have factory
+			}
+		}
+
+		// Obtain the access control type and factory
+		Class<AC> accessControlType = metaData.getAccessControlType();
+		if (accessControlType == null) {
+			this.loader.addIssue("No Access Control type provided");
+			return null;
+		}
+		HttpAccessControlFactory<AC> httpAccessControlFactory = null;
+		if (!(HttpAccessControl.class.isAssignableFrom(accessControlType))) {
+			httpAccessControlFactory = metaData.getHttpAccessControlFactory();
+			if (httpAccessControlFactory == null) {
+				this.loader.addIssue("Must provide " + HttpAccessControlFactory.class.getSimpleName()
+						+ ", as Access Control does not implement " + HttpAccessControl.class.getSimpleName()
+						+ " (Access Control Type: " + accessControlType.getName() + ")");
+				return null;
+			}
+		}
 
 		// Obtain the credentials type
-		Class<C> credentialsType = metaData.getCredentialsClass();
+		Class<C> credentialsType = metaData.getCredentialsType();
 
 		// Return the adapted type
-		return new ManagedObjectHttpSecurityType<A, AC, C, O, F>(moType, authenticationType, credentialsType);
+		return new HttpSecurityTypeImpl<A, AC, C, O, F>(authenticationType, httpAuthenticationFactory,
+				accessControlType, httpAccessControlFactory, credentialsType, moAccessControlType);
 	}
 
 	/**
@@ -173,6 +229,15 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 */
 		<O extends Enum<O>> ManagedObjectType<O> loadManagedObjectType(HttpSecurityManagedObjectAdapterSource<O> source,
 				PropertyList properties);
+
+		/**
+		 * Adds a {@link CompilerIssue}.
+		 * 
+		 * @param issueDescription
+		 *            Description of the issue.
+		 * @return {@link CompileError}.
+		 */
+		CompileError addIssue(String issueDescription);
 	}
 
 	/**
@@ -180,13 +245,8 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
-	private static class ManagedObjectHttpSecurityType<A, AC, C, O extends Enum<O>, F extends Enum<F>>
+	private static class HttpSecurityTypeImpl<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
 			implements HttpSecurityType<A, AC, C, O, F> {
-
-		/**
-		 * {@link ManagedObjectType}.
-		 */
-		private final ManagedObjectType<O> moType;
 
 		/**
 		 * Authentication type.
@@ -194,25 +254,54 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		private final Class<A> authenticationType;
 
 		/**
+		 * {@link HttpAuthenticationFactory}.
+		 */
+		private final HttpAuthenticationFactory<A, C> httpAuthenticationFactory;
+
+		/**
+		 * Access control type.
+		 */
+		private final Class<AC> accessControlType;
+
+		/**
+		 * {@link HttpAccessControlFactory}.
+		 */
+		private final HttpAccessControlFactory<AC> httpAccessControlFactory;
+
+		/**
 		 * Credentials type.
 		 */
 		private final Class<C> credentialsType;
 
 		/**
+		 * {@link ManagedObjectType}.
+		 */
+		private final ManagedObjectType<O> moAccessControlType;
+
+		/**
 		 * Initiate.
 		 * 
-		 * @param moType
-		 *            {@link ManagedObjectType}.
 		 * @param authenticationType
 		 *            Authentication type.
+		 * @param httpAuthenticationFactory
+		 *            {@link HttpAccessControlFactory}.
+		 * @param moAccessControlType
+		 *            {@link ManagedObjectType}.
+		 * @param httpAccessControlFactory
+		 *            {@link HttpAccessControlFactory}.
 		 * @param credentialsType
 		 *            Credentials type.
 		 */
-		private ManagedObjectHttpSecurityType(ManagedObjectType<O> moType, Class<A> authenticationType,
-				Class<C> credentialsType) {
-			this.moType = moType;
+		private HttpSecurityTypeImpl(Class<A> authenticationType,
+				HttpAuthenticationFactory<A, C> httpAuthenticationFactory, Class<AC> accessControlType,
+				HttpAccessControlFactory<AC> httpAccessControlFactory, Class<C> credentialsType,
+				ManagedObjectType<O> moAccessControlType) {
 			this.authenticationType = authenticationType;
+			this.httpAuthenticationFactory = httpAuthenticationFactory;
+			this.accessControlType = accessControlType;
+			this.httpAccessControlFactory = httpAccessControlFactory;
 			this.credentialsType = credentialsType;
+			this.moAccessControlType = moAccessControlType;
 		}
 
 		/*
@@ -220,30 +309,40 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 */
 
 		@Override
-		public Class<A> getAuthenticationClass() {
+		public Class<A> getAuthenticationType() {
 			return this.authenticationType;
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public Class<AC> getAccessControlClass() {
-			return (Class<AC>) this.moType.getObjectClass();
+		public HttpAuthenticationFactory<A, C> getHttpAuthenticationFactory() {
+			return this.httpAuthenticationFactory;
 		}
 
 		@Override
-		public Class<C> getCredentialsClass() {
+		public Class<AC> getAccessControlType() {
+			return this.accessControlType;
+		}
+
+		@Override
+		public HttpAccessControlFactory<AC> getHttpAccessControlFactory() {
+			return this.httpAccessControlFactory;
+		}
+
+		@Override
+		public Class<C> getCredentialsType() {
 			return this.credentialsType;
 		}
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public HttpSecurityDependencyType<O>[] getDependencyTypes() {
-			return AdaptFactory.adaptArray(this.moType.getDependencyTypes(), HttpSecurityDependencyType.class,
+			return AdaptFactory.adaptArray(this.moAccessControlType.getDependencyTypes(),
+					HttpSecurityDependencyType.class,
 					new AdaptFactory<HttpSecurityDependencyType, ManagedObjectDependencyType<O>>() {
 						@Override
 						public HttpSecurityDependencyType<O> createAdaptedObject(
 								ManagedObjectDependencyType<O> delegate) {
-							return new ManagedObjectHttpSecurityDependencyType<O>(delegate);
+							return new HttpSecurityDependencyTypeImpl<O>(delegate);
 						}
 					});
 		}
@@ -251,11 +350,11 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public HttpSecurityFlowType<?>[] getFlowTypes() {
-			return AdaptFactory.adaptArray(this.moType.getFlowTypes(), HttpSecurityFlowType.class,
+			return AdaptFactory.adaptArray(this.moAccessControlType.getFlowTypes(), HttpSecurityFlowType.class,
 					new AdaptFactory<HttpSecurityFlowType, ManagedObjectFlowType>() {
 						@Override
 						public HttpSecurityFlowType createAdaptedObject(ManagedObjectFlowType delegate) {
-							return new ManagedObjectHttpSecurityFlowType<F>(delegate);
+							return new HttpSecurityFlowTypeImpl<F>(delegate);
 						}
 					});
 		}
@@ -265,8 +364,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * {@link HttpSecurityDependencyType} adapted from the
 	 * {@link ManagedObjectDependencyType}.
 	 */
-	private static class ManagedObjectHttpSecurityDependencyType<O extends Enum<O>>
-			implements HttpSecurityDependencyType<O> {
+	private static class HttpSecurityDependencyTypeImpl<O extends Enum<O>> implements HttpSecurityDependencyType<O> {
 
 		/**
 		 * {@link ManagedObjectDependencyType}.
@@ -279,7 +377,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 * @param dependency
 		 *            {@link ManagedObjectDependencyType}.
 		 */
-		public ManagedObjectHttpSecurityDependencyType(ManagedObjectDependencyType<O> dependency) {
+		public HttpSecurityDependencyTypeImpl(ManagedObjectDependencyType<O> dependency) {
 			this.dependency = dependency;
 		}
 
@@ -317,7 +415,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * {@link HttpSecurityFlowType} adapted from the
 	 * {@link ManagedObjectFlowType}.
 	 */
-	private static class ManagedObjectHttpSecurityFlowType<F extends Enum<F>> implements HttpSecurityFlowType<F> {
+	private static class HttpSecurityFlowTypeImpl<F extends Enum<F>> implements HttpSecurityFlowType<F> {
 
 		/**
 		 * {@link ManagedObjectFlowType}.
@@ -330,7 +428,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 * @param flow
 		 *            {@link ManagedObjectFlowType}.
 		 */
-		public ManagedObjectHttpSecurityFlowType(ManagedObjectFlowType<F> flow) {
+		public HttpSecurityFlowTypeImpl(ManagedObjectFlowType<F> flow) {
 			this.flow = flow;
 		}
 

@@ -26,7 +26,7 @@ import net.officefloor.web.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpChallengeContext<O extends Enum<O>, F extends Enum<F>> {
+public interface ChallengeContext<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * <p>

@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -27,10 +29,11 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpChallengeContext;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -59,8 +62,8 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 
 		// Ensure have type
 		assertNotNull("Should have type", type);
-		assertEquals("Incorrect authentication class", HttpAuthentication.class, type.getAuthenticationClass());
-		assertEquals("Incorrect access control class", HttpAccessControl.class, type.getAccessControlClass());
+		assertEquals("Incorrect authentication class", HttpAuthentication.class, type.getAuthenticationType());
+		assertEquals("Incorrect access control class", HttpAccessControl.class, type.getAccessControlType());
 	}
 
 	/**
@@ -81,8 +84,8 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 
 		// Ensure have type
 		assertNotNull("Should have type", type);
-		assertEquals("Incorrect authentication class", HttpAuthentication.class, type.getAuthenticationClass());
-		assertEquals("Incorrect access control class", HttpAccessControl.class, type.getAccessControlClass());
+		assertEquals("Incorrect authentication class", HttpAuthentication.class, type.getAuthenticationType());
+		assertEquals("Incorrect access control class", HttpAccessControl.class, type.getAccessControlType());
 	}
 
 	/**
@@ -116,8 +119,9 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 	 * {@link HttpSecurityType}.
 	 */
 	@TestSource
-	public static class MockHttpSecuritySource implements HttpSecuritySource<Object, Object, Object, Indexed, Indexed>,
-			HttpSecurity<Object, Object, Object, Indexed, Indexed> {
+	public static class MockHttpSecuritySource
+			implements HttpSecuritySource<Object, Serializable, Object, Indexed, Indexed>,
+			HttpSecurity<Object, Serializable, Object, Indexed, Indexed> {
 
 		/*
 		 * =========== HttpSecuritySource ====================
@@ -130,15 +134,15 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public HttpSecuritySourceMetaData<Object, Object, Object, Indexed, Indexed> init(
+		public HttpSecuritySourceMetaData<Object, Serializable, Object, Indexed, Indexed> init(
 				HttpSecuritySourceContext context) throws Exception {
 			// No meta-data causing type load failure
 			return null;
 		}
 
 		@Override
-		public HttpSecurity<Object, Object, Object, Indexed, Indexed> sourceHttpSecurity(HttpSecurityContext context)
-				throws HttpException {
+		public HttpSecurity<Object, Serializable, Object, Indexed, Indexed> sourceHttpSecurity(
+				HttpSecurityContext context) throws HttpException {
 			return this;
 		}
 
@@ -147,29 +151,29 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public Object createAuthentication() {
+		public Object createAuthentication(AuthenticationContext<Serializable, Object> context) {
 			fail("Should not be invoked for loading type");
 			return null;
 		}
 
 		@Override
-		public boolean ratify(Object credentials, HttpRatifyContext<Object> context) {
+		public boolean ratify(Object credentials, RatifyContext<Serializable> context) {
 			fail("Should not be invoked for loading type");
 			return false;
 		}
 
 		@Override
-		public void authenticate(Object credentials, HttpAuthenticateContext<Object, Indexed> context) {
+		public void authenticate(Object credentials, AuthenticateContext<Serializable, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<Indexed, Indexed> context) {
+		public void challenge(ChallengeContext<Indexed, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<Indexed> context) {
+		public void logout(LogoutContext<Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}

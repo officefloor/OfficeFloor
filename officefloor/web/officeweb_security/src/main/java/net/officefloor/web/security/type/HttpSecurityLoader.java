@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.internal.structure.Flow;
@@ -53,7 +55,7 @@ public interface HttpSecurityLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	<A, AC, C, O extends Enum<O>, F extends Enum<F>> PropertyList loadSpecification(
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> PropertyList loadSpecification(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
 
 	/**
@@ -81,7 +83,7 @@ public interface HttpSecurityLoader {
 	 * @return {@link HttpSecurityType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
-	<A, AC, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource, PropertyList propertyList);
 
 }

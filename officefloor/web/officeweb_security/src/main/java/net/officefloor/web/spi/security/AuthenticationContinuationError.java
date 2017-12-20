@@ -17,16 +17,18 @@
  */
 package net.officefloor.web.spi.security;
 
+import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.security.HttpAuthentication;
+
 /**
- * Callback for HTTP authentication.
+ * <p>
+ * Indicates {@link HttpUrlContinuation} failure in {@link HttpAuthentication}.
+ * <p>
+ * Typically this occurs because the original request
+ * {@link HttpUrlContinuation} state could not be obtained to continue
+ * processing after authentication.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthenticateCallback {
-
-	/**
-	 * Notifies the requester that the authentication has completed.
-	 */
-	void authenticationComplete();
-
+public class AuthenticationContinuationError extends Error {
 }

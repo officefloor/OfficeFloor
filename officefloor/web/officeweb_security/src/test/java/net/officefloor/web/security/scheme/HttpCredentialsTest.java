@@ -18,8 +18,8 @@
 package net.officefloor.web.security.scheme;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.HttpCredentialsImpl;
-import net.officefloor.web.spi.security.HttpCredentials;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**

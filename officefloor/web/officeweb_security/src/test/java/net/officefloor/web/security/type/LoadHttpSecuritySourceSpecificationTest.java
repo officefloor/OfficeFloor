@@ -30,11 +30,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpChallengeContext;
-import net.officefloor.web.spi.security.HttpCredentials;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.security.HttpCredentials;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -284,7 +285,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader);
+		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler, this.issues);
 		PropertyList propertyList = httpSecurityLoader.loadSpecification(new MockHttpSecuritySource());
 
 		// Determine if expected to load
@@ -361,30 +362,30 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		 */
 
 		@Override
-		public HttpAuthentication<HttpCredentials> createAuthentication() {
+		public HttpAuthentication<HttpCredentials> createAuthentication(
+				AuthenticationContext<HttpAccessControl, HttpCredentials> context) {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}
 
 		@Override
-		public boolean ratify(HttpCredentials credentials, HttpRatifyContext<HttpAccessControl> context) {
+		public boolean ratify(HttpCredentials credentials, RatifyContext<HttpAccessControl> context) {
 			fail("Should not be invoked for obtaining specification");
 			return false;
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials,
-				HttpAuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context) {
+		public void challenge(ChallengeContext<None, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<None> context) {
+		public void logout(LogoutContext<None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 	}

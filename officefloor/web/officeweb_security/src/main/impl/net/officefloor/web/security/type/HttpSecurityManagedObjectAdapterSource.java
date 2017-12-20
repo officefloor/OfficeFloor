@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
@@ -64,7 +66,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	 * @param operation
 	 *            {@link Runnable} containing the operation to undertake.
 	 */
-	public static <A, AC, C, O extends Enum<O>, F extends Enum<F>> void doOperation(
+	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> void doOperation(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource, Runnable operation) {
 
 		// Make safe given that using static field
@@ -313,7 +315,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 
 		@Override
 		public Class<?> getObjectClass() {
-			return this.metaData.getAccessControlClass();
+			return Void.class;
 		}
 
 		@Override

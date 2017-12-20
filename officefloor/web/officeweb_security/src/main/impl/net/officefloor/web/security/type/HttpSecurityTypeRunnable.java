@@ -81,7 +81,8 @@ public class HttpSecurityTypeRunnable implements OfficeFloorCompilerRunnable<Htt
 
 		// Load the HTTP Security Loader
 		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader);
+		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler,
+				compiler.getCompilerIssues());
 
 		// Instantiate the HTTP Security Source
 		Class<?> httpSecuritySourceClass = compiler.getClassLoader().loadClass(httpSecuritySourceClassName);

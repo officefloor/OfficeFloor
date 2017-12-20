@@ -17,21 +17,22 @@
  */
 package net.officefloor.web.security.scheme;
 
+import java.io.Serializable;
+
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.mock.MockWebApp;
-import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpRatifyContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.RatifyContext;
 
 /**
- * Mock {@link HttpRatifyContext} for testing {@link HttpSecuritySource}
- * instances.
+ * Mock {@link RatifyContext} for testing {@link HttpSecuritySource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpRatifyContext<AC> implements HttpRatifyContext<AC> {
+public class MockHttpRatifyContext<AC extends Serializable> implements RatifyContext<AC> {
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -44,9 +45,14 @@ public class MockHttpRatifyContext<AC> implements HttpRatifyContext<AC> {
 	private final HttpSession session;
 
 	/**
-	 * {@link HttpAccessControl}.
+	 * Access control.
 	 */
 	private AC accessControl = null;
+
+	/**
+	 * {@link Escalation}.
+	 */
+	private Throwable escalation = null;
 
 	/**
 	 * Initiate.
@@ -70,6 +76,15 @@ public class MockHttpRatifyContext<AC> implements HttpRatifyContext<AC> {
 		return this.accessControl;
 	}
 
+	/**
+	 * Obtains the registered escalation.
+	 * 
+	 * @return {@link Escalation}.
+	 */
+	public Throwable getEscalation() {
+		return this.escalation;
+	}
+
 	/*
 	 * ===================== HttpRatifyContext ===============================
 	 */
@@ -85,8 +100,9 @@ public class MockHttpRatifyContext<AC> implements HttpRatifyContext<AC> {
 	}
 
 	@Override
-	public void setAccessControl(AC accessControl) {
+	public void accessControlChange(AC accessControl, Throwable escalation) {
 		this.accessControl = accessControl;
+		this.escalation = escalation;
 	}
 
 }

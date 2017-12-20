@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -25,22 +27,22 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
  * {@link ManagedFunction} and {@link ManagedFunctionFactory} for
- * {@link HttpAuthenticationManagedObjectSource} authentication.
+ * {@link AuthenticationContextManagedObjectSource} authentication.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction<Indexed, None> {
+public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
+		extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * {@link HttpSecurity}
 	 */
-	@SuppressWarnings("rawtypes")
-	private final HttpSecurity httpSecurity;
+	private final HttpSecurity<?, AC, C, ?, ?> httpSecurity;
 
 	/**
 	 * Instantiate.
@@ -48,7 +50,7 @@ public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction
 	 * @param httpSecurity
 	 *            {@link HttpSecurity}.
 	 */
-	public ManagedObjectHttpAuthenticateFunction(HttpSecurity<?, ?, ?, ?, ?> httpSecurity) {
+	public ManagedObjectAuthenticateFunction(HttpSecurity<?, AC, C, ?, ?> httpSecurity) {
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -57,43 +59,34 @@ public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction
 	 */
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 		// Obtain the function authenticate context
-		FunctionAuthenticateContext functionAuthenticateContext = (FunctionAuthenticateContext) context.getObject(0);
+		FunctionAuthenticateContext<AC, C> functionAuthenticateContext = (FunctionAuthenticateContext<AC, C>) context
+				.getObject(0);
 
 		// Obtain the credentials
-		Object credentials = functionAuthenticateContext.getCredentials();
+		C credentials = functionAuthenticateContext.getCredentials();
 
 		// Undertake authentication
-		HttpAuthenticateContextImpl authenticateContext = new HttpAuthenticateContextImpl(functionAuthenticateContext,
-				context);
-		Throwable failure = null;
 		try {
-			this.httpSecurity.authenticate(credentials, authenticateContext);
+			this.httpSecurity.authenticate(credentials,
+					new AuthenticateContextImpl<>(functionAuthenticateContext, context));
 		} catch (Throwable ex) {
-			failure = ex;
-		}
-
-		// Provide the results of authentication
-		if (failure != null) {
 			// Notify of failure in authentication
-			functionAuthenticateContext.setFailure(failure);
-		} else {
-			// Notify if obtained security from authentication
-			functionAuthenticateContext.setAccessControl(authenticateContext.accessControl);
+			functionAuthenticateContext.accessControlChange(null, ex);
 		}
 
-		// No further tasks
+		// Nothing further
 		return null;
 	}
 
 	/**
-	 * {@link HttpAuthenticateContext} implementation.
+	 * {@link AuthenticateContext} implementation.
 	 */
-	private static class HttpAuthenticateContextImpl<AC, C, O extends Enum<O>>
-			implements HttpAuthenticateContext<AC, O> {
+	private static class AuthenticateContextImpl<AC extends Serializable, C, O extends Enum<O>>
+			implements AuthenticateContext<AC, O> {
 
 		/**
 		 * {@link FunctionAuthenticateContext}.
@@ -106,11 +99,6 @@ public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction
 		private final ManagedFunctionContext<Indexed, None> functionContext;
 
 		/**
-		 * Access control.
-		 */
-		private AC accessControl = null;
-
-		/**
 		 * Initiate.
 		 * 
 		 * @param functionAuthenticateContext
@@ -118,7 +106,7 @@ public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction
 		 * @param functionContext
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public HttpAuthenticateContextImpl(FunctionAuthenticateContext<AC, C> functionAuthenticateContext,
+		public AuthenticateContextImpl(FunctionAuthenticateContext<AC, C> functionAuthenticateContext,
 				ManagedFunctionContext<Indexed, None> functionContext) {
 			this.functionAuthenticateContext = functionAuthenticateContext;
 			this.functionContext = functionContext;
@@ -146,8 +134,8 @@ public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction
 		}
 
 		@Override
-		public void setAccessControl(AC accessControl) {
-			this.accessControl = accessControl;
+		public void accessControlChange(AC accessControl, Throwable escalation) {
+			this.functionAuthenticateContext.accessControlChange(accessControl, escalation);
 		}
 	}
 

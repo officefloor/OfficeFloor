@@ -27,9 +27,10 @@ import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallenge;
-import net.officefloor.web.spi.security.HttpChallengeContext;
+import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
@@ -39,7 +40,8 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexed> {
+public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
+		extends StaticManagedFunction<Indexed, Indexed> {
 
 	/**
 	 * {@link HttpSession} attribute for the challenge request state.
@@ -64,7 +66,7 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 	/**
 	 * {@link HttpSecurity}.
 	 */
-	private final HttpSecurity<?, ?, ?, ?, ?> httpSecurity;
+	private final HttpSecurity<?, ?, ?, O, F> httpSecurity;
 
 	/**
 	 * Initiate.
@@ -72,7 +74,7 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 	 * @param httpSecurity
 	 *            {@link HttpSecurity}.
 	 */
-	public HttpChallengeFunction(HttpSecurity<?, ?, ?, ?, ?> httpSecurity) {
+	public HttpChallengeFunction(HttpSecurity<?, ?, ?, O, F> httpSecurity) {
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -81,11 +83,10 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 	 */
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the dependencies
-		HttpAuthenticationRequiredException exception = (HttpAuthenticationRequiredException) context.getObject(0);
+		AuthenticationRequiredException exception = (AuthenticationRequiredException) context.getObject(0);
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(1);
 		HttpSession session = (HttpSession) context.getObject(2);
 		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
@@ -101,10 +102,8 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 		challenge.setLength(0); // reset for use
 
 		// Undertake challenge
-		HttpChallengeContextImpl challengeContext = new HttpChallengeContextImpl(connection, session, context,
-				challenge);
 		try {
-			this.httpSecurity.challenge(challengeContext);
+			this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, challenge));
 		} catch (Throwable ex) {
 			// Allow handling of the failure
 			context.doFlow(0, ex, null);
@@ -122,10 +121,9 @@ public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexe
 	}
 
 	/**
-	 * {@link HttpChallengeContext} implementation.
+	 * {@link ChallengeContext} implementation.
 	 */
-	private static class HttpChallengeContextImpl<O extends Enum<O>, F extends Enum<F>>
-			implements HttpChallengeContext<O, F>, HttpChallenge {
+	private class HttpChallengeContextImpl implements ChallengeContext<O, F>, HttpChallenge {
 
 		/**
 		 * {@link ServerHttpConnection}.

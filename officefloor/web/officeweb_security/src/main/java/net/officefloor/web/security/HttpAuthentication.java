@@ -19,8 +19,6 @@ package net.officefloor.web.security;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.web.spi.security.HttpAuthenticateCallback;
-import net.officefloor.web.spi.security.HttpLogoutRequest;
 
 /**
  * Dependency interface allowing the application to check if the HTTP client is
@@ -46,25 +44,28 @@ public interface HttpAuthentication<C> {
 	 * @param credentials
 	 *            Credentials. May be <code>null</code> if no credentials are
 	 *            required, or they are pulled from the {@link HttpRequest}.
-	 * @param authenticationCallback
-	 *            {@link HttpAuthenticateCallback}.
+	 * @param authenticationRequest
+	 *            {@link AuthenticateRequest}.
 	 */
-	void authenticate(C credentials, HttpAuthenticateCallback authenticationCallback);
+	void authenticate(C credentials, AuthenticateRequest authenticationRequest);
 
 	/**
 	 * Obtains the {@link HttpAccessControl}.
 	 * 
-	 * @return {@link HttpAccessControl} or <code>null</code> if not
-	 *         authenticated.
+	 * @return {@link HttpAccessControl}.
+	 * @throws AuthenticationRequiredException
+	 *             If not authenticated.
+	 * @throws HttpException
+	 *             If failure occurred in authentication.
 	 */
-	HttpAccessControl getAccessControl();
+	HttpAccessControl getAccessControl() throws AuthenticationRequiredException, HttpException;
 
 	/**
 	 * Undertakes logging out.
 	 * 
 	 * @param logoutRequest
-	 *            {@link HttpLogoutRequest}.
+	 *            {@link LogoutRequest}.
 	 */
-	void logout(HttpLogoutRequest logoutRequest);
+	void logout(LogoutRequest logoutRequest);
 
 }

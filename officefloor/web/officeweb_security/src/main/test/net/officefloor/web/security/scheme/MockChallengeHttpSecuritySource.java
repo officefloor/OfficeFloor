@@ -23,13 +23,14 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpChallengeContext;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
@@ -121,7 +122,9 @@ public class MockChallengeHttpSecuritySource
 
 		// Specify the access control
 		context.setAuthenticationClass(MockAuthentication.class);
+		context.setHttpAuthenticationFactory((authentication) -> new MockHttpAuthentication<>(authentication));
 		context.setAccessControlClass(MockAccessControl.class);
+		context.setHttpAccessControlFactory((accessControl) -> new MockHttpAccessControl(accessControl));
 	}
 
 	@Override
@@ -158,20 +161,19 @@ public class MockChallengeHttpSecuritySource
 		 */
 
 		@Override
-		public MockAuthentication createAuthentication() {
-			// TODO Auto-generated method stub
-			return null;
+		public MockAuthentication createAuthentication(AuthenticationContext<MockAccessControl, Void> context) {
+			return new MockAuthentication(context);
 		}
 
 		@Override
-		public boolean ratify(Void credentials, HttpRatifyContext<MockAccessControl> context) {
+		public boolean ratify(Void credentials, RatifyContext<MockAccessControl> context) {
 
 			// Attempt to obtain from session
 			MockAccessControl accessControl = (MockAccessControl) context.getSession()
 					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 			if (accessControl != null) {
 				// Load the security and no need to authenticate
-				context.setAccessControl(accessControl);
+				context.accessControlChange(accessControl, null);
 				return false;
 			}
 
@@ -187,7 +189,7 @@ public class MockChallengeHttpSecuritySource
 		}
 
 		@Override
-		public void authenticate(Void credentials, HttpAuthenticateContext<MockAccessControl, None> context)
+		public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None> context)
 				throws HttpException {
 
 			// Obtain the authentication scheme
@@ -216,17 +218,17 @@ public class MockChallengeHttpSecuritySource
 			context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
 
 			// Return the access control
-			context.setAccessControl(accessControl);
+			context.accessControlChange(accessControl, null);
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context) throws HttpException {
+		public void challenge(ChallengeContext<None, None> context) throws HttpException {
 			// Load the challenge
 			context.setChallenge(AUTHENTICATION_SCHEME, this.realm);
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<None> context) throws HttpException {
+		public void logout(LogoutContext<None> context) throws HttpException {
 
 			// Forget access control for further requests (requires login again)
 			context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);

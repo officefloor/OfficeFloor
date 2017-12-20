@@ -15,39 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.spi.security;
+package net.officefloor.web.security;
 
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
- * Context for authentication.
+ * Portable interface for {@link HttpSecuritySource} credentials.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthenticateContext<AC, O extends Enum<O>> extends AccessControlLoader<AC> {
+public interface HttpCredentials {
 
 	/**
-	 * Obtains the {@link ServerHttpConnection}.
+	 * Obtains the username.
 	 * 
-	 * @return {@link ServerHttpConnection}.
+	 * @return Username.
 	 */
-	ServerHttpConnection getConnection();
+	String getUsername();
 
 	/**
-	 * Obtains the {@link HttpSession}.
+	 * Obtains the password.
 	 * 
-	 * @return {@link HttpSession}.
+	 * @return Password.
 	 */
-	HttpSession getSession();
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key
-	 *            Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
+	byte[] getPassword();
 
 }

@@ -27,12 +27,12 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.FormHttpSecuritySource;
 import net.officefloor.web.security.scheme.HttpCredentialsImpl;
 import net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource;
-import net.officefloor.web.spi.security.HttpCredentials;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.

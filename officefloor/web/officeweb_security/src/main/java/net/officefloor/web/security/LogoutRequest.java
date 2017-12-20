@@ -15,39 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.spi.security;
-
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
+package net.officefloor.web.security;
 
 /**
- * Context for logging out.
+ * Request for logging out.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpLogoutContext<O extends Enum<O>> {
+public interface LogoutRequest {
 
 	/**
-	 * Obtains the {@link ServerHttpConnection}.
+	 * Notifies the requester that the log out has completed.
 	 * 
-	 * @return {@link ServerHttpConnection}.
+	 * @param failure
+	 *            On a successful logout this will be <code>null</code>. On
+	 *            failure to logout it will be the cause of the failure.
 	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key
-	 *            Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
+	void logoutComplete(Throwable failure);
 
 }

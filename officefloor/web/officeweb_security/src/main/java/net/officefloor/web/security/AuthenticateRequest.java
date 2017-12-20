@@ -15,20 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.spi.security;
-
-import net.officefloor.web.build.HttpUrlContinuation;
-import net.officefloor.web.security.HttpAuthentication;
+package net.officefloor.web.security;
 
 /**
- * <p>
- * Indicates {@link HttpUrlContinuation} failure in {@link HttpAuthentication}.
- * <p>
- * Typically this occurs because the original request
- * {@link HttpUrlContinuation} state could not be obtained to continue
- * processing after authentication.
+ * Request for logging out.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticationContinuationException extends Exception {
+public interface AuthenticateRequest {
+
+	/**
+	 * Notifies the requester that the authenticate has completed.
+	 * 
+	 * @param failure
+	 *            On a successful authentication this will be <code>null</code>.
+	 *            On failure to authenticate it will be the cause of the
+	 *            failure.
+	 */
+	void authenticateComplete(Throwable failure);
+
 }

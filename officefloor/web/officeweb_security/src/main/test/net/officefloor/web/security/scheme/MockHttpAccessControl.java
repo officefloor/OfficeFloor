@@ -15,27 +15,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.spi.security;
+package net.officefloor.web.security.scheme;
 
-import java.io.Serializable;
+import java.security.Principal;
 
-import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 
 /**
- * Factory for the creation of the {@link HttpAccessControl}.
+ * Mock {@link HttpAccessControl}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAccessControlFactory<AC extends Serializable> {
+public class MockHttpAccessControl implements HttpAccessControl {
 
 	/**
-	 * Creates {@link HttpAccessControl} from the custom access control.
+	 * {@link MockAccessControl}.
+	 */
+	private final MockAccessControl accessControl;
+
+	/**
+	 * Instantiate.
 	 * 
 	 * @param accessControl
-	 *            Custom access control.
-	 * @return {@link HttpAccessControl} adapting the custom access control.
+	 *            {@link MockAccessControl}.
 	 */
-	HttpAccessControl createHttpAccessControl(AC accessControl) throws HttpException;
+	public MockHttpAccessControl(MockAccessControl accessControl) {
+		this.accessControl = accessControl;
+	}
+
+	/*
+	 * ================= HttpAccessControl ==============
+	 */
+
+	@Override
+	public String getAuthenticationScheme() {
+		return this.accessControl.getAuthenticationScheme();
+	}
+
+	@Override
+	public Principal getPrincipal() {
+		return () -> this.accessControl.getUserName();
+	}
+
+	@Override
+	public boolean inRole(String role) {
+		return this.accessControl.getRoles().contains(role);
+	}
 
 }

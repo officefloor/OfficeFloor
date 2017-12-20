@@ -17,68 +17,50 @@
  */
 package net.officefloor.web.security.impl;
 
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAccessControlFactory;
-import net.officefloor.web.spi.security.HttpSecurity;
-import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpAuthentication}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticationManagedObjectSource extends
-		AbstractManagedObjectSource<HttpAuthenticationManagedObjectSource.Dependencies, HttpAuthenticationManagedObjectSource.Flows> {
+public class HttpAuthenticationManagedObjectSource<A, C>
+		extends AbstractManagedObjectSource<HttpAuthenticationManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, HTTP_SESSION
+		AUTHENTICATION
 	}
 
 	/**
-	 * Flow keys.
+	 * Custom authentication type.
 	 */
-	public static enum Flows {
-		AUTHENTICATE, LOGOUT
-	}
+	private final Class<A> authenticationType;
 
 	/**
-	 * {@link HttpSecuritySource}.
+	 * {@link HttpAuthenticationFactory}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private final HttpSecurity httpSecurity;
-
-	/**
-	 * {@link HttpAccessControlFactory}.
-	 */
-	@SuppressWarnings("rawtypes")
-	private final HttpAccessControlFactory httpAccessControlFactory;
-
-	/**
-	 * {@link ManagedObjectExecuteContext}.
-	 */
-	private ManagedObjectExecuteContext<Flows> executeContext;
+	private final HttpAuthenticationFactory<A, C> httpAuthenticationFactory;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
-	 * @param httpAccessControlFactory
-	 *            {@link HttpAccessControlFactory}.
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType}.
 	 */
-	public HttpAuthenticationManagedObjectSource(HttpSecurity<?, ?, ?, ?, ?> httpSecurity,
-			HttpAccessControlFactory<?> httpAccessControlFactory) {
-		this.httpSecurity = httpSecurity;
-		this.httpAccessControlFactory = httpAccessControlFactory;
+	public HttpAuthenticationManagedObjectSource(HttpSecurityType<A, ?, C, ?, ?> httpSecurityType) {
+		this.authenticationType = httpSecurityType.getAuthenticationType();
+		this.httpAuthenticationFactory = httpSecurityType.getHttpAuthenticationFactory();
 	}
 
 	/*
@@ -90,27 +72,47 @@ public class HttpAuthenticationManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context) throws Exception {
-
-		// Provide the meta-data
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
 		context.setObjectClass(HttpAuthentication.class);
 		context.setManagedObjectClass(HttpAuthenticationManagedObject.class);
-		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
-		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
-		context.addFlow(Flows.AUTHENTICATE, FunctionAuthenticateContext.class);
-		context.addFlow(Flows.LOGOUT, FunctionLogoutContext.class);
+		context.addDependency(Dependencies.AUTHENTICATION, this.authenticationType);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-		this.executeContext = context;
-	}
-
-	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpAuthenticationManagedObject(this.httpSecurity, this.httpAccessControlFactory,
-				this.executeContext);
+		return new HttpAuthenticationManagedObject();
+	}
+
+	/**
+	 * {@link HttpAuthentication} {@link ManagedObject}.
+	 */
+	private class HttpAuthenticationManagedObject implements CoordinatingManagedObject<Dependencies> {
+
+		/**
+		 * {@link HttpAuthentication}.
+		 */
+		private HttpAuthentication<C> httpAuthentication;
+
+		/*
+		 * ====================== ManagedObject =====================
+		 */
+
+		@Override
+		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
+
+			// Obtain the custom authentication
+			@SuppressWarnings("unchecked")
+			A authentication = (A) registry.getObject(Dependencies.AUTHENTICATION);
+
+			// Adapt the authentication
+			this.httpAuthentication = HttpAuthenticationManagedObjectSource.this.httpAuthenticationFactory
+					.createHttpAuthentication(authentication);
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this.httpAuthentication;
+		}
 	}
 
 }

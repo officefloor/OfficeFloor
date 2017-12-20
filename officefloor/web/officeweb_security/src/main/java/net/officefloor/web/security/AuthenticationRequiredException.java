@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.security.impl;
+package net.officefloor.web.security;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
@@ -32,7 +32,7 @@ import net.officefloor.web.build.WebArchitect;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticationRequiredException extends Exception {
+public class AuthenticationRequiredException extends RuntimeException {
 
 	/**
 	 * Indicates whether to save request for {@link HttpUrlContinuation} after
@@ -43,7 +43,7 @@ public class HttpAuthenticationRequiredException extends Exception {
 	/**
 	 * Initiate.
 	 */
-	public HttpAuthenticationRequiredException() {
+	public AuthenticationRequiredException() {
 		this(true);
 	}
 
@@ -58,7 +58,7 @@ public class HttpAuthenticationRequiredException extends Exception {
 	 *            Indicates whether to save request for
 	 *            {@link HttpUrlContinuation} after authentication completes.
 	 */
-	public HttpAuthenticationRequiredException(boolean isSaveRequest) {
+	public AuthenticationRequiredException(boolean isSaveRequest) {
 		this.isSaveRequest = isSaveRequest;
 	}
 

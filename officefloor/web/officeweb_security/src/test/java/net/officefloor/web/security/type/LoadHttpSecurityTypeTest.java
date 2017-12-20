@@ -34,11 +34,16 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpChallengeContext;
-import net.officefloor.web.spi.security.HttpCredentials;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.security.HttpCredentials;
+import net.officefloor.web.security.scheme.MockAccessControl;
+import net.officefloor.web.security.scheme.MockAuthentication;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.HttpAccessControlFactory;
+import net.officefloor.web.spi.security.HttpAuthenticationFactory;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
@@ -223,13 +228,70 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no security class from meta-data.
+	 * Ensure issue if no authentication class from meta-data.
 	 */
-	public void testNoSecurityClass() {
+	public void testNoAuthenticationClass() {
 
-		// Record no object class
-		this.recordReturn(this.metaData, this.metaData.getAccessControlClass(), null);
-		this.record_issue("No Object type provided");
+		// Record no authentication class
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), null);
+		this.record_issue("No Authentication type provided");
+
+		// Attempt to load
+		this.loadHttpSecurityType(false, null);
+	}
+
+	/**
+	 * Ensure issue if no {@link HttpAuthenticationFactory} provided for
+	 * authentication not implementing {@link HttpAuthentication}.
+	 */
+	public void testNoHttpAuthenticationFactory() {
+
+		// Record no HTTP authentication factory
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), MockAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getHttpAuthenticationFactory(), null);
+		this.record_issue(
+				"Must provide HttpAuthenticationFactory, as Authentication does not implement HttpAuthentication (Authentication Type: "
+						+ MockAuthentication.class.getName() + ")");
+
+		// Attempt to load
+		this.loadHttpSecurityType(false, null);
+	}
+
+	/**
+	 * Ensure issue if no access control class from meta-data.
+	 */
+	public void testNoAccessControlClass() {
+
+		// Record no access control class
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), null);
+		this.record_issue("No Access Control type provided");
+
+		// Attempt to load
+		this.loadHttpSecurityType(false, null);
+	}
+
+	/**
+	 * Ensure issue if no {@link HttpAccessControlFactory} provided for access
+	 * control not implementing {@link HttpAccessControl}.
+	 */
+	public void testNoHttpAccessControlFactory() {
+
+		// Record no HTTP access control factory
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), MockAccessControl.class);
+		this.recordReturn(this.metaData, this.metaData.getHttpAccessControlFactory(), null);
+		this.record_issue(
+				"Must provide HttpAccessControlFactory, as Access Control does not implement HttpAccessControl (Access Control Type: "
+						+ MockAccessControl.class.getName() + ")");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -242,7 +304,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	public void testNullDependencyMetaData() {
 
 		// Record no dependency type
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { null });
 		this.record_issue("Null ManagedObjectDependencyMetaData for dependency 0");
@@ -259,7 +320,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityDependencyMetaData<?> dependency = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record no dependency type
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependency });
 		this.recordReturn(dependency, dependency.getLabel(), "NO TYPE");
@@ -280,7 +340,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
@@ -305,7 +364,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
@@ -329,7 +387,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
@@ -354,7 +411,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityDependencyMetaData<?> dependency = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record not all dependency keys
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependency });
 		this.recordReturn(dependency, dependency.getLabel(), null);
@@ -374,7 +430,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	public void testNullFlowMetaData() {
 
 		// Record no flow type
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new HttpSecurityFlowMetaData[] { null });
 		this.record_issue("Null ManagedObjectFlowMetaData for flow 0");
@@ -392,7 +447,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flowProvided = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record no flow argument type
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowDefaulted, flowProvided });
@@ -402,7 +456,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowProvided, flowProvided.getLabel(), null);
 		this.recordReturn(flowProvided, flowProvided.getKey(), null);
 		this.recordReturn(flowProvided, flowProvided.getArgumentType(), Connection.class);
-		this.record_authenticationAndCredentialsClass();
+		this.record_authenticationAccessControlAndCredentialsClass();
 
 		// Attempt to load
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
@@ -427,7 +481,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
@@ -452,7 +505,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
@@ -476,7 +528,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
@@ -500,7 +551,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flow = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record not all flow keys
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new HttpSecurityFlowMetaData[] { flow });
 		this.recordReturn(flow, flow.getLabel(), null);
@@ -524,7 +574,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record keyed dependencies and flows
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
@@ -543,7 +592,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.record_authenticationAndCredentialsClass();
+		this.record_authenticationAccessControlAndCredentialsClass();
 
 		// Attempt to load
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
@@ -592,7 +641,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record keyed dependencies and flows
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
@@ -611,7 +659,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), null);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.record_authenticationAndCredentialsClass();
+		this.record_authenticationAccessControlAndCredentialsClass();
 
 		// Attempt to load
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
@@ -660,9 +708,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Ensure correct security and credentials
-		assertEquals("Incorrect authentication type", HttpAuthentication.class, securityType.getAuthenticationClass());
-		assertEquals("Incorrect access control type", HttpAccessControl.class, securityType.getAccessControlClass());
-		assertEquals("Incorrect credentials type", HttpCredentials.class, securityType.getCredentialsClass());
+		assertEquals("Incorrect authentication type", HttpAuthentication.class, securityType.getAuthenticationType());
+		assertEquals("Incorrect access control type", HttpAccessControl.class, securityType.getAccessControlType());
+		assertEquals("Incorrect credentials type", HttpCredentials.class, securityType.getCredentialsType());
 	}
 
 	/**
@@ -670,19 +718,19 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * application specific behaviour.
 	 */
 	public void testNullCredentials() {
-		this.record_accessControlClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
-		this.recordReturn(this.metaData, this.metaData.getAuthenticationClass(), HttpAuthentication.class);
-		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), HttpAccessControl.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsType(), null);
 
 		// Load the security type
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Ensure correct security and no credentials
-		assertEquals("Incorrect authentication type", HttpAuthentication.class, securityType.getAuthenticationClass());
-		assertEquals("Incorrect access control type", HttpAccessControl.class, securityType.getAccessControlClass());
-		assertNull("Should be no credentials required", securityType.getCredentialsClass());
+		assertEquals("Incorrect authentication type", HttpAuthentication.class, securityType.getAuthenticationType());
+		assertEquals("Incorrect access control type", HttpAccessControl.class, securityType.getAccessControlType());
+		assertNull("Should be no credentials required", securityType.getCredentialsType());
 	}
 
 	/**
@@ -700,20 +748,13 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the security class from the
-	 * {@link HttpSecuritySourceMetaData}.
+	 * Records obtaining the authentication, access control and credentials
+	 * class from the {@link HttpSecuritySourceMetaData}.
 	 */
-	private void record_accessControlClass() {
-		this.recordReturn(this.metaData, this.metaData.getAccessControlClass(), HttpAccessControl.class);
-	}
-
-	/**
-	 * Records obtaining the credentials class from the
-	 * {@link HttpSecuritySourceMetaData}.
-	 */
-	private void record_authenticationAndCredentialsClass() {
-		this.recordReturn(this.metaData, this.metaData.getAuthenticationClass(), HttpAuthentication.class);
-		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(), HttpCredentials.class);
+	private void record_authenticationAccessControlAndCredentialsClass() {
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), HttpAccessControl.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsType(), HttpCredentials.class);
 	}
 
 	/**
@@ -726,8 +767,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
-		this.record_accessControlClass();
-
 		// Return no dependencies
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 
@@ -752,8 +791,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 			}
 		}
 
-		// Record obtaining the credentials
-		this.record_authenticationAndCredentialsClass();
+		// Record obtaining the authentication, access control and credentials
+		this.record_authenticationAccessControlAndCredentialsClass();
 	}
 
 	/**
@@ -809,7 +848,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader);
+		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler, this.issues);
 		MockHttpSecuritySource.init = init;
 		HttpSecurityType securityType = securityLoader.loadHttpSecurityType(new MockHttpSecuritySource(), propertyList);
 
@@ -935,31 +974,31 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public boolean ratify(HttpCredentials credentials, HttpRatifyContext<HttpAccessControl> context) {
+		public HttpAuthentication<HttpCredentials> createAuthentication(
+				AuthenticationContext<HttpAccessControl, HttpCredentials> context) {
+			fail("Should not be invoked for loading type");
+			return null;
+		}
+
+		@Override
+		public boolean ratify(HttpCredentials credentials, RatifyContext<HttpAccessControl> context) {
 			fail("Should not be invoked for loading type");
 			return false;
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials,
-				HttpAuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context) {
+		public void challenge(ChallengeContext<None, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<None> context) {
+		public void logout(LogoutContext<None> context) {
 			fail("Should not be invoked for loading type");
-		}
-
-		@Override
-		public HttpAuthentication<HttpCredentials> createAuthentication() {
-			// TODO Auto-generated method stub
-			return null;
 		}
 	}
 

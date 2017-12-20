@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -25,21 +27,21 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpLogoutRequest;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.LogoutContext;
 
 /**
  * {@link ManagedFunction} and {@link ManagedFunctionFactory} to log out.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectHttpLogoutFunction extends StaticManagedFunction<Indexed, None> {
+public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum<O>>
+		extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * {@link HttpSecurity}.
 	 */
-	private final HttpSecurity<?, ?, ?, ?, ?> httpSecurity;
+	private final HttpSecurity<?, AC, ?, O, ?> httpSecurity;
 
 	/**
 	 * Instantiate.
@@ -47,7 +49,7 @@ public class ManagedObjectHttpLogoutFunction extends StaticManagedFunction<Index
 	 * @param httpSecurity
 	 *            {@link HttpSecurity}.
 	 */
-	public ManagedObjectHttpLogoutFunction(HttpSecurity<?, ?, ?, ?, ?> httpSecurity) {
+	public ManagedObjectLogoutFunction(HttpSecurity<?, AC, ?, O, ?> httpSecurity) {
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -56,43 +58,36 @@ public class ManagedObjectHttpLogoutFunction extends StaticManagedFunction<Index
 	 */
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 		// Obtain the dependencies
-		FunctionLogoutContext logoutContext = (FunctionLogoutContext) context.getObject(0);
-		HttpLogoutRequest request = logoutContext.getHttpLogoutRequest();
+		final FunctionLogoutContext<AC> logoutContext = (FunctionLogoutContext<AC>) context.getObject(0);
 
-		// Logout
-		HttpLogoutContextImpl httpLogoutContext = new HttpLogoutContextImpl(logoutContext, context);
 		try {
-			this.httpSecurity.logout(httpLogoutContext);
+			// Logout
+			this.httpSecurity.logout(new LogoutContextImpl(logoutContext, context));
 
 			// Notify of successful logout
-			if (request != null) {
-				request.logoutComplete(null);
-			}
+			logoutContext.accessControlChange(null, null);
 
 		} catch (Throwable ex) {
-			// Notify failure in logging out
-			if (request != null) {
-				request.logoutComplete(ex);
-			}
+			logoutContext.accessControlChange(null, ex);
 		}
 
-		// No further tasks
+		// No further functions
 		return null;
 	}
 
 	/**
-	 * {@link HttpLogoutContext} implementation.
+	 * {@link LogoutContext} implementation.
 	 */
-	private static class HttpLogoutContextImpl<O extends Enum<O>> implements HttpLogoutContext<O> {
+	private class LogoutContextImpl implements LogoutContext<O> {
 
 		/**
 		 * {@link FunctionLogoutContext}.
 		 */
-		private FunctionLogoutContext logoutContext;
+		private FunctionLogoutContext<AC> logoutContext;
 
 		/**
 		 * {@link ManagedFunctionContext}.
@@ -107,7 +102,7 @@ public class ManagedObjectHttpLogoutFunction extends StaticManagedFunction<Index
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
 		 */
-		private HttpLogoutContextImpl(FunctionLogoutContext logoutContext,
+		private LogoutContextImpl(FunctionLogoutContext<AC> logoutContext,
 				ManagedFunctionContext<Indexed, None> context) {
 			this.logoutContext = logoutContext;
 			this.context = context;

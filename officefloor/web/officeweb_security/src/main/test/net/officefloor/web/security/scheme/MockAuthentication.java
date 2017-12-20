@@ -19,6 +19,9 @@ package net.officefloor.web.security.scheme;
 
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.web.spi.security.AuthenticationContext;
+
 /**
  * Mock authentication.
  * 
@@ -27,12 +30,43 @@ import java.util.function.Consumer;
 public class MockAuthentication {
 
 	/**
+	 * {@link AuthenticationContext}.
+	 */
+	private final AuthenticationContext<MockAccessControl, ?> authenticationContext;
+
+	/**
+	 * {@link MockAccessControl}.
+	 */
+	private MockAccessControl accessControl = null;
+
+	/**
+	 * {@link Escalation}.
+	 */
+	private Throwable escalation = null;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param authenticationContext
+	 *            {@link AuthenticationContext}.
+	 */
+	public MockAuthentication(AuthenticationContext<MockAccessControl, ?> authenticationContext) {
+		this.authenticationContext = authenticationContext;
+
+		// Listen for access control
+		this.authenticationContext.register((accessControl, failure) -> {
+			this.accessControl = accessControl;
+			this.escalation = failure;
+		});
+	}
+
+	/**
 	 * Indicates if authenticated.
 	 * 
 	 * @return <code>true</code> if authenticated.
 	 */
 	public boolean isAuthenticated() {
-		return false;
+		return this.authenticationContext.run(() -> this.accessControl != null);
 	}
 
 	/**
@@ -42,6 +76,7 @@ public class MockAuthentication {
 	 *            Optional completion listener.
 	 */
 	public void authenticate(Consumer<Throwable> completion) {
+		this.authenticationContext.authenticate(null, (failure) -> completion.accept(failure));
 	}
 
 	/**
@@ -50,7 +85,7 @@ public class MockAuthentication {
 	 * @return {@link MockAccessControl}.
 	 */
 	public MockAccessControl getAccessControl() {
-		return null;
+		return this.authenticationContext.run(() -> this.accessControl);
 	}
 
 	/**
@@ -60,6 +95,7 @@ public class MockAuthentication {
 	 *            Optional completion listener.
 	 */
 	public void logout(Consumer<Throwable> completion) {
+		this.authenticationContext.logout((failure) -> completion.accept(failure));
 	}
 
 }

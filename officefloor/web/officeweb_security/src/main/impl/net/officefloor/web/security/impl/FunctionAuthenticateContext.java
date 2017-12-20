@@ -17,16 +17,19 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.AccessControlListener;
 
 /**
  * {@link ManagedFunction} authentication context.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FunctionAuthenticateContext<AC, C> {
+public interface FunctionAuthenticateContext<AC extends Serializable, C> extends AccessControlListener<AC> {
 
 	/**
 	 * Obtains the credentials.
@@ -49,21 +52,5 @@ public interface FunctionAuthenticateContext<AC, C> {
 	 * @return {@link HttpSession}.
 	 */
 	HttpSession getSession();
-
-	/**
-	 * Specifies the access control.
-	 * 
-	 * @param accessControl
-	 *            Access control.
-	 */
-	void setAccessControl(AC accessControl);
-
-	/**
-	 * Specifies a failure occurred in authentication.
-	 * 
-	 * @param failure
-	 *            Failure in authentication.
-	 */
-	void setFailure(Throwable failure);
 
 }

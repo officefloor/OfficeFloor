@@ -27,10 +27,11 @@ import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.CredentialStoreUtil;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
-import net.officefloor.web.spi.security.HttpChallengeContext;
-import net.officefloor.web.spi.security.HttpLogoutContext;
-import net.officefloor.web.spi.security.HttpRatifyContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -132,20 +133,20 @@ public class BasicHttpSecuritySource extends
 		 */
 
 		@Override
-		public HttpAuthentication<Void> createAuthentication() {
+		public HttpAuthentication<Void> createAuthentication(AuthenticationContext<HttpAccessControl, Void> context) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public boolean ratify(Void credentials, HttpRatifyContext<HttpAccessControl> context) {
+		public boolean ratify(Void credentials, RatifyContext<HttpAccessControl> context) {
 
 			// Attempt to obtain from session
 			HttpAccessControl accessControl = (HttpAccessControl) context.getSession()
 					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 			if (accessControl != null) {
 				// Load the security and no need to authenticate
-				context.setAccessControl(accessControl);
+				context.accessControlChange(accessControl, null);
 				return false;
 			}
 
@@ -162,7 +163,7 @@ public class BasicHttpSecuritySource extends
 		}
 
 		@Override
-		public void authenticate(Void credentials, HttpAuthenticateContext<HttpAccessControl, Dependencies> context)
+		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies> context)
 				throws HttpException {
 
 			// Obtain the connection and session
@@ -193,28 +194,28 @@ public class BasicHttpSecuritySource extends
 			CredentialStore store = (CredentialStore) context.getObject(Dependencies.CREDENTIAL_STORE);
 
 			// Authenticate
-			HttpAccessControl security = CredentialStoreUtil.authenticate(userId, this.realm, password.getBytes(UTF_8),
-					AUTHENTICATION_SCHEME_BASIC, store);
-			if (security == null) {
+			HttpAccessControl accessControl = CredentialStoreUtil.authenticate(userId, this.realm,
+					password.getBytes(UTF_8), AUTHENTICATION_SCHEME_BASIC, store);
+			if (accessControl == null) {
 				return; // not authenticated
 			}
 
-			// Remember HTTP Security for further requests
-			session.setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, security);
+			// Remember access control for further requests
+			session.setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
 
-			// Return the HTTP Security
-			context.setAccessControl(security);
+			// Return the access control
+			context.accessControlChange(accessControl, null);
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<Dependencies, None> context) throws HttpException {
+		public void challenge(ChallengeContext<Dependencies, None> context) throws HttpException {
 
 			// Provide challenge
 			context.setChallenge(AUTHENTICATION_SCHEME_BASIC, this.realm);
 		}
 
 		@Override
-		public void logout(HttpLogoutContext<Dependencies> context) throws HttpException {
+		public void logout(LogoutContext<Dependencies> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();

@@ -17,7 +17,7 @@
  */
 package net.officefloor.web.security.scheme;
 
-import net.officefloor.web.spi.security.HttpCredentials;
+import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**

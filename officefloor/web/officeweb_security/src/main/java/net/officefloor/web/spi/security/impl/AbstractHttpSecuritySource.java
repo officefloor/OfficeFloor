@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.spi.security.impl;
 
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -40,7 +41,7 @@ import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpSecuritySource<A, AC, C, O extends Enum<O>, F extends Enum<F>>
+public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
 		implements HttpSecuritySource<A, AC, C, O, F> {
 
 	/**
@@ -165,7 +166,7 @@ public abstract class AbstractHttpSecuritySource<A, AC, C, O extends Enum<O>, F 
 	/**
 	 * Context for the {@link HttpSecuritySource#getMetaData()}.
 	 */
-	public static interface MetaDataContext<A, AC, C, O extends Enum<O>, F extends Enum<F>> {
+	public static interface MetaDataContext<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
 		/**
 		 * Obtains the {@link HttpSecuritySourceContext}.
@@ -492,7 +493,7 @@ public abstract class AbstractHttpSecuritySource<A, AC, C, O extends Enum<O>, F 
 		 */
 
 		@Override
-		public Class<A> getAuthenticationClass() {
+		public Class<A> getAuthenticationType() {
 			return this.authenticationClass;
 		}
 
@@ -502,7 +503,7 @@ public abstract class AbstractHttpSecuritySource<A, AC, C, O extends Enum<O>, F 
 		}
 
 		@Override
-		public Class<AC> getAccessControlClass() {
+		public Class<AC> getAccessControlType() {
 			return this.accessControlClass;
 		}
 
@@ -512,7 +513,7 @@ public abstract class AbstractHttpSecuritySource<A, AC, C, O extends Enum<O>, F 
 		}
 
 		@Override
-		public Class<C> getCredentialsClass() {
+		public Class<C> getCredentialsType() {
 			return this.credentialsClass;
 		}
 

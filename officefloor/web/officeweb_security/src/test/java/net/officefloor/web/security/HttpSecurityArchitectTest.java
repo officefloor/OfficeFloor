@@ -40,7 +40,6 @@ import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpCredentials;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -148,7 +147,11 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Ensure indicate not logged in
 			assertFalse("Should not be authenticated", authentication.isAuthenticated());
-			assertNull("Should not have access control", authentication.getAccessControl());
+			try {
+				assertNull("Should not have access control", authentication.getAccessControl());
+				fail("Should not successfully obtain access control");
+			} catch (AuthenticationRequiredException ex) {
+			}
 
 			// Logout should be no operation
 			Closure<Boolean> isLogout = new Closure<>(false);

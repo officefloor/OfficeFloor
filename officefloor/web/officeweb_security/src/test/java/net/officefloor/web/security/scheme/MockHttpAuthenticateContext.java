@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.security.scheme;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,16 +27,17 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpAuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
- * Mock {@link HttpAuthenticateContext} for testing {@link HttpSecuritySource}
+ * Mock {@link AuthenticateContext} for testing {@link HttpSecuritySource}
  * instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpAuthenticateContext<AC, O> {
+public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum<O>>
+		implements AuthenticateContext<AC, O> {
 
 	/**
 	 * Creates the {@link ServerHttpConnection} with authorization
@@ -78,6 +80,11 @@ public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpA
 	private AC accessControl = null;
 
 	/**
+	 * Escalation.
+	 */
+	private Throwable escalation = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param authorizationHeaderValue
@@ -109,6 +116,15 @@ public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpA
 		return this.accessControl;
 	}
 
+	/**
+	 * Obtains the registered escalation.
+	 * 
+	 * @return Escalation.
+	 */
+	public Throwable getEscalation() {
+		return this.escalation;
+	}
+
 	/*
 	 * ==================== HttpAuthenticateContext =========================
 	 */
@@ -129,8 +145,9 @@ public class MockHttpAuthenticateContext<AC, O extends Enum<O>> implements HttpA
 	}
 
 	@Override
-	public void setAccessControl(AC accessControl) {
+	public void accessControlChange(AC accessControl, Throwable escalation) {
 		this.accessControl = accessControl;
+		this.escalation = escalation;
 	}
 
 }

@@ -17,19 +17,30 @@
  */
 package net.officefloor.web.spi.security;
 
+import java.io.Serializable;
+
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.session.HttpSession;
+
 /**
- * Loads the access control.
+ * HTTP ratify context.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AccessControlLoader<AC> {
+public interface RatifyContext<AC extends Serializable> extends AccessControlListener<AC> {
 
 	/**
-	 * Loads the access control.
+	 * Obtains the {@link ServerHttpConnection}.
 	 * 
-	 * @param accessControl
-	 *            Access control.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	void setAccessControl(AC accessControl);
+	ServerHttpConnection getConnection();
+
+	/**
+	 * Obtains the {@link HttpSession}.
+	 * 
+	 * @return {@link HttpSession}.
+	 */
+	HttpSession getSession();
 
 }

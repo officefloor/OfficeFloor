@@ -24,16 +24,16 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpLogoutContext;
+import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
- * Mock {@link HttpLogoutContext} for testing {@link HttpSecuritySource}
+ * Mock {@link LogoutContext} for testing {@link HttpSecuritySource}
  * instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpLogoutContext<D extends Enum<D>> implements HttpLogoutContext<D> {
+public class MockHttpLogoutContext<D extends Enum<D>> implements LogoutContext<D> {
 
 	/**
 	 * {@link ServerHttpConnection}.
