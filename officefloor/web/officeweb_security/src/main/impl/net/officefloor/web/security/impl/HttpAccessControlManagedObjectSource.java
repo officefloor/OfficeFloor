@@ -78,6 +78,8 @@ public class HttpAccessControlManagedObjectSource<AC extends Serializable>
 		context.setObjectClass(HttpAccessControl.class);
 		context.setManagedObjectClass(HttpAccessControlManagedObject.class);
 		context.addDependency(Dependencies.ACCESS_CONTROL, this.accessControlType);
+		context.addManagedObjectExtensionInterface(HttpAccessControl.class,
+				(managedObject) -> (HttpAccessControl) managedObject.getObject());
 	}
 
 	@Override
@@ -112,7 +114,7 @@ public class HttpAccessControlManagedObjectSource<AC extends Serializable>
 		}
 
 		@Override
-		public Object getObject() throws Throwable {
+		public Object getObject() {
 			return this.httpAccessControl;
 		}
 	}

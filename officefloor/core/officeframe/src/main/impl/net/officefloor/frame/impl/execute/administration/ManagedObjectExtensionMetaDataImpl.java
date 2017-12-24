@@ -29,8 +29,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
  *
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectExtensionMetaDataImpl<I extends Object> implements
-		ManagedObjectExtensionMetaData<I>, ManagedObjectExtensionExtractor<I> {
+public class ManagedObjectExtensionMetaDataImpl<I extends Object>
+		implements ManagedObjectExtensionMetaData<I>, ManagedObjectExtensionExtractor<I> {
 
 	/**
 	 * {@link ManagedObjectIndex} identifying the {@link ManagedObject}
@@ -56,8 +56,7 @@ public class ManagedObjectExtensionMetaDataImpl<I extends Object> implements
 	 *            the {@link ManagedObject} instances for the
 	 *            {@link ManagedObjectIndex}.
 	 */
-	public ManagedObjectExtensionMetaDataImpl(
-			ManagedObjectIndex managedObjectIndex,
+	public ManagedObjectExtensionMetaDataImpl(ManagedObjectIndex managedObjectIndex,
 			ExtensionInterfaceFactory<I>[] extensionInterfaceFactories) {
 		this.managedObjectIndex = managedObjectIndex;
 		this.extensionInterfaceFactories = extensionInterfaceFactories;
@@ -82,8 +81,8 @@ public class ManagedObjectExtensionMetaDataImpl<I extends Object> implements
 	 */
 
 	@Override
-	public I extractExtension(ManagedObject managedObject,
-			ManagedObjectMetaData<?> managedObjectMetaData) {
+	public I extractExtension(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData)
+			throws Throwable {
 
 		// Obtain the instance index of the Managed Object
 		int instanceIndex = managedObjectMetaData.getInstanceIndex();

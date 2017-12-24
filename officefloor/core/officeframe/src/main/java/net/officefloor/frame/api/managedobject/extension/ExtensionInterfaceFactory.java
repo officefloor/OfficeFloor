@@ -33,7 +33,9 @@ public interface ExtensionInterfaceFactory<E> {
 	 *            {@link ManagedObject} that is have the extension interface
 	 *            created for it.
 	 * @return Extension interface for the input {@link ManagedObject}.
+	 * @throws Throwable
+	 *             If fails to create extension.
 	 */
-	E createExtensionInterface(ManagedObject managedObject);
+	E createExtensionInterface(ManagedObject managedObject) throws Throwable;
 
 }

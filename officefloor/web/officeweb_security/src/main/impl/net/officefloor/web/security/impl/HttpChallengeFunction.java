@@ -27,10 +27,9 @@ import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
@@ -86,28 +85,20 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the dependencies
-		AuthenticationRequiredException exception = (AuthenticationRequiredException) context.getObject(0);
-		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(1);
-		HttpSession session = (HttpSession) context.getObject(2);
-		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(0);
+		HttpSession session = (HttpSession) context.getObject(1);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(2);
 
-		// Save the request (if required)
-		if (exception.isSaveRequest()) {
-			Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
-			session.setAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, momento);
-		}
+		// Save the request
+		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
+		session.setAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, momento);
 
 		// Obtain the challenge string builder
 		StringBuilder challenge = stringBuilder.get();
 		challenge.setLength(0); // reset for use
 
 		// Undertake challenge
-		try {
-			this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, challenge));
-		} catch (Throwable ex) {
-			// Allow handling of the failure
-			context.doFlow(0, ex, null);
-		}
+		this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, challenge));
 
 		// Determine if challenge
 		if (challenge.length() > 0) {

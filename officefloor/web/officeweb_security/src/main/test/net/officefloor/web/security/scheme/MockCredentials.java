@@ -89,10 +89,11 @@ public class MockCredentials {
 	 * 
 	 * @param request
 	 *            {@link MockHttpRequestBuilder}.
+	 * @return Input {@link MockHttpRequestBuilder}.
 	 */
-	public void loadHttpRequest(MockHttpRequestBuilder request) {
-		request.header("authorization", MockChallengeHttpSecuritySource.AUTHENTICATION_SCHEME + " " + this.userName
-				+ "," + this.password + "," + String.join(",", this.roles));
+	public MockHttpRequestBuilder loadHttpRequest(MockHttpRequestBuilder request) {
+		return request.header("authorization", MockChallengeHttpSecuritySource.AUTHENTICATION_SCHEME + " "
+				+ this.userName + "," + this.password + "," + String.join(",", this.roles));
 	}
 
 }

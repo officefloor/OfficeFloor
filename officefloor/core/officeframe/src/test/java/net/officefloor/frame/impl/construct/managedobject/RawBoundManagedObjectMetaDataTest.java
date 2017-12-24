@@ -998,7 +998,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure {@link Governance} for the {@link ManagedObject}.
 	 */
-	public void testGovernManagedObject() {
+	public void testGovernManagedObject() throws Throwable {
 
 		final ManagedObjectGovernanceConfiguration governanceConfiguration = this
 				.createMock(ManagedObjectGovernanceConfiguration.class);

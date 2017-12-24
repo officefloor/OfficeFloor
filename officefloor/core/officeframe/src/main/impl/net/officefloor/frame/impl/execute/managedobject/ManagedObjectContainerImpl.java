@@ -860,7 +860,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			final E[] managedObjectExtensions, final int extensionIndex, TeamManagement responsibleTeam) {
 		return new ManagedObjectOperation() {
 			@Override
-			public FunctionState execute(FunctionStateContext context) {
+			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;

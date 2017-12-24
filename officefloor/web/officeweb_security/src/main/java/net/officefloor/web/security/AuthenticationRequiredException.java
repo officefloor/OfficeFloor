@@ -19,8 +19,8 @@ package net.officefloor.web.security;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
  * <p>
@@ -35,40 +35,37 @@ import net.officefloor.web.build.WebArchitect;
 public class AuthenticationRequiredException extends RuntimeException {
 
 	/**
-	 * Indicates whether to save request for {@link HttpUrlContinuation} after
-	 * authentication completes.
+	 * Name of the required {@link HttpSecurity}.
 	 */
-	private final boolean isSaveRequest;
+	private final String requiredHttpSecurityName;
 
 	/**
-	 * Initiate.
+	 * Initiate for any {@link HttpSecurity}.
 	 */
 	public AuthenticationRequiredException() {
-		this(true);
+		this(null);
 	}
 
 	/**
-	 * <p>
-	 * Used internally to trigger a challenge again.
-	 * <p>
-	 * Allows not saving the request so that the original request triggering
-	 * authentication is used once authentication completes.
+	 * Initiate for a specific {@link HttpSecurity}.
 	 * 
-	 * @param isSaveRequest
-	 *            Indicates whether to save request for
-	 *            {@link HttpUrlContinuation} after authentication completes.
+	 * @param requiredHttpSecurityName
+	 *            Name of the specific {@link HttpSecurity} required. May be
+	 *            <code>null</code> to indicate any configured
+	 *            {@link HttpSecurity}.
 	 */
-	public AuthenticationRequiredException(boolean isSaveRequest) {
-		this.isSaveRequest = isSaveRequest;
+	public AuthenticationRequiredException(String requiredHttpSecurityName) {
+		this.requiredHttpSecurityName = requiredHttpSecurityName;
 	}
 
 	/**
-	 * Indicates whether to save the request.
+	 * Obtains the required {@link HttpSecurity} name.
 	 * 
-	 * @return <code>true</code> to save the request.
+	 * @return Required {@link HttpSecurity} name or <code>null</code> if any
+	 *         {@link HttpSecurity}.
 	 */
-	public boolean isSaveRequest() {
-		return this.isSaveRequest;
+	public String getRequiredHttpSecurityName() {
+		return this.requiredHttpSecurityName;
 	}
 
 }

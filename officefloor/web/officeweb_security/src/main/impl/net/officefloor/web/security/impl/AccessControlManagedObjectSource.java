@@ -30,9 +30,9 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccessControl;
-import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AccessControlListener;
 import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
  * {@link ManagedObjectSource} for the access control object.
@@ -50,18 +50,26 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 	}
 
 	/**
-	 * {@link HttpSecurityType}.
+	 * Name of {@link HttpSecurity} for this access control.
 	 */
-	private final HttpSecurityType<?, AC, C, ?, ?> securityType;
+	private final String httpSecurityName;
+
+	/**
+	 * Access control type.
+	 */
+	private final Class<AC> accessControlType;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param securityType
-	 *            {@link HttpSecurityType}.
+	 * @param httpSecurityName
+	 *            Name of {@link HttpSecurity} for this access control.
+	 * @param accessControlType
+	 *            Access control type.
 	 */
-	public AccessControlManagedObjectSource(HttpSecurityType<?, AC, C, ?, ?> securityType) {
-		this.securityType = securityType;
+	public AccessControlManagedObjectSource(String httpSecurityName, Class<AC> accessControlType) {
+		this.httpSecurityName = httpSecurityName;
+		this.accessControlType = accessControlType;
 	}
 
 	/*
@@ -76,7 +84,6 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
 
 		// Obtain the access control type
-		Class<AC> accessControlType = this.securityType.getAccessControlType();
 		context.addManagedObjectExtensionInterface(HttpAccessControl.class, (managedObject) -> {
 			try {
 				return (HttpAccessControl) managedObject.getObject();
@@ -86,7 +93,7 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 		});
 
 		// Specify the meta-data
-		context.setObjectClass(accessControlType);
+		context.setObjectClass(this.accessControlType);
 		context.setManagedObjectClass(AccessControlManagedObject.class);
 
 		// Add the dependency
@@ -95,13 +102,13 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new AccessControlManagedObject<AC, C>();
+		return new AccessControlManagedObject();
 	}
 
 	/**
 	 * {@link ManagedObject} for the access control.
 	 */
-	public static class AccessControlManagedObject<AC extends Serializable, C>
+	public class AccessControlManagedObject
 			implements AsynchronousManagedObject, CoordinatingManagedObject<Dependencies>, AccessControlListener<AC> {
 
 		/**
@@ -166,7 +173,7 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 
 			// Ensure have the access control
 			if (this.accessControl == null) {
-				throw new AuthenticationRequiredException();
+				throw new AuthenticationRequiredException(AccessControlManagedObjectSource.this.httpSecurityName);
 			}
 
 			// Return the access control

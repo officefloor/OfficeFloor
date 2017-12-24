@@ -18,14 +18,10 @@
 package net.officefloor.web.security;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -35,10 +31,10 @@ import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
-import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
+import net.officefloor.web.security.scheme.MockCredentials;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecurity;
 
@@ -255,10 +251,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can check {@link HttpAccess}.
+	 * Ensure can check custom access control.
 	 */
-	public void testAccessControl() throws Exception {
-		this.initialiseMockHttpSecurity("/path", "REALM", AccessControlServicer.class);
+	public void testCustom_AccessControl() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Custom_AccessControlServicer.class);
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -266,7 +262,35 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect response", "TEST", response.getEntity(null));
 	}
 
-	public static class AccessControlServicer {
+	public static class Custom_AccessControlServicer {
+		public void service(MockAccessControl accessControl, ServerHttpConnection connection) throws IOException {
+
+			// Ensure correct authentication
+			assertEquals("Incorrect authentication scheme", "Mock", accessControl.getAuthenticationScheme());
+			assertEquals("Incorrect user", "test", accessControl.getUserName());
+
+			// Ensure in role
+			assertTrue("Should be in test role", accessControl.getRoles().contains("test"));
+			assertFalse("Should only be in test role", accessControl.getRoles().contains("not"));
+
+			// Send response
+			connection.getResponse().getEntityWriter().write("TEST");
+		}
+	}
+
+	/**
+	 * Ensure can check {@link HttpAccessControl}.
+	 */
+	public void testStandard_AccessControl() throws Exception {
+		this.initialiseMockHttpSecurity("/path", "REALM", Standard_AccessControlServicer.class);
+
+		// Send request (with authentication)
+		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+	}
+
+	public static class Standard_AccessControlServicer {
 		public void service(HttpAccessControl accessControl, ServerHttpConnection connection) throws IOException {
 
 			// Ensure correct authentication scheme
@@ -345,43 +369,15 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to configure multiple {@link HttpSecurity} instances.
-	 */
-	public void testMultipleSecurity() throws Exception {
-		this.compile((context, security) -> {
-			// Provide security for REST API calls
-			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class);
-
-			// Provide security for web content
-			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class);
-
-			// Provide servicer that will use any security
-			context.link(false, "/path", HttpAccessServicer.class);
-		});
-
-		// Ensure both security is on the challenge
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include both security challenges", response.getHeader("www-authenticate").getValue(),
-				MockChallengeHttpSecuritySource.getHeaderChallengeValue("test") + ", "
-						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("test"));
-
-		// Ensure can access once providing credentials
-		response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
-	}
-
-	/**
 	 * Ensure able to qualify which {@link HttpSecurity} to use.
 	 */
 	public void testQualifiedSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
-			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class);
+			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class).addProperty("realm", "api");
 
 			// Provide security for web content
-			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class);
+			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class).addProperty("realm", "app");
 
 			// Provide servicer that will use any security
 			context.link(false, "/path", HttpAccessServicer.class);
@@ -390,8 +386,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure only app challenge is on response
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include both security challenges", response.getHeader("www-authenticate").getValue(),
-				MockChallengeHttpSecuritySource.getHeaderChallengeValue("test"));
+		assertEquals("Should include only the qualified security", response.getHeader("www-authenticate").getValue(),
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("app"));
 
 		// Ensure can access once providing credentials
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
@@ -404,6 +400,35 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("QUALIFIED");
 		}
+	}
+
+	/**
+	 * Ensure able to configure multiple challenge {@link HttpSecurity}
+	 * instances.
+	 */
+	public void testMultipleChallengeSecurity() throws Exception {
+		this.compile((context, security) -> {
+			// Provide security for REST API calls
+			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class).addProperty("realm", "one");
+
+			// Provide security for web content
+			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class).addProperty("realm", "two");
+
+			// Provide servicer that will use any security
+			context.link(false, "/path", HttpAccessServicer.class);
+		});
+
+		// Ensure both security is on the challenge
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
+		assertEquals("Should include both security challenges", response.getHeader("www-authenticate").getValue(),
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one") + ", "
+						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("two"));
+
+		// Ensure can access once providing credentials
+		response = this.server.send(this.mockRequest("/path", "test", "test"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", "TEST", response.getEntity(null));
 	}
 
 	/**
@@ -447,9 +472,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
 	private MockHttpRequestBuilder mockRequest(String path, String userName, String password) {
-		Encoder encoder = Base64.getEncoder();
-		return MockHttpServer.mockRequest("/path").header("authorization", "Basic "
-				+ encoder.encodeToString((userName + ":" + password).getBytes(ServerHttpConnection.HTTP_CHARSET)));
+		return new MockCredentials(userName, password).loadHttpRequest(MockHttpServer.mockRequest(path));
 	}
 
 	/**
@@ -457,18 +480,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	private void initialiseMockHttpSecurity(String path, String realm, Class<?> sectionClass) throws Exception {
 		this.compile((context, security) -> {
-			HttpSecurityBuilder builder = security.addHttpSecurity(realm, new MockChallengeHttpSecuritySource(realm));
+			security.addHttpSecurity(realm, new MockChallengeHttpSecuritySource(realm));
 			context.link(false, path, sectionClass);
-
-			OfficeSection handler = context.addSection("HANDLE", HandleSection.class);
-			context.getOfficeArchitect().link(builder.getOutput("Failure"), handler.getOfficeSectionInput("handle"));
 		});
-	}
-
-	public static class HandleSection {
-		public void handle(@Parameter Throwable exception) {
-			exception.printStackTrace();
-		}
 	}
 
 	/**

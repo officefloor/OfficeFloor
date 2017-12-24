@@ -29,8 +29,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectGovernanceMetaDataImpl<I> implements
-		ManagedObjectGovernanceMetaData<I>, ManagedObjectExtensionExtractor<I> {
+public class ManagedObjectGovernanceMetaDataImpl<I>
+		implements ManagedObjectGovernanceMetaData<I>, ManagedObjectExtensionExtractor<I> {
 
 	/**
 	 * {@link Governance} index.
@@ -75,10 +75,9 @@ public class ManagedObjectGovernanceMetaDataImpl<I> implements
 	 */
 
 	@Override
-	public I extractExtension(ManagedObject managedObject,
-			ManagedObjectMetaData<?> managedObjectMetaData) {
-		return this.extensionInterfaceFactory
-				.createExtensionInterface(managedObject);
+	public I extractExtension(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData)
+			throws Throwable {
+		return this.extensionInterfaceFactory.createExtensionInterface(managedObject);
 	}
 
 }

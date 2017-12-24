@@ -63,7 +63,7 @@ public @interface HttpAccess {
 	String[] ifRole() default {};
 
 	/**
-	 * Provides means to all access if have <strong>ALL</strong> roles.
+	 * Provides means to allow access if have <strong>ALL</strong> roles.
 	 * 
 	 * @return All roles that must be supported for access to the
 	 *         {@link ManagedFunction} {@link Method}.

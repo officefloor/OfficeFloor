@@ -25,12 +25,13 @@ package net.officefloor.web.security;
 public interface AuthenticateRequest {
 
 	/**
-	 * Notifies the requester that the authenticate has completed.
+	 * Notifies the requester that the authenticate attempt has completed.
 	 * 
 	 * @param failure
-	 *            On a successful authentication this will be <code>null</code>.
 	 *            On failure to authenticate it will be the cause of the
-	 *            failure.
+	 *            failure. Note that a null {@link Throwable} does not
+	 *            necessarily mean authentication was successful (just the
+	 *            attempt has complete).
 	 */
 	void authenticateComplete(Throwable failure);
 

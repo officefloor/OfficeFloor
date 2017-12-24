@@ -18,7 +18,6 @@
 package net.officefloor.web.security.integrate;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
@@ -30,7 +29,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
@@ -105,18 +103,12 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 					context.getOfficeArchitect(), context.getOfficeSourceContext());
 
 			// Configure the HTTP Security
-			HttpSecurityBuilder security = this.configureHttpSecurity(context, securityArchitect);
+			this.configureHttpSecurity(context, securityArchitect);
 
 			// Add servicing methods
 			OfficeSection section = context.addSection("SERVICE", Servicer.class);
 			web.link(false, "service", section.getOfficeSectionInput("service"));
 			web.link(false, "logout", section.getOfficeSectionInput("logout"));
-
-			// Determine if security configured
-			if (security != null) {
-				context.getOfficeArchitect().link(security.getOutput("Failure"),
-						section.getOfficeSectionInput("handleFailure"));
-			}
 
 			// Inform web architect of security
 			securityArchitect.informWebArchitect();
@@ -281,23 +273,6 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 			// Indicate logged out
 			connection.getResponse().getEntityWriter().write("LOGOUT");
-		}
-
-		/**
-		 * Handles failure.
-		 * 
-		 * @param failure
-		 *            Failure.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @throws IOException
-		 *             If fails.
-		 */
-		public void handleFailure(@Parameter Throwable failure, ServerHttpConnection connection) throws IOException {
-			PrintWriter writer = new PrintWriter(connection.getResponse().getEntityWriter());
-			writer.write("ERROR: ");
-			failure.printStackTrace(writer);
-			writer.flush();
 		}
 	}
 

@@ -368,7 +368,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures able to construct {@link AdministrationMetaData}.
 	 */
-	public void testConstructAdministratorMetaData() {
+	public void testConstructAdministratorMetaData() throws Throwable {
 
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
 		final ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);

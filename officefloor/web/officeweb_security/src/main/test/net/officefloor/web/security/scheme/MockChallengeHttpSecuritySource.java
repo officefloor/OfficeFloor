@@ -162,7 +162,9 @@ public class MockChallengeHttpSecuritySource
 
 		@Override
 		public MockAuthentication createAuthentication(AuthenticationContext<MockAccessControl, Void> context) {
-			return new MockAuthentication(context);
+			MockAuthentication authentication = new MockAuthentication(context);
+			context.authenticate(null, null); // attempt authentication
+			return authentication;
 		}
 
 		@Override
@@ -181,10 +183,10 @@ public class MockChallengeHttpSecuritySource
 			HttpAuthenticationScheme scheme = HttpAuthenticationScheme
 					.getHttpAuthenticationScheme(context.getConnection().getRequest());
 			if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
-				return false; // must be basic authentication
+				return false; // must be mock authentication
 			}
 
-			// As here, then have basic authentication details
+			// As here, then have mock authentication details
 			return true;
 		}
 

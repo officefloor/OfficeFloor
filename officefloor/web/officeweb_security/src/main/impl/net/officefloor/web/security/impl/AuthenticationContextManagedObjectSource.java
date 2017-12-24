@@ -353,6 +353,12 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 							new FunctionAuthenticateContextImpl(this.connection, this.session, credentials),
 							executeManagedObject, 0,
 							(failure) -> this.safeNotifyChange(failure, authenticateRequest, null));
+					return null;
+				}
+
+				// As here, unable to authenticate (indicate complete)
+				if (authenticateRequest != null) {
+					authenticateRequest.authenticateComplete(null);
 				}
 
 				// Void return

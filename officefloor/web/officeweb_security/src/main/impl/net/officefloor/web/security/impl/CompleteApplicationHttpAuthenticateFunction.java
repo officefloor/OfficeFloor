@@ -19,11 +19,12 @@ package net.officefloor.web.security.impl;
 
 import java.io.Serializable;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.AuthenticationContinuationError;
+import net.officefloor.web.spi.security.AuthenticationContinuationException;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
@@ -33,8 +34,8 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable> extends
-		StaticManagedFunction<CompleteApplicationHttpAuthenticateFunction.Dependencies, CompleteApplicationHttpAuthenticateFunction.Flows> {
+public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable>
+		extends StaticManagedFunction<CompleteApplicationHttpAuthenticateFunction.Dependencies, None> {
 
 	/**
 	 * Dependency keys.
@@ -43,19 +44,12 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 		ACCESS_CONTROL, HTTP_SESSION, REQUEST_STATE
 	}
 
-	/**
-	 * Flow keys.
-	 */
-	public static enum Flows {
-		FAILURE
-	}
-
 	/*
 	 * ========================= ManagedFunction =============================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
 
 		// Obtain the access control (handles not logged in)
 		context.getObject(Dependencies.ACCESS_CONTROL);
@@ -69,8 +63,7 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 			HttpRequestStateManagedObjectSource.importHttpRequestState(momento, requestState);
 		} else {
 			// Failure as must reinstate request
-			context.doFlow(Flows.FAILURE, new AuthenticationContinuationError(), null);
-			return null; // continuation failure
+			throw new AuthenticationContinuationException();
 		}
 
 		// No further functions

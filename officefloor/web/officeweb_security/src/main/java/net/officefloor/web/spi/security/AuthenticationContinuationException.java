@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.spi.security;
 
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.security.HttpAuthentication;
 
@@ -30,5 +32,13 @@ import net.officefloor.web.security.HttpAuthentication;
  * 
  * @author Daniel Sagenschneider
  */
-public class AuthenticationContinuationError extends Error {
+public class AuthenticationContinuationException extends HttpException {
+
+	/**
+	 * Instantiate.
+	 */
+	public AuthenticationContinuationException() {
+		super(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 }

@@ -477,7 +477,6 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		// Should not supply managed object as requires flow configuration
 		// (both instance and input require dependency)
 		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
 		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
 

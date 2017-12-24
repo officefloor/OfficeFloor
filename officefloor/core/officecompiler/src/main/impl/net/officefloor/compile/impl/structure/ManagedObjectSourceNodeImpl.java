@@ -434,12 +434,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					() -> this.context.createManagedObjectTeamNode(teamName, this), (team) -> team.initialise());
 		}
 
-		// Initialise the input dependencies
-		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
-			String dependencyName = dependencyType.getDependencyName();
-			NodeUtil.getInitialisedNode(dependencyName, this.inputDependencies, this.context,
-					() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
-					(dependency) -> dependency.initialise());
+		// Initialise the input dependencies (if input)
+		if (managedObjectType.isInput()) {
+			for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
+				String dependencyName = dependencyType.getDependencyName();
+				NodeUtil.getInitialisedNode(dependencyName, this.inputDependencies, this.context,
+						() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
+						(dependency) -> dependency.initialise());
+			}
 		}
 
 		// Successfully sourced

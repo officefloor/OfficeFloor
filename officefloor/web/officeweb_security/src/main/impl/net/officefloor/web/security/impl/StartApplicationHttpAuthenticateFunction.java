@@ -19,6 +19,7 @@ package net.officefloor.web.security.impl;
 
 import java.io.Serializable;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -31,8 +32,8 @@ import net.officefloor.web.spi.security.AuthenticationContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C> extends
-		StaticManagedFunction<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> {
+public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C>
+		extends StaticManagedFunction<StartApplicationHttpAuthenticateFunction.Dependencies, None> {
 
 	/**
 	 * Dependency keys.
@@ -41,20 +42,13 @@ public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C
 		AUTHENTICATION_CONTEXT, CREDENTIALS
 	}
 
-	/**
-	 * Flow keys.
-	 */
-	public static enum Flows {
-		FAILURE
-	}
-
 	/*
 	 * ====================== ManagedFunction =============================
 	 */
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
 
 		// Obtain the dependencies
 		AuthenticationContext<AC, C> authenticationContext = (AuthenticationContext<AC, C>) context
@@ -62,15 +56,7 @@ public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C
 		C credentials = (C) context.getObject(Dependencies.CREDENTIALS);
 
 		// Trigger authentication
-		try {
-			authenticationContext.authenticate(credentials, (failure) -> {
-				if (failure != null) {
-					context.doFlow(Flows.FAILURE, failure, null);
-				}
-			});
-		} catch (Throwable ex) {
-			context.doFlow(Flows.FAILURE, ex, null);
-		}
+		authenticationContext.authenticate(credentials, null);
 
 		// Nothing further
 		return null;
