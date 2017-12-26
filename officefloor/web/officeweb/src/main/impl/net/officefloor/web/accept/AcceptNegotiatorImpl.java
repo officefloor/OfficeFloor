@@ -17,6 +17,9 @@
  */
 package net.officefloor.web.accept;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
@@ -36,19 +39,70 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	public static class AcceptHandler<H> {
 
 		/**
-		 * <code>Content-Type</code> handled by the handler.
+		 * Type of {@link AcceptHandler}.
 		 */
-		private final String contentType;
+		private final AcceptHandlerEnum type;
+
+		/**
+		 * <code>Content-Type</code> for matching. Value specific to
+		 * {@link AcceptHandlerEnum}.
+		 */
+		private final String matchContentType;
 
 		/**
 		 * Handler.
 		 */
 		private final H handler;
 
-		public AcceptHandler(String contentType, H handler) {
-			this.contentType = contentType;
+		/**
+		 * Instantiate.
+		 * 
+		 * @param handler
+		 *            Handler.
+		 */
+		private AcceptHandler(AcceptHandlerEnum type, String matchContentType, H handler) {
+			this.type = type;
+			this.matchContentType = matchContentType;
 			this.handler = handler;
 		}
+	}
+
+	/**
+	 * Easy look up of
+	 * 
+	 *
+	 * @author Daniel Sagenschneider
+	 */
+	private static enum AcceptHandlerEnum {
+		SUB_TYPE, TYPE, ANY
+	}
+
+	/**
+	 * Creates the {@link AcceptHandler}.
+	 * 
+	 * @param contentType
+	 *            <code>Content-Type</code>
+	 * @param handler
+	 *            Handler.
+	 * @return {@link AcceptHandler}.
+	 */
+	public static <H> AcceptHandler<H> createAcceptHandler(String contentType, H handler) {
+
+		// Clean content type
+		contentType = contentType.trim();
+
+		// Determine if default content type
+		if ("*/*".equals(contentType)) {
+			return new AcceptHandler<H>(AcceptHandlerEnum.ANY, null, handler);
+		}
+
+		// Determine if type (with wildcard sub type)
+		if (contentType.endsWith("/*")) {
+			return new AcceptHandler<H>(AcceptHandlerEnum.TYPE, contentType.split("/")[0] + "/", handler);
+		}
+
+		// As here, is specific type
+		return new AcceptHandler<H>(AcceptHandlerEnum.SUB_TYPE, contentType, handler);
 	}
 
 	/**
@@ -63,13 +117,52 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	private final AcceptHandler<H>[] acceptHandlers;
 
 	/**
+	 * Default {@link AcceptHandler}.
+	 */
+	private final AcceptHandler<H> defaultAcceptHandler;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param acceptHandlers
 	 *            {@link AcceptHandler} instances.
 	 */
+	@SuppressWarnings("unchecked")
 	public AcceptNegotiatorImpl(AcceptHandler<H>[] acceptHandlers) {
-		this.acceptHandlers = acceptHandlers;
+
+		// Split into lists
+		AcceptHandler<H> defaultAcceptHandler = null;
+		List<AcceptHandler<H>> handlers = new ArrayList<>(acceptHandlers.length);
+		for (AcceptHandler<H> handler : acceptHandlers) {
+			switch (handler.type) {
+			case ANY:
+				// Only one default matcher allowed
+				if (defaultAcceptHandler != null) {
+					throw new IllegalStateException("Two default (*/*) handlers configured");
+				}
+				defaultAcceptHandler = handler;
+				break;
+
+			default:
+				// Include remaining
+				handlers.add(handler);
+				break;
+			}
+		}
+
+		// Sort the accept handlers
+		handlers.sort((a, b) -> {
+			int comparison = a.type.ordinal() - b.type.ordinal();
+			if (comparison == 0) {
+				// Match, so sort by content type (descending)
+				return a.matchContentType.compareTo(b.matchContentType) * -1;
+			}
+			return comparison;
+		});
+
+		// Configure
+		this.acceptHandlers = handlers.toArray(new AcceptHandler[handlers.size()]);
+		this.defaultAcceptHandler = defaultAcceptHandler;
 	}
 
 	/*
@@ -88,7 +181,7 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 			// Attempt to match to accept handler
 			for (int i = 0; i < this.acceptHandlers.length; i++) {
 				AcceptHandler<H> handler = this.acceptHandlers[i];
-				if (acceptType.isMatch(handler.contentType)) {
+				if (acceptType.isMatch(handler)) {
 
 					// Found handler
 					return handler.handler;
@@ -97,6 +190,11 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 
 			// Try next accept type
 			acceptType = acceptType.next;
+		}
+
+		// Determine if default match
+		if (this.defaultAcceptHandler != null) {
+			return this.defaultAcceptHandler.handler;
 		}
 
 		// As here, no match found
@@ -548,13 +646,13 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 		}
 
 		/**
-		 * Indicates if matches the <code>content-type</code>.
+		 * Indicates if matches the {@link AcceptHandler}.
 		 * 
-		 * @param contentType
-		 *            <code>content-type</code>.
-		 * @return <code>true</code> if matches the <code>content-type</code>.
+		 * @param acceptHandler
+		 *            {@link AcceptHandler}.
+		 * @return <code>true</code> if matches the {@link AcceptHandler}.
 		 */
-		protected abstract boolean isMatch(String contentType);
+		protected abstract <H> boolean isMatch(AcceptHandler<H> acceptHandler);
 
 		/**
 		 * Compares this against another {@link AcceptType}.
@@ -611,7 +709,7 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 		 */
 
 		@Override
-		protected boolean isMatch(String contentType) {
+		protected <H> boolean isMatch(AcceptHandler<H> acceptHandler) {
 			// Matches any content type
 			return true;
 		}
@@ -647,8 +745,21 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 		 */
 
 		@Override
-		protected boolean isMatch(String contentType) {
-			return contentType.startsWith(this.contentPrefix);
+		protected <H> boolean isMatch(AcceptHandler<H> acceptHandler) {
+			switch (acceptHandler.type) {
+			case SUB_TYPE:
+				return acceptHandler.matchContentType.startsWith(this.contentPrefix);
+
+			case TYPE:
+				return acceptHandler.matchContentType.equals(this.contentPrefix);
+
+			case ANY:
+				return true;
+
+			default:
+				throw new IllegalStateException(
+						"Unknown " + AcceptHandlerEnum.class.getName() + " type " + acceptHandler.type);
+			}
 		}
 	}
 
@@ -682,8 +793,21 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 		 */
 
 		@Override
-		protected boolean isMatch(String contentType) {
-			return this.contentType.equals(contentType);
+		protected <H> boolean isMatch(AcceptHandler<H> acceptHandler) {
+			switch (acceptHandler.type) {
+			case SUB_TYPE:
+				return this.contentType.equals(acceptHandler.matchContentType);
+
+			case TYPE:
+				return this.contentType.startsWith(acceptHandler.matchContentType);
+
+			case ANY:
+				return true;
+
+			default:
+				throw new IllegalStateException(
+						"Unknown " + AcceptHandlerEnum.class.getName() + " type " + acceptHandler.type);
+			}
 		}
 	}
 

@@ -110,12 +110,12 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Default to first <code>content-type</code> if any.
+	 * Default to first sorted <code>content-type</code> if any.
 	 */
 	public void testDefaultFirstAsWildcardAccept() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(A("*/*"), "content/type", new MockObject("TEST"),
 				A("application/first", "application/second"));
-		assertResponse(response, "application/first", "{value: 'TEST-0'}");
+		assertResponse(response, "application/second", "{value: 'TEST-1'}");
 	}
 
 	/**

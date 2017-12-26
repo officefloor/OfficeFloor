@@ -17,9 +17,6 @@
  */
 package net.officefloor.web.security.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
@@ -30,11 +27,14 @@ import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.impl.HandleAuthenticationRequiredFunction.Dependencies;
 import net.officefloor.web.spi.security.HttpSecurity;
@@ -58,13 +58,22 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 	private final String[] httpSecurityNames;
 
 	/**
+	 * Challenge {@link AcceptNegotiator}.
+	 */
+	private final AcceptNegotiator<int[]> challengeNegotiator;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param httpSecurityNames
 	 *            Names of the {@link HttpSecurity} instances.
+	 * @param challengeNegotiator
+	 *            Challenge {@link AcceptNegotiator}.
 	 */
-	public HandleAuthenticationRequiredSectionSource(String[] httpSecurityNames) {
+	public HandleAuthenticationRequiredSectionSource(String[] httpSecurityNames,
+			AcceptNegotiator<int[]> challengeNegotiator) {
 		this.httpSecurityNames = httpSecurityNames;
+		this.challengeNegotiator = challengeNegotiator;
 	}
 
 	/*
@@ -81,11 +90,16 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 		// Add the input handle
 		SectionInput handle = designer.addSectionInput(HANDLE_INPUT, AuthenticationRequiredException.class.getName());
 
+		// Add the Server HTTP connection object
+		SectionObject serverHttpConnection = designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
+				ServerHttpConnection.class.getName());
+
 		// Add function to handle authentication required
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("handle",
 				new HandleAuthenticationRequiredManagedFunctionSource());
 		SectionFunction handler = namespace.addSectionFunction("handler", "handler");
 		handler.getFunctionObject(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION.name()).flagAsParameter();
+		designer.link(handler.getFunctionObject(Dependencies.SERVER_HTTP_CONNECTION.name()), serverHttpConnection);
 		for (String httpSecurityName : this.httpSecurityNames) {
 
 			// Link flow to section output by security name
@@ -113,20 +127,18 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Create the function
-			Map<String, Integer> httpSecurityNameToFlowIndex = new HashMap<>();
 			HandleAuthenticationRequiredFunction factory = new HandleAuthenticationRequiredFunction(
-					httpSecurityNameToFlowIndex);
+					HandleAuthenticationRequiredSectionSource.this.httpSecurityNames,
+					HandleAuthenticationRequiredSectionSource.this.challengeNegotiator);
 
 			// Configure the function
 			ManagedFunctionTypeBuilder<Dependencies, Indexed> function = functionNamespaceTypeBuilder
 					.addManagedFunctionType("handler", factory, Dependencies.class, Indexed.class);
 			function.addObject(AuthenticationRequiredException.class)
 					.setKey(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION);
-			int flowIndex = 0;
+			function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 			for (String httpSecurityName : HandleAuthenticationRequiredSectionSource.this.httpSecurityNames) {
 				function.addFlow().setLabel(httpSecurityName);
-				httpSecurityNameToFlowIndex.put(httpSecurityName, flowIndex);
-				flowIndex++;
 			}
 		}
 	}

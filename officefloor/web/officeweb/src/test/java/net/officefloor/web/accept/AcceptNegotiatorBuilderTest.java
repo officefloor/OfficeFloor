@@ -19,6 +19,7 @@ package net.officefloor.web.accept;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
@@ -53,7 +54,8 @@ public class AcceptNegotiatorBuilderTest extends OfficeFrameTestCase {
 	 * accept type.
 	 */
 	public void testMatchContentTypeAsNoAccept() throws Exception {
-		this.doTest("content/type", this.request(null, "content/type"), "application/not-match", "content/type");
+		this.doSpecificAndGenericTest("content/type", this.request(null, "content/type"), "application/not-match",
+				"content/type");
 	}
 
 	/**
@@ -61,51 +63,54 @@ public class AcceptNegotiatorBuilderTest extends OfficeFrameTestCase {
 	 * any type.
 	 */
 	public void testMatchContentTypeAsWildcardAccept() throws Exception {
-		this.doTest("content/type", this.request("*/*", "content/type"), "application/not-match", "content/type");
+		this.doSpecificAndGenericTest("content/type", this.request("*/*", "content/type"), "application/not-match",
+				"content/type");
 	}
 
 	/**
 	 * Default to first <code>content-type</code> if any.
 	 */
 	public void testDefaultFirstAsWildcardAccept() throws Exception {
-		this.doTest("application/first", this.request("*/*"), "application/first", "application/second");
+		this.doTest("application/second", this.request("*/*"), "application/first", "application/second");
 	}
 
 	/**
 	 * Ensure 406 if no <code>content-type</code> acceptable.
 	 */
 	public void testNotMatchAccept() throws Exception {
-		this.doTest(null, this.request("not/match"), "application/json", "application/xml");
+		this.doSpecificAndGenericTest(null, this.request("not/match"), "application/json", "application/xml");
 	}
 
 	/**
 	 * Ensure matches on specific sub-type first.
 	 */
 	public void testMatchOnSubTypeFirst() throws Exception {
-		this.doTest("application/match", this.request("*/*,application/*,application/match"), "application/not-match",
-				"application/match");
+		this.doSpecificAndGenericTest("application/match", this.request("*/*,application/*,application/match"),
+				"application/not-match", "application/match");
 	}
 
 	/**
 	 * Ensure matches on specific type first.
 	 */
 	public void testMatchOnTypeFirst() throws Exception {
-		this.doTest("application/match", this.request("*/*,application/*"), "not/match", "application/match");
+		this.doSpecificAndGenericTest("application/match", this.request("*/*,application/*"), "not/match",
+				"application/match");
 	}
 
 	/**
 	 * Ensure matches as per q priority.
 	 */
 	public void testMatchOnPriority() throws Throwable {
-		this.doTest("application/match", this.request("application/not-match;q=0.8,application/match;q=1"),
-				"application/not-match", "application/match");
+		this.doSpecificAndGenericTest("application/match",
+				this.request("application/not-match;q=0.8,application/match;q=1"), "application/not-match",
+				"application/match");
 	}
 
 	/**
 	 * Ensure matches as per q priority.
 	 */
 	public void testMatchOnPriorityBeforeWildcards() throws Throwable {
-		this.doTest("application/first",
+		this.doSpecificAndGenericTest("application/first",
 				this.request("application/*,*/*,application/not-match;q=0.6,application/first;q=0.8"),
 				"application/first", "application/not-match");
 	}
@@ -120,7 +125,7 @@ public class AcceptNegotiatorBuilderTest extends OfficeFrameTestCase {
 				"parameter/type", "multiple/parameters" }) {
 			availableContentTypes.add(availableContentType);
 
-			this.doTest(availableContentType,
+			this.doSpecificAndGenericTest(availableContentType,
 					this.request(
 							"*/*,specific/*,specific/type,parameter/type;one=parameter,multiple/parameters;has=two;parameters"),
 					availableContentTypes.toArray(new String[0]));
@@ -131,10 +136,20 @@ public class AcceptNegotiatorBuilderTest extends OfficeFrameTestCase {
 	 * Ensure can parse out values with spacing.
 	 */
 	public void testParsingWithSpacing() throws Exception {
-		this.doTest("application/match",
+		this.doSpecificAndGenericTest("application/match",
 				this.request(
 						"\t application/* \t , \t */* \t , application/match \t ; \t q=0.6 ; \t another = value \t ; param"),
 				"application/not-match", "application/match");
+	}
+
+	/**
+	 * Ensure default matcher is used last.
+	 */
+	public void testDefaultContentTypeMatchedLast() throws Exception {
+		String[] contentTypes = new String[] { "*/*", "type/*", "type/subtype" };
+		this.doTest("type/subtype", this.request("type/subtype"), contentTypes);
+		this.doTest("type/*", this.request("type/not"), contentTypes);
+		this.doTest("*/*", this.request("not/not"), contentTypes);
 	}
 
 	/**
@@ -166,6 +181,47 @@ public class AcceptNegotiatorBuilderTest extends OfficeFrameTestCase {
 			request.header("content-type", contentTypeHeaderValue);
 		}
 		return request;
+	}
+
+	/**
+	 * Undertakes the test and the generic test.
+	 * 
+	 * @param expectedResult
+	 *            Expected result (<code>Content-Type</code> used as handler).
+	 * @param request
+	 *            {@link MockHttpRequestBuilder}.
+	 * @param contentTypes
+	 *            <code>Content-Type</code> instances to create handlers.
+	 */
+	private void doSpecificAndGenericTest(String expectedResult, MockHttpRequestBuilder request, String... contentTypes)
+			throws NoAcceptHandlersException {
+
+		// Specific type test
+		this.doTest(expectedResult, request, contentTypes);
+
+		// Transform type to generic
+		Function<String, String> transform = (type) -> type.split("/")[0] + "/*";
+
+		// Setup for generic test
+		if (expectedResult != null) {
+			// Expected result, so transform only the result
+			String genericType = transform.apply(expectedResult);
+			for (int i = 0; i < contentTypes.length; i++) {
+				if (expectedResult.equals(contentTypes[i])) {
+					contentTypes[i] = genericType;
+				}
+			}
+			expectedResult = genericType;
+
+		} else {
+			// No expected, result so transform all types
+			for (int i = 0; i < contentTypes.length; i++) {
+				contentTypes[i] = transform.apply(contentTypes[i]);
+			}
+		}
+
+		// Undertake generic type test
+		this.doTest(expectedResult, request, contentTypes);
 	}
 
 	/**

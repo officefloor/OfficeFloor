@@ -19,8 +19,11 @@ package net.officefloor.web.security.build;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -35,6 +38,9 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.web.accept.AcceptNegotiator;
+import net.officefloor.web.build.AcceptNegotiatorBuilder;
+import net.officefloor.web.build.NoAcceptHandlersException;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccess;
@@ -164,9 +170,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		// Configure the HTTP security
 		OfficeManagedObject httpAccessControl = null;
 		String[] httpSecurityNames = new String[this.securities.size()];
+		Map<String, Integer> httpSecurityNameToFlowIndex = new HashMap<>();
 		for (int i = 0; i < this.securities.size(); i++) {
 			HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = this.securities.get(i);
 			httpSecurityNames[i] = security.name;
+			httpSecurityNameToFlowIndex.put(security.name, i);
 			httpAccessControl = security.build();
 		}
 
@@ -185,12 +193,60 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			}
 		}
 
+		// Create the accept negotiator
+		AcceptNegotiatorBuilder<int[]> challengeBuilder = this.webArchitect.createAcceptNegotiator();
+		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : applicationSecurities) {
+			int flowIndex = httpSecurityNameToFlowIndex.get(security.name);
+			if (security.contentTypes.size() == 0) {
+				// No configured content types, so use default all
+				challengeBuilder.addHandler("*/*", new int[] { flowIndex });
+			} else {
+				// Set up for configured content types
+				for (String contentType : security.contentTypes) {
+					challengeBuilder.addHandler(contentType, new int[] { flowIndex });
+				}
+			}
+		}
+		Map<String, List<Integer>> contentTypesToChallengeFlowIndexes = new HashMap<>();
+		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : httpChallengeSecurities) {
+			Consumer<String> loader = (contentType) -> {
+				int flowIndex = httpSecurityNameToFlowIndex.get(security.name);
+				List<Integer> flowIndexes = contentTypesToChallengeFlowIndexes.get(security.name);
+				if (flowIndexes == null) {
+					flowIndexes = new LinkedList<>();
+					contentTypesToChallengeFlowIndexes.put(security.name, flowIndexes);
+				}
+				flowIndexes.add(flowIndex);
+			};
+			if (security.contentTypes.size() == 0) {
+				// No configured content types, so use default all
+				loader.accept("*/*");
+			} else {
+				// Load for configured content types
+				for (String contentType : security.contentTypes) {
+					loader.accept(contentType);
+				}
+			}
+		}
+		for (String contentType : contentTypesToChallengeFlowIndexes.keySet()) {
+			List<Integer> flowIndexes = contentTypesToChallengeFlowIndexes.get(contentType);
+			int[] indexes = flowIndexes.stream().mapToInt((index) -> index).toArray();
+			challengeBuilder.addHandler(contentType, indexes);
+		}
+		AcceptNegotiator<int[]> challengeNegotiator;
+		try {
+			challengeNegotiator = challengeBuilder.build();
+		} catch (NoAcceptHandlersException ex) {
+			throw this.officeArchitect
+					.addIssue("Failed to create " + HttpSecurity.class.getSimpleName() + " challenge negotiator", ex);
+		}
+
 		// Add the authentication required handling
 		OfficeEscalation authenticationRequiredEscalation = this.officeArchitect
 				.addOfficeEscalation(AuthenticationRequiredException.class.getName());
 		OfficeSection handleAuthenticationRequiredSection = this.officeArchitect.addOfficeSection(
-				"AuthenticationRequiredHandler", new HandleAuthenticationRequiredSectionSource(httpSecurityNames),
-				null);
+				"AuthenticationRequiredHandler",
+				new HandleAuthenticationRequiredSectionSource(httpSecurityNames, challengeNegotiator), null);
 		this.officeArchitect.link(authenticationRequiredEscalation, handleAuthenticationRequiredSection
 				.getOfficeSectionInput(HandleAuthenticationRequiredSectionSource.HANDLE_INPUT));
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : this.securities) {
@@ -248,6 +304,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 * Timeout.
 		 */
 		private int timeout = 10 * 1000;
+
+		/**
+		 * <code>Content-Type</code> values.
+		 */
+		private List<String> contentTypes = new LinkedList<>();
 
 		/**
 		 * {@link HttpSecurityType}.
@@ -396,7 +457,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		@Override
 		public void addContentType(String contentType) {
-			// TODO Auto-generated method stub
+			this.contentTypes.add(contentType);
 		}
 
 		@Override

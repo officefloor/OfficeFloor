@@ -421,11 +421,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure both security is on the challenge
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include both security challenges", response.getHeader("www-authenticate").getValue(),
+		assertEquals("Should include both security challenges",
 				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one") + ", "
-						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("two"));
+						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("two"),
+				response.getHeader("www-authenticate").getValue());
 
-		// Ensure can access once providing credentials
+		// Ensure can access once providing credentialss
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "TEST", response.getEntity(null));

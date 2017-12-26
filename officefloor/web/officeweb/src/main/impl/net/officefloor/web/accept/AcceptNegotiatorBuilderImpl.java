@@ -42,7 +42,7 @@ public class AcceptNegotiatorBuilderImpl<H> implements AcceptNegotiatorBuilder<H
 
 	@Override
 	public void addHandler(String contentType, H handler) {
-		this.acceptHandlers.add(new AcceptHandler<H>(contentType, handler));
+		this.acceptHandlers.add(AcceptNegotiatorImpl.createAcceptHandler(contentType, handler));
 	}
 
 	@Override
