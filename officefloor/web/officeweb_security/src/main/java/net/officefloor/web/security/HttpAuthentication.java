@@ -39,6 +39,13 @@ public interface HttpAuthentication<C> {
 	boolean isAuthenticated() throws HttpException;
 
 	/**
+	 * Obtains the type of credentials.
+	 * 
+	 * @return Type of credentials.
+	 */
+	Class<C> getCredentialsType();
+
+	/**
 	 * Triggers to undertake authentication.
 	 *
 	 * @param credentials

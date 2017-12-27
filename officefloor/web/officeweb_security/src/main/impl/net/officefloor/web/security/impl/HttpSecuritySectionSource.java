@@ -51,6 +51,7 @@ import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.state.HttpRequestState;
@@ -127,6 +128,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		SectionObject authenticationContext = designer.addSectionObject(AuthenticationContext.class.getSimpleName(),
 				AuthenticationContext.class.getName());
 		SectionObject accessControl = designer.addSectionObject("AccessControl", accessControlType.getName());
+		SectionObject httpChallengeContext = designer.addSectionObject(HttpChallengeContext.class.getSimpleName(),
+				HttpChallengeContext.class.getName());
 
 		// Load the dynamic dependencies
 		HttpSecurityDependencyType<?>[] dependencyTypes = securityType.getDependencyTypes();
@@ -146,6 +149,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		SectionFunction challengeFunction = namespace.addSectionFunction(
 				HttpSecurityManagedFunctionSource.FUNCTION_CHALLENGE,
 				HttpSecurityManagedFunctionSource.FUNCTION_CHALLENGE);
+		designer.link(challengeFunction.getFunctionObject(HttpChallengeContext.class.getSimpleName()),
+				httpChallengeContext);
 		designer.link(challengeFunction.getFunctionObject(ServerHttpConnection.class.getSimpleName()),
 				serverHttpConnection);
 		designer.link(challengeFunction.getFunctionObject(HttpSession.class.getSimpleName()), httpSession);
@@ -343,6 +348,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			// Add the challenge function
 			ManagedFunctionTypeBuilder<Indexed, Indexed> challenge = namespaceTypeBuilder.addManagedFunctionType(
 					FUNCTION_CHALLENGE, new HttpChallengeFunction<>(this.httpSecurity), Indexed.class, Indexed.class);
+			challenge.addObject(HttpChallengeContext.class).setLabel(HttpChallengeContext.class.getSimpleName());
 			challenge.addObject(ServerHttpConnection.class).setLabel(ServerHttpConnection.class.getSimpleName());
 			challenge.addObject(HttpSession.class).setLabel(HttpSession.class.getSimpleName());
 			challenge.addObject(HttpRequestState.class).setLabel(HttpRequestState.class.getSimpleName());

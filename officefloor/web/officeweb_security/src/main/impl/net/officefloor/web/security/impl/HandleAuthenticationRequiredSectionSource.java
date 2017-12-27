@@ -33,10 +33,12 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.impl.HandleAuthenticationRequiredFunction.Dependencies;
+import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -90,9 +92,11 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 		// Add the input handle
 		SectionInput handle = designer.addSectionInput(HANDLE_INPUT, AuthenticationRequiredException.class.getName());
 
-		// Add the Server HTTP connection object
+		// Add the dependencies
 		SectionObject serverHttpConnection = designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
 				ServerHttpConnection.class.getName());
+		SectionObject httpChallengeContext = designer.addSectionObject(HttpChallengeContext.class.getSimpleName(),
+				HttpChallengeContext.class.getName());
 
 		// Add function to handle authentication required
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("handle",
@@ -107,6 +111,18 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 			FunctionFlow flow = handler.getFunctionFlow(httpSecurityName);
 			designer.link(flow, output, false);
 		}
+
+		// Add function to send challenge
+		SectionFunction sender = namespace.addSectionFunction("sender", "sender");
+		designer.link(sender.getFunctionObject(
+				net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.HTTP_CHALLENGE_CONTEXT.name()),
+				httpChallengeContext);
+		designer.link(sender.getFunctionObject(
+				net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+				serverHttpConnection);
+
+		// Configure flow to send
+		designer.link(handler.getFunctionFlow("Send"), sender, false);
 
 		// Handle the input
 		designer.link(handle, handler);
@@ -126,20 +142,29 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
-			// Create the function
-			HandleAuthenticationRequiredFunction factory = new HandleAuthenticationRequiredFunction(
+			// Configure the handle function
+			HandleAuthenticationRequiredFunction handleFactory = new HandleAuthenticationRequiredFunction(
 					HandleAuthenticationRequiredSectionSource.this.httpSecurityNames,
 					HandleAuthenticationRequiredSectionSource.this.challengeNegotiator);
-
-			// Configure the function
-			ManagedFunctionTypeBuilder<Dependencies, Indexed> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType("handler", factory, Dependencies.class, Indexed.class);
-			function.addObject(AuthenticationRequiredException.class)
+			ManagedFunctionTypeBuilder<Dependencies, Indexed> handleFunction = functionNamespaceTypeBuilder
+					.addManagedFunctionType("handler", handleFactory, Dependencies.class, Indexed.class);
+			handleFunction.addObject(AuthenticationRequiredException.class)
 					.setKey(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION);
-			function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+			handleFunction.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 			for (String httpSecurityName : HandleAuthenticationRequiredSectionSource.this.httpSecurityNames) {
-				function.addFlow().setLabel(httpSecurityName);
+				handleFunction.addFlow().setLabel(httpSecurityName);
 			}
+			handleFunction.addFlow().setLabel("Send");
+
+			// Configure the send function
+			SendHttpChallengeFunction sendFactory = new SendHttpChallengeFunction();
+			ManagedFunctionTypeBuilder<net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies, None> sendFunction = functionNamespaceTypeBuilder
+					.addManagedFunctionType("sender", sendFactory,
+							net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.class, None.class);
+			sendFunction.addObject(HttpChallengeContext.class).setKey(
+					net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.HTTP_CHALLENGE_CONTEXT);
+			sendFunction.addObject(ServerHttpConnection.class).setKey(
+					net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.SERVER_HTTP_CONNECTION);
 		}
 	}
 

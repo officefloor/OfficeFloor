@@ -420,13 +420,14 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure both security is on the challenge
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
+		assertEquals("Should not be authenticated: " + response.getEntity(null), 401,
+				response.getStatus().getStatusCode());
 		assertEquals("Should include both security challenges",
 				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one") + ", "
 						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("two"),
 				response.getHeader("www-authenticate").getValue());
 
-		// Ensure can access once providing credentialss
+		// Ensure can access once providing credentials
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "TEST", response.getEntity(null));
@@ -439,10 +440,11 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	public void testNegotiateSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
-			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class).addContentType("application/json");
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"))
+					.addContentType("application/json");
 
 			// Provide security for web content
-			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class).addContentType("text/html");
+			security.addHttpSecurity("app", new MockChallengeHttpSecuritySource("two")).addContentType("text/html");
 
 			// Provide servicer that will use any security
 			context.link(false, "/path", HttpAccessServicer.class);
@@ -450,8 +452,35 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure can select security based on accept-type
 		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest("/path").header("accept-type", "application/json"));
+				.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
 		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
+		assertEquals("Should include the negotiated security challenge",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
+				response.getHeader("www-authenticate").getValue());
+	}
+
+	/**
+	 * Ensure able to negotiate {@link HttpSecurity} with wildcards.
+	 */
+	public void testNegotiateWildcardSecurity() throws Exception {
+		this.compile((context, security) -> {
+			// Provide security for REST API calls
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one")).addContentType("application/*");
+
+			// Provide security for web content
+			security.addHttpSecurity("app", new MockChallengeHttpSecuritySource("two")).addContentType("text/*");
+
+			// Provide servicer that will use any security
+			context.link(false, "/path", HttpAccessServicer.class);
+		});
+
+		// Ensure can select security based on accept-type
+		MockHttpResponse response = this.server
+				.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
+		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
+		assertEquals("Should include the negotiated security challenge",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
+				response.getHeader("www-authenticate").getValue());
 	}
 
 	/**

@@ -49,16 +49,21 @@ import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.AccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.security.impl.AuthenticationManagedObjectSource;
+import net.officefloor.web.security.impl.DefaultHttpAccessControlManagedObjectSource;
+import net.officefloor.web.security.impl.DefaultHttpAccessControlManagedObjectSource.Dependencies;
+import net.officefloor.web.security.impl.DefaultHttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HandleAuthenticationRequiredSectionSource;
 import net.officefloor.web.security.impl.HttpAccessAdministrationSource;
 import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
+import net.officefloor.web.security.impl.HttpChallengeContextManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -167,15 +172,24 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	@Override
 	public void informWebArchitect() {
 
+		// Configure the HTTP challenge context
+		OfficeManagedObjectSource httpChallengeContextMos = this.officeArchitect.addOfficeManagedObjectSource(
+				HttpChallengeContext.class.getSimpleName(), new HttpChallengeContextManagedObjectSource());
+		OfficeManagedObject httpChallengeContext = httpChallengeContextMos
+				.addOfficeManagedObject(HttpChallengeContext.class.getSimpleName(), ManagedObjectScope.PROCESS);
+
 		// Configure the HTTP security
-		OfficeManagedObject httpAccessControl = null;
 		String[] httpSecurityNames = new String[this.securities.size()];
 		Map<String, Integer> httpSecurityNameToFlowIndex = new HashMap<>();
+		int maxTimeout = -1;
 		for (int i = 0; i < this.securities.size(); i++) {
 			HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = this.securities.get(i);
 			httpSecurityNames[i] = security.name;
 			httpSecurityNameToFlowIndex.put(security.name, i);
-			httpAccessControl = security.build();
+			if (security.timeout > maxTimeout) {
+				maxTimeout = security.timeout;
+			}
+			security.build(httpChallengeContext);
 		}
 
 		// Group the security into handling
@@ -193,17 +207,17 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			}
 		}
 
-		// Create the accept negotiator
-		AcceptNegotiatorBuilder<int[]> challengeBuilder = this.webArchitect.createAcceptNegotiator();
+		// Create the negotiator
+		AcceptNegotiatorBuilder<int[]> negotiatorBuilder = this.webArchitect.createAcceptNegotiator();
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : applicationSecurities) {
 			int flowIndex = httpSecurityNameToFlowIndex.get(security.name);
 			if (security.contentTypes.size() == 0) {
 				// No configured content types, so use default all
-				challengeBuilder.addHandler("*/*", new int[] { flowIndex });
+				negotiatorBuilder.addHandler("*/*", new int[] { flowIndex });
 			} else {
 				// Set up for configured content types
 				for (String contentType : security.contentTypes) {
-					challengeBuilder.addHandler(contentType, new int[] { flowIndex });
+					negotiatorBuilder.addHandler(contentType, new int[] { flowIndex });
 				}
 			}
 		}
@@ -211,10 +225,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : httpChallengeSecurities) {
 			Consumer<String> loader = (contentType) -> {
 				int flowIndex = httpSecurityNameToFlowIndex.get(security.name);
-				List<Integer> flowIndexes = contentTypesToChallengeFlowIndexes.get(security.name);
+				List<Integer> flowIndexes = contentTypesToChallengeFlowIndexes.get(contentType);
 				if (flowIndexes == null) {
 					flowIndexes = new LinkedList<>();
-					contentTypesToChallengeFlowIndexes.put(security.name, flowIndexes);
+					contentTypesToChallengeFlowIndexes.put(contentType, flowIndexes);
 				}
 				flowIndexes.add(flowIndex);
 			};
@@ -231,14 +245,14 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		for (String contentType : contentTypesToChallengeFlowIndexes.keySet()) {
 			List<Integer> flowIndexes = contentTypesToChallengeFlowIndexes.get(contentType);
 			int[] indexes = flowIndexes.stream().mapToInt((index) -> index).toArray();
-			challengeBuilder.addHandler(contentType, indexes);
+			negotiatorBuilder.addHandler(contentType, indexes);
 		}
-		AcceptNegotiator<int[]> challengeNegotiator;
+		AcceptNegotiator<int[]> negotiator;
 		try {
-			challengeNegotiator = challengeBuilder.build();
+			negotiator = negotiatorBuilder.build();
 		} catch (NoAcceptHandlersException ex) {
 			throw this.officeArchitect
-					.addIssue("Failed to create " + HttpSecurity.class.getSimpleName() + " challenge negotiator", ex);
+					.addIssue("Failed to create " + HttpSecurity.class.getSimpleName() + " negotiator", ex);
 		}
 
 		// Add the authentication required handling
@@ -246,7 +260,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				.addOfficeEscalation(AuthenticationRequiredException.class.getName());
 		OfficeSection handleAuthenticationRequiredSection = this.officeArchitect.addOfficeSection(
 				"AuthenticationRequiredHandler",
-				new HandleAuthenticationRequiredSectionSource(httpSecurityNames, challengeNegotiator), null);
+				new HandleAuthenticationRequiredSectionSource(httpSecurityNames, negotiator), null);
+		this.officeArchitect.link(
+				handleAuthenticationRequiredSection.getOfficeSectionObject(HttpChallengeContext.class.getSimpleName()),
+				httpChallengeContext);
 		this.officeArchitect.link(authenticationRequiredEscalation, handleAuthenticationRequiredSection
 				.getOfficeSectionInput(HandleAuthenticationRequiredSectionSource.HANDLE_INPUT));
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : this.securities) {
@@ -254,8 +271,41 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					security.section.getOfficeSectionInput(HttpSecuritySectionSource.INPUT_CHALLENGE));
 		}
 
+		// Obtain the default HTTP authentication and HTTP access control
+		OfficeManagedObject defaultHttpAuthentication;
+		OfficeManagedObject defaultHttpAccessControl;
+		if (this.securities.size() == 1) {
+			// Only the one security
+			HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = this.securities.get(0);
+			defaultHttpAuthentication = security.httpAuthentication;
+			defaultHttpAccessControl = security.httpAccessControl;
+		} else {
+			// Load the default HTTP authentication
+			String defaultHttpAuthenticationName = "Default" + HttpAuthentication.class.getSimpleName();
+			OfficeManagedObjectSource defaultHttpAuthenticationMos = this.officeArchitect.addOfficeManagedObjectSource(
+					defaultHttpAuthenticationName,
+					new DefaultHttpAuthenticationManagedObjectSource(negotiator, httpSecurityNames));
+			defaultHttpAuthentication = defaultHttpAuthenticationMos
+					.addOfficeManagedObject(defaultHttpAuthenticationName, ManagedObjectScope.PROCESS);
+			for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : this.securities) {
+				this.officeArchitect.link(defaultHttpAuthentication.getManagedObjectDependency(security.name),
+						security.httpAuthentication);
+			}
+
+			// Load the default HTTP access control
+			String defaultHttpAccessControlName = "Default" + HttpAccessControl.class.getSimpleName();
+			OfficeManagedObjectSource defaultHttpAccessControlMos = this.officeArchitect.addOfficeManagedObjectSource(
+					defaultHttpAccessControlName, new DefaultHttpAccessControlManagedObjectSource());
+			defaultHttpAccessControlMos.setTimeout(maxTimeout);
+			defaultHttpAccessControl = defaultHttpAccessControlMos.addOfficeManagedObject(defaultHttpAccessControlName,
+					ManagedObjectScope.PROCESS);
+			this.officeArchitect.link(
+					defaultHttpAccessControl.getManagedObjectDependency(Dependencies.HTTP_AUTHENTICATION.name()),
+					defaultHttpAuthentication);
+		}
+
 		// Augment functions with HTTP access administration
-		final OfficeManagedObject finalAccessControlManagedObject = httpAccessControl;
+		final OfficeManagedObject finalAccessControlManagedObject = defaultHttpAccessControl;
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 
 			// Determine if HTTP Access annotation
@@ -313,12 +363,22 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * {@link HttpSecurityType}.
 		 */
-		private HttpSecurityType<A, AC, C, O, F> type = null;
+		private HttpSecurityType<A, AC, C, O, F> type;
 
 		/**
 		 * {@link HttpSecurity}.
 		 */
-		private HttpSecurity<A, AC, C, O, F> security = null;
+		private HttpSecurity<A, AC, C, O, F> security;
+
+		/**
+		 * {@link OfficeManagedObject} for the {@link HttpAuthentication}.
+		 */
+		private OfficeManagedObject httpAuthentication;
+
+		/**
+		 * {@link OfficeManagedObject} for the {@link HttpAccessControl}.
+		 */
+		private OfficeManagedObject httpAccessControl;
 
 		/**
 		 * Instantiate.
@@ -342,10 +402,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Builds this {@link HttpSecurity}.
 		 * 
-		 * @return {@link OfficeManagedObject} for the
-		 *         {@link HttpAccessControl}.
+		 * @param httpChallengeContext
+		 *            {@link HttpChallengeContext}.
 		 */
-		private OfficeManagedObject build() {
+		private void build(OfficeManagedObject httpChallengeContext) {
 
 			// Create the HTTP Security loader
 			HttpSecurityLoader loader = new HttpSecurityLoaderImpl(HttpSecurityArchitectEmployer.this.officeArchitect,
@@ -389,16 +449,15 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 			// Add the HTTP authentication
 			Class<A> authenticationType = this.type.getAuthenticationType();
-			OfficeManagedObject httpAuthentication;
 			if (HttpAuthentication.class.isAssignableFrom(authenticationType)) {
-				httpAuthentication = authentication;
+				this.httpAuthentication = authentication;
 			} else {
 				String httpAuthenticationName = this.name + "_HttpAuthentication";
 				OfficeManagedObjectSource httpAuthenticationMos = office.addOfficeManagedObjectSource(
 						httpAuthenticationName, new HttpAuthenticationManagedObjectSource<>(this.type));
-				httpAuthentication = httpAuthenticationMos.addOfficeManagedObject(httpAuthenticationName,
+				this.httpAuthentication = httpAuthenticationMos.addOfficeManagedObject(httpAuthenticationName,
 						ManagedObjectScope.PROCESS);
-				office.link(httpAuthentication.getManagedObjectDependency("AUTHENTICATION"), authentication);
+				office.link(this.httpAuthentication.getManagedObjectDependency("AUTHENTICATION"), authentication);
 			}
 
 			// Add the access control managed object
@@ -415,14 +474,13 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			office.link(accessControl.getManagedObjectDependency("AUTHENTICATION_CONTEXT"), authenticationContext);
 
 			// Add the HTTP access control
-			OfficeManagedObject httpAccessControl;
 			if (HttpAccessControl.class.isAssignableFrom(accessControlType)) {
-				httpAccessControl = accessControl;
+				this.httpAccessControl = accessControl;
 			} else {
 				String httpAccessControlName = this.name + "_HttpAccessControl";
 				OfficeManagedObjectSource httpAccessControlMos = office.addOfficeManagedObjectSource(
 						httpAccessControlName, new HttpAccessControlManagedObjectSource<>(this.type));
-				httpAccessControl = httpAccessControlMos.addOfficeManagedObject(httpAccessControlName,
+				this.httpAccessControl = httpAccessControlMos.addOfficeManagedObject(httpAccessControlName,
 						ManagedObjectScope.PROCESS);
 				office.link(httpAccessControl.getManagedObjectDependency("ACCESS_CONTROL"), accessControl);
 				if (isRequireTypeQualification) {
@@ -441,9 +499,6 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				HttpSecurityArchitectEmployer.this.webArchitect
 						.reroute(this.section.getOfficeSectionOutput(HttpSecuritySectionSource.OUTPUT_RECONTINUE));
 			}
-
-			// Return the HTTP Access Control managed object
-			return httpAccessControl;
 		}
 
 		/*

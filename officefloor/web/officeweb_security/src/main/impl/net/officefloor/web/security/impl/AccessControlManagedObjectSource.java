@@ -117,6 +117,11 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 		private AsynchronousContext asynchronousContext;
 
 		/**
+		 * {@link AuthenticationContext}.
+		 */
+		private AuthenticationContext<AC, C> authenticationContext;
+
+		/**
 		 * Access control.
 		 */
 		private AC accessControl = null;
@@ -150,34 +155,36 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the authentication context
-			AuthenticationContext<AC, C> authenticationContext = (AuthenticationContext<AC, C>) registry
+			this.authenticationContext = (AuthenticationContext<AC, C>) registry
 					.getObject(Dependencies.AUTHENTICATION_CONTEXT);
 
 			// Register for the access control
-			authenticationContext.register(this);
+			this.authenticationContext.register(this);
 
 			// Trigger authentication
 			this.asynchronousContext.start(null);
-			authenticationContext.authenticate(null, (failure) -> {
+			this.authenticationContext.authenticate(null, (failure) -> {
 				this.asynchronousContext.complete(null);
 			});
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
+			return this.authenticationContext.run(() -> {
+				
+				// Propagate any escalation
+				if (this.escalation != null) {
+					throw this.escalation;
+				}
 
-			// Propagate any escalation
-			if (this.escalation != null) {
-				throw this.escalation;
-			}
+				// Ensure have the access control
+				if (this.accessControl == null) {
+					throw new AuthenticationRequiredException(AccessControlManagedObjectSource.this.httpSecurityName);
+				}
 
-			// Ensure have the access control
-			if (this.accessControl == null) {
-				throw new AuthenticationRequiredException(AccessControlManagedObjectSource.this.httpSecurityName);
-			}
-
-			// Return the access control
-			return this.accessControl;
+				// Return the access control
+				return this.accessControl;
+			});
 		}
 	}
 

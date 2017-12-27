@@ -122,7 +122,7 @@ public class MockChallengeHttpSecuritySource
 
 		// Specify the access control
 		context.setAuthenticationClass(MockAuthentication.class);
-		context.setHttpAuthenticationFactory((authentication) -> new MockHttpAuthentication<>(authentication));
+		context.setHttpAuthenticationFactory((authentication) -> new MockHttpAuthentication<>(authentication, null));
 		context.setAccessControlClass(MockAccessControl.class);
 		context.setHttpAccessControlFactory((accessControl) -> new MockHttpAccessControl(accessControl));
 	}

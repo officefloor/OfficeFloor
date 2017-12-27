@@ -23,13 +23,11 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.server.http.HttpHeaderName;
-import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpChallenge;
+import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
@@ -46,21 +44,6 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	 * {@link HttpSession} attribute for the challenge request state.
 	 */
 	public static final String ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO = "CHALLENGE_REQUEST_MOMENTO";
-
-	/**
-	 * <code>WWW-Authenticate</code> {@link HttpHeaderName}.
-	 */
-	private static final HttpHeaderName CHALLENGE_NAME = new HttpHeaderName("WWW-Authenticate");
-
-	/**
-	 * {@link ThreadLocal} {@link StringBuilder} to reduce GC.
-	 */
-	private static final ThreadLocal<StringBuilder> stringBuilder = new ThreadLocal<StringBuilder>() {
-		@Override
-		protected StringBuilder initialValue() {
-			return new StringBuilder();
-		}
-	};
 
 	/**
 	 * {@link HttpSecurity}.
@@ -85,27 +68,17 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the dependencies
-		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(0);
-		HttpSession session = (HttpSession) context.getObject(1);
-		HttpRequestState requestState = (HttpRequestState) context.getObject(2);
+		HttpChallengeContext httpChallengeContext = (HttpChallengeContext) context.getObject(0);
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(1);
+		HttpSession session = (HttpSession) context.getObject(2);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
 
 		// Save the request
 		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
 		session.setAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, momento);
 
-		// Obtain the challenge string builder
-		StringBuilder challenge = stringBuilder.get();
-		challenge.setLength(0); // reset for use
-
 		// Undertake challenge
-		this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, challenge));
-
-		// Determine if challenge
-		if (challenge.length() > 0) {
-			HttpResponse response = connection.getResponse();
-			response.setStatus(HttpStatus.UNAUTHORIZED);
-			response.getHeaders().addHeader(CHALLENGE_NAME, challenge.toString());
-		}
+		this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, httpChallengeContext));
 
 		// No further functions
 		return null;
@@ -114,7 +87,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * {@link ChallengeContext} implementation.
 	 */
-	private class HttpChallengeContextImpl implements ChallengeContext<O, F>, HttpChallenge {
+	private class HttpChallengeContextImpl implements ChallengeContext<O, F> {
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -132,9 +105,9 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		private final ManagedFunctionContext<Indexed, Indexed> context;
 
 		/**
-		 * {@link StringBuilder} to load the {@link HttpChallenge}.
+		 * {@link HttpChallengeContext}.
 		 */
-		private final StringBuilder challenge;
+		private final HttpChallengeContext httpChallengeContext;
 
 		/**
 		 * Initiate.
@@ -145,16 +118,15 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		 *            {@link HttpSession}.
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
-		 * @param challenge
-		 *            {@link StringBuilder} to be loaded with the
-		 *            {@link HttpChallenge}.
+		 * @param httpChallengeContext
+		 *            {@link HttpChallengeContext}.
 		 */
 		public HttpChallengeContextImpl(ServerHttpConnection connection, HttpSession session,
-				ManagedFunctionContext<Indexed, Indexed> context, StringBuilder challenge) {
+				ManagedFunctionContext<Indexed, Indexed> context, HttpChallengeContext httpChallengeContext) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;
-			this.challenge = challenge;
+			this.httpChallengeContext = httpChallengeContext;
 		}
 
 		/*
@@ -163,14 +135,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 
 		@Override
 		public HttpChallenge setChallenge(String authenticationScheme, String realm) {
-			if (this.challenge.length() > 0) {
-				this.challenge.append(", ");
-			}
-			this.challenge.append(authenticationScheme);
-			this.challenge.append(" realm=\"");
-			this.challenge.append(realm);
-			this.challenge.append("\"");
-			return null;
+			return this.httpChallengeContext.setChallenge(authenticationScheme, realm);
 		}
 
 		@Override
@@ -195,18 +160,6 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 			// Obtain the index (offset by challenge flows)
 			int index = key.ordinal() + 1;
 			this.context.doFlow(index, null, null);
-		}
-
-		/*
-		 * ==================== HttpChallenge ===========================
-		 */
-
-		@Override
-		public void addParameter(String name, String value) {
-			this.challenge.append(", ");
-			this.challenge.append(name);
-			this.challenge.append("=");
-			this.challenge.append(value);
 		}
 	}
 

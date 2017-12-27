@@ -87,37 +87,42 @@ public class HandleAuthenticationRequiredFunction
 		if (requiredHttpSecurityName != null) {
 
 			// Obtain the handling flow
+			boolean isSecurityFound = false;
 			for (int i = 0; i < this.httpSecurityNameToFlowIndex.length; i++) {
 				if (requiredHttpSecurityName.equals(this.httpSecurityNameToFlowIndex[i])) {
 					context.doFlow(i, null, null);
-					return null;
+					isSecurityFound = true;
 				}
 			}
 
-			// As here, did not find security flow
-			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null, "No " + HttpSecurity.class.getSimpleName()
-					+ " configured for name '" + requiredHttpSecurityName + "'");
-		}
+			// Ensure a flow is invoked
+			if (!isSecurityFound) {
+				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
+						"No " + HttpSecurity.class.getSimpleName() + " configured for name '" + requiredHttpSecurityName
+								+ "'");
+			}
 
-		// Determine if just the single security
-		if (this.httpSecurityNameToFlowIndex.length == 1) {
+		} else if (this.httpSecurityNameToFlowIndex.length == 1) {
 			// Trigger the only security
 			context.doFlow(0, null, null);
-			return null;
+
+		} else {
+			// Obtain the negotiated challenges
+			int[] flowIndexes = this.challengeNegotiator.getHandler(connection.getRequest());
+			if (flowIndexes == null) {
+				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
+						"No " + HttpSecurity.class.getSimpleName() + " available in accept negotiation");
+			}
+
+			// Trigger the challenge flows
+			for (int i = 0; i < flowIndexes.length; i++) {
+				int flowIndex = flowIndexes[i];
+				context.doFlow(flowIndex, null, null);
+			}
 		}
 
-		// Obtain the negotiated challenges
-		int[] flowIndexes = this.challengeNegotiator.getHandler(connection.getRequest());
-		if (flowIndexes == null) {
-			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
-					"No " + HttpSecurity.class.getSimpleName() + " available in accept negotiation");
-		}
-
-		// Trigger the challenge flows
-		for (int i = 0; i < flowIndexes.length; i++) {
-			int flowIndex = flowIndexes[i];
-			context.doFlow(flowIndex, null, null);
-		}
+		// Lastly, trigger sending challenge after challenges
+		context.doFlow(HandleAuthenticationRequiredFunction.this.httpSecurityNameToFlowIndex.length, null, null);
 
 		// Nothing further
 		return null;

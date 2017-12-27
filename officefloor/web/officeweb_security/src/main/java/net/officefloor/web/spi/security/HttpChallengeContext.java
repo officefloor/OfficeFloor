@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,45 +17,28 @@
  */
 package net.officefloor.web.spi.security;
 
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
 
 /**
- * Context for triggering a challenge.
+ * Context for the {@link HttpChallenge}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChallengeContext<O extends Enum<O>, F extends Enum<F>> extends HttpChallengeContext {
+public interface HttpChallengeContext {
 
 	/**
-	 * Obtains the {@link ServerHttpConnection}.
+	 * <p>
+	 * Sets the {@link HttpChallenge}.
+	 * <p>
+	 * This should be used instead of directly adding the {@link HttpHeader}, so
+	 * that can potentially include multiple {@link HttpChallenge} instances.
 	 * 
-	 * @return {@link ServerHttpConnection}.
+	 * @param authenticationScheme
+	 *            Authentication scheme.
+	 * @param realm
+	 *            Realm.
+	 * @return {@link HttpChallenge}.
 	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key
-	 *            Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
-
-	/**
-	 * Undertakes a flow.
-	 * 
-	 * @param key
-	 *            Key identifying the flow.
-	 */
-	void doFlow(F key);
+	HttpChallenge setChallenge(String authenticationScheme, String realm);
 
 }
