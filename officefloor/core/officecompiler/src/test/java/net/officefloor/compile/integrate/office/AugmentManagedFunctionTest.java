@@ -21,12 +21,15 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -192,6 +195,53 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	public static class MockAdministeredFunction {
 		public void function(StringBuilder writer) {
 			writer.append("FUNCTION ");
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link CompilerIssue} in augmenting
+	 * {@link ManagedFunction}.
+	 */
+	public void testIssueInAugmentManagedFunction() throws Exception {
+
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final Exception failure = new Exception("TEST");
+
+		// Record issue
+		issues.recordIssue("OFFICE", OfficeNodeImpl.class, "ISSUE");
+		issues.recordIssue("OFFICE", OfficeNodeImpl.class, "ANOTHER", failure);
+
+		// Test
+		this.replayMockObjects();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+		compile.office((context) -> {
+
+			// Augment the function object
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+				augment.addIssue("ISSUE");
+				throw augment.addIssue("ANOTHER", failure);
+			});
+		});
+		compile.section((context) -> {
+			SectionFunctionNamespace namespace = context.getSectionDesigner().addSectionFunctionNamespace("NAMESPACE",
+					ClassManagedFunctionSource.class.getName());
+			namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+					MockIssueFunction.class.getName());
+			namespace.addSectionFunction("function", "function");
+		});
+		OfficeFloor officeFloor = compile.compileOfficeFloor();
+		assertNull("Should not create OfficeFloor due to issue", officeFloor);
+
+		// Ensure issue
+		this.verifyMockObjects();
+	}
+
+	public static class MockIssueFunction {
+		public void function() {
+			fail("Should not be invoked");
 		}
 	}
 

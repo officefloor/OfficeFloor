@@ -180,11 +180,13 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Configure the HTTP security
 		String[] httpSecurityNames = new String[this.securities.size()];
+		Map<String, HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> nameToHttpSecurity = new HashMap<>();
 		Map<String, Integer> httpSecurityNameToFlowIndex = new HashMap<>();
 		int maxTimeout = -1;
 		for (int i = 0; i < this.securities.size(); i++) {
 			HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = this.securities.get(i);
 			httpSecurityNames[i] = security.name;
+			nameToHttpSecurity.put(security.name, security);
 			httpSecurityNameToFlowIndex.put(security.name, i);
 			if (security.timeout > maxTimeout) {
 				maxTimeout = security.timeout;
@@ -306,6 +308,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Augment functions with HTTP access administration
 		final OfficeManagedObject finalAccessControlManagedObject = defaultHttpAccessControl;
+		final Map<HttpAccessKey, OfficeAdministration> httpAccessAdministrators = new HashMap<>();
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 
 			// Determine if HTTP Access annotation
@@ -314,14 +317,126 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				if (annotation instanceof HttpAccess) {
 					HttpAccess httpAccess = (HttpAccess) annotation;
 
+					// Obtain the administration
+					HttpAccessKey key = new HttpAccessKey(httpAccess);
+					OfficeAdministration administration = httpAccessAdministrators.get(key);
+					if (administration == null) {
+
+						// Create and register the administration
+						administration = this.officeArchitect.addOfficeAdministration("HttpAccess",
+								new HttpAccessAdministrationSource(httpAccess));
+						httpAccessAdministrators.put(key, administration);
+
+						// Obtain the HTTP access control
+						String httpSecurityName = httpAccess.withQualifier();
+						OfficeManagedObject httpAccessControl;
+						if ("".equals(httpSecurityName)) {
+							// Use default HTTP access control
+							httpAccessControl = finalAccessControlManagedObject;
+						} else {
+							// Use the qualified HTTP access control
+							HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = nameToHttpSecurity.get(httpSecurityName);
+							if (security == null) {
+								throw context.addIssue("No " + HttpSecurity.class.getSimpleName()
+										+ " configured for qualifier '" + httpSecurityName + "'");
+							}
+							httpAccessControl = security.httpAccessControl;
+						}
+
+						// Provide the HTTP access control
+						administration.administerManagedObject(httpAccessControl);
+					}
+
 					// Configure access administration
-					OfficeAdministration administration = this.officeArchitect.addOfficeAdministration("HttpAccess",
-							new HttpAccessAdministrationSource(httpAccess));
 					context.addPreAdministration(administration);
-					administration.administerManagedObject(finalAccessControlManagedObject);
 				}
 			}
 		});
+	}
+
+	/**
+	 * Key to {@link HttpAccess} to determine uniqueness.
+	 */
+	private class HttpAccessKey {
+
+		/**
+		 * {@link HttpAccess}.
+		 */
+		private final HttpAccess access;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param access
+		 *            {@link HttpAccess}.
+		 */
+		private HttpAccessKey(HttpAccess access) {
+			this.access = access;
+		}
+
+		/*
+		 * =============== Object =====================
+		 */
+
+		@Override
+		public int hashCode() {
+			int hash = this.access.withQualifier().hashCode();
+			for (String role : this.access.ifRole()) {
+				hash += role.hashCode();
+			}
+			for (String role : this.access.ifAllRoles()) {
+				hash += role.hashCode();
+			}
+			return hash;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			// Ensure key
+			if (!(obj instanceof HttpAccessKey)) {
+				return false;
+			}
+			HttpAccessKey that = (HttpAccessKey) obj;
+
+			// Ensure match on qualifier
+			if (!(this.access.withQualifier().equals(that.access.withQualifier()))) {
+				return false;
+			}
+
+			// Ensure match on roles
+			String[] thisRoles = this.access.ifRole();
+			String[] thatRoles = that.access.ifRole();
+			if (thisRoles.length != thatRoles.length) {
+				return false;
+			}
+			NEXT_ROLE: for (String thisRole : thisRoles) {
+				for (String thatRole : thatRoles) {
+					if (thisRole.equals(thatRole)) {
+						continue NEXT_ROLE;
+					}
+				}
+				return false; // did not match on role
+			}
+
+			// Ensure match on all roles
+			String[] thisAllRoles = this.access.ifAllRoles();
+			String[] thatAllRoles = that.access.ifAllRoles();
+			if (thisAllRoles.length != thatAllRoles.length) {
+				return false;
+			}
+			NEXT_ALL_ROLE: for (String thisAllRole : thisAllRoles) {
+				for (String thatAllRole : thatAllRoles) {
+					if (thisAllRole.equals(thatAllRole)) {
+						continue NEXT_ALL_ROLE;
+					}
+				}
+				return false; // did not match on role
+			}
+
+			// As here, match
+			return true;
+		}
 	}
 
 	/**

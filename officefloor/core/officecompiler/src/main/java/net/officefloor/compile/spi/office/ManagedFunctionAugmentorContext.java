@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -26,7 +27,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionAugmentorContext {
+public interface ManagedFunctionAugmentorContext extends SourceIssues {
 
 	/**
 	 * Obtains the name of the {@link ManagedFunction}.

@@ -465,6 +465,16 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 				LinkUtil.linkObject(object, managedObject, OfficeNodeImpl.this.context.getCompilerIssues(),
 						managedFunctionNode);
 			}
+
+			@Override
+			public CompileError addIssue(String issueDescription) {
+				return OfficeNodeImpl.this.addIssue(issueDescription);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription, Throwable cause) {
+				return OfficeNodeImpl.this.addIssue(issueDescription, cause);
+			}
 		};
 
 		// Augment the managed function
@@ -642,7 +652,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Transform the office sections
 		this.transformOfficeSections();
 
-		// Source the all section trees
+		// Source all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
 				(section) -> section.sourceSectionTree(this, compileContext));
 		if (!isSourced) {

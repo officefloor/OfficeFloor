@@ -18,8 +18,7 @@
 package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.issues.CompileError;
-import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -38,7 +37,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionDesigner {
+public interface SectionDesigner extends SourceIssues {
 
 	/**
 	 * Adds a {@link SectionInput} to the {@link SectionNode} being built.
@@ -437,40 +436,5 @@ public interface SectionDesigner {
 	 *            {@link SectionManagedObject}.
 	 */
 	void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject);
-
-	/**
-	 * <p>
-	 * Allows the {@link SectionSource} to add an issue in attempting to design
-	 * the {@link SectionNode}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to design
-	 * the rest of the {@link SectionNode}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @return {@link CompileError} to be used in <code>throw</code> statement
-	 *         when adding {@link CompilerIssue} to avoid further compiling of
-	 *         the {@link SectionNode}.
-	 */
-	CompileError addIssue(String issueDescription);
-
-	/**
-	 * <p>
-	 * Allows the {@link SectionSource} to add an issue along with its cause in
-	 * attempting to design the {@link SectionNode}.
-	 * <p>
-	 * This is available to report an issue and continue designing the
-	 * {@link SectionNode} rather than throwing the {@link Exception} which
-	 * results in an incomplete design.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 * @return {@link CompileError} to be used in <code>throw</code> statement
-	 *         when adding {@link CompilerIssue} to avoid further compiling of
-	 *         the {@link SectionNode}.
-	 */
-	CompileError addIssue(String issueDescription, Throwable cause);
 
 }

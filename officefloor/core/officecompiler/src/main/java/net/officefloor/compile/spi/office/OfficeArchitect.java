@@ -17,14 +17,12 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.issues.CompileError;
-import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -39,7 +37,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeArchitect {
+public interface OfficeArchitect extends SourceIssues {
 
 	/**
 	 * Flags to attempt to auto wire any non-configured object links.
@@ -440,39 +438,5 @@ public interface OfficeArchitect {
 	 *            {@link OfficeTeam}.
 	 */
 	void link(OfficeAdministration administrator, OfficeTeam officeTeam);
-
-	/**
-	 * <p>
-	 * Allows the {@link OfficeSource} to add an issue in attempting to
-	 * architect the {@link Office}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to
-	 * architect the rest of the {@link Office}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @return {@link CompileError} to be used in <code>throw</code> statement
-	 *         when adding {@link CompilerIssue} to avoid further compiling of
-	 *         the {@link Office}.
-	 */
-	CompileError addIssue(String issueDescription);
-
-	/**
-	 * <p>
-	 * Allows the {@link OfficeSource} to add an issue along with its cause in
-	 * attempting to architect the {@link Office}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to
-	 * architect the rest of the {@link Office}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 * @return {@link CompileError} to be used in <code>throw</code> statement
-	 *         when adding {@link CompilerIssue} to avoid further compiling of
-	 *         the {@link Office}.
-	 */
-	CompileError addIssue(String issueDescription, Throwable cause);
 
 }

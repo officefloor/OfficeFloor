@@ -49,6 +49,7 @@ import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
@@ -339,7 +340,12 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// Visit this managed function
 		if (visitor != null) {
-			visitor.visit(functionType, this, compileContext);
+			try {
+				visitor.visit(functionType, this, compileContext);
+			} catch (CompileError error) {
+				// Issue should already be provided
+				return false;
+			}
 		}
 
 		// Successfully sourced
