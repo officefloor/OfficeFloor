@@ -19,6 +19,7 @@ package net.officefloor.web.security;
 
 import java.io.IOException;
 
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -31,11 +32,14 @@ import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockCredentials;
+import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -380,7 +384,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class).addProperty("realm", "app");
 
 			// Provide servicer that will use any security
-			context.link(false, "/path", HttpAccessServicer.class);
+			context.link(false, "/path", QualifiedHttpAccessServicer.class);
 		});
 
 		// Ensure only app challenge is on response
@@ -392,7 +396,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure can access once providing credentials
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		assertEquals("Incorrect response", "QUALIFIED", response.getEntity(null));
 	}
 
 	public static class QualifiedHttpAccessServicer {
@@ -481,6 +485,53 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Should include the negotiated security challenge",
 				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
 				response.getHeader("www-authenticate").getValue());
+	}
+
+	/**
+	 * Ensure can mix {@link HttpChallenge} {@link HttpSecurity} with appliation
+	 * {@link HttpSecurity}.
+	 */
+	public void testMixChallengeWithApplicationSecurity() throws Exception {
+		this.compile((context, security) -> {
+			// Provide security for REST API calls
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"))
+					.addContentType("application/json");
+
+			// Provide security for web content
+			HttpSecurityBuilder app = security.addHttpSecurity("app", new MockFlowHttpSecuritySource("two"));
+			app.addContentType("text/html");
+
+			// Provide servicer that will use any security
+			OfficeSection section = context.addSection("service", MixServicer.class);
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+
+			// Configure challenge
+			context.getOfficeArchitect().link(app.getOutput("CHALLENGE"), section.getOfficeSectionInput("challenge"));
+		});
+
+		// Ensure for html request that application challenge
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").header("accept", "text/html"));
+		assertEquals("Incorrect form response", "User name and password please", response.getEntity(null));
+		assertEquals("Should provide successful form response", 200, response.getStatus().getStatusCode());
+
+		// Ensure can select security based on accept-type
+		response = this.server.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
+		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
+		assertEquals("Should include the negotiated security challenge",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
+				response.getHeader("www-authenticate").getValue());
+
+	}
+
+	public static class MixServicer {
+		@HttpAccess(ifRole = "test")
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("TEST");
+		}
+
+		public void challenge(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("User name and password please");
+		}
 	}
 
 	/**

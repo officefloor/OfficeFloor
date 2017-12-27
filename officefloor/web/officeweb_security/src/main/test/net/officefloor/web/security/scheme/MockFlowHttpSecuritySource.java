@@ -147,8 +147,9 @@ public class MockFlowHttpSecuritySource extends
 		@Override
 		public MockAuthentication createAuthentication(
 				AuthenticationContext<MockAccessControl, MockCredentials> context) {
-			// TODO Auto-generated method stub
-			return null;
+			MockAuthentication authentication = new MockAuthentication(context);
+			context.authenticate(null, null); // attempt authentication
+			return authentication;
 		}
 
 		@Override

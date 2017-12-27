@@ -323,7 +323,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					if (administration == null) {
 
 						// Create and register the administration
-						administration = this.officeArchitect.addOfficeAdministration("HttpAccess",
+						administration = this.officeArchitect.addOfficeAdministration(key.getName(),
 								new HttpAccessAdministrationSource(httpAccess));
 						httpAccessAdministrators.put(key, administration);
 
@@ -372,6 +372,41 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 */
 		private HttpAccessKey(HttpAccess access) {
 			this.access = access;
+		}
+
+		/**
+		 * Obtains the name for the {@link OfficeAdministration}.
+		 * 
+		 * @return Name for the {@link OfficeAdministration}.
+		 */
+		private String getName() {
+			StringBuilder name = new StringBuilder();
+			name.append(HttpAccess.class.getSimpleName());
+			String qualifier = this.access.withQualifier();
+			if (!("".equals(qualifier))) {
+				name.append("-" + qualifier);
+			}
+			boolean isFirst = true;
+			for (String role : this.access.ifRole()) {
+				if (isFirst) {
+					name.append("-");
+					isFirst = false;
+				} else {
+					name.append("|");
+				}
+				name.append(role);
+			}
+			isFirst = true;
+			for (String role : this.access.ifAllRoles()) {
+				if (isFirst) {
+					name.append("-");
+					isFirst = false;
+				} else {
+					name.append("&");
+				}
+				name.append(role);
+			}
+			return name.toString();
 		}
 
 		/*

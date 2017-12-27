@@ -46,8 +46,6 @@ public class MockHttpAuthentication<C> implements HttpAuthentication<C> {
 	 * 
 	 * @param authentication
 	 *            {@link MockAuthentication}.
-	 * @param credentialsType
-	 *            Type of credentials.
 	 */
 	public MockHttpAuthentication(MockAuthentication authentication, Class<C> credentialsType) {
 		this.authentication = authentication;
@@ -70,7 +68,8 @@ public class MockHttpAuthentication<C> implements HttpAuthentication<C> {
 
 	@Override
 	public void authenticate(C credentials, AuthenticateRequest authenticationRequest) {
-		this.authentication.authenticate((failure) -> authenticationRequest.authenticateComplete(failure));
+		this.authentication.authenticate((MockCredentials) credentials,
+				(failure) -> authenticationRequest.authenticateComplete(failure));
 	}
 
 	@Override

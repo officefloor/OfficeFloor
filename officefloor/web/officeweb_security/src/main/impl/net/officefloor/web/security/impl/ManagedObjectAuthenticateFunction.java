@@ -128,9 +128,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 
 		@Override
 		public Object getObject(O key) {
-			// Obtain the relative index (offset for task authenticate context)
-			int index = key.ordinal() + 1;
-			return this.functionContext.getObject(index);
+			return this.functionContext.getObject(key.ordinal());
 		}
 
 		@Override

@@ -157,9 +157,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 
 		@Override
 		public void doFlow(F key) {
-			// Obtain the index (offset by challenge flows)
-			int index = key.ordinal() + 1;
-			this.context.doFlow(index, null, null);
+			this.context.doFlow(key.ordinal(), null, null);
 		}
 	}
 

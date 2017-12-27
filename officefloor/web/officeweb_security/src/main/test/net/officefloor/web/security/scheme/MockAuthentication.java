@@ -75,8 +75,10 @@ public class MockAuthentication {
 	 * @param completion
 	 *            Optional completion listener.
 	 */
-	public void authenticate(Consumer<Throwable> completion) {
-		this.authenticationContext.authenticate(null, (failure) -> completion.accept(failure));
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void authenticate(MockCredentials credentials, Consumer<Throwable> completion) {
+		((AuthenticationContext) this.authenticationContext).authenticate(credentials,
+				(failure) -> completion.accept(failure));
 	}
 
 	/**

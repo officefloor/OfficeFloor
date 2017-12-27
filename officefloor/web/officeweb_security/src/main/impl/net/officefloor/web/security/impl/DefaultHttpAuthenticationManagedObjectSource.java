@@ -168,21 +168,28 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 		@Override
 		public void authenticate(Object credentials, AuthenticateRequest authenticationRequest) {
 
-			// Trigger the authentication
+			// Determine if provided credentials
 			boolean isAuthenticating = false;
-			for (HttpAuthentication authentication : this.httpAuthentications) {
+			if (credentials == null) {
 
-				// Obtain the credentials type
-				Class<?> credentialsType = authentication.getCredentialsType();
-				if (credentialsType == null) {
-					if (credentials == null) {
+				// Attempt authentication on all
+				for (HttpAuthentication authentication : this.httpAuthentications) {
+					authentication.authenticate(null, authenticationRequest);
+					isAuthenticating = true;
+				}
+
+			} else {
+				// Trigger the authentication
+				for (HttpAuthentication authentication : this.httpAuthentications) {
+
+					// Obtain the credentials type
+					Class<?> credentialsType = authentication.getCredentialsType();
+					if (credentialsType == null) {
 						// Undertake authentication
 						authentication.authenticate(null, authenticationRequest);
 						isAuthenticating = true;
-					}
 
-				} else if (credentials != null) {
-					if (credentialsType.isAssignableFrom(credentials.getClass())) {
+					} else if (credentialsType.isAssignableFrom(credentials.getClass())) {
 						// Undertake authentication
 						authentication.authenticate(credentials, authenticationRequest);
 						isAuthenticating = true;
@@ -191,7 +198,9 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 			}
 
 			// Ensure authentication was triggered
-			if (!isAuthenticating) {
+			if (!isAuthenticating)
+
+			{
 				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
 						"No matching " + HttpSecurity.class.getSimpleName() + " for credentials of type "
 								+ (credentials == null ? "null" : credentials.getClass().getName()));
