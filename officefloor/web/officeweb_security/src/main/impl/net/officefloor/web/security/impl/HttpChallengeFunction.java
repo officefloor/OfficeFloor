@@ -137,7 +137,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		@Override
 		public Object getObject(O key) {
 			// Obtain the index (offset by challenge dependencies)
-			int index = key.ordinal() + 4;
+			int index = key.ordinal() + 3;
 			return this.context.getObject(index);
 		}
 

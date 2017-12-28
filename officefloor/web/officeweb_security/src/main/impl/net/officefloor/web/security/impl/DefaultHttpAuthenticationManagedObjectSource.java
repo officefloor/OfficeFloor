@@ -166,6 +166,7 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 		}
 
 		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public void authenticate(Object credentials, AuthenticateRequest authenticationRequest) {
 
 			// Determine if provided credentials
@@ -198,9 +199,7 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 			}
 
 			// Ensure authentication was triggered
-			if (!isAuthenticating)
-
-			{
+			if (!isAuthenticating) {
 				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
 						"No matching " + HttpSecurity.class.getSimpleName() + " for credentials of type "
 								+ (credentials == null ? "null" : credentials.getClass().getName()));

@@ -329,8 +329,9 @@ public class DigestHttpSecuritySource extends
 
 		@Override
 		public HttpAuthentication<Void> createAuthentication(AuthenticationContext<HttpAccessControl, Void> context) {
-			// TODO Auto-generated method stub
-			return null;
+			HttpAuthenticationImpl<Void> authentication = new HttpAuthenticationImpl<>(context, null);
+			authentication.authenticate(null, null);
+			return authentication;
 		}
 
 		@Override
@@ -443,7 +444,7 @@ public class DigestHttpSecuritySource extends
 			}
 
 			// Calculate A1 value
-			byte[] a1 = usernameRealmPasswordCredentials;
+			String a1 = new String(usernameRealmPasswordCredentials, UTF_8);
 			if (algorithmSuffix.equalsIgnoreCase("sess")) {
 				// Append the nounces for session integrity
 				Digest a1Digest = new Digest(algorithm);
@@ -473,7 +474,7 @@ public class DigestHttpSecuritySource extends
 				a2Digest.appendColon();
 				a2Digest.append(bodyDigest.getDigest());
 			}
-			byte[] a2 = a2Digest.getDigest();
+			String a2 = a2Digest.getDigest();
 
 			// Create the message digest for the required response
 			Digest digest = new Digest(algorithm);
@@ -500,8 +501,7 @@ public class DigestHttpSecuritySource extends
 			digest.append(a2);
 
 			// Obtain required response
-			byte[] requiredDigest = digest.getDigest();
-			String requiredResponse = new String(requiredDigest, UTF_8);
+			String requiredResponse = digest.getDigest();
 
 			// Ensure correct response
 			if (!requiredResponse.equals(response)) {
@@ -551,14 +551,12 @@ public class DigestHttpSecuritySource extends
 			nonceDigest.append(eTag);
 			nonceDigest.appendColon();
 			nonceDigest.append(DigestHttpSecuritySource.this.privateKey);
-			byte[] nonceData = nonceDigest.getDigest();
-			String nonce = new String(nonceData, UTF_8);
+			String nonce = nonceDigest.getDigest();
 
 			// Calculate the opaque
 			Digest opaqueDigest = new Digest(algorithm);
 			opaqueDigest.append(DigestHttpSecuritySource.this.getOpaqueSeed());
-			byte[] opaqueData = opaqueDigest.getDigest();
-			String opaque = new String(opaqueData, UTF_8);
+			String opaque = opaqueDigest.getDigest();
 
 			// Construct the authentication challenge
 			HttpChallenge challenge = context.setChallenge(AUTHENTICATION_SCHEME_DIGEST, this.realm);
@@ -723,19 +721,15 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Obtains the digest data after algorithm applied.
 		 * 
-		 * @return Digest data.
+		 * @return Digest string.
 		 */
-		public byte[] getDigest() {
+		public String getDigest() {
 
 			// Obtain the digest
 			byte[] digest = this.digest.digest();
 
 			// Obtain the Hex encoded digest
-			String digestText = new String(Hex.encodeHex(digest, true));
-			byte[] textDigest = digestText.getBytes(UTF_8);
-
-			// Return the text digest
-			return textDigest;
+			return new String(Hex.encodeHex(digest, true));
 		}
 	}
 

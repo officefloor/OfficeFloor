@@ -105,8 +105,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure indicate not logged in
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class Custom_CheckNotAuthenticatedServicer {
@@ -114,7 +113,11 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Ensure indicate not logged in
 			assertFalse("Should not be authenticated", authentication.isAuthenticated());
-			assertNull("Should not have access control", authentication.getAccessControl());
+			try {
+				assertNull("Should not have access control", authentication.getAccessControl());
+				fail("Should not successfully obtain access control");
+			} catch (AuthenticationRequiredException ex) {
+			}
 
 			// Logout should be no operation
 			Closure<Boolean> isLogout = new Closure<>(false);

@@ -17,6 +17,13 @@
  */
 package net.officefloor.web.security.integrate;
 
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.util.Properties;
+
+import org.apache.commons.codec.binary.Hex;
+
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -91,13 +98,13 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 		complete.assertResponse(200, "Serviced for daniel");
 
 		// Request again to ensure stay logged in
-		this.doRequest("service", init, 200, "Serviced for daniel");
+		this.doRequest("/service", init, 200, "Serviced for daniel");
 
 		// Logout
-		this.doRequest("logout", init, 200, "LOGOUT");
+		this.doRequest("/logout", init, 200, "LOGOUT");
 
 		// Should require to log in (after the log out)
-		this.doRequest("service", init, 401, "");
+		this.doRequest("/service", init, 401, "");
 	}
 
 	/**
@@ -132,15 +139,50 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 	 *            Password.
 	 * @return {@link MockHttpResponse}.
 	 */
-	private MockHttpResponse doComplete(String path, MockHttpResponse init, String username, String password) {
+	private MockHttpResponse doComplete(String path, MockHttpResponse init, String username, String password)
+			throws Exception {
 
 		// Obtain the init details
+		String wwwAuthenticate = init.getHeader("www-authenticate").getValue();
+		String propertiesText = wwwAuthenticate.replace(",", "");
+		propertiesText = propertiesText.replaceAll("\"", "");
+		propertiesText = propertiesText.replace(" ", "\n");
+		Properties properties = new Properties();
+		properties.load(new StringReader(propertiesText));
+
+		// Ensure digest properties available
+		assertEquals("Incorrect realm", "TestRealm", properties.getProperty("realm"));
+		assertEquals("Incorrect algorithm", "MD5", properties.getProperty("algorithm"));
+		assertEquals("Incorrect qop (with above , replacement)", "authauth-int", properties.getProperty("qop"));
+		assertNotNull("Should have nonce", properties.getProperty("nonce"));
+		assertNotNull("Should have opaque", properties.getProperty("opaque"));
+
+		// Generate the authentication header
+		String realm = properties.getProperty("realm");
+		String nonce = properties.getProperty("nonce");
+		String uri = path;
+		String qop = "auth";
+		String nc = "00000001";
+		String cnonce = "0a4f113b";
+		String opaque = properties.getProperty("opaque");
+
+		// Calculate authentication details
+		Charset charset = Charset.forName("UTF-8");
+		MessageDigest digest = MessageDigest.getInstance("MD5");
+		String ha1 = Hex.encodeHexString(digest.digest((username + ":" + realm + ":" + password).getBytes(charset)));
+		String ha2 = Hex.encodeHexString(digest.digest(("GET:" + uri).getBytes(charset)));
+		String response = Hex.encodeHexString(
+				digest.digest((ha1 + ":" + nonce + ":" + nc + ":" + cnonce + ":auth:" + ha2).getBytes(charset)));
 
 		// Undertake the request
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
+		String authetication = "Digest username=\"" + username + "\", realm=\"" + realm + "\", nonce=\"" + nonce
+				+ "\", uri=\"" + uri + "\", qop=\"" + qop + "\", nc=\"" + nc + "\", cnonce=\"" + cnonce
+				+ "\", response=\"" + response + "\", opaque=\"" + opaque + "\"";
+		MockHttpResponse httpResponse = this.server
+				.send(MockHttpServer.mockRequest(path).header("authorization", authetication).cookies(init));
 
 		// Return the response
-		return response;
+		return httpResponse;
 	}
 
 }

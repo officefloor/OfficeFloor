@@ -20,6 +20,8 @@ package net.officefloor.web.security.scheme;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.spi.security.AuthenticationContext;
 
 /**
@@ -90,7 +92,25 @@ public class MockAuthentication {
 	 * @return {@link MockAccessControl}.
 	 */
 	public MockAccessControl getAccessControl() {
-		return this.authenticationContext.run(() -> this.accessControl);
+		return this.authenticationContext.run(() -> {
+
+			// Propagate potential failure
+			if (this.escalation != null) {
+				if (this.escalation instanceof HttpException) {
+					throw (HttpException) this.escalation;
+				} else {
+					throw new HttpException(this.escalation);
+				}
+			}
+
+			// Ensure have access control
+			if (this.accessControl == null) {
+				throw new AuthenticationRequiredException(this.authenticationContext.getQualifier());
+			}
+
+			// Return the access control
+			return this.accessControl;
+		});
 	}
 
 	/**
