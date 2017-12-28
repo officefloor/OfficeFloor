@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.officefloor.web.resource.AbstractHttpFileDescription;
 import net.officefloor.web.resource.AbstractHttpFileTestCase;
 import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.impl.AbstractHttpFileDescription;
 import net.officefloor.web.resource.war.WarHttpFile;
 
 /**

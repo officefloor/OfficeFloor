@@ -27,13 +27,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.web.resource.AbstractHttpFileDescription;
-import net.officefloor.web.resource.AbstractHttpResourceFactory;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescription;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
-import net.officefloor.web.resource.NotExistHttpResource;
+import net.officefloor.web.resource.build.HttpFileDescription;
+import net.officefloor.web.resource.impl.AbstractHttpFileDescription;
+import net.officefloor.web.resource.impl.AbstractHttpResourceFactory;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.impl.NotExistHttpResource;
 
 /**
  * <p>

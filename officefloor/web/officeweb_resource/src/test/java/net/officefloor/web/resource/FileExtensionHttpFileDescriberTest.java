@@ -21,9 +21,9 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.resource.FileExtensionHttpFileDescriber;
-import net.officefloor.web.resource.HttpFileDescription;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.build.HttpFileDescription;
+import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
 
 /**
  * Tests the {@link FileExtensionHttpFileDescriber}.

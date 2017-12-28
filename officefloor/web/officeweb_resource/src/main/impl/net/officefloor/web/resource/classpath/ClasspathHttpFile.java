@@ -19,9 +19,9 @@ package net.officefloor.web.resource.classpath;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.web.resource.AbstractHttpFile;
-import net.officefloor.web.resource.AbstractHttpFileDescription;
 import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.impl.AbstractHttpFile;
+import net.officefloor.web.resource.impl.AbstractHttpFileDescription;
 
 /**
  * {@link HttpFile} implementation.

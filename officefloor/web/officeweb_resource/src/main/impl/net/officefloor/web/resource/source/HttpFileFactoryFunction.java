@@ -27,9 +27,9 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceCreationListener;
-import net.officefloor.web.resource.HttpResourceFactory;
-import net.officefloor.web.resource.NotExistHttpResource;
+import net.officefloor.web.resource.impl.HttpResourceCreationListener;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.impl.NotExistHttpResource;
 import net.officefloor.web.state.HttpApplicationState;
 
 /**

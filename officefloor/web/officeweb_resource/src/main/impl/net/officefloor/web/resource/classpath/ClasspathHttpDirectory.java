@@ -17,10 +17,10 @@
  */
 package net.officefloor.web.resource.classpath;
 
-import net.officefloor.web.resource.AbstractHttpResource;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.impl.AbstractHttpResource;
 
 /**
  * Classpath {@link HttpDirectory} implementation.

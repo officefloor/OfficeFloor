@@ -32,10 +32,10 @@ import java.util.LinkedList;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescriber;
-import net.officefloor.web.resource.HttpFileDescription;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
+import net.officefloor.web.resource.build.HttpFileDescriber;
+import net.officefloor.web.resource.build.HttpFileDescription;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
 
 /**
  * Abstract testing of the {@link HttpResourceFactory}.

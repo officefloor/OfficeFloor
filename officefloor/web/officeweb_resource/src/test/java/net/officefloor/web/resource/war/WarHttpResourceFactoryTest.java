@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 import net.officefloor.web.resource.AbstractHttpResourceFactoryTestCase;
-import net.officefloor.web.resource.HttpResourceFactory;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.war.WarHttpResourceFactory;
 
 /**

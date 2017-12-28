@@ -15,9 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.impl;
 
 import java.io.IOException;
+
+import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.build.HttpFileDescriber;
+import net.officefloor.web.resource.build.HttpFileDescription;
 
 /**
  * Factory to create a {@link HttpResource}.

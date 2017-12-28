@@ -19,10 +19,10 @@ package net.officefloor.web.resource.war;
 
 import java.io.File;
 
-import net.officefloor.web.resource.AbstractHttpResource;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.impl.AbstractHttpResource;
 
 /**
  * WAR {@link HttpDirectory}.

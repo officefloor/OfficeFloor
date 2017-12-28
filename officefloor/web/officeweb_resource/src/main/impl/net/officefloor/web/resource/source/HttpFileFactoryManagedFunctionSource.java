@@ -27,11 +27,11 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceCreationListener;
-import net.officefloor.web.resource.HttpResourceFactory;
+import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
+import net.officefloor.web.resource.impl.HttpResourceCreationListener;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.web.state.HttpApplicationState;
 

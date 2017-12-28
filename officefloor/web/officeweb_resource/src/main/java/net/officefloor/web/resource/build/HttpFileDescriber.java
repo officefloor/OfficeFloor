@@ -15,35 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.build;
 
-import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpFile;
 
 /**
- * Not existing {@link HttpResource}.
+ * Populates the {@link HttpFileDescription} for a {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
+public interface HttpFileDescriber {
 
 	/**
-	 * Initiate.
+	 * Describes the {@link HttpFileDescription}.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param description
+	 *            {@link HttpFileDescription}.
+	 * @return <code>true</code> should the {@link HttpFile} be described.
+	 *         <code>false</code> indicates unable to describe and should use
+	 *         alternate {@link HttpFileDescriber}.
 	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
-
-	/*
-	 * ====================== HttpResource ======================
-	 */
-
-	@Override
-	public boolean isExist() {
-		// Not exist
-		return false;
-	}
+	boolean describe(HttpFileDescription description);
 
 }

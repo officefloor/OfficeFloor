@@ -24,11 +24,11 @@ import java.nio.charset.Charset;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescriber;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
-import net.officefloor.web.resource.NotExistHttpResource;
+import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.direct.DirectHttpResourceFactory;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.impl.NotExistHttpResource;
 
 /**
  * Tests the {@link DirectHttpResourceFactory}.

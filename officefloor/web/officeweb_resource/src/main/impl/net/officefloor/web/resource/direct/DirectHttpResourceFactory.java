@@ -23,13 +23,13 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.web.resource.AbstractHttpResource;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescriber;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
-import net.officefloor.web.resource.NotExistHttpResource;
+import net.officefloor.web.resource.build.HttpFileDescriber;
+import net.officefloor.web.resource.impl.AbstractHttpResource;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.impl.NotExistHttpResource;
 
 /**
  * {@link HttpResourceFactory} to keep {@link HttpFile} and

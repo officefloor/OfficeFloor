@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.build;
+
+import net.officefloor.web.resource.HttpResource;
 
 /**
- * Populates the {@link HttpFileDescription} for a {@link HttpFile}.
+ * Builds the external {@link HttpResource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpFileDescriber {
+public interface ExternalHttpResourcesBuilder {
 
 	/**
-	 * Describes the {@link HttpFileDescription}.
+	 * Specifies the
 	 * 
-	 * @param description
-	 *            {@link HttpFileDescription}.
-	 * @return <code>true</code> should the {@link HttpFile} be described.
-	 *         <code>false</code> indicates unable to describe and should use
-	 *         alternate {@link HttpFileDescriber}.
+	 * @param httpSecurityName
 	 */
-	boolean describe(HttpFileDescription description);
+	void setHttpSecurityName(String httpSecurityName);
 
 }

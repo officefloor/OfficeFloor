@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.impl;
 
 import java.io.IOException;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.resource.HttpResource;
 
 /**
  * Listener for the creation of a {@link HttpResource}.

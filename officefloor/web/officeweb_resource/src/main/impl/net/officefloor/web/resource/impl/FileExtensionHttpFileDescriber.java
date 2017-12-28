@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.impl;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import net.officefloor.web.resource.HttpFileDescriber;
-import net.officefloor.web.resource.HttpFileDescription;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.build.HttpFileDescriber;
+import net.officefloor.web.resource.build.HttpFileDescription;
 
 /**
  * {@link HttpFileDescriber} that maps the file extension to the description

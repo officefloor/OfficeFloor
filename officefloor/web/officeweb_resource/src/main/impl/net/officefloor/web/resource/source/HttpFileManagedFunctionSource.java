@@ -31,11 +31,11 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.resource.AbstractHttpFile;
-import net.officefloor.web.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
+import net.officefloor.web.resource.impl.AbstractHttpFile;
+import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.route.WebRouter;
 
 /**

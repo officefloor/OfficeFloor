@@ -28,12 +28,12 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescriber;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
+import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
+import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.source.SourceHttpResourceFactory;
 import net.officefloor.web.resource.war.WarHttpResourceFactory;
 

@@ -34,12 +34,12 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescriber;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
-import net.officefloor.web.resource.NotExistHttpResource;
+import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.web.resource.direct.DirectHttpResourceFactory;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.impl.NotExistHttpResource;
 import net.officefloor.web.resource.war.WarHttpResourceFactory;
 
 /**

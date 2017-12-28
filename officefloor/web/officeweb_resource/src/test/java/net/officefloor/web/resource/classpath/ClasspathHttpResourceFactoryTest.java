@@ -20,8 +20,8 @@ package net.officefloor.web.resource.classpath;
 import net.officefloor.web.resource.AbstractHttpResourceFactoryTestCase;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceFactory;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
+import net.officefloor.web.resource.impl.HttpResourceFactory;
 
 /**
  * Tests the {@link ClasspathHttpResourceFactory}.

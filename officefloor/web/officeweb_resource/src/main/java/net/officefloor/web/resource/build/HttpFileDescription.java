@@ -15,10 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.build;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
+import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.HttpResource;
 
 /**
  * Allows providing a description of a {@link HttpFile}.

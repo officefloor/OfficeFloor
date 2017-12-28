@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource;
+package net.officefloor.web.resource.impl;
 
 import java.nio.charset.Charset;
 
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpFileDescription;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.build.HttpFileDescription;
 
 /**
  * Abstract {@link HttpFileDescription}.

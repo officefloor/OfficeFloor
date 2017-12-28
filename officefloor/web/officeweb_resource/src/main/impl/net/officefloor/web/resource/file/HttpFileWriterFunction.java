@@ -25,8 +25,8 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.resource.AbstractHttpFile;
 import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.impl.AbstractHttpFile;
 
 /**
  * {@link ManagedFunctionFactory} to write a {@link HttpFile} to the
