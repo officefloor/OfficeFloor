@@ -154,7 +154,6 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		designer.link(challengeFunction.getFunctionObject(ServerHttpConnection.class.getSimpleName()),
 				serverHttpConnection);
 		designer.link(challengeFunction.getFunctionObject(HttpSession.class.getSimpleName()), httpSession);
-		designer.link(challengeFunction.getFunctionObject(HttpRequestState.class.getSimpleName()), httpRequestState);
 		for (SectionObject dependency : dependencyObjects) {
 			designer.link(challengeFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
@@ -207,6 +206,10 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 					completeAuthFunction.getFunctionObject(
 							CompleteApplicationHttpAuthenticateFunction.Dependencies.ACCESS_CONTROL.name()),
 					accessControl);
+			designer.link(
+					completeAuthFunction.getFunctionObject(
+							CompleteApplicationHttpAuthenticateFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+					serverHttpConnection);
 			designer.link(completeAuthFunction.getFunctionObject(
 					CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION.name()), httpSession);
 			designer.link(
@@ -351,7 +354,6 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			challenge.addObject(HttpChallengeContext.class).setLabel(HttpChallengeContext.class.getSimpleName());
 			challenge.addObject(ServerHttpConnection.class).setLabel(ServerHttpConnection.class.getSimpleName());
 			challenge.addObject(HttpSession.class).setLabel(HttpSession.class.getSimpleName());
-			challenge.addObject(HttpRequestState.class).setLabel(HttpRequestState.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
 				challenge.addObject(dependencyType.getDependencyType())
 						.setLabel("Dependency_" + dependencyType.getDependencyName());
@@ -381,6 +383,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 							CompleteApplicationHttpAuthenticateFunction.Dependencies.class, None.class);
 			appComplete.addObject(accessControlType)
 					.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.ACCESS_CONTROL);
+			appComplete.addObject(ServerHttpConnection.class)
+					.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.SERVER_HTTP_CONNECTION);
 			appComplete.addObject(HttpSession.class)
 					.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION);
 			appComplete.addObject(HttpRequestState.class)

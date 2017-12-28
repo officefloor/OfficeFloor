@@ -40,13 +40,17 @@ public interface HttpSecurityBuilder extends PropertyConfigurable {
 	void addContentType(String contentType);
 
 	/**
-	 * Obtains the {@link OfficeSectionInput} from the {@link HttpSecurity}.
+	 * <p>
+	 * Obtains the {@link OfficeSectionInput} to authenticate with application
+	 * credentials.
+	 * <p>
+	 * The application credentials are to be a parameter to this
+	 * {@link OfficeSectionInput}.
 	 * 
-	 * @param inputName
-	 *            {@link OfficeSectionInput} name.
-	 * @return {@link OfficeSectionInput} for the name.
+	 * @return {@link OfficeSectionInput} to undertake authentication with the
+	 *         application credentials..
 	 */
-	OfficeSectionInput getInput(String inputName);
+	OfficeSectionInput getAuthenticateInput();
 
 	/**
 	 * Obtains the {@link OfficeSectionOutput} from the {@link HttpSecurity}.

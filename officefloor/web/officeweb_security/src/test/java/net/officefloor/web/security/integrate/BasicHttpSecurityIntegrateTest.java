@@ -17,10 +17,14 @@
  */
 package net.officefloor.web.security.integrate;
 
-import org.apache.http.client.CredentialsProvider;
+import java.nio.charset.Charset;
+import java.util.Base64;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
@@ -67,11 +71,10 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 	public void testIntegration() throws Exception {
 
 		// Should not authenticate (without credentials)
-		this.doRequest("service", 401, "");
+		this.doRequest("/service", 401, "");
 
 		// Should authenticate with credentials
-		this.useCredentials("TestRealm", null, "daniel", "password");
-		this.doRequest("service", 200, "Serviced for daniel");
+		this.doRequest("/service", "daniel", "password", 200, "Serviced for daniel");
 	}
 
 	/**
@@ -80,14 +83,13 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 	public void testMultipleLoginAttempts() throws Exception {
 
 		// Ensure can try multiple times
-		this.doRequest("service", 401, "");
-		this.doRequest("service", 401, "");
-		this.doRequest("service", 401, "");
-		this.doRequest("service", 401, "");
+		this.doRequest("/service", 401, "");
+		this.doRequest("/service", 401, "");
+		this.doRequest("/service", 401, "");
+		this.doRequest("/service", 401, "");
 
 		// Should authenticate with credentials
-		this.useCredentials("TestRealm", null, "daniel", "password");
-		this.doRequest("service", 200, "Serviced for daniel");
+		this.doRequest("/service", "daniel", "password", 200, "Serviced for daniel");
 	}
 
 	/**
@@ -96,20 +98,42 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		CredentialsProvider provider = this.useCredentials("TestRealm", null, "daniel", "password");
-		this.doRequest("service", 200, "Serviced for daniel");
-
-		// Clear login details
-		provider.clear();
+		MockHttpResponse response = this.doRequest("/service", "daniel", "password", 200, "Serviced for daniel");
 
 		// Request again to ensure stay logged in
-		this.doRequest("service", 200, "Serviced for daniel");
+		this.doRequest("/service", response, 200, "Serviced for daniel");
 
 		// Logout
-		this.doRequest("logout", 200, "LOGOUT");
+		this.doRequest("/logout", response, 200, "LOGOUT");
 
 		// Should require to log in (after the log out)
-		this.doRequest("service", 401, "");
+		this.doRequest("/service", response, 401, "");
+	}
+
+	/**
+	 * Undertakes the request.
+	 */
+	private MockHttpResponse doRequest(String path, String username, String password, int status, String entity) {
+
+		// Undertake the request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(path);
+		if (username != null) {
+
+			// Create the challenge
+			String plain = username + ":" + password;
+			String cypher = Base64.getEncoder().encodeToString(plain.getBytes(Charset.forName("UTF-8")));
+			String authorisation = "Basic " + cypher;
+
+			// Add the authorization
+			request.header("Authorization", authorisation);
+		}
+		MockHttpResponse response = this.server.send(request);
+
+		// Ensure appropriate response
+		response.assertResponse(status, entity);
+
+		// Return the response
+		return response;
 	}
 
 }

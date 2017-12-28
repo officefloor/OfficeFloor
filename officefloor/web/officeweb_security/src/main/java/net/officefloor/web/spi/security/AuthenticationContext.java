@@ -31,6 +31,15 @@ import net.officefloor.web.security.LogoutRequest;
 public interface AuthenticationContext<AC extends Serializable, C> {
 
 	/**
+	 * Obtains the qualifier for the {@link HttpSecurity} backing this
+	 * {@link AuthenticationContext}.
+	 * 
+	 * @return Qualifier for the {@link HttpSecurity} backing this
+	 *         {@link AuthenticationContext}.
+	 */
+	String getQualifier();
+
+	/**
 	 * Registers an {@link AccessControlListener}.
 	 * 
 	 * @param accessControlListener

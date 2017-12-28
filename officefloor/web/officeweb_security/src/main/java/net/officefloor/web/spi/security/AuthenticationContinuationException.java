@@ -36,9 +36,12 @@ public class AuthenticationContinuationException extends HttpException {
 
 	/**
 	 * Instantiate.
+	 * 
+	 * @param entity
+	 *            Entity.
 	 */
-	public AuthenticationContinuationException() {
-		super(HttpStatus.INTERNAL_SERVER_ERROR);
+	public AuthenticationContinuationException(String entity) {
+		super(HttpStatus.INTERNAL_SERVER_ERROR, null, entity);
 	}
 
 }

@@ -38,8 +38,10 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.impl.HandleAuthenticationRequiredFunction.Dependencies;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link SectionSource} to handle the {@link AuthenticationRequiredException}.
@@ -95,6 +97,10 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 		// Add the dependencies
 		SectionObject serverHttpConnection = designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
 				ServerHttpConnection.class.getName());
+		SectionObject httpSession = designer.addSectionObject(HttpSession.class.getSimpleName(),
+				HttpSession.class.getName());
+		SectionObject requestState = designer.addSectionObject(HttpRequestState.class.getSimpleName(),
+				HttpRequestState.class.getName());
 		SectionObject httpChallengeContext = designer.addSectionObject(HttpChallengeContext.class.getSimpleName(),
 				HttpChallengeContext.class.getName());
 
@@ -104,6 +110,8 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 		SectionFunction handler = namespace.addSectionFunction("handler", "handler");
 		handler.getFunctionObject(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION.name()).flagAsParameter();
 		designer.link(handler.getFunctionObject(Dependencies.SERVER_HTTP_CONNECTION.name()), serverHttpConnection);
+		designer.link(handler.getFunctionObject(Dependencies.HTTP_SESSION.name()), httpSession);
+		designer.link(handler.getFunctionObject(Dependencies.REQUEST_STATE.name()), requestState);
 		for (String httpSecurityName : this.httpSecurityNames) {
 
 			// Link flow to section output by security name
@@ -151,6 +159,8 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 			handleFunction.addObject(AuthenticationRequiredException.class)
 					.setKey(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION);
 			handleFunction.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+			handleFunction.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
+			handleFunction.addObject(HttpRequestState.class).setKey(Dependencies.REQUEST_STATE);
 			for (String httpSecurityName : HandleAuthenticationRequiredSectionSource.this.httpSecurityNames) {
 				handleFunction.addFlow().setLabel(httpSecurityName);
 			}

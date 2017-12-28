@@ -134,8 +134,9 @@ public class BasicHttpSecuritySource extends
 
 		@Override
 		public HttpAuthentication<Void> createAuthentication(AuthenticationContext<HttpAccessControl, Void> context) {
-			// TODO Auto-generated method stub
-			return null;
+			HttpAuthenticationImpl<Void> authentication = new HttpAuthenticationImpl<>(context, null);
+			context.authenticate(null, null);
+			return authentication;
 		}
 
 		@Override

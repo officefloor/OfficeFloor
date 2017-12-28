@@ -128,7 +128,9 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 
 		@Override
 		public Object getObject(O key) {
-			return this.functionContext.getObject(key.ordinal());
+			// Offset for function dependency
+			int index = key.ordinal() + 1;
+			return this.functionContext.getObject(index);
 		}
 
 		@Override

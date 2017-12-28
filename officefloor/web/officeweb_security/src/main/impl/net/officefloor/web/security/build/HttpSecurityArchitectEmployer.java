@@ -577,7 +577,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			String authenticationContextName = this.name + "_AuthenticationContext";
 			OfficeManagedObjectSource authenticationContextMos = office.addOfficeManagedObjectSource(
 					authenticationContextName,
-					new AuthenticationContextManagedObjectSource<>(this.security, this.type));
+					new AuthenticationContextManagedObjectSource<>(this.name, this.security));
 			authenticationContextMos.setTimeout(this.timeout);
 			office.link(authenticationContextMos.getManagedObjectFlow("AUTHENTICATE"),
 					this.section.getOfficeSectionInput("ManagedObjectAuthenticate"));
@@ -666,9 +666,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		}
 
 		@Override
-		public OfficeSectionInput getInput(String inputName) {
-			// TODO Auto-generated method stub
-			return null;
+		public OfficeSectionInput getAuthenticateInput() {
+			return this.section.getOfficeSectionInput(HttpSecuritySectionSource.INPUT_AUTHENTICATE);
 		}
 
 		@Override

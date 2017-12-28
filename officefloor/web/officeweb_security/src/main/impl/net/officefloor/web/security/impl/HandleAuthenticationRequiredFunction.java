@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.impl;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -27,7 +29,10 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.security.AuthenticationRequiredException;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
 /**
  * {@link ManagedFunction} to handle the
@@ -39,10 +44,15 @@ public class HandleAuthenticationRequiredFunction
 		extends StaticManagedFunction<HandleAuthenticationRequiredFunction.Dependencies, Indexed> {
 
 	/**
+	 * {@link HttpSession} attribute for the challenge request state.
+	 */
+	public static final String ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO = "CHALLENGE_REQUEST_MOMENTO";
+
+	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		AUTHENTICATION_REQUIRED_EXCEPTION, SERVER_HTTP_CONNECTION
+		AUTHENTICATION_REQUIRED_EXCEPTION, SERVER_HTTP_CONNECTION, HTTP_SESSION, REQUEST_STATE
 	}
 
 	/**
@@ -81,6 +91,17 @@ public class HandleAuthenticationRequiredFunction
 		AuthenticationRequiredException exception = (AuthenticationRequiredException) context
 				.getObject(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION);
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		HttpSession session = (HttpSession) context.getObject(Dependencies.HTTP_SESSION);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(Dependencies.REQUEST_STATE);
+
+		// Save the connection and request state
+		Serializable challengeMomento = session.getAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO);
+		if (challengeMomento == null) {
+			Serializable connectionMomento = connection.exportState();
+			Serializable requestStateMomento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
+			session.setAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO,
+					new ChallengeMomento(connectionMomento, requestStateMomento));
+		}
 
 		// Determine if requiring specific security
 		String requiredHttpSecurityName = exception.getRequiredHttpSecurityName();

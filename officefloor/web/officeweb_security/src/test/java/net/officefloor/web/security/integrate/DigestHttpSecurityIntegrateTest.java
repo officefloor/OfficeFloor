@@ -17,10 +17,10 @@
  */
 package net.officefloor.web.security.integrate;
 
-import org.apache.http.client.CredentialsProvider;
-
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
@@ -72,11 +72,12 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 	public void testIntegration() throws Exception {
 
 		// Should not authenticate (without credentials)
-		this.doRequest("service", 401, "");
+		this.doRequest("/service", 401, "");
 
 		// Should authenticate with credentials
-		this.useCredentials(REALM, "Digest", "daniel", "password");
-		this.doRequest("service", 200, "Serviced for daniel");
+		MockHttpResponse init = this.doInit("/service");
+		MockHttpResponse complete = this.doComplete("/service", init, "daniel", "password");
+		complete.assertResponse(200, "Serviced for daniel");
 	}
 
 	/**
@@ -85,20 +86,61 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		CredentialsProvider provider = this.useCredentials(REALM, "Digest", "daniel", "password");
-		this.doRequest("service", 200, "Serviced for daniel");
-
-		// Clear login details
-		provider.clear();
+		MockHttpResponse init = this.doInit("/service");
+		MockHttpResponse complete = this.doComplete("/service", init, "daniel", "password");
+		complete.assertResponse(200, "Serviced for daniel");
 
 		// Request again to ensure stay logged in
-		this.doRequest("service", 200, "Serviced for daniel");
+		this.doRequest("service", init, 200, "Serviced for daniel");
 
 		// Logout
-		this.doRequest("logout", 200, "LOGOUT");
+		this.doRequest("logout", init, 200, "LOGOUT");
 
 		// Should require to log in (after the log out)
-		this.doRequest("service", 401, "");
+		this.doRequest("service", init, 401, "");
+	}
+
+	/**
+	 * Undertakes the initial digest request.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @return {@link MockHttpResponse}.
+	 */
+	private MockHttpResponse doInit(String path) {
+
+		// Undertake the request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
+
+		// Ensure challenge
+		assertEquals("Should be challenge", 401, response.getStatus().getStatusCode());
+
+		// Return response
+		return response;
+	}
+
+	/**
+	 * Completes the digest request.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @param init
+	 *            Initialise digest {@link MockHttpResponse}.
+	 * @param username
+	 *            User name.
+	 * @param password
+	 *            Password.
+	 * @return {@link MockHttpResponse}.
+	 */
+	private MockHttpResponse doComplete(String path, MockHttpResponse init, String username, String password) {
+
+		// Obtain the init details
+
+		// Undertake the request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
+
+		// Return the response
+		return response;
 	}
 
 }

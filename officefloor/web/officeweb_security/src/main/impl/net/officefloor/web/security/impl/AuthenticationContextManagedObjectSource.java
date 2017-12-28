@@ -38,7 +38,6 @@ import net.officefloor.web.security.AuthenticateRequest;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.LogoutRequest;
-import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AccessControlListener;
 import net.officefloor.web.spi.security.AuthenticationContext;
@@ -70,6 +69,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	}
 
 	/**
+	 * Qualifier for the {@link HttpSecurity}.
+	 */
+	private final String qualifier;
+
+	/**
 	 * {@link HttpSecuritySource}.
 	 */
 	private final HttpSecurity<A, AC, C, O, F> httpSecurity;
@@ -81,14 +85,14 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 	/**
 	 * Instantiate.
-	 * 
+	 *
+	 * @param qualifier
+	 *            Qualifier for the {@link HttpSecurity}.
 	 * @param httpSecurity
 	 *            {@link HttpSecurity}.
-	 * @param httpSecurityType
-	 *            {@link HttpSecurityType}.
 	 */
-	public AuthenticationContextManagedObjectSource(HttpSecurity<A, AC, C, O, F> httpSecurity,
-			HttpSecurityType<A, AC, C, O, F> httpSecurityType) {
+	public AuthenticationContextManagedObjectSource(String qualifier, HttpSecurity<A, AC, C, O, F> httpSecurity) {
+		this.qualifier = qualifier;
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -123,7 +127,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new AuthenticationContextManagedObject(this.httpSecurity, this.executeContext);
+		return new AuthenticationContextManagedObject();
 	}
 
 	/**
@@ -131,16 +135,6 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	 */
 	private class AuthenticationContextManagedObject implements ProcessAwareManagedObject, AsynchronousManagedObject,
 			CoordinatingManagedObject<Dependencies>, AuthenticationContext<AC, C> {
-
-		/**
-		 * {@link HttpSecurity}.
-		 */
-		private final HttpSecurity<?, AC, C, ?, ?> httpSecurity;
-
-		/**
-		 * {@link ManagedObjectExecuteContext}.
-		 */
-		private final ManagedObjectExecuteContext<Flows> executeContext;
 
 		/**
 		 * {@link AccessControlListener} instances. Typically 2 listeners (
@@ -177,20 +171,6 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 * Cached {@link Escalation}.
 		 */
 		private Throwable escalation = null;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param httpSecurity
-		 *            {@link HttpSecurity}.
-		 * @param executeContext
-		 *            {@link ManagedObjectExecuteContext}.
-		 */
-		private AuthenticationContextManagedObject(HttpSecurity<?, AC, C, ?, ?> httpSecurity,
-				ManagedObjectExecuteContext<Flows> executeContext) {
-			this.httpSecurity = httpSecurity;
-			this.executeContext = executeContext;
-		}
 
 		/**
 		 * Loads the access control.
@@ -300,6 +280,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 */
 
 		@Override
+		public String getQualifier() {
+			return AuthenticationContextManagedObjectSource.this.qualifier;
+		}
+
+		@Override
 		public void register(AccessControlListener<AC> accessControlListener) {
 			this.processAwareContext.run(() -> this.listeners.add(accessControlListener));
 		}
@@ -315,24 +300,25 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 				}
 
 				// Determine if possible to authenticate
-				boolean isPossibleToAuthenticate = this.httpSecurity.ratify(credentials, new RatifyContext<AC>() {
+				boolean isPossibleToAuthenticate = AuthenticationContextManagedObjectSource.this.httpSecurity
+						.ratify(credentials, new RatifyContext<AC>() {
 
-					@Override
-					public ServerHttpConnection getConnection() {
-						return AuthenticationContextManagedObject.this.connection;
-					}
+							@Override
+							public ServerHttpConnection getConnection() {
+								return AuthenticationContextManagedObject.this.connection;
+							}
 
-					@Override
-					public HttpSession getSession() {
-						return AuthenticationContextManagedObject.this.session;
-					}
+							@Override
+							public HttpSession getSession() {
+								return AuthenticationContextManagedObject.this.session;
+							}
 
-					@Override
-					public void accessControlChange(AC accessControl, Throwable escalation) {
-						AuthenticationContextManagedObject.this.accessControl = accessControl;
-						AuthenticationContextManagedObject.this.escalation = escalation;
-					}
-				});
+							@Override
+							public void accessControlChange(AC accessControl, Throwable escalation) {
+								AuthenticationContextManagedObject.this.accessControl = accessControl;
+								AuthenticationContextManagedObject.this.escalation = escalation;
+							}
+						});
 
 				// Determine if already authenticated
 				if ((this.accessControl != null) || (this.escalation != null)) {
@@ -344,12 +330,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 				if (isPossibleToAuthenticate) {
 
 					// New (avoid overwrite asynchronous context)
-					AuthenticationContextManagedObject executeManagedObject = new AuthenticationContextManagedObject(
-							this.httpSecurity, this.executeContext);
+					AuthenticationContextManagedObject executeManagedObject = new AuthenticationContextManagedObject();
 
 					// Attempt authentication
 					this.asynchronousContext.start(null);
-					this.executeContext.invokeProcess(Flows.AUTHENTICATE,
+					AuthenticationContextManagedObjectSource.this.executeContext.invokeProcess(Flows.AUTHENTICATE,
 							new FunctionAuthenticateContextImpl(this.connection, this.session, credentials),
 							executeManagedObject, 0,
 							(failure) -> this.safeNotifyChange(failure, authenticateRequest, null));
@@ -377,12 +362,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 				}
 
 				// New managed object (stop overwrite async listener)
-				AuthenticationContextManagedObject executeManagedObject = new AuthenticationContextManagedObject(
-						this.httpSecurity, this.executeContext);
+				AuthenticationContextManagedObject executeManagedObject = new AuthenticationContextManagedObject();
 
 				// Trigger logout
 				this.asynchronousContext.start(null);
-				this.executeContext.invokeProcess(Flows.LOGOUT,
+				AuthenticationContextManagedObjectSource.this.executeContext.invokeProcess(Flows.LOGOUT,
 						new FunctionLogoutContextImpl(this.connection, this.session), executeManagedObject, 0,
 						(failure) -> this.safeNotifyChange(failure, null, logoutRequest));
 
@@ -506,7 +490,6 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 				AuthenticationContextManagedObject.this.loadAccessControl(accessControl, escalation);
 			}
 		}
-
 	}
 
 }

@@ -25,6 +25,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.security.HttpCredentials;
@@ -54,8 +55,8 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 		// Provide the form login page
 		OfficeSection form = context.addSection("FORM", LoginPage.class);
 		office.link(security.getOutput("FORM_LOGIN_PAGE"), form.getOfficeSectionInput("form"));
-		web.link(false, "login", form.getOfficeSectionInput("login"));
-		office.link(form.getOfficeSectionOutput("authenticate"), security.getInput("Authenticate"));
+		web.link(false, "/login", form.getOfficeSectionInput("login"));
+		office.link(form.getOfficeSectionOutput("authenticate"), security.getAuthenticateInput());
 
 		// Provide parameters for login form
 		web.addHttpRequestObject(LoginForm.class, true);
@@ -107,10 +108,10 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	public void testIntegration() throws Exception {
 
 		// Should be returned the login page
-		this.doRequest("service", 200, "LOGIN");
+		MockHttpResponse response = this.doRequest("/service", 200, "LOGIN");
 
 		// Send back login credentials and get service page
-		this.doRequest("login?username=daniel&password=daniel", 200, "Serviced for daniel");
+		this.doRequest("/login?username=daniel&password=daniel", response, 200, "Serviced for daniel");
 	}
 
 	/**
@@ -119,15 +120,15 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	public void testMultipleLoginAttempts() throws Exception {
 
 		// Initiate triggering login
-		this.doRequest("service", 200, "LOGIN");
+		MockHttpResponse response = this.doRequest("/service", 200, "LOGIN");
 
 		// Should not login multiple times
-		this.doRequest("login", 200, "LOGIN");
-		this.doRequest("login?username=daniel", 200, "LOGIN");
-		this.doRequest("login?password=daniel", 200, "LOGIN");
+		this.doRequest("/login", response, 200, "LOGIN");
+		this.doRequest("/login?username=daniel", response, 200, "LOGIN");
+		this.doRequest("/login?password=daniel", response, 200, "LOGIN");
 
 		// Now log in
-		this.doRequest("login?username=daniel&password=daniel", 200, "Serviced for daniel");
+		this.doRequest("/login?username=daniel&password=daniel", response, 200, "Serviced for daniel");
 	}
 
 	/**
@@ -136,19 +137,19 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	public void testLogout() throws Exception {
 
 		// Initiate triggering login
-		this.doRequest("service", 200, "LOGIN");
+		MockHttpResponse response = this.doRequest("/service", 200, "LOGIN");
 
 		// Send back login credentials and get service page
-		this.doRequest("login?username=daniel&password=daniel", 200, "Serviced for daniel");
+		this.doRequest("/login?username=daniel&password=daniel", response, 200, "Serviced for daniel");
 
 		// Request again to ensure stay logged in
-		this.doRequest("service", 200, "Serviced for daniel");
+		this.doRequest("/service", response, 200, "Serviced for daniel");
 
 		// Logout
-		this.doRequest("logout", 200, "LOGOUT");
+		this.doRequest("/logout", response, 200, "LOGOUT");
 
 		// Should require to log in (after the log out)
-		this.doRequest("service", 200, "LOGIN");
+		this.doRequest("/service", response, 200, "LOGIN");
 	}
 
 }

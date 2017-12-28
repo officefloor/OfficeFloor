@@ -19,20 +19,13 @@ package net.officefloor.web.security.integrate;
 
 import java.io.IOException;
 
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
@@ -55,30 +48,9 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
 public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Port to use for testing.
-	 */
-	private final int PORT = 7878;
-
-	/**
-	 * {@link CloseableHttpClient} to use for testing.
-	 */
-	private CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false);
-
-	/**
-	 * {@link HttpClientContext}.
-	 */
-	private HttpClientContext context = new HttpClientContext();
-
-	/**
-	 * FIXME: flag indicating if fix for Digest authentication in that the
-	 * {@link HttpClient} does not send cookies on authentication request.
-	 */
-	private boolean isDigestHttpClientCookieBug = false;
-
-	/**
 	 * {@link MockHttpServer}.
 	 */
-	private MockHttpServer server;
+	protected MockHttpServer server;
 
 	/**
 	 * {@link OfficeFloor}.
@@ -107,8 +79,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 			// Add servicing methods
 			OfficeSection section = context.addSection("SERVICE", Servicer.class);
-			web.link(false, "service", section.getOfficeSectionInput("service"));
-			web.link(false, "logout", section.getOfficeSectionInput("logout"));
+			web.link(false, "/service", section.getOfficeSectionInput("service"));
+			web.link(false, "/logout", section.getOfficeSectionInput("logout"));
 
 			// Inform web architect of security
 			securityArchitect.informWebArchitect();
@@ -132,106 +104,52 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Stop client then server
-		try {
-			this.client.close();
-		} finally {
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		// Stop server
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
 	/**
-	 * Use credentials.
+	 * Undertakes the request.
 	 * 
-	 * @param realm
-	 *            Security realm.
-	 * @param scheme
-	 *            Security scheme.
-	 * @param username
-	 *            User name.
-	 * @param password
-	 *            Password.
-	 * @return {@link CredentialsProvider}.
-	 * @throws IOException
-	 *             If fails to use credentials.
-	 */
-	protected CredentialsProvider useCredentials(String realm, String scheme, String username, String password)
-			throws IOException {
-
-		// Close the existing client
-		this.client.close();
-
-		// Use client with credentials
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		CredentialsProvider provider = HttpClientTestUtil.configureCredentials(builder, realm, scheme, username,
-				password);
-		this.client = builder.build();
-
-		// Reset the client context
-		this.context = new HttpClientContext();
-
-		// FIXME: determine if HttpClient cookie authentication fix
-		if ("Digest".equalsIgnoreCase(scheme)) {
-			isDigestHttpClientCookieBug = true;
-		}
-
-		// Return the credentials provider
-		return provider;
-	}
-
-	/**
-	 * Asserts the response from the {@link HttpGet}.
-	 * 
-	 * @param requestUriPath
-	 *            Request URI path.
-	 * @param expectedStatus
+	 * @param path
+	 *            Path.
+	 * @param status
 	 *            Expected status.
-	 * @param expectedBodyContent
-	 *            Expected body content.
+	 * @param entity
+	 *            Expected entity.
+	 * @return {@link MockHttpResponse}.
 	 */
-	protected void doRequest(String requestUriPath, int expectedStatus, String expectedBodyContent) {
-		try {
+	protected MockHttpResponse doRequest(String path, int status, String entity) {
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
+		response.assertResponse(status, entity);
+		return response;
+	}
 
-			// Undertake the request
-			HttpGet request = new HttpGet("http://localhost:" + PORT + "/" + requestUriPath);
+	/**
+	 * Undertakes the request with cookies from previous request.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @param response
+	 *            Previous response.
+	 * @param status
+	 *            Expected response status.
+	 * @param entity
+	 *            Expected response entity.
+	 */
+	protected MockHttpResponse doRequest(String path, MockHttpResponse response, int status, String entity) {
 
-			// Execute the method
-			org.apache.http.HttpResponse response;
-			if (this.isDigestHttpClientCookieBug) {
-				// Use the context to keep cookies
-				response = this.client.execute(request, this.context);
-			} else {
-				// Follow normal use
-				response = this.client.execute(request);
-			}
+		// Undertake the request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).cookies(response);
+		response = this.server.send(request);
 
-			/*
-			 * FIXME: work-around for bug in HttpClient no cookies on
-			 * authentication
-			 */
-			if (this.isDigestHttpClientCookieBug
-					&& (response.getStatusLine().getStatusCode() == HttpStatus.UNAUTHORIZED.getStatusCode())) {
-				// Try authentication again, with the cookie
-				this.context.getTargetAuthState().reset();
-				request.reset();
-				response = this.client.execute(request, this.context);
-			}
+		// Ensure appropriate response
+		response.assertResponse(status, entity);
 
-			// Obtain the details of the response
-			int status = response.getStatusLine().getStatusCode();
-			String body = HttpClientTestUtil.getEntityBody(response);
-
-			// Verify response
-			assertEquals(
-					"Should be successful. Response: " + body + " [" + response.getStatusLine().getReasonPhrase() + "]",
-					expectedStatus, status);
-			assertEquals("Incorrect response body", expectedBodyContent, body);
-
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
+		// Return the response
+		return response;
 	}
 
 	/**
@@ -251,8 +169,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		 *             If fails.
 		 */
 		public void service(HttpAccessControl acessControl, ServerHttpConnection connection) throws IOException {
-			connection.getResponse().getEntityWriter()
-					.write("Serviced for " + (acessControl == null ? "guest" : acessControl.getPrincipal().getName()));
+			connection.getResponse().getEntityWriter().write("Serviced for " + acessControl.getPrincipal().getName());
 		}
 
 		/**

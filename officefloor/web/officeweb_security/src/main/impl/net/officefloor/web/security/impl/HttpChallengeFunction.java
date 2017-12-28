@@ -17,8 +17,6 @@
  */
 package net.officefloor.web.security.impl;
 
-import java.io.Serializable;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -29,8 +27,6 @@ import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
-import net.officefloor.web.state.HttpRequestState;
-import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 
 /**
  * {@link ManagedFunctionFactory} to challenge the client.
@@ -39,11 +35,6 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  */
 public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		extends StaticManagedFunction<Indexed, Indexed> {
-
-	/**
-	 * {@link HttpSession} attribute for the challenge request state.
-	 */
-	public static final String ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO = "CHALLENGE_REQUEST_MOMENTO";
 
 	/**
 	 * {@link HttpSecurity}.
@@ -71,11 +62,6 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		HttpChallengeContext httpChallengeContext = (HttpChallengeContext) context.getObject(0);
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(1);
 		HttpSession session = (HttpSession) context.getObject(2);
-		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
-
-		// Save the request
-		Serializable momento = HttpRequestStateManagedObjectSource.exportHttpRequestState(requestState);
-		session.setAttribute(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, momento);
 
 		// Undertake challenge
 		this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, httpChallengeContext));

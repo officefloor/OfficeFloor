@@ -162,8 +162,10 @@ public class FormHttpSecuritySource extends
 		@Override
 		public HttpAuthentication<HttpCredentials> createAuthentication(
 				AuthenticationContext<HttpAccessControl, HttpCredentials> context) {
-			// TODO Auto-generated method stub
-			return null;
+			HttpAuthenticationImpl<HttpCredentials> authentication = new HttpAuthenticationImpl<>(context,
+					HttpCredentials.class);
+			authentication.authenticate(null, null);
+			return authentication;
 		}
 
 		@Override

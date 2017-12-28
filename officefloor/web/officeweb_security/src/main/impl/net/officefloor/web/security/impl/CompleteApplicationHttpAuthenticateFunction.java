@@ -23,6 +23,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticationContinuationException;
 import net.officefloor.web.state.HttpRequestState;
@@ -41,7 +42,7 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		ACCESS_CONTROL, HTTP_SESSION, REQUEST_STATE
+		ACCESS_CONTROL, SERVER_HTTP_CONNECTION, HTTP_SESSION, REQUEST_STATE
 	}
 
 	/*
@@ -55,15 +56,24 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 		context.getObject(Dependencies.ACCESS_CONTROL);
 
 		// Reinstate request for servicing prior to authentication required
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 		HttpSession session = (HttpSession) context.getObject(Dependencies.HTTP_SESSION);
 		HttpRequestState requestState = (HttpRequestState) context.getObject(Dependencies.REQUEST_STATE);
-		Serializable momento = session.getAttribute(HttpChallengeFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO);
+		Serializable momento = session
+				.getAttribute(HandleAuthenticationRequiredFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO);
 		if (momento != null) {
-			// Reinstate the request
-			HttpRequestStateManagedObjectSource.importHttpRequestState(momento, requestState);
+			// Reinstate the connection and request state
+			ChallengeMomento challenge = (ChallengeMomento) momento;
+			connection.importState(challenge.getServerHttpConnectionMomento());
+			HttpRequestStateManagedObjectSource.importHttpRequestState(challenge.getHttpRequestStateMomento(),
+					requestState);
+
+			// Clear the moment
+			session.removeAttribute(HandleAuthenticationRequiredFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO);
+
 		} else {
 			// Failure as must reinstate request
-			throw new AuthenticationContinuationException();
+			throw new AuthenticationContinuationException("No previous request state to continue after login");
 		}
 
 		// No further functions

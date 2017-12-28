@@ -68,6 +68,21 @@ public interface MockHttpResponse {
 	List<WritableHttpHeader> getHeaders();
 
 	/**
+	 * Asserts the contents of the {@link HttpResponse}.
+	 * 
+	 * @param statusCode
+	 *            Expected status code.
+	 * @param entity
+	 *            Expected entity.
+	 * @param headerNameValuePairs
+	 *            Expected {@link HttpHeader} name/value pairs. This only
+	 *            confirms they exist on the {@link HttpResponse}. It is not
+	 *            inclusive to check if these are the only {@link HttpHeader}
+	 *            instances.
+	 */
+	void assertResponse(int statusCode, String entity, String... headerNameValuePairs);
+
+	/**
 	 * Asserts contains the {@link HttpHeader}.
 	 * 
 	 * @param name

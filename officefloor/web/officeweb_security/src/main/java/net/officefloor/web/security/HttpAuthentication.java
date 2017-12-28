@@ -51,10 +51,10 @@ public interface HttpAuthentication<C> {
 	 * @param credentials
 	 *            Credentials. May be <code>null</code> if no credentials are
 	 *            required, or they are pulled from the {@link HttpRequest}.
-	 * @param authenticationRequest
+	 * @param authenticateRequest
 	 *            {@link AuthenticateRequest}.
 	 */
-	void authenticate(C credentials, AuthenticateRequest authenticationRequest);
+	void authenticate(C credentials, AuthenticateRequest authenticateRequest);
 
 	/**
 	 * Obtains the {@link HttpAccessControl}.
