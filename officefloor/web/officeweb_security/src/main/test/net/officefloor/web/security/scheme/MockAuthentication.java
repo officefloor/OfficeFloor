@@ -77,8 +77,11 @@ public class MockAuthentication {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void authenticate(MockCredentials credentials, Consumer<Throwable> completion) {
-		((AuthenticationContext) this.authenticationContext).authenticate(credentials,
-				(failure) -> completion.accept(failure));
+		((AuthenticationContext) this.authenticationContext).authenticate(credentials, (failure) -> {
+			if (completion != null) {
+				completion.accept(failure);
+			}
+		});
 	}
 
 	/**
@@ -97,7 +100,11 @@ public class MockAuthentication {
 	 *            Optional completion listener.
 	 */
 	public void logout(Consumer<Throwable> completion) {
-		this.authenticationContext.logout((failure) -> completion.accept(failure));
+		this.authenticationContext.logout((failure) -> {
+			if (completion != null) {
+				completion.accept(failure);
+			}
+		});
 	}
 
 }

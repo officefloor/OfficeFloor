@@ -511,10 +511,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure for html request that application challenge
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").header("accept", "text/html"));
-		assertEquals("Incorrect form response", "User name and password please", response.getEntity(null));
 		assertEquals("Should provide successful form response", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect form response", "User name and password please", response.getEntity(null));
 
-		// Ensure can select security based on accept-type
+		// Ensure for json request that challenge
 		response = this.server.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
 		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
 		assertEquals("Should include the negotiated security challenge",
@@ -537,8 +537,96 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can trigger logout.
 	 */
-	public void testLogout() throws Exception {
-		fail("TODO implement");
+	public void testCustom_Logout() throws Exception {
+		this.compile((context, security) -> {
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"));
+			OfficeSection section = context.addSection("section", CustomLogout.class);
+			WebArchitect web = context.getWebArchitect();
+			web.link(false, "/login", section.getOfficeSectionInput("login"));
+			web.link(false, "/logout", section.getOfficeSectionInput("logout"));
+			web.link(false, "/check", section.getOfficeSectionInput("check"));
+		});
+
+		// Ensure login
+		MockHttpResponse response = this.server.send(this.mockRequest("/login", "test", "test"));
+		assertEquals("Should login", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect login", "login", response.getEntity(null));
+
+		// Trigger logout
+		response = this.server.send(MockHttpServer.mockRequest("/logout").cookies(response));
+		assertEquals("Incorrect logout", "logout", response.getEntity(null));
+		assertEquals("Should logout", 200, response.getStatus().getStatusCode());
+
+		// Ensure logged out
+		response = this.server.send(MockHttpServer.mockRequest("/check").cookies(response));
+		assertEquals("Incorrect check", 200, response.getStatus().getStatusCode());
+		assertEquals("Should be logged out", "guest", response.getEntity(null));
+	}
+
+	public static class CustomLogout {
+		@HttpAccess(ifRole = "test")
+		public void login(ServerHttpConnection connection, MockAuthentication authentication) throws IOException {
+			connection.getResponse().getEntityWriter().write(authentication.isAuthenticated() ? "login" : "failed");
+		}
+
+		@HttpAccess(ifRole = "test")
+		public void logout(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
+			authentication.logout(null);
+			connection.getResponse().getEntityWriter().write("logout");
+		}
+
+		public void check(ServerHttpConnection connection, MockAuthentication authentication) throws IOException {
+			connection.getResponse().getEntityWriter()
+					.write(authentication.isAuthenticated() ? "authenticated" : "guest");
+		}
+	}
+
+	/**
+	 * Ensure can trigger logout.
+	 */
+	public void testStandard_Logout() throws Exception {
+		this.compile((context, security) -> {
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"));
+			OfficeSection section = context.addSection("section", CustomLogout.class);
+			WebArchitect web = context.getWebArchitect();
+			web.link(false, "/login", section.getOfficeSectionInput("login"));
+			web.link(false, "/logout", section.getOfficeSectionInput("logout"));
+			web.link(false, "/check", section.getOfficeSectionInput("check"));
+		});
+
+		// Ensure login
+		MockHttpResponse response = this.server.send(this.mockRequest("/login", "test", "test"));
+		assertEquals("Should login", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect login", "login", response.getEntity(null));
+
+		// Trigger logout
+		response = this.server.send(MockHttpServer.mockRequest("/logout").cookies(response));
+		assertEquals("Incorrect logout", "logout", response.getEntity(null));
+		assertEquals("Should logout", 200, response.getStatus().getStatusCode());
+
+		// Ensure logged out
+		response = this.server.send(MockHttpServer.mockRequest("/check").cookies(response));
+		assertEquals("Incorrect check", 200, response.getStatus().getStatusCode());
+		assertEquals("Should be logged out", "guest", response.getEntity(null));
+	}
+
+	public static class StandardLogout {
+		@HttpAccess(ifRole = "test")
+		public void login(ServerHttpConnection connection, HttpAuthentication<Void> authentication) throws IOException {
+			connection.getResponse().getEntityWriter().write(authentication.isAuthenticated() ? "login" : "failed");
+		}
+
+		@HttpAccess(ifRole = "test")
+		public void logout(HttpAuthentication<Void> authentication, ServerHttpConnection connection)
+				throws IOException {
+			authentication.logout(null);
+			connection.getResponse().getEntityWriter().write("logout");
+		}
+
+		public void check(ServerHttpConnection connection, HttpAuthentication<Void> authentication) throws IOException {
+			connection.getResponse().getEntityWriter()
+					.write(authentication.isAuthenticated() ? "authenticated" : "guest");
+		}
 	}
 
 	/**
