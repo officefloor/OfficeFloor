@@ -34,8 +34,8 @@ import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.Http
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 
 /**
  * Tests the {@link HttpFileWriterManagedFunctionSource}.
@@ -74,8 +74,7 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 		ManagedFunctionContext<HttpFileWriterFunctionDependencies, None> functionContext = this
 				.createMock(ManagedFunctionContext.class);
 		HttpFile httpFile = this.createMock(HttpFile.class);
-		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-		MockHttpResponseBuilder response = MockHttpServer.mockResponse();
+		MockServerHttpConnection connection = MockHttpServer.mockConnection();
 		final String contentType = "text/plain";
 		final Charset charset = UsAsciiUtil.US_ASCII;
 		ByteBuffer contents = ByteBuffer.wrap("TEST".getBytes());
@@ -85,7 +84,7 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 				httpFile);
 		this.recordReturn(functionContext,
 				functionContext.getObject(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION), connection);
-		this.recordReturn(connection, connection.getHttpResponse(), response);
+		this.recordReturn(httpFile, httpFile.getContentEncoding(), null);
 		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
 		this.recordReturn(httpFile, httpFile.getCharset(), charset);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
@@ -105,9 +104,10 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 		this.verifyMockObjects();
 
 		// Validate the entity content
-		MockHttpResponse mockResponse = response.build();
-		assertEquals("Incorrect content-type", "text/plain", mockResponse.getFirstHeader("Content-Type").getValue());
-		assertEquals("Incorrect entity content", "TEST", mockResponse.getHttpEntity(null));
+		MockHttpResponse mockResponse = connection.send(null);
+		assertEquals("Incorrect content-type", "text/plain; charset=US-ASCII",
+				mockResponse.getHeader("Content-Type").getValue());
+		assertEquals("Incorrect entity content", "TEST", mockResponse.getEntity(null));
 	}
 
 }

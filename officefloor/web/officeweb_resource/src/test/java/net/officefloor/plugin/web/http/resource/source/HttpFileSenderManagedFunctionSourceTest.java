@@ -34,15 +34,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.route.InvalidRequestUriHttpException;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
+import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * Tests the {@link HttpFileSenderManagedFunctionSource}.
@@ -59,24 +56,9 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 			.createMock(ManagedFunctionContext.class);
 
 	/**
-	 * Mock {@link ServerHttpConnection}.
+	 * {@link MockServerHttpConnection}.
 	 */
-	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-
-	/**
-	 * Mock {@link HttpRequest}.
-	 */
-	private final HttpRequest request = this.createMock(HttpRequest.class);
-
-	/**
-	 * Mock {@link HttpApplicationLocation}.
-	 */
-	private final HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
-
-	/**
-	 * Mock {@link HttpResponse}.
-	 */
-	private final MockHttpResponseBuilder response = MockHttpServer.mockResponse();
+	private MockServerHttpConnection connection;
 
 	/**
 	 * Validates the specification.
@@ -98,9 +80,8 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		ManagedFunctionTypeBuilder<DependencyKeys, None> functionBuilder = workBuilder
 				.addManagedFunctionType("SendFile", function, DependencyKeys.class, None.class);
 		functionBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
-		functionBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		functionBuilder.addObject(HttpApplicationState.class).setKey(DependencyKeys.HTTP_APPLICATION_STATE);
 		functionBuilder.addEscalation(IOException.class);
-		functionBuilder.addEscalation(InvalidRequestUriHttpException.class);
 
 		// Validate
 		ManagedFunctionLoaderUtil.validateManagedFunctionType(workBuilder, HttpFileSenderManagedFunctionSource.class,
@@ -114,7 +95,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	public void testSendHttpFile() throws Throwable {
 
 		// Record
-		this.recordSendFile("/index.html", 200);
+		this.recordSendFile("/index.html");
 
 		// Test
 		this.replayMockObjects();
@@ -129,7 +110,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		assertTrue("HTTP file should exist", httpFile.isExist());
 
 		// Verify
-		this.verifyFileSent("index.html");
+		this.verifyFileSent(200, "index.html");
 	}
 
 	/**
@@ -139,7 +120,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	public void testSendDefaultFileNotFoundContent() throws Throwable {
 
 		// Record
-		this.recordSendFile("/missing-file.html", 404);
+		this.recordSendFile("/missing-file.html");
 
 		// Test
 		this.replayMockObjects();
@@ -154,7 +135,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
 
 		// Verify
-		this.verifyFileSent("DefaultFileNotFound.html");
+		this.verifyFileSent(404, "DefaultFileNotFound.html");
 	}
 
 	/**
@@ -164,7 +145,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	public void testSendFileNotFoundOverrideContent() throws Throwable {
 
 		// Record
-		this.recordSendFile("/missing-file.html", 404);
+		this.recordSendFile("/missing-file.html");
 
 		// Test
 		this.replayMockObjects();
@@ -180,7 +161,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
 
 		// Verify
-		this.verifyFileSent("OverrideFileNotFound.html");
+		this.verifyFileSent(404, "OverrideFileNotFound.html");
 	}
 
 	/**
@@ -190,7 +171,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	public void testNotFoundOverrideWithCanonicalPath() throws Throwable {
 
 		// Record
-		this.recordSendFile("/missing-file.html", 404);
+		this.recordSendFile("/missing-file.html");
 
 		// Test
 		this.replayMockObjects();
@@ -207,7 +188,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
 
 		// Verify
-		this.verifyFileSent("OverrideFileNotFound.html");
+		this.verifyFileSent(404, "OverrideFileNotFound.html");
 	}
 
 	/**
@@ -249,32 +230,28 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 	 * 
 	 * @param uri
 	 *            URI.
-	 * @param status
-	 *            Status.
 	 */
-	private void recordSendFile(String uri, int status) throws Exception {
+	private void recordSendFile(String uri) throws Exception {
+		this.connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest(uri));
+		HttpApplicationState appliationState = MockWebApp.mockApplicationState(null);
 		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(), uri);
-		this.recordReturn(this.functionContext,
-				this.functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION), this.location);
-		this.recordReturn(this.location, this.location.transformToApplicationCanonicalPath(uri), uri);
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
+		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.HTTP_APPLICATION_STATE),
+				appliationState);
 	}
 
 	/**
 	 * Verifies the file sent content is valid.
 	 */
-	private void verifyFileSent(String fileName) throws IOException {
+	private void verifyFileSent(int status, String fileName) throws IOException {
 		this.verifyMockObjects();
 
 		// Validate the file content
 		File file = this.findFile(this.getClass(), fileName);
 		String fileContents = this.getFileContents(file);
-		MockHttpResponse mockResponse = this.response.build();
-		assertEquals("Incorrect status", HttpStatus.OK, mockResponse.getHttpStatus());
-		assertEquals("Incorrect file content", fileContents, mockResponse.getHttpEntity(null));
+		MockHttpResponse mockResponse = this.connection.send(null);
+		assertEquals("Incorrect status", status, mockResponse.getStatus().getStatusCode());
+		assertEquals("Incorrect file content", fileContents, mockResponse.getEntity(null));
 	}
 
 }

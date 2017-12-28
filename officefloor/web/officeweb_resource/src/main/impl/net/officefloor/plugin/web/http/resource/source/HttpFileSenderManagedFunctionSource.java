@@ -39,9 +39,8 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.D
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.path.HttpApplicationLocationMangedObject;
-import net.officefloor.web.route.InvalidRequestUriHttpException;
+import net.officefloor.web.route.WebRouter;
+import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * <p>
@@ -134,7 +133,7 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 		if (!notFoundContentPath.startsWith("/")) {
 			notFoundContentPath = "/" + notFoundContentPath;
 		}
-		notFoundContentPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(notFoundContentPath);
+		notFoundContentPath = WebRouter.transformToCanonicalPath(notFoundContentPath);
 
 		// Obtain the file not found content
 		HttpResource notFoundResource = notFoundResourceFactory.createHttpResource(notFoundContentPath);
@@ -151,7 +150,7 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 					ManagedFunctionContext<?, None> context) throws IOException {
 
 				// Obtain the response to write
-				HttpResponse response = connection.getHttpResponse();
+				HttpResponse response = connection.getResponse();
 
 				// Determine if HTTP file exists
 				if ((httpResource.isExist()) && (httpResource instanceof HttpFile)) {
@@ -161,14 +160,14 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 					AbstractHttpFile.writeHttpFile(httpFile, response);
 
 					// Specify found status
-					response.setHttpStatus(HttpStatus.OK);
+					response.setStatus(HttpStatus.OK);
 
 				} else {
 					// File not found so write file not found content
 					AbstractHttpFile.writeHttpFile(fileNotFoundContent, response);
 
 					// Specify not found status
-					response.setHttpStatus(HttpStatus.NOT_FOUND);
+					response.setStatus(HttpStatus.NOT_FOUND);
 				}
 
 				// Send the response
@@ -184,9 +183,8 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 		ManagedFunctionTypeBuilder<DependencyKeys, None> functionTypeBuilder = namespaceTypeBuilder
 				.addManagedFunctionType(FUNCTION_NAME, function, DependencyKeys.class, None.class);
 		functionTypeBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
-		functionTypeBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		functionTypeBuilder.addObject(HttpApplicationState.class).setKey(DependencyKeys.HTTP_APPLICATION_STATE);
 		functionTypeBuilder.addEscalation(IOException.class);
-		functionTypeBuilder.addEscalation(InvalidRequestUriHttpException.class);
 	}
 
 }

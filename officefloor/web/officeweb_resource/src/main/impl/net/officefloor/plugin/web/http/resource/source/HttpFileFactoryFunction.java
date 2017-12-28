@@ -28,10 +28,9 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
-import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.route.InvalidContextPathException;
+import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * {@link ManagedFunction} to locate a {@link HttpFile} via a
@@ -46,7 +45,7 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 	 * Dependency keys for the {@link HttpFileFactoryFunction}.
 	 */
 	public enum DependencyKeys {
-		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_STATE
 	}
 
 	/**
@@ -80,22 +79,18 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 	@Override
 	public Object execute(ManagedFunctionContext<DependencyKeys, F> context) throws IOException {
 
-		// Obtain the HTTP request
+		// Obtain the connection
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
-		HttpRequest request = connection.getRequest();
-
-		// Obtain the request URI
-		String requestUriPath = request.getUri();
 
 		// Obtain the resource
 		HttpResource resource;
 		try {
 
 			// Obtain the file path
-			HttpApplicationLocation location = (HttpApplicationLocation) context
-					.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION);
-			String filePath = location.transformToApplicationCanonicalPath(requestUriPath);
+			HttpApplicationState applicationState = (HttpApplicationState) context
+					.getObject(DependencyKeys.HTTP_APPLICATION_STATE);
+			String filePath = applicationState.extractApplicationPath(connection);
 
 			// Create the HTTP resource for the request
 			resource = this.httpResourceFactory.createHttpResource(filePath);
@@ -109,7 +104,8 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 				resource = (defaultFile != null ? defaultFile : new NotExistHttpResource(resource.getPath()));
 			}
 
-		} catch (InvalidContextPathException ex) {
+		} catch (HttpException ex) {
+			String requestUriPath = connection.getRequest().getUri();
 			resource = new NotExistHttpResource(requestUriPath);
 		}
 

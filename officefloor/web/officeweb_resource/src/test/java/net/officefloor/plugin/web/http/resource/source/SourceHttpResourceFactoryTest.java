@@ -292,9 +292,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(this.context,
 				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null), warDirectory);
 		this.recordReturn(this.context,
-				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
-						WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX),
-				(classpathPrefix == null ? WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX : classpathPrefix));
+				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, "PUBLIC"),
+				(classpathPrefix == null ? "PUBLIC" : classpathPrefix));
 		this.recordReturn(this.context, this.context.getClassLoader(), Thread.currentThread().getContextClassLoader());
 		this.recordReturn(this.context,
 				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,

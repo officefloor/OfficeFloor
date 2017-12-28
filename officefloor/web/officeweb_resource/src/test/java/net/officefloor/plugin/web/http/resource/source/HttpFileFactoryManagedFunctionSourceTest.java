@@ -33,10 +33,10 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryManagedFunctionSource.HttpFileFactoryFunctionFlows;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.route.InvalidRequestUriHttpException;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * Tests the {@link ClasspathHttpFileFactoryWorkSource}.
@@ -72,13 +72,12 @@ public class HttpFileFactoryManagedFunctionSourceTest extends OfficeFrameTestCas
 		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryFunctionFlows> functionBuilder = namespaceBuilder
 				.addManagedFunctionType("FindFile", function, DependencyKeys.class, HttpFileFactoryFunctionFlows.class);
 		functionBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
-		functionBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		functionBuilder.addObject(HttpApplicationState.class).setKey(DependencyKeys.HTTP_APPLICATION_STATE);
 		ManagedFunctionFlowTypeBuilder<HttpFileFactoryFunctionFlows> flowBuilder = functionBuilder.addFlow();
 		flowBuilder.setKey(HttpFileFactoryFunctionFlows.HTTP_FILE_NOT_FOUND);
 		flowBuilder.setArgumentType(HttpFile.class);
 		functionBuilder.setReturnType(HttpFile.class);
 		functionBuilder.addEscalation(IOException.class);
-		functionBuilder.addEscalation(InvalidRequestUriHttpException.class);
 
 		// Validate
 		ManagedFunctionLoaderUtil.validateManagedFunctionType(namespaceBuilder,
@@ -93,18 +92,14 @@ public class HttpFileFactoryManagedFunctionSourceTest extends OfficeFrameTestCas
 
 		ManagedFunctionContext<DependencyKeys, HttpFileFactoryFunctionFlows> functionContext = this
 				.createMock(ManagedFunctionContext.class);
-		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-		HttpRequest request = this.createMock(HttpRequest.class);
-		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
+		ServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("/index.html"));
+		HttpApplicationState applicationState = MockWebApp.mockApplicationState(null);
 
 		// Record
 		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				connection);
-		this.recordReturn(connection, connection.getHttpRequest(), request);
-		this.recordReturn(request, request.getRequestURI(), "/index.html");
-		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
-				location);
-		this.recordReturn(location, location.transformToApplicationCanonicalPath("/index.html"), "/index.html");
+		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_STATE),
+				applicationState);
 
 		// Test
 		this.replayMockObjects();
@@ -137,18 +132,14 @@ public class HttpFileFactoryManagedFunctionSourceTest extends OfficeFrameTestCas
 
 		ManagedFunctionContext<DependencyKeys, HttpFileFactoryFunctionFlows> functionContext = this
 				.createMock(ManagedFunctionContext.class);
-		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-		HttpRequest request = this.createMock(HttpRequest.class);
-		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
+		ServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("/"));
+		HttpApplicationState applicationState = MockWebApp.mockApplicationState(null);
 
 		// Record
 		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				connection);
-		this.recordReturn(connection, connection.getHttpRequest(), request);
-		this.recordReturn(request, request.getRequestURI(), "/");
-		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
-				location);
-		this.recordReturn(location, location.transformToApplicationCanonicalPath("/"), "/");
+		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_STATE),
+				applicationState);
 
 		// Test
 		this.replayMockObjects();
@@ -179,19 +170,15 @@ public class HttpFileFactoryManagedFunctionSourceTest extends OfficeFrameTestCas
 
 		ManagedFunctionContext<DependencyKeys, HttpFileFactoryFunctionFlows> functionContext = this
 				.createMock(ManagedFunctionContext.class);
-		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-		HttpRequest request = this.createMock(HttpRequest.class);
-		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
+		ServerHttpConnection connection = MockHttpServer
+				.mockConnection(MockHttpServer.mockRequest("/missing-file.html"));
+		HttpApplicationState applicationState = MockWebApp.mockApplicationState(null);
 
 		// Record
 		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				connection);
-		this.recordReturn(connection, connection.getHttpRequest(), request);
-		this.recordReturn(request, request.getRequestURI(), "/missing-file.html");
-		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
-				location);
-		this.recordReturn(location, location.transformToApplicationCanonicalPath("/missing-file.html"),
-				"/missing-file.html");
+		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_STATE),
+				applicationState);
 		functionContext.doFlow(HttpFileFactoryFunctionFlows.HTTP_FILE_NOT_FOUND, null, null);
 
 		// Test

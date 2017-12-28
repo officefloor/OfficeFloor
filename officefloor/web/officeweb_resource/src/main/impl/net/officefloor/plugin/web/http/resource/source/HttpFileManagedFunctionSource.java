@@ -36,7 +36,7 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocationMangedObject;
+import net.officefloor.web.route.WebRouter;
 
 /**
  * {@link ManagedFunctionSource} for always sending a particular
@@ -92,7 +92,7 @@ public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource
 		if (!(resourcePath.startsWith("/"))) {
 			resourcePath = "/" + resourcePath;
 		}
-		resourcePath = HttpApplicationLocationMangedObject.transformToCanonicalPath(resourcePath);
+		resourcePath = WebRouter.transformToCanonicalPath(resourcePath);
 
 		// Obtain the HTTP file
 		HttpResource resource = httpResourceFactory.createHttpResource(resourcePath);
@@ -141,7 +141,7 @@ public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource
 			// Obtain the response
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
-			HttpResponse response = connection.getHttpResponse();
+			HttpResponse response = connection.getResponse();
 
 			// Write the HTTP file
 			AbstractHttpFile.writeHttpFile(this.file, response);

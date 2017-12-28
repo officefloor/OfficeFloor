@@ -41,7 +41,6 @@ import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.direct.DirectHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
-import net.officefloor.web.build.WebArchitect;
 
 /**
  * <p>
@@ -50,7 +49,8 @@ import net.officefloor.web.build.WebArchitect;
  * It incorporates other {@link HttpResourceFactory} implementations configured
  * from the {@link SourceProperties} to achieve its functionality. This provides
  * reusable {@link HttpResourceFactory} capabilities for the various HTTP Web
- * {@link ManagedObjectSource} and {@link ManagedFunctionSource} implementations.
+ * {@link ManagedObjectSource} and {@link ManagedFunctionSource}
+ * implementations.
  * 
  * @author Daniel Sagenschneider
  */
@@ -68,12 +68,9 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	 * @param target
 	 *            {@link PropertyConfigurable}.
 	 */
-	public static void copyProperties(SourceProperties source,
-			PropertyConfigurable target) {
-		PropertiesUtil.copyProperties(source, target,
-				PROPERTY_CLASS_PATH_PREFIX, PROPERTY_RESOURCE_DIRECTORIES,
-				PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-				PROPERTY_DIRECT_STATIC_CONTENT);
+	public static void copyProperties(SourceProperties source, PropertyConfigurable target) {
+		PropertiesUtil.copyProperties(source, target, PROPERTY_CLASS_PATH_PREFIX, PROPERTY_RESOURCE_DIRECTORIES,
+				PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, PROPERTY_DIRECT_STATIC_CONTENT);
 	}
 
 	/**
@@ -98,9 +95,8 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	 * @param target
 	 *            {@link PropertyConfigurable}.
 	 */
-	public static void loadProperties(String classPathPrefix,
-			File[] resourceDirectories, String[] defaultDirectoryFileNames,
-			Boolean isDirect, PropertyConfigurable target) {
+	public static void loadProperties(String classPathPrefix, File[] resourceDirectories,
+			String[] defaultDirectoryFileNames, Boolean isDirect, PropertyConfigurable target) {
 
 		// Load class path prefix (if provided)
 		if ((classPathPrefix != null) && (classPathPrefix.length() > 0)) {
@@ -122,8 +118,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 		}
 
 		// Load default directory file names (if provided)
-		if ((defaultDirectoryFileNames != null)
-				&& (defaultDirectoryFileNames.length > 0)) {
+		if ((defaultDirectoryFileNames != null) && (defaultDirectoryFileNames.length > 0)) {
 			StringBuilder value = new StringBuilder();
 			boolean isFirst = true;
 			for (String fileName : defaultDirectoryFileNames) {
@@ -133,14 +128,12 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 				isFirst = false;
 				value.append(fileName);
 			}
-			target.addProperty(PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-					value.toString());
+			target.addProperty(PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, value.toString());
 		}
 
 		// Load direct content (if provided)
 		if (isDirect != null) {
-			target.addProperty(PROPERTY_DIRECT_STATIC_CONTENT,
-					String.valueOf(isDirect));
+			target.addProperty(PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(isDirect));
 		}
 	}
 
@@ -182,25 +175,19 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	 *             Should the configured resources not be accessible or not
 	 *             exist.
 	 */
-	public static HttpResourceFactory createHttpResourceFactory(
-			SourceContext context) throws IOException {
+	public static HttpResourceFactory createHttpResourceFactory(SourceContext context) throws IOException {
 
 		// Obtain the configuration for HTTP Resource Factory
-		String warDirectories = context.getProperty(
-				PROPERTY_RESOURCE_DIRECTORIES, null);
-		String classPathPrefix = context.getProperty(
-				PROPERTY_CLASS_PATH_PREFIX,
-				WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
+		String warDirectories = context.getProperty(PROPERTY_RESOURCE_DIRECTORIES, null);
+		String classPathPrefix = context.getProperty(PROPERTY_CLASS_PATH_PREFIX, "PUBLIC");
 		ClassLoader classLoader = context.getClassLoader();
-		boolean isDirect = Boolean.parseBoolean(context.getProperty(
-				PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(Boolean.TRUE)));
-		String defaultDirectoryFileNames = context.getProperty(
-				PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "index.html");
+		boolean isDirect = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(Boolean.TRUE)));
+		String defaultDirectoryFileNames = context.getProperty(PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "index.html");
 
 		// Obtain the listing of default directory file names
 		List<String> defaultDirectoryFileNameListing = new LinkedList<String>();
-		for (String defaultDirectoryFileName : defaultDirectoryFileNames
-				.split(";")) {
+		for (String defaultDirectoryFileName : defaultDirectoryFileNames.split(";")) {
 
 			// Ignore blank entries
 			defaultDirectoryFileName = defaultDirectoryFileName.trim();
@@ -210,8 +197,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 
 			// Remove leading slashes from name
 			while (defaultDirectoryFileName.startsWith("/")) {
-				defaultDirectoryFileName = defaultDirectoryFileName
-						.substring("/".length());
+				defaultDirectoryFileName = defaultDirectoryFileName.substring("/".length());
 			}
 
 			// Add the default directory file name
@@ -236,22 +222,19 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 				// Locate the WAR directory
 				File warDirectoryFile = new File(warDirectory);
 				if (!(warDirectoryFile.isDirectory())) {
-					throw new FileNotFoundException(
-							"Can not find WAR directory '" + warDirectory + "'");
+					throw new FileNotFoundException("Can not find WAR directory '" + warDirectory + "'");
 				}
 
 				// Create and register the WAR HTTP Resource Factory
-				HttpResourceFactory warFactory = WarHttpResourceFactory
-						.getHttpResourceFactory(warDirectoryFile,
-								defaultFileNames);
+				HttpResourceFactory warFactory = WarHttpResourceFactory.getHttpResourceFactory(warDirectoryFile,
+						defaultFileNames);
 				factories.add(warFactory);
 			}
 		}
 
 		// Create and register the Class path HTTP Resource Factory
-		HttpResourceFactory classpathFactory = ClasspathHttpResourceFactory
-				.getHttpResourceFactory(classPathPrefix, classLoader,
-						defaultFileNames);
+		HttpResourceFactory classpathFactory = ClasspathHttpResourceFactory.getHttpResourceFactory(classPathPrefix,
+				classLoader, defaultFileNames);
 		factories.add(classpathFactory);
 
 		// Create the Source HTTP Resource Factory
@@ -260,8 +243,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 
 		// Determine if wrap with Direct HTTP Resource Factory
 		if (isDirect) {
-			resourceFactory = new DirectHttpResourceFactory(resourceFactory,
-					defaultFileNames);
+			resourceFactory = new DirectHttpResourceFactory(resourceFactory, defaultFileNames);
 		}
 
 		// Return the HTTP Resource Factory
@@ -290,8 +272,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	 *            {@link HttpResourceFactory} instances for delegation to obtain
 	 *            the {@link HttpResource} instances.
 	 */
-	private SourceHttpResourceFactory(
-			HttpResourceFactory... httpResourceFactories) {
+	private SourceHttpResourceFactory(HttpResourceFactory... httpResourceFactories) {
 		this.httpResourceFactories = httpResourceFactories;
 	}
 
@@ -307,15 +288,13 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	}
 
 	@Override
-	public HttpResource createHttpResource(String applicationCanonicalPath)
-			throws IOException {
+	public HttpResource createHttpResource(String applicationCanonicalPath) throws IOException {
 
 		// Use HTTP Resource Factories to locate the resource
 		for (HttpResourceFactory resourceFactory : this.httpResourceFactories) {
 
 			// Attempt to obtain the resource
-			HttpResource resource = resourceFactory
-					.createHttpResource(applicationCanonicalPath);
+			HttpResource resource = resourceFactory.createHttpResource(applicationCanonicalPath);
 			if (resource.isExist()) {
 				// Found the resource
 				return resource;

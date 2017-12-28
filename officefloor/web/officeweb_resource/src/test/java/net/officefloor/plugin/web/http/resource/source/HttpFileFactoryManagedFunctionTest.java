@@ -28,10 +28,10 @@ import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.route.InvalidContextPathException;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * Tests the {@link HttpFileFactoryFunction}.
@@ -44,28 +44,6 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpResourceFactory}.
 	 */
 	private HttpResourceFactory factory = this.createMock(HttpResourceFactory.class);
-
-	/**
-	 * Mock {@link ManagedFunctionContext}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<DependencyKeys, Indexed> functionContext = this
-			.createMock(ManagedFunctionContext.class);
-
-	/**
-	 * Mock {@link ServerHttpConnection}.
-	 */
-	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-
-	/**
-	 * Mock {@link HttpRequest}.
-	 */
-	private final HttpRequest request = this.createMock(HttpRequest.class);
-
-	/**
-	 * Mock {@link HttpApplicationLocation}.
-	 */
-	private final HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 	/**
 	 * Mock {@link HttpFile}.
@@ -83,14 +61,14 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 	 * Ensures handle if {@link HttpFile} exists.
 	 */
 	public void testFileExists() throws Throwable {
-		this.doTaskTest("/path", true, "/path", false, this.httpFile);
+		this.doFunctionTest("/path", true, "/path", false, this.httpFile);
 	}
 
 	/**
 	 * Ensures handle non canonical path to {@link HttpFile}.
 	 */
 	public void testNonCanonicalPath() throws Throwable {
-		this.doTaskTest("/non-canonical/../path", true, "/path", false, this.httpFile);
+		this.doFunctionTest("/non-canonical/../path", true, "/path", false, this.httpFile);
 	}
 
 	/**
@@ -98,7 +76,7 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 	 */
 	public void testIncorrectContextForApplication() throws Throwable {
 		NotExistHttpResource notExistResource = new NotExistHttpResource("/incorrect-context/path");
-		this.doTaskTest("/incorrect-context/path", false, "/path", false, notExistResource);
+		this.doFunctionTest("/incorrect-context/path", false, "/path", false, notExistResource);
 	}
 
 	/**
@@ -106,14 +84,14 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 	 */
 	public void testFileNotExists() throws Throwable {
 		NotExistHttpResource notExistResource = new NotExistHttpResource("/path");
-		this.doTaskTest("/path", true, "/path", false, notExistResource);
+		this.doFunctionTest("/path", true, "/path", false, notExistResource);
 	}
 
 	/**
 	 * Ensures handle if default {@link HttpFile}.
 	 */
 	public void testDefaultFile() throws Throwable {
-		this.doTaskTest("/path", true, "/path", true, this.httpFile);
+		this.doFunctionTest("/path", true, "/path", true, this.httpFile);
 	}
 
 	/**
@@ -131,20 +109,24 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 	 *            {@link HttpResource}.
 	 * @return {@link HttpResource} returned from {@link ManagedFunction}.
 	 */
-	private void doTaskTest(String requestUri, boolean isValidContext, String filePath, boolean isDirectory,
+	private void doFunctionTest(String requestUri, boolean isValidContext, String filePath, boolean isDirectory,
 			HttpResource file) throws Throwable {
 
+		// Create the mock
+		@SuppressWarnings("unchecked")
+		ManagedFunctionContext<DependencyKeys, Indexed> functionContext = this.createMock(ManagedFunctionContext.class);
+
+		// Create the connection
+		ServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest(requestUri));
+		HttpApplicationState applicationState = MockWebApp.mockApplicationState(null);
+
 		// Record
-		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(), requestUri);
-		this.recordReturn(this.functionContext,
-				this.functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION), this.location);
-		this.location.transformToApplicationCanonicalPath(requestUri);
+		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+				connection);
+		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.HTTP_APPLICATION_STATE),
+				applicationState);
 		if (isValidContext) {
 			// Valid context
-			this.control(this.location).setReturnValue(filePath);
 			if (isDirectory) {
 				// Record directory
 				final HttpDirectory directory = this.createMock(HttpDirectory.class);
@@ -154,18 +136,17 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 				// Record file
 				this.recordReturn(this.factory, this.factory.createHttpResource(filePath), file);
 			}
-
 		} else {
-			// Incorrect context
-			this.control(this.location).setThrowable(new InvalidContextPathException("/context", "TEST"));
+			// Record not exist
+			this.recordReturn(this.factory, this.factory.createHttpResource(requestUri), file);
 		}
-		this.creationListener.httpResourceCreated(file, this.connection, this.functionContext);
+		this.creationListener.httpResourceCreated(file, connection, functionContext);
 
 		// Test
 		this.replayMockObjects();
-		HttpFileFactoryFunction<Indexed> task = new HttpFileFactoryFunction<Indexed>(this.factory,
+		HttpFileFactoryFunction<Indexed> function = new HttpFileFactoryFunction<Indexed>(this.factory,
 				this.creationListener);
-		HttpResource resource = (HttpResource) task.execute(this.functionContext);
+		HttpResource resource = (HttpResource) function.execute(functionContext);
 		this.verifyMockObjects();
 		assertEquals("Incorrect returned HTTP file", file, resource);
 	}

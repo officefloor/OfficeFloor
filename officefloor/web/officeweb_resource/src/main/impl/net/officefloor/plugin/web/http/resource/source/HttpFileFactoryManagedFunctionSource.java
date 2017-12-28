@@ -33,7 +33,7 @@ import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.path.HttpApplicationLocation;
+import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * {@link ManagedFunctionSource} to locate a {@link HttpFile} on the class path.
@@ -92,7 +92,7 @@ public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctio
 		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryFunctionFlows> functionTypeBuilder = namespaceTypeBuilder
 				.addManagedFunctionType("FindFile", function, DependencyKeys.class, HttpFileFactoryFunctionFlows.class);
 		functionTypeBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
-		functionTypeBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		functionTypeBuilder.addObject(HttpApplicationState.class).setKey(DependencyKeys.HTTP_APPLICATION_STATE);
 		ManagedFunctionFlowTypeBuilder<HttpFileFactoryFunctionFlows> flowTypeBuilder = functionTypeBuilder.addFlow();
 		flowTypeBuilder.setKey(HttpFileFactoryFunctionFlows.HTTP_FILE_NOT_FOUND);
 		flowTypeBuilder.setArgumentType(HttpFile.class);

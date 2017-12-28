@@ -31,11 +31,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource.DependencyKeys;
 import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource.SendHttpFileFunction;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpResponseBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 
 /**
  * Tests the {@link HttpFileManagedFunctionSource}.
@@ -43,23 +42,6 @@ import net.officefloor.server.http.mock.MockHttpServer;
  * @author Daniel Sagenschneider
  */
 public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
-
-	/**
-	 * Mock {@link ManagedFunctionContext}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<DependencyKeys, None> functionContext = this
-			.createMock(ManagedFunctionContext.class);
-
-	/**
-	 * Mock {@link ServerHttpConnection}.
-	 */
-	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
-
-	/**
-	 * Mock {@link HttpResponse}.
-	 */
-	private final MockHttpResponseBuilder response = MockHttpServer.mockResponse();
 
 	/**
 	 * Validate specification.
@@ -108,14 +90,19 @@ public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void doSendHttpFileTest(String fileName, String configuredFilePath) throws Throwable {
 
+		// Create the mocks
+		ManagedFunctionContext<DependencyKeys, None> functionContext = this.createMock(ManagedFunctionContext.class);
+
+		// Create the connection
+		MockServerHttpConnection connection = MockHttpServer.mockConnection();
+
 		// Read in the expected file content
 		File file = this.findFile(this.getClass(), fileName);
 		String fileContents = this.getFileContents(file);
 
 		// Record obtaining body to send HTTP file
-		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
+		this.recordReturn(functionContext, functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+				connection);
 
 		// Test
 		this.replayMockObjects();
@@ -131,15 +118,15 @@ public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
 				.createManagedFunction();
 
 		// Execute the function to send the HTTP file
-		Object result = function.execute(this.functionContext);
+		Object result = function.execute(functionContext);
 		assertNull("File should be sent and no return value", result);
 
 		// Verify
 		this.verifyMockObjects();
 
 		// Verify the file contents
-		MockHttpResponse mockResponse = this.response.build();
-		assertEquals("Incorrect file content", fileContents, mockResponse.getHttpEntity(null));
+		MockHttpResponse mockResponse = connection.send(null);
+		assertEquals("Incorrect file content", fileContents, mockResponse.getEntity(null));
 	}
 
 }
