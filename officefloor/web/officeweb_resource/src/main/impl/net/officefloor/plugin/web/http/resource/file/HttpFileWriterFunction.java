@@ -57,7 +57,7 @@ public class HttpFileWriterFunction
 				.getObject(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION);
 
 		// Write the file
-		AbstractHttpFile.writeHttpFile(httpFile, connection.getHttpResponse());
+		AbstractHttpFile.writeHttpFile(httpFile, connection.getResponse());
 
 		// Return nothing as file written to response
 		return null;

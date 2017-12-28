@@ -31,7 +31,6 @@ import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.route.InvalidRequestUriHttpException;
 import net.officefloor.web.route.InvalidContextPathException;
 
 /**
@@ -79,16 +78,15 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<DependencyKeys, F> context)
-			throws IOException, InvalidRequestUriHttpException {
+	public Object execute(ManagedFunctionContext<DependencyKeys, F> context) throws IOException {
 
 		// Obtain the HTTP request
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
-		HttpRequest request = connection.getHttpRequest();
+		HttpRequest request = connection.getRequest();
 
 		// Obtain the request URI
-		String requestUriPath = request.getRequestURI();
+		String requestUriPath = request.getUri();
 
 		// Obtain the resource
 		HttpResource resource;

@@ -24,8 +24,10 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.escalation.BadRequestHttpException;
 
@@ -50,13 +52,10 @@ public class WebRouter {
 	 *            Context path of the application. May be <code>null</code> if
 	 *            context at root.
 	 * @return Canonical path for the application.
-	 * @throws BadRequestHttpException
+	 * @throws HttpException
 	 *             If path is invalid.
-	 * @throws InvalidContextPathException
-	 *             If unknown context path.
 	 */
-	public static String transformToApplicationCanonicalPath(String path, String contextPath)
-			throws BadRequestHttpException, InvalidContextPathException {
+	public static String transformToApplicationCanonicalPath(String path, String contextPath) throws HttpException {
 
 		// Root if empty path
 		if (path == null) {
@@ -77,7 +76,8 @@ public class WebRouter {
 
 			// Ensure have context path
 			if (!(canonicalPath.startsWith(contextPath))) {
-				throw new InvalidContextPathException(contextPath, path);
+				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
+						"Incorrect context path for application [context=" + contextPath + ", path=" + path + "]");
 			}
 
 			// Strip off the context path
@@ -97,10 +97,10 @@ public class WebRouter {
 	 * @param path
 	 *            Path to transform.
 	 * @return Canonical path.
-	 * @throws BadRequestHttpException
+	 * @throws HttpException
 	 *             Should the Request URI path be invalid.
 	 */
-	public static String transformToCanonicalPath(String path) throws BadRequestHttpException {
+	public static String transformToCanonicalPath(String path) throws HttpException {
 
 		// Root if empty path
 		if (path == null) {

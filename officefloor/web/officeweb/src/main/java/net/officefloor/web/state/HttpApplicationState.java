@@ -19,6 +19,8 @@ package net.officefloor.web.state;
 
 import java.util.Iterator;
 
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -64,6 +66,17 @@ public interface HttpApplicationState {
 	 * @return Client path for the application.
 	 */
 	String createApplicationClientPath(String path);
+
+	/**
+	 * Extracts the application path from the {@link HttpRequest}.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return Application path.
+	 * @throws HttpException
+	 *             If invalid path for this application.
+	 */
+	String extractApplicationPath(ServerHttpConnection connection) throws HttpException;
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name.

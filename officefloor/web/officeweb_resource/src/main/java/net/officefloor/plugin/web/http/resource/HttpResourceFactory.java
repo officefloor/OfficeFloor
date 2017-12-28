@@ -19,10 +19,6 @@ package net.officefloor.plugin.web.http.resource;
 
 import java.io.IOException;
 
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpResponse;
-import net.officefloor.web.path.HttpApplicationLocation;
-
 /**
  * Factory to create a {@link HttpResource}.
  * 
@@ -45,17 +41,14 @@ public interface HttpResourceFactory {
 	void addHttpFileDescriber(HttpFileDescriber httpFileDescriber);
 
 	/**
-	 * Creates the {@link HttpResponse}.
+	 * Creates the {@link HttpResource}.
 	 * 
-	 * @param applicationCanonicalPath
-	 *            Application canonical path to the {@link HttpResource}. See
-	 *            the {@link HttpApplicationLocation} for obtaining this path
-	 *            from the {@link HttpRequest} request URI.
+	 * @param applicationPath
+	 *            Application path to the {@link HttpResource}.
 	 * @return {@link HttpResource}.
 	 * @throws IOException
 	 *             If failure in finding the {@link HttpResource}.
 	 */
-	HttpResource createHttpResource(String applicationCanonicalPath)
-			throws IOException;
+	HttpResource createHttpResource(String applicationCanonicalPath) throws IOException;
 
 }

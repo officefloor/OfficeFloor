@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 
+import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpResponse;
 
 /**
@@ -30,6 +31,11 @@ import net.officefloor.server.http.HttpResponse;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractHttpFile extends AbstractHttpResource implements HttpFile {
+
+	/**
+	 * <code>Content-Encoding</code> {@link HttpHeaderName}.
+	 */
+	private static final HttpHeaderName CONTENT_ENCODING = new HttpHeaderName("content-encoding");
 
 	/**
 	 * Writes the {@link HttpFile} to the {@link HttpResponse}.
@@ -49,7 +55,7 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements H
 		// Provide the details of the file
 		String contentEncoding = file.getContentEncoding();
 		if ((contentEncoding != null) && (contentEncoding.length() > 0)) {
-			response.getHttpHeaders().addHeader("Content-Encoding", contentEncoding);
+			response.getHeaders().addHeader(CONTENT_ENCODING, contentEncoding);
 		}
 		String contentType = file.getContentType();
 		Charset charset = file.getCharset();

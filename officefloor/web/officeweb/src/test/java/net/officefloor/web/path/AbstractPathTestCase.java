@@ -18,13 +18,14 @@
 package net.officefloor.web.path;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.escalation.BadRequestHttpException;
-import net.officefloor.web.route.InvalidContextPathException;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
@@ -126,12 +127,12 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 			assertEquals("Incorrect HTTP status", HttpStatus.BAD_REQUEST, ex.getHttpStatus());
 			assertEquals("Incorrect message", "Invalid request URI path " + requestUri, ex.getEntity());
 
-		} catch (InvalidContextPathException ex) {
+		} catch (HttpException ex) {
 			// Incorrect as missing context path
 			assertTrue("Incorrect only if have context path", (contextPath.trim().length() > 0));
 			assertEquals("Incorrect message",
-					"Incorrect context path for application [context=" + contextPath + ", request=" + requestUri + "]",
-					ex.getMessage());
+					"Incorrect context path for application [context=" + contextPath + ", path=" + requestUri + "]",
+					ex.getEntity());
 		}
 	}
 
@@ -240,9 +241,13 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 
 		// Transform to application path
 		String actualPath = WebRouter.transformToApplicationCanonicalPath(requestUri, contextPath);
-
-		// Ensure correct path
 		assertEquals("Incorrect application path", expectedPath, actualPath);
+
+		// Ensure extract application path
+		HttpApplicationState application = new HttpApplicationStateManagedObjectSource(contextPath);
+		String extractedPath = application
+				.extractApplicationPath(MockHttpServer.mockConnection(MockHttpServer.mockRequest(requestUri)));
+		assertEquals("Incorrect extract path", expectedPath, extractedPath);
 	}
 
 	/**
@@ -367,11 +372,14 @@ public abstract class AbstractPathTestCase extends OfficeFrameTestCase {
 			HttpApplicationState application = new HttpApplicationStateManagedObjectSource(contextPath);
 			String clientUrl = application.createApplicationClientUrl(isSecureLink, applicationPath, connection);
 			String clientPath = application.createApplicationClientPath(applicationPath);
+			String extractPath = application
+					.extractApplicationPath(MockHttpServer.mockConnection(MockHttpServer.mockRequest(clientPath)));
 			this.verifyMockObjects();
 
 			// Validate correct client path
 			assertEquals("Incorrect client URL", expectedUrl, clientUrl);
 			assertEquals("Incorrect client path", expectedPath, clientPath);
+			assertEquals("Incorrect application path", applicationPath, extractPath);
 
 		} catch (Throwable ex) {
 			throw fail(ex);

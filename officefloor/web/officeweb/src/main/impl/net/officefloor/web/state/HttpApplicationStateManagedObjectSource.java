@@ -27,7 +27,9 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.route.WebRouter;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
@@ -120,6 +122,11 @@ public class HttpApplicationStateManagedObjectSource extends AbstractManagedObje
 
 		// Return the path
 		return path;
+	}
+
+	@Override
+	public String extractApplicationPath(ServerHttpConnection connection) throws HttpException {
+		return WebRouter.transformToApplicationCanonicalPath(connection.getRequest().getUri(), this.contextPath);
 	}
 
 	@Override

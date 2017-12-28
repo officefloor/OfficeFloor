@@ -34,7 +34,6 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.path.HttpApplicationLocation;
-import net.officefloor.web.route.InvalidRequestUriHttpException;
 
 /**
  * {@link ManagedFunctionSource} to locate a {@link HttpFile} on the class path.
@@ -99,7 +98,6 @@ public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctio
 		flowTypeBuilder.setArgumentType(HttpFile.class);
 		functionTypeBuilder.setReturnType(HttpFile.class);
 		functionTypeBuilder.addEscalation(IOException.class);
-		functionTypeBuilder.addEscalation(InvalidRequestUriHttpException.class);
 	}
 
 }
