@@ -17,7 +17,27 @@
  */
 package net.officefloor.web.resource.build;
 
+import java.io.File;
+import java.util.function.Consumer;
+
+import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
+import net.officefloor.web.security.scheme.MockCredentials;
 
 /**
  * Tests the {@link HttpResourceArchitect}.
@@ -26,8 +46,212 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 
-	public void test() {
-		fail("TODO implement tests");
+	/**
+	 * {@link WebCompileOfficeFloor}.
+	 */
+	private final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+
+	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	private OfficeFloor officeFloor;
+
+	@Override
+	protected void setUp() throws Exception {
+		this.compile.officeFloor((context) -> {
+			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+		});
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * Ensure can send resource.
+	 */
+	public void testOutputToResource() throws Exception {
+		this.compile((context, resource) -> {
+			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
+			resource.link(section.getOfficeSectionOutput("resource"), "resource.html");
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+		});
+
+		// Send the request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "TEST RESOURCE");
+	}
+
+	public static class OutputToResourceServicer {
+		@NextFunction("resource")
+		public void service() {
+		}
+	}
+
+	/**
+	 * Ensure issue if missing resource.
+	 */
+	public void testOutputToMissingResource() throws Exception {
+		this.issue((issues) -> issues.recordIssue("Can not find resource 'mising.html'"), (context, resource) -> {
+			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
+			resource.link(section.getOfficeSectionOutput("resource"), "missing.html");
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+		});
+	}
+
+	/**
+	 * Ensure send resource on {@link Escalation}.
+	 */
+	public void testEscalationToResource() throws Exception {
+		this.compile((context, resource) -> {
+			context.link(false, "/path", EscalationToResourceServicer.class);
+			OfficeEscalation escalation = context.getOfficeArchitect().addOfficeEscalation(Exception.class.getName());
+			resource.link(escalation, "resource.html");
+		});
+
+		// Ensure handle escalation
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "TEST RESOURCE");
+	}
+
+	public static class EscalationToResourceServicer {
+		public void service() throws Exception {
+			throw new Exception("TEST");
+		}
+	}
+
+	/**
+	 * Ensure issue in missing resource.
+	 */
+	public void testEscalationToMissingResource() throws Exception {
+		this.issue((issues) -> issues.recordIssue("Can not find resource 'missing.html'"), (context, resource) -> {
+			context.link(false, "/path", EscalationToResourceServicer.class);
+			OfficeEscalation escalation = context.getOfficeArchitect().addOfficeEscalation(Exception.class.getName());
+			resource.link(escalation, "missing.html");
+		});
+	}
+
+	/**
+	 * Ensure can obtain external {@link HttpResource}.
+	 */
+	public void testExternalResources() throws Exception {
+		File resourcesDirectory = this.findFile(this.getClass(), "resources");
+		this.compile((context, resource) -> {
+			resource.addExternalHttpResources(resourcesDirectory);
+		});
+
+		// Ensure can obtain resource
+		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
+
+		// Ensure passes through if not found resource
+		this.server.send(MockHttpServer.mockRequest("/missing.html")).assertResponse(404, "");
+	}
+
+	/**
+	 * Ensure can secure external {@link HttpResource}.
+	 */
+	public void testSecureExternalResources() throws Exception {
+		File resourcesDirectory = this.findFile(this.getClass(), "resources");
+		File securedDirectory = this.findFile(this.getClass(), "secured");
+		this.compile((context, resource) -> {
+
+			// Configure secured resources
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
+					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+			security.addHttpSecurity("secure", new MockChallengeHttpSecuritySource("secure"));
+			ExternalHttpResourcesBuilder external = resource.addExternalHttpResources(securedDirectory);
+			external.setHttpSecurityName("secure");
+			external.addRole("test");
+
+			// Configure non-secured resources
+			resource.addExternalHttpResources(resourcesDirectory);
+		});
+
+		// Ensure can obtain non-secured resource
+		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
+
+		// Ensure secured resources
+		this.server.send(MockHttpServer.mockRequest("/secured.html")).assertResponse(401, "");
+
+		// Ensure no access if not in roles
+		this.server.send(new MockCredentials("not", "not").loadHttpRequest(MockHttpServer.mockRequest("/secured.html")))
+				.assertResponse(401, "");
+
+		// Ensure can obtain once authenticated with appropriate role
+		this.server
+				.send(new MockCredentials("test", "test").loadHttpRequest(MockHttpServer.mockRequest("/secured.html")))
+				.assertResponse(200, "TEST SECURED RESORUCE");
+	}
+
+	/**
+	 * Initialises the {@link HttpResourceArchitect}.
+	 */
+	private static interface Initialiser {
+
+		/**
+		 * Initialises the {@link HttpResourceArchitect}.
+		 * 
+		 * @param context
+		 *            {@link CompileWebContext}.
+		 * @param resource
+		 *            {@link HttpResourceArchitect}.
+		 */
+		void initialise(CompileWebContext context, HttpResourceArchitect resource);
+	}
+
+	/**
+	 * Compiles with the {@link Initialiser}.
+	 * 
+	 * @param initialiser
+	 *            {@link Initialiser}.
+	 */
+	private void compile(Initialiser initialiser) throws Exception {
+		this.compile.web((context) -> {
+			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
+					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+			initialiser.initialise(context, resource);
+			resource.informWebArchitect();
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+	}
+
+	/**
+	 * Ensure issue with compiling.
+	 * 
+	 * @param issueRecorder
+	 *            Records the {@link CompilerIssue}.
+	 * @param initialiser
+	 *            {@link Initialiser}.
+	 */
+	private void issue(Consumer<MockCompilerIssues> issueRecorder, Initialiser initialiser) throws Exception {
+
+		// Record issue
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		issueRecorder.accept(issues);
+
+		// Test
+		this.replayMockObjects();
+		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+		this.compile.web((context) -> {
+			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
+					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+			initialiser.initialise(context, resource);
+			resource.informWebArchitect();
+		});
+		this.officeFloor = this.compile.compileOfficeFloor();
+		assertNull("Should not compile", this.officeFloor);
+
+		// Ensure issue
+		this.verifyMockObjects();
 	}
 
 }

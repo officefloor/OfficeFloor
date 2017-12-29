@@ -18,6 +18,7 @@
 package net.officefloor.web.resource.build;
 
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
  * Builds the external {@link HttpResource} instances.
@@ -27,10 +28,20 @@ import net.officefloor.web.resource.HttpResource;
 public interface ExternalHttpResourcesBuilder {
 
 	/**
-	 * Specifies the
+	 * Specifies the {@link HttpSecurity} to secure external
+	 * {@link HttpResource} instances.
 	 * 
 	 * @param httpSecurityName
+	 *            Name of the {@link HttpSecurity}.
 	 */
 	void setHttpSecurityName(String httpSecurityName);
+
+	/**
+	 * Adds a role to allow access.
+	 * 
+	 * @param role
+	 *            Role to allow access.
+	 */
+	void addRole(String role);
 
 }
