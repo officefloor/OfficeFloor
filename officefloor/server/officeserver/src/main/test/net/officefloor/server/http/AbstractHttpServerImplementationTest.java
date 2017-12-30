@@ -24,13 +24,18 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -60,6 +65,8 @@ import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
+import net.officefloor.server.stream.TemporaryFiles;
 
 /**
  * Abstract {@link TestCase} for testing a {@link HttpServerImplementation}.
@@ -244,15 +251,13 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	public static class Servicer {
-
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
 			connection.getResponse().getEntityWriter().write("hello world");
 		}
 	}
 
-	public static class FastServicer {
-
+	public static class BytesServicer {
 		private static final byte[] HELLO_WORLD = "hello world"
 				.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		private static final HttpHeaderValue TEXT_PLAIN = new HttpHeaderValue("text/plain");
@@ -262,6 +267,42 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.setContentType(TEXT_PLAIN, null);
 			response.getEntity().write(HELLO_WORLD);
+		}
+	}
+
+	public static class BufferServicer {
+		private static final ByteBuffer HELLO_WORLD;
+		static {
+			byte[] data = BytesServicer.HELLO_WORLD;
+			HELLO_WORLD = ByteBuffer.allocate(data.length);
+			HELLO_WORLD.put(data);
+			HELLO_WORLD.flip();
+		}
+
+		public void service(ServerHttpConnection connection) throws Exception {
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
+			response.setContentType(BytesServicer.TEXT_PLAIN, null);
+			response.getEntity().write(HELLO_WORLD.duplicate());
+		}
+	}
+
+	private static final FileChannel HELLO_WORLD_FILE;
+
+	static {
+		try {
+			HELLO_WORLD_FILE = TemporaryFiles.getDefault().createTempFile("HelloWorld", BytesServicer.HELLO_WORLD);
+		} catch (IOException ex) {
+			throw fail(ex);
+		}
+	}
+
+	public static class FileServicer {
+		public void service(ServerHttpConnection connection) throws Exception {
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
+			response.setContentType(BytesServicer.TEXT_PLAIN, null);
+			response.getEntity().write(HELLO_WORLD_FILE);
 		}
 	}
 
@@ -282,7 +323,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	public static class EncodedUrlServicer {
-
 		public void service(ServerHttpConnection connection) throws IOException {
 			String requestUri = connection.getRequest().getUri();
 			assertEquals("Should have encoded ? #", "/encoded-%3f-%23-+?query=string", requestUri);
@@ -313,7 +353,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	public static class FunctionalityServicer {
-
 		public void service(ServerHttpConnection connection) throws IOException {
 
 			// Assert has all content of request
@@ -390,6 +429,38 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Ensure can send a single HTTP {@link ByteBuffer} response.
+	 */
+	public void testSingleBufferRequest() throws Exception {
+		this.startHttpServer(BufferServicer.class);
+		this.doSingleRequest(false);
+	}
+
+	/**
+	 * Ensure can send a single HTTPS {@link ByteBuffer} response.
+	 */
+	public void testSingleSecureBufferRequest() throws Exception {
+		this.startHttpServer(BufferServicer.class);
+		this.doSingleRequest(true);
+	}
+
+	/**
+	 * Ensure can send a single HTTP {@link FileBuffer} response.
+	 */
+	public void testSingleFileRequest() throws Exception {
+		this.startHttpServer(FileServicer.class);
+		this.doSingleRequest(false);
+	}
+
+	/**
+	 * Ensure can send a single HTTPS {@link FileBuffer} response.
+	 */
+	public void testSingleSecureFileRequest() throws Exception {
+		this.startHttpServer(FileServicer.class);
+		this.doSingleRequest(true);
+	}
+
+	/**
 	 * Ensure can send multiple HTTP requests.
 	 */
 	public void testMultipleIndividualRequests() throws Exception {
@@ -413,7 +484,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Ensure does not decode characters (allows for routing to work correctly
 	 * and not find query string / fragment incorrectly).
 	 */
-	public void testNotDecodeRequetUrl() throws Exception {
+	public void testNotDecodeRequestUrl() throws Exception {
 		this.startHttpServer(EncodedUrlServicer.class);
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			HttpResponse response = client.execute(new HttpGet(
@@ -515,33 +586,41 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 */
-	public void testOfficeFloorPipelining() throws Exception {
-		this.doPipeliningTest(true);
+	public void testRawPipelining() throws Exception {
+		this.doPipeliningTest(null);
 	}
 
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 */
-	public void testRawPipelining() throws Exception {
-		this.doPipeliningTest(false);
+	public void testBytesPipelining() throws Exception {
+		this.doPipeliningTest(BytesServicer.class);
+	}
+
+	/**
+	 * Ensure can pipeline HTTP requests.
+	 */
+	public void testBufferPipelining() throws Exception {
+		this.doPipeliningTest(BufferServicer.class);
+	}
+
+	/**
+	 * Ensure can pipeline HTTP requests.
+	 */
+	public void testFilePipelining() throws Exception {
+		this.doPipeliningTest(FileServicer.class);
 	}
 
 	/**
 	 * Undertakes the pipelining test.
 	 * 
-	 * @param isOfficeFloor
-	 *            If is {@link OfficeFloor} HTTP server.
+	 * @param servicerClass
+	 *            Servicer {@link Class}.
 	 */
-	private void doPipeliningTest(boolean isOfficeFloor) throws Exception {
+	private void doPipeliningTest(Class<?> servicerClass) throws Exception {
 
 		// Start the HTTP server
-		if (isOfficeFloor) {
-			// Start the OfficeFloor HTTP server
-			this.startHttpServer(FastServicer.class);
-		} else {
-			// Start the Raw HTTP server
-			this.momento = this.startRawHttpServer(this.serverLocation);
-		}
+		this.startAppropriateHttpServer(servicerClass);
 
 		// Create pipeline executor
 		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
@@ -554,39 +633,47 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		result.printResult(this.getName() + " RUN");
 
 		// Load for comparison
-		CompareResult.setResult("pipelining", isOfficeFloor, result);
-	}
-
-	/**
-	 * Ensure can handle HTTP requests with threaded handler.
-	 */
-	public void testOfficeFloorThreadedHandler() throws Exception {
-		this.doThreadedHandlerTest(true);
+		CompareResult.setResult("pipelining", servicerClass, result);
 	}
 
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 */
 	public void testRawThreadedHandler() throws Exception {
-		this.doThreadedHandlerTest(false);
+		this.doThreadedHandlerTest(null);
+	}
+
+	/**
+	 * Ensure can handle HTTP requests with threaded handler.
+	 */
+	public void testBytesThreadedHandler() throws Exception {
+		this.doThreadedHandlerTest(BytesServicer.class);
+	}
+
+	/**
+	 * Ensure can handle HTTP requests with threaded handler.
+	 */
+	public void testBufferThreadedHandler() throws Exception {
+		this.doThreadedHandlerTest(BufferServicer.class);
+	}
+
+	/**
+	 * Ensure can handle HTTP requests with threaded handler.
+	 */
+	public void testFileThreadedHandler() throws Exception {
+		this.doThreadedHandlerTest(FileServicer.class);
 	}
 
 	/**
 	 * Undertakes the threaded handler test.
 	 * 
-	 * @param isOfficeFloor
-	 *            If is {@link OfficeFloor} HTTP server.
+	 * @param servicerClass
+	 *            Servicer {@link Class}.
 	 */
-	private void doThreadedHandlerTest(boolean isOfficeFloor) throws Exception {
+	private void doThreadedHandlerTest(Class<?> servicerClass) throws Exception {
 
 		// Start the HTTP server
-		if (isOfficeFloor) {
-			// Start the OfficeFloor HTTP server
-			this.startHttpServer(ThreadedServicer.class);
-		} else {
-			// Start the Raw HTTP server
-			this.momento = this.startRawHttpServer(this.serverLocation);
-		}
+		this.startAppropriateHttpServer(servicerClass);
 
 		// Create pipeline executor
 		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
@@ -599,89 +686,136 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		result.printResult(this.getName() + " RUN");
 
 		// Load for comparison
-		CompareResult.setResult("threaded-handler", isOfficeFloor, result);
-	}
-
-	/**
-	 * Ensure can service multiple requests pipelined.
-	 */
-	public void testOfficeFloorHeavyLoad() throws Exception {
-		this.doHeavyLoadTest(true);
+		CompareResult.setResult("threaded-handler", servicerClass, result);
 	}
 
 	/**
 	 * Ensure can service multiple requests pipelined.
 	 */
 	public void testRawHeavyLoad() throws Exception {
-		this.doHeavyLoadTest(false);
+		this.doHeavyLoadTest(null);
+	}
+
+	/**
+	 * Ensure can service multiple requests pipelined.
+	 */
+	public void testBytesHeavyLoad() throws Exception {
+		this.doHeavyLoadTest(BytesServicer.class);
+	}
+
+	/**
+	 * Ensure can service multiple requests pipelined.
+	 */
+	public void testBufferHeavyLoad() throws Exception {
+		this.doHeavyLoadTest(BufferServicer.class);
+	}
+
+	/**
+	 * Ensure can service multiple requests pipelined.
+	 */
+	public void testFileHeavyLoad() throws Exception {
+		this.doHeavyLoadTest(FileServicer.class);
 	}
 
 	/**
 	 * Undertakes the heavy load test.
 	 * 
-	 * @param isOfficeFloor
-	 *            Indicates if {@link OfficeFloor}.
+	 * @param servicerClass
+	 *            Servicer {@link Class}.
 	 */
-	private void doHeavyLoadTest(boolean isOfficeFloor) throws Exception {
+	private void doHeavyLoadTest(Class<?> servicerClass) throws Exception {
 		// CPU for client and server
 		int clientCount = Runtime.getRuntime().availableProcessors() / 2;
 		if (clientCount == 0) {
 			clientCount = 1; // ensure at least one client
 		}
-		this.doMultiClientLoadTest(isOfficeFloor, clientCount, 1000000, "Heavy Load (" + clientCount + " clients)");
-	}
-
-	/**
-	 * Ensure can service overload requests pipelined.
-	 */
-	public void testOfficeFloorOverLoad() throws Exception {
-		this.doOverLoadTest(true);
+		this.doMultiClientLoadTest(servicerClass, clientCount, 1000000, "Heavy Load (" + clientCount + " clients)");
 	}
 
 	/**
 	 * Ensure can service over requests pipelined.
 	 */
 	public void testRawOverLoad() throws Exception {
-		this.doOverLoadTest(false);
+		this.doOverLoadTest(null);
+	}
+
+	/**
+	 * Ensure can service overload requests pipelined.
+	 */
+	public void testBytesOverLoad() throws Exception {
+		this.doOverLoadTest(BytesServicer.class);
+	}
+
+	/**
+	 * Ensure can service overload requests pipelined.
+	 */
+	public void testBufferOverLoad() throws Exception {
+		this.doOverLoadTest(BufferServicer.class);
+	}
+
+	/**
+	 * Ensure can service overload requests pipelined.
+	 */
+	public void testFileOverLoad() throws Exception {
+		this.doOverLoadTest(FileServicer.class);
 	}
 
 	/**
 	 * Undertakes the over load test.
 	 * 
-	 * @param isOfficeFloor
-	 *            Indicates if {@link OfficeFloor}.
+	 * @param servicerClass
+	 *            Servicer {@link Class}.
 	 */
-	private void doOverLoadTest(boolean isOfficeFloor) throws Exception {
+	private void doOverLoadTest(Class<?> servicerClass) throws Exception {
 		int clientCount = Runtime.getRuntime().availableProcessors() * 4;
-		this.doMultiClientLoadTest(isOfficeFloor, clientCount, 100000, "Over Load (" + clientCount + " clients)");
+		this.doMultiClientLoadTest(servicerClass, clientCount, 100000, "Over Load (" + clientCount + " clients)");
+	}
+
+	/**
+	 * Starts the appropriate server for the servicer.
+	 * 
+	 * @param servicerClass
+	 *            Servicer {@link Class}.
+	 */
+	private void startAppropriateHttpServer(Class<?> servicerClass) throws Exception {
+
+		// Create set of servicer
+		Set<Class<?>> servicerClasses = new HashSet<>(
+				Arrays.asList(BytesServicer.class, BufferServicer.class, FileServicer.class));
+
+		// Start the HTTP server
+		if (servicerClass == null) {
+			// Start the Raw HTTP server
+			this.momento = this.startRawHttpServer(this.serverLocation);
+		} else if (servicerClasses.contains(servicerClass)) {
+			// Start the OfficeFloor HTTP server
+			this.startHttpServer(servicerClass);
+		} else {
+			fail("Invalid servicer " + servicerClass.getName());
+		}
 	}
 
 	/**
 	 * Undertakes the multi-client pipelining test.
 	 * 
-	 * @param isOfficeFloor
-	 *            IF is {@link OfficeFloor} HTTP server.
+	 * @param servicerClass
+	 *            Servicer {@link Class}.
 	 * @param clientCount
 	 *            Number of simultaneous clients.
 	 * @param requestCount
 	 *            Number of requests per client.
 	 * @param resultName
-	 *            Name of result fo comparison.
+	 *            Name of result for comparison.
 	 */
-	public void doMultiClientLoadTest(boolean isOfficeFloor, int clientCount, int requestCount, String resultName)
+	public void doMultiClientLoadTest(Class<?> servicerClass, int clientCount, int requestCount, String resultName)
 			throws Exception {
 
 		// Start the HTTP server
-		if (isOfficeFloor) {
-			// Start the OfficeFloor HTTP server
-			this.startHttpServer(FastServicer.class);
-		} else {
-			// Start the Raw HTTP server
-			this.momento = this.startRawHttpServer(this.serverLocation);
-		}
+		this.startAppropriateHttpServer(servicerClass);
 
 		// Indicate details of test
-		System.out.println("========= " + (isOfficeFloor ? "OfficeFloor" : "Raw") + " " + resultName + " =========");
+		System.out.println("========= " + (servicerClass == null ? "Raw" : servicerClass.getSimpleName()) + " "
+				+ resultName + " =========");
 
 		// Create the pipeline executors
 		@SuppressWarnings("unchecked")
@@ -719,7 +853,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		result.printResult(this.getName() + " TOTAL");
 
 		// Provide results for comparison
-		CompareResult.setResult(resultName, isOfficeFloor, result);
+		CompareResult.setResult(resultName, servicerClass, result);
 	}
 
 	/**
@@ -1074,7 +1208,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			testClass = testClazz;
 		}
 
-		private static void setResult(String prefix, boolean isOfficeFloorResult, PipelineResult pipelineResult) {
+		private static void setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
 
 			// Obtain the compare result
 			Map<String, CompareResult> testResults = results.get(testClass);
@@ -1089,18 +1223,22 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			}
 
 			// Load the pipeline result
-			if (isOfficeFloorResult) {
-				result.officeFloorResult = pipelineResult;
-			} else {
+			if (servicerClass == null) {
 				result.rawResult = pipelineResult;
+			} else if (servicerClass == BytesServicer.class) {
+				result.bytesResult = pipelineResult;
+			} else if (servicerClass == BufferServicer.class) {
+				result.bufferResult = pipelineResult;
+			} else if (servicerClass == FileServicer.class) {
+				result.fileResult = pipelineResult;
+			} else {
+				fail("Unknown servicer " + servicerClass.getName());
 			}
 
-			// Determine if have both values
-			if (result.officeFloorResult == null) {
-				return; // missing OfficeFloor result
-			}
-			if (result.rawResult == null) {
-				return; // missing Raw result
+			// Determine if have all values
+			if ((result.rawResult == null) || (result.bytesResult == null) || (result.bufferResult == null)
+					|| (result.fileResult == null)) {
+				return;
 			}
 
 			// Have both values, so print comparison
@@ -1113,42 +1251,58 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 			// Output headers
 			out.print(String.format(format, ""));
-			out.print(String.format(format, "OfficeFloor"));
 			out.print(String.format(format, "Raw"));
-			out.println(String.format(format, "Difference"));
-
+			out.print(String.format(format, "Bytes"));
+			out.print(String.format(format, "Buffer"));
+			out.print(String.format(format, "File"));
+			out.println();
+			
 			// Output the run time
 			out.print(String.format(format, "Run time (ms)"));
-			out.print(String.format(format, String.valueOf(result.officeFloorResult.getRunTime())));
 			out.print(String.format(format, String.valueOf(result.rawResult.getRunTime())));
-			out.println(String.format(format,
-					String.valueOf(result.officeFloorResult.getRunTime() - result.rawResult.getRunTime())));
-
+			out.print(String.format(format, String.valueOf(result.bytesResult.getRunTime())));
+			out.print(String.format(format, String.valueOf(result.bufferResult.getRunTime())));
+			out.print(String.format(format, String.valueOf(result.fileResult.getRunTime())));
+			out.println();
+			
 			// Output the requests per second
 			out.print(String.format(format, "Requests/Sec"));
-			out.print(String.format(format, String.valueOf(result.officeFloorResult.getRequestsPerSecond())));
 			out.print(String.format(format, String.valueOf(result.rawResult.getRequestsPerSecond())));
-			out.println(String.format(format, String.valueOf(
-					result.rawResult.getRequestsPerSecond() - result.officeFloorResult.getRequestsPerSecond())));
+			out.print(String.format(format, String.valueOf(result.bytesResult.getRequestsPerSecond())));
+			out.print(String.format(format, String.valueOf(result.bufferResult.getRequestsPerSecond())));
+			out.print(String.format(format, String.valueOf(result.fileResult.getRequestsPerSecond())));
+			out.println();
+			
+			// Calculate the overhead
+			final PipelineResult rawResult = result.rawResult;
+			Function<PipelineResult, String> overhead = (compare) -> {
+				long runtimeDifference = compare.getRunTime() - rawResult.getRunTime();
+				long maxRunTime = Math.max(compare.getRunTime(), rawResult.getRunTime());
+				float difference = (float) runtimeDifference / (float) maxRunTime;
+				return String.valueOf(difference);
+			};
 
 			// Overhead increase
 			out.println();
 			out.print(String.format(format, "Overhead (%)"));
 			out.print(String.format(format, ""));
-			out.print(String.format(format, ""));
-			long runtimeDifference = result.officeFloorResult.getRunTime() - result.rawResult.getRunTime();
-			long maxRunTime = Math.max(result.officeFloorResult.getRunTime(), result.rawResult.getRunTime());
-			float difference = (float) runtimeDifference / (float) maxRunTime;
-			out.println(String.format(format, String.valueOf(difference)));
+			out.print(String.format(format, overhead.apply(result.bytesResult)));
+			out.print(String.format(format, overhead.apply(result.bufferResult)));
+			out.print(String.format(format, overhead.apply(result.fileResult)));
+			out.println();
 
 			out.println("============================================================");
 			out.flush();
 			System.out.println(message.toString());
 		}
 
-		private PipelineResult officeFloorResult = null;
-
 		private PipelineResult rawResult = null;
+
+		private PipelineResult bytesResult = null;
+
+		private PipelineResult bufferResult = null;
+
+		private PipelineResult fileResult = null;
 	}
 
 }
