@@ -173,6 +173,10 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	public void write(ByteBuffer buffer) throws IOException {
 		this.ensureOpen();
 
+		// Capture bytes being added
+		// (implementation may copy out bytes to stream buffer)
+		int bytesToInclude = buffer.remaining();
+
 		// Add the unpooled buffer
 		StreamBuffer<B> streamBuffer = this.bufferPool.getUnpooledStreamBuffer(buffer);
 		if (this.head == null) {
@@ -186,7 +190,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		}
 
 		// Content included
-		this.contentLength += buffer.remaining();
+		this.contentLength += bytesToInclude;
 	}
 
 	@Override
@@ -205,8 +209,8 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		}
 
 		// Content included
-		count = (count < 0) ? file.size() : count;
-		this.contentLength += (count - position);
+		count = (count < 0) ? file.size() - position : count;
+		this.contentLength += count;
 	}
 
 	@Override

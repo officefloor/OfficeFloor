@@ -350,13 +350,13 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Create file
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFile", new byte[] { 3 });
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2),
-					this.tester.bufferPool.getFileStreamBuffer(file, 0, -1));
+			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 		});
 
 		this.tester.start();
@@ -392,13 +392,13 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			data[i] = transform.apply(i);
 		}
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndLargeFile", data);
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2),
-					this.tester.bufferPool.getFileStreamBuffer(file, 0, -1));
+			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 		});
 
 		this.tester.start();
@@ -430,13 +430,13 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Create file
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFileSegment",
 				new byte[] { 1, 2, 3 });
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 2, 1);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2),
-					this.tester.bufferPool.getFileStreamBuffer(file, 2, 1));
+			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 		});
 
 		this.tester.start();

@@ -1059,20 +1059,19 @@ public class SocketManager {
 
 					// Obtain the next buffer
 					StreamBuffer<ByteBuffer> streamBuffer = this.head.headResponseBuffer;
+					boolean isReleaseStreamBuffer;
 					if (streamBuffer.fileBuffer != null) {
-						// File buffer
-						FileBuffer buffer = streamBuffer.fileBuffer;
-
 						// Append the file buffer
 						// (avoids copying data into user space for DMA)
-						writeBuffer.next = this.socketListener.bufferPool.getFileStreamBuffer(buffer.file,
-								buffer.position, buffer.count);
+						writeBuffer.next = streamBuffer;
+						isReleaseStreamBuffer = false;
 						writeBuffer = writeBuffer.next;
 
 					} else {
 						// Pooled / Unpooled buffer
 						ByteBuffer buffer = (streamBuffer.pooledBuffer != null) ? streamBuffer.pooledBuffer
 								: streamBuffer.unpooledByteBuffer;
+						isReleaseStreamBuffer = true;
 
 						// Compact the data into the write buffer
 						int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
@@ -1110,7 +1109,9 @@ public class SocketManager {
 					this.head.headResponseBuffer = streamBuffer.next;
 
 					// Must release buffer (after released from chain)
-					streamBuffer.release();
+					if (isReleaseStreamBuffer) {
+						streamBuffer.release();
+					}
 				}
 
 				// Compacted head response, so move onto next request

@@ -17,7 +17,9 @@
  */
 package net.officefloor.server.http.netty;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -43,12 +45,12 @@ public class NettyBufferPool extends StreamBuffer<ByteBuf> implements StreamBuff
 	 *            {@link FullHttpResponse}.
 	 */
 	public NettyBufferPool(FullHttpResponse response) {
-		super(response.content(), null);
+		super(response.content(), null, null);
 		this.response = response;
 	}
 
 	/*
-	 * ================= BufferPool =================
+	 * ============== StreamBufferPool =============
 	 */
 
 	@Override
@@ -62,8 +64,15 @@ public class NettyBufferPool extends StreamBuffer<ByteBuf> implements StreamBuff
 		return this;
 	}
 
+	@Override
+	public StreamBuffer<ByteBuf> getFileStreamBuffer(FileChannel file, long position, long count) throws IOException {
+		int length = (int) (count < 0 ? file.size() - position : count);
+		this.response.content().writeBytes(file, position, length);
+		return this;
+	}
+
 	/*
-	 * ================== PooledBuffer ==============
+	 * ================== StreamBuffer ==============
 	 */
 
 	@Override

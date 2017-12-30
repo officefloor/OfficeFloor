@@ -17,6 +17,7 @@
  */
 package net.officefloor.server.stream;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -71,7 +72,12 @@ public interface StreamBufferPool<B> {
 	 *            Count of bytes to write from the {@link FileChannel}. A
 	 *            negative value (typically <code>-1</code>) indicates to write
 	 *            the remaining {@link FileChannel} content from the position.
+	 * @throws IOException
+	 *             If fails to create the {@link StreamBuffer} for the
+	 *             {@link FileChannel}. Typically, this is because the
+	 *             underlying implementation does not support DMA and copies the
+	 *             data from the {@link FileChannel}.
 	 */
-	StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count);
+	StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count) throws IOException;
 
 }
