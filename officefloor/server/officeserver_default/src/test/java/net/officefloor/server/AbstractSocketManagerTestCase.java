@@ -385,8 +385,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Transform index into byte value
 		Function<Integer, Byte> transform = (value) -> (byte) (value % Byte.MAX_VALUE);
 
-		// Create the large file
-		int fileSize = 2 * 1000 * 1000;
+		// Create the larger file than buffer size
+		int fileSize = this.getBufferSize() < 10 ? 5 : 2 * 1000 * 1000;
 		byte[] data = new byte[fileSize];
 		for (int i = 0; i < fileSize; i++) {
 			data[i] = transform.apply(i);
