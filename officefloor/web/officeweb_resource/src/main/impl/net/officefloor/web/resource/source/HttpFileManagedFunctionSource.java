@@ -33,9 +33,9 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.impl.AbstractHttpFile;
 import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.route.WebRouter;
 
 /**
@@ -80,7 +80,7 @@ public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource
 		String resourcePath = context.getProperty(PROPERTY_RESOURCE_PATH);
 
 		// Create the class path HTTP resource factory
-		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
+		HttpResourceStore httpResourceFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -95,7 +95,7 @@ public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource
 		resourcePath = WebRouter.transformToCanonicalPath(resourcePath);
 
 		// Obtain the HTTP file
-		HttpResource resource = httpResourceFactory.createHttpResource(resourcePath);
+		HttpResource resource = httpResourceFactory.getHttpResource(resourcePath);
 		if (!(resource instanceof HttpFile)) {
 			throw new FileNotFoundException("Can not find resource '" + resourcePath + "'");
 		}

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.application;
+package net.officefloor.web.resource.source;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -31,11 +31,9 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource.DependencyKeys;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
+import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.source.HttpFileManagedFunctionSource.DependencyKeys;
 
 /**
  * Provides sending a particular {@link HttpFile}.

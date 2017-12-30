@@ -27,14 +27,14 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.impl.HttpResourceCreationListener;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.impl.NotExistHttpResource;
 import net.officefloor.web.state.HttpApplicationState;
 
 /**
  * {@link ManagedFunction} to locate a {@link HttpFile} via a
- * {@link HttpResourceFactory}.
+ * {@link HttpResourceStore}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,9 +49,9 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 	}
 
 	/**
-	 * {@link HttpResourceFactory}.
+	 * {@link HttpResourceStore}.
 	 */
-	private final HttpResourceFactory httpResourceFactory;
+	private final HttpResourceStore httpResourceFactory;
 
 	/**
 	 * {@link HttpResourceCreationListener}.
@@ -62,11 +62,11 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 	 * Initiate.
 	 * 
 	 * @param httpResourceFactory
-	 *            {@link HttpResourceFactory}.
+	 *            {@link HttpResourceStore}.
 	 * @param httpFileCreationListener
 	 *            {@link HttpResourceCreationListener}.
 	 */
-	public HttpFileFactoryFunction(HttpResourceFactory httpResourceFactory,
+	public HttpFileFactoryFunction(HttpResourceStore httpResourceFactory,
 			HttpResourceCreationListener<F> httpFileCreationListener) {
 		this.httpResourceFactory = httpResourceFactory;
 		this.httpFileCreationListener = httpFileCreationListener;
@@ -93,7 +93,7 @@ public class HttpFileFactoryFunction<F extends Enum<F>>
 			String filePath = applicationState.extractApplicationPath(connection);
 
 			// Create the HTTP resource for the request
-			resource = this.httpResourceFactory.createHttpResource(filePath);
+			resource = this.httpResourceFactory.getHttpResource(filePath);
 
 			// Ensure obtain default file (if directory)
 			if (resource instanceof HttpDirectory) {

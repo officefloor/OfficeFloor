@@ -25,7 +25,20 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ExternalHttpResourcesBuilder {
+public interface HttpResourcesBuilder {
+
+	/**
+	 * <p>
+	 * Specifies the context path within the application to serve the
+	 * {@link HttpResource} instances.
+	 * <p>
+	 * Should a context path not be specified, the {@link HttpResource}
+	 * instances will be served from the root of the application.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 */
+	void setContextPath(String contextPath);
 
 	/**
 	 * Specifies the {@link HttpSecurity} to secure external

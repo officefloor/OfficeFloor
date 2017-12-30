@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.war;
+package net.officefloor.web.resource.file;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.officefloor.web.resource.AbstractHttpFileTestCase;
 import net.officefloor.web.resource.HttpFile;
+import net.officefloor.web.resource.file.FileHttpFile;
 import net.officefloor.web.resource.impl.AbstractHttpFileDescription;
-import net.officefloor.web.resource.war.WarHttpFile;
+import net.officefloor.web.resource.impl.AbstractHttpFileTestCase;
 
 /**
- * Tests the {@link WarHttpFile}.
+ * Tests the {@link FileHttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WarHttpFileTest extends AbstractHttpFileTestCase {
+public class FileHttpFileTest extends AbstractHttpFileTestCase {
 
 	/**
 	 * Ensure obtain details from <code>toString</code> method.
@@ -43,14 +43,14 @@ public class WarHttpFileTest extends AbstractHttpFileTestCase {
 		final Charset charset = Charset.defaultCharset();
 		assertEquals(
 				"Incorrect toString with full details",
-				"WarHttpFile: /index.html (file: "
+				"FileHttpFile: /index.html (file: "
 						+ file.getAbsolutePath()
 						+ ", Content-Encoding: encoding, Content-Type: type; charset="
 						+ charset.name() + ")",
 				this.createHttpFile(RESOURCE_PATH, "encoding", "type", charset)
 						.toString());
 		assertEquals("Incorrect toString with no details",
-				"WarHttpFile: /index.html (file: " + file.getAbsolutePath()
+				"FileHttpFile: /index.html (file: " + file.getAbsolutePath()
 						+ ")",
 				this.createHttpFile(RESOURCE_PATH, null, null, null).toString());
 	}
@@ -93,7 +93,7 @@ public class WarHttpFileTest extends AbstractHttpFileTestCase {
 		description.setContentType(contentType, charset);
 
 		// Create HTTP File
-		HttpFile httpFile = new WarHttpFile(resourcePath, file, description);
+		HttpFile httpFile = new FileHttpFile(resourcePath, file, description);
 
 		// Return the HTTP File
 		return httpFile;

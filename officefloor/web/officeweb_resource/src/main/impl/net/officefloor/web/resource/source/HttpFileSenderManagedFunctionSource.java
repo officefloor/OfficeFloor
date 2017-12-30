@@ -33,11 +33,11 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.web.resource.impl.AbstractHttpFile;
 import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
 import net.officefloor.web.resource.impl.HttpResourceCreationListener;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.state.HttpApplicationState;
@@ -107,7 +107,7 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 		ClassLoader classLoader = context.getClassLoader();
 
 		// Create the HTTP resource factory
-		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
+		HttpResourceStore httpResourceFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -116,7 +116,7 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 		httpResourceFactory.addHttpFileDescriber(describer);
 
 		// Initiate to obtain the not found content
-		HttpResourceFactory notFoundResourceFactory;
+		HttpResourceStore notFoundResourceFactory;
 		if (notFoundContentPath == null) {
 			// Use default file not found content
 			notFoundContentPath = DEFAULT_NOT_FOUND_FILE_NAME;
@@ -136,7 +136,7 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 		notFoundContentPath = WebRouter.transformToCanonicalPath(notFoundContentPath);
 
 		// Obtain the file not found content
-		HttpResource notFoundResource = notFoundResourceFactory.createHttpResource(notFoundContentPath);
+		HttpResource notFoundResource = notFoundResourceFactory.getHttpResource(notFoundContentPath);
 		if ((!notFoundResource.isExist()) || (!(notFoundResource instanceof HttpFile))) {
 			// Must have file not found content
 			throw new FileNotFoundException("Can not obtain file not found content: " + notFoundContentPath);

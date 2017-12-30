@@ -19,6 +19,7 @@ package net.officefloor.server.stream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.time.format.DateTimeFormatter;
 
 import net.officefloor.server.http.ServerHttpConnection;
@@ -31,6 +32,58 @@ import net.officefloor.server.http.ServerHttpConnection;
  * @author Daniel Sagenschneider
  */
 public abstract class StreamBuffer<B> {
+
+	/**
+	 * {@link FileChannel} content buffer.
+	 */
+	public static class FileBuffer {
+
+		/**
+		 * {@link FileChannel}.
+		 */
+		public final FileChannel file;
+
+		/**
+		 * Position within the {@link FileChannel} to write content.
+		 */
+		public final long position;
+
+		/**
+		 * Count of bytes after the position to write from the
+		 * {@link FileChannel}. Negative number (eg <code>-1</code>) will write
+		 * remaining content of {@link FileChannel}.
+		 */
+		public final long count;
+
+		/**
+		 * Bytes written. This is used by server implementations to track the
+		 * number of bytes written from the {@link FileChannel}.
+		 */
+		public long bytesWritten = 0;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param file
+		 *            {@link FileChannel}.
+		 * @param position
+		 *            Position.
+		 * @param count
+		 *            Count.
+		 */
+		public FileBuffer(FileChannel file, long position, long count) {
+			this.file = file;
+			this.position = position;
+			this.count = count;
+		}
+
+		/**
+		 * Instantiate to write the entire {@link FileChannel} content.
+		 */
+		public FileBuffer(FileChannel file) {
+			this(file, 0, -1);
+		}
+	}
 
 	/**
 	 * Writes all the bytes to the {@link StreamBuffer} stream.
@@ -287,7 +340,8 @@ public abstract class StreamBuffer<B> {
 		}
 
 		// Ensure writing to pooled buffer
-		if (!headBuffer.isPooled) {
+		if (headBuffer.pooledBuffer == null) {
+			// Not pooled, so append pooled
 			headBuffer.next = bufferPool.getPooledStreamBuffer();
 			headBuffer = headBuffer.next;
 		}
@@ -322,25 +376,20 @@ public abstract class StreamBuffer<B> {
 	}
 
 	/**
-	 * Indicates if pooled.
-	 * 
-	 * @return <code>true</code> if pooled.
-	 */
-	public final boolean isPooled;
-
-	/**
-	 * Obtains the pooled buffer.
-	 * 
-	 * @return Buffer. Will be <code>null</code> if read-only.
+	 * Obtains the pooled buffer. Will be <code>null</code> if not pooled.
 	 */
 	public final B pooledBuffer;
 
 	/**
-	 * Obtains the read-only {@link ByteBuffer}.
-	 * 
-	 * @return {@link ByteBuffer}. Will be <code>null</code> if read-only.
+	 * Obtains the non-pooled {@link ByteBuffer}. Will be <code>null</code> if
+	 * non-pooled.
 	 */
 	public final ByteBuffer unpooledByteBuffer;
+
+	/**
+	 * Obtains the {@link FileBuffer}. Will be <code>null</code> if not file.
+	 */
+	public final FileBuffer fileBuffer;
 
 	/**
 	 * <p>
@@ -355,36 +404,55 @@ public abstract class StreamBuffer<B> {
 	 * Instantiate.
 	 * 
 	 * @param pooledBuffer
-	 *            Pooled buffer. Must be <code>null</code> if unpooled
-	 *            {@link ByteBuffer} provided.
+	 *            Pooled buffer. Must be <code>null</code> if another buffer
+	 *            provided.
 	 * @param unpooledByteBuffer
 	 *            Unpooled {@link ByteBuffer}. Must be <code>null</code> if
-	 *            pooled buffer provided.
+	 *            another buffer provided.
+	 * @param fileBuffer
+	 *            {@link FileBuffer}. Must be <code>null</code> if another
+	 *            buffer provided.
 	 * @throws IllegalArgumentException
 	 *             If not providing the one buffer.
 	 */
-	public StreamBuffer(B pooledBuffer, ByteBuffer unpooledByteBuffer) {
+	public StreamBuffer(B pooledBuffer, ByteBuffer unpooledByteBuffer, FileBuffer fileBuffer) {
 		if (pooledBuffer != null) {
 
 			// Pooled buffer, so ensure only pooled buffer
-			if (unpooledByteBuffer != null) {
-				throw new IllegalArgumentException("Must provide either pooled or unpooled buffer (not both)");
+			if ((unpooledByteBuffer != null) || (fileBuffer != null)) {
+				throw new IllegalArgumentException("Must provide either a pooled, unpooled or file buffer");
 			}
 
 			// Setup for pooled buffer
-			this.isPooled = true;
 			this.pooledBuffer = pooledBuffer;
 			this.unpooledByteBuffer = null;
+			this.fileBuffer = null;
 
 		} else if (unpooledByteBuffer != null) {
+
+			// Unpooled buffer, so ensure only unpooled buffer
+			// (pooled checked above)
+			if (fileBuffer != null) {
+				throw new IllegalArgumentException("Must provide either a pooled, unpooled or file buffer");
+			}
+
 			// Setup for unpooled buffer
-			this.isPooled = false;
 			this.pooledBuffer = null;
 			this.unpooledByteBuffer = unpooledByteBuffer;
+			this.fileBuffer = null;
+
+		} else if (fileBuffer != null) {
+
+			// Above checks others are null
+
+			// Setup for file buffer
+			this.pooledBuffer = null;
+			this.unpooledByteBuffer = null;
+			this.fileBuffer = fileBuffer;
 
 		} else {
 			// No buffer provided
-			throw new IllegalArgumentException("Must provide a pooled or unpooled buffer");
+			throw new IllegalArgumentException("Must provide a pooled, unpooled or file buffer");
 		}
 	}
 

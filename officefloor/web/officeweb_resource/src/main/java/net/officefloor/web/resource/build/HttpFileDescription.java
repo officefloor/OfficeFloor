@@ -17,11 +17,12 @@
  */
 package net.officefloor.web.resource.build;
 
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.web.resource.HttpFile;
-import net.officefloor.web.resource.HttpResource;
 
 /**
  * Allows providing a description of a {@link HttpFile}.
@@ -31,15 +32,11 @@ import net.officefloor.web.resource.HttpResource;
 public interface HttpFileDescription {
 
 	/**
-	 * <p>
-	 * Obtains the {@link HttpResource} for details of the {@link HttpFile}.
-	 * <p>
-	 * This allows, for example, mapping file extensions to descriptions (from
-	 * the path).
+	 * Obtains the name of the {@link HttpFile}.
 	 * 
-	 * @return {@link HttpResource} of the {@link HttpFile}.
+	 * @return Name of the {@link HttpFile}.
 	 */
-	HttpResource getResource();
+	String getName();
 
 	/**
 	 * <p>
@@ -50,11 +47,19 @@ public interface HttpFileDescription {
 	 * 
 	 * @return Contents of the {@link HttpFile}.
 	 */
-	ByteBuffer getContents();
+	InputStream getContents();
 
 	/**
-	 * This is to be invoked by the {@link HttpFileDescriber} to describe the
-	 * <code>Content-Encoding</code> of the {@link HttpFile}.
+	 * Obtains the {@link Path} to the {@link HttpFile}.
+	 * 
+	 * @return {@link Path} to the {@link HttpFile}, or <code>null</code> if not
+	 *         available (typically because {@link HttpFile} is from class
+	 *         path).
+	 */
+	Path getPath();
+
+	/**
+	 * Describes the <code>Content-Encoding</code> of the {@link HttpFile}.
 	 * 
 	 * @param encoding
 	 *            <code>Content-Encoding</code> of the {@link HttpFile}.
@@ -62,8 +67,15 @@ public interface HttpFileDescription {
 	void setContentEncoding(String encoding);
 
 	/**
-	 * This is to be invoked by the {@link HttpFileDescriber} to describe the
-	 * <code>Content-Type</code> of the {@link HttpFile}.
+	 * Describes the <code>Content-Encoding</code> of the {@link HttpFile}.
+	 * 
+	 * @param encoding
+	 *            <code>Content-Encoding</code> of the {@link HttpFile}.
+	 */
+	void setContentEncoding(HttpHeaderValue encoding);
+
+	/**
+	 * Describes the <code>Content-Type</code> of the {@link HttpFile}.
 	 * 
 	 * @param type
 	 *            <code>Content-Type</code> of the {@link HttpFile}.
@@ -71,5 +83,17 @@ public interface HttpFileDescription {
 	 *            {@link Charset} or <code>null</code> if content is not text.
 	 */
 	void setContentType(String type, Charset charset);
+
+	/**
+	 * Describes the <code>Content-Type</code> of the {@link HttpFile}.
+	 * 
+	 * @param type
+	 *            <code>Content-Type</code> of the {@link HttpFile}.
+	 * @param charset
+	 *            {@link Charset} or <code>null</code> if content is not text.
+	 *            Note that the {@link Charset} will not be appended to the
+	 *            <code>Content-Type</code>.
+	 */
+	void setContentType(HttpHeaderValue type, Charset charset);
 
 }

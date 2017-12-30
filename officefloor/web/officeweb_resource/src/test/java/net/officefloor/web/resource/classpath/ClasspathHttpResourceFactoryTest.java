@@ -17,19 +17,19 @@
  */
 package net.officefloor.web.resource.classpath;
 
-import net.officefloor.web.resource.AbstractHttpResourceFactoryTestCase;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
+import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.impl.AbstractHttpResourceFactoryTestCase;
 
 /**
  * Tests the {@link ClasspathHttpResourceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpResourceFactoryTest extends
-		AbstractHttpResourceFactoryTestCase {
+public class ClasspathHttpResourceFactoryTest extends AbstractHttpResourceFactoryTestCase {
 
 	/**
 	 * Tests retrieving directory from a JAR (as most tests are using
@@ -38,10 +38,10 @@ public class ClasspathHttpResourceFactoryTest extends
 	 * Note test expects JUnit 4.8.2 on class path.
 	 */
 	public void testObtainDirectoryFromJar() throws Exception {
-		HttpResourceFactory factory = this.createHttpResourceFactory("");
-		HttpResource directory = factory.createHttpResource("/junit");
-		this.assertHttpDirectory(directory, "/junit/", "/junit/extensions/",
-				"/junit/framework/", "/junit/runner/", "/junit/textui/");
+		HttpResourceStore factory = this.createHttpResourceFactory("");
+		HttpResource directory = factory.getHttpResource("/junit");
+		this.assertHttpDirectory(directory, "/junit/", "/junit/extensions/", "/junit/framework/", "/junit/runner/",
+				"/junit/textui/");
 	}
 
 	/**
@@ -50,12 +50,10 @@ public class ClasspathHttpResourceFactoryTest extends
 	 * Note test expects JUnit 4.8.2 on class path.
 	 */
 	public void testObtainFileFromJar() throws Exception {
-		HttpResourceFactory factory = this.createHttpResourceFactory("");
-		HttpResource file = factory
-				.createHttpResource("/junit/framework/Test.class");
+		HttpResourceStore factory = this.createHttpResourceFactory("");
+		HttpResource file = factory.getHttpResource("/junit/framework/Test.class");
 		assertTrue("Expecting file", file instanceof HttpFile);
-		assertEquals("Incorrect file path", "/junit/framework/Test.class",
-				file.getPath());
+		assertEquals("Incorrect file path", "/junit/framework/Test.class", file.getPath());
 		assertTrue("File should exist", file.isExist());
 	}
 
@@ -64,18 +62,17 @@ public class ClasspathHttpResourceFactoryTest extends
 	 */
 
 	@Override
-	protected HttpResourceFactory createHttpResourceFactory(String prefix) {
+	protected HttpResourceStore createHttpResourceFactory(String prefix, HttpFileDescriber describer) {
 
 		// Obtain the class loader
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		// Clear to create new instance
 		ClasspathHttpResourceFactory.clearHttpResourceFactories();
 
 		// Create the factory to obtain files from test package
-		HttpResourceFactory factory = ClasspathHttpResourceFactory
-				.getHttpResourceFactory(prefix, classLoader, "index.html");
+		HttpResourceStore factory = ClasspathHttpResourceFactory.getHttpResourceFactory(prefix, classLoader,
+				"index.html");
 
 		// Return the factory
 		return factory;

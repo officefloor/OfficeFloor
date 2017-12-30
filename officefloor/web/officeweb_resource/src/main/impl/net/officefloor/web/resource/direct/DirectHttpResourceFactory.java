@@ -20,30 +20,30 @@ package net.officefloor.web.resource.direct;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.impl.AbstractHttpResource;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.impl.NotExistHttpResource;
 
 /**
- * {@link HttpResourceFactory} to keep {@link HttpFile} and
+ * {@link HttpResourceStore} to keep {@link HttpFile} and
  * {@link HttpDirectory} instances in memory with direct {@link ByteBuffer} for
  * improved performance.
  * 
  * @author Daniel Sagenschneider
  */
-public class DirectHttpResourceFactory implements HttpResourceFactory {
+public class DirectHttpResourceFactory implements HttpResourceStore {
 
 	/**
-	 * Delegate {@link HttpResourceFactory}.
+	 * Delegate {@link HttpResourceStore}.
 	 */
-	private final HttpResourceFactory delegate;
+	private final HttpResourceStore delegate;
 
 	/**
 	 * Default directory file names.
@@ -53,18 +53,17 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 	/**
 	 * Mapping of in memory {@link HttpResource} by its canonical resource path.
 	 */
-	private final Map<String, HttpResource> resources = new HashMap<String, HttpResource>();
+	private final Map<String, HttpResource> resources = new ConcurrentHashMap<>();
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param delegate
-	 *            Delegate {@link HttpResourceFactory}.
+	 *            Delegate {@link HttpResourceStore}.
 	 * @param defaultDirectoryFileNames
 	 *            Default directory file names.
 	 */
-	public DirectHttpResourceFactory(HttpResourceFactory delegate,
-			String... defaultDirectoryFileNames) {
+	public DirectHttpResourceFactory(HttpResourceStore delegate, String... defaultDirectoryFileNames) {
 		this.delegate = delegate;
 		this.defaultDirectoryFileNames = defaultDirectoryFileNames;
 	}
@@ -79,55 +78,42 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 	}
 
 	@Override
-	public HttpResource createHttpResource(String applicationCanonicalPath)
-			throws IOException {
+	public HttpResource getHttpResource(String applicationCanonicalPath) throws IOException {
 
 		// Attempt to obtain in memory resource
-		HttpResource resource;
-		synchronized (this.resources) {
-			resource = this.resources.get(applicationCanonicalPath);
-		}
+		HttpResource resource = this.resources.get(applicationCanonicalPath);
 		if (resource != null) {
 			// Use the in memory resource
 			return resource;
 		}
 
 		// Obtain the resource from delegate
-		resource = this.delegate.createHttpResource(applicationCanonicalPath);
+		resource = this.delegate.getHttpResource(applicationCanonicalPath);
 
 		// Determine if HTTP File
 		if (resource instanceof HttpFile) {
 			// Create the in memory HTTP File
 			HttpFile delegateFile = (HttpFile) resource;
-			HttpFile file = new DirectHttpFile(applicationCanonicalPath,
-					delegateFile);
+			HttpFile file = new DirectHttpFile(applicationCanonicalPath, delegateFile);
 
 			// Register for further look ups
-			synchronized (this.resources) {
-				this.resources.put(applicationCanonicalPath, file);
-			}
+			this.resources.put(applicationCanonicalPath, file);
 
 			// Return the HTTP file
 			return file;
 
 		} else if (resource instanceof HttpDirectory) {
 			// Obtain the default file for HTTP directory
-			String directoryResourcePath = (applicationCanonicalPath
-					.endsWith("/") ? applicationCanonicalPath
+			String directoryResourcePath = (applicationCanonicalPath.endsWith("/") ? applicationCanonicalPath
 					: applicationCanonicalPath + "/");
 			HttpFile defaultFile = null;
 			FOUND_DEFAULT_FILE: for (String defaultFileName : this.defaultDirectoryFileNames) {
 
 				// Obtain the path to the default file
-				String defaultFileResourcePath = directoryResourcePath
-						+ defaultFileName;
+				String defaultFileResourcePath = directoryResourcePath + defaultFileName;
 
 				// Look up the default file
-				HttpResource defaultResource;
-				synchronized (this.resources) {
-					defaultResource = this.resources
-							.get(defaultFileResourcePath);
-				}
+				HttpResource defaultResource = this.resources.get(defaultFileResourcePath);
 				if (defaultResource instanceof DirectHttpFile) {
 					// Already have direct default file
 					defaultFile = (DirectHttpFile) defaultResource;
@@ -135,19 +121,14 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 				}
 
 				// Attempt to obtain default file
-				defaultResource = this.delegate
-						.createHttpResource(defaultFileResourcePath);
+				defaultResource = this.delegate.getHttpResource(defaultFileResourcePath);
 				if (defaultResource instanceof HttpFile) {
 					// Create the direct HTTP file
 					HttpFile delegateFile = (HttpFile) defaultResource;
-					defaultFile = new DirectHttpFile(defaultFileResourcePath,
-							delegateFile);
+					defaultFile = new DirectHttpFile(defaultFileResourcePath, delegateFile);
 
 					// Register for further look ups
-					synchronized (this.resources) {
-						this.resources
-								.put(defaultFileResourcePath, defaultFile);
-					}
+					this.resources.put(defaultFileResourcePath, defaultFile);
 
 					// Have the default file
 					break FOUND_DEFAULT_FILE;
@@ -156,13 +137,10 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 
 			// Create the in memory HTTP Directory
 			HttpDirectory delegateDirectory = (HttpDirectory) resource;
-			HttpDirectory directory = new DirectHttpDirectory(
-					directoryResourcePath, delegateDirectory, defaultFile);
+			HttpDirectory directory = new DirectHttpDirectory(directoryResourcePath, delegateDirectory, defaultFile);
 
 			// Register for further look ups
-			synchronized (this.resources) {
-				this.resources.put(applicationCanonicalPath, directory);
-			}
+			this.resources.put(applicationCanonicalPath, directory);
 
 			// Return the HTTP directory
 			return directory;
@@ -179,8 +157,7 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 	/**
 	 * Direct {@link HttpFile}.
 	 */
-	private static class DirectHttpFile extends AbstractHttpResource implements
-			HttpFile {
+	private static class DirectHttpFile extends AbstractHttpResource implements HttpFile {
 
 		/**
 		 * Delegate {@link HttpFile}.
@@ -245,8 +222,7 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 	/**
 	 * Direct {@link HttpDirectory}.
 	 */
-	private static class DirectHttpDirectory extends AbstractHttpResource
-			implements HttpDirectory {
+	private static class DirectHttpDirectory extends AbstractHttpResource implements HttpDirectory {
 
 		/**
 		 * Delegate {@link HttpDirectory}.
@@ -268,8 +244,7 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 		 * @param defaultFile
 		 *            Default {@link HttpFile}.
 		 */
-		public DirectHttpDirectory(String resourcePath, HttpDirectory delegate,
-				HttpFile defaultFile) {
+		public DirectHttpDirectory(String resourcePath, HttpDirectory delegate, HttpFile defaultFile) {
 			super(resourcePath);
 			this.delegate = delegate;
 			this.defaultFile = defaultFile;

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.war;
+package net.officefloor.web.resource.file;
 
 import java.io.File;
 
@@ -25,22 +25,16 @@ import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.impl.AbstractHttpResource;
 
 /**
- * WAR {@link HttpDirectory}.
+ * {@link File} {@link HttpDirectory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WarHttpDirectory extends AbstractHttpResource implements
-		HttpDirectory {
+public class FileHttpDirectory extends AbstractHttpResource implements HttpDirectory {
 
 	/**
-	 * Identifier for {@link WarHttpResourceFactory}.
+	 * Directory path.
 	 */
-	private String warIdentifier;
-
-	/**
-	 * Directory.
-	 */
-	private File directory;
+	private String directoryPath;
 
 	/**
 	 * Names of the default {@link HttpFile} instances in order of searching for
@@ -54,18 +48,16 @@ public class WarHttpDirectory extends AbstractHttpResource implements
 	 * @param resourcePath
 	 *            Resource path.
 	 * @param warIdentifier
-	 *            WAR identifier to locate {@link WarHttpResourceFactory}.
+	 *            WAR identifier to locate {@link FileHttpResourceFactory}.
 	 * @param directory
 	 *            Directory {@link File}.
 	 * @param defaultFileNames
 	 *            Names of the default {@link HttpFile} instances in order of
 	 *            searching for the default {@link HttpFile}.
 	 */
-	public WarHttpDirectory(String resourcePath, String warIdentifier,
-			File directory, String... defaultFileNames) {
+	public FileHttpDirectory(String resourcePath, File directory, String... defaultFileNames) {
 		super(resourcePath.endsWith("/") ? resourcePath : resourcePath + "/");
-		this.warIdentifier = warIdentifier;
-		this.directory = directory;
+		this.directoryPath = directory.getAbsolutePath();
 		this.defaultFileNames = defaultFileNames;
 	}
 
@@ -82,21 +74,17 @@ public class WarHttpDirectory extends AbstractHttpResource implements
 	@Override
 	public HttpFile getDefaultFile() {
 
-		// Obtain the HTTP Resource Factory
-		WarHttpResourceFactory factory = WarHttpResourceFactory
-				.getHttpResourceFactory(this.warIdentifier, null);
-
 		// Search for the default file
 		for (String defaultFileName : this.defaultFileNames) {
 
 			// Determine if default file exists
-			File defaultFile = new File(this.directory, defaultFileName);
+			File defaultFile = new File(this.directoryPath, defaultFileName);
 			if (!(defaultFile.isFile())) {
 				continue; // try next default file
 			}
 
 			// Have default file so create and return
-			return (HttpFile) factory.createHttpResource(defaultFile,
+			return (HttpFile) FileHttpResourceFactory.createHttpResource(defaultFile,
 					this.resourcePath + defaultFileName);
 		}
 
@@ -107,17 +95,12 @@ public class WarHttpDirectory extends AbstractHttpResource implements
 	@Override
 	public HttpResource[] listResources() {
 
-		// Obtain the HTTP Resource Factory
-		WarHttpResourceFactory factory = WarHttpResourceFactory
-				.getHttpResourceFactory(this.warIdentifier, null);
-
 		// Create the listing of resources
-		File[] files = this.directory.listFiles();
+		File[] files = new File(this.directoryPath).listFiles();
 		HttpResource[] resources = new HttpResource[files.length];
 		for (int i = 0; i < resources.length; i++) {
 			File file = files[i];
-			resources[i] = factory.createHttpResource(file, this.resourcePath
-					+ file.getName());
+			resources[i] = FileHttpResourceFactory.createHttpResource(file, this.resourcePath + file.getName());
 		}
 
 		// Return the resources

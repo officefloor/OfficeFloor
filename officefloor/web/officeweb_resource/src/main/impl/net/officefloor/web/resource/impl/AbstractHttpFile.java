@@ -176,48 +176,4 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements H
 		return hash;
 	}
 
-	/*
-	 * ===================== Serializable =============================
-	 */
-
-	/**
-	 * Due to the {@link Charset} must manually handle serialising this
-	 * {@link HttpFile}.
-	 * 
-	 * @param stream
-	 *            {@link ObjectOutputStream}.
-	 * @throws IOException
-	 *             {@link IOException}.
-	 */
-	private void writeObject(ObjectOutputStream stream) throws IOException {
-
-		// Write path and description of file
-		stream.writeObject(this.resourcePath);
-		stream.writeObject(this.contentEncoding);
-		stream.writeObject(this.contentType);
-		String charsetName = (this.charset == null ? null : this.charset.name());
-		stream.writeObject(charsetName);
-	}
-
-	/**
-	 * Due to the {@link Charset} must manually handle serialising this
-	 * {@link HttpFile}.
-	 * 
-	 * @param stream
-	 *            {@link ObjectInputStream}.
-	 * @throws IOException
-	 *             {@link IOException}.
-	 * @throws ClassNotFoundException
-	 *             {@link ClassNotFoundException}.
-	 */
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-
-		// Obtain path and description of file
-		this.resourcePath = (String) stream.readObject();
-		this.contentEncoding = (String) stream.readObject();
-		this.contentType = (String) stream.readObject();
-		String charsetName = (String) stream.readObject();
-		this.charset = (charsetName == null ? null : Charset.forName(charsetName));
-	}
-
 }

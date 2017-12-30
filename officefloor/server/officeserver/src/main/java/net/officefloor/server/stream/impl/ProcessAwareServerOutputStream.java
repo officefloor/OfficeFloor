@@ -20,6 +20,7 @@ package net.officefloor.server.stream.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
@@ -93,6 +94,17 @@ public class ProcessAwareServerOutputStream extends ServerOutputStream {
 	@Override
 	public void write(ByteBuffer buffer) throws IOException {
 		this.safe(() -> this.unsafeOutputStream.write(buffer));
+	}
+
+	@Override
+	public void write(FileChannel file, long position, long count) throws IOException {
+		this.safe(() -> this.unsafeOutputStream.write(file, position, count));
+
+	}
+
+	@Override
+	public void write(FileChannel file) throws IOException {
+		this.safe(() -> this.unsafeOutputStream.write(file));
 	}
 
 	@Override

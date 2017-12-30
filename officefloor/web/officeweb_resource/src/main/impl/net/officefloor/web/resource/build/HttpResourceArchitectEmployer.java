@@ -18,12 +18,19 @@
 package net.officefloor.web.resource.build;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.resource.source.HttpFileSectionSource;
+import net.officefloor.web.resource.source.SourceHttpResourceFactory;
 
 /**
  * Employs a {@link HttpResourceArchitect}.
@@ -64,6 +71,16 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	private final OfficeSourceContext officeSourceContext;
 
 	/**
+	 * {@link ResourceLink} instances.
+	 */
+	private final List<ResourceLink> resourceLinks = new LinkedList<>();
+
+	/**
+	 * {@link EscalationResource} instances.
+	 */
+	private final List<EscalationResource> escalationResources = new LinkedList<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param webArchitect
@@ -92,8 +109,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 	@Override
 	public void link(OfficeSectionOutput output, String resourcePath) {
-		// TODO Auto-generated method stub
-
+		this.resourceLinks.add(new ResourceLink(output, resourcePath));
 	}
 
 	@Override
@@ -103,15 +119,105 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	@Override
-	public ExternalHttpResourcesBuilder addExternalHttpResources(File rootDirectory) {
+	public HttpResourcesBuilder addInternalHttpResources(String classpathPrefix) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HttpResourcesBuilder addExternalHttpResources(File rootDirectory) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void informWebArchitect() {
-		// TODO Auto-generated method stub
 
+		// Link to resources
+		if ((this.resourceLinks.size() > 0) || (this.escalationResources.size() > 0)) {
+
+			// Create section to send resources
+			OfficeSection section = this.officeArchitect.addOfficeSection("RESOURCES",
+					HttpFileSectionSource.class.getName(), "");
+			SourceHttpResourceFactory.copyProperties(this.officeSourceContext, section);
+
+			// Link section outputs to the resources
+			for (ResourceLink resourceLink : this.resourceLinks) {
+				this.officeArchitect.link(resourceLink.sectionOutput,
+						section.getOfficeSectionInput(resourceLink.resourcePath));
+				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + resourceLink.resourcePath,
+						resourceLink.resourcePath);
+			}
+
+			// Link escalations to the resources
+			for (EscalationResource escalation : this.escalationResources) {
+				OfficeEscalation officeEscalation = this.officeArchitect
+						.addOfficeEscalation(escalation.escalationType.getName());
+				this.officeArchitect.link(officeEscalation, section.getOfficeSectionInput(escalation.resourcePath));
+				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + escalation.resourcePath,
+						escalation.resourcePath);
+			}
+		}
+	}
+
+	/**
+	 * Resource link.
+	 */
+	private static class ResourceLink {
+
+		/**
+		 * {@link OfficeSectionOutput}.
+		 */
+		public final OfficeSectionOutput sectionOutput;
+
+		/**
+		 * Resource path.
+		 */
+		public final String resourcePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param section
+		 *            {@link OfficeSection}.
+		 * @param outputName
+		 *            Name of the {@link SectionOutput}.
+		 * @param resourcePath
+		 *            Resource path.
+		 */
+		public ResourceLink(OfficeSectionOutput sectionOutput, String resourcePath) {
+			this.sectionOutput = sectionOutput;
+			this.resourcePath = resourcePath;
+		}
+	}
+
+	/**
+	 * Resource to handle {@link Escalation}.
+	 */
+	private static class EscalationResource {
+
+		/**
+		 * {@link Escalation} type.
+		 */
+		public final Class<? extends Throwable> escalationType;
+
+		/**
+		 * Resource path.
+		 */
+		public final String resourcePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param escalationType
+		 *            {@link Escalation} type.
+		 * @param resourcePath
+		 *            Resource path.
+		 */
+		public EscalationResource(Class<? extends Throwable> escalationType, String resourcePath) {
+			this.escalationType = escalationType;
+			this.resourcePath = resourcePath;
+		}
 	}
 
 }

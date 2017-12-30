@@ -27,6 +27,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.TemporaryFiles;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
 /**
  * Tests the {@link BufferPoolServerOutputStream}.
@@ -111,13 +113,48 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can interlace {@link FileBuffer} into the output stream.
+	 */
+	public void testInterlaceFileBuffer() throws IOException {
+		this.outputStream.write(new byte[] { 1, 2, 3, 4 });
+		this.outputStream.write(TemporaryFiles.getDefault().createTempFile("testInterlaceFileBuffer",
+				new byte[] { 5, 6, 7, 8, 9, 10 }));
+		this.outputStream.write(new byte[] { 11, 12, 13, 14 });
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1, 2, 3, 4),
+				(buffer) -> assertFileBuffer(buffer, 5, 6, 7, 8, 9, 10),
+				(buffer) -> assertPooledBuffer(buffer, 11, 12, 13, 14));
+	}
+
+	/**
+	 * Ensure can interlace {@link FileBuffer} into the output stream, when data
+	 * does not line up to end of {@link StreamBuffer}.
+	 */
+	public void testInterlaceFileBufferNotOnBufferBoundary() throws IOException {
+		this.outputStream.write(new byte[] { 1, 2 });
+		this.outputStream.write(new byte[] { 3 });
+		this.outputStream.write(TemporaryFiles.getDefault().createTempFile("testInterlaceFileBufferNotOnBufferBoundary",
+				new byte[] { 4 }));
+		this.outputStream.write(new byte[] { 5, 6, 7, 8, 9 });
+		this.outputStream.write(TemporaryFiles.getDefault().createTempFile("testInterlaceFileBufferNotOnBufferBoundary",
+				new byte[] { 10 }));
+		this.outputStream.write(TemporaryFiles.getDefault().createTempFile("testInterlaceFileBufferNotOnBufferBoundary",
+				new byte[] { 11 }));
+		this.outputStream.write(new byte[] { 12 });
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1, 2, 3), (buffer) -> assertFileBuffer(buffer, 4),
+				(buffer) -> assertPooledBuffer(buffer, 5, 6, 7, 8), (buffer) -> assertPooledBuffer(buffer, 9),
+				(buffer) -> assertFileBuffer(buffer, 10), (buffer) -> assertFileBuffer(buffer, 11),
+				(buffer) -> assertPooledBuffer(buffer, 12));
+	}
+
+	/**
 	 * Ensure can clear the {@link BufferPoolServerOutputStream}.
 	 */
 	public void testClear() throws IOException {
 
 		// Write content
 		this.outputStream.write(new byte[] { 1, 2, 3, 4, 5 });
-		this.outputStream.write(ByteBuffer.wrap(new byte[] { 6, 7, 8, 9, 10 }));
+		this.outputStream.write(ByteBuffer.wrap(new byte[] { 6, 7, 8 }));
+		this.outputStream.write(TemporaryFiles.getDefault().createTempFile("testClear", new byte[] { 9, 10 }));
 		this.outputStream.write(11);
 		assertEquals("Incorrect content length", 11, this.outputStream.getContentLength());
 
@@ -196,6 +233,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 		test.accept(() -> this.outputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		test.accept(() -> this.outputStream.write(new byte[] { 1 }));
 		test.accept(() -> this.outputStream.write(ByteBuffer.wrap(new byte[] { 2 })));
+		test.accept(() -> this.outputStream
+				.write(TemporaryFiles.getDefault().createTempFile("testEnsureClosed", "not written")));
 		test.accept(() -> this.outputStream.write(3));
 		test.accept(() -> this.outputStream.write(new byte[] { 4 }, 0, 1));
 	}
@@ -229,7 +268,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertPooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
-		assertTrue("Should be pooled buffer", buffer.isPooled);
+		assertNotNull("Should be pooled buffer", buffer.pooledBuffer);
 		ByteBuffer data = buffer.pooledBuffer;
 		assertTrue("Buffer should be larger than expected bytes", data.position() >= expectedBytes.length);
 		for (int i = 0; i < expectedBytes.length; i++) {
@@ -251,13 +290,40 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertUnpooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
-		assertFalse("Should be unpooled buffer", buffer.isPooled);
+		assertNotNull("Should be unpooled buffer", buffer.unpooledByteBuffer);
 		ByteBuffer byteBuffer = buffer.unpooledByteBuffer;
 		assertEquals("Incorrect number of bytes", expectedBytes.length, byteBuffer.remaining());
 		for (int i = 0; i < expectedBytes.length; i++) {
 			assertEquals("Incorrect byte " + i, expectedBytes[i], byteBuffer.get());
 		}
 		return expectedBytes.length;
+	}
+
+	/**
+	 * Asserts the {@link StreamBuffer} content.
+	 * 
+	 * @param buffer
+	 *            {@link StreamBuffer}.
+	 * @param expectedBytes
+	 *            Expected bytes.
+	 * @return Number of bytes in buffer.
+	 */
+	private static int assertFileBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
+		try {
+			assertNotNull("Should be file buffer", buffer.fileBuffer);
+			FileBuffer fileBuffer = buffer.fileBuffer;
+			long count = (fileBuffer.count < 0) ? fileBuffer.file.size() : fileBuffer.count;
+			assertEquals("Incorrect number of bytes", expectedBytes.length, count);
+			ByteBuffer input = ByteBuffer.allocate(1);
+			for (int i = 0; i < expectedBytes.length; i++) {
+				input.clear();
+				assertEquals("Failed to read byte " + i, 1, fileBuffer.file.read(input));
+				assertEquals("Incorrect byte " + i, expectedBytes[i], input.get(0));
+			}
+			return expectedBytes.length;
+		} catch (IOException ex) {
+			throw fail(ex);
+		}
 	}
 
 }

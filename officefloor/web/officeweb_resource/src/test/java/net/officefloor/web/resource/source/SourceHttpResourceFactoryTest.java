@@ -30,12 +30,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
+import net.officefloor.web.resource.file.FileHttpResourceFactory;
 import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.source.SourceHttpResourceFactory;
-import net.officefloor.web.resource.war.WarHttpResourceFactory;
 
 /**
  * Tests the {@link SourceHttpResourceFactory}.
@@ -50,9 +50,9 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	private final SourceContext context = this.createMock(SourceContext.class);
 
 	/**
-	 * {@link HttpResourceFactory}.
+	 * {@link HttpResourceStore}.
 	 */
-	private HttpResourceFactory factory;
+	private HttpResourceStore factory;
 
 	/**
 	 * Ensure if no properties specified that none are copied (handles nulls).
@@ -251,7 +251,7 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure configured {@link HttpResourceFactory} instances are provided the
+	 * Ensure configured {@link HttpResourceStore} instances are provided the
 	 * {@link HttpFileDescriber}.
 	 */
 	public void testHttpFileDescriber() throws IOException {
@@ -287,7 +287,7 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Clear the factories
 		ClasspathHttpResourceFactory.clearHttpResourceFactories();
-		WarHttpResourceFactory.clearHttpResourceFactories();
+		FileHttpResourceFactory.clearHttpResourceFactories();
 
 		// Record the creation
 		this.recordReturn(this.context,
@@ -325,7 +325,7 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 			}
 
 			// Obtain the resource
-			HttpResource resource = this.factory.createHttpResource(requestUriPath);
+			HttpResource resource = this.factory.getHttpResource(requestUriPath);
 			assertEquals("Incorrectly existing", isExpectingExists, resource.isExist());
 			return resource;
 		} catch (Exception ex) {

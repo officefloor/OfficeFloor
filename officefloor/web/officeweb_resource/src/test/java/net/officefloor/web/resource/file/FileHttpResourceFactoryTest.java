@@ -15,21 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.war;
+package net.officefloor.web.resource.file;
 
 import java.io.File;
 import java.io.IOException;
 
-import net.officefloor.web.resource.AbstractHttpResourceFactoryTestCase;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
-import net.officefloor.web.resource.war.WarHttpResourceFactory;
+import net.officefloor.web.resource.HttpResourceStore;
+import net.officefloor.web.resource.file.FileHttpResourceFactory;
+import net.officefloor.web.resource.impl.AbstractHttpResourceFactoryTestCase;
 
 /**
- * Tests the {@link WarHttpResourceFactory}.
+ * Tests the {@link FileHttpResourceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WarHttpResourceFactoryTest extends
+public class FileHttpResourceFactoryTest extends
 		AbstractHttpResourceFactoryTestCase {
 
 	/*
@@ -37,7 +37,7 @@ public class WarHttpResourceFactoryTest extends
 	 */
 
 	@Override
-	protected HttpResourceFactory createHttpResourceFactory(String namespace)
+	protected HttpResourceStore createHttpResourceFactory(String namespace)
 			throws IOException {
 
 		// Find the war directory
@@ -46,8 +46,8 @@ public class WarHttpResourceFactoryTest extends
 				.getParentFile();
 
 		// Create and return the WAR HTTP ResourceFactory
-		WarHttpResourceFactory.clearHttpResourceFactories();
-		return WarHttpResourceFactory.getHttpResourceFactory(warDirectory,
+		FileHttpResourceFactory.clearHttpResourceFactories();
+		return FileHttpResourceFactory.getHttpResourceFactory(warDirectory,
 				"index.html");
 	}
 

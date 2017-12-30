@@ -168,7 +168,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
 					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
 			security.addHttpSecurity("secure", new MockChallengeHttpSecuritySource("secure"));
-			ExternalHttpResourcesBuilder external = resource.addExternalHttpResources(securedDirectory);
+			HttpResourcesBuilder external = resource.addExternalHttpResources(securedDirectory);
 			external.setHttpSecurityName("secure");
 			external.addRole("test");
 

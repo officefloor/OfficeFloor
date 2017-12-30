@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.war;
+package net.officefloor.web.resource.file;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -25,11 +25,11 @@ import net.officefloor.web.resource.impl.AbstractHttpFile;
 import net.officefloor.web.resource.impl.AbstractHttpFileDescription;
 
 /**
- * War {@link HttpFile}.
+ * {@link File} {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WarHttpFile extends AbstractHttpFile {
+public class FileHttpFile extends AbstractHttpFile {
 
 	/**
 	 * {@link File}.
@@ -46,8 +46,7 @@ public class WarHttpFile extends AbstractHttpFile {
 	 * @param description
 	 *            {@link AbstractHttpFileDescription}.
 	 */
-	public WarHttpFile(String resourcePath, File file,
-			AbstractHttpFileDescription description) {
+	public FileHttpFile(String resourcePath, File file, AbstractHttpFileDescription description) {
 		super(resourcePath, description);
 		this.file = file;
 	}
@@ -58,7 +57,7 @@ public class WarHttpFile extends AbstractHttpFile {
 
 	@Override
 	public ByteBuffer getContents() {
-		return WarHttpResourceFactory.getHttpResourceContents(this.file);
+		return FileHttpResourceFactory.getHttpResourceContents(this.file);
 	}
 
 	/*

@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 import net.officefloor.server.stream.ServerOutputStream;
@@ -140,8 +141,11 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 		// Release all the buffers (and clear list)
 		while (this.head != null) {
-			this.head.release();
+			StreamBuffer<B> release = this.head;
 			this.head = this.head.next;
+
+			// Release after (so next not cleared)
+			release.release();
 		}
 		this.tail = null;
 
@@ -186,6 +190,31 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	}
 
 	@Override
+	public void write(FileChannel file, long position, long count) throws IOException {
+		this.ensureOpen();
+
+		// Add the file buffer
+		StreamBuffer<B> fileBuffer = this.bufferPool.getFileStreamBuffer(file, position, count);
+		if (this.head == null) {
+			this.head = fileBuffer;
+			this.tail = fileBuffer;
+		} else {
+			// Add buffer
+			this.tail.next = fileBuffer;
+			this.tail = fileBuffer;
+		}
+
+		// Content included
+		count = (count < 0) ? file.size() : count;
+		this.contentLength += (count - position);
+	}
+
+	@Override
+	public void write(FileChannel file) throws IOException {
+		this.write(file, 0, -1);
+	}
+
+	@Override
 	public void write(int b) throws IOException {
 		this.ensureOpen();
 
@@ -195,7 +224,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.head = streamBuffer;
 			this.tail = streamBuffer;
-		} else if (!this.tail.isPooled) {
+		} else if (this.tail.pooledBuffer == null) {
 			// Last is not pooled, so add pooled
 			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.tail.next = streamBuffer;
@@ -237,7 +266,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.head = streamBuffer;
 			this.tail = streamBuffer;
-		} else if (!this.tail.isPooled) {
+		} else if (this.tail.pooledBuffer == null) {
 			// Last is not pooled, so add pooled
 			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.tail.next = streamBuffer;
@@ -328,6 +357,26 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 			// Write the buffer
 			BufferPoolServerOutputStream.this.write(encodedBytes);
+		}
+
+		@Override
+		public void write(FileChannel file, long position, long count) throws IOException {
+
+			// Flush to ensure written out
+			this.delegate.flush();
+
+			// Write the file content
+			BufferPoolServerOutputStream.this.write(file, position, count);
+		}
+
+		@Override
+		public void write(FileChannel file) throws IOException {
+
+			// Flush to ensure written out
+			this.delegate.flush();
+
+			// Write the file content
+			BufferPoolServerOutputStream.this.write(file);
 		}
 
 		/*

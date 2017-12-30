@@ -20,15 +20,14 @@ package net.officefloor.web.resource.classpath;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
+import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.build.HttpFileDescription;
 import net.officefloor.web.resource.impl.AbstractHttpFileDescription;
 import net.officefloor.web.resource.impl.AbstractHttpResourceFactory;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.impl.NotExistHttpResource;
 
 /**
@@ -39,99 +38,18 @@ import net.officefloor.web.resource.impl.NotExistHttpResource;
 public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 
 	/**
-	 * <p>
-	 * {@link ClasspathHttpResourceFactory} instances by class path prefix.
-	 * <p>
-	 * Typically within an application there will only be one of these.
-	 */
-	private static final Map<String, ClasspathHttpResourceFactory> factories = new HashMap<String, ClasspathHttpResourceFactory>(
-			1);
-
-	/**
-	 * Obtains the {@link ClasspathHttpResourceFactory} for the class path
-	 * prefix.
-	 * 
-	 * @param classPathPrefix
-	 *            Class path prefix.
-	 * @param classLoader
-	 *            {@link ClassLoader} to use to obtain the {@link HttpResource}
-	 *            instances.
-	 * @param defaultDirectoryFileNames
-	 *            Default directory file names. Should the
-	 *            {@link ClasspathHttpResourceFactory} already be created for
-	 *            the class path prefix, these values are ignored.
-	 * @return {@link ClasspathHttpResourceFactory} for the class path prefix.
-	 */
-	public static ClasspathHttpResourceFactory getHttpResourceFactory(
-			String classPathPrefix, ClassLoader classLoader,
-			String... defaultDirectoryFileNames) {
-
-		// Initiate prefix (trim, make resource path and no trailing '/')
-		classPathPrefix = classPathPrefix.trim().replace('.', '/');
-		classPathPrefix = (classPathPrefix.endsWith("/") ? classPathPrefix
-				.substring(0, (classPathPrefix.length() - 1)) : classPathPrefix);
-
-		// Attempt to obtain existing factory
-		ClasspathHttpResourceFactory factory;
-		synchronized (factories) {
-			factory = factories.get(classPathPrefix);
-			if (factory == null) {
-
-				// Ensure not looking up
-				if (classLoader == null) {
-					throw new IllegalStateException(
-							"Looking up unknown "
-									+ ClasspathHttpResourceFactory.class
-											.getSimpleName() + " '"
-									+ classPathPrefix + "'");
-				}
-
-				// Not exist, so create factory
-				factory = new ClasspathHttpResourceFactory(classPathPrefix,
-						classLoader, defaultDirectoryFileNames);
-
-				// Register the factory for the class path prefix
-				factories.put(classPathPrefix, factory);
-			}
-		}
-
-		// Return the factory
-		return factory;
-	}
-
-	/**
-	 * Allows clearing the {@link HttpResourceFactory} instances.
-	 */
-	public static void clearHttpResourceFactories() {
-		synchronized (factories) {
-			factories.clear();
-		}
-	}
-
-	/**
 	 * Obtains the contents of the {@link HttpResource} for the class path.
 	 * 
-	 * @param classpathPrefix
-	 *            Class path prefix to identify the {@link HttpResourceFactory}.
 	 * @param classPath
 	 *            Class path to the {@link HttpResource}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 * @return ByteBuffer containing the contents of the {@link HttpResource}.
 	 */
-	public static ByteBuffer getHttpResourceContents(String classpathPrefix,
-			String classPath) {
-
-		// Obtain the resource factory for the class path prefix
-		ClasspathHttpResourceFactory factory = factories.get(classpathPrefix);
-		if (factory == null) {
-			// Must have factory for class path prefix
-			throw new IllegalStateException("Looking up unknown "
-					+ ClasspathHttpResourceFactory.class.getSimpleName() + " '"
-					+ classpathPrefix + "'");
-		}
+	public static ByteBuffer getHttpResourceContents(String classPath, ClassLoader classLoader) {
 
 		// Obtain the input stream to potential resource
-		InputStream inputStream = factory.classLoader
-				.getResourceAsStream(classPath);
+		InputStream inputStream = classLoader.getResourceAsStream(classPath);
 
 		// Obtain the resource contents
 		return getHttpResourceContents(inputStream, classPath);
@@ -143,7 +61,7 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 	private final ClassPathHttpResourceNode root;
 
 	/**
-	 * Class path prefix for this {@link HttpResourceFactory}.
+	 * Class path prefix for this {@link HttpResourceStore}.
 	 */
 	private final String classPathPrefix;
 
@@ -174,15 +92,14 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 	 *            default file. The search for the default file follows the
 	 *            order provided - returning the first default file found.
 	 */
-	private ClasspathHttpResourceFactory(String classPathPrefix,
-			ClassLoader classLoader, String... defaultDirectoryFileNames) {
+	private ClasspathHttpResourceFactory(String classPathPrefix, ClassLoader classLoader,
+			String... defaultDirectoryFileNames) {
 		this.defaultDirectoryFileNames = defaultDirectoryFileNames;
 		this.classLoader = classLoader;
 		this.classPathPrefix = classPathPrefix;
 
 		// Create the class path HTTP resource tree
-		this.root = ClassPathHttpResourceNode
-				.createClassPathResourceTree(this.classPathPrefix);
+		this.root = ClassPathHttpResourceNode.createClassPathResourceTree(this.classPathPrefix);
 	}
 
 	/**
@@ -212,8 +129,7 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 				}
 
 				// Obtain the node path (include last character if necessary)
-				String nodePath = resourcePath.substring(startIndex, i
-						+ includeLastCharacter);
+				String nodePath = resourcePath.substring(startIndex, i + includeLastCharacter);
 
 				// Obtain the child node (if have node path)
 				if (nodePath.length() > 0) {
@@ -246,18 +162,17 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 		// Determine if a directory
 		if (node.isDirectory()) {
 			// Directory, so create and return the directory
-			return new ClasspathHttpDirectory(node.getResourcePath(),
-					this.classPathPrefix, this.defaultDirectoryFileNames);
+			return new ClasspathHttpDirectory(node.getResourcePath(), this.classPathPrefix,
+					this.defaultDirectoryFileNames);
 		}
 
 		// As here, resource is a file so have file described
-		HttpFileDescriptionImpl description = new HttpFileDescriptionImpl(
-				node.getResourcePath(), node.getClassPath());
+		HttpFileDescriptionImpl description = new HttpFileDescriptionImpl(node.getResourcePath(), node.getClassPath());
 		this.describeFile(description);
 
 		// Create the HTTP File
-		HttpFile httpFile = new ClasspathHttpFile(node.getResourcePath(),
-				node.getClassPath(), this.classPathPrefix, description);
+		HttpFile httpFile = new ClasspathHttpFile(node.getResourcePath(), node.getClassPath(), this.classPathPrefix,
+				description);
 
 		// Return the HTTP File
 		return httpFile;
@@ -268,8 +183,7 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 	 */
 
 	@Override
-	public HttpResource createHttpResource(String applicationCanonicalPath)
-			throws IOException {
+	public HttpResource getHttpResource(String applicationCanonicalPath) throws IOException {
 
 		// Obtains the node for the path
 		ClassPathHttpResourceNode node = this.getNode(applicationCanonicalPath);
@@ -280,6 +194,18 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 
 		// Return the created HTTP resource
 		return this.createHttpResource(node);
+	}
+
+	@Override
+	public HttpResource getDefaultHttpResource(HttpDirectory directory) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HttpResource[] listHttpResources(HttpDirectory directory) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -312,9 +238,7 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 		@Override
 		public ByteBuffer getContents() {
 			// Always attempt to obtain contents for file
-			return getHttpResourceContents(
-					ClasspathHttpResourceFactory.this.classPathPrefix,
-					this.classPath);
+			return getHttpResourceContents(this.classPath, ClasspathHttpResourceFactory.this.classLoader);
 		}
 	}
 

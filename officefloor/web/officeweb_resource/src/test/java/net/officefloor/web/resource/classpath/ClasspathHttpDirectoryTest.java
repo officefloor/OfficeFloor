@@ -17,11 +17,11 @@
  */
 package net.officefloor.web.resource.classpath;
 
-import net.officefloor.web.resource.AbstractHttpDirectoryTestCase;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.classpath.ClasspathHttpDirectory;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
+import net.officefloor.web.resource.impl.AbstractHttpDirectoryTestCase;
 
 /**
  * Tests the {@link ClasspathHttpDirectory}.
@@ -68,7 +68,7 @@ public class ClasspathHttpDirectoryTest extends AbstractHttpDirectoryTestCase {
 		// Create and return the HTTP directory
 		HttpResource resource;
 		try {
-			resource = factory.createHttpResource(resourcePath);
+			resource = factory.getHttpResource(resourcePath);
 		} catch (Exception ex) {
 			throw fail(ex);
 		}

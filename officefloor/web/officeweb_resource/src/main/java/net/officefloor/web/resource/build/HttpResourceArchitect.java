@@ -60,15 +60,26 @@ public interface HttpResourceArchitect {
 	void link(OfficeEscalation escalation, String resourcePath);
 
 	/**
+	 * Adds internal {@link HttpResource} instances that may be served from
+	 * class path.
+	 * 
+	 * @param classpathPrefix
+	 *            Class path prefix to include only files found under this class
+	 *            path prefix.
+	 * @return {@link HttpResourcesBuilder}.
+	 */
+	HttpResourcesBuilder addInternalHttpResources(String classpathPrefix);
+
+	/**
 	 * Adds external {@link HttpResource} instances that may be served from file
 	 * system.
 	 * 
 	 * @param rootDirectory
 	 *            Root directory for the external {@link HttpResource}
 	 *            instances.
-	 * @return {@link ExternalHttpResourcesBuilder}.
+	 * @return {@link HttpResourcesBuilder}.
 	 */
-	ExternalHttpResourcesBuilder addExternalHttpResources(File rootDirectory);
+	HttpResourcesBuilder addExternalHttpResources(File rootDirectory);
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary {@link HttpResource}

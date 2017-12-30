@@ -259,7 +259,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		 *            {@link ByteBuffer}.
 		 */
 		private PooledStreamBuffer(ByteBuffer byteBuffer) {
-			super(byteBuffer, null);
+			super(byteBuffer, null, null);
 		}
 
 		/*

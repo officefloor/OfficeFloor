@@ -338,7 +338,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							// Prepare the response buffers for writing
 							StreamBuffer<ByteBuffer> buffer = responseHead;
 							while (buffer != null) {
-								if (buffer.isPooled) {
+								if (buffer.pooledBuffer != null) {
 									buffer.pooledBuffer.flip();
 								}
 								buffer = buffer.next;
@@ -479,7 +479,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 						} else {
 							// Obtain the buffer (could be overflow unpooled)
-							unwrapBuffer = this.currentUnwrapToAppBuffer.isPooled
+							unwrapBuffer = (this.currentUnwrapToAppBuffer.pooledBuffer != null)
 									? this.currentUnwrapToAppBuffer.pooledBuffer
 									: this.currentUnwrapToAppBuffer.unpooledByteBuffer;
 
@@ -554,7 +554,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							if (unwrapBuffer.position() > 0) {
 
 								// Determine if unpooled (transform to pooled)
-								StreamBuffer<ByteBuffer> serviceStreamBuffer = this.currentUnwrapToAppBuffer.isPooled
+								StreamBuffer<ByteBuffer> serviceStreamBuffer = (this.currentUnwrapToAppBuffer.pooledBuffer != null)
 										? this.currentUnwrapToAppBuffer
 										: new ServiceUnpooledStreamBuffer(this.currentUnwrapToAppBuffer);
 
@@ -628,9 +628,9 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						while (this.currentAppToWrapBuffer != null) {
 
 							// Obtain the application data
-							appToWrapBuffer = (this.currentAppToWrapBuffer.isPooled
+							appToWrapBuffer = (this.currentAppToWrapBuffer.pooledBuffer != null)
 									? this.currentAppToWrapBuffer.pooledBuffer
-									: this.currentAppToWrapBuffer.unpooledByteBuffer);
+									: this.currentAppToWrapBuffer.unpooledByteBuffer;
 
 							// Obtain the response stream buffer
 							StreamBuffer<ByteBuffer> wrapToResponseBuffer = SslSocketServicerFactory.this.bufferPool
@@ -869,7 +869,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 *            Unpooled {@link StreamBuffer}.
 		 */
 		public ServiceUnpooledStreamBuffer(StreamBuffer<ByteBuffer> unpooledStreamBuffer) {
-			super(unpooledStreamBuffer.unpooledByteBuffer, null);
+			super(unpooledStreamBuffer.unpooledByteBuffer, null, null);
 			this.unpooledStreamBuffer = unpooledStreamBuffer;
 		}
 

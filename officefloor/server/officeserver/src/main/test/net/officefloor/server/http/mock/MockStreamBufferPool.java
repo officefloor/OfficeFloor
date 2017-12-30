@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -32,6 +33,7 @@ import org.junit.Assert;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
 /**
@@ -174,6 +176,13 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		return buffer;
 	}
 
+	@Override
+	public StreamBuffer<ByteBuffer> getFileStreamBuffer(FileChannel file, long position, long count) {
+		MockFileStreamBuffer buffer = new MockFileStreamBuffer(new FileBuffer(file, position, count));
+		this.createdBuffers.add(buffer);
+		return buffer;
+	}
+
 	/**
 	 * Abstract mock {@link StreamBuffer}.
 	 */
@@ -201,9 +210,11 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		 *            Pooled {@link ByteBuffer}.
 		 * @param unpooledByteBuffer
 		 *            Unpooled {@link ByteBuffer}.
+		 * @param fileBuffer
+		 *            {@link FileBuffer}.
 		 */
-		public AbstractMockStreamBuffer(ByteBuffer pooledBuffer, ByteBuffer unpooledByteBuffer) {
-			super(pooledBuffer, unpooledByteBuffer);
+		public AbstractMockStreamBuffer(ByteBuffer pooledBuffer, ByteBuffer unpooledByteBuffer, FileBuffer fileBuffer) {
+			super(pooledBuffer, unpooledByteBuffer, fileBuffer);
 			this.id = MockStreamBufferPool.this.nextBufferId.getAndIncrement();
 
 			// Obtain the stack trace to locate creation
@@ -246,7 +257,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		 *            {@link ByteBuffer}.
 		 */
 		private MockPooledStreamBuffer(ByteBuffer buffer) {
-			super(buffer, null);
+			super(buffer, null, null);
 		}
 
 		/*
@@ -289,10 +300,10 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		 * Instantiate.
 		 * 
 		 * @param buffer
-		 *            Read-only {@link ByteBuffer}.
+		 *            Unpooled {@link ByteBuffer}.
 		 */
 		private MockUnpooledStreamBuffer(ByteBuffer buffer) {
-			super(null, buffer);
+			super(null, buffer, null);
 		}
 
 		/*
@@ -308,6 +319,38 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		@Override
 		public int write(byte[] data, int offset, int length) {
 			Assert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
+			return 0;
+		}
+	}
+
+	/**
+	 * Mock file {@link StreamBuffer}.
+	 */
+	private class MockFileStreamBuffer extends AbstractMockStreamBuffer {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param buffer
+		 *            {@link FileBuffer}.
+		 */
+		private MockFileStreamBuffer(FileBuffer buffer) {
+			super(null, null, buffer);
+		}
+
+		/*
+		 * =================== PooledBuffer ======================
+		 */
+
+		@Override
+		public boolean write(byte datum) {
+			Assert.fail(this.getClass().getSimpleName() + " is file" + this.getStackTrace());
+			return false;
+		}
+
+		@Override
+		public int write(byte[] data, int offset, int length) {
+			Assert.fail(this.getClass().getSimpleName() + " is file" + this.getStackTrace());
 			return 0;
 		}
 	}
@@ -366,7 +409,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 				}
 
 				// Attempt to obtain value from current buffer
-				if (this.currentBuffer.isPooled) {
+				if (this.currentBuffer.pooledBuffer != null) {
 					// Obtain the pooled data
 					ByteBuffer bufferData = this.currentBuffer.pooledBuffer;
 
@@ -376,13 +419,29 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 						return byteToInt(bufferData.get(this.currentBufferPosition++));
 					}
 
-				} else {
+				} else if (this.currentBuffer.unpooledByteBuffer != null) {
 					// Attempt to read from unpooled byte buffer
 					ByteBuffer byteBuffer = this.currentBuffer.unpooledByteBuffer;
 
 					// Determine if can read from byte buffer
 					if (byteBuffer.remaining() > 0) {
 						return byteToInt(byteBuffer.get());
+					}
+				} else {
+					// Attempt to read from file buffer
+					FileBuffer fileBuffer = this.currentBuffer.fileBuffer;
+
+					// Determine if can read data from buffer
+					long count = (fileBuffer.count < 0) ? fileBuffer.file.size() : fileBuffer.count;
+					if (this.currentBufferPosition < count) {
+						// Read data from the buffer
+						long position = fileBuffer.position + this.currentBufferPosition;
+						this.currentBufferPosition++;
+						ByteBuffer buffer = ByteBuffer.allocate(1);
+						if (fileBuffer.file.read(buffer, position) != 1) {
+							throw new IOException("Failed to ready byte " + position + " from file buffer");
+						}
+						return byteToInt(buffer.get(0));
 					}
 				}
 

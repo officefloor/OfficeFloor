@@ -35,26 +35,26 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.web.resource.direct.DirectHttpResourceFactory;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
+import net.officefloor.web.resource.file.FileHttpResourceFactory;
 import net.officefloor.web.resource.impl.NotExistHttpResource;
-import net.officefloor.web.resource.war.WarHttpResourceFactory;
 
 /**
  * <p>
- * {@link HttpResourceFactory} initialised from {@link SourceProperties}.
+ * {@link HttpResourceStore} initialised from {@link SourceProperties}.
  * <p>
- * It incorporates other {@link HttpResourceFactory} implementations configured
+ * It incorporates other {@link HttpResourceStore} implementations configured
  * from the {@link SourceProperties} to achieve its functionality. This provides
- * reusable {@link HttpResourceFactory} capabilities for the various HTTP Web
+ * reusable {@link HttpResourceStore} capabilities for the various HTTP Web
  * {@link ManagedObjectSource} and {@link ManagedFunctionSource}
  * implementations.
  * 
  * @author Daniel Sagenschneider
  */
-public class SourceHttpResourceFactory implements HttpResourceFactory {
+public class SourceHttpResourceFactory implements HttpResourceStore {
 
 	/**
 	 * <p>
@@ -165,17 +165,17 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	public static String PROPERTY_DIRECT_STATIC_CONTENT = "http.direct.static.content";
 
 	/**
-	 * Creates the {@link HttpResourceFactory}.
+	 * Creates the {@link HttpResourceStore}.
 	 * 
 	 * @param context
 	 *            {@link SourceContext} to configure the
-	 *            {@link HttpResourceFactory} (and its delegates).
-	 * @return {@link HttpResourceFactory}.
+	 *            {@link HttpResourceStore} (and its delegates).
+	 * @return {@link HttpResourceStore}.
 	 * @throws IOException
 	 *             Should the configured resources not be accessible or not
 	 *             exist.
 	 */
-	public static HttpResourceFactory createHttpResourceFactory(SourceContext context) throws IOException {
+	public static HttpResourceStore createHttpResourceFactory(SourceContext context) throws IOException {
 
 		// Obtain the configuration for HTTP Resource Factory
 		String warDirectories = context.getProperty(PROPERTY_RESOURCE_DIRECTORIES, null);
@@ -207,7 +207,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 				.toArray(new String[defaultDirectoryFileNameListing.size()]);
 
 		// Provide listing of delegate HTTP resource factories
-		List<HttpResourceFactory> factories = new LinkedList<HttpResourceFactory>();
+		List<HttpResourceStore> factories = new LinkedList<HttpResourceStore>();
 
 		// Create the listing of war directories
 		if (warDirectories != null) {
@@ -226,20 +226,20 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 				}
 
 				// Create and register the WAR HTTP Resource Factory
-				HttpResourceFactory warFactory = WarHttpResourceFactory.getHttpResourceFactory(warDirectoryFile,
+				HttpResourceStore warFactory = FileHttpResourceFactory.getHttpResourceFactory(warDirectoryFile,
 						defaultFileNames);
 				factories.add(warFactory);
 			}
 		}
 
 		// Create and register the Class path HTTP Resource Factory
-		HttpResourceFactory classpathFactory = ClasspathHttpResourceFactory.getHttpResourceFactory(classPathPrefix,
+		HttpResourceStore classpathFactory = ClasspathHttpResourceFactory.getHttpResourceFactory(classPathPrefix,
 				classLoader, defaultFileNames);
 		factories.add(classpathFactory);
 
 		// Create the Source HTTP Resource Factory
-		HttpResourceFactory resourceFactory = new SourceHttpResourceFactory(
-				factories.toArray(new HttpResourceFactory[factories.size()]));
+		HttpResourceStore resourceFactory = new SourceHttpResourceFactory(
+				factories.toArray(new HttpResourceStore[factories.size()]));
 
 		// Determine if wrap with Direct HTTP Resource Factory
 		if (isDirect) {
@@ -251,28 +251,28 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	}
 
 	/**
-	 * Clears the {@link HttpResourceFactory} instances. This is useful for
-	 * testing to have a fresh {@link HttpResourceFactory}.
+	 * Clears the {@link HttpResourceStore} instances. This is useful for
+	 * testing to have a fresh {@link HttpResourceStore}.
 	 */
 	public static void clearHttpResourceFactories() {
-		WarHttpResourceFactory.clearHttpResourceFactories();
+		FileHttpResourceFactory.clearHttpResourceFactories();
 		ClasspathHttpResourceFactory.clearHttpResourceFactories();
 	}
 
 	/**
-	 * {@link HttpResourceFactory} instances for delegation to obtain the
+	 * {@link HttpResourceStore} instances for delegation to obtain the
 	 * {@link HttpResource} instances.
 	 */
-	private final HttpResourceFactory[] httpResourceFactories;
+	private final HttpResourceStore[] httpResourceFactories;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param httpResourceFactories
-	 *            {@link HttpResourceFactory} instances for delegation to obtain
+	 *            {@link HttpResourceStore} instances for delegation to obtain
 	 *            the {@link HttpResource} instances.
 	 */
-	private SourceHttpResourceFactory(HttpResourceFactory... httpResourceFactories) {
+	private SourceHttpResourceFactory(HttpResourceStore... httpResourceFactories) {
 		this.httpResourceFactories = httpResourceFactories;
 	}
 
@@ -282,19 +282,19 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 
 	@Override
 	public void addHttpFileDescriber(HttpFileDescriber httpFileDescriber) {
-		for (HttpResourceFactory factory : this.httpResourceFactories) {
+		for (HttpResourceStore factory : this.httpResourceFactories) {
 			factory.addHttpFileDescriber(httpFileDescriber);
 		}
 	}
 
 	@Override
-	public HttpResource createHttpResource(String applicationCanonicalPath) throws IOException {
+	public HttpResource getHttpResource(String applicationCanonicalPath) throws IOException {
 
 		// Use HTTP Resource Factories to locate the resource
-		for (HttpResourceFactory resourceFactory : this.httpResourceFactories) {
+		for (HttpResourceStore resourceFactory : this.httpResourceFactories) {
 
 			// Attempt to obtain the resource
-			HttpResource resource = resourceFactory.createHttpResource(applicationCanonicalPath);
+			HttpResource resource = resourceFactory.getHttpResource(applicationCanonicalPath);
 			if (resource.isExist()) {
 				// Found the resource
 				return resource;

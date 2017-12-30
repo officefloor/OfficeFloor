@@ -63,6 +63,7 @@ import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.path.HttpApplicationLocation;
 import net.officefloor.web.path.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.web.resource.source.HttpFileSectionSource;
 import net.officefloor.web.route.InvalidRequestUriHttpException;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;

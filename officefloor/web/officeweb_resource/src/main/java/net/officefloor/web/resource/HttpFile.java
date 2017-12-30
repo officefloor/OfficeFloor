@@ -17,8 +17,10 @@
  */
 package net.officefloor.web.resource;
 
-import java.nio.ByteBuffer;
+import java.io.IOException;
 import java.nio.charset.Charset;
+
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * HTTP file.
@@ -53,14 +55,14 @@ public interface HttpFile extends HttpResource {
 	Charset getCharset();
 
 	/**
-	 * <p>
-	 * Obtains the contents of this {@link HttpFile}.
-	 * <p>
-	 * The {@link ByteBuffer} will typically be read-only to prevent changes to
-	 * the contents.
+	 * Writes the {@link HttpFile} to the {@link HttpResponse}.
 	 * 
-	 * @return Contents of this {@link HttpFile}.
+	 * @param response
+	 *            {@link HttpResponse}.
+	 * @throws IOException
+	 *             If failure in writing the {@link HttpFile} to the
+	 *             {@link HttpResponse}.
 	 */
-	ByteBuffer getContents();
+	void writeTo(HttpResponse response) throws IOException;
 
 }

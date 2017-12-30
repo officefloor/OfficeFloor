@@ -28,6 +28,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.TemporaryFiles;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
@@ -60,7 +61,7 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the writable buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
-		assertTrue("Should not be pooled", buffer.isPooled);
+		assertNotNull("Should be pooled", buffer.pooledBuffer);
 
 		// Ensure issue if not returned to pool
 		try {
@@ -82,7 +83,30 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the read-only buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getUnpooledStreamBuffer(ByteBuffer.allocate(4));
-		assertFalse("Should be unpooled", buffer.isPooled);
+		assertNotNull("Should be unpooled", buffer.unpooledByteBuffer);
+
+		// Ensure issue if not returned to pool
+		try {
+			this.pool.assertAllBuffersReturned();
+		} catch (AssertionError ex) {
+			assertTrue("Incorrect failure", ex.getMessage().startsWith("Buffer 0 (of 1) should be released"));
+		}
+
+		// Release
+		buffer.release();
+		this.pool.assertAllBuffersReturned();
+	}
+
+	/**
+	 * Ensure can release file {@link StreamBuffer} back to
+	 * {@link MockStreamBufferPool}.
+	 */
+	public void testReleaseFileStreamBuffer() throws IOException {
+
+		// Obtain the read-only buffer
+		StreamBuffer<ByteBuffer> buffer = this.pool
+				.getFileStreamBuffer(TemporaryFiles.getDefault().createTempFile("ReleaseFileBuffer", "contest"), 0, -1);
+		assertNotNull("Should be file", buffer.fileBuffer);
 
 		// Ensure issue if not returned to pool
 		try {

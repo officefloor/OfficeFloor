@@ -29,9 +29,9 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.impl.FileExtensionHttpFileDescriber;
 import net.officefloor.web.resource.impl.HttpResourceCreationListener;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.web.state.HttpApplicationState;
 
@@ -63,7 +63,7 @@ public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctio
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the class path HTTP file factory
-		HttpResourceFactory httpFileFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
+		HttpResourceStore httpFileFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();

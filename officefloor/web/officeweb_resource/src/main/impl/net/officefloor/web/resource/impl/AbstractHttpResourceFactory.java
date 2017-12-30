@@ -28,16 +28,17 @@ import java.util.logging.Logger;
 
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.build.HttpFileDescription;
 
 /**
- * Abstract {@link HttpResourceFactory}.
+ * Abstract {@link HttpResourceStore}.
  * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractHttpResourceFactory implements
-		HttpResourceFactory {
+		HttpResourceStore {
 
 	/**
 	 * {@link Logger}.

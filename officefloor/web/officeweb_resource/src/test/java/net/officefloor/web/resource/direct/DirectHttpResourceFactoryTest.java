@@ -25,9 +25,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.build.HttpFileDescriber;
 import net.officefloor.web.resource.direct.DirectHttpResourceFactory;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.impl.NotExistHttpResource;
 
 /**
@@ -38,10 +38,10 @@ import net.officefloor.web.resource.impl.NotExistHttpResource;
 public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * Delegate {@link HttpResourceFactory}.
+	 * Delegate {@link HttpResourceStore}.
 	 */
-	private final HttpResourceFactory delegate = this
-			.createMock(HttpResourceFactory.class);
+	private final HttpResourceStore delegate = this
+			.createMock(HttpResourceStore.class);
 
 	/**
 	 * Default directory file names.
@@ -52,7 +52,7 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link DirectHttpResourceFactory} to test.
 	 */
-	private final HttpResourceFactory factory = new DirectHttpResourceFactory(
+	private final HttpResourceStore factory = new DirectHttpResourceFactory(
 			this.delegate, this.defaultDirectoryFileNames);
 
 	/**
@@ -99,7 +99,7 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 		// Record only one creation of the file
 		final String REQUEST_URI_PATH = "/index.html";
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource(REQUEST_URI_PATH), this.file);
+				this.delegate.getHttpResource(REQUEST_URI_PATH), this.file);
 		this.recordReturn(this.file, this.file.getContents(), this.fileContents);
 
 		// Record details of HTTP File
@@ -113,7 +113,7 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Lazy create the file
 		HttpResource resource = this.factory
-				.createHttpResource(REQUEST_URI_PATH);
+				.getHttpResource(REQUEST_URI_PATH);
 		HttpFile file = this.assertHttpFile(resource);
 
 		// Validate the file
@@ -127,7 +127,7 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Ensure obtain same file again (as stored in memory)
 		HttpResource sameResource = this.factory
-				.createHttpResource(REQUEST_URI_PATH);
+				.getHttpResource(REQUEST_URI_PATH);
 		this.assertHttpFile(sameResource);
 
 		// Ensure same file
@@ -146,13 +146,13 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 		// Record only one creation of the directory and file
 		final String REQUEST_URI_PATH = "/directory";
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource(REQUEST_URI_PATH),
+				this.delegate.getHttpResource(REQUEST_URI_PATH),
 				this.directory);
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource("/directory/index.html"),
+				this.delegate.getHttpResource("/directory/index.html"),
 				new NotExistHttpResource("/directory/index.html"));
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource("/directory/default.html"),
+				this.delegate.getHttpResource("/directory/default.html"),
 				this.file);
 		this.recordReturn(this.file, this.file.getContents(), this.fileContents);
 
@@ -169,7 +169,7 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Lazy create the directory
 		HttpResource resource = this.factory
-				.createHttpResource(REQUEST_URI_PATH);
+				.getHttpResource(REQUEST_URI_PATH);
 		HttpDirectory directory = this.assertHttpDirectory(resource, true);
 
 		// Validate the directory
@@ -184,12 +184,12 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Ensure obtain same directory again (as stored in memory)
 		HttpResource sameResource = this.factory
-				.createHttpResource(REQUEST_URI_PATH);
+				.getHttpResource(REQUEST_URI_PATH);
 		this.assertHttpDirectory(sameResource, true);
 		assertSame("Should be same directory", resource, sameResource);
 
 		// Ensure file is registered in memory for lookup
-		HttpResource file = this.factory.createHttpResource(REQUEST_URI_PATH
+		HttpResource file = this.factory.getHttpResource(REQUEST_URI_PATH
 				+ "/default.html");
 		this.assertHttpFile(file);
 		assertSame("Should be same file", file, directory.getDefaultFile());
@@ -207,13 +207,13 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 		// Record only one creation of the directory and no file
 		final String REQUEST_URI_PATH = "/directory";
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource(REQUEST_URI_PATH),
+				this.delegate.getHttpResource(REQUEST_URI_PATH),
 				this.directory);
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource("/directory/index.html"),
+				this.delegate.getHttpResource("/directory/index.html"),
 				new NotExistHttpResource("/directory/index.html"));
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource("/directory/default.html"),
+				this.delegate.getHttpResource("/directory/default.html"),
 				new NotExistHttpResource("/directory/default.html"));
 
 		// Test
@@ -221,12 +221,12 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Lazy create the directory
 		HttpResource resource = this.factory
-				.createHttpResource(REQUEST_URI_PATH);
+				.getHttpResource(REQUEST_URI_PATH);
 		this.assertHttpDirectory(resource, false);
 
 		// Ensure obtain same directory again (as stored in memory)
 		HttpResource sameResource = this.factory
-				.createHttpResource(REQUEST_URI_PATH);
+				.getHttpResource(REQUEST_URI_PATH);
 		this.assertHttpDirectory(sameResource, false);
 
 		// Ensure same file
@@ -246,22 +246,22 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Record only one creation of the directory and file
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource("/directory/index.html"),
+				this.delegate.getHttpResource("/directory/index.html"),
 				this.file);
 		this.recordReturn(this.file, this.file.getContents(), this.fileContents);
 		this.recordReturn(this.delegate,
-				this.delegate.createHttpResource("/directory"), this.directory);
+				this.delegate.getHttpResource("/directory"), this.directory);
 
 		// Test
 		this.replayMockObjects();
 
 		// Lazy create the file
 		HttpResource file = this.factory
-				.createHttpResource("/directory/index.html");
+				.getHttpResource("/directory/index.html");
 		this.assertHttpFile(file);
 
 		// Lazy create the directory
-		HttpResource resource = this.factory.createHttpResource("/directory");
+		HttpResource resource = this.factory.getHttpResource("/directory");
 		HttpDirectory directory = this.assertHttpDirectory(resource, true);
 
 		// Ensure same file

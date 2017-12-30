@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.resource.AbstractHttpResourceFactoryTestCase;
 import net.officefloor.web.resource.classpath.ClassPathHttpResourceNode;
+import net.officefloor.web.resource.impl.AbstractHttpResourceFactoryTestCase;
 
 /**
  * Tests the {@link ClassPathHttpResourceNode}.

@@ -23,12 +23,14 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.function.Function;
 
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.TemporaryFiles;
 
 /**
  * Tests the {@link SocketListener}.
@@ -337,6 +339,120 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			InputStream inputStream = client.getInputStream();
 			assertEquals("Incorrect header value", 2, inputStream.read());
 			assertEquals("Incorrect body value", 3, inputStream.read());
+		}
+	}
+
+	/**
+	 * Ensure can send header and file.
+	 */
+	public void testSendHeaderAndFile() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Create file
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFile", new byte[] { 3 });
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2),
+					this.tester.bufferPool.getFileStreamBuffer(file, 0, -1));
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			assertEquals("Incorrect file value", 3, inputStream.read());
+		}
+	}
+
+	/**
+	 * Ensure can send header and large file.
+	 */
+	public void testSendHeaderAndLargeFile() throws Exception {
+		this.tester = new SocketManagerTester(1);
+
+		// Transform index into byte value
+		Function<Integer, Byte> transform = (value) -> (byte) (value % Byte.MAX_VALUE);
+
+		// Create the large file
+		int fileSize = 2 * 1000 * 1000;
+		byte[] data = new byte[fileSize];
+		for (int i = 0; i < fileSize; i++) {
+			data[i] = transform.apply(i);
+		}
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndLargeFile", data);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2),
+					this.tester.bufferPool.getFileStreamBuffer(file, 0, -1));
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			for (int i = 0; i < fileSize; i++) {
+				byte expected = transform.apply(i);
+				assertEquals("Incorrect file value for byte " + i, expected, inputStream.read());
+			}
+		}
+	}
+
+	/**
+	 * Ensure can send header and file segment.
+	 */
+	public void testSendHeaderAndFileSegment() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Create file
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFileSegment",
+				new byte[] { 1, 2, 3 });
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2),
+					this.tester.bufferPool.getFileStreamBuffer(file, 2, 1));
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			assertEquals("Incorrect file value", 3, inputStream.read());
 		}
 	}
 

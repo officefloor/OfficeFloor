@@ -27,8 +27,8 @@ import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.impl.HttpResourceCreationListener;
-import net.officefloor.web.resource.impl.HttpResourceFactory;
 import net.officefloor.web.resource.impl.NotExistHttpResource;
 import net.officefloor.web.resource.source.HttpFileFactoryFunction;
 import net.officefloor.web.resource.source.HttpFileFactoryFunction.DependencyKeys;
@@ -42,9 +42,9 @@ import net.officefloor.web.state.HttpApplicationState;
 public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 
 	/**
-	 * Mock {@link HttpResourceFactory}.
+	 * Mock {@link HttpResourceStore}.
 	 */
-	private HttpResourceFactory factory = this.createMock(HttpResourceFactory.class);
+	private HttpResourceStore factory = this.createMock(HttpResourceStore.class);
 
 	/**
 	 * Mock {@link HttpFile}.
@@ -131,15 +131,15 @@ public class HttpFileFactoryManagedFunctionTest extends OfficeFrameTestCase {
 			if (isDirectory) {
 				// Record directory
 				final HttpDirectory directory = this.createMock(HttpDirectory.class);
-				this.recordReturn(this.factory, this.factory.createHttpResource(filePath), directory);
+				this.recordReturn(this.factory, this.factory.getHttpResource(filePath), directory);
 				this.recordReturn(directory, directory.getDefaultFile(), file);
 			} else {
 				// Record file
-				this.recordReturn(this.factory, this.factory.createHttpResource(filePath), file);
+				this.recordReturn(this.factory, this.factory.getHttpResource(filePath), file);
 			}
 		} else {
 			// Record not exist
-			this.recordReturn(this.factory, this.factory.createHttpResource(requestUri), file);
+			this.recordReturn(this.factory, this.factory.getHttpResource(requestUri), file);
 		}
 		this.creationListener.httpResourceCreated(file, connection, functionContext);
 

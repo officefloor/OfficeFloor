@@ -20,29 +20,21 @@ package net.officefloor.web.resource;
 import java.io.IOException;
 
 /**
- * HTTP Directory.
+ * Store of {@link HttpResource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpDirectory extends HttpResource {
+public interface HttpResourceStore {
 
 	/**
-	 * Obtains the default {@link HttpResource} for the {@link HttpDirectory}.
+	 * Obtains the {@link HttpResource}.
 	 * 
-	 * @return Default {@link HttpResource}.
+	 * @param path
+	 *            Path to the {@link HttpResource}.
+	 * @return {@link HttpResource}.
 	 * @throws IOException
 	 *             If failure in finding the {@link HttpResource}.
 	 */
-	HttpResource getDefaultHttpResource() throws IOException;
-
-	/**
-	 * Lists the {@link HttpResource} instances for the {@link HttpDirectory}.
-	 * 
-	 * @return {@link HttpResource} instances for the {@link HttpDirectory}.
-	 * @throws IOException
-	 *             If failure in loading {@link HttpResource} instances for the
-	 *             {@link HttpDirectory}.
-	 */
-	HttpResource[] listHttpResources() throws IOException;
+	HttpResource getHttpResource(String path) throws IOException;
 
 }

@@ -15,22 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.war;
+package net.officefloor.web.resource.file;
 
 import java.io.File;
 import java.io.IOException;
 
-import net.officefloor.web.resource.AbstractHttpDirectoryTestCase;
 import net.officefloor.web.resource.HttpDirectory;
-import net.officefloor.web.resource.war.WarHttpDirectory;
-import net.officefloor.web.resource.war.WarHttpResourceFactory;
+import net.officefloor.web.resource.file.FileHttpDirectory;
+import net.officefloor.web.resource.file.FileHttpResourceFactory;
+import net.officefloor.web.resource.impl.AbstractHttpDirectoryTestCase;
 
 /**
- * Tests the {@link WarHttpDirectory}.
+ * Tests the {@link FileHttpDirectory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WarHttpDirectoryTest extends AbstractHttpDirectoryTestCase {
+public class FileHttpDirectoryTest extends AbstractHttpDirectoryTestCase {
 
 	/*
 	 * ===================== AbstractHttpDirectoryTestCase ================
@@ -45,12 +45,12 @@ public class WarHttpDirectoryTest extends AbstractHttpDirectoryTestCase {
 				"index.html").getParentFile();
 
 		// Obtain the 'fresh' resource factory
-		WarHttpResourceFactory.clearHttpResourceFactories();
-		WarHttpResourceFactory factory = WarHttpResourceFactory
+		FileHttpResourceFactory.clearHttpResourceFactories();
+		FileHttpResourceFactory factory = FileHttpResourceFactory
 				.getHttpResourceFactory(warDirectory, "index.html");
 
 		// Create and return the HTTP Directory
-		return (HttpDirectory) factory.createHttpResource(resourcePath);
+		return (HttpDirectory) factory.getHttpResource(resourcePath);
 	}
 
 }

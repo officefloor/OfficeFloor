@@ -18,9 +18,11 @@
 package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
 /**
  * Abstract {@link StreamBufferPool}.
@@ -38,6 +40,11 @@ public abstract class AbstractStreamBufferPool<B> implements StreamBufferPool<B>
 		return new UnpooledStreamBuffer(buffer);
 	}
 
+	@Override
+	public StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count) {
+		return new FileStreamBuffer(new FileBuffer(file, position, count));
+	}
+
 	/**
 	 * Unpooled {@link StreamBuffer}.
 	 */
@@ -50,7 +57,42 @@ public abstract class AbstractStreamBufferPool<B> implements StreamBufferPool<B>
 		 *            Read-only {@link ByteBuffer}.
 		 */
 		private UnpooledStreamBuffer(ByteBuffer buffer) {
-			super(null, buffer);
+			super(null, buffer, null);
+		}
+
+		/*
+		 * =================== StreamBuffer ======================
+		 */
+
+		@Override
+		public boolean write(byte datum) {
+			throw new IllegalStateException(this.getClass().getSimpleName() + " is unpooled");
+		}
+
+		@Override
+		public int write(byte[] data, int offset, int length) {
+			throw new IllegalStateException(this.getClass().getSimpleName() + " is unpooled");
+		}
+
+		@Override
+		public void release() {
+			// Nothing to release
+		}
+	}
+
+	/**
+	 * {@link FileChannel} {@link StreamBuffer}.
+	 */
+	protected class FileStreamBuffer extends StreamBuffer<B> {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param buffer
+		 *            {@link FileBuffer}.
+		 */
+		private FileStreamBuffer(FileBuffer buffer) {
+			super(null, null, buffer);
 		}
 
 		/*

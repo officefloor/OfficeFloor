@@ -17,30 +17,21 @@
  */
 package net.officefloor.web.resource;
 
-import java.io.Serializable;
-
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.server.http.HttpRequest;
-
 /**
- * <p>
  * HTTP resource.
- * <p>
- * All {@link HttpResource} implementations must be {@link Serializable} to
- * enable them to be serialised into caches.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpResource extends Serializable {
+public interface HttpResource {
 
 	/**
 	 * <p>
-	 * Obtains the Request URI path to this {@link HttpResource}.
+	 * Obtains the path to this {@link HttpResource}.
 	 * <p>
 	 * The path is canonical to allow using it as a key for caching this
 	 * {@link HttpResource}.
 	 * 
-	 * @return Canonical request URI path to this {@link HttpResource}.
+	 * @return Canonical path to this {@link HttpResource}.
 	 */
 	String getPath();
 
@@ -50,10 +41,6 @@ public interface HttpResource extends Serializable {
 	 * {@link HttpResource} not exist, only the path will be available.
 	 * <p>
 	 * This allows for caching of {@link HttpResource} instances not existing.
-	 * <p>
-	 * It also enables implementations of {@link ManagedObjectSource} instances
-	 * to provide the {@link HttpResource} from a {@link HttpRequest} dependency
-	 * - can always provide an instance with this indicating if exists.
 	 * 
 	 * @return <code>true</code> if this {@link HttpResource} exists.
 	 */

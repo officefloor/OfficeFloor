@@ -101,7 +101,20 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 		this.write(2);
 		assertEquals("Should not write to head", 0, this.head.pooledBuffer.position());
 		assertNotNull("Should append pooled buffer", this.head.next.next);
-		assertTrue("Should be pooled buffer appended", this.head.next.next.isPooled);
+		assertNotNull("Should be pooled buffer appended", this.head.next.next.pooledBuffer);
+		this.assertBytes(1, 2);
+	}
+
+	/**
+	 * Ensure if last buffer is file, that a pooled buffer is added.
+	 */
+	public void testNotWriteFileBuffer() throws IOException {
+		this.head.next = this.bufferPool
+				.getFileStreamBuffer(TemporaryFiles.getDefault().createTempFile("test", new byte[] { 1 }), 0, -1);
+		this.write(2);
+		assertEquals("Should not write to head", 0, this.head.pooledBuffer.position());
+		assertNotNull("Should append pooled buffer", this.head.next.next);
+		assertNotNull("Should be pooled buffer appended", this.head.next.next.pooledBuffer);
 		this.assertBytes(1, 2);
 	}
 
