@@ -710,6 +710,11 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								fileBuffer.bytesWritten += bytesConsumed;
 								isStreamBufferWritten = (fileBuffer.bytesWritten == fileBytesCount);
 
+								// Callback once stream buffer written
+								if ((isStreamBufferWritten) && (fileBuffer.callback != null)) {
+									fileBuffer.callback.complete(fileBuffer.file, true);
+								}
+
 							} else {
 								// Determine if pooled / unpooled written
 								isStreamBufferWritten = (appToWrapBuffer.remaining() == 0);

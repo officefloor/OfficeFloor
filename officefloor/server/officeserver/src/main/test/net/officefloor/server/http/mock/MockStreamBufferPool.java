@@ -32,6 +32,7 @@ import org.junit.Assert;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.ByteBufferFactory;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -177,8 +178,9 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	}
 
 	@Override
-	public StreamBuffer<ByteBuffer> getFileStreamBuffer(FileChannel file, long position, long count) {
-		MockFileStreamBuffer buffer = new MockFileStreamBuffer(new FileBuffer(file, position, count));
+	public StreamBuffer<ByteBuffer> getFileStreamBuffer(FileChannel file, long position, long count,
+			FileCompleteCallback callback) {
+		MockFileStreamBuffer buffer = new MockFileStreamBuffer(new FileBuffer(file, position, count, callback));
 		this.createdBuffers.add(buffer);
 		return buffer;
 	}
@@ -442,6 +444,11 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 							throw new IOException("Failed to ready byte " + position + " from file buffer");
 						}
 						return byteToInt(buffer.get(0));
+					}
+
+					// As here, all file content read (so complete)
+					if (fileBuffer.callback != null) {
+						fileBuffer.callback.complete(fileBuffer.file, true);
 					}
 				}
 

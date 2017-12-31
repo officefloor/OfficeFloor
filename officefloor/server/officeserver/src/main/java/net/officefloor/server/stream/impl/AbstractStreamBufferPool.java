@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
@@ -41,8 +42,9 @@ public abstract class AbstractStreamBufferPool<B> implements StreamBufferPool<B>
 	}
 
 	@Override
-	public StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count) {
-		return new FileStreamBuffer(new FileBuffer(file, position, count));
+	public StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count,
+			FileCompleteCallback callback) {
+		return new FileStreamBuffer(new FileBuffer(file, position, count, callback));
 	}
 
 	/**

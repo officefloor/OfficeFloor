@@ -147,12 +147,32 @@ public class TemporaryFiles {
 	 *            <code>null</code>.
 	 * @param contents
 	 *            Contents for the temporary file.
+	 * @param offset
+	 *            Offset into contents.
+	 * @param length
+	 *            Length from offset to write to file.
+	 * @return {@link FileChannel} to the temporary file.
+	 * @throws IOException
+	 *             If fails to create temporary file.
+	 */
+	public FileChannel createTempFile(String name, byte[] contents, int offset, int length) throws IOException {
+		return this.createTempFile(name, new ByteArrayInputStream(contents, offset, length));
+	}
+
+	/**
+	 * Creates a {@link FileChannel} to a temporary file.
+	 * 
+	 * @param name
+	 *            Name to aid identifying the temporary file on disk. May be
+	 *            <code>null</code>.
+	 * @param contents
+	 *            Contents for the temporary file.
 	 * @return {@link FileChannel} to the temporary file.
 	 * @throws IOException
 	 *             If fails to create temporary file.
 	 */
 	public FileChannel createTempFile(String name, byte[] contents) throws IOException {
-		return this.createTempFile(name, new ByteArrayInputStream(contents));
+		return this.createTempFile(name, contents, 0, contents.length);
 	}
 
 	/**

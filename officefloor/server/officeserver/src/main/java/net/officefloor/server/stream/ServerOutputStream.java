@@ -65,10 +65,14 @@ public abstract class ServerOutputStream extends OutputStream {
 	 *            Count of bytes to write from the {@link FileChannel}. A
 	 *            negative value (typically <code>-1</code>) indicates to write
 	 *            the remaining {@link FileChannel} content from position.
+	 * @param callback
+	 *            Optional {@link FileCompleteCallback}. May be
+	 *            <code>null</code>.
 	 * @throws IOException
 	 *             If fails to write the {@link FileChannel} content.
 	 */
-	public abstract void write(FileChannel file, long position, long count) throws IOException;
+	public abstract void write(FileChannel file, long position, long count, FileCompleteCallback callback)
+			throws IOException;
 
 	/**
 	 * <p>
@@ -78,9 +82,12 @@ public abstract class ServerOutputStream extends OutputStream {
 	 * 
 	 * @param file
 	 *            {@link FileChannel}.
+	 * @param callback
+	 *            Optional {@link FileCompleteCallback}. May be
+	 *            <code>null</code>.
 	 * @throws IOException
 	 *             If fails to write the {@link FileChannel} content.
 	 */
-	public abstract void write(FileChannel file) throws IOException;
+	public abstract void write(FileChannel file, FileCompleteCallback callback) throws IOException;
 
 }

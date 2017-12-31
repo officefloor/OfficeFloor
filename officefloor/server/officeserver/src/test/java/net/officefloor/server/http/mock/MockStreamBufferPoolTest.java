@@ -104,8 +104,8 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 	public void testReleaseFileStreamBuffer() throws IOException {
 
 		// Obtain the read-only buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool
-				.getFileStreamBuffer(TemporaryFiles.getDefault().createTempFile("ReleaseFileBuffer", "contest"), 0, -1);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getFileStreamBuffer(
+				TemporaryFiles.getDefault().createTempFile("ReleaseFileBuffer", "contest"), 0, -1, null);
 		assertNotNull("Should be file", buffer.fileBuffer);
 
 		// Ensure issue if not returned to pool

@@ -23,6 +23,7 @@ import java.nio.channels.FileChannel;
 
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.TemporaryFiles;
@@ -101,7 +102,9 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Ensure can obtain a byte buffer
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testGetFileBuffer", "test");
-		StreamBuffer<ByteBuffer> buffer = this.pool.getFileStreamBuffer(file, 0, -1);
+		FileCompleteCallback callback = (completedFile, isWritten) -> {
+		};
+		StreamBuffer<ByteBuffer> buffer = this.pool.getFileStreamBuffer(file, 0, -1, callback);
 
 		// Ensure have buffer
 		assertNotNull("Should have buffer", buffer);
@@ -112,6 +115,7 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		assertSame("Incorrect file", file, content.file);
 		assertEquals("Incorrect position", 0, content.position);
 		assertEquals("Incorrect count", -1, content.count);
+		assertSame("Incorrect callback", callback, content.callback);
 	}
 
 	/**

@@ -56,6 +56,11 @@ public abstract class StreamBuffer<B> {
 		public final long count;
 
 		/**
+		 * Optional {@link FileCompleteCallback}. May be <code>null</code>.
+		 */
+		public final FileCompleteCallback callback;
+
+		/**
 		 * Bytes written. This is used by server implementations to track the
 		 * number of bytes written from the {@link FileChannel}.
 		 */
@@ -70,18 +75,28 @@ public abstract class StreamBuffer<B> {
 		 *            Position.
 		 * @param count
 		 *            Count.
+		 * @param callback
+		 *            Optional {@link FileCompleteCallback}. May be
+		 *            <code>null</code>.
 		 */
-		public FileBuffer(FileChannel file, long position, long count) {
+		public FileBuffer(FileChannel file, long position, long count, FileCompleteCallback callback) {
 			this.file = file;
 			this.position = position;
 			this.count = count;
+			this.callback = callback;
 		}
 
 		/**
 		 * Instantiate to write the entire {@link FileChannel} content.
+		 * 
+		 * @param file
+		 *            {@link FileChannel}.
+		 * @param callback
+		 *            Optional {@link FileCompleteCallback}. May be
+		 *            <code>null</code>.
 		 */
-		public FileBuffer(FileChannel file) {
-			this(file, 0, -1);
+		public FileBuffer(FileChannel file, FileCompleteCallback callback) {
+			this(file, 0, -1, callback);
 		}
 	}
 

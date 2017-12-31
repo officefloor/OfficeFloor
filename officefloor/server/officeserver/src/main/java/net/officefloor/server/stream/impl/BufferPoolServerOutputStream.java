@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
@@ -136,13 +137,22 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	/**
 	 * Clears this {@link OutputStream} and releases the {@link StreamBuffer}
 	 * instances.
+	 * 
+	 * @throws IOException
+	 *             If failure in clearing {@link OutputStream}.
 	 */
-	public void clear() {
+	public void clear() throws IOException {
 
 		// Release all the buffers (and clear list)
 		while (this.head != null) {
 			StreamBuffer<B> release = this.head;
 			this.head = this.head.next;
+
+			// Determine if file with callback
+			if ((release.fileBuffer != null) && (release.fileBuffer.callback != null)) {
+				// File will not be written, so complete
+				release.fileBuffer.callback.complete(release.fileBuffer.file, false);
+			}
 
 			// Release after (so next not cleared)
 			release.release();
@@ -194,11 +204,11 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	}
 
 	@Override
-	public void write(FileChannel file, long position, long count) throws IOException {
+	public void write(FileChannel file, long position, long count, FileCompleteCallback callback) throws IOException {
 		this.ensureOpen();
 
 		// Add the file buffer
-		StreamBuffer<B> fileBuffer = this.bufferPool.getFileStreamBuffer(file, position, count);
+		StreamBuffer<B> fileBuffer = this.bufferPool.getFileStreamBuffer(file, position, count, callback);
 		if (this.head == null) {
 			this.head = fileBuffer;
 			this.tail = fileBuffer;
@@ -214,8 +224,8 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	}
 
 	@Override
-	public void write(FileChannel file) throws IOException {
-		this.write(file, 0, -1);
+	public void write(FileChannel file, FileCompleteCallback callback) throws IOException {
+		this.write(file, 0, -1, callback);
 	}
 
 	@Override
@@ -364,23 +374,24 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		}
 
 		@Override
-		public void write(FileChannel file, long position, long count) throws IOException {
+		public void write(FileChannel file, long position, long count, FileCompleteCallback callback)
+				throws IOException {
 
 			// Flush to ensure written out
 			this.delegate.flush();
 
 			// Write the file content
-			BufferPoolServerOutputStream.this.write(file, position, count);
+			BufferPoolServerOutputStream.this.write(file, position, count, callback);
 		}
 
 		@Override
-		public void write(FileChannel file) throws IOException {
+		public void write(FileChannel file, FileCompleteCallback callback) throws IOException {
 
 			// Flush to ensure written out
 			this.delegate.flush();
 
 			// Write the file content
-			BufferPoolServerOutputStream.this.write(file);
+			BufferPoolServerOutputStream.this.write(file, callback);
 		}
 
 		/*

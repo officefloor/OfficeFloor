@@ -192,7 +192,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	 */
 	public void testFileBuffer() throws IOException {
 		this.writer.write("TEST-");
-		this.writer.write(TemporaryFiles.getDefault().createTempFile("testFileBuffer", "buffer"));
+		this.writer.write(TemporaryFiles.getDefault().createTempFile("testFileBuffer", "buffer"), null);
 		this.writer.write(new char[] { '.' });
 		this.writer.flush();
 		assertEquals("Incorrect written data", "TEST-buffer.", this.getContent());
@@ -263,8 +263,8 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		test.accept(() -> this.writer.append("3", 0, 1));
 		test.accept(() -> this.writer.write(new byte[] { 4 }));
 		test.accept(() -> this.writer.write(ByteBuffer.wrap(new byte[] { 5 })));
-		test.accept(
-				() -> this.writer.write(TemporaryFiles.getDefault().createTempFile("testEnsureClosed", "not written")));
+		test.accept(() -> this.writer
+				.write(TemporaryFiles.getDefault().createTempFile("testEnsureClosed", "not written"), null));
 		test.accept(() -> this.writer.write(6));
 		test.accept(() -> this.writer.write(new char[] { 7 }));
 		test.accept(() -> this.writer.write("9"));

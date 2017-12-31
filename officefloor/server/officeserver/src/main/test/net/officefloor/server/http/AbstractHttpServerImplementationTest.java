@@ -302,7 +302,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.setContentType(BytesServicer.TEXT_PLAIN, null);
-			response.getEntity().write(HELLO_WORLD_FILE);
+			response.getEntity().write(HELLO_WORLD_FILE, null);
 		}
 	}
 
@@ -458,6 +458,43 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	public void testSingleSecureFileRequest() throws Exception {
 		this.startHttpServer(FileServicer.class);
 		this.doSingleRequest(true);
+	}
+
+	/**
+	 * Ensure closes the {@link FileChannel} on write.
+	 */
+	public void testSingleCloseFileRequest() throws Exception {
+		CLOSE_FILE = TemporaryFiles.getDefault().createTempFile("testSingleCloseFileRequest",
+				BytesServicer.HELLO_WORLD);
+		this.startHttpServer(CloseFileServicer.class);
+		this.doSingleRequest(false);
+		assertFalse("File should be closed", CLOSE_FILE.isOpen());
+	}
+
+	/**
+	 * Ensure closes the {@link FileChannel} on write.
+	 */
+	public void testSingleSecureCloseFileRequest() throws Exception {
+		CLOSE_FILE = TemporaryFiles.getDefault().createTempFile("testSingleSecureCloseFileRequest",
+				BytesServicer.HELLO_WORLD);
+		this.startHttpServer(CloseFileServicer.class);
+		this.doSingleRequest(true);
+		assertFalse("File should be closed", CLOSE_FILE.isOpen());
+	}
+
+	private volatile static FileChannel CLOSE_FILE = null;
+
+	public static class CloseFileServicer {
+		public void service(ServerHttpConnection connection) throws Exception {
+			assertEquals("Incorrect request URI", "/test", connection.getRequest().getUri());
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
+			response.setContentType(BytesServicer.TEXT_PLAIN, null);
+			response.getEntity().write(CLOSE_FILE, 0, 6, (file, isWritten) -> {
+				assertTrue("File should be written", isWritten);
+				file.close();
+			});
+			response.getEntity().write(BytesServicer.HELLO_WORLD, 6, BytesServicer.HELLO_WORLD.length - 6);
+		}
 	}
 
 	/**
@@ -1245,7 +1282,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			final String format = "%1$15s";
 			StringWriter message = new StringWriter();
 			PrintWriter out = new PrintWriter(message);
-			out.println("============================================================");
+			out.println("=====================================================================================");
 			out.println(testClass.getSimpleName() + " - " + prefix);
 			out.println();
 
@@ -1256,7 +1293,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.print(String.format(format, "Buffer"));
 			out.print(String.format(format, "File"));
 			out.println();
-			
+
 			// Output the run time
 			out.print(String.format(format, "Run time (ms)"));
 			out.print(String.format(format, String.valueOf(result.rawResult.getRunTime())));
@@ -1264,7 +1301,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.print(String.format(format, String.valueOf(result.bufferResult.getRunTime())));
 			out.print(String.format(format, String.valueOf(result.fileResult.getRunTime())));
 			out.println();
-			
+
 			// Output the requests per second
 			out.print(String.format(format, "Requests/Sec"));
 			out.print(String.format(format, String.valueOf(result.rawResult.getRequestsPerSecond())));
@@ -1272,14 +1309,14 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.print(String.format(format, String.valueOf(result.bufferResult.getRequestsPerSecond())));
 			out.print(String.format(format, String.valueOf(result.fileResult.getRequestsPerSecond())));
 			out.println();
-			
+
 			// Calculate the overhead
 			final PipelineResult rawResult = result.rawResult;
 			Function<PipelineResult, String> overhead = (compare) -> {
 				long runtimeDifference = compare.getRunTime() - rawResult.getRunTime();
 				long maxRunTime = Math.max(compare.getRunTime(), rawResult.getRunTime());
 				float difference = (float) runtimeDifference / (float) maxRunTime;
-				return String.valueOf(difference);
+				return String.valueOf((int) (difference * 100));
 			};
 
 			// Overhead increase
@@ -1291,7 +1328,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.print(String.format(format, overhead.apply(result.fileResult)));
 			out.println();
 
-			out.println("============================================================");
+			out.println("=====================================================================================");
 			out.flush();
 			System.out.println(message.toString());
 		}

@@ -1073,6 +1073,12 @@ public class SocketManager {
 								: streamBuffer.unpooledByteBuffer;
 						isReleaseStreamBuffer = true;
 
+						// Ensure have pooled buffer for writing (may be file)
+						if (writeBuffer.pooledBuffer == null) {
+							writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
+							writeBuffer = writeBuffer.next;
+						}
+
 						// Compact the data into the write buffer
 						int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
 						int bytesToWrite = buffer.remaining();
@@ -1227,6 +1233,11 @@ public class SocketManager {
 
 							// Can not write anything further
 							return false; // require further writes
+						}
+
+						// As here, file complete
+						if (writeBuffer.callback != null) {
+							writeBuffer.callback.complete(writeBuffer.file, true);
 						}
 
 					} catch (IOException ex) {

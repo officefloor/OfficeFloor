@@ -350,7 +350,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Create file
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFile", new byte[] { 3 });
-		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1);
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1, null);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
@@ -373,6 +373,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			InputStream inputStream = client.getInputStream();
 			assertEquals("Incorrect header value", 2, inputStream.read());
 			assertEquals("Incorrect file value", 3, inputStream.read());
+
+			// Ensure the file is still open
+			assertTrue("File should still be open", file.isOpen());
 		}
 	}
 
@@ -392,7 +395,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			data[i] = transform.apply(i);
 		}
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndLargeFile", data);
-		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1);
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1,
+				(completedFile, isWritten) -> completedFile.close());
+		fileBuffer.next = this.tester.createStreamBuffer(1);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
@@ -418,6 +423,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				byte expected = transform.apply(i);
 				assertEquals("Incorrect file value for byte " + i, expected, inputStream.read());
 			}
+			assertEquals("Incorrect final value", 1, inputStream.read());
+
+			// File should be closed
+			assertFalse("File should be closed", file.isOpen());
 		}
 	}
 
@@ -430,7 +439,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Create file
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFileSegment",
 				new byte[] { 1, 2, 3 });
-		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 2, 1);
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 2, 1,
+				(completedFile, isWritten) -> completedFile.close());
+		fileBuffer.next = this.tester.createStreamBuffer(4);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
@@ -453,6 +464,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			InputStream inputStream = client.getInputStream();
 			assertEquals("Incorrect header value", 2, inputStream.read());
 			assertEquals("Incorrect file value", 3, inputStream.read());
+			assertEquals("Incorrect further value", 4, inputStream.read());
+
+			// File should be closed
+			assertFalse("File should be closed", file.isOpen());
 		}
 	}
 

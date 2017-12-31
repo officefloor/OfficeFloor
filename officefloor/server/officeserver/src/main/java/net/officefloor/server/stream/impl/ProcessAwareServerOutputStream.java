@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.ServerOutputStream;
 
 /**
@@ -97,14 +98,14 @@ public class ProcessAwareServerOutputStream extends ServerOutputStream {
 	}
 
 	@Override
-	public void write(FileChannel file, long position, long count) throws IOException {
-		this.safe(() -> this.unsafeOutputStream.write(file, position, count));
+	public void write(FileChannel file, long position, long count, FileCompleteCallback callback) throws IOException {
+		this.safe(() -> this.unsafeOutputStream.write(file, position, count, callback));
 
 	}
 
 	@Override
-	public void write(FileChannel file) throws IOException {
-		this.safe(() -> this.unsafeOutputStream.write(file));
+	public void write(FileChannel file, FileCompleteCallback callback) throws IOException {
+		this.safe(() -> this.unsafeOutputStream.write(file, callback));
 	}
 
 	@Override

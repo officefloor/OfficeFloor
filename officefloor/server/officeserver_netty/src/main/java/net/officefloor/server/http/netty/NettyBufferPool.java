@@ -24,6 +24,7 @@ import java.nio.channels.FileChannel;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -65,9 +66,13 @@ public class NettyBufferPool extends StreamBuffer<ByteBuf> implements StreamBuff
 	}
 
 	@Override
-	public StreamBuffer<ByteBuf> getFileStreamBuffer(FileChannel file, long position, long count) throws IOException {
+	public StreamBuffer<ByteBuf> getFileStreamBuffer(FileChannel file, long position, long count,
+			FileCompleteCallback callback) throws IOException {
 		int length = (int) (count < 0 ? file.size() - position : count);
 		this.response.content().writeBytes(file, position, length);
+		if (callback != null) {
+			callback.complete(file, true);
+		}
 		return this;
 	}
 
