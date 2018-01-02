@@ -15,34 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.impl;
+package net.officefloor.web.resource.file;
 
-import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.impl.AbstractHttpResourceStoreTestCase;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
- * Not existing {@link HttpResource}.
+ * Tests the {@link FileResourceSystem}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param path
-	 *            Path.
-	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
+public class FileResourceSystemTest extends AbstractHttpResourceStoreTestCase {
 
 	/*
-	 * ====================== HttpResource ======================
+	 * ============== AbstractHttpResourceStoreTestCase ==================
 	 */
 
 	@Override
-	public boolean isExist() {
-		return false;
+	protected String getLocation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected ResourceSystemFactory getResourceSystemFactory() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

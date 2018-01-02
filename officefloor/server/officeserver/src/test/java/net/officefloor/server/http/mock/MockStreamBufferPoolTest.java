@@ -26,9 +26,9 @@ import java.nio.ByteBuffer;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.TemporaryFiles;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**

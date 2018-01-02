@@ -18,11 +18,11 @@
 package net.officefloor.web.resource.impl;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 import net.officefloor.server.http.HttpHeaderName;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.web.resource.HttpFile;
 
@@ -31,7 +31,7 @@ import net.officefloor.web.resource.HttpFile;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpFile extends AbstractHttpResource implements HttpFile {
+public abstract class HttpFileImpl extends AbstractHttpResource implements HttpFile {
 
 	/**
 	 * <code>Content-Encoding</code> {@link HttpHeaderName}.
@@ -39,63 +39,44 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements H
 	private static final HttpHeaderName CONTENT_ENCODING = new HttpHeaderName("content-encoding");
 
 	/**
-	 * Writes the {@link HttpFile} to the {@link HttpResponse}.
-	 * 
-	 * @param file
-	 *            {@link HttpFile} to write to the {@link HttpResponse}.
-	 * @param response
-	 *            {@link HttpResponse}
-	 * @throws IOException
-	 *             If fails to write the {@link HttpFile}.
+	 * <code>Content-Encoding</code> {@link HttpHeaderValue}.
 	 */
-	public static void writeHttpFile(HttpFile file, HttpResponse response) throws IOException {
-
-		// Reset the HTTP response for writing the file
-		response.reset();
-
-		// Provide the details of the file
-		String contentEncoding = file.getContentEncoding();
-		if ((contentEncoding != null) && (contentEncoding.length() > 0)) {
-			response.getHeaders().addHeader(CONTENT_ENCODING, contentEncoding);
-		}
-		String contentType = file.getContentType();
-		Charset charset = file.getCharset();
-		response.setContentType(contentType, charset);
-
-		// Write the HTTP file content to response
-		response.getEntityWriter().write(file.getContents().duplicate());
-	}
+	private final HttpHeaderValue contentEncoding;
 
 	/**
-	 * <code>Content-Encoding</code>.
+	 * <code>Content-Type</code> {@link HttpHeaderValue}.
 	 */
-	protected String contentEncoding;
-
-	/**
-	 * <code>Content-Type</code>.
-	 */
-	protected String contentType;
+	private final HttpHeaderValue contentType;
 
 	/**
 	 * {@link Charset}.
 	 */
-	protected transient Charset charset;
+	private final Charset charset;
+
+	/**
+	 * {@link FileChannel}.
+	 */
+	private final FileChannel file;
 
 	/**
 	 * Initiate an existing {@link HttpFile}.
 	 * 
-	 * @param resourcePath
-	 *            Resource path.
-	 * @param description
-	 *            {@link AbstractHttpFileDescription}.
+	 * @param path
+	 *            Path.
+	 * @param contentEncoding
+	 *            <code>Content-Encoding</code>.
+	 * @param contentType
+	 *            <code>Content-Type</code>.
+	 * @param charset
+	 *            {@link Charset}.
 	 */
-	public AbstractHttpFile(String resourcePath, AbstractHttpFileDescription description) {
-		super(resourcePath);
-		String contentEncoding = description.getContentEncoding();
-		this.contentEncoding = (contentEncoding == null ? "" : contentEncoding);
-		String contentType = description.getContentType();
-		this.contentType = (contentType == null ? "" : contentType);
-		this.charset = description.getCharset();
+	public HttpFileImpl(String path, FileChannel file, HttpHeaderValue contentEncoding, HttpHeaderValue contentType,
+			Charset charset) {
+		super(path);
+		this.contentEncoding = contentEncoding;
+		this.contentType = contentType;
+		this.charset = charset;
+		this.file = file;
 	}
 
 	/*
@@ -104,23 +85,48 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements H
 
 	@Override
 	public boolean isExist() {
-		// File always exists
 		return true;
 	}
 
 	@Override
-	public String getContentEncoding() {
+	public HttpHeaderValue getContentEncoding() {
 		return this.contentEncoding;
 	}
 
 	@Override
-	public String getContentType() {
+	public HttpHeaderValue getContentType() {
 		return this.contentType;
 	}
 
 	@Override
 	public Charset getCharset() {
 		return this.charset;
+	}
+
+	/**
+	 * Writes the {@link HttpFile} to the {@link HttpResponse}.
+	 * 
+	 * @param response
+	 *            {@link HttpResponse}
+	 * @throws IOException
+	 *             If fails to write the {@link HttpFile}.
+	 */
+	@Override
+	public void writeTo(HttpResponse response) throws IOException {
+
+		// Reset the HTTP response for writing the file
+		response.reset();
+
+		// Provide the details of the file
+		if (this.contentEncoding != null) {
+			response.getHeaders().addHeader(CONTENT_ENCODING, this.contentEncoding);
+		}
+		if (this.contentType != null) {
+			response.setContentType(this.contentType, this.charset);
+		}
+
+		// Write the HTTP file content to response
+		response.getEntityWriter().write(file, null);
 	}
 
 	/*
@@ -136,10 +142,10 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements H
 		}
 
 		// Ensure same type
-		if (!(obj instanceof AbstractHttpFile)) {
+		if (!(obj instanceof HttpFileImpl)) {
 			return false;
 		}
-		AbstractHttpFile that = (AbstractHttpFile) obj;
+		HttpFileImpl that = (HttpFileImpl) obj;
 
 		// Return whether details same
 		return (this.getPath().equals(that.getPath())) && (this.contentEncoding.equals(that.getContentEncoding()))

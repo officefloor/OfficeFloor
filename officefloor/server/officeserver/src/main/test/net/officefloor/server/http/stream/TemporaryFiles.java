@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.stream;
+package net.officefloor.server.http.stream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class TemporaryFiles {
 	 * read by group (useful for read-only debugging access).
 	 */
 	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = new FileAttribute[] {
-			PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")) };
+			PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")) };
 
 	/**
 	 * Allow files to be read/written by executing user, and allow files to be

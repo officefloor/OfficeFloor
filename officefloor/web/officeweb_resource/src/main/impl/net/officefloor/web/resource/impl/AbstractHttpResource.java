@@ -27,18 +27,18 @@ import net.officefloor.web.resource.HttpResource;
 public abstract class AbstractHttpResource implements HttpResource {
 
 	/**
-	 * Resource path.
+	 * Path.
 	 */
-	protected String resourcePath;
+	protected String path;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param resourcePath
+	 * @param path
 	 *            Resource path.
 	 */
-	public AbstractHttpResource(String resourcePath) {
-		this.resourcePath = resourcePath;
+	public AbstractHttpResource(String path) {
+		this.path = path;
 	}
 
 	/*
@@ -47,7 +47,7 @@ public abstract class AbstractHttpResource implements HttpResource {
 
 	@Override
 	public String getPath() {
-		return this.resourcePath;
+		return this.path;
 	}
 
 	/*
@@ -69,12 +69,12 @@ public abstract class AbstractHttpResource implements HttpResource {
 		AbstractHttpResource that = (AbstractHttpResource) obj;
 
 		// Return whether same resource by path
-		return this.resourcePath.equals(that.resourcePath);
+		return this.path.equals(that.path);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.resourcePath.hashCode();
+		return this.path.hashCode();
 	}
 
 }

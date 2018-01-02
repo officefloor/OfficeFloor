@@ -17,7 +17,6 @@
  */
 package net.officefloor.web.resource.build;
 
-import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,8 +28,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.resource.source.HttpFileSectionSource;
-import net.officefloor.web.resource.source.SourceHttpResourceFactory;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
  * Employs a {@link HttpResourceArchitect}.
@@ -102,12 +100,6 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	 */
 
 	@Override
-	public void addHttpFileDescriber(HttpFileDescriber describer) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void link(OfficeSectionOutput output, String resourcePath) {
 		this.resourceLinks.add(new ResourceLink(output, resourcePath));
 	}
@@ -119,13 +111,13 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	@Override
-	public HttpResourcesBuilder addInternalHttpResources(String classpathPrefix) {
+	public HttpResourcesBuilder addHttpResources(ResourceSystemFactory resourceSystemFactory) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public HttpResourcesBuilder addExternalHttpResources(File rootDirectory) {
+	public HttpResourcesBuilder addHttpResources(String protocolLocation) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -136,27 +128,6 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		// Link to resources
 		if ((this.resourceLinks.size() > 0) || (this.escalationResources.size() > 0)) {
 
-			// Create section to send resources
-			OfficeSection section = this.officeArchitect.addOfficeSection("RESOURCES",
-					HttpFileSectionSource.class.getName(), "");
-			SourceHttpResourceFactory.copyProperties(this.officeSourceContext, section);
-
-			// Link section outputs to the resources
-			for (ResourceLink resourceLink : this.resourceLinks) {
-				this.officeArchitect.link(resourceLink.sectionOutput,
-						section.getOfficeSectionInput(resourceLink.resourcePath));
-				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + resourceLink.resourcePath,
-						resourceLink.resourcePath);
-			}
-
-			// Link escalations to the resources
-			for (EscalationResource escalation : this.escalationResources) {
-				OfficeEscalation officeEscalation = this.officeArchitect
-						.addOfficeEscalation(escalation.escalationType.getName());
-				this.officeArchitect.link(officeEscalation, section.getOfficeSectionInput(escalation.resourcePath));
-				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + escalation.resourcePath,
-						escalation.resourcePath);
-			}
 		}
 	}
 

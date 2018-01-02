@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.impl;
+package net.officefloor.web.resource.spi;
 
-import net.officefloor.web.resource.HttpResource;
+import java.io.IOException;
+import java.nio.file.Path;
+
+import javax.annotation.Resource;
 
 /**
- * Not existing {@link HttpResource}.
+ * Transforms {@link Resource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
+public interface ResourceTransformer {
 
 	/**
-	 * Initiate.
+	 * <p>
+	 * Transforms the resource at {@link Path} to another resource at the return
+	 * {@link Path}.
+	 * <p>
+	 * Typically this is to compress the files, however available for other
+	 * transforms to files (such as altering contents of files).
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param context
+	 *            {@link ResourceTransformerContext}.
+	 * @throws IOException
+	 *             If fails to transform the resource.
 	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
-
-	/*
-	 * ====================== HttpResource ======================
-	 */
-
-	@Override
-	public boolean isExist() {
-		return false;
-	}
+	void transform(ResourceTransformerContext context) throws IOException;
 
 }

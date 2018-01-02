@@ -17,12 +17,12 @@
  */
 package net.officefloor.web.resource.build;
 
-import java.io.File;
-
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.spi.ResourceSystem;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
  * Builds the {@link HttpResource} for {@link WebArchitect}.
@@ -30,14 +30,6 @@ import net.officefloor.web.resource.HttpResource;
  * @author Daniel Sagenschneider
  */
 public interface HttpResourceArchitect {
-
-	/**
-	 * Adds a {@link HttpFileDescriber}.
-	 * 
-	 * @param describer
-	 *            {@link HttpFileDescriber}.
-	 */
-	void addHttpFileDescriber(HttpFileDescriber describer);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to the {@link HttpResource}.
@@ -60,26 +52,36 @@ public interface HttpResourceArchitect {
 	void link(OfficeEscalation escalation, String resourcePath);
 
 	/**
-	 * Adds internal {@link HttpResource} instances that may be served from
-	 * class path.
+	 * <p>
+	 * Adds {@link HttpResource} instances.
+	 * <p>
+	 * The {@link ResourceSystem} instances will be interrogated in the order
+	 * they are added for a {@link HttpResource}.
 	 * 
-	 * @param classpathPrefix
-	 *            Class path prefix to include only files found under this class
-	 *            path prefix.
+	 * @param resourceSystemFactory
+	 *            {@link ResourceSystemFactory} to create the
+	 *            {@link ResourceSystem} to provide the resources backing the
+	 *            {@link HttpResource} instances.
 	 * @return {@link HttpResourcesBuilder}.
 	 */
-	HttpResourcesBuilder addInternalHttpResources(String classpathPrefix);
+	HttpResourcesBuilder addHttpResources(ResourceSystemFactory resourceSystemFactory);
 
 	/**
-	 * Adds external {@link HttpResource} instances that may be served from file
-	 * system.
+	 * <p>
+	 * Adds {@link HttpResource} instances via a {@link ResourceSystemFactory}.
+	 * <p>
+	 * The {@link ResourceSystem} instances will be interrogated in the order
+	 * they are added for a {@link HttpResource}.
 	 * 
-	 * @param rootDirectory
-	 *            Root directory for the external {@link HttpResource}
-	 *            instances.
+	 * @param protocolLocation
+	 *            String configuration of <code>[protocol]:location</code> to
+	 *            configure a {@link ResourceSystem} from
+	 *            {@link ResourceSystemFactory}.
 	 * @return {@link HttpResourcesBuilder}.
+	 * 
+	 * @see ResourceSystemFactory
 	 */
-	HttpResourcesBuilder addExternalHttpResources(File rootDirectory);
+	HttpResourcesBuilder addHttpResources(String protocolLocation);
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary {@link HttpResource}

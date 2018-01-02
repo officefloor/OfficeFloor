@@ -23,10 +23,10 @@ import java.nio.channels.FileChannel;
 
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
-import net.officefloor.server.stream.TemporaryFiles;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**

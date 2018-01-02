@@ -18,6 +18,8 @@
 package net.officefloor.web.resource.build;
 
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.spi.ResourceTransformer;
+import net.officefloor.web.resource.spi.ResourceTransformerFactory;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -41,8 +43,40 @@ public interface HttpResourcesBuilder {
 	void setContextPath(String contextPath);
 
 	/**
-	 * Specifies the {@link HttpSecurity} to secure external
+	 * Registers a {@link ResourceTransformer} to transform the resources.
+	 * 
+	 * @param transformer
+	 *            {@link ResourceTransformer}.
+	 */
+	void addResourceTransformer(ResourceTransformer transformer);
+
+	/**
+	 * Registers a {@link ResourceTransformer} from a
+	 * {@link ResourceTransformerFactory} to transform the resources.
+	 * 
+	 * @param name
+	 *            Name of the {@link ResourceTransformerFactory} to create the
+	 *            {@link ResourceTransformer}.
+	 * 
+	 * @see ResourceTransformerFactory
+	 */
+	void addResourceTransformer(String name);
+
+	/**
+	 * Specifies the default file names within a directory.
+	 * 
+	 * @param defaultResourceNames
+	 *            Default file names within directory.
+	 */
+	void setDirectoryDefaultResourceNames(String... defaultResourceNames);
+
+	/**
+	 * <p>
+	 * Specifies a particular {@link HttpSecurity} to secure the
 	 * {@link HttpResource} instances.
+	 * <p>
+	 * Should this not be provided, then the default {@link HttpSecurity} is
+	 * used if role access specified.
 	 * 
 	 * @param httpSecurityName
 	 *            Name of the {@link HttpSecurity}.

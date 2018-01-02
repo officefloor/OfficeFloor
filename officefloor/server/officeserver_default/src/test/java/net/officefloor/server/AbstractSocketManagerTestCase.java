@@ -29,8 +29,8 @@ import java.util.function.Function;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.RequestHandler.Execution;
+import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.TemporaryFiles;
 
 /**
  * Tests the {@link SocketListener}.

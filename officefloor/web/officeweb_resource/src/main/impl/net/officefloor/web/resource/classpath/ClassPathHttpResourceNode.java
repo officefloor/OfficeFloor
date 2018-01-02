@@ -19,7 +19,6 @@ package net.officefloor.web.resource.classpath;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -33,7 +32,7 @@ import net.officefloor.web.resource.HttpResource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassPathHttpResourceNode implements Serializable {
+public class ClassPathHttpResourceNode {
 
 	/**
 	 * Creates the {@link ClassPathHttpResourceNode} tree for available
@@ -44,16 +43,15 @@ public class ClassPathHttpResourceNode implements Serializable {
 	 *            <code>null</code> for the entire class path.
 	 * @return {@link ClassPathHttpResourceNode}.
 	 */
-	public static ClassPathHttpResourceNode createClassPathResourceTree(
-			String classpathPrefix) {
+	public static ClassPathHttpResourceNode createClassPathResourceTree(String classpathPrefix) {
 
 		// Obtain the class path entries
 		String classPath = System.getProperty("java.class.path");
 		String[] classPathEntries = classPath.split(File.pathSeparator);
 
 		// Create the root class path node for loading (always directory)
-		ClassPathHttpResourceNode root = new ClassPathHttpResourceNode(null,
-				"/", (classpathPrefix == null ? "" : classpathPrefix), true);
+		ClassPathHttpResourceNode root = new ClassPathHttpResourceNode(null, "/",
+				(classpathPrefix == null ? "" : classpathPrefix), true);
 
 		// Iterate over class path entries creating the nodes
 		for (String classPathEntry : classPathEntries) {
@@ -107,8 +105,7 @@ public class ClassPathHttpResourceNode implements Serializable {
 	 * @param directory
 	 *            Parent directory.
 	 */
-	private static void loadDirectoryEntries(ClassPathHttpResourceNode parent,
-			File directory) {
+	private static void loadDirectoryEntries(ClassPathHttpResourceNode parent, File directory) {
 
 		// Iterate over children of directory
 		for (File file : directory.listFiles()) {
@@ -117,8 +114,7 @@ public class ClassPathHttpResourceNode implements Serializable {
 			boolean isDirectory = file.isDirectory();
 
 			// Always add the node
-			ClassPathHttpResourceNode child = addChild(parent, file.getName(),
-					isDirectory);
+			ClassPathHttpResourceNode child = addChild(parent, file.getName(), isDirectory);
 
 			// Add children of directory
 			if (isDirectory) {
@@ -137,15 +133,13 @@ public class ClassPathHttpResourceNode implements Serializable {
 	 * @param classpathPrefix
 	 *            Class path prefix.
 	 */
-	private static void loadJarEntries(ClassPathHttpResourceNode tree,
-			JarFile jarFile, String classpathPrefix) {
+	private static void loadJarEntries(ClassPathHttpResourceNode tree, JarFile jarFile, String classpathPrefix) {
 
 		// Ensure have class path prefix
 		classpathPrefix = (classpathPrefix == null ? "" : classpathPrefix);
 
 		// Iterate over the jar entries
-		for (Enumeration<JarEntry> enumeration = jarFile.entries(); enumeration
-				.hasMoreElements();) {
+		for (Enumeration<JarEntry> enumeration = jarFile.entries(); enumeration.hasMoreElements();) {
 			JarEntry jarEntry = enumeration.nextElement();
 
 			// Obtain the entry name
@@ -155,8 +149,7 @@ public class ClassPathHttpResourceNode implements Serializable {
 			}
 
 			// Strip off class path prefix to find resource path
-			String resourcePath = jarEntryName.substring(classpathPrefix
-					.length());
+			String resourcePath = jarEntryName.substring(classpathPrefix.length());
 
 			// Ignore root directory
 			if ("/".equals(resourcePath)) {
@@ -172,16 +165,14 @@ public class ClassPathHttpResourceNode implements Serializable {
 				String nodePath = nodePaths[i];
 
 				// Add the child directory
-				ClassPathHttpResourceNode child = addChild(parent, nodePath,
-						true);
+				ClassPathHttpResourceNode child = addChild(parent, nodePath, true);
 
 				// Child becomes parent for next iteration
 				parent = child;
 			}
 
 			// Create the leaf node being added
-			addChild(parent, nodePaths[nodePaths.length - 1],
-					jarEntry.isDirectory());
+			addChild(parent, nodePaths[nodePaths.length - 1], jarEntry.isDirectory());
 		}
 	}
 
@@ -196,8 +187,7 @@ public class ClassPathHttpResourceNode implements Serializable {
 	 *            Indicates if directory.
 	 * @return Added child {@link ClassPathHttpResourceNode}.
 	 */
-	private static ClassPathHttpResourceNode addChild(
-			ClassPathHttpResourceNode parent, String nodePath,
+	private static ClassPathHttpResourceNode addChild(ClassPathHttpResourceNode parent, String nodePath,
 			boolean isDirectory) {
 
 		// Ensure have path for child
@@ -212,30 +202,23 @@ public class ClassPathHttpResourceNode implements Serializable {
 		}
 
 		// No child so create the child
-		String resourcePath = parent.resourcePath + nodePath
-				+ (isDirectory ? "/" : "");
-		String classPath = parent.classPath
-				+ ("".equals(parent.classPath) ? "" : "/") + nodePath;
-		child = new ClassPathHttpResourceNode(nodePath, resourcePath,
-				classPath, isDirectory);
+		String resourcePath = parent.resourcePath + nodePath + (isDirectory ? "/" : "");
+		String classPath = parent.classPath + ("".equals(parent.classPath) ? "" : "/") + nodePath;
+		child = new ClassPathHttpResourceNode(nodePath, resourcePath, classPath, isDirectory);
 
 		// Add child to the parent
 		ClassPathHttpResourceNode[] children = new ClassPathHttpResourceNode[parent.children.length + 1];
-		System.arraycopy(parent.children, 0, children, 0,
-				parent.children.length);
+		System.arraycopy(parent.children, 0, children, 0, parent.children.length);
 		children[children.length - 1] = child;
 		parent.children = children;
 
 		// Sort the children
-		Arrays.sort(parent.children,
-				new Comparator<ClassPathHttpResourceNode>() {
-					@Override
-					public int compare(ClassPathHttpResourceNode a,
-							ClassPathHttpResourceNode b) {
-						return String.CASE_INSENSITIVE_ORDER.compare(
-								a.nodePath, b.nodePath);
-					}
-				});
+		Arrays.sort(parent.children, new Comparator<ClassPathHttpResourceNode>() {
+			@Override
+			public int compare(ClassPathHttpResourceNode a, ClassPathHttpResourceNode b) {
+				return String.CASE_INSENSITIVE_ORDER.compare(a.nodePath, b.nodePath);
+			}
+		});
 
 		// Return the child
 		return child;
@@ -279,8 +262,7 @@ public class ClassPathHttpResourceNode implements Serializable {
 	 *            <code>true</code> if this node is a directory (otherwise a
 	 *            file).
 	 */
-	public ClassPathHttpResourceNode(String nodePath, String resourcePath,
-			String classPath, boolean isDirectory) {
+	public ClassPathHttpResourceNode(String nodePath, String resourcePath, String classPath, boolean isDirectory) {
 		this.nodePath = nodePath;
 		this.resourcePath = resourcePath;
 		this.classPath = classPath;

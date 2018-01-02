@@ -146,7 +146,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	public void testExternalResources() throws Exception {
 		File resourcesDirectory = this.findFile(this.getClass(), "resources");
 		this.compile((context, resource) -> {
-			resource.addExternalHttpResources(resourcesDirectory);
+			resource.addHttpResources(resourcesDirectory.getAbsolutePath());
 		});
 
 		// Ensure can obtain resource
@@ -168,12 +168,12 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
 					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
 			security.addHttpSecurity("secure", new MockChallengeHttpSecuritySource("secure"));
-			HttpResourcesBuilder external = resource.addExternalHttpResources(securedDirectory);
+			HttpResourcesBuilder external = resource.addHttpResources(securedDirectory.getAbsolutePath());
 			external.setHttpSecurityName("secure");
 			external.addRole("test");
 
 			// Configure non-secured resources
-			resource.addExternalHttpResources(resourcesDirectory);
+			resource.addHttpResources(resourcesDirectory.getAbsolutePath());
 		});
 
 		// Ensure can obtain non-secured resource

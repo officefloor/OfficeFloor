@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
+import net.officefloor.server.http.stream.TemporaryFiles;
 
 /**
  * Tests the write functionality of the {@link StreamBuffer}.

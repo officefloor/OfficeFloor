@@ -19,8 +19,13 @@ package net.officefloor.web.resource;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.spi.FileTypeDetector;
 
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.web.resource.spi.ResourceSystem;
+import net.officefloor.web.resource.spi.ResourceSystemContext;
+import net.officefloor.web.resource.spi.ResourceTransformer;
 
 /**
  * HTTP file.
@@ -33,24 +38,28 @@ public interface HttpFile extends HttpResource {
 	 * Obtains the <code>Content-Encoding</code> for this {@link HttpFile}.
 	 * 
 	 * @return <code>Content-Encoding</code> for this {@link HttpFile}.
+	 * 
+	 * @see ResourceTransformer
 	 */
-	String getContentEncoding();
+	HttpHeaderValue getContentEncoding();
 
 	/**
-	 * <p>
 	 * Obtains the <code>Content-Type</code> for this {@link HttpFile}.
-	 * <p>
-	 * The value should omit the <code>charset</code> attribute.
 	 * 
 	 * @return <code>Content-Type</code> for this {@link HttpFile}.
+	 * 
+	 * @see FileTypeDetector
 	 */
-	String getContentType();
+	HttpHeaderValue getContentType();
 
 	/**
 	 * Obtains the {@link Charset} for the contents.
 	 * 
 	 * @return {@link Charset} or <code>null</code> if contents are not text or
 	 *         the {@link Charset} is unknown.
+	 * 
+	 * @see ResourceSystem
+	 * @see ResourceSystemContext
 	 */
 	Charset getCharset();
 

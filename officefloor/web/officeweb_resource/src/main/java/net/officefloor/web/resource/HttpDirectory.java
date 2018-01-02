@@ -27,22 +27,12 @@ import java.io.IOException;
 public interface HttpDirectory extends HttpResource {
 
 	/**
-	 * Obtains the default {@link HttpResource} for the {@link HttpDirectory}.
+	 * Obtains the default {@link HttpFile} for the {@link HttpDirectory}.
 	 * 
-	 * @return Default {@link HttpResource}.
+	 * @return Default {@link HttpFile}.
 	 * @throws IOException
-	 *             If failure in finding the {@link HttpResource}.
+	 *             If failure in finding the {@link HttpFile}.
 	 */
-	HttpResource getDefaultHttpResource() throws IOException;
-
-	/**
-	 * Lists the {@link HttpResource} instances for the {@link HttpDirectory}.
-	 * 
-	 * @return {@link HttpResource} instances for the {@link HttpDirectory}.
-	 * @throws IOException
-	 *             If failure in loading {@link HttpResource} instances for the
-	 *             {@link HttpDirectory}.
-	 */
-	HttpResource[] listHttpResources() throws IOException;
+	HttpFile getDefaultHttpFile() throws IOException;
 
 }

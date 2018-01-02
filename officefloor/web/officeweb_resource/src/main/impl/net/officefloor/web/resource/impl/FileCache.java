@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,32 +17,37 @@
  */
 package net.officefloor.web.resource.impl;
 
-import net.officefloor.web.resource.HttpResource;
+import java.nio.file.Path;
+
+import java.io.IOException;
 
 /**
- * Not existing {@link HttpResource}.
+ * Cache of files.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
+public interface FileCache {
 
 	/**
-	 * Initiate.
+	 * Creates a new file.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param name
+	 *            Name to aid in identifying the file for debugging.
+	 * @return {@link Path} to the new file.
+	 * @throws IOException
+	 *             If fails to create the file.
 	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
+	Path createFile(String name) throws IOException;
 
-	/*
-	 * ====================== HttpResource ======================
+	/**
+	 * Creates a new directory.
+	 *
+	 * @param name
+	 *            Name to aid in identifying the file for debugging.
+	 * @return {@link Path} to the new directory.
+	 * @throws IOException
+	 *             If fails to create the directory.
 	 */
-
-	@Override
-	public boolean isExist() {
-		return false;
-	}
+	Path createDirectory(String name) throws IOException;
 
 }

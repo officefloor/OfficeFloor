@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.impl;
+package net.officefloor.web.resource;
 
-import net.officefloor.web.resource.HttpResource;
+import java.io.IOException;
 
 /**
- * Not existing {@link HttpResource}.
+ * Cache of the {@link HttpResource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
+public interface HttpResourceCache {
 
 	/**
-	 * Initiate.
+	 * Obtains the cached {@link HttpResource}.
 	 * 
 	 * @param path
-	 *            Path.
+	 *            Path to the {@link HttpResource}.
+	 * @return {@link HttpResource} or <code>null</code> if {@link HttpResource}
+	 *         not cached.
+	 * @throws IOException
+	 *             If failure in finding the {@link HttpResource}.
 	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
-
-	/*
-	 * ====================== HttpResource ======================
-	 */
-
-	@Override
-	public boolean isExist() {
-		return false;
-	}
+	HttpResource getHttpResource(String path) throws IOException;
 
 }

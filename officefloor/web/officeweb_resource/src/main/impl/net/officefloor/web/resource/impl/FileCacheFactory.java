@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.build;
+package net.officefloor.web.resource.impl;
 
-import net.officefloor.web.resource.HttpFile;
+import java.io.IOException;
 
 /**
- * Populates the {@link HttpFileDescription} for a {@link HttpFile}.
+ * Factory for the creation of a new {@link FileCache}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpFileDescriber {
+public interface FileCacheFactory {
 
 	/**
-	 * Describes the {@link HttpFileDescription}.
+	 * Creates a new {@link FileCache}.
 	 * 
-	 * @param description
-	 *            {@link HttpFileDescription}.
-	 * @return <code>true</code> should the {@link HttpFile} be described.
-	 *         <code>false</code> indicates unable to describe and should use
-	 *         alternate {@link HttpFileDescriber}.
+	 * @param name
+	 *            Name for the {@link FileCache}.
+	 * @return New {@link FileCache}.
+	 * @throws IOException
+	 *             If fails to create a new {@link FileCache}.
 	 */
-	boolean describe(HttpFileDescription description);
+	FileCache createFileCache(String name) throws IOException;
 
 }

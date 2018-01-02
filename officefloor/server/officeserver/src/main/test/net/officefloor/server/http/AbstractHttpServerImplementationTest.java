@@ -63,10 +63,10 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
-import net.officefloor.server.stream.TemporaryFiles;
 
 /**
  * Abstract {@link TestCase} for testing a {@link HttpServerImplementation}.

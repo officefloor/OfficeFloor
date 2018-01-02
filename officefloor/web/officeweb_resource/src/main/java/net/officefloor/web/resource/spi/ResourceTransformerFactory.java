@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.impl;
+package net.officefloor.web.resource.spi;
 
-import net.officefloor.web.resource.HttpResource;
+import java.util.ServiceLoader;
 
 /**
- * Not existing {@link HttpResource}.
+ * <p>
+ * Factory for the creation of a {@link ResourceTransformer}.
+ * <p>
+ * This is loaded by the {@link ServiceLoader}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
+public interface ResourceTransformerFactory {
 
 	/**
-	 * Initiate.
+	 * Obtains the name of transformation.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @return Name of transformation.
 	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
+	String getName();
 
-	/*
-	 * ====================== HttpResource ======================
+	/**
+	 * Creates the {@link ResourceTransformer}.
+	 * 
+	 * @return {@link ResourceTransformer}.
 	 */
-
-	@Override
-	public boolean isExist() {
-		return false;
-	}
+	ResourceTransformer createResourceTransformer();
 
 }
