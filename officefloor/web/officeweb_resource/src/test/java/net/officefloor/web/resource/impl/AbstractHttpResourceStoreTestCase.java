@@ -62,9 +62,41 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	protected abstract String getLocation();
 
 	/**
+	 * Allows overriding to specify the context path.
+	 * 
+	 * @return Context path.
+	 */
+	protected String getContextPath() {
+		return "";
+	}
+
+	/**
 	 * {@link HttpResourceStore} to test.
 	 */
 	private HttpResourceStoreImpl store;
+
+	/**
+	 * Obtains the file path to the store directory.
+	 * 
+	 * @return File path to the store directory.
+	 */
+	protected String getStoreFilePath() {
+		try {
+			return this.findFile(AbstractHttpResourceStoreTestCase.class, "index.html").getParentFile()
+					.getCanonicalPath();
+		} catch (IOException ex) {
+			throw fail(ex);
+		}
+	}
+
+	/**
+	 * Obtains the class path to the store directory.
+	 * 
+	 * @return Class path to the store directory.
+	 */
+	protected String getStoreClassPath() {
+		return this.getPackageRelativePath(AbstractHttpResourceStoreTestCase.class);
+	}
 
 	/**
 	 * Obtains the {@link HttpResourceStore} for further testing.
@@ -85,14 +117,47 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	}
 
 	/**
+	 * Obtains the path with possible context path prefix.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @return Path with context path prefix.
+	 */
+	protected String path(String path) {
+		String contextPath = this.getContextPath();
+		if ((!("".equals(contextPath))) && (!contextPath.startsWith("/"))) {
+			contextPath = "/" + contextPath;
+		}
+		return contextPath + path;
+	}
+
+	/**
 	 * Sets up a new {@link HttpResourceStore} for the location.
 	 * 
 	 * @param location
 	 *            Location.
+	 * @param transformers
+	 *            {@link ResourceTransformer} instances.
 	 * @param directoryDefaultFileNames
 	 *            Directory default file names.
 	 */
-	protected void setupNewHttpResourceStore(String location, String... directoryDefaultFileNames) throws IOException {
+	protected void setupNewHttpResourceStore(String location, ResourceTransformer[] transformers,
+			String... directoryDefaultFileNames) throws IOException {
+
+		// Close the existing store
+		this.closeHttpResourceStore();
+
+		// Set up the new HTTP resource store
+		String contextPath = this.getContextPath();
+		ResourceSystemFactory factory = this.getResourceSystemFactory();
+		this.store = new HttpResourceStoreImpl(location, factory, contextPath, (name) -> new MockFileCache(name),
+				transformers, directoryDefaultFileNames);
+	}
+
+	/**
+	 * Closes the {@link HttpResourceStore}.
+	 */
+	protected void closeHttpResourceStore() throws IOException {
 
 		// Close the existing HTTP resource store
 		if (this.store != null) {
@@ -100,14 +165,12 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 
 			// Ensure all files are deleted after close
 			for (Path path : this.tempPaths) {
-				assertFalse("Should delete file on close " + path, Files.exists(path));
+				assertFalse("Should delete file on close " + path.toAbsolutePath(), Files.exists(path));
 			}
 		}
 
-		// Set up the new HTTP resource store
-		ResourceSystemFactory factory = this.getResourceSystemFactory();
-		this.store = new HttpResourceStoreImpl(location, factory, (name) -> new MockFileCache(name),
-				new ResourceTransformer[] { transformer }, directoryDefaultFileNames);
+		// Clear the store
+		this.store = null;
 	}
 
 	/**
@@ -122,19 +185,14 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 
 		// Create the store
 		String location = this.getLocation();
-		this.setupNewHttpResourceStore(location, "index.html");
+		this.setupNewHttpResourceStore(location, new ResourceTransformer[] { transformer }, "index.html");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
 		// Close the HTTP resource store
-		this.store.close();
-
-		// Ensure all files are deleted after close
-		for (Path path : this.tempPaths) {
-			assertFalse("Should delete file on close " + path, Files.exists(path));
-		}
+		this.closeHttpResourceStore();
 
 		// Complete tear down
 		super.tearDown();
@@ -144,8 +202,9 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * Obtains the file.
 	 */
 	public void testObtainHttpFile() throws IOException {
-		HttpResource resource = this.store.getHttpResource("/index.html");
-		assertEquals("Incorrect path", "/index.html", resource.getPath());
+		String path = this.path("/index.html");
+		HttpResource resource = this.store.getHttpResource(path);
+		assertEquals("Incorrect path", path, resource.getPath());
 		assertTrue("Resource should exist", resource.isExist());
 		assertTrue("Should be file", resource instanceof HttpFile);
 		HttpFile file = (HttpFile) resource;
@@ -158,19 +217,20 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * Ensure the {@link HttpFile} is being cached.
 	 */
 	public void testCacheHttpFile() throws IOException {
+		String path = this.path("/index.html");
 
 		// Should not be available in cache
-		HttpResource resource = this.store.getCache().getHttpResource("/index.html");
+		HttpResource resource = this.store.getCache().getHttpResource(path);
 		assertNull("Should not be availabe in cache yet", resource);
 
 		// Ensure that cache resource
-		resource = this.store.getHttpResource("/index.html");
+		resource = this.store.getHttpResource(path);
 		assertNotNull("Invalid test: should have resource", resource);
-		HttpResource cached = this.store.getHttpResource("/index.html");
+		HttpResource cached = this.store.getHttpResource(path);
 		assertSame("HttpFile should be cached", resource, cached);
 
 		// Ensure that also now available in cache
-		cached = this.store.getCache().getHttpResource("/index.html");
+		cached = this.store.getCache().getHttpResource(path);
 		assertSame("HttpFile should be available in cache", resource, cached);
 	}
 
@@ -178,28 +238,31 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * Ensure can write the {@link HttpFile}.
 	 */
 	public void testWriteHttpFile() throws IOException {
-		HttpFile file = (HttpFile) this.store.getHttpResource("/index.html");
+		String path = this.path("/index.html");
+		HttpFile file = (HttpFile) this.store.getHttpResource(path);
 		MockHttpResponseBuilder mock = MockHttpServer.mockResponse();
 		file.writeTo(mock);
 		MockHttpResponse response = mock.build();
 		assertEquals("Incorrect content-encoding", "mock", response.getHeader("content-encoding").getValue());
 		assertEquals("Incorrect content-type", "text/html", response.getHeader("content-type").getValue());
-		assertEquals("Incorrect entity", "hello world", response.getEntity(null));
+		assertEquals("Incorrect entity", "<html><body>Hello World</body></html>", response.getEntity(null));
 	}
 
 	/**
 	 * Obtain the directory.
 	 */
 	public void testObtainHttpDirectory() throws IOException {
-		HttpResource resource = this.store.getHttpResource("/directory");
-		assertEquals("Incorrect path", "/directory", resource.getPath());
+		String path = this.path("/directory");
+		HttpResource resource = this.store.getHttpResource(path);
+		assertEquals("Incorrect path", path, resource.getPath());
 		assertTrue("Resource should exist", resource.isExist());
 		assertTrue("Should be directory", resource instanceof HttpDirectory);
 		HttpDirectory directory = (HttpDirectory) resource;
 
 		// Ensure able to obtain default directory resource
 		HttpFile defaultFile = directory.getDefaultHttpFile();
-		assertEquals("Incorrect default file path", "/directory/index.html", defaultFile.getPath());
+		assertNotNull("Should have default file", defaultFile);
+		assertEquals("Incorrect default file path", path + "/index.html", defaultFile.getPath());
 		assertSame("Ensure same file when obtaining", defaultFile, this.store.getHttpResource(defaultFile.getPath()));
 	}
 
@@ -207,19 +270,20 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * Ensure the {@link HttpDirectory} is being cached.
 	 */
 	public void testCacheHttpDirectory() throws IOException {
+		String path = this.path("/directory");
 
 		// Should not be available in cache
-		HttpResource resource = this.store.getCache().getHttpResource("/directory");
+		HttpResource resource = this.store.getCache().getHttpResource(path);
 		assertNull("Should not be availabe in cache yet", resource);
 
 		// Ensure that cache resource
-		resource = this.store.getHttpResource("/directory");
+		resource = this.store.getHttpResource(path);
 		assertNotNull("Invalid test: should have resource", resource);
-		HttpResource cached = this.store.getHttpResource("/directory");
+		HttpResource cached = this.store.getHttpResource(path);
 		assertSame("HttpDirectory should be cached", resource, cached);
 
 		// Ensure that also now available in cache
-		cached = this.store.getCache().getHttpResource("/directory");
+		cached = this.store.getCache().getHttpResource(path);
 		assertSame("HttpDirectory should be available in cache", resource, cached);
 	}
 
@@ -227,8 +291,9 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * Ensure able to obtain not exist {@link HttpResource}.
 	 */
 	public void testNotExistResource() throws IOException {
-		HttpResource resource = this.store.getHttpResource("/not_exist");
-		assertEquals("Incorrect path", "/not_exist", resource.getPath());
+		String path = this.path("/not_exist");
+		HttpResource resource = this.store.getHttpResource(path);
+		assertEquals("Incorrect path", path, resource.getPath());
 		assertFalse("Should not exist", resource.isExist());
 		assertFalse("Should not be file", resource instanceof HttpFile);
 		assertFalse("Should not be directory", resource instanceof HttpDirectory);
@@ -239,17 +304,18 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * out of memory due to lots of requests for not existing resources.
 	 */
 	public void testNoteCacheNotExistingHttpResource() throws IOException {
-		HttpResource resource = this.store.getHttpResource("/not_exist");
-		HttpResource notCached = this.store.getHttpResource("/not_exist");
+		String path = this.path("/not_exist");
+		HttpResource resource = this.store.getHttpResource(path);
+		HttpResource notCached = this.store.getHttpResource(path);
 		assertNotSame("Not existing HttpResource should NOT be cached", resource, notCached);
-		assertNull("Should not cache not exsting HttpResource", this.store.getCache().getHttpResource("/not_exist"));
+		assertNull("Should not cache not exsting HttpResource", this.store.getCache().getHttpResource(path));
 	}
 
 	/**
 	 * Ensure handle no default {@link HttpResource} for {@link HttpDirectory}.
 	 */
 	public void testNoDirectoryDefaultFile() throws IOException {
-		HttpDirectory directory = (HttpDirectory) this.store.getHttpResource("/directory/sub_directory");
+		HttpDirectory directory = (HttpDirectory) this.store.getHttpResource(this.path("/directory/sub_directory"));
 		HttpFile defaultFile = directory.getDefaultHttpFile();
 		assertNull("Should be no default file", defaultFile);
 	}
@@ -290,6 +356,12 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")));
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(directory);
 			return directory;
+		}
+
+		@Override
+		public void close() throws IOException {
+			// Delete the temporary directory
+			Files.delete(this.tempDirectory);
 		}
 	}
 

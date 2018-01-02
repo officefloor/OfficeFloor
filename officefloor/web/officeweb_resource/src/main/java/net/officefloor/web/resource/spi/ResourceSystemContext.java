@@ -100,10 +100,10 @@ public interface ResourceSystemContext {
 	 * for the path. Should the path be <code>null</code> then all
 	 * {@link HttpResource} instances are discarded.
 	 * 
-	 * @param path
+	 * @param resourcePath
 	 *            Path for the resource. If <code>null</code> then all resources
 	 *            will be discarded.
 	 */
-	void notifyResourceChanged(String path);
+	void notifyResourceChanged(String resourcePath);
 
 }

@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.resource.spi;
 
+import java.io.IOException;
 import java.util.ServiceLoader;
 
 /**
@@ -46,7 +47,9 @@ public interface ResourceSystemFactory {
 	 * @param context
 	 *            {@link ResourceSystemContext}.
 	 * @return {@link ResourceSystem}.
+	 * @throws IOException
+	 *             If fails to create the {@link ResourceSystem}.
 	 */
-	ResourceSystem createResourceSystem(ResourceSystemContext context);
+	ResourceSystem createResourceSystem(ResourceSystemContext context) throws IOException;
 
 }

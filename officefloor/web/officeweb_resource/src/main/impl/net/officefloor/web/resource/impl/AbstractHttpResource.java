@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.resource.impl;
 
+import java.io.Closeable;
+
 import net.officefloor.web.resource.HttpResource;
 
 /**
@@ -24,7 +26,7 @@ import net.officefloor.web.resource.HttpResource;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpResource implements HttpResource {
+public abstract class AbstractHttpResource implements HttpResource, Closeable {
 
 	/**
 	 * Path.

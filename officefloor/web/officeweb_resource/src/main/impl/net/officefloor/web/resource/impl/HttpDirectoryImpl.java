@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,32 +19,46 @@ package net.officefloor.web.resource.impl;
 
 import java.io.IOException;
 
-import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpDirectory;
+import net.officefloor.web.resource.HttpFile;
 
 /**
- * Not existing {@link HttpResource}.
+ * {@link HttpDirectory} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
+public class HttpDirectoryImpl extends AbstractHttpResource implements HttpDirectory {
 
 	/**
-	 * Initiate.
+	 * {@link HttpResourceStoreImpl}.
+	 */
+	private final HttpResourceStoreImpl store;
+
+	/**
+	 * Instantiate.
 	 * 
 	 * @param path
-	 *            Path.
+	 *            Path to the {@link HttpDirectory}.
+	 * @param store
+	 *            {@link HttpResourceStoreImpl}.
 	 */
-	public NotExistHttpResource(String path) {
+	public HttpDirectoryImpl(String path, HttpResourceStoreImpl store) {
 		super(path);
+		this.store = store;
 	}
 
 	/*
-	 * ====================== HttpResource ======================
+	 * ================= HttpDirectory =====================
 	 */
 
 	@Override
 	public boolean isExist() {
-		return false;
+		return true;
+	}
+
+	@Override
+	public HttpFile getDefaultHttpFile() throws IOException {
+		return this.store.getDefaultHttpFile(this);
 	}
 
 	/*

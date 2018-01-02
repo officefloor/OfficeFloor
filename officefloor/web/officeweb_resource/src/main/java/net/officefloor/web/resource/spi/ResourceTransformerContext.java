@@ -18,9 +18,11 @@
 package net.officefloor.web.resource.spi;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.web.resource.HttpFile;
 
 /**
  * Context for the {@link ResourceTransformer}.
@@ -48,6 +50,39 @@ public interface ResourceTransformerContext {
 	 *             If fails to create the new file.
 	 */
 	Path createFile() throws IOException;
+
+	/**
+	 * Obtains the <code>Content-Type</code> of the resource.
+	 * 
+	 * @return <code>Content-Type</code> of the resource.
+	 */
+	String getContentType();
+
+	/**
+	 * <p>
+	 * Obtains the {@link Charset} for the resource.
+	 * <p>
+	 * Typically this is the {@link Charset} of the backing
+	 * {@link ResourceSystem}. However, it may be changed by a previous
+	 * {@link ResourceTransformer}.
+	 * 
+	 * @return {@link Charset} for the resource.
+	 */
+	Charset getCharset();
+
+	/**
+	 * Allows specifying a new <code>Content-Type</code> for the transformed
+	 * resource.
+	 * 
+	 * @param contentType
+	 *            <code>Content-Type</code> for the transformed resource. This
+	 *            needs to include the {@link Charset} parameter if required.
+	 * @param charset
+	 *            {@link Charset} for the {@link HttpFile}. May be
+	 *            <code>null</code> to use/reset to the default {@link Charset}
+	 *            of the {@link ResourceSystem}.
+	 */
+	void setContentType(HttpHeaderValue contentType, Charset charset);
 
 	/**
 	 * Obtains the <code>Content-Encoding</code> of the resource.

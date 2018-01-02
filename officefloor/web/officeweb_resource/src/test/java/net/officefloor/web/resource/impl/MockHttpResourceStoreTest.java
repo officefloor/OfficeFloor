@@ -18,6 +18,7 @@
 package net.officefloor.web.resource.impl;
 
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,7 +45,7 @@ public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase
 	 * Mock {@link ResourceSystem}.
 	 */
 	private final ResourceSystem system = (path) -> {
-		String directory = this.getLocation();
+		String directory = this.context.getLocation();
 		return Paths.get(directory, path);
 	};
 
@@ -52,21 +53,47 @@ public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase
 	 * Ensure the system is accessing the test files.
 	 */
 	public void testAbleToGetFile() throws IOException {
-		Path path = system.getResource("index.html");
+		Path path = this.system.getResource("index.html");
 		assertTrue("Should find index.html", Files.isReadable(path));
+	}
+
+	/**
+	 * Ensure always creates cache copy of file (ensures never deleted and that
+	 * {@link FileChannel} always backed by a file).
+	 */
+	public void testAlwaysCacheCopyOfFile() throws IOException {
+
+		// Setup without transformers (so uses resource system path)
+		this.setupNewHttpResourceStore(this.getLocation(), null, "index.html");
+
+		// Obtain the resource system path
+		Path path = this.system.getResource("index.html");
+		assertTrue("Should find index.html", Files.isReadable(path));
+
+		// Obtain the HTTP file
+		HttpResource resource = this.getHttpResourceStore().getHttpResource(this.path("/index.html"));
+		assertTrue("Should have resource", resource.isExist());
+
+		// Close the store
+		this.closeHttpResourceStore();
+
+		// Ensure the resource system file still exists
+		assertTrue("Should still have resource system file", Files.exists(path));
 	}
 
 	/**
 	 * Ensure can trigger resource changed.
 	 */
 	public void testTriggerResourceChanged() throws IOException {
-		HttpResource file = this.getHttpResourceStore().getHttpResource("/index.html");
-		HttpResource directory = this.getHttpResourceStore().getHttpResource("/directory");
+		String filePath = this.path("/index.html");
+		String directoryPath = this.path("/directory");
+		HttpResource file = this.getHttpResourceStore().getHttpResource(filePath);
+		HttpResource directory = this.getHttpResourceStore().getHttpResource(directoryPath);
 		this.context.notifyResourceChanged("/index.html");
-		assertNull("File should no longer be cached", this.getHttpResourceCache().getHttpResource("/index.html"));
+		assertNull("File should no longer be cached", this.getHttpResourceCache().getHttpResource(filePath));
 		assertSame("Directory should still be cached", directory,
-				this.getHttpResourceCache().getHttpResource("/directory"));
-		HttpResource reloaded = this.getHttpResourceStore().getHttpResource("/index.html");
+				this.getHttpResourceCache().getHttpResource(directoryPath));
+		HttpResource reloaded = this.getHttpResourceStore().getHttpResource(filePath);
 		assertNotSame("Should be different loaded HTTP file", file, reloaded);
 	}
 
@@ -74,15 +101,17 @@ public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase
 	 * Ensure can trigger all resources changed.
 	 */
 	public void testTriggerAllResourcesChanged() throws IOException {
-		HttpResource file = this.getHttpResourceStore().getHttpResource("/index.html");
-		HttpResource directory = this.getHttpResourceStore().getHttpResource("/directory");
+		String filePath = this.path("/index.html");
+		String directoryPath = this.path("/directory");
+		HttpResource file = this.getHttpResourceStore().getHttpResource(filePath);
+		HttpResource directory = this.getHttpResourceStore().getHttpResource(directoryPath);
 		this.context.notifyResourceChanged(null);
-		assertNull("File should no longer be cached", this.getHttpResourceCache().getHttpResource("/index.html"));
-		assertNull("Directory should no longer be cached", this.getHttpResourceCache().getHttpResource("/directory"));
+		assertNull("File should no longer be cached", this.getHttpResourceCache().getHttpResource(filePath));
+		assertNull("Directory should no longer be cached", this.getHttpResourceCache().getHttpResource(directoryPath));
 		assertNotSame("Should be different loaded HTTP file", file,
-				this.getHttpResourceStore().getHttpResource("/index.html"));
+				this.getHttpResourceStore().getHttpResource(filePath));
 		assertNotSame("Should be different loaded HTTP directory", directory,
-				this.getHttpResourceStore().getHttpResource("/directory"));
+				this.getHttpResourceStore().getHttpResource(directoryPath));
 	}
 
 	/*
@@ -91,7 +120,7 @@ public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase
 
 	@Override
 	protected String getLocation() {
-		return this.getPackageRelativePath(AbstractHttpResourceStoreTestCase.class);
+		return this.getStoreFilePath();
 	}
 
 	@Override

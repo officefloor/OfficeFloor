@@ -37,7 +37,7 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 	 * Note test expects JUnit on class path.
 	 */
 	public void testObtainDirectoryFromJar() throws Exception {
-		this.setupNewHttpResourceStore("", "Assert.class");
+		this.setupNewHttpResourceStore("", null, "Assert.class");
 		HttpResource resource = this.getHttpResourceStore().getHttpResource("/org/junit");
 		assertTrue("Should be directory", resource instanceof HttpDirectory);
 		HttpDirectory directory = (HttpDirectory) resource;
@@ -51,7 +51,7 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 	 * Note test expects JUnit 4.8.2 on class path.
 	 */
 	public void testObtainFileFromJar() throws Exception {
-		this.setupNewHttpResourceStore("", "Assert.class");
+		this.setupNewHttpResourceStore("", null, "Assert.class");
 		HttpResource resource = this.getHttpResourceStore().getHttpResource("/org/junit/Asset.class");
 		assertTrue("Should be file", resource instanceof HttpFile);
 		HttpFile file = (HttpFile) resource;

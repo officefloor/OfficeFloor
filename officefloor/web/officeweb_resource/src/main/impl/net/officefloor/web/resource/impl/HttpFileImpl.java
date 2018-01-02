@@ -31,7 +31,7 @@ import net.officefloor.web.resource.HttpFile;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class HttpFileImpl extends AbstractHttpResource implements HttpFile {
+public class HttpFileImpl extends AbstractHttpResource implements HttpFile {
 
 	/**
 	 * <code>Content-Encoding</code> {@link HttpHeaderName}.
@@ -130,56 +130,11 @@ public abstract class HttpFileImpl extends AbstractHttpResource implements HttpF
 	}
 
 	/*
-	 * ===================== Object ===================================
+	 * ===================== Closeable ==========================
 	 */
 
 	@Override
-	public boolean equals(Object obj) {
-
-		// Check if same object
-		if (this == obj) {
-			return true;
-		}
-
-		// Ensure same type
-		if (!(obj instanceof HttpFileImpl)) {
-			return false;
-		}
-		HttpFileImpl that = (HttpFileImpl) obj;
-
-		// Return whether details same
-		return (this.getPath().equals(that.getPath())) && (this.contentEncoding.equals(that.getContentEncoding()))
-				&& (this.contentType.equals(that.getContentType()) && isCharsetMatch(this.charset, that.getCharset()));
-	}
-
-	/**
-	 * Returns whether the {@link Charset} matches the other {@link Charset}.
-	 * 
-	 * @param a
-	 *            {@link Charset}.
-	 * @param b
-	 *            {@link Charset}.
-	 * @return <code>true</code> if match.
-	 */
-	private static boolean isCharsetMatch(Charset a, Charset b) {
-		if (a != null) {
-			// Have a, so match if equal
-			return a.equals(b);
-		} else {
-			// Only match if b also null
-			return (b == null);
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = super.hashCode();
-		hash = (hash * 31) + this.contentEncoding.hashCode();
-		hash = (hash * 31) + this.contentType.hashCode();
-		if (this.charset != null) {
-			hash = (hash * 31) + this.charset.hashCode();
-		}
-		return hash;
+	public void close() throws IOException {
 	}
 
 }
