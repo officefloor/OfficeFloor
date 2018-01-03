@@ -22,13 +22,13 @@ import java.util.ServiceLoader;
 
 /**
  * <p>
- * Factory for the creation of a {@link ResourceSystem}.
+ * {@link ServiceLoader} service for the creation of a {@link ResourceSystem}.
  * <p>
  * These are loaded via the {@link ServiceLoader}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResourceSystemFactory {
+public interface ResourceSystemService {
 
 	/**
 	 * <p>

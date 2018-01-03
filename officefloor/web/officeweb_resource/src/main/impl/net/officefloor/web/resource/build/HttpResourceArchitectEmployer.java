@@ -28,7 +28,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.resource.spi.ResourceSystemFactory;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 
 /**
  * Employs a {@link HttpResourceArchitect}.
@@ -111,7 +111,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	@Override
-	public HttpResourcesBuilder addHttpResources(ResourceSystemFactory resourceSystemFactory) {
+	public HttpResourcesBuilder addHttpResources(ResourceSystemService resourceSystemFactory) {
 		// TODO Auto-generated method stub
 		return null;
 	}

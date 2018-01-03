@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.web.resource.HttpFile;
 
 /**
@@ -31,7 +32,7 @@ import net.officefloor.web.resource.HttpFile;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileImpl extends AbstractHttpResource implements HttpFile {
+public class HttpFileImpl extends AbstractHttpResource implements HttpFile, FileCompleteCallback {
 
 	/**
 	 * <code>Content-Encoding</code> {@link HttpHeaderName}.
@@ -126,7 +127,16 @@ public class HttpFileImpl extends AbstractHttpResource implements HttpFile {
 		}
 
 		// Write the HTTP file content to response
-		response.getEntityWriter().write(file, null);
+		response.getEntityWriter().write(this.file, this);
+	}
+
+	/*
+	 * ================ FileCompleteCallback =====================
+	 */
+
+	@Override
+	public void complete(FileChannel file, boolean isWritten) throws IOException {
+		// Nothing required, as just keeps reference to this alive
 	}
 
 	/*

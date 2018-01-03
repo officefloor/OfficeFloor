@@ -36,9 +36,9 @@ import net.officefloor.web.resource.spi.ResourceSystemContext;
 public class ClasspathResourceSystem implements ResourceSystem {
 
 	/**
-	 * Root {@link ClassPathHttpResourceNode}.
+	 * Root {@link ClassPathNode}.
 	 */
-	private final ClassPathHttpResourceNode root;
+	private final ClassPathNode root;
 
 	/**
 	 * Class path prefix for this {@link HttpResourceStore}.
@@ -74,7 +74,7 @@ public class ClasspathResourceSystem implements ResourceSystem {
 		this.context = context;
 
 		// Create the class path HTTP resource tree
-		this.root = ClassPathHttpResourceNode.createClassPathResourceTree(this.classPathPrefix);
+		this.root = ClassPathNode.createClassPathResourceTree(this.classPathPrefix);
 
 		// Obtain the class loader
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -85,17 +85,17 @@ public class ClasspathResourceSystem implements ResourceSystem {
 	}
 
 	/**
-	 * Obtains the {@link ClassPathHttpResourceNode} for resource path.
+	 * Obtains the {@link ClassPathNode} for resource path.
 	 * 
 	 * @param path
 	 *            Resource path.
-	 * @return {@link ClassPathHttpResourceNode} for resource path or
+	 * @return {@link ClassPathNode} for resource path or
 	 *         <code>null</code> if no resource.
 	 */
-	public ClassPathHttpResourceNode getNode(String path) {
+	public ClassPathNode getNode(String path) {
 
 		// Search tree for node
-		ClassPathHttpResourceNode node = this.root;
+		ClassPathNode node = this.root;
 		int startIndex = 0;
 		for (int i = 0; i < path.length(); i++) {
 			char character = path.charAt(i);
@@ -139,7 +139,7 @@ public class ClasspathResourceSystem implements ResourceSystem {
 	public Path getResource(String path) throws IOException {
 
 		// Obtains the node for the path
-		ClassPathHttpResourceNode node = this.getNode(path);
+		ClassPathNode node = this.getNode(path);
 		if (node == null) {
 			// Not existing resource
 			return null;

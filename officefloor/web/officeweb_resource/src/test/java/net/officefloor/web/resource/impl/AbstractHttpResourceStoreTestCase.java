@@ -18,6 +18,7 @@
 package net.officefloor.web.resource.impl;
 
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +26,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -37,7 +39,7 @@ import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceSystem;
-import net.officefloor.web.resource.spi.ResourceSystemFactory;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceTransformer;
 
 /**
@@ -48,11 +50,15 @@ import net.officefloor.web.resource.spi.ResourceTransformer;
 public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Obtains the {@link ResourceSystem}.
+	 * <p>
+	 * Obtains the {@link ResourceSystemService} {@link Class}.
+	 * <p>
+	 * As the {@link ResourceSystemService} is loaded via a
+	 * {@link ServiceLoader} this ensures it can be.
 	 * 
-	 * @return {@link ResourceSystem}.
+	 * @return {@link ResourceSystemService}.
 	 */
-	protected abstract ResourceSystemFactory getResourceSystemFactory();
+	protected abstract Class<? extends ResourceSystemService> getResourceSystemService();
 
 	/**
 	 * Obtains the location to configure the {@link ResourceSystem}.
@@ -74,6 +80,16 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * {@link HttpResourceStore} to test.
 	 */
 	private HttpResourceStoreImpl store;
+
+	/**
+	 * Creates the {@link ResourceSystemService}.
+	 * 
+	 * @return {@link ResourceSystemService}.
+	 */
+	protected ResourceSystemService createResourceSystemService() throws Exception {
+		Class<? extends ResourceSystemService> serviceClass = this.getResourceSystemService();
+		return serviceClass.newInstance();
+	}
 
 	/**
 	 * Obtains the file path to the store directory.
@@ -142,14 +158,16 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 *            Directory default file names.
 	 */
 	protected void setupNewHttpResourceStore(String location, ResourceTransformer[] transformers,
-			String... directoryDefaultFileNames) throws IOException {
+			String... directoryDefaultFileNames) throws Exception {
 
 		// Close the existing store
-		this.closeHttpResourceStore();
+		if (this.store != null) {
+			this.closeHttpResourceStore();
+		}
 
 		// Set up the new HTTP resource store
 		String contextPath = this.getContextPath();
-		ResourceSystemFactory factory = this.getResourceSystemFactory();
+		ResourceSystemService factory = this.createResourceSystemService();
 		this.store = new HttpResourceStoreImpl(location, factory, contextPath, (name) -> new MockFileCache(name),
 				transformers, directoryDefaultFileNames);
 	}
@@ -160,14 +178,13 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	protected void closeHttpResourceStore() throws IOException {
 
 		// Close the existing HTTP resource store
-		if (this.store != null) {
-			this.store.close();
+		this.store.close();
 
-			// Ensure all files are deleted after close
-			for (Path path : this.tempPaths) {
-				assertFalse("Should delete file on close " + path.toAbsolutePath(), Files.exists(path));
-			}
+		// Ensure all files are deleted after close
+		for (Path path : this.tempPaths) {
+			assertFalse("Should delete file on close " + path.toAbsolutePath(), Files.exists(path));
 		}
+		this.tempPaths.clear();
 
 		// Clear the store
 		this.store = null;
@@ -185,14 +202,16 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 
 		// Create the store
 		String location = this.getLocation();
-		this.setupNewHttpResourceStore(location, new ResourceTransformer[] { transformer }, "index.html");
+		this.setupNewHttpResourceStore(location, new ResourceTransformer[] { transformer, transformer }, "index.html");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
 		// Close the HTTP resource store
-		this.closeHttpResourceStore();
+		if (this.store != null) {
+			this.closeHttpResourceStore();
+		}
 
 		// Complete tear down
 		super.tearDown();
@@ -246,6 +265,45 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 		assertEquals("Incorrect content-encoding", "mock", response.getHeader("content-encoding").getValue());
 		assertEquals("Incorrect content-type", "text/html", response.getHeader("content-type").getValue());
 		assertEquals("Incorrect entity", "<html><body>Hello World</body></html>", response.getEntity(null));
+	}
+
+	/**
+	 * Ensure the {@link FileChannel} is available until complete write.
+	 */
+	public void testFileChannelAvailableUntilCompleteWrite() throws IOException {
+
+		// Write HTTP file to response
+		String filePath = this.path("/index.html");
+		HttpFile file = (HttpFile) this.getHttpResourceStore().getHttpResource(filePath);
+
+		// Close the HTTP resource store
+		this.closeHttpResourceStore();
+
+		// Ensure file channel still available after close
+		MockHttpResponseBuilder mockResponse = MockHttpServer.mockResponse();
+		file.writeTo(mockResponse);
+		MockHttpResponse response = mockResponse.build();
+		assertEquals("Should still have file channel", "<html><body>Hello World</body></html>",
+				response.getEntity(null));
+	}
+
+	/**
+	 * Ensure can re-use the {@link FileChannel} within the {@link HttpFile}.
+	 */
+	public void testReuseHttpFile() throws IOException {
+
+		// Write HTTP file to response
+		String filePath = this.path("/index.html");
+		HttpFile file = (HttpFile) this.getHttpResourceStore().getHttpResource(filePath);
+
+		// Write multiple times
+		for (int i = 0; i < 100; i++) {
+			MockHttpResponseBuilder mockResponse = MockHttpServer.mockResponse();
+			file.writeTo(mockResponse);
+			MockHttpResponse response = mockResponse.build();
+			assertEquals("Should still have file channel", "<html><body>Hello World</body></html>",
+					response.getEntity(null));
+		}
 	}
 
 	/**
@@ -335,31 +393,38 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 		private final Path tempDirectory;
 
 		public MockFileCache(String name) throws IOException {
-			this.tempDirectory = Files.createTempDirectory(name,
+			this.tempDirectory = Files.createTempDirectory(name + "-",
 					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")));
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(this.tempDirectory);
 		}
 
 		@Override
 		public Path createFile(String name) throws IOException {
-			name = name.replace('/', '_');
-			Path file = Files.createTempFile(this.tempDirectory, null, name,
+			String suffix = name.replace('/', '_');
+			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix,
 					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r-----")));
+			assertTrue("Should have file " + name, Files.isRegularFile(file));
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(file);
 			return file;
 		}
 
 		@Override
 		public Path createDirectory(String name) throws IOException {
-			name = name.replace('/', '_');
-			Path directory = Files.createTempDirectory(this.tempDirectory, name,
+			String prefix = name.replace('/', '_');
+			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-",
 					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")));
+			assertTrue("Should have directory " + name, Files.isDirectory(directory));
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(directory);
 			return directory;
 		}
 
 		@Override
 		public void close() throws IOException {
+
+			// Ensure contains no files before deleting
+			Files.list(this.tempDirectory)
+					.forEach((file) -> fail("Should be empty file cache " + file.toAbsolutePath()));
+
 			// Delete the temporary directory
 			Files.delete(this.tempDirectory);
 		}

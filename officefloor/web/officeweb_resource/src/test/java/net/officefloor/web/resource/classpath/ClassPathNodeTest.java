@@ -27,11 +27,11 @@ import java.util.List;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link ClassPathHttpResourceNode}.
+ * Tests the {@link ClassPathNode}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
+public class ClassPathNodeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Original <code>java.class.path</code> property value to reinstate after
@@ -56,9 +56,8 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	 * 
 	 * @return Test resource directory.
 	 */
-	public File getTestResourceDirectory() {
-		// TODO obtain the test resource directory
-		return null;
+	public File getTestResourceDirectory() throws IOException {
+		return this.findFile(this.getClass(), "test.jar").getParentFile();
 	}
 
 	/**
@@ -71,13 +70,13 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		System.setProperty("java.class.path", resourceDirectory.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
-		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode.createClassPathResourceTree(null);
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree(null);
 
 		// Validate the tree (checking directory, sub directory, file)
 		assertNode(tree, "/", "", true, "/index.html", "/sub_directory/");
-		ClassPathHttpResourceNode directory = tree.getChild("sub_directory");
-		assertNode(directory, "/sub_directory/", "sub_directory", true, "/sub_directory/index.html");
-		ClassPathHttpResourceNode file = tree.getChild("index.html");
+		ClassPathNode directory = tree.getChild("sub_directory");
+		assertNode(directory, "/sub_directory/", "sub_directory", true, "/sub_directory/empty.txt");
+		ClassPathNode file = tree.getChild("index.html");
 		assertNode(file, "/index.html", "index.html", false);
 	}
 
@@ -91,11 +90,11 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		System.setProperty("java.class.path", resourceDirectory.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
-		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode.createClassPathResourceTree("directory");
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree("directory");
 
 		// Validate the tree (checking directory, file)
 		assertNode(tree, "/", "directory", true, "/index.html", "/sub_directory/");
-		ClassPathHttpResourceNode file = tree.getChild("index.html");
+		ClassPathNode file = tree.getChild("index.html");
 		assertNode(file, "/index.html", "directory/index.html", false);
 	}
 
@@ -116,7 +115,7 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		System.setProperty("java.class.path", resourceDirectory.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
-		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode.createClassPathResourceTree(CLASS_PATH_PREFIX);
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree(CLASS_PATH_PREFIX);
 
 		// Validate the tree (checking directory, file)
 		assertNode(tree, "/", CLASS_PATH_PREFIX, true);
@@ -132,13 +131,13 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		System.setProperty("java.class.path", jarFile.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
-		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode.createClassPathResourceTree(null);
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree(null);
 
 		// Validate the tree (checking directory, sub directory, file)
 		assertNode(tree, "/", "", true, "/directory/", "/empty/", "/index.html", "/META-INF/");
-		ClassPathHttpResourceNode directory = tree.getChild("directory");
+		ClassPathNode directory = tree.getChild("directory");
 		assertNode(directory, "/directory/", "directory", true, "/directory/index.html", "/directory/sub_directory/");
-		ClassPathHttpResourceNode file = tree.getChild("index.html");
+		ClassPathNode file = tree.getChild("index.html");
 		assertNode(file, "/index.html", "index.html", false);
 	}
 
@@ -152,11 +151,11 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		System.setProperty("java.class.path", jarFile.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
-		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode.createClassPathResourceTree("directory");
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree("directory");
 
 		// Validate the tree (checking directory, file)
 		assertNode(tree, "/", "directory", true, "/index.html", "/sub_directory/");
-		ClassPathHttpResourceNode file = tree.getChild("index.html");
+		ClassPathNode file = tree.getChild("index.html");
 		assertNode(file, "/index.html", "directory/index.html", false);
 	}
 
@@ -171,17 +170,17 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		System.setProperty("java.class.path", jarFile.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
-		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode.createClassPathResourceTree("not_exist");
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree("not_exist");
 
 		// Validate the tree (no children as not exist)
 		assertNode(tree, "/", "not_exist", true);
 	}
 
 	/**
-	 * Validates the {@link ClassPathHttpResourceNode}.
+	 * Validates the {@link ClassPathNode}.
 	 * 
 	 * @param node
-	 *            {@link ClassPathHttpResourceNode} to be validated.
+	 *            {@link ClassPathNode} to be validated.
 	 * @param expectedResourcePath
 	 *            Expected resource path.
 	 * @param expectedClassPath
@@ -191,8 +190,8 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	 * @param expectedChildren
 	 *            Resource paths of the expected children.
 	 */
-	private static void assertNode(ClassPathHttpResourceNode node, String expectedResourcePath,
-			String expectedClassPath, boolean isExpectedToBeDirectory, String... expectedChildren) {
+	private static void assertNode(ClassPathNode node, String expectedResourcePath, String expectedClassPath,
+			boolean isExpectedToBeDirectory, String... expectedChildren) {
 
 		// Validate details of the node
 		assertEquals("Incorrect resource path", expectedResourcePath, node.getResourcePath());
@@ -200,20 +199,20 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect indication if directory", isExpectedToBeDirectory, node.isDirectory());
 
 		// Obtain the children (ignoring SVN entries)
-		ClassPathHttpResourceNode[] children = node.getChildren();
-		List<ClassPathHttpResourceNode> svnCleanup = new ArrayList<ClassPathHttpResourceNode>(Arrays.asList(children));
-		for (Iterator<ClassPathHttpResourceNode> iterator = svnCleanup.iterator(); iterator.hasNext();) {
-			ClassPathHttpResourceNode child = iterator.next();
+		ClassPathNode[] children = node.getChildren();
+		List<ClassPathNode> svnCleanup = new ArrayList<ClassPathNode>(Arrays.asList(children));
+		for (Iterator<ClassPathNode> iterator = svnCleanup.iterator(); iterator.hasNext();) {
+			ClassPathNode child = iterator.next();
 			if (child.getResourcePath().toLowerCase().contains(".svn")) {
 				iterator.remove(); // remove SVN entry
 			}
 		}
-		children = svnCleanup.toArray(new ClassPathHttpResourceNode[svnCleanup.size()]);
+		children = svnCleanup.toArray(new ClassPathNode[svnCleanup.size()]);
 
 		// Validate children of the node
 		assertEquals("Incorrect number of children", expectedChildren.length, children.length);
 		for (int i = 0; i < expectedChildren.length; i++) {
-			ClassPathHttpResourceNode child = children[i];
+			ClassPathNode child = children[i];
 			String expectedChildResourcePath = expectedChildren[i];
 			assertEquals("Incorrect child " + i, expectedChildResourcePath, child.getResourcePath());
 		}

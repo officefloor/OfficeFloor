@@ -17,11 +17,12 @@
  */
 package net.officefloor.web.resource.classpath;
 
+import org.junit.Assert;
+
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.impl.AbstractHttpResourceStoreTestCase;
-import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
  * Tests the {@link ClasspathResourceSystem}.
@@ -37,12 +38,21 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 	 * Note test expects JUnit on class path.
 	 */
 	public void testObtainDirectoryFromJar() throws Exception {
-		this.setupNewHttpResourceStore("", null, "Assert.class");
-		HttpResource resource = this.getHttpResourceStore().getHttpResource("/org/junit");
+
+		// Derive the paths
+		String directoryPath = "/" + Assert.class.getPackage().getName().replace('.', '/');
+		String fileName = "/" + Assert.class.getSimpleName() + ".class";
+		String filePath = directoryPath + fileName;
+
+		// Setup to find Assert as default file
+		this.setupNewHttpResourceStore("", null, fileName);
+
+		// Test obtain directory from jar file
+		HttpResource resource = this.getHttpResourceStore().getHttpResource(directoryPath);
 		assertTrue("Should be directory", resource instanceof HttpDirectory);
 		HttpDirectory directory = (HttpDirectory) resource;
 		HttpFile defaultFile = directory.getDefaultHttpFile();
-		assertEquals("Should have default file", "/org/junit/Asset.class", defaultFile.getPath());
+		assertEquals("Should have default file", filePath, defaultFile.getPath());
 	}
 
 	/**
@@ -51,11 +61,18 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 	 * Note test expects JUnit 4.8.2 on class path.
 	 */
 	public void testObtainFileFromJar() throws Exception {
-		this.setupNewHttpResourceStore("", null, "Assert.class");
-		HttpResource resource = this.getHttpResourceStore().getHttpResource("/org/junit/Asset.class");
+
+		// Derive the path
+		String path = "/" + Assert.class.getName().replace('.', '/') + ".class";
+
+		// Setup to find Assert file
+		this.setupNewHttpResourceStore("", null);
+
+		// Test obtain file from jar file
+		HttpResource resource = this.getHttpResourceStore().getHttpResource(path);
 		assertTrue("Should be file", resource instanceof HttpFile);
 		HttpFile file = (HttpFile) resource;
-		assertEquals("Incorrect file", "/org/junit/Asset.class", file.getPath());
+		assertEquals("Incorrect file", path, file.getPath());
 	}
 
 	/*
@@ -64,14 +81,12 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 
 	@Override
 	protected String getLocation() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.getStoreClassPath();
 	}
 
 	@Override
-	protected ResourceSystemFactory getResourceSystemFactory() {
-		// TODO Auto-generated method stub
-		return null;
+	protected Class<ClasspathResourceSystemService> getResourceSystemService() {
+		return ClasspathResourceSystemService.class;
 	}
 
 }

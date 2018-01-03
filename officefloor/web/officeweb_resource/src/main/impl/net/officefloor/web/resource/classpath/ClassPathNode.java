@@ -32,25 +32,25 @@ import net.officefloor.web.resource.HttpResource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassPathHttpResourceNode {
+public class ClassPathNode {
 
 	/**
-	 * Creates the {@link ClassPathHttpResourceNode} tree for available
+	 * Creates the {@link ClassPathNode} tree for available
 	 * {@link HttpResource} instances.
 	 * 
 	 * @param classpathPrefix
 	 *            The prefix on the class path to locate resources for the tree.
 	 *            <code>null</code> for the entire class path.
-	 * @return {@link ClassPathHttpResourceNode}.
+	 * @return {@link ClassPathNode}.
 	 */
-	public static ClassPathHttpResourceNode createClassPathResourceTree(String classpathPrefix) {
+	public static ClassPathNode createClassPathResourceTree(String classpathPrefix) {
 
 		// Obtain the class path entries
 		String classPath = System.getProperty("java.class.path");
 		String[] classPathEntries = classPath.split(File.pathSeparator);
 
 		// Create the root class path node for loading (always directory)
-		ClassPathHttpResourceNode root = new ClassPathHttpResourceNode(null, "/",
+		ClassPathNode root = new ClassPathNode(null, "/",
 				(classpathPrefix == null ? "" : classpathPrefix), true);
 
 		// Iterate over class path entries creating the nodes
@@ -98,14 +98,14 @@ public class ClassPathHttpResourceNode {
 	}
 
 	/**
-	 * Loads the {@link ClassPathHttpResourceNode} directory instances.
+	 * Loads the {@link ClassPathNode} directory instances.
 	 * 
 	 * @param parent
-	 *            Parent {@link ClassPathHttpResourceNode}.
+	 *            Parent {@link ClassPathNode}.
 	 * @param directory
 	 *            Parent directory.
 	 */
-	private static void loadDirectoryEntries(ClassPathHttpResourceNode parent, File directory) {
+	private static void loadDirectoryEntries(ClassPathNode parent, File directory) {
 
 		// Iterate over children of directory
 		for (File file : directory.listFiles()) {
@@ -114,7 +114,7 @@ public class ClassPathHttpResourceNode {
 			boolean isDirectory = file.isDirectory();
 
 			// Always add the node
-			ClassPathHttpResourceNode child = addChild(parent, file.getName(), isDirectory);
+			ClassPathNode child = addChild(parent, file.getName(), isDirectory);
 
 			// Add children of directory
 			if (isDirectory) {
@@ -124,16 +124,16 @@ public class ClassPathHttpResourceNode {
 	}
 
 	/**
-	 * Loads the {@link ClassPathHttpResourceNode} instances for the JAR file.
+	 * Loads the {@link ClassPathNode} instances for the JAR file.
 	 * 
 	 * @param tree
-	 *            Tree root {@link ClassPathHttpResourceNode}.
+	 *            Tree root {@link ClassPathNode}.
 	 * @param jarFile
 	 *            {@link JarFile}.
 	 * @param classpathPrefix
 	 *            Class path prefix.
 	 */
-	private static void loadJarEntries(ClassPathHttpResourceNode tree, JarFile jarFile, String classpathPrefix) {
+	private static void loadJarEntries(ClassPathNode tree, JarFile jarFile, String classpathPrefix) {
 
 		// Ensure have class path prefix
 		classpathPrefix = (classpathPrefix == null ? "" : classpathPrefix);
@@ -160,12 +160,12 @@ public class ClassPathHttpResourceNode {
 			String[] nodePaths = resourcePath.split("/");
 
 			// Add the parent directories (-1 to ignore leaf node)
-			ClassPathHttpResourceNode parent = tree;
+			ClassPathNode parent = tree;
 			for (int i = 0; i < (nodePaths.length - 1); i++) {
 				String nodePath = nodePaths[i];
 
 				// Add the child directory
-				ClassPathHttpResourceNode child = addChild(parent, nodePath, true);
+				ClassPathNode child = addChild(parent, nodePath, true);
 
 				// Child becomes parent for next iteration
 				parent = child;
@@ -185,9 +185,9 @@ public class ClassPathHttpResourceNode {
 	 *            Node path for child.
 	 * @param isDirectory
 	 *            Indicates if directory.
-	 * @return Added child {@link ClassPathHttpResourceNode}.
+	 * @return Added child {@link ClassPathNode}.
 	 */
-	private static ClassPathHttpResourceNode addChild(ClassPathHttpResourceNode parent, String nodePath,
+	private static ClassPathNode addChild(ClassPathNode parent, String nodePath,
 			boolean isDirectory) {
 
 		// Ensure have path for child
@@ -196,7 +196,7 @@ public class ClassPathHttpResourceNode {
 		}
 
 		// Determine if node already added
-		ClassPathHttpResourceNode child = parent.getChild(nodePath);
+		ClassPathNode child = parent.getChild(nodePath);
 		if (child != null) {
 			return child; // child already added, so return it
 		}
@@ -204,18 +204,18 @@ public class ClassPathHttpResourceNode {
 		// No child so create the child
 		String resourcePath = parent.resourcePath + nodePath + (isDirectory ? "/" : "");
 		String classPath = parent.classPath + ("".equals(parent.classPath) ? "" : "/") + nodePath;
-		child = new ClassPathHttpResourceNode(nodePath, resourcePath, classPath, isDirectory);
+		child = new ClassPathNode(nodePath, resourcePath, classPath, isDirectory);
 
 		// Add child to the parent
-		ClassPathHttpResourceNode[] children = new ClassPathHttpResourceNode[parent.children.length + 1];
+		ClassPathNode[] children = new ClassPathNode[parent.children.length + 1];
 		System.arraycopy(parent.children, 0, children, 0, parent.children.length);
 		children[children.length - 1] = child;
 		parent.children = children;
 
 		// Sort the children
-		Arrays.sort(parent.children, new Comparator<ClassPathHttpResourceNode>() {
+		Arrays.sort(parent.children, new Comparator<ClassPathNode>() {
 			@Override
-			public int compare(ClassPathHttpResourceNode a, ClassPathHttpResourceNode b) {
+			public int compare(ClassPathNode a, ClassPathNode b) {
 				return String.CASE_INSENSITIVE_ORDER.compare(a.nodePath, b.nodePath);
 			}
 		});
@@ -245,9 +245,9 @@ public class ClassPathHttpResourceNode {
 	private final boolean isDirectory;
 
 	/**
-	 * Children of this {@link ClassPathHttpResourceNode}.
+	 * Children of this {@link ClassPathNode}.
 	 */
-	private ClassPathHttpResourceNode[] children = new ClassPathHttpResourceNode[0];
+	private ClassPathNode[] children = new ClassPathNode[0];
 
 	/**
 	 * Initiate.
@@ -262,7 +262,7 @@ public class ClassPathHttpResourceNode {
 	 *            <code>true</code> if this node is a directory (otherwise a
 	 *            file).
 	 */
-	public ClassPathHttpResourceNode(String nodePath, String resourcePath, String classPath, boolean isDirectory) {
+	public ClassPathNode(String nodePath, String resourcePath, String classPath, boolean isDirectory) {
 		this.nodePath = nodePath;
 		this.resourcePath = resourcePath;
 		this.classPath = classPath;
@@ -270,10 +270,10 @@ public class ClassPathHttpResourceNode {
 	}
 
 	/**
-	 * Obtains the path of this {@link ClassPathHttpResourceNode} from its
+	 * Obtains the path of this {@link ClassPathNode} from its
 	 * parent.
 	 * 
-	 * @return Path of this {@link ClassPathHttpResourceNode} from its parent.
+	 * @return Path of this {@link ClassPathNode} from its parent.
 	 */
 	public String getNodePath() {
 		return this.nodePath;
@@ -307,26 +307,26 @@ public class ClassPathHttpResourceNode {
 	}
 
 	/**
-	 * Obtains the child {@link ClassPathHttpResourceNode} instances.
+	 * Obtains the child {@link ClassPathNode} instances.
 	 * 
-	 * @return Child {@link ClassPathHttpResourceNode} instances.
+	 * @return Child {@link ClassPathNode} instances.
 	 */
-	public ClassPathHttpResourceNode[] getChildren() {
+	public ClassPathNode[] getChildren() {
 		return this.children;
 	}
 
 	/**
-	 * Obtains the child {@link ClassPathHttpResourceNode} by the name.
+	 * Obtains the child {@link ClassPathNode} by the name.
 	 * 
 	 * @param childNodePath
 	 *            Child node path.
-	 * @return Child {@link ClassPathHttpResourceNode} or <code>null</code> if
+	 * @return Child {@link ClassPathNode} or <code>null</code> if
 	 *         no child by node path.
 	 */
-	public ClassPathHttpResourceNode getChild(String childNodePath) {
+	public ClassPathNode getChild(String childNodePath) {
 
 		// Find the corresponding child
-		for (ClassPathHttpResourceNode child : this.children) {
+		for (ClassPathNode child : this.children) {
 			if (child.nodePath.equals(childNodePath)) {
 				return child; // found corresponding child
 			}

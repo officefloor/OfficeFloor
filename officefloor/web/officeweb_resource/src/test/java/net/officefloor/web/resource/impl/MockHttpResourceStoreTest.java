@@ -27,14 +27,14 @@ import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
-import net.officefloor.web.resource.spi.ResourceSystemFactory;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 
 /**
  * Tests the {@link HttpResourceStore} with mock {@link ResourceSystem}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase implements ResourceSystemFactory {
+public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase implements ResourceSystemService {
 
 	/**
 	 * {@link ResourceSystemContext}.
@@ -61,7 +61,7 @@ public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase
 	 * Ensure always creates cache copy of file (ensures never deleted and that
 	 * {@link FileChannel} always backed by a file).
 	 */
-	public void testAlwaysCacheCopyOfFile() throws IOException {
+	public void testAlwaysCacheCopyOfFile() throws Exception {
 
 		// Setup without transformers (so uses resource system path)
 		this.setupNewHttpResourceStore(this.getLocation(), null, "index.html");
@@ -124,7 +124,13 @@ public class MockHttpResourceStoreTest extends AbstractHttpResourceStoreTestCase
 	}
 
 	@Override
-	protected ResourceSystemFactory getResourceSystemFactory() {
+	protected Class<? extends ResourceSystemService> getResourceSystemService() {
+		fail("Should not obtain class");
+		return null;
+	}
+
+	@Override
+	protected ResourceSystemService createResourceSystemService() throws Exception {
 		return this;
 	}
 

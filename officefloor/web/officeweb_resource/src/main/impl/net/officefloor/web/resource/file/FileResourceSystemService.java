@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,36 @@
  */
 package net.officefloor.web.resource.file;
 
-import net.officefloor.web.resource.impl.AbstractHttpResourceStoreTestCase;
+import java.io.IOException;
+
+import net.officefloor.web.resource.spi.ResourceSystem;
+import net.officefloor.web.resource.spi.ResourceSystemContext;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 
 /**
- * Tests the {@link FileResourceSystem}.
+ * {@link ResourceSystemService} backed by files.
  * 
  * @author Daniel Sagenschneider
  */
-public class FileResourceSystemTest extends AbstractHttpResourceStoreTestCase {
+public class FileResourceSystemService implements ResourceSystemService {
+
+	/**
+	 * Protocol name.
+	 */
+	public static final String PROTOCOL_NAME = "file";
 
 	/*
-	 * ============== AbstractHttpResourceStoreTestCase ==================
+	 * ==================== ResourceSystemService =====================
 	 */
 
 	@Override
-	protected String getLocation() {
-		return this.getStoreFilePath();
+	public String getProtocolName() {
+		return PROTOCOL_NAME;
 	}
 
 	@Override
-	protected Class<FileResourceSystemService> getResourceSystemService() {
-		return FileResourceSystemService.class;
+	public ResourceSystem createResourceSystem(ResourceSystemContext context) throws IOException {
+		return new FileResourceSystem(context);
 	}
 
 }

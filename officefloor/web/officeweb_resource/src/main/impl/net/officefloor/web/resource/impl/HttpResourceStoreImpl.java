@@ -27,11 +27,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +45,7 @@ import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
-import net.officefloor.web.resource.spi.ResourceSystemFactory;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceTransformer;
 import net.officefloor.web.resource.spi.ResourceTransformerContext;
 import net.officefloor.web.route.WebRouter;
@@ -83,6 +85,11 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * {@link Map} of {@link HttpResource} path to the {@link HttpResource}.
 	 */
 	private final Map<String, AbstractHttpResource> cache = new ConcurrentHashMap<>();
+
+	/**
+	 * Files to clean up on close of this {@link HttpResourceStore}.
+	 */
+	private final Deque<Path> closeCleanupFiles = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * {@link HttpResourceCache}.
@@ -135,8 +142,8 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * 
 	 * @param location
 	 *            Location for the {@link ResourceSystemContext}.
-	 * @param resourceSystemFactory
-	 *            {@link ResourceSystemFactory}.
+	 * @param resourceSystemService
+	 *            {@link ResourceSystemService}.
 	 * @param contextPath
 	 *            Context path for {@link HttpResource} instances from this
 	 *            {@link HttpResourceStore}.
@@ -149,13 +156,10 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * @throws IOException
 	 *             If fails to instantiate the {@link HttpResourceStore}.
 	 */
-	public HttpResourceStoreImpl(String location, ResourceSystemFactory resourceSystemFactory, String contextPath,
+	public HttpResourceStoreImpl(String location, ResourceSystemService resourceSystemService, String contextPath,
 			FileCacheFactory fileCacheFactory, ResourceTransformer[] transformers,
 			String[] directoryDefaultResourceNames) throws IOException {
 		this.location = location;
-
-		// Create the resource system
-		this.resourceSystem = resourceSystemFactory.createResourceSystem(this);
 
 		// Obtain the context path
 		if (contextPath == null) {
@@ -185,6 +189,9 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 			}
 			this.directoryDefaultResourceNames[i] = WebRouter.transformToCanonicalPath(defaultName);
 		}
+
+		// Create the resource system
+		this.resourceSystem = resourceSystemService.createResourceSystem(this);
 	}
 
 	/**
@@ -296,14 +303,30 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 	@Override
 	public Path createFile(String name) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Ensure safe name for file
+		name = name.replace('/', '_');
+
+		// Create and register the new file
+		Path newFile = HttpResourceStoreImpl.this.fileCache.createFile(name);
+		this.closeCleanupFiles.push(newFile);
+
+		// Return the new file
+		return newFile;
 	}
 
 	@Override
 	public Path createDirectory(String name) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Ensure safe name for file
+		name = name.replace('/', '_');
+
+		// Create and register the new directory
+		Path newDirectory = HttpResourceStoreImpl.this.fileCache.createDirectory(name);
+		this.closeCleanupFiles.push(newDirectory);
+
+		// Return the new directory
+		return newDirectory;
 	}
 
 	@Override
@@ -368,6 +391,17 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 	@Override
 	public void close() throws IOException {
+
+		// Close all the HTTP resources
+		for (AbstractHttpResource resource : this.cache.values()) {
+			resource.close();
+		}
+
+		// Clean up files
+		Path file;
+		while ((file = this.closeCleanupFiles.pollFirst()) != null) {
+			Files.delete(file);
+		}
 
 		// Close the file cache
 		this.fileCache.close();
@@ -503,8 +537,11 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 				}
 
 				// Undertake transformation of resource
-				ResourceTransformerContextImpl context = new ResourceTransformerContextImpl(resource,
-						contentTypeHeaderValue);
+				// (typically file per transform)
+				List<Path> cleanUpFiles = new ArrayList<>(
+						store.transformers.length == 0 ? 1 : store.transformers.length);
+				ResourceTransformerContextImpl context = new ResourceTransformerContextImpl(this.httpPath, resource,
+						contentTypeHeaderValue, cleanUpFiles);
 				for (int i = 0; i < store.transformers.length; i++) {
 					ResourceTransformer transformer = store.transformers[i];
 					transformer.transform(context);
@@ -515,14 +552,25 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 					/*
 					 * Must make copy of file. This is so the file channel is
-					 * always backed by file. Specifically, if file is deleted
-					 * from the resource system outside the control of the HTTP
-					 * resource store, then this needs to be managed rather than
-					 * breaking file channel.
+					 * always backed by a file. Specifically, if the file is
+					 * altered within the resource system outside the control of
+					 * the HTTP resource store, then this needs to be managed
+					 * rather than breaking the file channel.
+					 * 
+					 * Furthermore, it ensures that system does not accidently
+					 * delete the source file.
 					 */
 					Path copy = context.createFile();
 					Files.copy(context.resource, copy, StandardCopyOption.REPLACE_EXISTING);
 					context.resource = copy;
+				}
+
+				// Clean unused files (in reverse order created)
+				Collections.reverse(context.cleanupFiles);
+				for (Path cleanUpFile : context.cleanupFiles) {
+					if (!(Files.isSameFile(context.resource, cleanUpFile))) {
+						Files.delete(cleanUpFile);
+					}
 				}
 
 				// Create the HTTP file
@@ -552,20 +600,20 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	private class ResourceTransformerContextImpl implements ResourceTransformerContext {
 
 		/**
-		 * {@link Path} to the resource.
-		 */
-		private Path resource;
-
-		/**
 		 * Path of the {@link HttpResource} to use as name for cached files.
 		 * This aids identifying the file for debugging.
 		 */
-		private String path;
+		private final String httpPath;
 
 		/**
 		 * Index of the next file. This aids identifying the file for debugging.
 		 */
 		private int fileIndex = 0;
+
+		/**
+		 * {@link Path} to the resource.
+		 */
+		private Path resource;
 
 		/**
 		 * <code>Content-Type</code> {@link HttpHeaderValue}.
@@ -585,19 +633,26 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		/**
 		 * {@link Path} instances to the files that require clean up.
 		 */
-		private final List<Path> cleanupFiles = new LinkedList<>();
+		private final List<Path> cleanupFiles;
 
 		/**
 		 * Instantiate.
 		 * 
+		 * @param httpPath
+		 *            Path to {@link HttpResource}.
 		 * @param resource
 		 *            {@link Path} to the {@link ResourceSystem} resource.
 		 * @param contentType
 		 *            <code>Content-Type</code> {@link HttpHeaderValue}.
+		 * @param cleanupFiles
+		 *            {@link List} of cleanup files.
 		 */
-		private ResourceTransformerContextImpl(Path resource, HttpHeaderValue contentType) {
+		private ResourceTransformerContextImpl(String httpPath, Path resource, HttpHeaderValue contentType,
+				List<Path> cleanupFiles) {
+			this.httpPath = httpPath;
 			this.resource = resource;
 			this.contentType = contentType;
+			this.cleanupFiles = cleanupFiles;
 		}
 
 		/*
@@ -613,7 +668,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		public Path createFile() throws IOException {
 
 			// Create the name for the file
-			String name = this.path + this.fileIndex;
+			String name = "_" + this.fileIndex + "-" + this.httpPath;
 			this.fileIndex++;
 			name = name.replace('/', '_');
 

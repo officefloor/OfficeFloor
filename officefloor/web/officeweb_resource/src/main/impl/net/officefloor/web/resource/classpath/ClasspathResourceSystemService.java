@@ -15,32 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.spi;
+package net.officefloor.web.resource.classpath;
 
-import java.util.ServiceLoader;
+import java.io.IOException;
+
+import net.officefloor.web.resource.spi.ResourceSystem;
+import net.officefloor.web.resource.spi.ResourceSystemContext;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 
 /**
- * <p>
- * Factory for the creation of a {@link ResourceTransformer}.
- * <p>
- * This is loaded by the {@link ServiceLoader}.
+ * {@link ResourceSystemService} to create a {@link ResourceSystem} from the
+ * class path.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResourceTransformerFactory {
+public class ClasspathResourceSystemService implements ResourceSystemService {
 
 	/**
-	 * Obtains the name of transformation.
-	 * 
-	 * @return Name of transformation.
+	 * Protocol name.
 	 */
-	String getName();
+	public static final String PROTOCOL_NAME = "classpath";
 
-	/**
-	 * Creates the {@link ResourceTransformer}.
-	 * 
-	 * @return {@link ResourceTransformer}.
+	/*
+	 * ===================== ResourceSystemFactory =======================
 	 */
-	ResourceTransformer createResourceTransformer();
+
+	@Override
+	public String getProtocolName() {
+		return PROTOCOL_NAME;
+	}
+
+	@Override
+	public ResourceSystem createResourceSystem(ResourceSystemContext context) throws IOException {
+		return new ClasspathResourceSystem(context);
+	}
 
 }

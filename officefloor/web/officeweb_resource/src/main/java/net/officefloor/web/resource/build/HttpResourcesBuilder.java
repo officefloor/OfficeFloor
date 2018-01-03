@@ -19,7 +19,7 @@ package net.officefloor.web.resource.build;
 
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.spi.ResourceTransformer;
-import net.officefloor.web.resource.spi.ResourceTransformerFactory;
+import net.officefloor.web.resource.spi.ResourceTransformerService;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -52,13 +52,13 @@ public interface HttpResourcesBuilder {
 
 	/**
 	 * Registers a {@link ResourceTransformer} from a
-	 * {@link ResourceTransformerFactory} to transform the resources.
+	 * {@link ResourceTransformerService} to transform the resources.
 	 * 
 	 * @param name
-	 *            Name of the {@link ResourceTransformerFactory} to create the
+	 *            Name of the {@link ResourceTransformerService} to create the
 	 *            {@link ResourceTransformer}.
 	 * 
-	 * @see ResourceTransformerFactory
+	 * @see ResourceTransformerService
 	 */
 	void addResourceTransformer(String name);
 

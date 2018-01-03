@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.file;
+package net.officefloor.web.resource.spi;
 
-import net.officefloor.web.resource.impl.AbstractHttpResourceStoreTestCase;
+import java.util.ServiceLoader;
 
 /**
- * Tests the {@link FileResourceSystem}.
+ * <p>
+ * {@link ServiceLoader} service for the creation of a
+ * {@link ResourceTransformer}.
+ * <p>
+ * This is loaded by the {@link ServiceLoader}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FileResourceSystemTest extends AbstractHttpResourceStoreTestCase {
+public interface ResourceTransformerService {
 
-	/*
-	 * ============== AbstractHttpResourceStoreTestCase ==================
+	/**
+	 * Obtains the name of transformation.
+	 * 
+	 * @return Name of transformation.
 	 */
+	String getName();
 
-	@Override
-	protected String getLocation() {
-		return this.getStoreFilePath();
-	}
-
-	@Override
-	protected Class<FileResourceSystemService> getResourceSystemService() {
-		return FileResourceSystemService.class;
-	}
+	/**
+	 * Creates the {@link ResourceTransformer}.
+	 * 
+	 * @return {@link ResourceTransformer}.
+	 */
+	ResourceTransformer createResourceTransformer();
 
 }
