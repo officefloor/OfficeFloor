@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -28,7 +29,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectConfiguration<D extends Enum<D>> {
+public interface ManagedObjectConfiguration<O extends Enum<O>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject} registered within the
@@ -54,7 +55,7 @@ public interface ManagedObjectConfiguration<D extends Enum<D>> {
 	 * 
 	 * @return {@link ManagedObjectDependencyConfiguration} instances.
 	 */
-	ManagedObjectDependencyConfiguration<D>[] getDependencyConfiguration();
+	ManagedObjectDependencyConfiguration<O>[] getDependencyConfiguration();
 
 	/**
 	 * Obtains the listing of {@link ManagedObjectGovernanceConfiguration}
@@ -63,5 +64,14 @@ public interface ManagedObjectConfiguration<D extends Enum<D>> {
 	 * @return {@link ManagedObjectGovernanceConfiguration} instances.
 	 */
 	ManagedObjectGovernanceConfiguration[] getGovernanceConfiguration();
+
+	/**
+	 * Obtains the listing of the {@link Administration} to be done before the
+	 * {@link ManagedObject} is loaded.
+	 * 
+	 * @return Listing of the {@link Administration} to be done before the
+	 *         {@link ManagedObject} is loaded.
+	 */
+	AdministrationConfiguration<?, ?, ?>[] getPreLoadAdministration();
 
 }

@@ -43,6 +43,21 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
+import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
+import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaData;
+import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
+import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
+import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
@@ -52,22 +67,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.EscalationFlowFactory;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
-import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -92,7 +91,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
- * Tests the {@link RawOfficeMetaDataImpl}.
+ * Tests the {@link RawOfficeMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -153,7 +152,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link RawAdministrationMetaDataFactory}.
 	 */
-	private final RawAdministrationMetaDataFactory rawBoundAdministratorFactory = this
+	private final RawAdministrationMetaDataFactory rawAdministrationFactory = this
 			.createMock(RawAdministrationMetaDataFactory.class);
 
 	/**
@@ -871,7 +870,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				RawBoundManagedObjectMetaData expectedBoundMetaData = processManagedObjects.get("OFFICE_MO_0");
 				assertEquals("Incorrect bound meta-data", expectedBoundMetaData, boundMetaData[0]);
 				assertEquals("Incorrect responsible teams", RawOfficeMetaDataTest.this.officeTeams, actual[2]);
-				assertEquals("Incorrect issues", RawOfficeMetaDataTest.this.issues, actual[3]);
+				assertSame("Incorrect issues", RawOfficeMetaDataTest.this.issues, actual[3]);
 				return true;
 			}
 		});
@@ -1375,9 +1374,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new AdministrationMetaData[0]);
 		this.recordReturn(functionMetaData, functionMetaData.getPostAdministrationMetaData(),
 				new AdministrationMetaData[0]);
-		this.recordReturn(functionMetaData, functionMetaData.getManagedObjectMetaData(), new ManagedObjectMetaData[0]);
 		this.recordReturn(functionMetaData, functionMetaData.getRequiredManagedObjects(), new ManagedObjectIndex[0]);
 		this.recordReturn(functionMetaData, functionMetaData.getRequiredGovernance(), new boolean[0]);
+		this.recordReturn(functionMetaData, functionMetaData.getManagedObjectMetaData(), new ManagedObjectMetaData[0]);
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1914,9 +1913,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.toArray(new RawManagingOfficeMetaData[0]);
 
 		// Construct the meta-data
-		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory().constructRawOfficeMetaData(this.configuration,
+		RawOfficeMetaData metaData = new RawOfficeMetaDataFactory().constructRawOfficeMetaData(this.configuration,
 				this.issues, officeMos, this.rawOfficeFloorMetaData, this.rawBoundManagedObjectFactory,
-				this.rawGovernanceFactory, this.rawBoundAdministratorFactory, this.rawManagedFunctionMetaDataFactory);
+				this.rawGovernanceFactory, this.rawAdministrationFactory, this.rawManagedFunctionMetaDataFactory);
 		if (isExpectConstruct) {
 			assertNotNull("Meta-data should be constructed", metaData);
 		} else {

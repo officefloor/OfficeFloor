@@ -32,13 +32,12 @@ import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link RawTeamMetaDataImpl}.
+ * Tests the {@link RawTeamMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -506,14 +505,14 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Constructs the {@link RawTeamMetaDataImpl} with the mock objects.
+	 * Constructs the {@link RawTeamMetaData} with the mock objects.
 	 * 
-	 * @return {@link RawTeamMetaDataImpl}.
+	 * @return {@link RawTeamMetaData}.
 	 */
 	private RawTeamMetaData constructRawTeamMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawTeamMetaData metaData = RawTeamMetaDataImpl.getFactory().constructRawTeamMetaData(this.configuration,
+		RawTeamMetaData metaData = new RawTeamMetaDataFactory().constructRawTeamMetaData(this.configuration,
 				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory,
 				this.issues);
 

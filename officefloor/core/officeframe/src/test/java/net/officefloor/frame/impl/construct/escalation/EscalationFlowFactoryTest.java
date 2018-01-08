@@ -27,7 +27,6 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.EscalationFlowFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
@@ -211,7 +210,7 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 	private EscalationFlow[] constructEscalationFlows(boolean isCreate) {
 
 		// Construct the escalation flows
-		EscalationFlowFactory factory = new EscalationFlowFactoryImpl();
+		EscalationFlowFactory factory = new EscalationFlowFactory();
 		EscalationFlow[] flows = factory.createEscalationFlows(new EscalationConfiguration[] { this.configuration },
 				officeMetaData, AssetType.FUNCTION, "FUNCTION", this.issues);
 

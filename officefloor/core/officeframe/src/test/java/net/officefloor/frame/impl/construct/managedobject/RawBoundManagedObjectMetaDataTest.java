@@ -31,22 +31,23 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -55,7 +56,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Test the {@link RawBoundManagedObjectMetaDataImpl}.
+ * Test the {@link RawBoundManagedObjectMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -84,7 +85,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private AssetManagerFactory assetManagerFactory = this.createMock(AssetManagerFactory.class);
+	private AssetManagerFactory assetManagerFactory = new AssetManagerFactory(null, null, null);
 
 	/**
 	 * Registered {@link RawManagedObjectMetaData} instances by their name.
@@ -112,10 +113,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoBoundName() {
 
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
+		final ManagedObjectConfiguration<?> configuration = new DependencyMappingBuilderImpl<>(null, null);
 
 		// Record construction
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), null);
 		this.issues.addIssue(this.assetType, this.assetName, "No bound name for managed object");
 
 		// Attempt to construct
@@ -129,11 +129,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoOfficeName() {
 
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
+		final ManagedObjectConfiguration<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", null);
 
 		// Record construction
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), "BOUND");
-		this.recordReturn(configuration, configuration.getOfficeManagedObjectName(), "");
 		this.issues.addIssue(this.assetType, this.assetName, "No office name for bound managed object of name 'BOUND'");
 
 		// Attempt to construct
@@ -147,11 +145,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoManagedObjectMetaData() {
 
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
+		final ManagedObjectConfiguration<?> configuration = new DependencyMappingBuilderImpl<>("BOUND_MO", "OFFICE_MO");
 
 		// Record construction
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), "BOUND_MO");
-		this.recordReturn(configuration, configuration.getOfficeManagedObjectName(), "OFFICE_MO");
 		this.issues.addIssue(this.assetType, this.assetName,
 				"No managed object by name 'OFFICE_MO' registered with the Office");
 
@@ -176,7 +172,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct bound meta-data without scope managed objects
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData[] rawBoundMoMetaData = RawBoundManagedObjectMetaDataImpl.getFactory()
+		RawBoundManagedObjectMetaData[] rawBoundMoMetaData = new RawBoundManagedObjectMetaDataFactory()
 				.constructBoundManagedObjectMetaData(new ManagedObjectConfiguration[] { configuration }, this.issues,
 						this.managedObjectScope, this.assetType, this.assetName, this.assetManagerFactory,
 						this.registeredManagedObjects, null, null, null, null);
@@ -1014,14 +1010,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
 				governanceConfiguration);
 		this.record_getDependencyMetaData(rawMoMetaData);
-		ExtensionInterfaceFactory<?>[] eiFactories = this.record_governManagedObject(String.class, rawMoMetaData,
+		ExtensionFactory<?>[] eiFactories = this.record_governManagedObject(String.class, rawMoMetaData,
 				configuration, new ManagedObjectGovernanceConfiguration[] { governanceConfiguration }, String.class);
 		ManagedObjectMetaData<?> moMetaData = this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0,
 				governances);
 
 		// Record using extension interface factory
-		ExtensionInterfaceFactory<?> eiFactory = eiFactories[0];
-		this.recordReturn(eiFactory, eiFactory.createExtensionInterface(managedObject), extensionInterface);
+		ExtensionFactory<?> eiFactory = eiFactories[0];
+		this.recordReturn(eiFactory, eiFactory.createExtension(managedObject), extensionInterface);
 
 		// Construct and obtain the managed object meta-data
 		this.replayMockObjects();
@@ -1295,7 +1291,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records mapping the {@link Governance} for the {@link ManagedObject}.
 	 */
-	private ExtensionInterfaceFactory<?>[] record_governManagedObject(Class<?> governanceExtensionInterfaceType,
+	private ExtensionFactory<?>[] record_governManagedObject(Class<?> governanceExtensionInterfaceType,
 			RawManagedObjectMetaData<?, ?> rawMoMetaData, ManagedObjectConfiguration<?> configuration,
 			ManagedObjectGovernanceConfiguration[] governanceConfigurations, Class<?>... extensionInterfaceTypes) {
 
@@ -1305,9 +1301,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.rawGovernanceMetaDatas.put(GOVERNANCE_NAME, rawGovernanceMetaData);
 
 		// Extension interface meta-data
-		ManagedObjectExtensionInterfaceMetaData<?>[] eiMetaDatas = new ManagedObjectExtensionInterfaceMetaData<?>[extensionInterfaceTypes.length];
+		ManagedObjectExtensionMetaData<?>[] eiMetaDatas = new ManagedObjectExtensionMetaData<?>[extensionInterfaceTypes.length];
 		for (int i = 0; i < eiMetaDatas.length; i++) {
-			eiMetaDatas[i] = this.createMock(ManagedObjectExtensionInterfaceMetaData.class);
+			eiMetaDatas[i] = this.createMock(ManagedObjectExtensionMetaData.class);
 		}
 
 		// Ensure have Managed Object Governance configuration
@@ -1315,7 +1311,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				: governanceConfigurations);
 
 		// Configure the governance
-		ExtensionInterfaceFactory<?>[] eiFactories = new ExtensionInterfaceFactory<?>[governanceConfigurations.length];
+		ExtensionFactory<?>[] eiFactories = new ExtensionFactory<?>[governanceConfigurations.length];
 		for (int i = 0; i < governanceConfigurations.length; i++) {
 			ManagedObjectGovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
 
@@ -1340,15 +1336,15 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 			// Iterate over extensions to find match
 			NEXT_GOVERNANCE: for (int e = 0; e < eiMetaDatas.length; e++) {
-				ManagedObjectExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[e];
+				ManagedObjectExtensionMetaData<?> eiMetaData = eiMetaDatas[e];
 				Class<?> extensionInterfaceType = extensionInterfaceTypes[e];
-				this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(), extensionInterfaceType);
+				this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), extensionInterfaceType);
 
 				// Determine if a match
 				if (governanceExtensionInterfaceType.isAssignableFrom(extensionInterfaceType)) {
 					// Match, so load governance
-					final ExtensionInterfaceFactory<?> eiFactory = this.createMock(ExtensionInterfaceFactory.class);
-					this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceFactory(), eiFactory);
+					final ExtensionFactory<?> eiFactory = this.createMock(ExtensionFactory.class);
+					this.recordReturn(eiMetaData, eiMetaData.getExtensionFactory(), eiFactory);
 
 					// Set factory for return
 					eiFactories[i] = eiFactory;
@@ -1528,7 +1524,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				: this.inputManagedObjectDefaults);
 
 		// Attempt to construct
-		RawBoundManagedObjectMetaData[] metaData = RawBoundManagedObjectMetaDataImpl.getFactory()
+		RawBoundManagedObjectMetaData[] metaData = new RawBoundManagedObjectMetaDataFactory()
 				.constructBoundManagedObjectMetaData(boundManagedObjectConfiguration, this.issues,
 						this.managedObjectScope, this.assetType, this.assetName, this.assetManagerFactory,
 						this.registeredManagedObjects, this.scopeManagedObjects, inputManagedObjects, inputDefaults,

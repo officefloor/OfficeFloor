@@ -32,15 +32,13 @@ import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -190,7 +188,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Manage by office
 		this.replayMockObjects();
-		RawManagingOfficeMetaDataImpl<?> rawOffice = this.createRawManagingOffice(RECYCLE_FUNCTION_NAME);
+		RawManagingOfficeMetaData<?> rawOffice = this.createRawManagingOffice(RECYCLE_FUNCTION_NAME);
 
 		// Have managed before managed by office.
 		// This would be the possible case that used by same office.
@@ -229,7 +227,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Manage by office
 		this.replayMockObjects();
-		RawManagingOfficeMetaDataImpl<?> rawOffice = this.createRawManagingOffice(RECYCLE_FUNCTION_NAME);
+		RawManagingOfficeMetaData<?> rawOffice = this.createRawManagingOffice(RECYCLE_FUNCTION_NAME);
 		rawOffice.manageByOffice(this.officeMetaData, null, this.officeTeams, this.issues);
 
 		// Have managed after managed by office.
@@ -258,7 +256,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Manage by office
 		this.replayMockObjects();
-		RawManagingOfficeMetaDataImpl<?> rawOffice = this.run_manageByOffice(true, null, null);
+		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true, null, null);
 
 		// Ensure not obtain recycle function
 		rawOffice.manageManagedObject(moMetaData);
@@ -492,7 +490,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link Flow} for a {@link ManagedObject} .
+	 * Ensures able to construct {@link Flow} for a {@link ManagedObject}.
 	 */
 	public void testConstructFlow() throws Exception {
 
@@ -766,19 +764,19 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link RawManagingOfficeMetaDataImpl} for testing.
+	 * Creates the {@link RawManagingOfficeMetaData} for testing.
 	 * 
 	 * @param recycleFunctionName
 	 *            Recycle {@link ManagedFunction} name.
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} listing.
-	 * @return New {@link RawManagingOfficeMetaDataImpl}.
+	 * @return New {@link RawManagingOfficeMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private RawManagingOfficeMetaDataImpl<?> createRawManagingOffice(String recycleFunctionName,
+	private RawManagingOfficeMetaData<?> createRawManagingOffice(String recycleFunctionName,
 			ManagedObjectFlowMetaData<?>... flowMetaData) {
 		// Create and return the raw managing office meta-data
-		RawManagingOfficeMetaDataImpl<?> rawManagingOffice = new RawManagingOfficeMetaDataImpl(MANAGING_OFFICE_NAME,
+		RawManagingOfficeMetaData<?> rawManagingOffice = new RawManagingOfficeMetaData(MANAGING_OFFICE_NAME,
 				recycleFunctionName, this.inputConfiguration, flowMetaData, this.configuration);
 		rawManagingOffice.setRawManagedObjectMetaData(this.rawMoMetaData);
 		return rawManagingOffice;
@@ -795,7 +793,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates a {@link RawManagingOfficeMetaDataImpl} and runs the manage by
+	 * Creates a {@link RawManagingOfficeMetaData} and runs the manage by
 	 * office.
 	 * 
 	 * @param isCreateExecuteContext
@@ -808,15 +806,15 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 *            {@link RawBoundManagedObjectMetaData} for the {@link Office}.
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} listing.
-	 * @return New {@link RawManagingOfficeMetaDataImpl} with manage by office
+	 * @return New {@link RawManagingOfficeMetaData} with manage by office
 	 *         run.
 	 */
-	private RawManagingOfficeMetaDataImpl<?> run_manageByOffice(boolean isCreateExecuteContext,
+	private RawManagingOfficeMetaData<?> run_manageByOffice(boolean isCreateExecuteContext,
 			String recycleFunctionName, RawBoundManagedObjectMetaData[] processBoundMetaData,
 			ManagedObjectFlowMetaData<?>... flowMetaData) {
 
 		// Create and manage by office
-		RawManagingOfficeMetaDataImpl<?> rawOffice = this.createRawManagingOffice(recycleFunctionName, flowMetaData);
+		RawManagingOfficeMetaData<?> rawOffice = this.createRawManagingOffice(recycleFunctionName, flowMetaData);
 		rawOffice.manageByOffice(this.officeMetaData, processBoundMetaData, this.officeTeams, this.issues);
 
 		// Validate creation of execute context

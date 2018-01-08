@@ -22,11 +22,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
@@ -37,9 +40,8 @@ import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfi
  * 
  * @author Daniel Sagenschneider
  */
-public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
-		DependencyMappingBuilder, ManagedObjectConfiguration<D>,
-		InputManagedObjectConfiguration<D> {
+public class DependencyMappingBuilderImpl<O extends Enum<O>>
+		implements DependencyMappingBuilder, ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
 
 	/**
 	 * Name of the {@link ManagedObject} is being bound.
@@ -54,12 +56,12 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	/**
 	 * {@link ManagedObjectDependencyConfiguration} by index of dependency.
 	 */
-	private final Map<Integer, ManagedObjectDependencyConfiguration<D>> dependencies = new HashMap<Integer, ManagedObjectDependencyConfiguration<D>>();
+	private final Map<Integer, ManagedObjectDependencyConfiguration<O>> dependencies = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectGovernanceConfiguration} instances.
 	 */
-	private final List<ManagedObjectGovernanceConfiguration> governances = new LinkedList<ManagedObjectGovernanceConfiguration>();
+	private final List<ManagedObjectGovernanceConfiguration> governances = new LinkedList<>();
 
 	/**
 	 * Initiate as a {@link ManagedObjectConfiguration}.
@@ -69,8 +71,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	 * @param officeManagedObjectName
 	 *            Name of the {@link ManagedObject} within the {@link Office}.
 	 */
-	public DependencyMappingBuilderImpl(String boundManagedObjectName,
-			String officeManagedObjectName) {
+	public DependencyMappingBuilderImpl(String boundManagedObjectName, String officeManagedObjectName) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.officeManagedObjectName = officeManagedObjectName;
 	}
@@ -90,15 +91,14 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	 */
 
 	@Override
-	public <d extends Enum<d>> void mapDependency(d key,
-			String scopeManagedObjectName) {
+	public <d extends Enum<d>> void mapDependency(d key, String scopeManagedObjectName) {
 		// Use ordinal of key to index the dependency
 		this.mapDependency(key.ordinal(), key, scopeManagedObjectName);
 	}
 
 	@Override
 	public void mapDependency(int index, String scopeManagedObjectName) {
-		this.mapDependency(index, (D) null, scopeManagedObjectName);
+		this.mapDependency(index, (O) null, scopeManagedObjectName);
 	}
 
 	@Override
@@ -112,6 +112,13 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 		this.governances.add(governance);
 	}
 
+	@Override
+	public <E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preLoadAdminister(
+			String administrationName, Class<E> extension, AdministrationFactory<E, f, G> administrationFactory) {
+		// TODO implement preLoadAdminister
+		throw new UnsupportedOperationException("TODO implement preLoadAdminister");
+	}
+
 	/**
 	 * Maps in the dependency.
 	 * 
@@ -123,15 +130,14 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	 *            Scope name for the {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	private <d extends Enum<d>> void mapDependency(int index, d key,
-			String scopeManagedObjectName) {
+	private <d extends Enum<d>> void mapDependency(int index, d key, String scopeManagedObjectName) {
 
 		// Cast key to expected type
-		D castKey = (D) key;
+		O castKey = (O) key;
 
 		// Create the dependency
-		ManagedObjectDependencyConfigurationImpl dependency = new ManagedObjectDependencyConfigurationImpl(
-				castKey, scopeManagedObjectName);
+		ManagedObjectDependencyConfigurationImpl dependency = new ManagedObjectDependencyConfigurationImpl(castKey,
+				scopeManagedObjectName);
 
 		// Map the dependency at the index
 		this.dependencies.put(new Integer(index), dependency);
@@ -152,28 +158,31 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public ManagedObjectDependencyConfiguration<D>[] getDependencyConfiguration() {
-		return ConstructUtil.toArray(this.dependencies,
-				new ManagedObjectDependencyConfiguration[0]);
+	public ManagedObjectDependencyConfiguration<O>[] getDependencyConfiguration() {
+		return ConstructUtil.toArray(this.dependencies, new ManagedObjectDependencyConfiguration[0]);
 	}
 
 	@Override
 	public ManagedObjectGovernanceConfiguration[] getGovernanceConfiguration() {
 		return (ManagedObjectGovernanceConfiguration[]) this.governances
-				.toArray(new ManagedObjectGovernanceConfiguration[this.governances
-						.size()]);
+				.toArray(new ManagedObjectGovernanceConfiguration[this.governances.size()]);
+	}
+
+	@Override
+	public AdministrationConfiguration<?, ?, ?>[] getPreLoadAdministration() {
+		// TODO implement getPreLoadAdministration
+		return null;
 	}
 
 	/**
 	 * {@link ManagedObjectDependencyConfiguration} implementation.
 	 */
-	private class ManagedObjectDependencyConfigurationImpl implements
-			ManagedObjectDependencyConfiguration<D> {
+	private class ManagedObjectDependencyConfigurationImpl implements ManagedObjectDependencyConfiguration<O> {
 
 		/**
 		 * Dependency key.
 		 */
-		private final D dependencyKey;
+		private final O dependencyKey;
 
 		/**
 		 * {@link ManagedObject} name.
@@ -188,8 +197,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 		 * @param managedObjectName
 		 *            {@link ManagedObject} name.
 		 */
-		public ManagedObjectDependencyConfigurationImpl(D dependencyKey,
-				String managedObjectName) {
+		public ManagedObjectDependencyConfigurationImpl(O dependencyKey, String managedObjectName) {
 			this.dependencyKey = dependencyKey;
 			this.managedObjectName = managedObjectName;
 		}
@@ -199,7 +207,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 		 */
 
 		@Override
-		public D getDependencyKey() {
+		public O getDependencyKey() {
 			return this.dependencyKey;
 		}
 
@@ -212,8 +220,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	/**
 	 * {@link ManagedObjectGovernanceConfiguration} implementation.
 	 */
-	private class ManagedObjectGovernanceConfigurationImpl implements
-			ManagedObjectGovernanceConfiguration {
+	private class ManagedObjectGovernanceConfigurationImpl implements ManagedObjectGovernanceConfiguration {
 
 		/**
 		 * {@link Governance} name.

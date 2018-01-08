@@ -89,6 +89,6 @@ public interface ManagedObjectSourceMetaData<O extends Enum<O>, F extends Enum<F
 	 * @return Meta-data regarding the extension interfaces that this
 	 *         {@link ManagedObject} implements.
 	 */
-	ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData();
+	ManagedObjectExtensionMetaData<?>[] getExtensionInterfacesMetaData();
 
 }

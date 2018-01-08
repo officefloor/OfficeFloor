@@ -36,7 +36,7 @@ import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>>
+public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>>
 		implements ManagedObjectBuilder<F>, ManagedObjectSourceConfiguration<F, MS> {
 
 	/**

@@ -28,28 +28,26 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
-import net.officefloor.frame.internal.construct.EscalationFlowFactory;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractorMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -137,10 +135,10 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 			.createMock(ManagedObjectSourceMetaData.class);
 
 	/**
-	 * {@link ManagedObjectExtensionInterfaceMetaData}.
+	 * {@link ManagedObjectExtensionMetaData}.
 	 */
-	private final ManagedObjectExtensionInterfaceMetaData<?> extensionInterfaceMetaData = this
-			.createMock(ManagedObjectExtensionInterfaceMetaData.class);
+	private final ManagedObjectExtensionMetaData<?> extensionInterfaceMetaData = this
+			.createMock(ManagedObjectExtensionMetaData.class);
 
 	/**
 	 * {@link ManagedObjectIndex}.
@@ -148,10 +146,9 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	private final ManagedObjectIndex managedObjectIndex = this.createMock(ManagedObjectIndex.class);
 
 	/**
-	 * {@link ExtensionInterfaceFactory}.
+	 * {@link ExtensionFactory}.
 	 */
-	private final ExtensionInterfaceFactory<?> extensionInterfaceFactory = this
-			.createMock(ExtensionInterfaceFactory.class);
+	private final ExtensionFactory<?> extensionInterfaceFactory = this.createMock(ExtensionFactory.class);
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -349,8 +346,8 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 				this.managedObjectSourceMetaData);
 		this.recordReturn(this.managedObjectSourceMetaData,
 				this.managedObjectSourceMetaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionInterfaceMetaData[] { this.extensionInterfaceMetaData });
-		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionInterfaceType(),
+				new ManagedObjectExtensionMetaData[] { this.extensionInterfaceMetaData });
+		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionType(),
 				Integer.class);
 		this.recordReturn(this.rawBoundMoInstanceMetaData,
 				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(), this.rawMoMetaData);
@@ -381,8 +378,8 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Record ei extraction to verify the extension interface factory
 		this.recordReturn(moMetaData, moMetaData.getInstanceIndex(), 0);
-		this.recordReturn(this.extensionInterfaceFactory,
-				this.extensionInterfaceFactory.createExtensionInterface(managedObject), extensionInterface);
+		this.recordReturn(this.extensionInterfaceFactory, this.extensionInterfaceFactory.createExtension(managedObject),
+				extensionInterface);
 
 		// No flows or governance
 		this.record_noFlows();
@@ -400,8 +397,9 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Verify extension interface factory by extracting ei
 		AdministrationMetaData<?, ?, ?> adminMetaData = rawAdminMetaData.getAdministrationMetaData();
 		assertEquals("Incorrect number of administered managed objects", 1,
-				adminMetaData.getManagedObjectExtensionMetaData().length);
-		ManagedObjectExtensionMetaData<?> moEiMetaData = adminMetaData.getManagedObjectExtensionMetaData()[0];
+				adminMetaData.getManagedObjectExtensionExtractorMetaData().length);
+		ManagedObjectExtensionExtractorMetaData<?> moEiMetaData = adminMetaData
+				.getManagedObjectExtensionExtractorMetaData()[0];
 		assertEquals("Incorrect extracted extension interface", extensionInterface,
 				moEiMetaData.getManagedObjectExtensionExtractor().extractExtension(managedObject, moMetaData));
 
@@ -526,13 +524,13 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 				this.managedObjectSourceMetaData);
 		this.recordReturn(this.managedObjectSourceMetaData,
 				this.managedObjectSourceMetaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionInterfaceMetaData[] { this.extensionInterfaceMetaData });
-		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionInterfaceType(),
+				new ManagedObjectExtensionMetaData[] { this.extensionInterfaceMetaData });
+		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionType(),
 				String.class);
 		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData.getManagedObjectIndex(),
 				this.managedObjectIndex);
-		this.recordReturn(this.extensionInterfaceMetaData,
-				this.extensionInterfaceMetaData.getExtensionInterfaceFactory(), this.extensionInterfaceFactory);
+		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionFactory(),
+				this.extensionInterfaceFactory);
 	}
 
 	/**
@@ -611,7 +609,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 			AdministrationConfiguration<?, ?, ?>... configuration) {
 
 		// Construct the meta-data
-		RawAdministrationMetaData[] rawAdministrations = RawAdministrationMetaDataImpl.getFactory()
+		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaDataFactory()
 				.constructRawAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeMetaData,
 						this.flowMetaDataFactory, this.escalationFlowFactory, this.officeTeams, this.scopeMo,
 						this.issues);

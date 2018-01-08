@@ -27,13 +27,11 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.construct.EscalationFlowFactory;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -416,9 +414,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Create the raw governance meta-data
-		RawGovernanceMetaData rawGovernanceMetaData = RawGovernanceMetaDataImpl.getFactory()
-				.createRawGovernanceMetaData((GovernanceConfiguration) this.configuration, GOVERNANCE_INDEX,
-						officeTeams, OFFICE_NAME, this.issues);
+		RawGovernanceMetaData rawGovernanceMetaData = new RawGovernanceMetaDataFactory().createRawGovernanceMetaData(
+				(GovernanceConfiguration) this.configuration, GOVERNANCE_INDEX, officeTeams, OFFICE_NAME, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data", rawGovernanceMetaData);

@@ -17,7 +17,10 @@
  */
 package net.officefloor.web.resource.build;
 
+import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceTransformer;
 import net.officefloor.web.resource.spi.ResourceTransformerService;
 import net.officefloor.web.spi.security.HttpSecurity;
@@ -41,6 +44,15 @@ public interface HttpResourcesBuilder {
 	 *            Context path.
 	 */
 	void setContextPath(String contextPath);
+
+	/**
+	 * Adds a {@link TypeQualification} for the {@link HttpResourceStore}
+	 * {@link ManagedObject} backing this {@link HttpResourcesBuilder}.
+	 * 
+	 * @param qualifier
+	 *            {@link TypeQualification} qualifier.
+	 */
+	void addTypeQualifier(String qualifier);
 
 	/**
 	 * Registers a {@link ResourceTransformer} to transform the resources.

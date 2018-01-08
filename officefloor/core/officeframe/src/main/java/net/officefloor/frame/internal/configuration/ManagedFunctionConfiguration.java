@@ -83,7 +83,7 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	 * Obtains the listing of the {@link Administration} to be done before the
 	 * {@link ManagedFunction} is executed.
 	 * 
-	 * @return Listing of the {@link Administration} to be done after the
+	 * @return Listing of the {@link Administration} to be done before the
 	 *         {@link ManagedFunction} is executed.
 	 */
 	AdministrationConfiguration<?, ?, ?>[] getPreAdministration();

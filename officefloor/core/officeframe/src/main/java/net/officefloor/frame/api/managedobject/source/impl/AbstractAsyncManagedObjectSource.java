@@ -22,11 +22,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -201,7 +202,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * @return {@link DependencyLabeller} to possibly label the required
 		 *         dependency.
 		 */
-		DependencyLabeller addDependency(O key, Class<?> dependencyType);
+		DependencyLabeller<O> addDependency(O key, Class<?> dependencyType);
 
 		/**
 		 * Adds a required dependency identified by an index into the order the
@@ -212,7 +213,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * @return {@link DependencyLabeller} to possibly label the required
 		 *         dependency.
 		 */
-		DependencyLabeller addDependency(Class<?> dependencyType);
+		DependencyLabeller<O> addDependency(Class<?> dependencyType);
 
 		/**
 		 * Adds a required {@link Flow} identified by the key.
@@ -223,7 +224,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
-		Labeller addFlow(F key, Class<?> argumentType);
+		Labeller<F> addFlow(F key, Class<?> argumentType);
 
 		/**
 		 * Adds a required {@link Flow} identified by an index into the order
@@ -233,10 +234,10 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
-		Labeller addFlow(Class<?> argumentType);
+		Labeller<F> addFlow(Class<?> argumentType);
 
 		/**
-		 * Adds a {@link ManagedObjectExtensionInterfaceMetaData} instance.
+		 * Adds a {@link ManagedObjectExtensionMetaData} instance.
 		 * 
 		 * @param <E>
 		 *            Extension interface type.
@@ -244,17 +245,17 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Type of the extension interface supported by the
 		 *            {@link ManagedObject} instances.
 		 * @param extensionInterfaceFactory
-		 *            {@link ExtensionInterfaceFactory}.
+		 *            {@link ExtensionFactory}.
 		 */
 		<E> void addManagedObjectExtensionInterface(Class<E> interfaceType,
-				ExtensionInterfaceFactory<E> extensionInterfaceFactory);
+				ExtensionFactory<E> extensionInterfaceFactory);
 	}
 
 	/**
 	 * Provide {@link Labeller} functionality along with qualifying type of
 	 * dependency.
 	 */
-	public static interface DependencyLabeller extends Labeller {
+	public static interface DependencyLabeller<K extends Enum<K>> extends Labeller<K> {
 
 		/**
 		 * Specifies qualifier for the type.
@@ -263,14 +264,14 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Type qualifier.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
 		 */
-		Labeller setTypeQualifier(String qualifier);
+		Labeller<K> setTypeQualifier(String qualifier);
 
 	}
 
 	/**
 	 * Provides the ability to label the required dependency or {@link Flow}.
 	 */
-	public static interface Labeller {
+	public static interface Labeller<K extends Enum<K>> {
 
 		/**
 		 * Specifies the label.
@@ -279,12 +280,20 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Label.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
 		 */
-		Labeller setLabel(String label);
+		Labeller<K> setLabel(String label);
 
 		/**
-		 * Obtains the index of the dependency of {@link Flow}.
+		 * Obtains the key of the dependency or {@link Flow}.
 		 * 
-		 * @return Index of the dependency of {@link Flow}.
+		 * @return Key of the dependency or {@link Flow}. May be
+		 *         <code>null</code> if {@link Indexed}.
+		 */
+		K getKey();
+
+		/**
+		 * Obtains the index of the dependency or {@link Flow}.
+		 * 
+		 * @return Index of the dependency or {@link Flow}.
 		 */
 		int getIndex();
 	}
@@ -321,9 +330,9 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		private Map<Integer, ManagedObjectFlowMetaData<F>> flows = new HashMap<Integer, ManagedObjectFlowMetaData<F>>();
 
 		/**
-		 * {@link ManagedObjectExtensionInterfaceMetaData} instances.
+		 * {@link ManagedObjectExtensionMetaData} instances.
 		 */
-		private List<ManagedObjectExtensionInterfaceMetaData<?>> externsionInterfaces = new LinkedList<ManagedObjectExtensionInterfaceMetaData<?>>();
+		private List<ManagedObjectExtensionMetaData<?>> externsionInterfaces = new LinkedList<ManagedObjectExtensionMetaData<?>>();
 
 		/**
 		 * Initiate.
@@ -355,13 +364,13 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		}
 
 		@Override
-		public DependencyLabeller addDependency(O key, Class<?> dependencyType) {
+		public DependencyLabeller<O> addDependency(O key, Class<?> dependencyType) {
 			// Use ordinal of key to index the dependency
 			return this.addDependency(key.ordinal(), key, dependencyType);
 		}
 
 		@Override
-		public DependencyLabeller addDependency(Class<?> dependencyType) {
+		public DependencyLabeller<O> addDependency(Class<?> dependencyType) {
 			// Indexed, so use next index (size will increase with indexing)
 			return this.addDependency(this.dependencies.size(), null, dependencyType);
 		}
@@ -377,7 +386,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Type of dependency.
 		 * @return {@link Labeller} for the dependency.
 		 */
-		private DependencyLabeller addDependency(final int index, O key, Class<?> dependencyType) {
+		private DependencyLabeller<O> addDependency(final int index, final O key, Class<?> dependencyType) {
 
 			// Create the dependency meta-data
 			final ManagedObjectDependencyMetaDataImpl<O> dependency = new ManagedObjectDependencyMetaDataImpl<O>(key,
@@ -387,17 +396,22 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 			this.dependencies.put(new Integer(index), dependency);
 
 			// Return the labeller for the dependency
-			return new DependencyLabeller() {
+			return new DependencyLabeller<O>() {
 				@Override
-				public Labeller setLabel(String label) {
+				public Labeller<O> setLabel(String label) {
 					dependency.setLabel(label);
 					return this;
 				}
 
 				@Override
-				public Labeller setTypeQualifier(String qualifier) {
+				public Labeller<O> setTypeQualifier(String qualifier) {
 					dependency.setTypeQualifier(qualifier);
 					return this;
+				}
+
+				@Override
+				public O getKey() {
+					return key;
 				}
 
 				@Override
@@ -408,13 +422,13 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		}
 
 		@Override
-		public Labeller addFlow(F key, Class<?> argumentType) {
+		public Labeller<F> addFlow(F key, Class<?> argumentType) {
 			// Use ordinal of key to index the flow
 			return this.addFlow(key.ordinal(), key, argumentType);
 		}
 
 		@Override
-		public Labeller addFlow(Class<?> argumentType) {
+		public Labeller<F> addFlow(Class<?> argumentType) {
 			// Indexed, so use next index (size will increase with indexing)
 			return this.addFlow(this.flows.size(), null, argumentType);
 		}
@@ -430,7 +444,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            Type of the argument passed to the {@link Flow}.
 		 * @return {@link Labeller} for the {@link Flow}.
 		 */
-		private Labeller addFlow(final int index, F key, Class<?> argumentType) {
+		private Labeller<F> addFlow(final int index, final F key, Class<?> argumentType) {
 
 			// Create the flow meta-data
 			final ManagedObjectFlowMetaDataImpl<F> flow = new ManagedObjectFlowMetaDataImpl<F>(key, argumentType);
@@ -439,11 +453,16 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 			this.flows.put(new Integer(index), flow);
 
 			// Return the labeller for the flow
-			return new Labeller() {
+			return new Labeller<F>() {
 				@Override
-				public Labeller setLabel(String label) {
+				public Labeller<F> setLabel(String label) {
 					flow.setLabel(label);
 					return this;
+				}
+
+				@Override
+				public F getKey() {
+					return key;
 				}
 
 				@Override
@@ -455,9 +474,9 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 
 		@Override
 		public <E> void addManagedObjectExtensionInterface(Class<E> interfaceType,
-				ExtensionInterfaceFactory<E> extensionInterfaceFactory) {
+				ExtensionFactory<E> extensionInterfaceFactory) {
 			this.externsionInterfaces
-					.add(new ManagedObjectExtensionInterfaceMetaDataImpl<E>(interfaceType, extensionInterfaceFactory));
+					.add(new ManagedObjectExtensionMetaDataImpl<E>(interfaceType, extensionInterfaceFactory));
 		}
 
 		/*
@@ -485,8 +504,8 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		}
 
 		@Override
-		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-			return this.externsionInterfaces.toArray(new ManagedObjectExtensionInterfaceMetaData[0]);
+		public ManagedObjectExtensionMetaData<?>[] getExtensionInterfacesMetaData() {
+			return this.externsionInterfaces.toArray(new ManagedObjectExtensionMetaData[0]);
 		}
 	}
 

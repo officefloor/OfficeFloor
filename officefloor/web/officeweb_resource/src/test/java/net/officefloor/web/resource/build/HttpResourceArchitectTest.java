@@ -79,7 +79,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can send resource.
 	 */
-	public void testOutputToResource() throws Exception {
+	public void testSectionOutputToResource() throws Exception {
 		this.compile((context, resource) -> {
 			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
 			resource.link(section.getOfficeSectionOutput("resource"), "resource.html");
@@ -100,7 +100,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if missing resource.
 	 */
-	public void testOutputToMissingResource() throws Exception {
+	public void testSectionOutputToMissingResource() throws Exception {
 		this.issue((issues) -> issues.recordIssue("Can not find resource 'mising.html'"), (context, resource) -> {
 			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
 			resource.link(section.getOfficeSectionOutput("resource"), "missing.html");

@@ -41,23 +41,22 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
+import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
+import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow.EscalationKey;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawTeamMetaData;
-import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -70,7 +69,7 @@ import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link RawOfficeFloorMetaDataImpl}.
+ * Tests the {@link RawOfficeFloorMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -982,7 +981,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	private RawOfficeFloorMetaData constructRawOfficeFloorMetaData(boolean isConstruct) {
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaData metaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
+		RawOfficeFloorMetaData metaData = new RawOfficeFloorMetaDataFactory().constructRawOfficeFloorMetaData(
 				this.configuration, this.issues, this.rawTeamFactory, this.threadLocalAwareExecutor, this.rawMosFactory,
 				this.rawBoundMoFactory, this.rawGovernanceFactory, this.rawBoundAdminFactory, this.rawOfficeFactory,
 				this.rawFunctionMetaDataFactory);

@@ -32,10 +32,11 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
@@ -142,6 +143,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 * create the {@link Job} instances.
 	 */
 	private OfficeMetaData officeMetaData;
+
+	/**
+	 * Pre-load {@link ManagedObjectAdministrationMetaData}.
+	 */
+	private ManagedObjectAdministrationMetaData<?, ?, ?>[] preloadAdministration;
 
 	/**
 	 * {@link FlowMetaData} for the recycling of this {@link ManagedObject}.
@@ -467,6 +473,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	@Override
 	public ManagedObjectGovernanceMetaData<?>[] getGovernanceMetaData() {
 		return this.governanceMetaData;
+	}
+
+	@Override
+	public ManagedObjectAdministrationMetaData<?, ?, ?>[] getPreLoadAdministration() {
+		return this.preloadAdministration;
 	}
 
 	@Override

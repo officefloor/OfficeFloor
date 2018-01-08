@@ -276,7 +276,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		this.dependencyMetaData = this.extractDependencyMetaData(objectClass);
 		for (DependencyMetaData dependency : this.dependencyMetaData) {
 			// Register the dependency
-			DependencyLabeller labeller = context.addDependency(dependency.field.getType());
+			DependencyLabeller<Indexed> labeller = context.addDependency(dependency.field.getType());
 
 			// Use field name as name of dependency
 			labeller.setLabel(dependency.name);

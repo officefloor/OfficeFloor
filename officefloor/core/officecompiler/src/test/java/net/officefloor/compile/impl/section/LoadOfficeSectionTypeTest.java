@@ -50,6 +50,7 @@ import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
@@ -380,7 +381,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 							public void make(ManagedObjectMakerContext context) {
 
 								// Qualified dependency
-								DependencyLabeller qualified = context.getContext().addDependency(Connection.class);
+								DependencyLabeller<Indexed> qualified = context.getContext()
+										.addDependency(Connection.class);
 								qualified.setLabel("QUALIFIED-DEPENDENCY");
 								qualified.setTypeQualifier("QUALIFIED");
 

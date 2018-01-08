@@ -33,6 +33,17 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
+import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
@@ -43,18 +54,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.EscalationFlowFactory;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -1621,7 +1620,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	private RawManagedFunctionMetaData<O, F> constructRawFunctionMetaData(boolean isExpectConstruct) {
 
 		// Construct the raw function meta-data
-		RawManagedFunctionMetaData<?, ?> metaData = RawManagedFunctionMetaDataImpl.getFactory()
+		RawManagedFunctionMetaData<?, ?> metaData = new RawManagedFunctionMetaDataFactory()
 				.constructRawManagedFunctionMetaData(this.configuration, this.rawOfficeMetaData,
 						this.assetManagerFactory, this.rawBoundManagedObjectFactory, this.issues);
 		if (isExpectConstruct) {

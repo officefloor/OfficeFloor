@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -38,9 +38,9 @@ public class ManagedObjectGovernanceMetaDataImpl<I>
 	private final int governanceIndex;
 
 	/**
-	 * {@link ExtensionInterfaceFactory}.
+	 * {@link ExtensionFactory}.
 	 */
-	private final ExtensionInterfaceFactory<I> extensionInterfaceFactory;
+	private final ExtensionFactory<I> extensionInterfaceFactory;
 
 	/**
 	 * Initiate.
@@ -48,10 +48,10 @@ public class ManagedObjectGovernanceMetaDataImpl<I>
 	 * @param governanceIndex
 	 *            {@link Governance} index.
 	 * @param extensionInterfaceFactory
-	 *            {@link ExtensionInterfaceFactory}.
+	 *            {@link ExtensionFactory}.
 	 */
 	public ManagedObjectGovernanceMetaDataImpl(int governanceIndex,
-			ExtensionInterfaceFactory<I> extensionInterfaceFactory) {
+			ExtensionFactory<I> extensionInterfaceFactory) {
 		this.governanceIndex = governanceIndex;
 		this.extensionInterfaceFactory = extensionInterfaceFactory;
 	}
@@ -77,7 +77,7 @@ public class ManagedObjectGovernanceMetaDataImpl<I>
 	@Override
 	public I extractExtension(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData)
 			throws Throwable {
-		return this.extensionInterfaceFactory.createExtensionInterface(managedObject);
+		return this.extensionInterfaceFactory.createExtension(managedObject);
 	}
 
 }

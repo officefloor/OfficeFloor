@@ -22,7 +22,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
@@ -184,7 +183,7 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private FlowMetaData[] constructFlowMetaData(boolean isCreate) {
-		FlowMetaDataFactory factory = new FlowMetaDataFactoryImpl();
+		FlowMetaDataFactory factory = new FlowMetaDataFactory();
 		FlowMetaData[] flowMetaData = factory.createFlowMetaData(new FlowConfiguration[] { this.configuration },
 				this.officeMetaData, AssetType.FUNCTION, "FUNCTION", this.issues);
 		if (isCreate) {
