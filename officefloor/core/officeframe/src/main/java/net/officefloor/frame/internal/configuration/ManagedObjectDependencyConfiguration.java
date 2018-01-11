@@ -26,7 +26,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectDependencyConfiguration<D extends Enum<D>> {
+public interface ManagedObjectDependencyConfiguration<O extends Enum<O>> {
 
 	/**
 	 * Obtains the dependency key of the {@link ManagedObject} for which this
@@ -35,7 +35,7 @@ public interface ManagedObjectDependencyConfiguration<D extends Enum<D>> {
 	 * @return Dependency key or <code>null</code> if dependencies are
 	 *         {@link Indexed}.
 	 */
-	D getDependencyKey();
+	O getDependencyKey();
 
 	/**
 	 * Obtains the name of the {@link ManagedObject} providing the dependency

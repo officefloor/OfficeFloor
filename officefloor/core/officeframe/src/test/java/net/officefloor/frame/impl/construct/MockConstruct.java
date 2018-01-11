@@ -25,6 +25,7 @@ import org.junit.Assert;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
@@ -53,12 +54,20 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBui
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
+import net.officefloor.frame.impl.construct.office.ManagedFunctionLocatorImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.test.MockManagedObjectSourceMetaData;
 
 /**
@@ -87,6 +96,35 @@ public class MockConstruct {
 	}
 
 	/**
+	 * Creates a {@link MockOfficeMetaDataBuilder}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @return {@link MockOfficeMetaDataBuilder}.
+	 */
+	public static MockOfficeMetaDataBuilder mockOfficeMetaData(String officeName) {
+		return new MockOfficeMetaDataBuilder(officeName);
+	}
+
+	/**
+	 * Creates mock {@link ManagedObjectMetaDataImpl}.
+	 * 
+	 * @param boundManagedObjectName
+	 *            Bound {@link ManagedObject} name.
+	 * @param objectType
+	 *            Object type of {@link ManagedObject}.
+	 * @return Mock {@link ManagedObjectMetaDataImpl}.
+	 */
+	public static <O extends Enum<O>> ManagedObjectMetaDataImpl<O> mockManagedObjectMetaData(
+			String boundManagedObjectName, Class<?> objectType) {
+		AssetManagerFactory assetManagerFactory = mockAssetManagerFactory();
+		return new ManagedObjectMetaDataImpl<>(boundManagedObjectName, objectType, 0,
+				new MockConstructManagedObjectSource<>(), null, false, false,
+				assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT, boundManagedObjectName, "mock", null),
+				false, null, false, null, 0, null);
+	}
+
+	/**
 	 * Creates a {@link MockManagedObjectSourceMetaDataBuilder} to build a
 	 * {@link ManagedObjectSourceMetaData}.
 	 * 
@@ -107,7 +145,22 @@ public class MockConstruct {
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> MockRawManagedObjectMetaDataBuilder<O, F> mockRawManagedObjectMetaData(
 			String managedObjectSourceName) {
-		return mockRawManagedObjectMetaData(managedObjectSourceName, OFFICE_NAME);
+		return new MockRawManagedObjectMetaDataBuilder<>(managedObjectSourceName);
+	}
+
+	/**
+	 * Creates a {@link MockRawManagingOfficeMetaDataBuilder} to build a
+	 * {@link RawManagingOfficeMetaData}.
+	 * 
+	 * @param managingOfficeName
+	 *            Name of the managing {@link Office}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @return {@link MockRawManagingOfficeMetaDataBuilder}.
+	 */
+	public static <F extends Enum<F>> MockRawManagingOfficeMetaDataBuilder<F> mockRawManaingOfficeMetaData(
+			String managingOfficeName, String managedObjectSourceName) {
+		return new MockRawManagingOfficeMetaDataBuilder<>(managingOfficeName, managedObjectSourceName);
 	}
 
 	/**
@@ -150,21 +203,6 @@ public class MockConstruct {
 	 */
 	public static AssetManagerFactory mockAssetManagerFactory() {
 		return new AssetManagerFactory(null, null, null);
-	}
-
-	/**
-	 * Creates a {@link MockRawManagedObjectMetaDataBuilder} to build a
-	 * {@link RawManagedObjectMetaData}.
-	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managingOfficeName
-	 *            Name of the managing {@link Office}.
-	 * @return {@link MockRawManagedObjectMetaDataBuilder}.
-	 */
-	public static <O extends Enum<O>, F extends Enum<F>> MockRawManagedObjectMetaDataBuilder<O, F> mockRawManagedObjectMetaData(
-			String managedObjectSourceName, String managingOfficeName) {
-		return new MockRawManagedObjectMetaDataBuilder<>(managedObjectSourceName, managingOfficeName);
 	}
 
 	/**
@@ -480,6 +518,24 @@ public class MockConstruct {
 			}
 			return this.built;
 		}
+
+		/**
+		 * Obtains the {@link ManagingOfficeConfiguration}.
+		 * 
+		 * @return {@link ManagingOfficeConfiguration}.
+		 */
+		public ManagingOfficeConfiguration<F> getManagingOfficeConfiguration() {
+			return this.managingOfficeConfiguration;
+		}
+
+		/**
+		 * Obtains the {@link InputManagedObjectConfiguration}.
+		 * 
+		 * @return {@link InputManagedObjectConfiguration}.
+		 */
+		public InputManagedObjectConfiguration<?> getInputManagedObjectConfiguration() {
+			return this.inputConfiguration;
+		}
 	}
 
 	/**
@@ -501,11 +557,6 @@ public class MockConstruct {
 		 * {@link MockManagedObjectSourceMetaDataBuilder}.
 		 */
 		private final MockManagedObjectSourceMetaDataBuilder<O, F> managedObjectSourceMetaDataBuilder = new MockManagedObjectSourceMetaDataBuilder<>();
-
-		/**
-		 * {@link MockRawManagedObjectMetaDataBuilder}.
-		 */
-		private final MockRawManagingOfficeMetaDataBuilder<F> rawManagingOfficeMetaDataBuilder;
 
 		/**
 		 * Timeout for the {@link ManagedObjectSource}.
@@ -543,33 +594,28 @@ public class MockConstruct {
 		private boolean isCoordinating = false;
 
 		/**
-		 * Instantiate.
-		 * 
-		 * @param managedObjectSourceName
-		 *            {@link ManagedObjectSource} name.
-		 * @param managingOfficeName
-		 *            Name of the managing {@link Office}.
+		 * Built {@link RawManagedObjectMetaData}.
 		 */
-		public MockRawManagedObjectMetaDataBuilder(String managedObjectSourceName, String managingOfficeName) {
-			this(managedObjectSourceName,
-					new MockRawManagingOfficeMetaDataBuilder<>(managedObjectSourceName, managingOfficeName));
-		}
+		private RawManagedObjectMetaData<O, F> built = null;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param managedObjectSourceName
 		 *            {@link ManagedObjectSource} name.
-		 * @param rawManagingOfficeMetaDataBuilder
-		 *            {@link MockRawManagedObjectMetaDataBuilder}.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		private MockRawManagedObjectMetaDataBuilder(String managedObjectSourceName,
-				MockRawManagingOfficeMetaDataBuilder<F> rawManagingOfficeMetaDataBuilder) {
+		private MockRawManagedObjectMetaDataBuilder(String managedObjectSourceName) {
 			this.managedObjectSourceName = managedObjectSourceName;
 			this.managedObjectConfiguration = new ManagedObjectBuilderImpl(this.managedObjectSourceName,
 					MockConstructManagedObjectSource.class);
-			this.rawManagingOfficeMetaDataBuilder = rawManagingOfficeMetaDataBuilder;
+		}
+
+		/**
+		 * Ensure not built.
+		 */
+		private void assetNotBuilt() {
+			Assert.assertNull("Should not alter once built", this.built);
 		}
 
 		/**
@@ -578,6 +624,7 @@ public class MockConstruct {
 		 * @return {@link ManagedObjectBuilder}.
 		 */
 		public ManagedObjectBuilder<F> getBuilder() {
+			this.assetNotBuilt();
 			return this.managedObjectConfiguration;
 		}
 
@@ -587,6 +634,7 @@ public class MockConstruct {
 		 * @return {@link MockManagedObjectSourceMetaDataBuilder}.
 		 */
 		public MockManagedObjectSourceMetaDataBuilder<O, F> getMetaDataBuilder() {
+			this.assetNotBuilt();
 			return this.managedObjectSourceMetaDataBuilder;
 		}
 
@@ -598,6 +646,7 @@ public class MockConstruct {
 		 * @return <code>this</code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> timeout(long timeout) {
+			this.assetNotBuilt();
 			this.timeout = timeout;
 			return this;
 		}
@@ -610,6 +659,7 @@ public class MockConstruct {
 		 * @return <code>this</code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> pool(ManagedObjectPool managedObjectPool) {
+			this.assetNotBuilt();
 			this.managedObjectPool = managedObjectPool;
 			return this;
 		}
@@ -622,6 +672,7 @@ public class MockConstruct {
 		 * @return <code>this</code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> threadCompletionListener(ThreadCompletionListener listener) {
+			this.assetNotBuilt();
 			this.threadCompletionListeners.add(listener);
 			return this;
 		}
@@ -632,6 +683,7 @@ public class MockConstruct {
 		 * @return <code>this<code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> processAware() {
+			this.assetNotBuilt();
 			this.isProcessAware = true;
 			return this;
 		}
@@ -642,6 +694,7 @@ public class MockConstruct {
 		 * @return <code>this<code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> nameAware() {
+			this.assetNotBuilt();
 			this.isNameAware = true;
 			return this;
 		}
@@ -652,6 +705,7 @@ public class MockConstruct {
 		 * @return <code>this<code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> asychronous() {
+			this.assetNotBuilt();
 			this.isAsynchronous = true;
 			return this;
 		}
@@ -662,6 +716,7 @@ public class MockConstruct {
 		 * @return <code>this<code>.
 		 */
 		public MockRawManagedObjectMetaDataBuilder<O, F> coordinating() {
+			this.assetNotBuilt();
 			this.isCoordinating = true;
 			return this;
 		}
@@ -671,14 +726,35 @@ public class MockConstruct {
 		 * 
 		 * @return {@link RawManagedObjectMetaData}.
 		 */
-		public RawManagedObjectMetaData<O, F> build() {
-			return new RawManagedObjectMetaData<>(this.managedObjectSourceName, this.managedObjectConfiguration,
-					new MockConstructManagedObjectSource<O, F>(), this.managedObjectSourceMetaDataBuilder, this.timeout,
-					this.managedObjectPool,
-					this.threadCompletionListeners
-							.toArray(new ThreadCompletionListener[this.threadCompletionListeners.size()]),
-					this.managedObjectSourceMetaDataBuilder.objectClass, this.isProcessAware, this.isNameAware,
-					this.isAsynchronous, this.isCoordinating, this.rawManagingOfficeMetaDataBuilder.build());
+		public RawManagedObjectMetaData<O, F> build(RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
+			if (this.built == null) {
+				this.built = new RawManagedObjectMetaData<>(this.managedObjectSourceName,
+						this.managedObjectConfiguration, new MockConstructManagedObjectSource<O, F>(),
+						this.managedObjectSourceMetaDataBuilder, this.timeout, this.managedObjectPool,
+						this.threadCompletionListeners
+								.toArray(new ThreadCompletionListener[this.threadCompletionListeners.size()]),
+						this.managedObjectSourceMetaDataBuilder.objectClass, this.isProcessAware, this.isNameAware,
+						this.isAsynchronous, this.isCoordinating, rawManagingOfficeMetaData);
+			}
+			return this.built;
+		}
+
+		/**
+		 * Obtains the {@link ManagedObjectSourceConfiguration}.
+		 * 
+		 * @return {@link ManagedObjectSourceConfiguration}.
+		 */
+		public ManagedObjectSourceConfiguration<F, MockConstructManagedObjectSource<O, F>> getManagedObjectConfiguratation() {
+			return this.managedObjectConfiguration;
+		}
+
+		/**
+		 * Obtains the {@link ManagedObjectSourceMetaData}.
+		 * 
+		 * @return {@link ManagedObjectSourceMetaData}.
+		 */
+		public ManagedObjectSourceMetaData<O, F> getManagedObjectSourceMetaData() {
+			return this.managedObjectSourceMetaDataBuilder;
 		}
 	}
 
@@ -836,13 +912,74 @@ public class MockConstruct {
 		 * 
 		 * @return {@link RawBoundManagedObjectInstanceMetaData}.
 		 */
-		public RawBoundManagedObjectInstanceMetaData<?> build() {
+		@SuppressWarnings("unchecked")
+		public RawBoundManagedObjectInstanceMetaData<O> build() {
 			if (this.built == null) {
 				this.built = this.rawBoundManagedObjectMetaData.rawBoundManagedObjectMetaData.addInstance(
 						this.rawBoundManagedObjectMetaData.rawBoundManagedObjectMetaData.getBoundManagedObjectName(),
 						this.rawBoundManagedObjectMetaData.rawManagedObjectMetaData,
 						this.configuration.getDependencyConfiguration(),
 						this.configuration.getGovernanceConfiguration(), this.configuration.getPreLoadAdministration());
+			}
+			return (RawBoundManagedObjectInstanceMetaData<O>) this.built;
+		}
+	}
+
+	/**
+	 * Builder to build {@link OfficeMetaData}.
+	 */
+	public static class MockOfficeMetaDataBuilder {
+
+		/**
+		 * Name of the {@link Office}.
+		 */
+		private final String officeName;
+
+		/**
+		 * {@link ManagedFunctionMetaData} instances.
+		 */
+		private final List<ManagedFunctionMetaData<?, ?>> functions = new LinkedList<>();
+
+		/**
+		 * Built {@link OfficeMetaData}.
+		 */
+		private OfficeMetaData built = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param officeName
+		 *            Name of the {@link Office}.
+		 */
+		private MockOfficeMetaDataBuilder(String officeName) {
+			this.officeName = officeName;
+		}
+
+		/**
+		 * Adds a {@link ManagedFunction} to the {@link OfficeMetaData}.
+		 * 
+		 * @param functionName
+		 *            Name of the {@link ManagedFunction}.
+		 * @param parameterType
+		 *            to the {@link ManagedFunction}.
+		 */
+		public void addManagedFunction(String functionName, Class<?> parameterType) {
+			ManagedFunctionMetaData<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName, null, null,
+					parameterType, null, null, null, null);
+			this.functions.add(function);
+		}
+
+		/**
+		 * Builds the {@link OfficeMetaData}.
+		 * 
+		 * @return {@link OfficeMetaData}.
+		 */
+		public OfficeMetaData build() {
+			if (this.built == null) {
+				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
+						this.functions.toArray(new ManagedFunctionMetaData[this.functions.size()]));
+				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
+						functionLocator, null, null, null);
 			}
 			return this.built;
 		}
