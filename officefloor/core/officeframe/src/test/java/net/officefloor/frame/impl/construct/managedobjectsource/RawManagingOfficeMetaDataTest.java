@@ -19,8 +19,6 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.util.Map;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -29,7 +27,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.MockConstruct;
 import net.officefloor.frame.impl.construct.MockConstruct.MockOfficeMetaDataBuilder;
@@ -42,13 +39,9 @@ import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectM
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -63,9 +56,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
-	// TODO remove deprecated once refactored unit tests
-	@Deprecated
-	private final ManagedFunctionLocator functionLocator = null;
+	/**
+	 * {@link Flow} key.
+	 */
+	private enum Flows {
+		KEY, WRONG_KEY
+	}
 
 	/**
 	 * Name of the {@link ManagedObjectSource}.
@@ -355,32 +351,16 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testExtraFlowConfigured() {
 
-		final ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowConfiguration<?> flowConfigurationOne = this
-				.createMock(ManagedObjectFlowConfiguration.class);
-		final ManagedFunctionReference taskReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
-		final ManagedObjectFlowConfiguration<?> flowConfigurationTwo = this
-				.createMock(ManagedObjectFlowConfiguration.class);
-
-		// Record extra flow configured
-		this.record_managedObjectSourceName_and_managedFunctionLocator();
-		this.record_getFlowConfigurations(flowConfigurationOne, flowConfigurationTwo);
-		RawBoundManagedObjectMetaData[] processBoundMetaData = this.record_bindToProcess(0, INPUT_MANAGED_OBJECT_NAME);
-		this.recordReturn(flowConfigurationOne, flowConfigurationOne.getFlowKey(), Flows.KEY);
-		this.recordReturn(flowConfigurationTwo, flowConfigurationTwo.getFlowKey(), Flows.WRONG_KEY);
-		this.recordReturn(flowMetaData, flowMetaData.getKey(), Flows.KEY);
-		this.recordReturn(flowMetaData, flowMetaData.getLabel(), "LABEL");
-		this.recordReturn(flowConfigurationOne, flowConfigurationOne.getManagedFunctionReference(), taskReference);
-		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), null);
-		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
-		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), null);
+		// Record
+		this.rawMoMetaData.getMetaDataBuilder().addFlow(null, Flows.KEY);
+		this.configuration.getBuilder().linkFlow(Flows.KEY, "FUNCTION");
+		this.configuration.getBuilder().linkFlow(Flows.WRONG_KEY, "FUNCTION");
+		this.officeMetaData.addManagedFunction("FUNCTION", null);
 		this.record_issue("Extra flows configured than specified by ManagedObjectSourceMetaData");
 
 		// Manage by office
 		this.replayMockObjects();
-		this.run_manageByOffice(false, MANAGED_OBJECT_SOURCE_NAME);
+		this.run_manageByOffice(false, INPUT_MANAGED_OBJECT_NAME);
 		this.verifyMockObjects();
 	}
 
@@ -389,68 +369,25 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testConstructFlow() throws Exception {
 
-		final ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedObjectFlowConfiguration.class);
-		final ManagedFunctionReference taskReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
-		final String parameter = "PARAMETER";
-		final ManagedObject managedObject = this.createMock(ManagedObject.class);
+		// Record
+		this.rawMoMetaData.getMetaDataBuilder().addFlow(null, Flows.KEY);
 
-		// Record construct flow
-		this.record_managedObjectSourceName_and_managedFunctionLocator();
-		this.record_getFlowConfigurations(flowConfiguration);
-		RawBoundManagedObjectMetaData[] processBoundMetaData = this.record_bindToProcess(0, INPUT_MANAGED_OBJECT_NAME);
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(), null);
-		this.recordReturn(flowMetaData, flowMetaData.getKey(), null);
-		this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
-		this.recordReturn(flowConfiguration, flowConfiguration.getManagedFunctionReference(), taskReference);
-		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), String.class);
-		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
-		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), Object.class);
-
-		// Record invoking the flow
-		// this.recordReturn(this.officeMetaData,
-		// this.officeMetaData.getManagedExecutionFactory(),
-		// new ManagedExecutionFactory() {
-		// @Override
-		// public <E extends Throwable> ManagedExecution<E>
-		// createManagedExecution(Execution<E> execution) {
-		// return () -> execution.execute();
-		// }
-		// });
-		// this.officeMetaData.invokeProcess(null, parameter, 0, null, null,
-		// managedObject, this.moMetaData, 0);
-		this.control(this.officeMetaData).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				FlowMetaData flowMetaData = (FlowMetaData) actual[0];
-				assertEquals("Incorrect parameter", parameter, actual[1]);
-				assertEquals("Incorrect delay", Long.valueOf(0), actual[2]);
-				assertNull("Should be no flow callback", actual[3]);
-				assertNull("Should be no flow callback thread state", actual[4]);
-				assertEquals("Incorrect managed object", managedObject, actual[5]);
-				// assertEquals("Incorrect managed object meta-data",
-				// RawManagingOfficeMetaDataTest.this.moMetaData,
-				// actual[6]);
-				assertEquals("Incorrect process index", 0, actual[7]);
-
-				// Validate flow meta-data
-				assertEquals("Incorrect task meta-data", taskMetaData, flowMetaData.getInitialFunctionMetaData());
-				assertFalse("Within new process so no need to spawn thread state", flowMetaData.isSpawnThreadState());
-
-				// Matches if at this point
-				return true;
-			}
-		});
+		// Configure function through managed object source context
+		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(false,
+				INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null, this.configuration,
+				this.officeMetaData.getBuilder());
+		context.addManagedFunction("FUNCTION", null);
+		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 
 		// Manage by office
 		this.replayMockObjects();
-		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true, MANAGED_OBJECT_SOURCE_NAME);
-		rawOffice.getManagedObjectExecuteContextFactory().createManagedObjectExecuteContext().invokeProcess(0,
-				parameter, managedObject, 0, null);
+		this.run_manageByOffice(true, INPUT_MANAGED_OBJECT_NAME);
 		this.verifyMockObjects();
+
+		// Ensure function name spaced to managed object
+		ManagedFunctionMetaData<?, ?> function = this.officeMetaData.build().getManagedFunctionLocator()
+				.getManagedFunctionMetaData(INPUT_MANAGED_OBJECT_NAME + ".FUNCTION");
+		assertNotNull("Should have managed object name spaced function", function);
 	}
 
 	/**
@@ -459,158 +396,25 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testConstructFlowOfNotFirstBoundOrInstance() throws Exception {
 
-		final int processMoIndex = 2;
-		final int instanceIndex = 3;
+		// Record
+		this.rawMoMetaData.getMetaDataBuilder().addFlow(null, Flows.KEY);
 
-		final ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedObjectFlowConfiguration.class);
-		final ManagedFunctionReference functionReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
-		final String parameter = "PARAMETER";
-		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-
-		// Record construct flow
-		this.record_managedObjectSourceName_and_managedFunctionLocator();
-		this.record_getFlowConfigurations(flowConfiguration);
-		RawBoundManagedObjectMetaData[] processBoundMetaData = this.record_bindToProcess(instanceIndex,
-				"NOT_MATCH_INDEX_0", "NOT_MATCH_INDEX_1", INPUT_MANAGED_OBJECT_NAME);
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(), null);
-		this.recordReturn(flowMetaData, flowMetaData.getKey(), null);
-		this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
-		this.recordReturn(flowConfiguration, flowConfiguration.getManagedFunctionReference(), functionReference);
-		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), String.class);
-		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
-				functionMetaData);
-		this.recordReturn(functionMetaData, functionMetaData.getParameterType(), Object.class);
-
-		// Record invoking the flow
-		// this.recordReturn(this.officeMetaData,
-		// this.officeMetaData.getManagedExecutionFactory(),
-		// new ManagedExecutionFactory() {
-		// @Override
-		// public <E extends Throwable> ManagedExecution<E>
-		// createManagedExecution(Execution<E> execution) {
-		// return () -> execution.execute();
-		// }
-		// });
-		// this.officeMetaData.invokeProcess(null, parameter, 0, null, null,
-		// managedObject, this.moMetaData,
-		// processMoIndex);
-		this.control(this.officeMetaData).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				FlowMetaData flowMetaData = (FlowMetaData) actual[0];
-				assertEquals("Incorrect parameter", parameter, actual[1]);
-				assertEquals("Incorrect delay", Long.valueOf(0), actual[2]);
-				assertNull("Should not have flow callback", actual[3]);
-				assertNull("Should not have flow callback thread state", actual[4]);
-				assertEquals("Incorrect managed object", managedObject, actual[5]);
-				// assertEquals("Incorrect managed object meta-data",
-				// RawManagingOfficeMetaDataTest.this.moMetaData,
-				// actual[6]);
-				assertEquals("Incorrect process index", processMoIndex, actual[7]);
-
-				// Validate flow meta-data
-				assertEquals("Incorrect function meta-data", functionMetaData,
-						flowMetaData.getInitialFunctionMetaData());
-				assertFalse("In process, so no need to spawn thread state", flowMetaData.isSpawnThreadState());
-
-				// Matches if at this point
-				return true;
-			}
-		});
+		// Configure function through managed object source context
+		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(false,
+				INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null, this.configuration,
+				this.officeMetaData.getBuilder());
+		context.addManagedFunction("FUNCTION", null);
+		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 
 		// Manage by office
 		this.replayMockObjects();
-		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true, MANAGED_OBJECT_SOURCE_NAME);
-		rawOffice.getManagedObjectExecuteContextFactory().createManagedObjectExecuteContext().invokeProcess(0,
-				parameter, managedObject, 0, null);
+		this.run_manageByOffice(true, "NOT_MATCH_INDEX_0", "NOT_MATCH_INDEX_1", INPUT_MANAGED_OBJECT_NAME);
 		this.verifyMockObjects();
-	}
 
-	/**
-	 * {@link Flow} key.
-	 */
-	private enum Flows {
-		KEY, WRONG_KEY
-	}
-
-	/**
-	 * Records obtaining the {@link ManagedObjectSource} name.
-	 */
-	private void record_managedObjectSourceName_and_managedFunctionLocator() {
-		// this.recordReturn(this.rawMoMetaData,
-		// this.rawMoMetaData.getManagedObjectName(),
-		// MANAGED_OBJECT_SOURCE_NAME);
-		// this.recordReturn(this.officeMetaData,
-		// this.officeMetaData.getManagedFunctionLocator(),
-		// this.functionLocator);
-	}
-
-	/**
-	 * Records obtaining the {@link ManagedObjectFlowConfiguration} instances.
-	 * 
-	 * @param flowConfigurations
-	 *            {@link ManagedObjectFlowConfiguration} instances.
-	 */
-	private void record_getFlowConfigurations(ManagedObjectFlowConfiguration<?>... flowConfigurations) {
-		// Record obtaining the flow configuration
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfigurations);
-	}
-
-	/**
-	 * Records obtaining the {@link ProcessState} bound index for the
-	 * {@link ManagedObject}.
-	 * 
-	 * @param flowConfigurations
-	 *            {@link ManagedObjectFlowConfiguration} instances.
-	 */
-	private RawBoundManagedObjectMetaData[] record_bindToProcess(int instanceIndex, String... processBoundNames) {
-
-		RawBoundManagedObjectMetaData[] processBoundMetaDatas = new RawBoundManagedObjectMetaData[processBoundNames.length];
-		for (int i = 0; i < processBoundMetaDatas.length; i++) {
-			processBoundMetaDatas[i] = this.createMock(RawBoundManagedObjectMetaData.class);
-		}
-
-		RawBoundManagedObjectInstanceMetaData<?>[] instanceMetaDatas = new RawBoundManagedObjectInstanceMetaData[instanceIndex
-				+ 1];
-		RawManagedObjectMetaData<?, ?>[] rawMoMetaDatas = new RawManagedObjectMetaData[instanceMetaDatas.length];
-		for (int i = 0; i < instanceMetaDatas.length; i++) {
-			instanceMetaDatas[i] = this.createMock(RawBoundManagedObjectInstanceMetaData.class);
-			rawMoMetaDatas[i] = this.createMock(RawManagedObjectMetaData.class);
-		}
-
-		// Record obtaining the process index and meta-data
-		this.recordReturn(this.inputConfiguration, this.inputConfiguration.getBoundManagedObjectName(),
-				INPUT_MANAGED_OBJECT_NAME);
-		for (int b = 0; b < processBoundNames.length; b++) {
-			String processBoundName = processBoundNames[b];
-			RawBoundManagedObjectMetaData processBoundMetaData = processBoundMetaDatas[b];
-			this.recordReturn(processBoundMetaData, processBoundMetaData.getBoundManagedObjectName(), processBoundName);
-			if (INPUT_MANAGED_OBJECT_NAME.equals(processBoundName)) {
-				this.recordReturn(processBoundMetaData, processBoundMetaData.getRawBoundManagedObjectInstanceMetaData(),
-						instanceMetaDatas);
-				for (int i = 0; i < instanceMetaDatas.length; i++) {
-					RawBoundManagedObjectInstanceMetaData<?> instanceMetaData = instanceMetaDatas[i];
-					RawManagedObjectMetaData<?, ?> rawMoMetaData = rawMoMetaDatas[i];
-					this.recordReturn(instanceMetaData, instanceMetaData.getRawManagedObjectMetaData(), rawMoMetaData);
-					if (i != instanceIndex) {
-						this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectName(), "NOT_MATCH");
-					} else {
-						this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectName(),
-								MANAGED_OBJECT_SOURCE_NAME);
-						// this.recordReturn(instanceMetaData,
-						// instanceMetaData.getManagedObjectMetaData(),
-						// this.moMetaData);
-					}
-				}
-			}
-		}
-
-		// Return the process bound meta-data
-		return processBoundMetaDatas;
+		// Ensure function name spaced to managed object
+		ManagedFunctionMetaData<?, ?> function = this.officeMetaData.build().getManagedFunctionLocator()
+				.getManagedFunctionMetaData(INPUT_MANAGED_OBJECT_NAME + ".FUNCTION");
+		assertNotNull("Should have managed object name spaced function", function);
 	}
 
 	/**

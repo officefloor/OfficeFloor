@@ -25,6 +25,7 @@ import org.junit.Assert;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
@@ -55,13 +56,17 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBu
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
 import net.officefloor.frame.impl.construct.office.ManagedFunctionLocatorImpl;
+import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
+import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -158,7 +163,7 @@ public class MockConstruct {
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @return {@link MockRawManagingOfficeMetaDataBuilder}.
 	 */
-	public static <F extends Enum<F>> MockRawManagingOfficeMetaDataBuilder<F> mockRawManaingOfficeMetaData(
+	public static <F extends Enum<F>> MockRawManagingOfficeMetaDataBuilder<F> mockRawManagingOfficeMetaData(
 			String managingOfficeName, String managedObjectSourceName) {
 		return new MockRawManagingOfficeMetaDataBuilder<>(managingOfficeName, managedObjectSourceName);
 	}
@@ -192,6 +197,40 @@ public class MockConstruct {
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> MockRawBoundManagedObjectMetaDataBuilder<O, F> mockRawBoundManagedObjectMetaData(
 			String boundManagedObjectName, boolean isInput, RawManagedObjectMetaData<O, F> rawManagedObjectMetaData) {
+		return new MockRawBoundManagedObjectMetaDataBuilder<>(boundManagedObjectName, isInput,
+				rawManagedObjectMetaData);
+	}
+
+	/**
+	 * Creates a {@link MockRawBoundManagedObjectMetaDataBuilder} to build a
+	 * {@link RawBoundManagedObjectMetaData} (that is not an input).
+	 * 
+	 * @param boundManagedObjectName
+	 *            Bound {@link ManagedObject} name.
+	 * @param rawManagedObjectMetaData
+	 *            {@link MockRawManagedObjectMetaDataBuilder}.
+	 * @return {@link MockRawBoundManagedObjectMetaDataBuilder}.
+	 */
+	public static <O extends Enum<O>, F extends Enum<F>> MockRawBoundManagedObjectMetaDataBuilder<O, F> mockRawBoundManagedObjectMetaData(
+			String boundManagedObjectName, MockRawManagedObjectMetaDataBuilder<O, F> rawManagedObjectMetaData) {
+		return mockRawBoundManagedObjectMetaData(boundManagedObjectName, false, rawManagedObjectMetaData);
+	}
+
+	/**
+	 * Creates a {@link MockRawBoundManagedObjectMetaDataBuilder} to build a
+	 * {@link RawBoundManagedObjectMetaData} (that is not an input).
+	 * 
+	 * @param boundManagedObjectName
+	 *            Bound {@link ManagedObject} name.
+	 * @param isInput
+	 *            Indicates if input.
+	 * @param rawManagedObjectMetaData
+	 *            {@link MockRawManagedObjectMetaDataBuilder}.
+	 * @return {@link MockRawBoundManagedObjectMetaDataBuilder}.
+	 */
+	public static <O extends Enum<O>, F extends Enum<F>> MockRawBoundManagedObjectMetaDataBuilder<O, F> mockRawBoundManagedObjectMetaData(
+			String boundManagedObjectName, boolean isInput,
+			MockRawManagedObjectMetaDataBuilder<O, F> rawManagedObjectMetaData) {
 		return new MockRawBoundManagedObjectMetaDataBuilder<>(boundManagedObjectName, isInput,
 				rawManagedObjectMetaData);
 	}
@@ -722,20 +761,38 @@ public class MockConstruct {
 		}
 
 		/**
+		 * Indicates if built.
+		 * 
+		 * @return <code>true</code> if built.
+		 */
+		public boolean isBuilt() {
+			return this.built != null;
+		}
+
+		/**
 		 * Builds the {@link RawManagedObjectMetaData}.
 		 * 
 		 * @return {@link RawManagedObjectMetaData}.
 		 */
 		public RawManagedObjectMetaData<O, F> build(RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
-			if (this.built == null) {
-				this.built = new RawManagedObjectMetaData<>(this.managedObjectSourceName,
-						this.managedObjectConfiguration, new MockConstructManagedObjectSource<O, F>(),
-						this.managedObjectSourceMetaDataBuilder, this.timeout, this.managedObjectPool,
-						this.threadCompletionListeners
-								.toArray(new ThreadCompletionListener[this.threadCompletionListeners.size()]),
-						this.managedObjectSourceMetaDataBuilder.objectClass, this.isProcessAware, this.isNameAware,
-						this.isAsynchronous, this.isCoordinating, rawManagingOfficeMetaData);
-			}
+			this.assetNotBuilt();
+			this.built = new RawManagedObjectMetaData<>(this.managedObjectSourceName, this.managedObjectConfiguration,
+					new MockConstructManagedObjectSource<O, F>(), this.managedObjectSourceMetaDataBuilder, this.timeout,
+					this.managedObjectPool,
+					this.threadCompletionListeners
+							.toArray(new ThreadCompletionListener[this.threadCompletionListeners.size()]),
+					this.managedObjectSourceMetaDataBuilder.objectClass, this.isProcessAware, this.isNameAware,
+					this.isAsynchronous, this.isCoordinating, rawManagingOfficeMetaData);
+			return this.built;
+		}
+
+		/**
+		 * Obtains the built {@link RawManagedObjectMetaData}.
+		 * 
+		 * @return {@link RawManagedObjectMetaData}.
+		 */
+		public RawManagedObjectMetaData<O, F> getBuilt() {
+			Assert.assertNotNull(this.getClass().getSimpleName() + " should be built", this.built);
 			return this.built;
 		}
 
@@ -767,6 +824,12 @@ public class MockConstruct {
 		 * {@link MockRawManagedObjectMetaDataBuilder}.
 		 */
 		private final RawManagedObjectMetaData<O, F> rawManagedObjectMetaData;
+
+		/**
+		 * {@link MockRawManagedObjectMetaDataBuilder} to build the
+		 * {@link RawManagedObjectMetaData}.
+		 */
+		private final MockRawManagedObjectMetaDataBuilder<O, F> rawManagedObjectMetaDataBuilder;
 
 		/**
 		 * {@link RawBoundManagedObjectMetaData}.
@@ -808,6 +871,24 @@ public class MockConstruct {
 				RawManagedObjectMetaData<O, F> rawManagedObjectMetaData) {
 			this.rawBoundManagedObjectMetaData = new RawBoundManagedObjectMetaData(boundManagedObjectName, isInput);
 			this.rawManagedObjectMetaData = rawManagedObjectMetaData;
+			this.rawManagedObjectMetaDataBuilder = null;
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param boundManagedObjectName
+		 *            Bound {@link ManagedObject} name.
+		 * @param isInput
+		 *            Indicates if input.
+		 * @param rawManagedObjectMetaData
+		 *            {@link MockRawManagedObjectMetaDataBuilder}.
+		 */
+		private MockRawBoundManagedObjectMetaDataBuilder(String boundManagedObjectName, boolean isInput,
+				MockRawManagedObjectMetaDataBuilder<O, F> rawManagedObjectMetaData) {
+			this.rawBoundManagedObjectMetaData = new RawBoundManagedObjectMetaData(boundManagedObjectName, isInput);
+			this.rawManagedObjectMetaData = null;
+			this.rawManagedObjectMetaDataBuilder = rawManagedObjectMetaData;
 		}
 
 		/**
@@ -915,10 +996,16 @@ public class MockConstruct {
 		@SuppressWarnings("unchecked")
 		public RawBoundManagedObjectInstanceMetaData<O> build() {
 			if (this.built == null) {
+
+				// Obtain the built managed object meta-data
+				RawManagedObjectMetaData<O, F> rawManagedObjectMetaData = (this.rawBoundManagedObjectMetaData.rawManagedObjectMetaData != null)
+						? this.rawBoundManagedObjectMetaData.rawManagedObjectMetaData
+						: this.rawBoundManagedObjectMetaData.rawManagedObjectMetaDataBuilder.getBuilt();
+
+				// Build the instance
 				this.built = this.rawBoundManagedObjectMetaData.rawBoundManagedObjectMetaData.addInstance(
 						this.rawBoundManagedObjectMetaData.rawBoundManagedObjectMetaData.getBoundManagedObjectName(),
-						this.rawBoundManagedObjectMetaData.rawManagedObjectMetaData,
-						this.configuration.getDependencyConfiguration(),
+						rawManagedObjectMetaData, this.configuration.getDependencyConfiguration(),
 						this.configuration.getGovernanceConfiguration(), this.configuration.getPreLoadAdministration());
 			}
 			return (RawBoundManagedObjectInstanceMetaData<O>) this.built;
@@ -934,6 +1021,11 @@ public class MockConstruct {
 		 * Name of the {@link Office}.
 		 */
 		private final String officeName;
+
+		/**
+		 * {@link OfficeConfiguration}.
+		 */
+		private final OfficeBuilderImpl builder;
 
 		/**
 		 * {@link ManagedFunctionMetaData} instances.
@@ -953,6 +1045,16 @@ public class MockConstruct {
 		 */
 		private MockOfficeMetaDataBuilder(String officeName) {
 			this.officeName = officeName;
+			this.builder = new OfficeBuilderImpl(officeName);
+		}
+
+		/**
+		 * Obtains the {@link OfficeBuilder}.
+		 * 
+		 * @return {@link OfficeBuilder}.
+		 */
+		public OfficeBuilder getBuilder() {
+			return this.builder;
 		}
 
 		/**
@@ -976,8 +1078,31 @@ public class MockConstruct {
 		 */
 		public OfficeMetaData build() {
 			if (this.built == null) {
+
+				// Load the managed functions
+				List<ManagedFunctionMetaData<?, ?>> functions = new LinkedList<>();
+
+				// Obtain the builder configured managed functions
+				for (ManagedFunctionConfiguration<?, ?> config : this.builder.getManagedFunctionConfiguration()) {
+					String functionName = config.getFunctionName();
+					Class<?> parameterType = null;
+					for (ManagedFunctionObjectConfiguration<?> objectConfig : config.getObjectConfiguration()) {
+						if (objectConfig.isParameter()) {
+							parameterType = objectConfig.getObjectType();
+						}
+					}
+					functions.add(new ManagedFunctionMetaDataImpl<>(functionName, null, null, parameterType, null, null,
+							null, null));
+				}
+
+				// Load the convenience functions
+				for (ManagedFunctionMetaData<?, ?> function : this.functions) {
+					functions.add(function);
+				}
+
+				// Load the convenience functions
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
-						this.functions.toArray(new ManagedFunctionMetaData[this.functions.size()]));
+						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
 				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
 						functionLocator, null, null, null);
 			}
