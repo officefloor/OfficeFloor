@@ -29,10 +29,10 @@ import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.MockConstruct;
-import net.officefloor.frame.impl.construct.MockConstruct.MockOfficeMetaDataBuilder;
-import net.officefloor.frame.impl.construct.MockConstruct.MockRawBoundManagedObjectInstanceMetaDataBuilder;
-import net.officefloor.frame.impl.construct.MockConstruct.MockRawBoundManagedObjectMetaDataBuilder;
-import net.officefloor.frame.impl.construct.MockConstruct.MockRawManagedObjectMetaDataBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -81,7 +81,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link RawManagedObjectMetaData}.
 	 */
-	private final MockRawManagedObjectMetaDataBuilder<Indexed, Flows> rawMoMetaData = MockConstruct
+	private final RawManagedObjectMetaDataMockBuilder<Indexed, Flows> rawMoMetaData = MockConstruct
 			.mockRawManagedObjectMetaData(MANAGED_OBJECT_SOURCE_NAME);
 
 	/**
@@ -110,7 +110,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeMetaData}.
 	 */
-	private final MockOfficeMetaDataBuilder officeMetaData = MockConstruct.mockOfficeMetaData(MANAGING_OFFICE_NAME);
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(MANAGING_OFFICE_NAME);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -255,8 +255,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Manage by office
 		this.replayMockObjects();
 		RawManagingOfficeMetaData<Flows> office = this.createRawManagingOffice();
-		MockRawBoundManagedObjectMetaDataBuilder<?, ?> rawBoundManagedObjectMetaData = MockConstruct
-				.mockRawBoundManagedObjectMetaData("BOUND", this.rawMoMetaData.build(office));
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> rawBoundManagedObjectMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData("BOUND", this.rawMoMetaData.getBuilt());
 		this.run_manageByOffice(office, false, rawBoundManagedObjectMetaData.build());
 		this.verifyMockObjects();
 	}
@@ -450,10 +450,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private RawBoundManagedObjectMetaData createRawBoundManagedObjectMetaData(String managedObjectSourceName,
 			RawManagingOfficeMetaData<Flows> rawManaingOfficeMetaData) {
-		MockRawBoundManagedObjectMetaDataBuilder<Indexed, Flows> rawBoundManagedObjectMetaData = MockConstruct
-				.mockRawBoundManagedObjectMetaData(managedObjectSourceName,
-						this.rawMoMetaData.build(rawManaingOfficeMetaData));
-		MockRawBoundManagedObjectInstanceMetaDataBuilder<Indexed, Flows> instance = rawBoundManagedObjectMetaData
+		RawBoundManagedObjectMetaDataMockBuilder<Indexed, Flows> rawBoundManagedObjectMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData(managedObjectSourceName, this.rawMoMetaData.getBuilt());
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<Indexed, Flows> instance = rawBoundManagedObjectMetaData
 				.addRawBoundManagedObjectInstanceMetaData();
 		rawBoundManagedObjectMetaData.build();
 		instance.build().loadManagedObjectMetaData(AssetType.MANAGED_OBJECT, managedObjectSourceName,

@@ -49,10 +49,10 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.MockConstruct;
-import net.officefloor.frame.impl.construct.MockConstruct.MockConstructManagedObjectSource;
-import net.officefloor.frame.impl.construct.MockConstruct.MockManagedObjectSourceMetaDataBuilder;
-import net.officefloor.frame.impl.construct.MockConstruct.MockRawBoundManagedObjectInstanceMetaDataBuilder;
-import net.officefloor.frame.impl.construct.MockConstruct.MockRawBoundManagedObjectMetaDataBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.ConstructManagedObjectSource;
+import net.officefloor.frame.impl.construct.MockConstruct.ManagedObjectSourceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.officefloor.OfficeFloorBuilderImpl;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
@@ -113,7 +113,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedObjectSourceMetaData}.
 	 */
-	private final MockManagedObjectSourceMetaDataBuilder<Indexed, FlowKey> metaData = MockConstruct
+	private final ManagedObjectSourceMetaDataMockBuilder<Indexed, FlowKey> metaData = MockConstruct
 			.mockManagedObjectSourceMetaData();
 
 	/**
@@ -150,7 +150,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record no class
 		this.configuration = new ManagedObjectBuilderImpl<>(MANAGED_OBJECT_NAME,
-				(MockConstructManagedObjectSource<?, ?>) null);
+				(ConstructManagedObjectSource<?, ?>) null);
 		this.record_issue("No ManagedObjectSource class provided");
 
 		// Attempt to construct managed object
@@ -553,10 +553,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Provide the bound configuration
 		final int INSTANCE_INDEX = 0;
 		final String BOUND_NAME = "BOUND_NAME";
-		MockRawBoundManagedObjectMetaDataBuilder<?, ?> boundMetaData = MockConstruct
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
 				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
 		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
-		MockRawBoundManagedObjectInstanceMetaDataBuilder<?, ?> boundInstanceMetaData = boundMetaData
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
 				.addRawBoundManagedObjectInstanceMetaData();
 
 		// Create the managed object meta-data
@@ -627,10 +627,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Provide the bound configuration
 		final int INSTANCE_INDEX = 0;
 		final String BOUND_NAME = "BOUND_NAME";
-		MockRawBoundManagedObjectMetaDataBuilder<?, ?> boundMetaData = MockConstruct
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
 				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
 		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
-		MockRawBoundManagedObjectInstanceMetaDataBuilder<?, ?> boundInstanceMetaData = boundMetaData
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
 				.addRawBoundManagedObjectInstanceMetaData();
 
 		// Create the managed object meta-data
@@ -662,10 +662,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Provide the bound configuration
 		final int INSTANCE_INDEX = 0;
 		final String BOUND_NAME = "BOUND_NAME";
-		MockRawBoundManagedObjectMetaDataBuilder<?, ?> boundMetaData = MockConstruct
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
 				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
 		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
-		MockRawBoundManagedObjectInstanceMetaDataBuilder<?, ?> boundInstanceMetaData = boundMetaData
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
 				.addRawBoundManagedObjectInstanceMetaData();
 
 		// Create the managed object meta-data
@@ -698,10 +698,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Provide the bound configuration
 		final int INSTANCE_INDEX = 0;
 		final String BOUND_NAME = "BOUND_NAME";
-		MockRawBoundManagedObjectMetaDataBuilder<?, ?> boundMetaData = MockConstruct
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
 				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
 		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
-		MockRawBoundManagedObjectInstanceMetaDataBuilder<?, ?> boundInstanceMetaData = boundMetaData
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
 				.addRawBoundManagedObjectInstanceMetaData();
 
 		// Create the managed object meta-data
@@ -741,10 +741,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Provide the bound configuration
 		final int INSTANCE_INDEX = 0;
 		final String BOUND_NAME = "BOUND_NAME";
-		MockRawBoundManagedObjectMetaDataBuilder<?, ?> boundMetaData = MockConstruct
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
 				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
 		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
-		MockRawBoundManagedObjectInstanceMetaDataBuilder<?, ?> boundInstanceMetaData = boundMetaData
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
 				.addRawBoundManagedObjectInstanceMetaData();
 
 		// Create the managed object meta-data

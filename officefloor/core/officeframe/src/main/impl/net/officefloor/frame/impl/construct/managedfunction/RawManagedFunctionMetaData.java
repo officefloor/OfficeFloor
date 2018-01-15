@@ -181,7 +181,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 *            {@link Team} instances within the {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return <code>true</code> if sucessfully loaded the
+	 * @return <code>true</code> if successfully loaded the
 	 *         {@link OfficeMetaData}.
 	 */
 	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,

@@ -78,7 +78,7 @@ public class RawGovernanceMetaDataFactory {
 		}
 
 		// Obtain the extension interface type
-		Class<E> extensionInterfaceType = configuration.getExtensionInterface();
+		Class<E> extensionInterfaceType = configuration.getExtensionType();
 		if (extensionInterfaceType == null) {
 			issues.addIssue(AssetType.GOVERNANCE, governanceName, "No extension interface type provided");
 			return null; // can not carry on

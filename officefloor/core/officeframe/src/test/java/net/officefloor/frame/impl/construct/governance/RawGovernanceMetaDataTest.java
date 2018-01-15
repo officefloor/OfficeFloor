@@ -144,7 +144,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record no class
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), null);
+		this.recordReturn(this.configuration, this.configuration.getExtensionType(), null);
 		this.record_issue("No extension interface type provided");
 
 		// Attempt to construct governance
@@ -161,7 +161,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record no team name
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
+		this.recordReturn(this.configuration, this.configuration.getExtensionType(), String.class);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
 		this.record_flows(0);
 		this.record_escalations(0);
@@ -187,7 +187,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record no team name
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
+		this.recordReturn(this.configuration, this.configuration.getExtensionType(), String.class);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
 		this.record_issue("Can not find Team by name '" + TEAM_NAME + "'");
 
@@ -215,7 +215,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify the content of the raw meta data
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME, rawMetaData.getGovernanceName());
-		assertEquals("Incorrect extension interface type", String.class, rawMetaData.getExtensionInterfaceType());
+		assertEquals("Incorrect extension interface type", String.class, rawMetaData.getExtensionType());
 
 		// Verify governance meta-data
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME, governanceMetaData.getGovernanceName());
@@ -329,7 +329,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record instantiating governance
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
+		this.recordReturn(this.configuration, this.configuration.getExtensionType(), String.class);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
 	}
 

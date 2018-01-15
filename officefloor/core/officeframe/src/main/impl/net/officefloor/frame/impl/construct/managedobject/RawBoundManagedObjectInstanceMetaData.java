@@ -306,7 +306,7 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 			int governanceIndex = rawGovernanceMetaData.getGovernanceIndex();
 
 			// Obtain the Governance extension interface
-			Class<?> governanceExtensionInterface = rawGovernanceMetaData.getExtensionInterfaceType();
+			Class<?> governanceExtensionInterface = rawGovernanceMetaData.getExtensionType();
 
 			// Create the extension interface extractor
 			ManagedObjectExtensionMetaData<?>[] eiMetaDatas = this.rawMoMetaData.getManagedObjectSourceMetaData()

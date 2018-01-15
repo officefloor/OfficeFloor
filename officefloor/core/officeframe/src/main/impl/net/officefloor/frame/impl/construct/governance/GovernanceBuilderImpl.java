@@ -39,7 +39,7 @@ public class GovernanceBuilderImpl<E, F extends Enum<F>> extends AbstractFunctio
 	/**
 	 * Extension interface.
 	 */
-	private final Class<E> extensionInterface;
+	private final Class<E> extensionType;
 
 	/**
 	 * {@link GovernanceFactory}.
@@ -51,15 +51,15 @@ public class GovernanceBuilderImpl<E, F extends Enum<F>> extends AbstractFunctio
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param extensionInterface
+	 * @param extensionType
 	 *            Extension interface.
 	 * @param governanceFactory
 	 *            {@link GovernanceFactory}.
 	 */
-	public GovernanceBuilderImpl(String governanceName, Class<E> extensionInterface,
+	public GovernanceBuilderImpl(String governanceName, Class<E> extensionType,
 			GovernanceFactory<? super E, F> governanceFactory) {
 		this.governanceName = governanceName;
-		this.extensionInterface = extensionInterface;
+		this.extensionType = extensionType;
 		this.governanceFactory = governanceFactory;
 	}
 
@@ -78,8 +78,8 @@ public class GovernanceBuilderImpl<E, F extends Enum<F>> extends AbstractFunctio
 	}
 
 	@Override
-	public Class<E> getExtensionInterface() {
-		return this.extensionInterface;
+	public Class<E> getExtensionType() {
+		return this.extensionType;
 	}
 
 }

@@ -53,9 +53,9 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 	private final int governanceIndex;
 
 	/**
-	 * Extension interface type.
+	 * Extension type.
 	 */
-	private final Class<E> extensionInterfaceType;
+	private final Class<E> extensionType;
 
 	/**
 	 * {@link GovernanceConfiguration}.
@@ -75,18 +75,18 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 	 * @param governanceIndex
 	 *            Index of this {@link RawGovernanceMetaData} within the
 	 *            {@link ProcessState}.
-	 * @param extensionInterfaceType
+	 * @param extensionType
 	 *            Extension interface type.
 	 * @param governanceConfiguration
 	 *            {@link GovernanceConfiguration}.
 	 * @param governanceMetaData
 	 *            {@link GovernanceMetaDataImpl}.
 	 */
-	public RawGovernanceMetaData(String governanceName, int governanceIndex, Class<E> extensionInterfaceType,
+	public RawGovernanceMetaData(String governanceName, int governanceIndex, Class<E> extensionType,
 			GovernanceConfiguration<E, F> governanceConfiguration, GovernanceMetaDataImpl<E, F> governanceMetaData) {
 		this.governanceName = governanceName;
 		this.governanceIndex = governanceIndex;
-		this.extensionInterfaceType = extensionInterfaceType;
+		this.extensionType = extensionType;
 		this.governanceConfiguration = governanceConfiguration;
 		this.governanceMetaData = governanceMetaData;
 	}
@@ -101,12 +101,12 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 	}
 
 	/**
-	 * Obtains the extension interface type used by the {@link Governance}.
+	 * Obtains the extension type used by the {@link Governance}.
 	 * 
-	 * @return Extension interface type used by the {@link Governance}.
+	 * @return Extension type used by the {@link Governance}.
 	 */
-	public Class<E> getExtensionInterfaceType() {
-		return this.extensionInterfaceType;
+	public Class<E> getExtensionType() {
+		return this.extensionType;
 	}
 
 	/**
