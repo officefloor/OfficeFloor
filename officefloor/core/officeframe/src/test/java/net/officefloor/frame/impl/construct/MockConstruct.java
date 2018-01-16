@@ -70,7 +70,9 @@ import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
+import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
+import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
@@ -84,10 +86,13 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.MockManagedObjectSourceMetaData;
 
@@ -1468,6 +1473,11 @@ public class MockConstruct {
 		private final OfficeBuilderImpl builder;
 
 		/**
+		 * {@link ProcessMetaDataMockBuilder}.
+		 */
+		private final ProcessMetaDataMockBuilder processMetaData = new ProcessMetaDataMockBuilder();
+
+		/**
 		 * {@link ManagedFunctionMetaData} instances.
 		 */
 		private final List<ManagedFunctionMetaData<?, ?>> functions = new LinkedList<>();
@@ -1486,6 +1496,15 @@ public class MockConstruct {
 		private OfficeMetaDataMockBuilder(String officeName) {
 			this.officeName = officeName;
 			this.builder = new OfficeBuilderImpl(officeName);
+		}
+
+		/**
+		 * Obtains {@link ProcessMetaDataMockBuilder}.
+		 * 
+		 * @return {@link ProcessMetaDataMockBuilder}.
+		 */
+		public ProcessMetaDataMockBuilder getProcessMetaData() {
+			return this.processMetaData;
 		}
 
 		/**
@@ -1547,7 +1566,140 @@ public class MockConstruct {
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
 				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
-						functionLocator, null, null, null);
+						functionLocator, this.processMetaData.build(), null, null);
+			}
+			return this.built;
+		}
+	}
+
+	/**
+	 * Builder for the {@link ProcessMetaData}.
+	 */
+	private static class ProcessMetaDataMockBuilder {
+
+		/**
+		 * Built {@link ProcessMetaData}.
+		 */
+		private ProcessMetaData built = null;
+
+		/**
+		 * {@link ManagedObjectMetaData} instances.
+		 */
+		private List<ManagedObjectMetaData<?>> managedObjects = new LinkedList<>();
+
+		/**
+		 * {@link ThreadMetaData} for the {@link ProcessMetaData}.
+		 */
+		private final ThreadMetaDataMockBuilder thread = new ThreadMetaDataMockBuilder();
+
+		/**
+		 * Instantiate.
+		 */
+		private ProcessMetaDataMockBuilder() {
+		}
+
+		/**
+		 * Ensure not built.
+		 */
+		private void assertNotBuilt() {
+			Assert.assertNull("Should not alter once built", this.built);
+		}
+
+		/**
+		 * Obtains the {@link ThreadMetaDataMockBuilder}.
+		 * 
+		 * @return {@link ThreadMetaDataMockBuilder}.
+		 */
+		public ThreadMetaDataMockBuilder getThreadMetaData() {
+			this.assertNotBuilt();
+			return this.thread;
+		}
+
+		/**
+		 * Adds a {@link ManagedObjectMetaData}.
+		 * 
+		 * @param boundManagedObjectName
+		 *            Name of {@link ManagedObject}.
+		 * @param objectType
+		 *            Object type of {@link ManagedObject}.
+		 * @return {@link ManagedObjectMetaData}.
+		 */
+		public ManagedObjectMetaData<?> addManagedObjectMetaData(String boundManagedObjectName, Class<?> objectType) {
+			this.assertNotBuilt();
+			ManagedObjectMetaData<?> mo = mockManagedObjectMetaData(boundManagedObjectName, objectType);
+			this.managedObjects.add(mo);
+			return mo;
+		}
+
+		/**
+		 * Builds the {@link ProcessMetaData}.
+		 * 
+		 * @return {@link ProcessMetaData}.
+		 */
+		public ProcessMetaData build() {
+			if (this.built == null) {
+				this.built = new ProcessMetaDataImpl(
+						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
+						this.thread.built());
+			}
+			return this.built;
+		}
+	}
+
+	/**
+	 * Builder for the {@link ThreadMetaData}.
+	 */
+	private static class ThreadMetaDataMockBuilder {
+
+		/**
+		 * Built {@link ThreadMetaData}.
+		 */
+		private ThreadMetaData built = null;
+
+		/**
+		 * {@link ManagedObjectMetaData} instances.
+		 */
+		private List<ManagedObjectMetaData<?>> managedObjects = new LinkedList<>();
+
+		/**
+		 * Instantiate.
+		 */
+		private ThreadMetaDataMockBuilder() {
+		}
+
+		/**
+		 * Ensure not built.
+		 */
+		private void assertNotBuilt() {
+			Assert.assertNull("Should not alter once built", this.built);
+		}
+
+		/**
+		 * Adds a {@link ManagedObjectMetaData}.
+		 * 
+		 * @param boundManagedObjectName
+		 *            Name of {@link ManagedObject}.
+		 * @param objectType
+		 *            Object type of {@link ManagedObject}.
+		 * @return {@link ManagedObjectMetaData}.
+		 */
+		public ManagedObjectMetaData<?> addManagedObjectMetaData(String boundManagedObjectName, Class<?> objectType) {
+			this.assertNotBuilt();
+			ManagedObjectMetaData<?> mo = mockManagedObjectMetaData(boundManagedObjectName, objectType);
+			this.managedObjects.add(mo);
+			return mo;
+		}
+
+		/**
+		 * Builds the {@link ThreadMetaData}.
+		 * 
+		 * @return {@link ThreadMetaData}.
+		 */
+		public ThreadMetaData built() {
+			if (this.built == null) {
+				this.built = new ThreadMetaDataImpl(
+						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]), null, 1000,
+						null, null, null);
 			}
 			return this.built;
 		}

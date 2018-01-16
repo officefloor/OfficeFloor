@@ -18,10 +18,6 @@
 package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.Indexed;
@@ -39,35 +35,21 @@ import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectI
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
-import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
-import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
-import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -78,15 +60,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
-
-	@Deprecated
-	private final RawAdministrationMetaDataFactory administrationMetaDataFactory = null;
-	@Deprecated
-	private final FlowMetaDataFactory flowMetaDataFactory = null;
-	@Deprecated
-	private final EscalationFlowFactory escalationFlowFactory = null;
-	@Deprecated
-	private final ManagedFunctionLocator functionLocator = null;
 
 	/**
 	 * Name of the {@link ManagedFunction}.
@@ -108,16 +81,6 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	 * {@link RawOfficeMetaData}.
 	 */
 	private final RawOfficeMetaDataMockBuilder rawOfficeMetaData = MockConstruct.mockRawOfficeMetaData("OFFICE");
-
-	/**
-	 * {@link Office} scope {@link RawBoundManagedObjectMetaData}.
-	 */
-	private final Map<String, RawBoundManagedObjectMetaDataMockBuilder<Indexed, Indexed>> officeScopeManagedObjects = new HashMap<>();
-
-	/**
-	 * {@link TeamManagement} instances by their name within the {@link Office}.
-	 */
-	private final Map<String, TeamManagement> officeTeams = new HashMap<>();
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -731,42 +694,6 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 
 		// Record
 		this.configuration.preAdminister("ADMIN", Object.class, () -> null);
-		
-//
-//		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[] {
-//				this.createMock(AdministrationConfiguration.class) };
-//		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[0];
-//		final RawAdministrationMetaData rawAdministrationMetaData = this.createMock(RawAdministrationMetaData.class);
-//		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
-//		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>();
-//
-//		// Record construct function with pre-administration
-//		this.record_nameFactoryTeam();
-//		this.record_functionBoundManagedObjects();
-//		this.record_NoRequiredManagedObjects();
-//		this.record_dependencySortingForCoordination();
-//		this.record_NoGovernance();
-//		this.record_NoFlows();
-//		this.record_NoNextFunction();
-//		this.record_NoEscalations();
-//		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
-//		// this.recordReturn(this.administrationMetaDataFactory,
-//		// this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
-//		// AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData,
-//		// this.flowMetaDataFactory,
-//		// this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
-//		// new RawAdministrationMetaData[] { rawAdministrationMetaData });
-//		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getAdministrationMetaData(),
-//				administrationMetaData);
-//		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getRawBoundManagedObjectMetaData(),
-//				new RawBoundManagedObjectMetaData[0]);
-//		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
-//		// this.recordReturn(this.administrationMetaDataFactory,
-//		// this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
-//		// AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData,
-//		// this.flowMetaDataFactory,
-//		// this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
-//		// new RawAdministrationMetaData[0]);
 
 		// Construct
 		this.replayMockObjects();
@@ -777,7 +704,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 		// Ensure have administration
 		assertEquals("Should have pre administration", 1, functionMetaData.getPreAdministrationMetaData().length);
 		AdministrationMetaData<?, ?, ?> adminMetaData = functionMetaData.getPreAdministrationMetaData()[0];
-//		assertSame("Incorrect administration meta-data", administrationMetaData, adminMetaData);
+		assertEquals("Incorrect administration meta-data", "ADMIN", adminMetaData.getAdministrationName());
 		assertEquals("Should not have post administration", 0, functionMetaData.getPostAdministrationMetaData().length);
 	}
 
@@ -787,330 +714,57 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testPostAdminstrationWithAdministeredManagedObjectDependency() {
 
-		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[0];
-		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[] {
-				this.createMock(AdministrationConfiguration.class) };
-		final RawAdministrationMetaData rawAdministrationMetaData = this.createMock(RawAdministrationMetaData.class);
-		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
-		final Map<String, RawBoundManagedObjectMetaData> scopeMo = null; // new
-																			// HashMap<>(this.officeScopeManagedObjects);
-		final RawBoundManagedObjectMetaData rawBoundManagedObject = this
-				.createMock(RawBoundManagedObjectMetaData.class);
+		// Record
+		this.configuration.linkManagedObject(0, "ONE", Object.class);
 
-		// Administration required Managed Object
-		final RawBoundManagedObjectInstanceMetaData<?> rawAdministrationMoInstance = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final ManagedObjectIndex administrationMoIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 0);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> one = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("ONE");
+		one.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addDependency(Object.class, null);
+		one.getBuilder().mapDependency(0, "FOUR");
 
-		// Dependency of the administration required Managed Object
-		final RawBoundManagedObjectMetaData dependencyMo = this.createMock(RawBoundManagedObjectMetaData.class);
-		final RawBoundManagedObjectInstanceMetaData<?> dependencyMoInstance = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final ManagedObjectIndex dependencyMoIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 1);
+		this.configuration.postAdminister("ADMIN", Object.class, () -> null).administerManagedObject("TWO");
 
-		// Dependency of the dependency Managed Object
-		final RawBoundManagedObjectMetaData dependencyDependency = this.createMock(RawBoundManagedObjectMetaData.class);
-		final RawBoundManagedObjectInstanceMetaData<?> dependencyDependencyInstance = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final ManagedObjectIndex dependencyDependencyIndex = new ManagedObjectIndexImpl(ManagedObjectScope.PROCESS, 0);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> two = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("TWO");
+		two.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addDependency(Object.class, null);
+		two.getBuilder().mapDependency(0, "THREE");
+		two.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addExtension(Object.class, (mo) -> mo);
 
-		// Record construct task duty association
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
-		// this.recordReturn(this.administrationMetaDataFactory,
-		// this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
-		// AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData,
-		// this.flowMetaDataFactory,
-		// this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
-		// new RawAdministrationMetaData[0]);
-		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
-		// this.recordReturn(this.administrationMetaDataFactory,
-		// this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
-		// AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData,
-		// this.flowMetaDataFactory,
-		// this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
-		// new RawAdministrationMetaData[] { rawAdministrationMetaData });
-		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getAdministrationMetaData(),
-				administrationMetaData);
-		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getRawBoundManagedObjectMetaData(),
-				new RawBoundManagedObjectMetaData[] { rawBoundManagedObject });
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> three = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("THREE");
+		three.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addDependency(Object.class, null);
+		three.getBuilder().mapDependency(0, "FOUR");
 
-		// Record loading dependencies
-		LoadDependencies dependencyDependencyLinked = new LoadDependencies(dependencyDependency,
-				dependencyDependencyIndex, dependencyDependencyInstance);
-		LoadDependencies dependencyLinked = new LoadDependencies(dependencyMo, dependencyMoIndex, dependencyMoInstance,
-				dependencyDependencyLinked);
-		LoadDependencies administrationLinked = new LoadDependencies(rawBoundManagedObject, administrationMoIndex,
-				rawAdministrationMoInstance, dependencyLinked);
-		this.record_loadDependencies(administrationLinked);
-		this.record_dependencySortingForCoordination(administrationLinked, dependencyLinked,
-				dependencyDependencyLinked);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> four = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("FOUR");
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
+
+		one.build().loadDependencies(this.issues, this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
+		two.build().loadDependencies(this.issues, this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
+		three.build().loadDependencies(this.issues, this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
+		four.build().loadDependencies(this.issues, this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
+
 		RawManagedFunctionMetaData<Indexed, Indexed> rawMetaData = this.fullyConstructRawFunctionMetaData(true);
-		ManagedFunctionMetaData<Indexed, Indexed> functionMetaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have administered managed object and dependency as required
+		ManagedFunctionMetaData<Indexed, Indexed> functionMetaData = rawMetaData.getManagedFunctionMetaData();
 		ManagedObjectIndex[] requiredManagedObjects = functionMetaData.getRequiredManagedObjects();
-		assertEquals("Administered managed objects should be required", 3, requiredManagedObjects.length);
-		assertEquals("Dependency of dependency must be first", dependencyDependencyIndex, requiredManagedObjects[0]);
-		assertEquals("Administered dependency must be first", dependencyMoIndex, requiredManagedObjects[1]);
-		assertEquals("Administered managed object must be after its dependency", administrationMoIndex,
-				requiredManagedObjects[2]);
-	}
-
-	/**
-	 * Records obtaining {@link ManagedFunction} name,
-	 * {@link ManagedFunctionFactory} and responsible {@link Team}.
-	 */
-	private void record_nameFactoryTeam() {
-		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.FUNCTION_FACTORY);
-		this.recordReturn(this.configuration, this.configuration.getAnnotations(), new Object[0]);
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
-		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.build().getTeams(), teams);
-	}
-
-	/**
-	 * Records bounding {@link ManagedObject} instances to the
-	 * {@link ManagedFunction}.
-	 * 
-	 * @param nameMoPairs
-	 *            Name and {@link RawBoundManagedObjectMetaData} pairs.
-	 */
-	private void record_functionBoundManagedObjects(Object... nameMoPairs) {
-
-		// Obtain the listing of work bound names and managed objects
-		int moCount = nameMoPairs.length / 2;
-		String[] boundMoNames = new String[moCount];
-		RawBoundManagedObjectMetaData[] workBoundMo = new RawBoundManagedObjectMetaData[moCount];
-		for (int i = 0; i < nameMoPairs.length; i += 2) {
-			int loadIndex = i / 2;
-			boundMoNames[loadIndex] = (String) nameMoPairs[i];
-			workBoundMo[loadIndex] = (RawBoundManagedObjectMetaData) nameMoPairs[i + 1];
-		}
-
-		// Record bounding managed objects to work
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(),
-				this.officeScopeManagedObjects);
-		ManagedObjectConfiguration<?>[] moConfiguration = new ManagedObjectConfiguration[moCount];
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectConfiguration(), moConfiguration);
-		if (moConfiguration.length > 0) {
-			Map<String, RawManagedObjectMetaData<?, ?>> officeRegisteredManagedObjects = new HashMap<String, RawManagedObjectMetaData<?, ?>>(
-					0);
-			this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.build().getManagedObjectMetaData(),
-					officeRegisteredManagedObjects);
-			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData<?, ?>>();
-			this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.build().getGovernanceMetaData(),
-					rawGovernanceMetaData);
-			// this.recordReturn(this.rawBoundManagedObjectFactory,
-			// this.rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(moConfiguration,
-			// this.issues,
-			// ManagedObjectScope.FUNCTION, AssetType.FUNCTION, FUNCTION_NAME,
-			// this.assetManagerFactory,
-			// officeRegisteredManagedObjects, this.officeScopeManagedObjects,
-			// null, null,
-			// rawGovernanceMetaData),
-			// workBoundMo);
-			for (int i = 0; i < moCount; i++) {
-				this.recordReturn(workBoundMo[i], workBoundMo[i].getBoundManagedObjectName(), boundMoNames[i]);
-			}
-		}
-	}
-
-	/**
-	 * Records no {@link ManagedObject} instances required.
-	 */
-	private void record_NoRequiredManagedObjects() {
-		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
-				new ManagedFunctionObjectConfiguration[0]);
-	}
-
-	/**
-	 * Records no {@link Administration} {@link AdministrationDuty} instances
-	 * for {@link ManagedFunction}.
-	 */
-	private void record_NoAdministration() {
-		final Map<String, RawBoundManagedObjectMetaData> scopeMo = null; // new
-																			// HashMap<>(this.officeScopeManagedObjects);
-
-		// Record no pre administration
-		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[0];
-		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
-		// this.recordReturn(this.administrationMetaDataFactory,
-		// this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
-		// AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData,
-		// this.flowMetaDataFactory,
-		// this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
-		// new RawAdministrationMetaData[0]);
-
-		// Record no post administration
-		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[0];
-		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
-		// this.recordReturn(this.administrationMetaDataFactory,
-		// this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
-		// AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData,
-		// this.flowMetaDataFactory,
-		// this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
-		// new RawAdministrationMetaData[0]);
-	}
-
-	/**
-	 * Records no {@link Governance} instances for the {@link ManagedFunction}.
-	 */
-	private void record_NoGovernance() {
-		final Map<?, ?> governances = this.createMock(Map.class);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
-				new ManagedFunctionGovernanceConfiguration[0]);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.build().isManuallyManageGovernance(), false);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.build().getGovernanceMetaData(), governances);
-		this.recordReturn(governances, governances.size(), 0);
-	}
-
-	/**
-	 * Records obtaining the {@link RawManagedObjectMetaData} for a
-	 * {@link RawBoundManagedObjectMetaData} with a single
-	 * {@link RawBoundManagedObjectInstanceMetaData}.
-	 * 
-	 * @param rawMo
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param rawInstanceMo
-	 *            Single {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param rawMo
-	 *            {@link RawManagedObjectMetaData}.
-	 */
-	private void record_singleInstance_getRawManagedObjectMetaData(RawBoundManagedObjectMetaData rawBoundMo,
-			RawBoundManagedObjectInstanceMetaData<?> rawBoundMoInstance, RawManagedObjectMetaData<?, ?> rawMo) {
-		this.recordReturn(rawBoundMo, rawBoundMo.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { rawBoundMoInstance });
-		this.recordReturn(rawBoundMoInstance, rawBoundMoInstance.getRawManagedObjectMetaData(), rawMo);
-	}
-
-	/**
-	 * Records sorting the {@link RawBoundManagedObjectMetaData} for
-	 * coordinating.
-	 * 
-	 * @param boundManagedObjects
-	 *            Listing of {@link RawBoundManagedObjectMetaData} to be sorted.
-	 */
-	private void record_dependencySortingForCoordination(LoadDependencies... boundManagedObjects) {
-		for (LoadDependencies boundManagedObject : boundManagedObjects) {
-			this.record_loadDependencies(boundManagedObject);
-		}
-	}
-
-	/**
-	 * Records loading the dependencies.
-	 * 
-	 * @param mo
-	 *            {@link LoadDependencies}.
-	 */
-	private void record_loadDependencies(LoadDependencies mo) {
-		this.record_loadDependencies(mo, new HashSet<ManagedObjectIndex>());
-	}
-
-	/**
-	 * Records loading the dependencies.
-	 * 
-	 * @param mo
-	 *            {@link LoadDependencies}.
-	 * @param loadedDependencies
-	 *            Set of loaded dependencies.
-	 */
-	private void record_loadDependencies(LoadDependencies mo, Set<ManagedObjectIndex> loadedDependencies) {
-
-		// Record checking whether loaded
-		this.recordReturn(mo.boundMo, mo.boundMo.getManagedObjectIndex(), mo.index);
-		if (loadedDependencies.contains(mo.index)) {
-			// Dependency already loaded
-			return;
-		}
-
-		// Create the listing of dependencies
-		RawBoundManagedObjectMetaData[] dependencies = new RawBoundManagedObjectMetaData[mo.dependencies.length];
-		for (int i = 0; i < dependencies.length; i++) {
-			dependencies[i] = mo.dependencies[i].boundMo;
-		}
-
-		// Record loading the direct dependencies
-		this.recordReturn(mo.boundMo, mo.boundMo.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { mo.boundMoInstance });
-		this.recordReturn(mo.boundMoInstance, mo.boundMoInstance.getDependencies(), dependencies);
-
-		// Flag the dependency as loaded
-		loadedDependencies.add(mo.index);
-
-		// Record loading the transient dependencies
-		for (LoadDependencies dependency : mo.dependencies) {
-			this.record_loadDependencies(dependency, loadedDependencies);
-		}
-	}
-
-	/**
-	 * Struct to contain details for recording loading dependencies.
-	 */
-	private static class LoadDependencies {
-
-		public final RawBoundManagedObjectMetaData boundMo;
-
-		public final ManagedObjectIndex index;
-
-		public final RawBoundManagedObjectInstanceMetaData<?> boundMoInstance;
-
-		public final LoadDependencies[] dependencies;
-
-		public LoadDependencies(RawBoundManagedObjectMetaData boundMo, ManagedObjectIndex index,
-				RawBoundManagedObjectInstanceMetaData<?> boundMoInstance, LoadDependencies... dependencies) {
-			this.boundMo = boundMo;
-			this.index = index;
-			this.boundMoInstance = boundMoInstance;
-			this.dependencies = dependencies;
-		}
-	}
-
-	/**
-	 * Records no {@link Flow}.
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void record_NoFlows() {
-		final FlowConfiguration[] flowConfigurations = new FlowConfiguration[0];
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfigurations);
-		// this.recordReturn(this.flowMetaDataFactory,
-		// this.flowMetaDataFactory.createFlowMetaData(flowConfigurations,
-		// this.officeMetaData, AssetType.FUNCTION, FUNCTION_NAME, issues), new
-		// FlowMetaData[0]);
-	}
-
-	/**
-	 * Records no next {@link ManagedFunction}.
-	 */
-	private void record_NoNextFunction() {
-		// this.recordReturn(this.officeMetaData,
-		// this.officeMetaData.getManagedFunctionLocator(),
-		// this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getNextFunction(), null);
-	}
-
-	/**
-	 * Records no {@link EscalationFlow}.
-	 */
-	private void record_NoEscalations() {
-		final EscalationConfiguration[] escalationConfigurations = new EscalationConfiguration[0];
-		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalationConfigurations);
-		// this.recordReturn(this.escalationFlowFactory,
-		// this.escalationFlowFactory.createEscalationFlows(escalationConfigurations,
-		// this.officeMetaData,
-		// AssetType.FUNCTION, FUNCTION_NAME, issues),
-		// new EscalationFlow[0]);
+		assertEquals("Administered managed objects should be required", 4, requiredManagedObjects.length);
+		assertSame("Dependency of dependency must be first",
+				four.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[0]);
+		assertSame("Function managed object must be after its dependency",
+				one.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[1]);
+		assertSame("Administered managed object must be after its dependency",
+				three.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[2]);
+		assertSame("Administered dependency must be next",
+				two.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[3]);
 	}
 
 	/**
