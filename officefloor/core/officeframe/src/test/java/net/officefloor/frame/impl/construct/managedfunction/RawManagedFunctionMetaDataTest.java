@@ -18,6 +18,9 @@
 package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.Indexed;
@@ -742,7 +745,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> four = this.rawOfficeMetaData
 				.addScopeBoundManagedObject("FOUR");
 
-		// Attempt to construct task meta-data
+		// Construct
 		this.replayMockObjects();
 
 		one.build().loadDependencies(this.issues, this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
@@ -759,12 +762,14 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Administered managed objects should be required", 4, requiredManagedObjects.length);
 		assertSame("Dependency of dependency must be first",
 				four.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[0]);
-		assertSame("Function managed object must be after its dependency",
-				one.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[1]);
-		assertSame("Administered managed object must be after its dependency",
-				three.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[2]);
-		assertSame("Administered dependency must be next",
-				two.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), requiredManagedObjects[3]);
+		Set<ManagedObjectIndex> remaining = new HashSet<>(
+				Arrays.asList(one.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(),
+						two.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(),
+						three.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex()));
+		for (int i = 1; i < requiredManagedObjects.length; i++) {
+			assertTrue("Should have index", remaining.remove(requiredManagedObjects[i]));
+		}
+		assertEquals("Should be no remaining", 0, remaining.size());
 	}
 
 	/**
