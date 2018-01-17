@@ -84,7 +84,7 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
 
 		// Obtain the access control type
-		context.addManagedObjectExtensionInterface(HttpAccessControl.class, (managedObject) -> {
+		context.addManagedObjectExtension(HttpAccessControl.class, (managedObject) -> {
 			try {
 				return (HttpAccessControl) managedObject.getObject();
 			} catch (Throwable e) {
@@ -171,7 +171,7 @@ public class AccessControlManagedObjectSource<AC extends Serializable, C>
 		@Override
 		public Object getObject() throws Throwable {
 			return this.authenticationContext.run(() -> {
-				
+
 				// Propagate any escalation
 				if (this.escalation != null) {
 					throw this.escalation;

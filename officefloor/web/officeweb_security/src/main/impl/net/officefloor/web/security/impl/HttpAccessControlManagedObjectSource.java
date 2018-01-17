@@ -78,7 +78,7 @@ public class HttpAccessControlManagedObjectSource<AC extends Serializable>
 		context.setObjectClass(HttpAccessControl.class);
 		context.setManagedObjectClass(HttpAccessControlManagedObject.class);
 		context.addDependency(Dependencies.ACCESS_CONTROL, this.accessControlType);
-		context.addManagedObjectExtensionInterface(HttpAccessControl.class,
+		context.addManagedObjectExtension(HttpAccessControl.class,
 				(managedObject) -> (HttpAccessControl) managedObject.getObject());
 	}
 

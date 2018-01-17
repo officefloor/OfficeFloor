@@ -23,7 +23,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -344,7 +344,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		}
 
 		@Override
-		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
+		public ManagedObjectExtensionMetaData<?>[] getExtensionInterfacesMetaData() {
 			// No extension interfaces
 			return null;
 		}

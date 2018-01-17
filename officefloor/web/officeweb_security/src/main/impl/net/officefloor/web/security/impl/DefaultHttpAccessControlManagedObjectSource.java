@@ -56,7 +56,7 @@ public class DefaultHttpAccessControlManagedObjectSource
 		context.setObjectClass(HttpAuthentication.class);
 		context.setManagedObjectClass(DefaultHttpAccessControlManagedObject.class);
 		context.addDependency(HttpAuthentication.class).setLabel(Dependencies.HTTP_AUTHENTICATION.name());
-		context.addManagedObjectExtensionInterface(HttpAccessControl.class,
+		context.addManagedObjectExtension(HttpAccessControl.class,
 				(managedObject) -> (HttpAccessControl) managedObject.getObject());
 	}
 
