@@ -33,7 +33,7 @@ public interface ProfiledThreadState {
 	 * 
 	 * @return Start time stamp in milliseconds.
 	 */
-	long getSTartTimestampMilliseconds();
+	long getStartTimestampMilliseconds();
 
 	/**
 	 * Obtains the start time stamp.

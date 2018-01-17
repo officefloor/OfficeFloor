@@ -441,7 +441,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		RawManagingOfficeMetaDataMockBuilder<?> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS");
-		inputMo.setInputManagedObject(null);
+		inputMo.getBuilder().setInputManagedObjectName(null);
 		this.issues.addIssue(AssetType.OFFICE, "OFFICE", "No bound name for input managed object");
 
 		// Construct
@@ -463,7 +463,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		RawManagingOfficeMetaDataMockBuilder<?> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS");
-		inputMo.setInputManagedObject(CLASH_NAME);
+		inputMo.getBuilder().setInputManagedObjectName(CLASH_NAME);
 
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, CLASH_NAME,
 				"Name clash between bound and input Managed Objects (name=" + CLASH_NAME + ")");
@@ -495,7 +495,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.registerRawManagedObjectMetaData("BOUND_MO");
 		RawManagingOfficeMetaDataMockBuilder<None> sameInputMo = MockConstruct
 				.mockRawManagingOfficeMetaData(OFFICE_NAME, "MOS");
-		sameInputMo.setInputManagedObject(CLASH_NAME);
+		sameInputMo.getBuilder().setInputManagedObjectName(CLASH_NAME);
 		RawManagedObjectMetaData<DependencyKey, None> sameMo = bound.build(sameInputMo.build());
 		sameInputMo.build().setRawManagedObjectMetaData(sameMo);
 
@@ -523,7 +523,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		RawManagingOfficeMetaDataMockBuilder<None> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS");
-		inputMo.setInputManagedObject("MO");
+		inputMo.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> rawManagedObject = MockConstruct
 				.mockRawManagedObjectMetaData("MOS");
 		inputMo.build().setRawManagedObjectMetaData(rawManagedObject.build(inputMo.build()));
@@ -559,14 +559,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		RawManagingOfficeMetaDataMockBuilder<None> inputOne = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS_ONE");
-		inputOne.setInputManagedObject("MO");
+		inputOne.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moOne = MockConstruct
 				.mockRawManagedObjectMetaData("MOS_ONE");
 		inputOne.build().setRawManagedObjectMetaData(moOne.build(inputOne.build()));
 
 		RawManagingOfficeMetaDataMockBuilder<None> inputTwo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS_TWO");
-		inputTwo.setInputManagedObject("MO");
+		inputTwo.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moTwo = MockConstruct
 				.mockRawManagedObjectMetaData("MOS_TWO");
 		inputTwo.build().setRawManagedObjectMetaData(moTwo.build(inputOne.build()));
@@ -595,14 +595,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		RawManagingOfficeMetaDataMockBuilder<None> inputOne = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS_ONE");
-		inputOne.setInputManagedObject("MO");
+		inputOne.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moOne = MockConstruct
 				.mockRawManagedObjectMetaData("MOS_ONE");
 		inputOne.build().setRawManagedObjectMetaData(moOne.build(inputOne.build()));
 
 		RawManagingOfficeMetaDataMockBuilder<None> inputTwo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS_TWO");
-		inputTwo.setInputManagedObject("MO");
+		inputTwo.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moTwo = MockConstruct
 				.mockRawManagedObjectMetaData("MOS_TWO");
 		inputTwo.build().setRawManagedObjectMetaData(moTwo.build(inputOne.build()));
@@ -632,14 +632,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		RawManagingOfficeMetaDataMockBuilder<None> inputOne = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS_ONE");
-		inputOne.setInputManagedObject("MO");
+		inputOne.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moOne = MockConstruct
 				.mockRawManagedObjectMetaData("MOS_ONE");
 		inputOne.build().setRawManagedObjectMetaData(moOne.build(inputOne.build()));
 
 		RawManagingOfficeMetaDataMockBuilder<None> inputTwo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
 				"MOS_TWO");
-		inputTwo.setInputManagedObject("MO");
+		inputTwo.getBuilder().setInputManagedObjectName("MO");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moTwo = MockConstruct
 				.mockRawManagedObjectMetaData("MOS_TWO");
 		inputTwo.build().setRawManagedObjectMetaData(moTwo.build(inputOne.build()));
@@ -691,7 +691,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		RawManagingOfficeMetaDataMockBuilder<None> inputOffice = MockConstruct
 				.mockRawManagingOfficeMetaData(OFFICE_NAME, "INPUT_MO");
-		inputOffice.setInputManagedObject("INPUT");
+		inputOffice.getBuilder().setInputManagedObjectName("INPUT");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> inputMo = MockConstruct
 				.mockRawManagedObjectMetaData("INPUT_MO");
 		inputOffice.build().setRawManagedObjectMetaData(inputMo.build(inputOffice.build()));
@@ -728,7 +728,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		RawManagingOfficeMetaDataMockBuilder<None> inputOffice = MockConstruct
 				.mockRawManagingOfficeMetaData(OFFICE_NAME, "INPUT_MO");
-		inputOffice.setInputManagedObject("INPUT").mapDependency(DependencyKey.KEY, "BOUND");
+		inputOffice.getBuilder().setInputManagedObjectName("INPUT").mapDependency(DependencyKey.KEY, "BOUND");
 		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> inputMo = MockConstruct
 				.mockRawManagedObjectMetaData("INPUT_MO");
 		inputMo.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);

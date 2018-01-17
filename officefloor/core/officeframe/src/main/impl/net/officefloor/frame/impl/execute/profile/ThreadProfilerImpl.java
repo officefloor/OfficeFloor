@@ -131,7 +131,7 @@ public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState
 	 */
 
 	@Override
-	public long getSTartTimestampMilliseconds() {
+	public long getStartTimestampMilliseconds() {
 		return this.startTimestampMilliseconds;
 	}
 

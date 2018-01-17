@@ -40,10 +40,10 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -758,14 +758,14 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if <code>null</code> extension interface meta-data.
 	 */
-	public void testNullExtensionInterfaceMetaData() {
+	public void testNullExtensionMetaData() {
 
 		// Record null extension interface meta-data
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionInterfaceMetaData[] { null });
+				new ManagedObjectExtensionMetaData[] { null });
 		this.issues.recordIssue("Null extension interface meta-data");
 
 		// Attempt to load
@@ -775,18 +775,17 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if <code>null</code> extension interface type.
 	 */
-	public void testNullExtensionInterfaceType() {
+	public void testNullExtensionType() {
 
-		final ManagedObjectExtensionInterfaceMetaData<?> eiMetaData = this
-				.createMock(ManagedObjectExtensionInterfaceMetaData.class);
+		final ManagedObjectExtensionMetaData<?> eiMetaData = this.createMock(ManagedObjectExtensionMetaData.class);
 
 		// Record null extension interface type
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
-		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(), null);
+				new ManagedObjectExtensionMetaData[] { eiMetaData });
+		this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), null);
 		this.issues.recordIssue("Null extension interface type");
 
 		// Attempt to load
@@ -794,45 +793,42 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link ExtensionInterfaceFactory} for an extension
-	 * interface.
+	 * Ensure issue if no {@link ExtensionFactory} for an extension.
 	 */
-	public void testNoFactoryForExtensionInterface() {
+	public void testNoFactoryForExtension() {
 
-		final ManagedObjectExtensionInterfaceMetaData<?> eiMetaData = this
-				.createMock(ManagedObjectExtensionInterfaceMetaData.class);
+		final ManagedObjectExtensionMetaData<?> eiMetaData = this.createMock(ManagedObjectExtensionMetaData.class);
 
 		// Record null extension interface factory
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
-		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(), XAResource.class);
-		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceFactory(), null);
-		this.issues.recordIssue("No extension interface factory (type=" + XAResource.class.getName() + ")");
+				new ManagedObjectExtensionMetaData[] { eiMetaData });
+		this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), XAResource.class);
+		this.recordReturn(eiMetaData, eiMetaData.getExtensionFactory(), null);
+		this.issues.recordIssue("No extension factory (type=" + XAResource.class.getName() + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
 	}
 
 	/**
-	 * Ensure can define extension interface.
+	 * Ensure can define extension.
 	 */
-	public void testExtensionInterface() {
+	public void testExtension() {
 
-		final ManagedObjectExtensionInterfaceMetaData<?> eiMetaData = this
-				.createMock(ManagedObjectExtensionInterfaceMetaData.class);
-		final ExtensionInterfaceFactory<?> factory = this.createMock(ExtensionInterfaceFactory.class);
+		final ManagedObjectExtensionMetaData<?> eiMetaData = this.createMock(ManagedObjectExtensionMetaData.class);
+		final ExtensionFactory<?> factory = this.createMock(ExtensionFactory.class);
 
 		// Record null extension interface factory
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
-		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(), XAResource.class);
-		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceFactory(), factory);
+				new ManagedObjectExtensionMetaData[] { eiMetaData });
+		this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), XAResource.class);
+		this.recordReturn(eiMetaData, eiMetaData.getExtensionFactory(), factory);
 
 		// Attempt to load
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (Init<None>) null);

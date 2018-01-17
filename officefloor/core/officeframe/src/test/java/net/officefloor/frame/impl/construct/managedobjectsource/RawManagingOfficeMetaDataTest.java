@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -46,7 +44,6 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -100,12 +97,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private InputManagedObjectConfiguration<Flows> inputConfiguration = new DependencyMappingBuilderImpl<>(
 			INPUT_MANAGED_OBJECT_NAME);
-
-	/**
-	 * {@link Office} {@link TeamManagement} instances.
-	 */
-	@SuppressWarnings("unchecked")
-	private final Map<String, TeamManagement> officeTeams = this.createMock(Map.class);
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -479,8 +470,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			RawBoundManagedObjectMetaData... processBoundMetaData) {
 
 		// Manage by office
-		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, this.officeTeams,
-				this.issues);
+		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, this.issues);
 
 		// Validate creation of execute context
 		if (isCreateExecuteContext) {

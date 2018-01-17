@@ -43,7 +43,7 @@ public class AdministrationFailObtainExtensionTest extends AbstractOfficeConstru
 		// Construct the managed object
 		Exception failure = new Exception("TEST");
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> {
 					throw failure;
 				});
@@ -76,7 +76,7 @@ public class AdministrationFailObtainExtensionTest extends AbstractOfficeConstru
 		// Construct the managed object
 		Exception failure = new Exception("TEST");
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> {
 					throw failure;
 				});
@@ -111,7 +111,7 @@ public class AdministrationFailObtainExtensionTest extends AbstractOfficeConstru
 		// Construct the managed object
 		Exception failure = new Exception("TEST");
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> {
 					throw failure;
 				});
@@ -144,7 +144,7 @@ public class AdministrationFailObtainExtensionTest extends AbstractOfficeConstru
 		// Construct the managed object
 		Exception failure = new Exception("TEST");
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> {
 					throw failure;
 				});

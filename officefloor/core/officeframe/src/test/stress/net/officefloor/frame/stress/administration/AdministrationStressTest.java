@@ -41,7 +41,7 @@ public class AdministrationStressTest extends AbstractStressTestCase {
 
 		// Construct the managed object
 		this.constructManagedObject("MO",
-				(metaData) -> metaData.addManagedObjectExtensionInterface(AdministeredManagedObject.class,
+				(metaData) -> metaData.addManagedObjectExtension(AdministeredManagedObject.class,
 						(managedObject) -> (AdministeredManagedObject) managedObject),
 				() -> new AdministeredManagedObject());
 

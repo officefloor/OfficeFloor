@@ -19,12 +19,12 @@ package net.officefloor.plugin.managedobject.clazz;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 
 /**
  * <p>
- * {@link ExtensionInterfaceFactory} that return the object of the
+ * {@link ExtensionFactory} that return the object of the
  * {@link ClassManagedObject}.
  * <p>
  * This allows any implemented interfaces of the class to be an extension
@@ -34,29 +34,26 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedO
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ClassExtensionInterfaceFactory implements
-		ExtensionInterfaceFactory {
+public class ClassExtensionFactory implements ExtensionFactory {
 
 	/**
-	 * Registers the extension interface.
+	 * Registers the extension.
 	 * 
 	 * @param context
 	 *            {@link MetaDataContext} to add the extension interface.
 	 * @param objectClass
 	 *            Object class which is the extension interface.
 	 */
-	public static void registerExtensionInterface(
-			MetaDataContext<Indexed, Indexed> context, Class<?> objectClass) {
-		context.addManagedObjectExtensionInterface(objectClass,
-				new ClassExtensionInterfaceFactory());
+	public static void registerExtension(MetaDataContext<Indexed, Indexed> context, Class<?> objectClass) {
+		context.addManagedObjectExtension(objectClass, new ClassExtensionFactory());
 	}
 
 	/*
-	 * ================ ExtensionInterfaceFactory =======================
+	 * ================ ExtensionFactory =======================
 	 */
 
 	@Override
-	public Object createExtensionInterface(ManagedObject managedObject) {
+	public Object createExtension(ManagedObject managedObject) {
 
 		// Downcast to the class managed object
 		ClassManagedObject classManagedObject = (ClassManagedObject) managedObject;

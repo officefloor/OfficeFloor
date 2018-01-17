@@ -60,7 +60,7 @@ public class GovernLoadedManagedObjectTest extends AbstractOfficeConstructTestCa
 
 		// Construct the object
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (metaData) -> metaData.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (metaData) -> metaData.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> (TestObject) managedObject);
 		this.bindManagedObject("MO", scope, null).mapGovernance("GOVERNANCE");
 

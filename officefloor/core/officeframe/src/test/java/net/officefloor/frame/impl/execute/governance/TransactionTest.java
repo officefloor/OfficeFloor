@@ -129,7 +129,7 @@ public class TransactionTest extends AbstractOfficeConstructTestCase {
 		@Override
 		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			context.setObjectClass(Connection.class);
-			context.addManagedObjectExtensionInterface(Connection.class, (managedObject) -> this.connection);
+			context.addManagedObjectExtension(Connection.class, (managedObject) -> this.connection);
 		}
 
 		@Override

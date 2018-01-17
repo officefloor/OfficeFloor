@@ -129,8 +129,8 @@ public class RawOfficeFloorMetaDataFactory {
 		for (ManagedObjectSourceConfiguration mosConfiguration : configuration.getManagedObjectSourceConfiguration()) {
 
 			// Construct the managed object source
-			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory
-					.constructRawManagedObjectMetaData(mosConfiguration, sourceContext, issues, configuration);
+			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory.constructRawManagedObjectMetaData(
+					mosConfiguration, sourceContext, officeFloorName, issues, configuration);
 			if (mosMetaData == null) {
 				return null; // issue with managed object source
 			}
@@ -195,7 +195,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 			// Construct the raw team meta-data
 			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
-					threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, issues);
+					threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, officeFloorName, issues);
 			if (rawTeamMetaData == null) {
 				return null; // issue with team
 			}
@@ -219,7 +219,8 @@ public class RawOfficeFloorMetaDataFactory {
 		// Construct the break chain team
 		TeamConfiguration<?> breakTeamConfiguration = configuration.getBreakChainTeamConfiguration();
 		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
-				sourceContext, threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, issues);
+				sourceContext, threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, officeFloorName,
+				issues);
 		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
 		teamListing.add(breakChainTeamManagement);
 

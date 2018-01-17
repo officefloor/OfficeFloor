@@ -152,7 +152,7 @@ public class RawAdministrationMetaDataFactory {
 		// Obtain the administrator factory
 		AdministrationFactory<E, F, G> adminFactory = configuration.getAdministrationFactory();
 		if (adminFactory == null) {
-			issues.addIssue(assetType, assetName, "Administration '" + adminName + "' did not provide an "
+			issues.addIssue(AssetType.ADMINISTRATOR, adminName, "Administration " + adminName + " did not provide an "
 					+ AdministrationFactory.class.getSimpleName());
 			return null; // no class
 		}
@@ -163,8 +163,8 @@ public class RawAdministrationMetaDataFactory {
 		if (!ConstructUtil.isBlank(teamName)) {
 			responsibleTeam = officeTeams.get(teamName);
 			if (responsibleTeam == null) {
-				issues.addIssue(assetType, assetName,
-						"Administration " + adminName + " team '" + teamName + "' can not be found");
+				issues.addIssue(AssetType.ADMINISTRATOR, adminName,
+						"Administration " + adminName + " team " + teamName + " can not be found");
 				return null; // must have team
 			}
 		}
@@ -172,8 +172,8 @@ public class RawAdministrationMetaDataFactory {
 		// Obtain the extension interface
 		Class<E> extensionInterfaceType = configuration.getExtensionInterface();
 		if (extensionInterfaceType == null) {
-			issues.addIssue(assetType, assetName,
-					"Administration " + adminName + " did not provide extension interface type");
+			issues.addIssue(AssetType.ADMINISTRATOR, adminName,
+					"Administration " + adminName + " did not provide extension type");
 			return null; // no extension interface
 		}
 
@@ -184,7 +184,7 @@ public class RawAdministrationMetaDataFactory {
 
 			// Ensure have managed object name
 			if (ConstructUtil.isBlank(moName)) {
-				issues.addIssue(assetType, assetName,
+				issues.addIssue(AssetType.ADMINISTRATOR, adminName,
 						"Administration " + adminName + " specifying no name for managed object");
 				return null; // unspecified managed object name
 			}
@@ -192,8 +192,8 @@ public class RawAdministrationMetaDataFactory {
 			// Obtain the managed object
 			RawBoundManagedObjectMetaData mo = scopeMo.get(moName);
 			if (mo == null) {
-				issues.addIssue(assetType, assetName,
-						"Managed Object '" + moName + "' not available to Administration " + adminName);
+				issues.addIssue(AssetType.ADMINISTRATOR, adminName,
+						"Managed Object " + moName + " not available to Administration " + adminName);
 				return null; // unknown managed object
 			}
 
@@ -221,7 +221,7 @@ public class RawAdministrationMetaDataFactory {
 							if (extensionInterfaceFactory == null) {
 								// Managed Object invalid
 								isExtensionInterfaceFactoryIssue = true;
-								issues.addIssue(assetType, assetName,
+								issues.addIssue(AssetType.ADMINISTRATOR, adminName,
 										"Managed Object did not provide " + ExtensionFactory.class.getSimpleName()
 												+ " for Administration " + adminName + " (ManagedObjectSource="
 												+ moInstance.getRawManagedObjectMetaData().getManagedObjectName()
@@ -238,8 +238,8 @@ public class RawAdministrationMetaDataFactory {
 				if (extensionInterfaceFactory == null) {
 					// Managed Object invalid
 					isExtensionInterfaceFactoryIssue = true;
-					issues.addIssue(assetType, assetName,
-							"Managed Object '" + moName + "' does not support extension interface "
+					issues.addIssue(AssetType.ADMINISTRATOR, adminName,
+							"Managed Object " + moName + " does not support extension type "
 									+ extensionInterfaceType.getName() + " required by Administration " + adminName
 									+ " (ManagedObjectSource="
 									+ moInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
@@ -274,16 +274,21 @@ public class RawAdministrationMetaDataFactory {
 				.getGovernanceMetaData();
 
 		// Obtain the governance mapping
-		AdministrationGovernanceConfiguration<?>[] dutyGovernanceConfigurations = configuration
+		AdministrationGovernanceConfiguration<?>[] administrationGovernanceConfigurations = configuration
 				.getGovernanceConfiguration();
-		int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
-		for (AdministrationGovernanceConfiguration<?> administrationGovernanceConfiguration : dutyGovernanceConfigurations) {
+		int[] governanceMapping = new int[administrationGovernanceConfigurations.length];
+		for (AdministrationGovernanceConfiguration<?> administrationGovernanceConfiguration : administrationGovernanceConfigurations) {
 
 			// Index of governance for reference by administration
 			int administrationGovernanceIndex = administrationGovernanceConfiguration.getIndex();
 
 			// Obtain the governance
 			String governanceName = administrationGovernanceConfiguration.getGovernanceName();
+			if (governanceName == null) {
+				// Must have governance name
+				issues.addIssue(AssetType.ADMINISTRATOR, adminName, "Governance linked without a name");
+				return null;
+			}
 			int processGovernanceIndex = -1;
 			for (int i = 0; i < governanceMetaDatas.length; i++) {
 				GovernanceMetaData<?, ?> governanceMetaData = governanceMetaDatas[i];
@@ -293,7 +298,7 @@ public class RawAdministrationMetaDataFactory {
 			}
 			if (processGovernanceIndex < 0) {
 				// Did not find the process governance
-				issues.addIssue(AssetType.ADMINISTRATOR, adminName, "Can not find governance '" + governanceName + "'");
+				issues.addIssue(AssetType.ADMINISTRATOR, adminName, "Can not find governance " + governanceName);
 				return null;
 			}
 

@@ -49,7 +49,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFacto
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * {@link RawManagingOfficeMetaData} implementation.
@@ -249,15 +248,11 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances of
 	 *            the managing {@link Office}.
-	 * @param officeTeams
-	 *            {@link TeamManagement} instances by their {@link Office}
-	 *            names.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	public void manageByOffice(OfficeMetaData officeMetaData,
-			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData, Map<String, TeamManagement> officeTeams,
-			OfficeFloorIssues issues) {
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData, OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
 		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();

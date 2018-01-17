@@ -70,7 +70,7 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
 		object.enhanceMetaData = (metaData) -> {
-			metaData.addManagedObjectExtensionInterface(ManagedObjectExtension.class, new ManagedObjectExtension(null));
+			metaData.addManagedObjectExtension(ManagedObjectExtension.class, new ManagedObjectExtension(null));
 		};
 
 		// Construct the function

@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -66,23 +67,30 @@ import net.officefloor.frame.impl.construct.office.ManagedFunctionLocatorImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
+import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
+import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
+import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -92,6 +100,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.MockManagedObjectSourceMetaData;
@@ -128,6 +137,15 @@ public class MockConstruct {
 			String managedObjectSourceName) {
 		return new ManagedObjectBuilderImpl<O, F, ConstructManagedObjectSource<O, F>>(managedObjectSourceName,
 				new ConstructManagedObjectSource<>());
+	}
+
+	/**
+	 * Creates a mock {@link RawOfficeFloorMetaData}.
+	 * 
+	 * @return Mock {@link RawOfficeFloorMetaData}.
+	 */
+	public static RawOfficeFloorMetaDataMockBuilder mockRawOfficeFloorMetaData() {
+		return new RawOfficeFloorMetaDataMockBuilder();
 	}
 
 	/**
@@ -496,11 +514,6 @@ public class MockConstruct {
 		private String recycleFunctionName = null;
 
 		/**
-		 * {@link InputManagedObjectConfiguration}.
-		 */
-		private DependencyMappingBuilderImpl<F> inputConfiguration = null;
-
-		/**
 		 * Built {@link RawManagedObjectMetaData}.
 		 */
 		private RawManagingOfficeMetaData<F> built = null;
@@ -565,21 +578,6 @@ public class MockConstruct {
 		}
 
 		/**
-		 * Provides the {@link InputManagedObjectConfiguration}.
-		 * 
-		 * @param boundManagedObjectName
-		 *            Name to bind the input {@link ManagedObject}.
-		 * @return {@link DependencyMappingBuilder} to configure the
-		 *         {@link InputManagedObjectConfiguration}.
-		 */
-		public DependencyMappingBuilder setInputManagedObject(String boundManagedObjectName) {
-			this.assetNotBuilt();
-			Assert.assertNull("Should only specify one input managed object", this.inputConfiguration);
-			this.inputConfiguration = new DependencyMappingBuilderImpl<>(boundManagedObjectName);
-			return this.inputConfiguration;
-		}
-
-		/**
 		 * Obtains the {@link ManagedObjectSourceMetaDataMockBuilder} to
 		 * configure the {@link Flow} instances.
 		 * 
@@ -599,8 +597,8 @@ public class MockConstruct {
 		public RawManagingOfficeMetaData<F> build() {
 			if (this.built == null) {
 				this.built = new RawManagingOfficeMetaData<>(this.managingOfficeName, this.recycleFunctionName,
-						this.inputConfiguration, this.managedObjectSourceMetDataBuilder.getFlowMetaData(),
-						this.managingOfficeConfiguration);
+						this.managingOfficeConfiguration.getInputManagedObjectConfiguration(),
+						this.managedObjectSourceMetDataBuilder.getFlowMetaData(), this.managingOfficeConfiguration);
 			}
 			return this.built;
 		}
@@ -612,15 +610,6 @@ public class MockConstruct {
 		 */
 		public ManagingOfficeConfiguration<F> getManagingOfficeConfiguration() {
 			return this.managingOfficeConfiguration;
-		}
-
-		/**
-		 * Obtains the {@link InputManagedObjectConfiguration}.
-		 * 
-		 * @return {@link InputManagedObjectConfiguration}.
-		 */
-		public InputManagedObjectConfiguration<?> getInputManagedObjectConfiguration() {
-			return this.inputConfiguration;
 		}
 	}
 
@@ -1458,6 +1447,148 @@ public class MockConstruct {
 	}
 
 	/**
+	 * Builder to build {@link RawOfficeFloorMetaData}.
+	 */
+	public static class RawOfficeFloorMetaDataMockBuilder {
+
+		/**
+		 * {@link RawTeamMetaData}.
+		 */
+		private final Map<String, RawTeamMetaData> teamRegistry = new HashMap<>();
+
+		/**
+		 * Break chain {@link TeamManagement}.
+		 */
+		private TeamManagement breakChainTeamManagement = new TeamManagementImpl(null);
+
+		/**
+		 * {@link ThreadLocalAwareExecutor}.
+		 */
+		private ThreadLocalAwareExecutor threadLocalAwareExecutor = new ThreadLocalAwareExecutorImpl();
+
+		/**
+		 * {@link ManagedExecutionFactory}.
+		 */
+		private ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(null);
+
+		/**
+		 * {@link RawManagedObjectMetaData} registry.
+		 */
+		private Map<String, RawManagedObjectMetaDataMockBuilder<?, ?>> mosRegistry = new HashMap<>();
+
+		/**
+		 * {@link EscalationFlow}.
+		 */
+		private EscalationFlow officeFloorEscalation = new EscalationFlowImpl(Throwable.class,
+				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null));
+
+		/**
+		 * {@link RawOfficeFloorMetaData}.
+		 */
+		private RawOfficeFloorMetaData built = null;
+
+		/**
+		 * Instantiate.
+		 */
+		private RawOfficeFloorMetaDataMockBuilder() {
+		}
+
+		/**
+		 * Ensure not built.
+		 */
+		private void assertNotBuilt() {
+			Assert.assertNull("Should not alter once built", this.built);
+		}
+
+		/**
+		 * Convenience method to register {@link Team} that is not
+		 * {@link ThreadLocal} aware.
+		 * 
+		 * @param teamName
+		 *            Name of the {@link Team}.
+		 * @param team
+		 *            {@link Team}.
+		 * @return {@link RawTeamMetaData}.
+		 */
+		public RawTeamMetaData registerTeam(String teamName, Team team) {
+			return this.registerTeam(teamName, team, false);
+		}
+
+		/**
+		 * Registers a {@link RawTeamMetaData}.
+		 * 
+		 * @param teamName
+		 *            Name of the {@link Team}.
+		 * @param team
+		 *            {@link Team}.
+		 * @param isRequireThreadLocalAwareness
+		 *            <code>true</code> if requires {@link ThreadLocal}
+		 *            awareness.
+		 * @return {@link RawTeamMetaData}.
+		 */
+		public RawTeamMetaData registerTeam(String teamName, Team team, boolean isRequireThreadLocalAwareness) {
+			this.assertNotBuilt();
+			RawTeamMetaData rawTeam = new RawTeamMetaData(teamName, new TeamManagementImpl(team), false);
+			this.teamRegistry.put(teamName, rawTeam);
+			return rawTeam;
+		}
+
+		/**
+		 * Registers the {@link RawManagedObjectMetaData}.
+		 * 
+		 * @param managedObjectSourceName
+		 *            Name of the {@link ManagedObjectSource}.
+		 * @return {@link RawManagedObjectMetaDataMockBuilder} for the
+		 *         {@link RawManagedObjectMetaData}.
+		 */
+		public RawManagedObjectMetaDataMockBuilder<?, ?> registerManagedObjectSource(String managedObjectSourceName) {
+			RawManagedObjectMetaDataMockBuilder<?, ?> mos = mockRawManagedObjectMetaData(managedObjectSourceName);
+			this.mosRegistry.put(managedObjectSourceName, mos);
+			return mos;
+		}
+
+		/**
+		 * Specifies the {@link EscalationFlow} for the {@link OfficeFloor}.
+		 * 
+		 * @param escalationFlow
+		 *            {@link EscalationFlow} for the {@link OfficeFloor}.
+		 */
+		public void setOfficeFloorEscalation(EscalationFlow escalationFlow) {
+			this.officeFloorEscalation = escalationFlow;
+		}
+
+		/**
+		 * Builds the {@link RawOfficeFloorMetaData}.
+		 * 
+		 * @return {@link RawOfficeFloorMetaData}.
+		 */
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public RawOfficeFloorMetaData build() {
+			if (this.built == null) {
+
+				// Build the managed object registry
+				Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<>();
+				for (String name : this.mosRegistry.keySet()) {
+					RawManagedObjectMetaDataMockBuilder<?, ?> mos = this.mosRegistry.get(name);
+					if (mos.isBuilt()) {
+						mosRegistry.put(name, mos.getBuilt());
+					} else {
+						RawManagingOfficeMetaData office = MockConstruct
+								.mockRawManagingOfficeMetaData(OFFICE_NAME, name).build();
+						mosRegistry.put(name, mos.build(office));
+					}
+				}
+
+				// Build
+				this.built = new RawOfficeFloorMetaData(this.teamRegistry, this.breakChainTeamManagement,
+						this.threadLocalAwareExecutor, this.managedExecutionFactory, mosRegistry,
+						this.officeFloorEscalation);
+			}
+			return this.built;
+		}
+	}
+
+	/**
 	 * Builder to build {@link OfficeMetaData}.
 	 */
 	public static class OfficeMetaDataMockBuilder {
@@ -1480,7 +1611,7 @@ public class MockConstruct {
 		/**
 		 * {@link ManagedFunctionMetaData} instances.
 		 */
-		private final List<ManagedFunctionMetaData<?, ?>> functions = new LinkedList<>();
+		private final List<ManagedFunctionMetaDataImpl<?, ?>> functions = new LinkedList<>();
 
 		/**
 		 * Built {@link OfficeMetaData}.
@@ -1499,11 +1630,19 @@ public class MockConstruct {
 		}
 
 		/**
+		 * Ensure not built.
+		 */
+		private void assertNotBuilt() {
+			Assert.assertNull("Should not alter once built", this.built);
+		}
+
+		/**
 		 * Obtains {@link ProcessMetaDataMockBuilder}.
 		 * 
 		 * @return {@link ProcessMetaDataMockBuilder}.
 		 */
 		public ProcessMetaDataMockBuilder getProcessMetaData() {
+			this.assertNotBuilt();
 			return this.processMetaData;
 		}
 
@@ -1513,6 +1652,7 @@ public class MockConstruct {
 		 * @return {@link OfficeBuilder}.
 		 */
 		public OfficeBuilder getBuilder() {
+			this.assertNotBuilt();
 			return this.builder;
 		}
 
@@ -1527,8 +1667,10 @@ public class MockConstruct {
 		 *         {@link ManagedFunction}.
 		 */
 		public ManagedFunctionMetaData<?, ?> addManagedFunction(String functionName, Class<?> parameterType) {
-			ManagedFunctionMetaData<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName, null, null,
-					parameterType, null, null, null, null);
+			this.assertNotBuilt();
+			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
+					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
+					new ManagedObjectMetaData[0], new boolean[0]);
 			this.functions.add(function);
 			return function;
 		}
@@ -1542,7 +1684,7 @@ public class MockConstruct {
 			if (this.built == null) {
 
 				// Load the managed functions
-				List<ManagedFunctionMetaData<?, ?>> functions = new LinkedList<>();
+				List<ManagedFunctionMetaDataImpl<?, ?>> functions = new LinkedList<>();
 
 				// Obtain the builder configured managed functions
 				for (ManagedFunctionConfiguration<?, ?> config : this.builder.getManagedFunctionConfiguration()) {
@@ -1558,7 +1700,7 @@ public class MockConstruct {
 				}
 
 				// Load the convenience functions
-				for (ManagedFunctionMetaData<?, ?> function : this.functions) {
+				for (ManagedFunctionMetaDataImpl<?, ?> function : this.functions) {
 					functions.add(function);
 				}
 
@@ -1567,6 +1709,12 @@ public class MockConstruct {
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
 				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
 						functionLocator, this.processMetaData.build(), null, null);
+
+				// Load the office meta-data to functions
+				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {
+					function.loadOfficeMetaData(this.built, new FlowMetaData[0], null, null,
+							new AdministrationMetaData[0], new AdministrationMetaData[0], new ManagedObjectIndex[0]);
+				}
 			}
 			return this.built;
 		}
@@ -1575,7 +1723,7 @@ public class MockConstruct {
 	/**
 	 * Builder for the {@link ProcessMetaData}.
 	 */
-	private static class ProcessMetaDataMockBuilder {
+	public static class ProcessMetaDataMockBuilder {
 
 		/**
 		 * Built {@link ProcessMetaData}.
@@ -1649,7 +1797,7 @@ public class MockConstruct {
 	/**
 	 * Builder for the {@link ThreadMetaData}.
 	 */
-	private static class ThreadMetaDataMockBuilder {
+	public static class ThreadMetaDataMockBuilder {
 
 		/**
 		 * Built {@link ThreadMetaData}.
@@ -1660,6 +1808,11 @@ public class MockConstruct {
 		 * {@link ManagedObjectMetaData} instances.
 		 */
 		private List<ManagedObjectMetaData<?>> managedObjects = new LinkedList<>();
+
+		/**
+		 * {@link GovernanceMetaData} instances.
+		 */
+		private List<GovernanceMetaData<?, ?>> governances = new LinkedList<>();
 
 		/**
 		 * Instantiate.
@@ -1691,6 +1844,21 @@ public class MockConstruct {
 		}
 
 		/**
+		 * Adds a {@link GovernanceMetaData}.
+		 * 
+		 * @param governanceName
+		 *            Name of {@link Governance}.
+		 * @return {@link GovernanceMetaData}.
+		 */
+		public GovernanceMetaData<?, ?> addGovernanceMetaData(String governanceName) {
+			this.assertNotBuilt();
+			GovernanceMetaData<?, ?> governance = mockRawGovernanceMetaData(governanceName, Object.class)
+					.getGovernanceMetaData();
+			this.governances.add(governance);
+			return governance;
+		}
+
+		/**
 		 * Builds the {@link ThreadMetaData}.
 		 * 
 		 * @return {@link ThreadMetaData}.
@@ -1698,8 +1866,9 @@ public class MockConstruct {
 		public ThreadMetaData built() {
 			if (this.built == null) {
 				this.built = new ThreadMetaDataImpl(
-						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]), null, 1000,
-						null, null, null);
+						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
+						this.governances.toArray(new GovernanceMetaData[this.governances.size()]), 1000, null, null,
+						null);
 			}
 			return this.built;
 		}

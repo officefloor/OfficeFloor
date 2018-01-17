@@ -93,7 +93,7 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -1029,10 +1029,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addExtensionInterface(Class<?> extensionInterface) {
-			// Add the extension interface
-			this.context.addManagedObjectExtensionInterface(extensionInterface, new ExtensionInterfaceFactory() {
+			// Add the extension
+			this.context.addManagedObjectExtension(extensionInterface, new ExtensionFactory() {
 				@Override
-				public Object createExtensionInterface(ManagedObject managedObject) {
+				public Object createExtension(ManagedObject managedObject) {
 					fail("Should not require to create extension interface");
 					return null;
 				}

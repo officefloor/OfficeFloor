@@ -247,7 +247,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * @param extensionInterfaceFactory
 		 *            {@link ExtensionFactory}.
 		 */
-		<E> void addManagedObjectExtensionInterface(Class<E> interfaceType,
+		<E> void addManagedObjectExtension(Class<E> interfaceType,
 				ExtensionFactory<E> extensionInterfaceFactory);
 	}
 
@@ -473,7 +473,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		}
 
 		@Override
-		public <E> void addManagedObjectExtensionInterface(Class<E> interfaceType,
+		public <E> void addManagedObjectExtension(Class<E> interfaceType,
 				ExtensionFactory<E> extensionInterfaceFactory) {
 			this.externsionInterfaces
 					.add(new ManagedObjectExtensionMetaDataImpl<E>(interfaceType, extensionInterfaceFactory));

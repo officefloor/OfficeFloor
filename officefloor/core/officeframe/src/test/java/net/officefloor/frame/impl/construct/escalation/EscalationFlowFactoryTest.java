@@ -24,12 +24,15 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.function.EscalationConfigurationImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -42,14 +45,25 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 
 	/**
+	 * Name of the {@link ManagedFunction}.
+	 */
+	private static final String FUNCTION_NAME = "FUNCTION";
+
+	/**
 	 * {@link EscalationConfiguration}.
 	 */
-	private final EscalationConfiguration configuration = this.createMock(EscalationConfiguration.class);
+	private EscalationConfiguration configuration = new EscalationConfigurationImpl(SQLException.class,
+			new ManagedFunctionReferenceImpl(FUNCTION_NAME, SQLException.class));
+
+	/**
+	 * Name of the {@link Office}.
+	 */
+	private static final String OFFICE_NAME = "OFFICE";
 
 	/**
 	 * {@link OfficeMetaData}.
 	 */
-	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -57,28 +71,13 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
-	 * {@link ManagedFunctionLocator}.
-	 */
-	private final ManagedFunctionLocator functionLocator = this.createMock(ManagedFunctionLocator.class);
-
-	/**
-	 * {@link ManagedFunctionReference}.
-	 */
-	private final ManagedFunctionReference functionReference = this.createMock(ManagedFunctionReference.class);
-
-	/**
-	 * {@link ManagedFunctionMetaData}.
-	 */
-	private final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
-
-	/**
 	 * Ensure issue if no cause type for {@link Escalation}.
 	 */
 	public void testNoEscalationTypeOfCause() {
 
-		// Record simple governance
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getTypeOfCause(), null);
+		// Record
+		this.configuration = new EscalationConfigurationImpl(null,
+				new ManagedFunctionReferenceImpl(FUNCTION_NAME, null));
 		this.record_issue("No escalation type for escalation index 0");
 
 		// Attempt to construct governance
@@ -92,11 +91,9 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNoEscalationFunctionName() {
 
-		// Record simple governance
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getTypeOfCause(), SQLException.class);
-		this.recordReturn(this.configuration, this.configuration.getManagedFunctionReference(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), null);
+		// Record
+		this.configuration = new EscalationConfigurationImpl(Throwable.class,
+				new ManagedFunctionReferenceImpl(null, null));
 		this.record_issue("No function name provided for escalation index 0");
 
 		// Attempt to construct governance
@@ -110,15 +107,8 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNoEscalationFunction() {
 
-		final String TASK_NAME = "TASK";
-
-		// Record simple governance
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getTypeOfCause(), SQLException.class);
-		this.recordReturn(this.configuration, this.configuration.getManagedFunctionReference(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), TASK_NAME);
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME), null);
-		this.record_issue("Can not find function meta-data " + TASK_NAME + " for escalation index 0");
+		// Record
+		this.record_issue("Can not find function meta-data " + FUNCTION_NAME + " for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -132,19 +122,10 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testEscalationIncorrectParameter() {
 
-		final String TASK_NAME = "TASK";
-
-		// Record simple governance
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getTypeOfCause(), SQLException.class);
-		this.recordReturn(this.configuration, this.configuration.getManagedFunctionReference(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), TASK_NAME);
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME),
-				this.functionMetaData);
-		this.recordReturn(this.functionReference, this.functionReference.getArgumentType(), SQLException.class);
-		this.recordReturn(this.functionMetaData, this.functionMetaData.getParameterType(), RuntimeException.class);
+		// Record
+		this.officeMetaData.addManagedFunction(FUNCTION_NAME, RuntimeException.class);
 		this.record_issue("Argument is not compatible with function parameter (argument=" + SQLException.class.getName()
-				+ ", parameter=" + RuntimeException.class.getName() + ", function=" + TASK_NAME
+				+ ", parameter=" + RuntimeException.class.getName() + ", function=" + FUNCTION_NAME
 				+ ") for escalation index 0");
 
 		// Attempt to construct governance
@@ -161,17 +142,9 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 
 		final SQLException exception = new SQLException("TEST");
 
-		final String TASK_NAME = "TASK";
-
-		// Record simple governance
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getTypeOfCause(), SQLException.class);
-		this.recordReturn(this.configuration, this.configuration.getManagedFunctionReference(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), TASK_NAME);
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME),
-				this.functionMetaData);
-		this.recordReturn(this.functionReference, this.functionReference.getArgumentType(), SQLException.class);
-		this.recordReturn(this.functionMetaData, this.functionMetaData.getParameterType(), SQLException.class);
+		// Record
+		ManagedFunctionMetaData<?, ?> function = this.officeMetaData.addManagedFunction(FUNCTION_NAME,
+				SQLException.class);
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -182,7 +155,7 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalationFlows);
 		EscalationFlow flow = escalationProcedure.getEscalation(exception);
 		assertEquals("Incorrect type of cause", SQLException.class, flow.getTypeOfCause());
-		assertEquals("Incorrect task meta-data", this.functionMetaData, flow.getManagedFunctionMetaData());
+		assertEquals("Incorrect function meta-data", function, flow.getManagedFunctionMetaData());
 
 		// Ensure not handle unknown escalation
 		assertNull("Should not handle unknown escalation",
@@ -212,7 +185,7 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 		// Construct the escalation flows
 		EscalationFlowFactory factory = new EscalationFlowFactory();
 		EscalationFlow[] flows = factory.createEscalationFlows(new EscalationConfiguration[] { this.configuration },
-				officeMetaData, AssetType.FUNCTION, "FUNCTION", this.issues);
+				this.officeMetaData.build(), AssetType.FUNCTION, "FUNCTION", this.issues);
 
 		// Ensure appropriately created (or not)
 		if (isCreate) {

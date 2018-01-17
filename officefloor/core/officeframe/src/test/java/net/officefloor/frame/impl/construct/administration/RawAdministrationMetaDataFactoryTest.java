@@ -17,43 +17,28 @@
  */
 package net.officefloor.frame.impl.construct.administration;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
-import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
-import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractorMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -66,18 +51,28 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Name of the {@link Administration}.
 	 */
-	private final String ADMINISTRATION_NAME = "ADMIN";
+	private static final String ADMINISTRATION_NAME = "ADMIN";
 
 	/**
 	 * {@link AdministrationConfiguration}.
 	 */
-	private final AdministrationConfiguration<?, ?, ?> configuration = this
-			.createMock(AdministrationConfiguration.class);
+	private AdministrationBuilderImpl<?, ?, ?> configuration = new AdministrationBuilderImpl<>(ADMINISTRATION_NAME,
+			String.class, () -> null);
 
 	/**
-	 * {@link AdministrationFactory}.
+	 * Name of the {@link Office}.
 	 */
-	private final AdministrationFactory<?, ?, ?> administrationFactory = this.createMock(AdministrationFactory.class);
+	private static final String OFFICE_NAME = "OFFICE";
+
+	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(OFFICE_NAME);
+
+	/**
+	 * {@link RawOfficeMetaData}.
+	 */
+	private final RawOfficeMetaDataMockBuilder rawOfficeMetaData = MockConstruct.mockRawOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -85,98 +80,30 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
-	 * {@link AssetType}.
-	 */
-	private final AssetType assetType = AssetType.OFFICE;
-
-	/**
-	 * Name of the {@link Asset}.
-	 */
-	private final String assetName = "OFFICE";
-
-	/**
-	 * {@link TeamManagement} instances by their {@link Office} registered
-	 * names.
-	 */
-	private final Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
-
-	/**
-	 * Responsible {@link TeamManagement}.
-	 */
-	private final TeamManagement responsibleTeam = this.createMock(TeamManagement.class);
-
-	/**
-	 * Scope bound {@link RawBoundManagedObjectMetaData} instances by their
-	 * scope name.
-	 */
-	private final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
-
-	/**
-	 * {@link RawBoundManagedObjectMetaData}.
-	 */
-	private final RawBoundManagedObjectMetaData rawBoundMoMetaData = this
-			.createMock(RawBoundManagedObjectMetaData.class);
-
-	/**
-	 * {@link RawBoundManagedObjectInstanceMetaData}.
-	 */
-	private final RawBoundManagedObjectInstanceMetaData<?> rawBoundMoInstanceMetaData = this
-			.createMock(RawBoundManagedObjectInstanceMetaData.class);
-
-	/**
-	 * {@link RawManagedObjectMetaData}.
-	 */
-	private final RawManagedObjectMetaData<?, ?> rawMoMetaData = this.createMock(RawManagedObjectMetaData.class);
-
-	/**
-	 * {@link ManagedObjectSourceMetaData}.
-	 */
-	private final ManagedObjectSourceMetaData<?, ?> managedObjectSourceMetaData = this
-			.createMock(ManagedObjectSourceMetaData.class);
-
-	/**
-	 * {@link ManagedObjectExtensionMetaData}.
-	 */
-	private final ManagedObjectExtensionMetaData<?> extensionInterfaceMetaData = this
-			.createMock(ManagedObjectExtensionMetaData.class);
-
-	/**
-	 * {@link ManagedObjectIndex}.
-	 */
-	private final ManagedObjectIndex managedObjectIndex = this.createMock(ManagedObjectIndex.class);
-
-	/**
-	 * {@link ExtensionFactory}.
-	 */
-	private final ExtensionFactory<?> extensionInterfaceFactory = this.createMock(ExtensionFactory.class);
-
-	/**
-	 * {@link OfficeMetaData}.
-	 */
-	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
-
-	/**
-	 * {@link FlowMetaDataFactory}.
-	 */
-	private final FlowMetaDataFactory flowMetaDataFactory = this.createMock(FlowMetaDataFactory.class);
-
-	/**
-	 * {@link EscalationFlowFactory}.
-	 */
-	private final EscalationFlowFactory escalationFlowFactory = this.createMock(EscalationFlowFactory.class);
-
-	/**
 	 * Ensures issue if not {@link Administration} name.
 	 */
 	public void testNoAdministrationName() {
 
-		// Record no name
-		this.recordReturn(this.configuration, this.configuration.getAdministrationName(), "");
-		this.issues.addIssue(this.assetType, this.assetName, "Administration added without a name");
+		// Record
+		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME, "Administration added without a name");
+
+		// Construct
+		this.replayMockObjects();
+		this.constructRawAdministration(false, new AdministrationBuilderImpl<>(null, Object.class, () -> null));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if no extension type.
+	 */
+	public void testNoExtensionType() {
+
+		// Record
+		this.record_issue("Administration " + ADMINISTRATION_NAME + " did not provide extension type");
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(false, this.configuration);
+		this.constructRawAdministration(false, new AdministrationBuilderImpl<>(ADMINISTRATION_NAME, null, () -> null));
 		this.verifyMockObjects();
 	}
 
@@ -185,15 +112,13 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNoAdministrationFactory() {
 
-		// Record no administration factory
-		this.recordReturn(this.configuration, this.configuration.getAdministrationName(), "ADMIN");
-		this.recordReturn(this.configuration, this.configuration.getAdministrationFactory(), null);
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Administration 'ADMIN' did not provide an AdministrationFactory");
+		// Record
+		this.record_issue("Administration " + ADMINISTRATION_NAME + " did not provide an AdministrationFactory");
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(false, this.configuration);
+		this.constructRawAdministration(false,
+				new AdministrationBuilderImpl<>(ADMINISTRATION_NAME, Object.class, null));
 		this.verifyMockObjects();
 	}
 
@@ -202,19 +127,16 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testAnyTeam() {
 
-		// Record any team
-		this.record_init();
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
-		this.record_managedObject();
-		this.record_noFlows();
-		this.record_noEscalations();
-		this.record_governanceMetaData(0);
-		this.record_noGovernance();
+		// Record
+		this.configuration.setResponsibleTeam(null);
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(true, this.configuration);
+		RawAdministrationMetaData admin = this.constructRawAdministration(true, this.configuration)[0];
 		this.verifyMockObjects();
+
+		// SHould be any team
+		assertNull("Should be any team", admin.getAdministrationMetaData().getResponsibleTeam());
 	}
 
 	/**
@@ -222,33 +144,32 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownTeam() {
 
-		// Record no team
-		this.record_init();
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
-		this.issues.addIssue(this.assetType, this.assetName, "Administration ADMIN team 'TEAM' can not be found");
+		// Record
+		this.configuration.setResponsibleTeam("UNKNOWN");
+		this.record_issue("Administration " + ADMINISTRATION_NAME + " team UNKNOWN can not be found");
 
-		// Construct the administrators
+		// Construct
 		this.replayMockObjects();
 		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures issue if no extension interface.
+	 * Ensure can construct with responsible {@link Team}.
 	 */
-	public void testNoExtensionInterface() {
+	public void testResponsibleTeam() {
 
-		// Record no extension interface
-		this.record_init();
-		this.record_team();
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), null);
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Administration ADMIN did not provide extension interface type");
+		// Record
+		this.configuration.setResponsibleTeam("TEAM");
+		TeamManagement team = this.rawOfficeMetaData.addTeam("TEAM");
 
-		// Construct the administrators
+		// Construct
 		this.replayMockObjects();
-		this.constructRawAdministration(false, this.configuration);
+		RawAdministrationMetaData admin = this.constructRawAdministration(true, this.configuration)[0];
 		this.verifyMockObjects();
+
+		// Ensure have responsible team
+		assertSame("Incorrect responsible team", team, admin.getAdministrationMetaData().getResponsibleTeam());
 	}
 
 	/**
@@ -256,16 +177,11 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNoManagedObjectName() {
 
-		// Record no managed object name
-		this.record_init();
-		this.record_team();
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), Object.class);
-		this.recordReturn(this.configuration, this.configuration.getAdministeredManagedObjectNames(),
-				new String[] { null });
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Administration ADMIN specifying no name for managed object");
+		// Record
+		this.configuration.administerManagedObject(null);
+		this.record_issue("Administration " + ADMINISTRATION_NAME + " specifying no name for managed object");
 
-		// Construct the administrators
+		// Construct
 		this.replayMockObjects();
 		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
@@ -274,16 +190,11 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures issue if no {@link RawBoundManagedObjectMetaData}.
 	 */
-	public void testNoBoundManagedObject() {
+	public void testUnknownBoundManagedObject() {
 
-		// Record no bound managed object
-		this.record_init();
-		this.record_team();
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), Object.class);
-		this.recordReturn(this.configuration, this.configuration.getAdministeredManagedObjectNames(),
-				new String[] { "MO" });
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Managed Object 'MO' not available to Administration ADMIN");
+		// Record
+		this.configuration.administerManagedObject("UNKNOWN");
+		this.record_issue("Managed Object UNKNOWN not available to Administration " + ADMINISTRATION_NAME);
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -297,27 +208,11 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testBoundManagedObjectHasNoExtensionInterfaces() {
 
-		// Record managed object without extension interfaces
-		this.record_init();
-		this.record_team();
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), Object.class);
-		this.recordReturn(this.configuration, this.configuration.getAdministeredManagedObjectNames(),
-				new String[] { "MO" });
-		this.scopeMo.put("MO", this.rawBoundMoMetaData);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { this.rawBoundMoInstanceMetaData });
-		this.recordReturn(this.rawBoundMoInstanceMetaData,
-				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(), this.rawMoMetaData);
-		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData.getManagedObjectSourceMetaData(),
-				this.managedObjectSourceMetaData);
-		this.recordReturn(this.managedObjectSourceMetaData,
-				this.managedObjectSourceMetaData.getExtensionInterfacesMetaData(), null);
-		this.recordReturn(this.rawBoundMoInstanceMetaData,
-				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(), this.rawMoMetaData);
-		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Managed Object 'MO' does not support extension interface " + Object.class.getName()
-						+ " required by Administration ADMIN (ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
+		// Record
+		this.configuration.administerManagedObject("MO");
+		this.rawOfficeMetaData.addScopeBoundManagedObject("MO");
+		this.record_issue("Managed Object MO does not support extension type " + String.class.getName()
+				+ " required by Administration " + ADMINISTRATION_NAME + " (ManagedObjectSource=MO)");
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -331,32 +226,14 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testBoundManagedObjectNotSupportExtensionInterface() {
 
-		// Record managed object not support extension interface
-		this.record_init();
-		this.record_team();
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getAdministeredManagedObjectNames(),
-				new String[] { "MO" });
-		this.scopeMo.put("MO", this.rawBoundMoMetaData);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { this.rawBoundMoInstanceMetaData });
-		this.recordReturn(this.rawBoundMoInstanceMetaData,
-				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(), this.rawMoMetaData);
-		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData.getManagedObjectSourceMetaData(),
-				this.managedObjectSourceMetaData);
-		this.recordReturn(this.managedObjectSourceMetaData,
-				this.managedObjectSourceMetaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionMetaData[] { this.extensionInterfaceMetaData });
-		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionType(),
-				Integer.class);
-		this.recordReturn(this.rawBoundMoInstanceMetaData,
-				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(), this.rawMoMetaData);
-		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Managed Object 'MO' does not support extension interface " + String.class.getName()
-						+ " required by Administration ADMIN (ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
+		// Record
+		this.configuration.administerManagedObject("MO");
+		this.rawOfficeMetaData.addScopeBoundManagedObject("MO").getRawBoundManagedObjectMetaData()
+				.getRawManagedObjectBuilder().getMetaDataBuilder().addExtension(Integer.class, (mo) -> 1);
+		this.record_issue("Managed Object MO does not support extension type " + String.class.getName()
+				+ " required by Administration " + ADMINISTRATION_NAME + " (ManagedObjectSource=MO)");
 
-		// Construct the administrators
+		// Construct
 		this.replayMockObjects();
 		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
@@ -367,41 +244,36 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testConstructAdministratorMetaData() throws Throwable {
 
-		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);
-		final Object extensionInterface = "EXTENSION_INTERFACE";
-
-		// Record successfully create bound administrator
-		this.record_init();
-		this.record_team();
-		this.record_managedObject();
-
-		// Record ei extraction to verify the extension interface factory
-		this.recordReturn(moMetaData, moMetaData.getInstanceIndex(), 0);
-		this.recordReturn(this.extensionInterfaceFactory, this.extensionInterfaceFactory.createExtension(managedObject),
-				extensionInterface);
-
-		// No flows or governance
-		this.record_noFlows();
-		this.record_noEscalations();
-		this.record_governanceMetaData(0);
-		this.record_noGovernance();
+		// Record
+		this.configuration.administerManagedObject("MO");
+		final String EXTENSION = "EXTENSION";
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundManagedObject = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("MO");
+		boundManagedObject.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addExtension(String.class, (mo) -> EXTENSION);
 
 		// Test
 		this.replayMockObjects();
 
+		// Load managed object meta data
+		boundManagedObject.getRawBoundManagedObjectMetaData().build();
+		boundManagedObject.build().loadManagedObjectMetaData(AssetType.OFFICE, OFFICE_NAME,
+				MockConstruct.mockAssetManagerFactory(), this.issues);
+
 		// Construct the administrators
 		RawAdministrationMetaData[] rawAdminMetaDatas = this.constructRawAdministration(true, this.configuration);
+		assertEquals("Should just be the one administration", 1, rawAdminMetaDatas.length);
 		RawAdministrationMetaData rawAdminMetaData = rawAdminMetaDatas[0];
 
-		// Verify extension interface factory by extracting ei
+		// Verify extension factory by extracting extension
 		AdministrationMetaData<?, ?, ?> adminMetaData = rawAdminMetaData.getAdministrationMetaData();
 		assertEquals("Incorrect number of administered managed objects", 1,
 				adminMetaData.getManagedObjectExtensionExtractorMetaData().length);
-		ManagedObjectExtensionExtractorMetaData<?> moEiMetaData = adminMetaData
+		ManagedObjectExtensionExtractorMetaData<?> extensionMetaData = adminMetaData
 				.getManagedObjectExtensionExtractorMetaData()[0];
-		assertEquals("Incorrect extracted extension interface", extensionInterface,
-				moEiMetaData.getManagedObjectExtensionExtractor().extractExtension(managedObject, moMetaData));
+		ManagedObjectMetaData<?> moMetaData = boundManagedObject.build().getManagedObjectMetaData();
+		assertEquals("Incorrect extracted extension", EXTENSION,
+				extensionMetaData.getManagedObjectExtensionExtractor().extractExtension(null, moMetaData));
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -409,15 +281,33 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Verify administration meta-data
 		assertEquals("Incorrect name", "ADMIN", adminMetaData.getAdministrationName());
 		assertNotNull("Must have admin factory", adminMetaData.getAdministrationFactory());
-		assertEquals("Incorrect responsible team", this.responsibleTeam, adminMetaData.getResponsibleTeam());
-		assertEquals("Incorrect administered managed object", this.managedObjectIndex,
-				moEiMetaData.getManagedObjectIndex());
+		assertNull("Allow any team", adminMetaData.getResponsibleTeam());
+		assertEquals("Incorrect administered managed object",
+				boundManagedObject.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(),
+				extensionMetaData.getManagedObjectIndex());
 
 		// Ensure also include administered managed object
 		RawBoundManagedObjectMetaData[] administeredManagedObjects = rawAdminMetaData
 				.getRawBoundManagedObjectMetaData();
 		assertEquals("Incorrect number of administered managed objects", 1, administeredManagedObjects.length);
-		assertSame("Incorrect administered managed object", this.rawBoundMoMetaData, administeredManagedObjects[0]);
+		assertSame("Incorrect administered managed object",
+				boundManagedObject.getRawBoundManagedObjectMetaData().build(), administeredManagedObjects[0]);
+	}
+
+	/**
+	 * Ensure issue if no {@link Governance} name for linking to
+	 * {@link Administration}.
+	 */
+	public void testLinkNoGovernanceName() {
+
+		// Record
+		this.configuration.linkGovernance(0, null);
+		this.record_issue("Governance linked without a name");
+
+		// Construct
+		this.replayMockObjects();
+		this.constructRawAdministration(false, this.configuration);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -426,29 +316,11 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkUnkownGovernance() {
 
-		final int GOVERNANCE_INDEX = 0;
-		final AdministrationGovernanceConfiguration<?> governanceConfiguration = this
-				.createMock(AdministrationGovernanceConfiguration.class);
+		// Record
+		this.configuration.linkGovernance(0, "UNKNOWN");
+		this.record_issue("Can not find governance UNKNOWN");
 
-		// Record construction of administration meta-data
-		this.record_init();
-		this.record_team();
-		this.record_managedObject();
-		this.record_noFlows();
-		this.record_noEscalations();
-
-		// Record governance configuration
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(1);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
-				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
-		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), GOVERNANCE_INDEX);
-		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
-
-		// Record unknown governance
-		this.recordReturn(governanceMetaData[0], governanceMetaData[0].getGovernanceName(), "NOT MATCH");
-		this.record_issue("Can not find governance 'GOVERNANCE'");
-
-		// Construct the administrator and link tasks
+		// Construct
 		this.replayMockObjects();
 		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
@@ -459,25 +331,10 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkGovernance() {
 
-		final int GOVERNANCE_INDEX = 0;
-		final AdministrationGovernanceConfiguration<?> governanceConfiguration = this
-				.createMock(AdministrationGovernanceConfiguration.class);
-
-		// Record construction of bound administrator meta-data
-		this.record_init();
-		this.record_team();
-		this.record_managedObject();
-		this.record_noFlows();
-		this.record_noEscalations();
-		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
-				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
-		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), GOVERNANCE_INDEX);
-		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
-
-		// Record configuring links
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(2);
-		this.recordReturn(governanceMetaData[0], governanceMetaData[0].getGovernanceName(), "NOT MATCH");
-		this.recordReturn(governanceMetaData[1], governanceMetaData[1].getGovernanceName(), "GOVERNANCE");
+		// Record
+		this.configuration.linkGovernance(0, "GOVERNANCE");
+		this.officeMetaData.getProcessMetaData().getThreadMetaData().addGovernanceMetaData("NOT_MATCH");
+		this.officeMetaData.getProcessMetaData().getThreadMetaData().addGovernanceMetaData("GOVERNANCE");
 
 		// Construct the administration
 		this.replayMockObjects();
@@ -486,104 +343,8 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify the governance
-		int threadIndex = adminMetaData.translateGovernanceIndexToThreadIndex(GOVERNANCE_INDEX);
-		assertEquals("Incorrect thread index", 1, threadIndex);
-	}
-
-	/**
-	 * Records initiating the {@link Administration}.
-	 */
-	private void record_init() {
-		this.recordReturn(this.configuration, this.configuration.getAdministrationName(), ADMINISTRATION_NAME);
-		this.recordReturn(this.configuration, this.configuration.getAdministrationFactory(),
-				this.administrationFactory);
-	}
-
-	/**
-	 * Records obtaining the {@link Team}.
-	 */
-	private void record_team() {
-		final String TEAM_NAME = "TEAM";
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
-		this.officeTeams.put(TEAM_NAME, this.responsibleTeam);
-	}
-
-	/**
-	 * Records the administering of {@link ManagedObject} instances.
-	 */
-	private void record_managedObject() {
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getAdministeredManagedObjectNames(),
-				new String[] { "MO" });
-		this.scopeMo.put("MO", this.rawBoundMoMetaData);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { this.rawBoundMoInstanceMetaData });
-		this.recordReturn(this.rawBoundMoInstanceMetaData,
-				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(), this.rawMoMetaData);
-		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData.getManagedObjectSourceMetaData(),
-				this.managedObjectSourceMetaData);
-		this.recordReturn(this.managedObjectSourceMetaData,
-				this.managedObjectSourceMetaData.getExtensionInterfacesMetaData(),
-				new ManagedObjectExtensionMetaData[] { this.extensionInterfaceMetaData });
-		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionType(),
-				String.class);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData.getManagedObjectIndex(),
-				this.managedObjectIndex);
-		this.recordReturn(this.extensionInterfaceMetaData, this.extensionInterfaceMetaData.getExtensionFactory(),
-				this.extensionInterfaceFactory);
-	}
-
-	/**
-	 * Records no {@link Flow} instances.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void record_noFlows() {
-		FlowConfiguration[] flowConfiguration = new FlowConfiguration[0];
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfiguration);
-		FlowMetaData[] flowMetaData = new FlowMetaData[0];
-		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfiguration,
-				this.officeMetaData, AssetType.ADMINISTRATOR, ADMINISTRATION_NAME, this.issues), flowMetaData);
-	}
-
-	/**
-	 * Records no {@link Escalation} instances.
-	 */
-	private void record_noEscalations() {
-		EscalationConfiguration[] escalationConfiguration = new EscalationConfiguration[0];
-		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalationConfiguration);
-		EscalationFlow[] escalationFlows = new EscalationFlow[0];
-		this.recordReturn(
-				this.escalationFlowFactory, this.escalationFlowFactory.createEscalationFlows(escalationConfiguration,
-						this.officeMetaData, AssetType.ADMINISTRATOR, ADMINISTRATION_NAME, this.issues),
-				escalationFlows);
-	}
-
-	/**
-	 * Records obtaining the {@link GovernanceMetaData}.
-	 * 
-	 * @param governanceCount
-	 *            Number of {@link GovernanceMetaData}.
-	 * @return Mock {@link GovernanceMetaData}.
-	 */
-	private GovernanceMetaData<?, ?>[] record_governanceMetaData(int governanceCount) {
-		ProcessMetaData processMetaData = this.createMock(ProcessMetaData.class);
-		ThreadMetaData threadMetaData = this.createMock(ThreadMetaData.class);
-		GovernanceMetaData<?, ?>[] governanceMetaData = new GovernanceMetaData<?, ?>[governanceCount];
-		for (int i = 0; i < governanceCount; i++) {
-			governanceMetaData[i] = this.createMock(GovernanceMetaData.class);
-		}
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getProcessMetaData(), processMetaData);
-		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(), threadMetaData);
-		this.recordReturn(threadMetaData, threadMetaData.getGovernanceMetaData(), governanceMetaData);
-		return governanceMetaData;
-	}
-
-	/**
-	 * Records no {@link Governance}.
-	 */
-	private void record_noGovernance() {
-		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
-				new AdministrationGovernanceConfiguration[0]);
+		int threadIndex = adminMetaData.translateGovernanceIndexToThreadIndex(0);
+		assertEquals("Incorrect thread governance index", 1, threadIndex);
 	}
 
 	/**
@@ -593,7 +354,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(AssetType.ADMINISTRATOR, "ADMIN", issueDescription);
+		this.issues.addIssue(AssetType.ADMINISTRATOR, ADMINISTRATION_NAME, issueDescription);
 	}
 
 	/**
@@ -610,9 +371,10 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the meta-data
 		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaDataFactory()
-				.constructRawAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeMetaData,
-						this.flowMetaDataFactory, this.escalationFlowFactory, this.officeTeams, this.scopeMo,
-						this.issues);
+				.constructRawAdministrationMetaData(configuration, AssetType.OFFICE, OFFICE_NAME,
+						this.officeMetaData.build(), new FlowMetaDataFactory(), new EscalationFlowFactory(),
+						this.rawOfficeMetaData.build().getTeams(),
+						this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), this.issues);
 
 		// Ensure correct number created
 		if (isCreate) {

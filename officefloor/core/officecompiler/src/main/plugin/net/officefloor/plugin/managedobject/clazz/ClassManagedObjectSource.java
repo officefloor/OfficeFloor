@@ -321,7 +321,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		this.classLoader = mosContext.getClassLoader();
 
 		// Add the object class as extension interface.
-		ClassExtensionInterfaceFactory.registerExtensionInterface(context, objectClass);
+		ClassExtensionFactory.registerExtension(context, objectClass);
 	}
 
 	@Override

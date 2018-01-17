@@ -74,7 +74,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		TestObject object = new TestObject("MO", this);
 		object.isAsynchronousManagedObject = true;
 		object.managedObjectBuilder.setTimeout(100);
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> (TestObject) managedObject);
 
 		// Construct the functions
@@ -161,7 +161,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		dependentObject.isCoordinatingManagedObject = true;
 		dependentObject.enhanceMetaData = (metaData) -> {
 			metaData.addDependency(TestObject.class);
-			metaData.addManagedObjectExtensionInterface(TestObject.class,
+			metaData.addManagedObjectExtension(TestObject.class,
 					(managedObject) -> (TestObject) managedObject);
 		};
 		dependentObject.isRecycleFunction = true;

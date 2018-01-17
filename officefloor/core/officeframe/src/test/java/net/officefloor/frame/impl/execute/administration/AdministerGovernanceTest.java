@@ -71,7 +71,7 @@ public class AdministerGovernanceTest extends AbstractOfficeConstructTestCase {
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
 		object.isRecycleFunction = true;
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> (TestObject) managedObject);
 
 		// Construct the functions
@@ -132,7 +132,7 @@ public class AdministerGovernanceTest extends AbstractOfficeConstructTestCase {
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
 		object.isRecycleFunction = true;
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> (TestObject) managedObject);
 
 		// Construct the functions

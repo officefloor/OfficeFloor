@@ -26,7 +26,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -36,7 +36,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * @author Daniel Sagenschneider
  */
 public class Singleton extends AbstractManagedObjectSource<None, None>
-		implements ManagedObject, ExtensionInterfaceFactory<Object> {
+		implements ManagedObject, ExtensionFactory<Object> {
 
 	/**
 	 * Convenience method to load singleton {@link Object}.
@@ -129,7 +129,7 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 		List<Class<?>> extensionInterfaces = new LinkedList<Class<?>>();
 		this.loadAllExtensionInterfaces(objectType, extensionInterfaces);
 		for (Class extensionInterface : extensionInterfaces) {
-			context.addManagedObjectExtensionInterface(extensionInterface, this);
+			context.addManagedObjectExtension(extensionInterface, this);
 		}
 	}
 
@@ -148,11 +148,11 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 	}
 
 	/*
-	 * =================== ExtensionInterfaceFactory ======================
+	 * =================== ExtensionFactory ======================
 	 */
 
 	@Override
-	public Object createExtensionInterface(ManagedObject managedObject) {
+	public Object createExtension(ManagedObject managedObject) {
 		return ((Singleton) managedObject).object;
 	}
 

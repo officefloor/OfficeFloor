@@ -42,7 +42,7 @@ public class GovernanceStressTest extends AbstractStressTestCase {
 
 		// Construct the managed object
 		this.constructManagedObject("MO",
-				(metaData) -> metaData.addManagedObjectExtensionInterface(GovernedManagedObject.class,
+				(metaData) -> metaData.addManagedObjectExtension(GovernedManagedObject.class,
 						(managedObject) -> (GovernedManagedObject) managedObject),
 				() -> new GovernedManagedObject());
 

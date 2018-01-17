@@ -28,7 +28,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -41,7 +41,7 @@ import net.officefloor.frame.api.source.TestSource;
  */
 @TestSource
 public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed>
-		implements ManagedFunctionFactory<Indexed, Indexed>, ExtensionInterfaceFactory<Object> {
+		implements ManagedFunctionFactory<Indexed, Indexed>, ExtensionFactory<Object> {
 
 	/**
 	 * Object type.
@@ -174,7 +174,7 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 
 		// Configure the extension interfaces
 		for (Class extensionInterface : this.extensionInterfaces) {
-			context.addManagedObjectExtensionInterface(extensionInterface, this);
+			context.addManagedObjectExtension(extensionInterface, this);
 		}
 	}
 
@@ -195,11 +195,11 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	}
 
 	/*
-	 * ===================== ExtensionInterfaceFactory ======================
+	 * ===================== ExtensionFactory ======================
 	 */
 
 	@Override
-	public Object createExtensionInterface(ManagedObject managedObject) {
+	public Object createExtension(ManagedObject managedObject) {
 		Assert.fail("Should not require creating an extension for type testing");
 		return null;
 	}

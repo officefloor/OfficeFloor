@@ -68,23 +68,23 @@ public class RawManagedObjectMetaDataFactory {
 	 *            {@link ManagedObjectSourceConfiguration}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param officeFloorConfiguration
 	 *            {@link OfficeFloorConfiguration} of the {@link OfficeFloor}
 	 *            containing the {@link ManagedObjectSource}.
-	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if
-	 *         issue.
+	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if issue.
 	 */
 	public <d extends Enum<d>, h extends Enum<h>, MS extends ManagedObjectSource<d, h>> RawManagedObjectMetaData<d, h> constructRawManagedObjectMetaData(
-			ManagedObjectSourceConfiguration<h, MS> configuration, SourceContext sourceContext,
+			ManagedObjectSourceConfiguration<h, MS> configuration, SourceContext sourceContext, String officeFloorName,
 			OfficeFloorIssues issues, OfficeFloorConfiguration officeFloorConfiguration) {
 
 		// Obtain the managed object source name
 		String managedObjectSourceName = configuration.getManagedObjectSourceName();
 		if (ConstructUtil.isBlank(managedObjectSourceName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR, OfficeFloor.class.getSimpleName(),
-					"ManagedObject added without a name");
+			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, "ManagedObject added without a name");
 			return null; // can not carry on
 		}
 
@@ -255,10 +255,10 @@ public class RawManagedObjectMetaDataFactory {
 				recycleFunctionName, inputConfiguration, flowMetaDatas, managingOfficeConfiguration);
 
 		// Created raw managed object meta-data
-		RawManagedObjectMetaData<d, h> rawMoMetaData = new RawManagedObjectMetaData<d, h>(
-				managedObjectSourceName, configuration, managedObjectSource, metaData, timeout, managedObjectPool,
-				threadCompletionListeners, objectType, isManagedObjectProcessAware, isManagedObjectNameAware,
-				isManagedObjectAsynchronous, isManagedObjectCoordinating, rawManagingOfficeMetaData);
+		RawManagedObjectMetaData<d, h> rawMoMetaData = new RawManagedObjectMetaData<d, h>(managedObjectSourceName,
+				configuration, managedObjectSource, metaData, timeout, managedObjectPool, threadCompletionListeners,
+				objectType, isManagedObjectProcessAware, isManagedObjectNameAware, isManagedObjectAsynchronous,
+				isManagedObjectCoordinating, rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);

@@ -41,7 +41,7 @@ public class GovernMultipleManagedObjectsTest extends AbstractOfficeConstructTes
 
 		// Construct the managed objects
 		TestObject functionObject = new TestObject("F_MO", this);
-		functionObject.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		functionObject.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> (TestObject) managedObject);
 		TestObject threadObject = new TestObject("T_MO", this);
 		threadObject.enhanceMetaData = functionObject.enhanceMetaData;

@@ -135,7 +135,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record no name
 		this.configuration = MockConstruct.mockManagedObjectBuilder(null);
-		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor", "ManagedObject added without a name");
+		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OFFICE_FLOOR", "ManagedObject added without a name");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -994,7 +994,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawManagedObjectMetaData metaData = new RawManagedObjectMetaDataFactory().constructRawManagedObjectMetaData(
-				this.configuration, this.sourceContext, this.issues, this.officeFloorConfiguration);
+				this.configuration, this.sourceContext, "OFFICE_FLOOR", this.issues, this.officeFloorConfiguration);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

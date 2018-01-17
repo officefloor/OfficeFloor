@@ -159,7 +159,7 @@ public class RawOfficeMetaDataFactory {
 			String officeFloorTeamName = teamConfig.getOfficeFloorTeamName();
 			if (ConstructUtil.isBlank(officeFloorTeamName)) {
 				issues.addIssue(AssetType.OFFICE, officeName,
-						"No Office Floor Team name for Office Team '" + officeTeamName + "'");
+						"No OfficeFloor Team name for Office Team '" + officeTeamName + "'");
 				return null; // can not register team
 			}
 
@@ -354,8 +354,8 @@ public class RawOfficeMetaDataFactory {
 		}
 
 		// Create the raw office meta-data
-		RawOfficeMetaData rawOfficeMetaData = new RawOfficeMetaData(officeName, rawOfficeFloorMetaData,
-				officeTeams, registeredMo, processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
+		RawOfficeMetaData rawOfficeMetaData = new RawOfficeMetaData(officeName, rawOfficeFloorMetaData, officeTeams,
+				registeredMo, processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
 				isManuallyManageGovernance, rawGovernanceMetaData);
 
 		// Construct the meta-data of the managed functions within the office
@@ -475,7 +475,7 @@ public class RawOfficeMetaDataFactory {
 
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
-			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, officeTeams, issues);
+			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, issues);
 		}
 
 		// Link functions within the meta-data of the office

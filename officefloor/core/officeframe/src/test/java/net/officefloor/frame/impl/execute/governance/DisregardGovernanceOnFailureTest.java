@@ -67,7 +67,7 @@ public class DisregardGovernanceOnFailureTest extends AbstractOfficeConstructTes
 
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (context) -> context.addManagedObjectExtensionInterface(TestObject.class,
+		object.enhanceMetaData = (context) -> context.addManagedObjectExtension(TestObject.class,
 				(managedObject) -> (TestObject) managedObject);
 		object.isRecycleFunction = true;
 

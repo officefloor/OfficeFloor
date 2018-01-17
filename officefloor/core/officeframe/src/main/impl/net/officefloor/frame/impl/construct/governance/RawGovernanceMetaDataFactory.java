@@ -73,14 +73,15 @@ public class RawGovernanceMetaDataFactory {
 		GovernanceFactory<? super E, F> governanceFactory = configuration.getGovernanceFactory();
 		if (governanceFactory == null) {
 			issues.addIssue(AssetType.GOVERNANCE, governanceName,
-					"No " + GovernanceFactory.class.getSimpleName() + " provided");
+					"No " + GovernanceFactory.class.getSimpleName() + " provided for governance " + governanceName);
 			return null; // can not carry on
 		}
 
 		// Obtain the extension interface type
 		Class<E> extensionInterfaceType = configuration.getExtensionType();
 		if (extensionInterfaceType == null) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName, "No extension interface type provided");
+			issues.addIssue(AssetType.GOVERNANCE, governanceName,
+					"No extension type provided for governance " + governanceName);
 			return null; // can not carry on
 		}
 
@@ -90,8 +91,8 @@ public class RawGovernanceMetaDataFactory {
 		if (!ConstructUtil.isBlank(teamName)) {
 			responsibleTeam = officeTeams.get(teamName);
 			if (responsibleTeam == null) {
-				issues.addIssue(AssetType.GOVERNANCE, governanceName,
-						"Can not find " + Team.class.getSimpleName() + " by name '" + teamName + "'");
+				issues.addIssue(AssetType.GOVERNANCE, governanceName, "Can not find " + Team.class.getSimpleName()
+						+ " by name '" + teamName + "' for governance " + governanceName);
 				return null; // can not carry on
 			}
 		}

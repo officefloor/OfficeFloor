@@ -62,6 +62,8 @@ public class RawTeamMetaDataFactory {
 	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param managedExecutionFactory
 	 *            {@link ManagedExecutionFactory}.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
@@ -70,12 +72,12 @@ public class RawTeamMetaDataFactory {
 	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
 			SourceContext sourceContext, Consumer<Thread> threadDecorator,
 			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
-			OfficeFloorIssues issues) {
+			String officeFloorName, OfficeFloorIssues issues) {
 
 		// Obtain the team name
 		String teamName = configuration.getTeamName();
 		if (ConstructUtil.isBlank(teamName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR, OfficeFloor.class.getSimpleName(), "Team added without a name");
+			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, "Team added without a name");
 			return null; // can not carry on
 		}
 
