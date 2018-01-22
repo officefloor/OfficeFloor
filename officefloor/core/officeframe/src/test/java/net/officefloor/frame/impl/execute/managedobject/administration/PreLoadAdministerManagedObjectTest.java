@@ -66,8 +66,6 @@ public class PreLoadAdministerManagedObjectTest extends AbstractOfficeConstructT
 
 		// Construct the object
 		TestObject object = new TestObject("MO", this);
-		object.enhanceMetaData = (metaData) -> metaData.addManagedObjectExtension(TestObject.class,
-				(managedObject) -> (TestObject) managedObject);
 
 		// Construct the functions
 		TestWork work = new TestWork(object);
