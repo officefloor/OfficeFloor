@@ -33,7 +33,7 @@ import net.officefloor.frame.test.TestObject;
  *
  * @author Daniel Sagenschneider
  */
-public class PreLoadAdministerManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class PreLoadAdministerTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure can apply {@link Governance} to a {@link ProcessState} loaded
