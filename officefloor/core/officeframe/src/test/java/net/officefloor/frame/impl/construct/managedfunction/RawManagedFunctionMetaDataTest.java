@@ -794,10 +794,12 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	private RawManagedFunctionMetaData<Indexed, Indexed> constructRawFunctionMetaData(boolean isExpectConstruct) {
 
 		// Construct the raw function meta-data
-		RawManagedFunctionMetaData<?, ?> metaData = new RawManagedFunctionMetaDataFactory()
-				.constructRawManagedFunctionMetaData(this.configuration, this.rawOfficeMetaData.build(),
-						MockConstruct.mockAssetManagerFactory(), new RawBoundManagedObjectMetaDataFactory(),
-						this.issues);
+		RawBoundManagedObjectMetaDataFactory rawBoundMoFactory = new RawBoundManagedObjectMetaDataFactory(
+				MockConstruct.mockAssetManagerFactory(), this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				this.rawOfficeMetaData.build().getGovernanceMetaData());
+		RawManagedFunctionMetaData<?, ?> metaData = new RawManagedFunctionMetaDataFactory(
+				this.rawOfficeMetaData.build(), rawBoundMoFactory)
+						.constructRawManagedFunctionMetaData(this.configuration, this.issues);
 		if (isExpectConstruct) {
 			assertNotNull("Expected to construct meta-data", metaData);
 		} else {
@@ -824,10 +826,16 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 
 		// Other functions expected to be constructed between these steps
 
+		// Construct the factories
+		OfficeMetaData officeMetaData = this.officeMetaData.build();
+		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);
+		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
+		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
+				flowMetaDataFactory, escalationFlowFactory, this.rawOfficeMetaData.getOfficeTeams());
+
 		// Link the functions and load remaining state to function meta-data
-		boolean isLoaded = metaData.loadOfficeMetaData(this.officeMetaData.build(), new FlowMetaDataFactory(),
-				new EscalationFlowFactory(), new RawAdministrationMetaDataFactory(),
-				this.rawOfficeMetaData.getOfficeTeams(), this.issues);
+		boolean isLoaded = metaData.loadOfficeMetaData(this.officeMetaData.build(), flowMetaDataFactory,
+				escalationFlowFactory, rawAdminFactory, this.issues);
 		assertEquals("Incorrect load", isLoad, isLoaded);
 
 		// Return the fully constructed meta-data

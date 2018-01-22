@@ -40,12 +40,8 @@ import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuil
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagingOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeFloorMetaDataMockBuilder;
-import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
-import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
@@ -899,10 +895,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Construct the meta-data
-		RawOfficeMetaData metaData = new RawOfficeMetaDataFactory().constructRawOfficeMetaData(this.configuration,
-				this.issues, officeMos, this.rawOfficeFloorMetaData.build(), new RawBoundManagedObjectMetaDataFactory(),
-				new RawGovernanceMetaDataFactory(), new RawAdministrationMetaDataFactory(),
-				new RawManagedFunctionMetaDataFactory());
+		RawOfficeMetaData metaData = new RawOfficeMetaDataFactory(this.rawOfficeFloorMetaData.build())
+				.constructRawOfficeMetaData(this.configuration, officeMos, this.issues);
 		if (isExpectConstruct) {
 			assertNotNull("Meta-data should be constructed", metaData);
 		} else {

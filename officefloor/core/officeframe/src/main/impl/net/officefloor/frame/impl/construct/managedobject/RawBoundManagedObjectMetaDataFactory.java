@@ -52,30 +52,53 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 public class RawBoundManagedObjectMetaDataFactory {
 
 	/**
-	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
+	 * {@link AssetManagerFactory}.
+	 */
+	private final AssetManagerFactory assetManagerFactory;
+
+	/**
+	 * Registered {@link ManagedObject} instances that may be selected for being
+	 * bound.
+	 */
+	private final Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects;
+
+	/**
+	 * {@link RawGovernanceMetaData} by its {@link Office} registered name.
+	 */
+	private final Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData;
+
+	/**
+	 * Instantiate.
 	 * 
-	 * @param boundManagedObjectConfiguration
-	 *            {@link ManagedObjectConfiguration} of the
-	 *            {@link RawBoundManagedObjectMetaData} instances.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} for the
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param assetType
-	 *            {@link AssetType} that {@link ManagedObject} instances are
-	 *            being bound.
-	 * @param assetName
-	 *            Name of the {@link Asset} that {@link ManagedObject} instances
-	 *            are being bound.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param registeredManagedObjects
 	 *            Registered {@link ManagedObject} instances that may be
 	 *            selected for being bound.
+	 * @param rawGovernanceMetaData
+	 *            {@link RawGovernanceMetaData} by its {@link Office} registered
+	 *            name.
+	 */
+	public RawBoundManagedObjectMetaDataFactory(AssetManagerFactory assetManagerFactory,
+			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData) {
+		this.assetManagerFactory = assetManagerFactory;
+		this.registeredManagedObjects = registeredManagedObjects;
+		this.rawGovernanceMetaData = rawGovernanceMetaData;
+	}
+
+	/**
+	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
+	 * 
+	 * @param boundManagedObjectConfiguration
+	 *            {@link ManagedObjectConfiguration} of the
+	 *            {@link RawBoundManagedObjectMetaData} instances.
+	 * @param scope
+	 *            {@link ManagedObjectScope} for the
+	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @param scopeManagedObjects
-	 *            Already bound {@link ManagedObject} instances that may full
-	 *            fill dependencies of bound {@link ManagedObject} instances.
+	 *            Already bound {@link ManagedObject} instances that may fulfill
+	 *            dependencies of bound {@link ManagedObject} instances.
 	 * @param inputManagedObjects
 	 *            Meta-data about input {@link ManagedObject} instances by
 	 *            {@link ManagedObjectSource} instances.
@@ -84,19 +107,22 @@ public class RawBoundManagedObjectMetaDataFactory {
 	 *            {@link ManagedObject} instances bound to the same name.
 	 *            Mapping is of input {@link ManagedObject} name to the default
 	 *            {@link ManagedObjectSource} name.
-	 * @param rawGovernanceMetaData
-	 *            {@link RawGovernanceMetaData} by its {@link Office} registered
-	 *            name.
+	 * @param assetType
+	 *            {@link AssetType} that {@link ManagedObject} instances are
+	 *            being bound.
+	 * @param assetName
+	 *            Name of the {@link Asset} that {@link ManagedObject} instances
+	 *            are being bound.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound
 	 *         {@link ManagedObject} instances.
 	 */
 	public RawBoundManagedObjectMetaData[] constructBoundManagedObjectMetaData(
-			ManagedObjectConfiguration<?>[] boundManagedObjectConfiguration, OfficeFloorIssues issues,
-			ManagedObjectScope scope, AssetType assetType, String assetName, AssetManagerFactory assetManagerFactory,
-			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
+			ManagedObjectConfiguration<?>[] boundManagedObjectConfiguration, ManagedObjectScope scope,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
 			RawManagingOfficeMetaData<?>[] inputManagedObjects, Map<String, String> boundInputManagedObjects,
-			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData) {
+			AssetType assetType, String assetName, OfficeFloorIssues issues) {
 
 		// Handle if null scope managed objects
 		if (scopeManagedObjects == null) {

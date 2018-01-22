@@ -47,13 +47,6 @@ import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
-import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
-import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
-import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow.EscalationKey;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -463,11 +456,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	private RawOfficeFloorMetaData constructRawOfficeFloorMetaData(boolean isConstruct) {
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaData metaData = new RawOfficeFloorMetaDataFactory().constructRawOfficeFloorMetaData(
-				this.configuration, this.issues, new RawTeamMetaDataFactory(), this.threadLocalAwareExecutor,
-				new RawManagedObjectMetaDataFactory(), new RawBoundManagedObjectMetaDataFactory(),
-				new RawGovernanceMetaDataFactory(), new RawAdministrationMetaDataFactory(),
-				new RawOfficeMetaDataFactory(), new RawManagedFunctionMetaDataFactory());
+		RawOfficeFloorMetaData metaData = new RawOfficeFloorMetaDataFactory(this.threadLocalAwareExecutor)
+				.constructRawOfficeFloorMetaData(this.configuration, this.issues);
 
 		// Determine if constructed
 		if (isConstruct) {

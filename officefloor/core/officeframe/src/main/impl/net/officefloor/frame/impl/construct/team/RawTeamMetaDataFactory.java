@@ -47,21 +47,54 @@ import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 public class RawTeamMetaDataFactory {
 
 	/**
+	 * {@link SourceContext}.
+	 */
+	private final SourceContext sourceContext;
+
+	/**
+	 * Decorator for the created {@link Thread} instances. May be
+	 * <code>null</code>.
+	 */
+	private final Consumer<Thread> threadDecorator;
+
+	/**
+	 * {@link ThreadLocalAwareExecutor}.
+	 */
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
+
+	/**
+	 * {@link ManagedExecutionFactory}.
+	 */
+	private ManagedExecutionFactory managedExecutionFactory;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param sourceContext
+	 *            {@link SourceContext}.
+	 * @param threadDecorator
+	 *            Decorator for the created {@link Thread} instances. May be
+	 *            <code>null</code>.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param managedExecutionFactory
+	 *            {@link ManagedExecutionFactory}.
+	 */
+	public RawTeamMetaDataFactory(SourceContext sourceContext, Consumer<Thread> threadDecorator,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory) {
+		this.sourceContext = sourceContext;
+		this.threadDecorator = threadDecorator;
+		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+		this.managedExecutionFactory = managedExecutionFactory;
+	}
+
+	/**
 	 * Constructs the {@link RawTeamMetaData}.
 	 * 
 	 * @param <TS>
 	 *            {@link TeamSource} type.
 	 * @param configuration
 	 *            {@link TeamConfiguration}.
-	 * @param threadDecorator
-	 *            Decorator for the created {@link Thread} instances. May be
-	 *            <code>null</code>.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param managedExecutionFactory
-	 *            {@link ManagedExecutionFactory}.
 	 * @param officeFloorName
 	 *            Name of the {@link OfficeFloor}.
 	 * @param issues
@@ -70,8 +103,6 @@ public class RawTeamMetaDataFactory {
 	 *         construct.
 	 */
 	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
-			SourceContext sourceContext, Consumer<Thread> threadDecorator,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
 			String officeFloorName, OfficeFloorIssues issues) {
 
 		// Obtain the team name
@@ -103,8 +134,8 @@ public class RawTeamMetaDataFactory {
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
-			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, threadDecorator,
-					managedExecutionFactory, properties, sourceContext);
+			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
+					this.managedExecutionFactory, properties, this.sourceContext);
 
 			// Create the team
 			team = teamSource.createTeam(context);
@@ -117,7 +148,8 @@ public class RawTeamMetaDataFactory {
 			// Determine if requires thread local awareness
 			if (team instanceof ThreadLocalAwareTeam) {
 				ThreadLocalAwareTeam threadLocalAwareTeam = (ThreadLocalAwareTeam) team;
-				threadLocalAwareTeam.setThreadLocalAwareness(new ThreadLocalAwareContextImpl(threadLocalAwareExecutor));
+				threadLocalAwareTeam
+						.setThreadLocalAwareness(new ThreadLocalAwareContextImpl(this.threadLocalAwareExecutor));
 				isRequireThreadLocalAwareness = true;
 			}
 

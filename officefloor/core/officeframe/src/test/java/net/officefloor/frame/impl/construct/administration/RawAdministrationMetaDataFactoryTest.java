@@ -370,11 +370,12 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 			AdministrationConfiguration<?, ?, ?>... configuration) {
 
 		// Construct the meta-data
-		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaDataFactory()
-				.constructRawAdministrationMetaData(configuration, AssetType.OFFICE, OFFICE_NAME,
-						this.officeMetaData.build(), new FlowMetaDataFactory(), new EscalationFlowFactory(),
-						this.rawOfficeMetaData.build().getTeams(),
-						this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), this.issues);
+		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaDataFactory(
+				this.officeMetaData.build(), new FlowMetaDataFactory(this.officeMetaData.build()),
+				new EscalationFlowFactory(this.officeMetaData.build()), this.rawOfficeMetaData.build().getTeams())
+						.constructRawAdministrationMetaData(configuration,
+								this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), AssetType.OFFICE,
+								OFFICE_NAME, this.issues);
 
 		// Ensure correct number created
 		if (isCreate) {

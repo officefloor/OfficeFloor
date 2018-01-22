@@ -173,9 +173,9 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private FlowMetaData[] constructFlowMetaData(boolean isCreate) {
-		FlowMetaDataFactory factory = new FlowMetaDataFactory();
+		FlowMetaDataFactory factory = new FlowMetaDataFactory(this.officeMetaData.build());
 		FlowMetaData[] flowMetaData = factory.createFlowMetaData(new FlowConfiguration[] { this.configuration },
-				this.officeMetaData.build(), AssetType.FUNCTION, "FUNCTION", this.issues);
+				AssetType.FUNCTION, "FUNCTION", this.issues);
 		if (isCreate) {
 			assertNotNull("Should have create the flow meta-data", flowMetaData);
 			assertEquals("Incorrect number of flow meta-data", 1, flowMetaData.length);

@@ -37,12 +37,25 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 public class EscalationFlowFactory {
 
 	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaData officeMetaData;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
+	 */
+	public EscalationFlowFactory(OfficeMetaData officeMetaData) {
+		this.officeMetaData = officeMetaData;
+	}
+
+	/**
 	 * Creates the {@link EscalationFlow} instances.
 	 * 
 	 * @param configurations
 	 *            {@link EscalationConfiguration} instances.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
 	 * @param assetType
 	 *            {@link AssetType}.
 	 * @param assetName
@@ -51,11 +64,11 @@ public class EscalationFlowFactory {
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link EscalationFlow} instances.
 	 */
-	public EscalationFlow[] createEscalationFlows(EscalationConfiguration[] configurations,
-			OfficeMetaData officeMetaData, AssetType assetType, String assetName, OfficeFloorIssues issues) {
+	public EscalationFlow[] createEscalationFlows(EscalationConfiguration[] configurations, AssetType assetType,
+			String assetName, OfficeFloorIssues issues) {
 
 		// Obtain the function locator
-		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
+		ManagedFunctionLocator functionLocator = this.officeMetaData.getManagedFunctionLocator();
 
 		// Create the escalation flows
 		EscalationFlow[] escalations = new EscalationFlow[configurations.length];

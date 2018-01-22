@@ -278,9 +278,9 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	public ManagedObjectMetaData<?> createManagedObjectMetaData(AssetType assetType, String assetName,
+	public ManagedObjectMetaData<O> createManagedObjectMetaData(AssetType assetType, String assetName,
 			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
-			RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
+			RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
 			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues) {
 
@@ -305,13 +305,13 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 		}
 
 		// Create the managed object meta-data
-		ManagedObjectMetaDataImpl<O> moMetaData = new ManagedObjectMetaDataImpl<O>(boundName, this.objectType,
+		ManagedObjectMetaDataImpl<O> moMetaData = new ManagedObjectMetaDataImpl<>(boundName, this.objectType,
 				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isProcessAware, this.isNameAware,
 				sourcingAssetManager, this.isAsynchronous, operationsAssetManager, this.isCoordinating,
 				dependencyMappings, this.timeout, governanceMetaData);
 
 		// Have the managed object managed by its managing office
-		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData);
+		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData, boundInstanceMetaData);
 
 		// Return the managed object meta-data
 		return moMetaData;

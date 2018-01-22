@@ -455,10 +455,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	private RawTeamMetaData constructRawTeamMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawTeamMetaData metaData = new RawTeamMetaDataFactory().constructRawTeamMetaData(this.configuration,
-				this.sourceContext, (thread) -> {
-				}, this.threadLocalAwareExecutor, new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]),
-				OFFICE_FLOOR_NAME, this.issues);
+		RawTeamMetaData metaData = new RawTeamMetaDataFactory(this.sourceContext, (thread) -> {
+		}, this.threadLocalAwareExecutor, new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]))
+				.constructRawTeamMetaData(this.configuration, OFFICE_FLOOR_NAME, this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

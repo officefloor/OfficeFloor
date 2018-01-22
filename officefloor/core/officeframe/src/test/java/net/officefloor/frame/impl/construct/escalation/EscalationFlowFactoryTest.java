@@ -183,9 +183,9 @@ public class EscalationFlowFactoryTest extends OfficeFrameTestCase {
 	private EscalationFlow[] constructEscalationFlows(boolean isCreate) {
 
 		// Construct the escalation flows
-		EscalationFlowFactory factory = new EscalationFlowFactory();
+		EscalationFlowFactory factory = new EscalationFlowFactory(this.officeMetaData.build());
 		EscalationFlow[] flows = factory.createEscalationFlows(new EscalationConfiguration[] { this.configuration },
-				this.officeMetaData.build(), AssetType.FUNCTION, "FUNCTION", this.issues);
+				AssetType.FUNCTION, "FUNCTION", this.issues);
 
 		// Ensure appropriately created (or not)
 		if (isCreate) {

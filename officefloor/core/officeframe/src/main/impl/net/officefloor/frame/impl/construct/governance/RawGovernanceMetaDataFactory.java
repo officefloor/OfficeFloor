@@ -39,6 +39,29 @@ import net.officefloor.frame.internal.structure.TeamManagement;
 public class RawGovernanceMetaDataFactory {
 
 	/**
+	 * Name of the {@link Office}.
+	 */
+	private final String officeName;
+
+	/**
+	 * {@link Office} {@link TeamManagement} instances by their name.
+	 */
+	private final Map<String, TeamManagement> officeTeams;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office} having {@link Governance} added.
+	 * @param officeTeams
+	 *            {@link TeamManagement} instances by their {@link Office} name.
+	 */
+	public RawGovernanceMetaDataFactory(String officeName, Map<String, TeamManagement> officeTeams) {
+		this.officeName = officeName;
+		this.officeTeams = officeTeams;
+	}
+
+	/**
 	 * Creates the {@link RawGovernanceMetaData}.
 	 * 
 	 * @param <E>
@@ -50,22 +73,17 @@ public class RawGovernanceMetaDataFactory {
 	 * @param governanceIndex
 	 *            Index of the {@link Governance} within the
 	 *            {@link ProcessState}.
-	 * @param officeTeams
-	 *            {@link TeamManagement} instances by their {@link Office} name.
-	 * @param officeName
-	 *            Name of the {@link Office} having {@link Governance} added.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	public <E, F extends Enum<F>> RawGovernanceMetaData<E, F> createRawGovernanceMetaData(
-			GovernanceConfiguration<E, F> configuration, int governanceIndex, Map<String, TeamManagement> officeTeams,
-			String officeName, OfficeFloorIssues issues) {
+			GovernanceConfiguration<E, F> configuration, int governanceIndex, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
 		if (ConstructUtil.isBlank(governanceName)) {
-			issues.addIssue(AssetType.OFFICE, officeName, "Governance added without a name");
+			issues.addIssue(AssetType.OFFICE, this.officeName, "Governance added without a name");
 			return null; // can not carry on
 		}
 
@@ -89,7 +107,7 @@ public class RawGovernanceMetaDataFactory {
 		TeamManagement responsibleTeam = null;
 		String teamName = configuration.getResponsibleTeamName();
 		if (!ConstructUtil.isBlank(teamName)) {
-			responsibleTeam = officeTeams.get(teamName);
+			responsibleTeam = this.officeTeams.get(teamName);
 			if (responsibleTeam == null) {
 				issues.addIssue(AssetType.GOVERNANCE, governanceName, "Can not find " + Team.class.getSimpleName()
 						+ " by name '" + teamName + "' for governance " + governanceName);

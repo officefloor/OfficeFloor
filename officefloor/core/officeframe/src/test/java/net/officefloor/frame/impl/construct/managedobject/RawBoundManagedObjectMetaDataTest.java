@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.construct.managedobject;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -807,8 +808,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if extension interface for {@link Governance} is not
-	 * available for the {@link ManagedObject}.
+	 * Ensure issue if extension for {@link Governance} is not available for the
+	 * {@link ManagedObject}.
 	 */
 	public void testUnsupportedGovernance() {
 
@@ -817,8 +818,24 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
 		configuration.mapGovernance("GOVERNANCE");
 		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
-		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Extension interface of type " + String.class.getName()
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Extension of type " + String.class.getName()
 				+ " is not available from Managed Object for Governance 'GOVERNANCE'");
+
+		// Construct
+		this.replayMockObjects();
+		this.constructRawBoundManagedObjectMetaData(1, configuration);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no pre-load {@link Administration}.
+	 */
+	public void testNoPreLoadAdministrationName() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister(null, Object.class, () -> null);
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Pre-load administration added without a name");
 
 		// Construct
 		this.replayMockObjects();
@@ -877,46 +894,13 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		Map<String, String> inputDefaults = (this.inputManagedObjectDefaults.size() == 0 ? null
 				: this.inputManagedObjectDefaults);
 
-		// // Build the registered managed objects
-		// Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects
-		// = new HashMap<>();
-		// for (String name : this.registeredManagedObjects.keySet()) {
-		// RawManagedObjectMetaDataMockBuilder<?, ?> registeredManagedObject =
-		// this.registeredManagedObjects.get(name);
-		// if (registeredManagedObject.isBuilt()) {
-		// registeredManagedObjects.put(name,
-		// registeredManagedObject.getBuilt());
-		// } else {
-		// RawManagingOfficeMetaData rawManagingOffice = MockConstruct
-		// .mockRawManagingOfficeMetaData(OFFICE_NAME, name).build();
-		// registeredManagedObjects.put(name,
-		// this.registeredManagedObjects.get(name).build(rawManagingOffice));
-		// }
-		// }
-		//
-		// // Build the scope managed objects
-		// Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects = new
-		// HashMap<>();
-		// for (String name : this.scopeManagedObjects.keySet()) {
-		// scopeManagedObjects.put(name,
-		// this.scopeManagedObjects.get(name).build());
-		// }
-		//
-		// // Build the governance
-		// Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = new
-		// HashMap<>();
-		// for (String name : this.rawGovernanceMetaDatas.keySet()) {
-		// rawGovernanceMetaDatas.put(name,
-		// this.rawGovernanceMetaDatas.get(name).build());
-		// }
-
 		// Attempt to construct
-		RawBoundManagedObjectMetaData[] metaData = new RawBoundManagedObjectMetaDataFactory()
-				.constructBoundManagedObjectMetaData(boundManagedObjectConfiguration, this.issues,
-						this.managedObjectScope, AssetType.OFFICE, OFFICE_NAME, this.assetManagerFactory,
-						this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+		RawBoundManagedObjectMetaData[] metaData = new RawBoundManagedObjectMetaDataFactory(this.assetManagerFactory,
+				this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				this.rawOfficeMetaData.build().getGovernanceMetaData()).constructBoundManagedObjectMetaData(
+						boundManagedObjectConfiguration, this.managedObjectScope,
 						this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), inputManagedObjects,
-						inputDefaults, this.rawOfficeMetaData.build().getGovernanceMetaData());
+						inputDefaults, AssetType.OFFICE, OFFICE_NAME, this.issues);
 
 		// Ensure correct number constructed
 		assertEquals("Incorrect number of bound managed objects", expectedNumberConstructed, metaData.length);

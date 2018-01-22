@@ -32,7 +32,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
@@ -53,7 +52,6 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * Raw meta-data for a {@link ManagedFunction}.
@@ -177,8 +175,6 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 *            {@link EscalationFlowFactory}.
 	 * @param administrationMetaDataFactory
 	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param officeTeams
-	 *            {@link Team} instances within the {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return <code>true</code> if successfully loaded the
@@ -186,12 +182,11 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 */
 	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationFlowFactory,
-			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, Map<String, TeamManagement> officeTeams,
-			OfficeFloorIssues issues) {
+			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
 		FlowMetaData[] flowMetaDatas = flowMetaDataFactory.createFlowMetaData(this.configuration.getFlowConfiguration(),
-				officeMetaData, AssetType.FUNCTION, this.functionName, issues);
+				AssetType.FUNCTION, this.functionName, issues);
 		if (flowMetaDatas == null) {
 			return false;
 		}
@@ -212,7 +207,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 
 		// Create the escalation procedure
 		EscalationFlow[] escalationFlows = escalationFlowFactory.createEscalationFlows(
-				this.configuration.getEscalations(), officeMetaData, AssetType.FUNCTION, this.functionName, issues);
+				this.configuration.getEscalations(), AssetType.FUNCTION, this.functionName, issues);
 		if (escalationFlows == null) {
 			return false;
 		}
@@ -221,12 +216,10 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 		// Create the administrations
 		AdministrationMetaData<?, ?, ?>[] preAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
-						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, officeMetaData,
-						flowMetaDataFactory, escalationFlowFactory, officeTeams, issues);
+						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, issues);
 		AdministrationMetaData<?, ?, ?>[] postAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
-						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, officeMetaData,
-						flowMetaDataFactory, escalationFlowFactory, officeTeams, issues);
+						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, issues);
 
 		// Create the required managed object indexes
 		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[this.requiredManagedObjects.size()];
@@ -305,32 +298,19 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * 
 	 * @param configuration
 	 *            {@link AdministrationConfiguration} instances.
-	 * @param rawAdministrationMetaDataFactory
+	 * @param rawAdminFactory
 	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param flowMetaDataFactory
-	 *            {@link FlowMetaDataFactory}.
-	 * @param escalationFlowFactory
-	 *            {@link EscalationFlowFactory}.
-	 * @param officeTeams
-	 *            {@link Map} of {@link TeamManagement} instances within the
-	 *            {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return Constructed {@link AdministrationMetaData} instances.
 	 */
 	private AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
-			AdministrationConfiguration<?, ?, ?>[] configuration,
-			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, OfficeMetaData officeMetaData,
-			FlowMetaDataFactory flowMetaDataFactory, EscalationFlowFactory escalationFlowFactory,
-			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues) {
+			AdministrationConfiguration<?, ?, ?>[] configuration, RawAdministrationMetaDataFactory rawAdminFactory,
+			OfficeFloorIssues issues) {
 
 		// Construct the raw administration meta-data
-		RawAdministrationMetaData[] rawAdministrations = rawAdministrationMetaDataFactory
-				.constructRawAdministrationMetaData(configuration, AssetType.FUNCTION, functionName, officeMetaData,
-						flowMetaDataFactory, escalationFlowFactory, officeTeams, this.functionScopedManagedObjects,
-						issues);
+		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
+				configuration, this.functionScopedManagedObjects, AssetType.FUNCTION, functionName, issues);
 
 		// Create array of administration meta-data and register managed objects
 		AdministrationMetaData<?, ?, ?>[] administrations = new AdministrationMetaData[rawAdministrations.length];

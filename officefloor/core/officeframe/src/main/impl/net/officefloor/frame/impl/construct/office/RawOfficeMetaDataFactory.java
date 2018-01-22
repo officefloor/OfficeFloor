@@ -90,32 +90,32 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 public class RawOfficeMetaDataFactory {
 
 	/**
+	 * {@link RawOfficeFloorMetaData}.
+	 */
+	private final RawOfficeFloorMetaData rawOfficeFloorMetaData;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param rawOfficeFloorMetaData
+	 *            {@link RawOfficeFloorMetaData}.
+	 */
+	public RawOfficeMetaDataFactory(RawOfficeFloorMetaData rawOfficeFloorMetaData) {
+		this.rawOfficeFloorMetaData = rawOfficeFloorMetaData;
+	}
+
+	/**
 	 * Constructs the {@link RawOfficeMetaData}.
 	 * 
 	 * @param configuration
 	 *            {@link OfficeConfiguration}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param officeManagingManagedObjects
-	 *            {@link RawManagingOfficeMetaData} instances.
-	 * @param rawOfficeFloorMetaData
-	 *            {@link RawOfficeFloorMetaData}.
-	 * @param rawBoundManagedObjectFactory
-	 *            {@link RawBoundManagedObjectMetaDataFactory}.
-	 * @param rawGovernanceMetaDataFactory
-	 *            {@link RawGovernanceMetaDataFactory}.
-	 * @param rawBoundAdministratorFactory
-	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param rawFunctionFactory
-	 *            {@link RawManagedFunctionMetaDataFactory}.
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public RawOfficeMetaData constructRawOfficeMetaData(OfficeConfiguration configuration, OfficeFloorIssues issues,
-			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects, RawOfficeFloorMetaData rawOfficeFloorMetaData,
-			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawGovernanceMetaDataFactory rawGovernanceFactory, RawAdministrationMetaDataFactory rawAdminFactory,
-			RawManagedFunctionMetaDataFactory rawFunctionFactory) {
+	public RawOfficeMetaData constructRawOfficeMetaData(OfficeConfiguration configuration,
+			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects, OfficeFloorIssues issues) {
 
 		// Obtain the name of the office
 		String officeName = configuration.getOfficeName();
@@ -164,7 +164,7 @@ public class RawOfficeMetaDataFactory {
 			}
 
 			// Obtain the team
-			RawTeamMetaData rawTeamMetaData = rawOfficeFloorMetaData.getRawTeamMetaData(officeFloorTeamName);
+			RawTeamMetaData rawTeamMetaData = this.rawOfficeFloorMetaData.getRawTeamMetaData(officeFloorTeamName);
 			if (rawTeamMetaData == null) {
 				issues.addIssue(AssetType.OFFICE, officeName,
 						"Unknown Team '" + officeFloorTeamName + "' not available to register to Office");
@@ -194,12 +194,12 @@ public class RawOfficeMetaDataFactory {
 		}
 
 		// Obtain the break chain team
-		TeamManagement breakChainTeam = rawOfficeFloorMetaData.getBreakChainTeamManagement();
+		TeamManagement breakChainTeam = this.rawOfficeFloorMetaData.getBreakChainTeamManagement();
 
 		// Obtain the thread local aware executor (if required)
 		ThreadLocalAwareExecutor threadLocalAwareExecutor = null;
 		if (isRequireThreadLocalAwareness) {
-			threadLocalAwareExecutor = rawOfficeFloorMetaData.getThreadLocalAwareExecutor();
+			threadLocalAwareExecutor = this.rawOfficeFloorMetaData.getThreadLocalAwareExecutor();
 		}
 
 		// Create the office details
@@ -224,6 +224,9 @@ public class RawOfficeMetaDataFactory {
 		// Determine if manually manage governance
 		boolean isManuallyManageGovernance = configuration.isManuallyManageGovernance();
 
+		// Create the governance factory
+		RawGovernanceMetaDataFactory rawGovernanceFactory = new RawGovernanceMetaDataFactory(officeName, officeTeams);
+
 		// Register the governances to office
 		GovernanceConfiguration<?, ?>[] governanceConfigurations = configuration.getGovernanceConfiguration();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[governanceConfigurations.length];
@@ -234,7 +237,7 @@ public class RawOfficeMetaDataFactory {
 
 			// Create the raw governance
 			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceFactory
-					.createRawGovernanceMetaData(governanceConfiguration, i, officeTeams, officeName, issues);
+					.createRawGovernanceMetaData(governanceConfiguration, i, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,
@@ -271,7 +274,8 @@ public class RawOfficeMetaDataFactory {
 			}
 
 			// Obtain the raw managed object source meta-data
-			RawManagedObjectMetaData<?, ?> rawMoMetaData = rawOfficeFloorMetaData.getRawManagedObjectMetaData(mosName);
+			RawManagedObjectMetaData<?, ?> rawMoMetaData = this.rawOfficeFloorMetaData
+					.getRawManagedObjectMetaData(mosName);
 			if (rawMoMetaData == null) {
 				issues.addIssue(AssetType.OFFICE, officeName,
 						"Unknown Managed Object Source '" + mosName + "' not available to register to Office");
@@ -317,6 +321,10 @@ public class RawOfficeMetaDataFactory {
 			}
 		}
 
+		// Create the raw bound managed object factory
+		RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory = new RawBoundManagedObjectMetaDataFactory(
+				officeAssetManagerFactory, registeredMo, rawGovernanceMetaData);
+
 		// Obtain the process bound managed object instances
 		ManagedObjectConfiguration<?>[] processManagedObjectConfiguration = configuration
 				.getProcessManagedObjectConfiguration();
@@ -325,10 +333,9 @@ public class RawOfficeMetaDataFactory {
 			processManagedObjectConfiguration = new ManagedObjectConfiguration[0];
 		}
 		final RawBoundManagedObjectMetaData[] processBoundManagedObjects = rawBoundManagedObjectFactory
-				.constructBoundManagedObjectMetaData(processManagedObjectConfiguration, issues,
-						ManagedObjectScope.PROCESS, AssetType.OFFICE, officeName, officeAssetManagerFactory,
-						registeredMo, null, officeManagingManagedObjects, boundInputManagedObjects,
-						rawGovernanceMetaData);
+				.constructBoundManagedObjectMetaData(processManagedObjectConfiguration, ManagedObjectScope.PROCESS,
+						null, officeManagingManagedObjects, boundInputManagedObjects, AssetType.OFFICE, officeName,
+						issues);
 
 		// Create the map of process bound managed objects by name
 		Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
@@ -344,8 +351,8 @@ public class RawOfficeMetaDataFactory {
 			threadBoundManagedObjects = new RawBoundManagedObjectMetaData[0];
 		} else {
 			threadBoundManagedObjects = rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(
-					threadManagedObjectConfiguration, issues, ManagedObjectScope.THREAD, AssetType.OFFICE, officeName,
-					officeAssetManagerFactory, registeredMo, scopeMo, null, null, rawGovernanceMetaData);
+					threadManagedObjectConfiguration, ManagedObjectScope.THREAD, scopeMo, null, null, AssetType.OFFICE,
+					officeName, issues);
 		}
 
 		// Load the thread bound managed objects to scope managed objects
@@ -354,9 +361,13 @@ public class RawOfficeMetaDataFactory {
 		}
 
 		// Create the raw office meta-data
-		RawOfficeMetaData rawOfficeMetaData = new RawOfficeMetaData(officeName, rawOfficeFloorMetaData, officeTeams,
-				registeredMo, processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
+		RawOfficeMetaData rawOfficeMetaData = new RawOfficeMetaData(officeName, this.rawOfficeFloorMetaData,
+				officeTeams, registeredMo, processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
 				isManuallyManageGovernance, rawGovernanceMetaData);
+
+		// Create the raw managed function factory
+		RawManagedFunctionMetaDataFactory rawFunctionFactory = new RawManagedFunctionMetaDataFactory(rawOfficeMetaData,
+				rawBoundManagedObjectFactory);
 
 		// Construct the meta-data of the managed functions within the office
 		List<RawManagedFunctionMetaData<?, ?>> rawFunctionMetaDatas = new LinkedList<>();
@@ -366,8 +377,7 @@ public class RawOfficeMetaDataFactory {
 
 			// Construct the managed function
 			RawManagedFunctionMetaData<?, ?> rawFunctionMetaData = rawFunctionFactory
-					.constructRawManagedFunctionMetaData(functionConfiguration, rawOfficeMetaData,
-							officeAssetManagerFactory, rawBoundManagedObjectFactory, issues);
+					.constructRawManagedFunctionMetaData(functionConfiguration, issues);
 			if (rawFunctionMetaData == null) {
 				continue; // issue in constructing function
 			}
@@ -395,7 +405,7 @@ public class RawOfficeMetaDataFactory {
 		EscalationProcedure officeEscalationProcedure = new EscalationProcedureImpl(officeEscalations);
 
 		// Obtain the OfficeFloor escalation
-		EscalationFlow officeFloorEscalation = rawOfficeFloorMetaData.getOfficeFloorEscalation();
+		EscalationFlow officeFloorEscalation = this.rawOfficeFloorMetaData.getOfficeFloorEscalation();
 
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
@@ -461,7 +471,7 @@ public class RawOfficeMetaDataFactory {
 				officeClockImpl, functionLoop, timer);
 
 		// Obtain the managed execution factory
-		ManagedExecutionFactory managedExecutionFactory = rawOfficeFloorMetaData.getManagedExecutionFactory();
+		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
 
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
@@ -470,8 +480,10 @@ public class RawOfficeMetaDataFactory {
 				startupFunctions, profiler);
 
 		// Create the factories
-		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory();
-		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory();
+		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);
+		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
+		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
+				flowMetaDataFactory, escalationFlowFactory, officeTeams);
 
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
@@ -481,7 +493,7 @@ public class RawOfficeMetaDataFactory {
 		// Link functions within the meta-data of the office
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
 			if (!rawFunctionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory,
-					rawAdminFactory, officeTeams, issues)) {
+					rawAdminFactory, issues)) {
 				return null;
 			}
 		}

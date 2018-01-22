@@ -149,16 +149,14 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 
 		// Obtain the listing of flow meta-data
 		FlowMetaData[] flowMetaDatas = flowMetaDataFactory.createFlowMetaData(
-				this.governanceConfiguration.getFlowConfiguration(), officeMetaData, AssetType.GOVERNANCE,
-				this.governanceName, issues);
+				this.governanceConfiguration.getFlowConfiguration(), AssetType.GOVERNANCE, this.governanceName, issues);
 		if (flowMetaDatas == null) {
 			return false; // not loaded
 		}
 
 		// Create the escalation procedure
 		EscalationFlow[] escalations = escalationFlowFactory.createEscalationFlows(
-				this.governanceConfiguration.getEscalations(), officeMetaData, AssetType.GOVERNANCE,
-				this.governanceName, issues);
+				this.governanceConfiguration.getEscalations(), AssetType.GOVERNANCE, this.governanceName, issues);
 		if (escalations == null) {
 			return false; // not loaded
 		}

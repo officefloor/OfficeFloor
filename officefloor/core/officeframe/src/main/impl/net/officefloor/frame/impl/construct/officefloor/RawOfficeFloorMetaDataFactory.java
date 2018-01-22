@@ -29,10 +29,6 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
@@ -69,6 +65,21 @@ import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 public class RawOfficeFloorMetaDataFactory {
 
 	/**
+	 * {@link ThreadLocalAwareExecutor}.
+	 */
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
+	 */
+	public RawOfficeFloorMetaDataFactory(ThreadLocalAwareExecutor threadLocalAwareExecutor) {
+		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+	}
+
+	/**
 	 * Constructs the {@link RawOfficeFloorMetaData} from the
 	 * {@link OfficeFloorConfiguration}.
 	 * 
@@ -76,31 +87,11 @@ public class RawOfficeFloorMetaDataFactory {
 	 *            {@link OfficeFloorConfiguration}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param rawTeamFactory
-	 *            {@link RawTeamMetaDataFactory}.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param rawMosFactory
-	 *            {@link RawManagedObjectMetaDataFactory}.
-	 * @param rawBoundMoFactory
-	 *            {@link RawBoundManagedObjectMetaDataFactory}.
-	 * @param rawGovernanceFactory
-	 *            {@link RawGovernanceMetaDataFactory}.
-	 * @param rawBoundAdminFactory
-	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param rawOfficeFactory
-	 *            {@link RawOfficeMetaDataFactory}.
-	 * @param rawFunctionFactory
-	 *            {@link RawManagedFunctionMetaDataFactory}.
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawOfficeFloorMetaData constructRawOfficeFloorMetaData(OfficeFloorConfiguration configuration,
-			OfficeFloorIssues issues, RawTeamMetaDataFactory rawTeamFactory,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, RawManagedObjectMetaDataFactory rawMosFactory,
-			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory, RawGovernanceMetaDataFactory rawGovernanceFactory,
-			RawAdministrationMetaDataFactory rawAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
-			RawManagedFunctionMetaDataFactory rawFunctionFactory) {
+			OfficeFloorIssues issues) {
 
 		// Name of OfficeFloor for reporting issues
 		String officeFloorName = configuration.getOfficeFloorName();
@@ -121,6 +112,10 @@ public class RawOfficeFloorMetaDataFactory {
 			sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 		}
 
+		// Create the managed object source factory
+		RawManagedObjectMetaDataFactory rawMosFactory = new RawManagedObjectMetaDataFactory(sourceContext,
+				configuration);
+
 		// Construct the managed object sources
 		Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
 		List<RawManagedObjectMetaData<?, ?>> mosListing = new LinkedList<RawManagedObjectMetaData<?, ?>>();
@@ -129,8 +124,8 @@ public class RawOfficeFloorMetaDataFactory {
 		for (ManagedObjectSourceConfiguration mosConfiguration : configuration.getManagedObjectSourceConfiguration()) {
 
 			// Construct the managed object source
-			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory.constructRawManagedObjectMetaData(
-					mosConfiguration, sourceContext, officeFloorName, issues, configuration);
+			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory
+					.constructRawManagedObjectMetaData(mosConfiguration, officeFloorName, issues);
 			if (mosMetaData == null) {
 				return null; // issue with managed object source
 			}
@@ -190,12 +185,16 @@ public class RawOfficeFloorMetaDataFactory {
 		// Obtain the thread decorator
 		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
 
+		// Create the team factory
+		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, threadDecorator,
+				this.threadLocalAwareExecutor, managedExecutionFactory);
+
 		// Construct the configured teams
 		for (TeamConfiguration<?> teamConfiguration : configuration.getTeamConfiguration()) {
 
 			// Construct the raw team meta-data
-			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
-					threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, officeFloorName, issues);
+			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration,
+					officeFloorName, issues);
 			if (rawTeamMetaData == null) {
 				return null; // issue with team
 			}
@@ -219,8 +218,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Construct the break chain team
 		TeamConfiguration<?> breakTeamConfiguration = configuration.getBreakChainTeamConfiguration();
 		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
-				sourceContext, threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, officeFloorName,
-				issues);
+				officeFloorName, issues);
 		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
 		teamListing.add(breakChainTeamManagement);
 
@@ -241,6 +239,9 @@ public class RawOfficeFloorMetaDataFactory {
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(teamRegistry, breakChainTeamManagement,
 				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation);
+
+		// Construct the office factory
+		RawOfficeMetaDataFactory rawOfficeFactory = new RawOfficeMetaDataFactory(rawMetaData);
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -264,8 +265,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 			// Construct the raw office meta-data
 			RawOfficeMetaData rawOfficeMetaData = rawOfficeFactory.constructRawOfficeMetaData(officeConfiguration,
-					issues, officeManagingManagedObjects, rawMetaData, rawBoundMoFactory, rawGovernanceFactory,
-					rawAdminFactory, rawFunctionFactory);
+					officeManagingManagedObjects, issues);
 			if (rawOfficeMetaData == null) {
 				return null; // issue with office
 			}

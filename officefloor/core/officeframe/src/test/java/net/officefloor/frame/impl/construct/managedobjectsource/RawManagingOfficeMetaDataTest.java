@@ -160,7 +160,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Have managed before managed by office.
 		// This would be the possible case that used by same office.
-		rawOffice.manageManagedObject(moMetaData); // undertake first
+		rawOffice.manageManagedObject(moMetaData, null); // undertake first
 		this.run_manageByOffice(rawOffice, true);
 		FunctionState function = moMetaData.recycle(managedObject, cleanup);
 		this.verifyMockObjects();
@@ -185,7 +185,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawManagingOfficeMetaData<Flows> rawOffice = this.createRawManagingOffice();
 		this.run_manageByOffice(rawOffice, true);
-		rawOffice.manageManagedObject(moMetaData); // undertake afterwards
+		rawOffice.manageManagedObject(moMetaData, null); // undertake afterwards
 		FunctionState function = moMetaData.recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
@@ -207,7 +207,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true);
 
 		// Ensure not obtain recycle function
-		rawOffice.manageManagedObject(moMetaData);
+		rawOffice.manageManagedObject(moMetaData, null);
 		FunctionState function = moMetaData.recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 

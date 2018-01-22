@@ -36,12 +36,25 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 public class FlowMetaDataFactory {
 
 	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaData officeMetaData;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
+	 */
+	public FlowMetaDataFactory(OfficeMetaData officeMetaData) {
+		this.officeMetaData = officeMetaData;
+	}
+
+	/**
 	 * Creates the {@link FlowMetaData}.
 	 * 
 	 * @param configurations
 	 *            {@link FlowConfiguration} instances.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
 	 * @param assetType
 	 *            {@link AssetType}.
 	 * @param assetName
@@ -52,7 +65,7 @@ public class FlowMetaDataFactory {
 	 *         with issues reported to the {@link OfficeFloorIssues}.
 	 */
 	public <F extends Enum<F>> FlowMetaData[] createFlowMetaData(FlowConfiguration<F>[] configurations,
-			OfficeMetaData officeMetaData, AssetType assetType, String assetName, OfficeFloorIssues issues) {
+			AssetType assetType, String assetName, OfficeFloorIssues issues) {
 
 		// Obtain the function locator
 		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();

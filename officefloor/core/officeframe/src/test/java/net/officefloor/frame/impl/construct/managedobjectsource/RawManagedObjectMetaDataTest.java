@@ -993,8 +993,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	private RawManagedObjectMetaData constructRawManagedObjectMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawManagedObjectMetaData metaData = new RawManagedObjectMetaDataFactory().constructRawManagedObjectMetaData(
-				this.configuration, this.sourceContext, "OFFICE_FLOOR", this.issues, this.officeFloorConfiguration);
+		RawManagedObjectMetaData metaData = new RawManagedObjectMetaDataFactory(this.sourceContext,
+				this.officeFloorConfiguration).constructRawManagedObjectMetaData(this.configuration, "OFFICE_FLOOR",
+						this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

@@ -295,9 +295,9 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private RawGovernanceMetaData<?, ?> constructRawGovernanceMetaData(boolean isCreated) {
 
 		// Create the raw governance meta-data
-		RawGovernanceMetaData<?, ?> rawGovernanceMetaData = new RawGovernanceMetaDataFactory()
-				.createRawGovernanceMetaData(this.configuration, GOVERNANCE_INDEX,
-						this.rawOfficeMetaData.build().getTeams(), OFFICE_NAME, this.issues);
+		RawGovernanceMetaData<?, ?> rawGovernanceMetaData = new RawGovernanceMetaDataFactory(OFFICE_NAME,
+				this.rawOfficeMetaData.build().getTeams()).createRawGovernanceMetaData(this.configuration,
+						GOVERNANCE_INDEX, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data", rawGovernanceMetaData);
@@ -323,8 +323,9 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private RawGovernanceMetaData<?, ?> fullyConstructRawGovernanceMetaData(boolean isSuccessful) {
 		RawGovernanceMetaData<?, ?> governanceMetaData = this.constructRawGovernanceMetaData(true);
-		boolean isLoaded = governanceMetaData.loadOfficeMetaData(this.officeMetaData.build(), new FlowMetaDataFactory(),
-				new EscalationFlowFactory(), this.issues);
+		boolean isLoaded = governanceMetaData.loadOfficeMetaData(this.officeMetaData.build(),
+				new FlowMetaDataFactory(this.officeMetaData.build()),
+				new EscalationFlowFactory(this.officeMetaData.build()), this.issues);
 		assertEquals("Incorrectly loaded", isSuccessful, isLoaded);
 		return governanceMetaData;
 	}

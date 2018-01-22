@@ -107,7 +107,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Listing of {@link ManagedObjectMetaData} created before this is managed
 	 * by the {@link Office}.
 	 */
-	private List<ManagedObjectMetaDataImpl<?>> managedObjectMetaDatas = new LinkedList<ManagedObjectMetaDataImpl<?>>();
+	private List<OfficeManagedManagedObject<?>> managedObjectMetaDatas = new LinkedList<>();
 
 	/**
 	 * {@link OfficeMetaData} of the managing {@link Office}.
@@ -168,13 +168,17 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * @param moMetaData
 	 *            {@link ManagedObjectMetaData} to be managed by the managing
 	 *            {@link Office}.
+	 * @param boundInstanceMetaData
+	 *            {@link RawBoundManagedObjectInstanceMetaData} for the
+	 *            {@link ManagedObjectMetaData}.
 	 */
-	public void manageManagedObject(ManagedObjectMetaDataImpl<?> moMetaData) {
+	public <O extends Enum<O>> void manageManagedObject(ManagedObjectMetaDataImpl<O> moMetaData,
+			RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData) {
 
 		// Determine if being managed by an office
 		if (this.managedObjectMetaDatas != null) {
 			// Not yet managed by an office
-			this.managedObjectMetaDatas.add(moMetaData);
+			this.managedObjectMetaDatas.add(new OfficeManagedManagedObject<>(moMetaData, boundInstanceMetaData));
 
 		} else {
 			// Already being managed, so load remaining state
@@ -294,8 +298,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		}
 
 		// Load remaining state to existing managed object meta-data
-		for (ManagedObjectMetaDataImpl<?> moMetaData : this.managedObjectMetaDatas) {
-			moMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData);
+		for (OfficeManagedManagedObject<?> mo : this.managedObjectMetaDatas) {
+			mo.managedObjectMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData);
 		}
 
 		// Setup for further managed object meta-data to be managed
@@ -445,6 +449,38 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 */
 	public ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
 		return this.managedObjectExecuteContextFactory;
+	}
+
+	/**
+	 * {@link ManagedObject} to be managed by the {@link Office}.
+	 */
+	private static class OfficeManagedManagedObject<O extends Enum<O>> {
+
+		/**
+		 * {@link ManagedObjectMetaData}.
+		 */
+		private final ManagedObjectMetaDataImpl<O> managedObjectMetaData;
+
+		/**
+		 * {@link RawBoundManagedObjectInstanceMetaData} for the
+		 * {@link ManagedObjectMetaData}.
+		 */
+		private final RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObjectMetaData
+		 *            {@link ManagedObjectMetaData}.
+		 * @param boundInstanceMetaData
+		 *            {@link RawBoundManagedObjectInstanceMetaData} for the
+		 *            {@link ManagedObjectMetaData}.
+		 */
+		private OfficeManagedManagedObject(ManagedObjectMetaDataImpl<O> managedObjectMetaData,
+				RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData) {
+			this.managedObjectMetaData = managedObjectMetaData;
+			this.boundInstanceMetaData = boundInstanceMetaData;
+		}
 	}
 
 }

@@ -36,16 +36,9 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
-import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
-import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
@@ -57,6 +50,7 @@ import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Implementation of {@link OfficeFloorBuilder}.
@@ -217,14 +211,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
-	public OfficeFloor buildOfficeFloor(OfficeFloorIssues issuesListener) {
+	public OfficeFloor buildOfficeFloor(OfficeFloorIssues issues) {
 
 		// Build this OfficeFloor
-		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaDataFactory().constructRawOfficeFloorMetaData(this,
-				issuesListener, new RawTeamMetaDataFactory(), new ThreadLocalAwareExecutorImpl(),
-				new RawManagedObjectMetaDataFactory(), new RawBoundManagedObjectMetaDataFactory(),
-				new RawGovernanceMetaDataFactory(), new RawAdministrationMetaDataFactory(),
-				new RawOfficeMetaDataFactory(), new RawManagedFunctionMetaDataFactory());
+		ThreadLocalAwareExecutor threadLocalAwareExecutor = new ThreadLocalAwareExecutorImpl();
+		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaDataFactory(threadLocalAwareExecutor)
+				.constructRawOfficeFloorMetaData(this, issues);
 
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();

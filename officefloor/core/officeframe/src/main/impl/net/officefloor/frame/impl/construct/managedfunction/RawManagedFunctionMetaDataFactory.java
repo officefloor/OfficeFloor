@@ -29,7 +29,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -56,29 +55,45 @@ import net.officefloor.frame.internal.structure.TeamManagement;
 public class RawManagedFunctionMetaDataFactory {
 
 	/**
+	 * {@link RawOfficeMetaData}.
+	 */
+	private final RawOfficeMetaData rawOfficeMetaData;
+
+	/**
+	 * {@link RawBoundManagedObjectMetaDataFactory}.
+	 */
+	private final RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param rawOfficeMetaData
+	 *            {@link RawOfficeMetaData}.
+	 * @param rawBoundManagedObjectFactory
+	 *            {@link RawBoundManagedObjectMetaDataFactory}.
+	 */
+	public RawManagedFunctionMetaDataFactory(RawOfficeMetaData rawOfficeMetaData,
+			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory) {
+		this.rawOfficeMetaData = rawOfficeMetaData;
+		this.rawBoundManagedObjectFactory = rawBoundManagedObjectFactory;
+	}
+
+	/**
 	 * Constructs the {@link RawManagedFunctionMetaData}.
 	 * 
 	 * @param configuration
 	 *            {@link ManagedFunctionConfiguration}.
-	 * @param rawOfficeMetaData
-	 *            {@link RawOfficeMetaData}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
-	 * @param rawBoundManagedObjectFactory
-	 *            {@link RawBoundManagedObjectMetaDataFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	public RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
-			ManagedFunctionConfiguration<?, ?> configuration, RawOfficeMetaData rawOfficeMetaData,
-			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			OfficeFloorIssues issues) {
+			ManagedFunctionConfiguration<?, ?> configuration, OfficeFloorIssues issues) {
 
 		// Obtain the function name
 		String functionName = configuration.getFunctionName();
 		if (ConstructUtil.isBlank(functionName)) {
-			issues.addIssue(AssetType.OFFICE, rawOfficeMetaData.getOfficeName(),
+			issues.addIssue(AssetType.OFFICE, this.rawOfficeMetaData.getOfficeName(),
 					ManagedFunction.class.getSimpleName() + " added without name");
 			return null; // no task name
 		}
@@ -98,7 +113,7 @@ public class RawManagedFunctionMetaDataFactory {
 		TeamManagement responsibleTeam = null;
 		String officeTeamName = configuration.getResponsibleTeamName();
 		if (!ConstructUtil.isBlank(officeTeamName)) {
-			responsibleTeam = rawOfficeMetaData.getTeams().get(officeTeamName);
+			responsibleTeam = this.rawOfficeMetaData.getTeams().get(officeTeamName);
 			if (responsibleTeam == null) {
 				issues.addIssue(AssetType.FUNCTION, functionName, "Unknown " + Team.class.getSimpleName() + " '"
 						+ officeTeamName + "' responsible for " + ManagedFunction.class.getSimpleName());
@@ -107,7 +122,8 @@ public class RawManagedFunctionMetaDataFactory {
 		}
 
 		// Obtain the office scoped managed objects
-		Map<String, RawBoundManagedObjectMetaData> officeScopeMo = rawOfficeMetaData.getOfficeScopeManagedObjects();
+		Map<String, RawBoundManagedObjectMetaData> officeScopeMo = this.rawOfficeMetaData
+				.getOfficeScopeManagedObjects();
 
 		// Obtain the function bound managed objects
 		ManagedObjectConfiguration<?>[] moConfiguration = configuration.getManagedObjectConfiguration();
@@ -115,10 +131,8 @@ public class RawManagedFunctionMetaDataFactory {
 		if ((moConfiguration == null) || (moConfiguration.length == 0)) {
 			functionBoundMo = new RawBoundManagedObjectMetaData[0];
 		} else {
-			functionBoundMo = rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(moConfiguration, issues,
-					ManagedObjectScope.FUNCTION, AssetType.FUNCTION, functionName, assetManagerFactory,
-					rawOfficeMetaData.getManagedObjectMetaData(), officeScopeMo, null, null,
-					rawOfficeMetaData.getGovernanceMetaData());
+			functionBoundMo = this.rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(moConfiguration,
+					ManagedObjectScope.FUNCTION, officeScopeMo, null, null, AssetType.FUNCTION, functionName, issues);
 		}
 
 		// Create the function scope managed objects
@@ -228,7 +242,7 @@ public class RawManagedFunctionMetaDataFactory {
 		// Obtain the required governance
 		boolean[] requiredGovernance;
 		ManagedFunctionGovernanceConfiguration[] governanceConfigurations = configuration.getGovernanceConfiguration();
-		boolean isManuallyManageGovernance = rawOfficeMetaData.isManuallyManageGovernance();
+		boolean isManuallyManageGovernance = this.rawOfficeMetaData.isManuallyManageGovernance();
 		if (isManuallyManageGovernance) {
 			// Ensure no governance is configured
 			if (governanceConfigurations.length > 0) {
@@ -244,7 +258,7 @@ public class RawManagedFunctionMetaDataFactory {
 
 		} else {
 			// OfficeFloor to manage Governance, create base flags
-			Map<String, RawGovernanceMetaData<?, ?>> rawGovernances = rawOfficeMetaData.getGovernanceMetaData();
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernances = this.rawOfficeMetaData.getGovernanceMetaData();
 			requiredGovernance = new boolean[rawGovernances.size()];
 			for (int i = 0; i < requiredGovernance.length; i++) {
 				requiredGovernance[i] = false;

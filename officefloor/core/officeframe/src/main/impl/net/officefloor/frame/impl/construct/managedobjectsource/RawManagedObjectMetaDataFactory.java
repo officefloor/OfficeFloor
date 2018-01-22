@@ -56,6 +56,30 @@ import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 public class RawManagedObjectMetaDataFactory {
 
 	/**
+	 * {@link SourceContext}.
+	 */
+	private final SourceContext sourceContext;
+
+	/**
+	 * {@link OfficeFloorConfiguration}.
+	 */
+	private final OfficeFloorConfiguration officeFloorConfiguration;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param sourceContext
+	 *            {@link SourceContext}.
+	 * @param officeFloorConfiguration
+	 *            {@link OfficeFloorConfiguration}.
+	 */
+	public RawManagedObjectMetaDataFactory(SourceContext sourceContext,
+			OfficeFloorConfiguration officeFloorConfiguration) {
+		this.sourceContext = sourceContext;
+		this.officeFloorConfiguration = officeFloorConfiguration;
+	}
+
+	/**
 	 * Creates the {@link RawManagedObjectMetaData}.
 	 * 
 	 * @param <O>
@@ -66,20 +90,14 @@ public class RawManagedObjectMetaDataFactory {
 	 *            {@link ManagedObjectSource} type.
 	 * @param configuration
 	 *            {@link ManagedObjectSourceConfiguration}.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
 	 * @param officeFloorName
 	 *            Name of the {@link OfficeFloor}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param officeFloorConfiguration
-	 *            {@link OfficeFloorConfiguration} of the {@link OfficeFloor}
-	 *            containing the {@link ManagedObjectSource}.
 	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if issue.
 	 */
 	public <d extends Enum<d>, h extends Enum<h>, MS extends ManagedObjectSource<d, h>> RawManagedObjectMetaData<d, h> constructRawManagedObjectMetaData(
-			ManagedObjectSourceConfiguration<h, MS> configuration, SourceContext sourceContext, String officeFloorName,
-			OfficeFloorIssues issues, OfficeFloorConfiguration officeFloorConfiguration) {
+			ManagedObjectSourceConfiguration<h, MS> configuration, String officeFloorName, OfficeFloorIssues issues) {
 
 		// Obtain the managed object source name
 		String managedObjectSourceName = configuration.getManagedObjectSourceName();
@@ -123,7 +141,7 @@ public class RawManagedObjectMetaDataFactory {
 			return null; // can not carry on
 		}
 		OfficeBuilder officeBuilder = null;
-		for (OfficeConfiguration officeConfiguration : officeFloorConfiguration.getOfficeConfiguration()) {
+		for (OfficeConfiguration officeConfiguration : this.officeFloorConfiguration.getOfficeConfiguration()) {
 			if (officeName.equals(officeConfiguration.getOfficeName())) {
 				officeBuilder = officeConfiguration.getBuilder();
 			}
@@ -139,8 +157,8 @@ public class RawManagedObjectMetaDataFactory {
 
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(false,
-				managedObjectSourceName, managingOfficeConfiguration, properties, sourceContext, managingOfficeBuilder,
-				officeBuilder);
+				managedObjectSourceName, managingOfficeConfiguration, properties, this.sourceContext,
+				managingOfficeBuilder, officeBuilder);
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<d, h> metaData;
@@ -223,6 +241,11 @@ public class RawManagedObjectMetaDataFactory {
 						"Must provide Input configuration as Managed Object Source requires flows");
 				return null; // can not carry on
 			}
+		} else if (managingOfficeConfiguration.getInputManagedObjectConfiguration() != null) {
+			// No flows, so should not be input
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"Configured as input managed object without flows");
+			return null; // can not carry on
 		}
 
 		// Obtain managed object pool and possible thread completion listeners
