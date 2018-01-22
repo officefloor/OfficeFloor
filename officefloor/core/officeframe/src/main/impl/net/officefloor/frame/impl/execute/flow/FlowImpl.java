@@ -102,27 +102,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		this.threadState = threadState;
 	}
 
-	/**
-	 * TODO include in {@link Flow} interface for
-	 * {@link ManagedObjectContainer}.
-	 * 
-	 * Creates the {@link ManagedFunctionContainer} for the
-	 * {@link ManagedObjectAdministrationMetaData}.
-	 * 
-	 * @param adminMetaData
-	 *            {@link ManagedObjectAdministrationMetaData}.
-	 * @param parallelFunctionOwner
-	 *            {@link ManagedFunctionContainer} to be the parallel owner.
-	 * @return {@link ManagedFunctionContainer} for the
-	 *         {@link ManagedObjectAdministrationMetaData}.
-	 */
-	private <E, F extends Enum<F>, G extends Enum<G>> ManagedFunctionContainer createAdministrationFunction(
-			ManagedObjectAdministrationMetaData<E, F, G> adminMetaData,
-			ManagedFunctionContainer parallelFunctionOwner) {
-		return this.createAdministrationFunction(adminMetaData.getAdministrationMetaData(),
-				adminMetaData.getRequiredManagedObjects(), null, true, parallelFunctionOwner, null, false);
-	}
-
 	/*
 	 * ================== LinkedListSetEntry ================================
 	 */
@@ -224,6 +203,14 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		return governanceFunctionContainer;
 	}
 
+	@Override
+	public <E, F extends Enum<F>, G extends Enum<G>> ManagedFunctionContainer createAdministrationFunction(
+			ManagedObjectAdministrationMetaData<E, F, G> adminMetaData,
+			ManagedFunctionContainer parallelFunctionOwner) {
+		return this.createAdministrationFunction(adminMetaData.getAdministrationMetaData(),
+				adminMetaData.getRequiredManagedObjects(), null, true, parallelFunctionOwner, null, false);
+	}
+
 	/**
 	 * Creates the {@link ManagedFunctionContainer} for the
 	 * {@link Administration}.
@@ -260,7 +247,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		final TeamManagement responsibleTeam = administrationMetaData.getResponsibleTeam();
 
 		// Obtain the extension meta-data
-		ManagedObjectExtensionExtractorMetaData<E>[] eiMetaDatas = administrationMetaData.getManagedObjectExtensionExtractorMetaData();
+		ManagedObjectExtensionExtractorMetaData<E>[] eiMetaDatas = administrationMetaData
+				.getManagedObjectExtensionExtractorMetaData();
 
 		// Create the array of extensions
 		Class<E> extensionInterface = administrationMetaData.getExtensionInterface();

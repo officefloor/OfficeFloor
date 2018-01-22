@@ -21,6 +21,7 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.governance.Governance;
@@ -51,6 +52,7 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
@@ -361,6 +363,24 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			switch (container.containerState) {
 			case NOT_LOADED:
 
+				// Undertake any pre-load administration
+				ManagedFunctionContainer preLoadAdministration = null;
+				ManagedObjectAdministrationMetaData<?, ?, ?>[] preLoadAdministrations = container.metaData
+						.getPreLoadAdministration();
+				for (int i = 0; i < preLoadAdministrations.length; i++) {
+					preLoadAdministration = this.managedFunction.getFlow()
+							.createAdministrationFunction(preLoadAdministrations[i], preLoadAdministration);
+				}
+
+				// Flag now pre-load administration
+				container.containerState = ManagedObjectContainerState.PRE_LOAD_ADMINISTRATION;
+
+				// Undertake the pre-load administration (before continuing)
+				if (preLoadAdministration != null) {
+					return Promise.then(preLoadAdministration, this);
+				}
+
+			case PRE_LOAD_ADMINISTRATION:
 				// Check whether dependencies are ready
 				if (container.check == null) {
 					// Undertake check to ensure managed objects are ready
@@ -934,6 +954,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 			switch (container.containerState) {
 			case NOT_LOADED:
+			case PRE_LOAD_ADMINISTRATION:
 			case LOADING:
 
 				// Not loaded, so no need to unload.
@@ -1175,6 +1196,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		 * Initial state to indicate to load the {@link ManagedObject}.
 		 */
 		NOT_LOADED,
+
+		/**
+		 * Indicates pre-load {@link Administration} undertaken.
+		 */
+		PRE_LOAD_ADMINISTRATION,
 
 		/**
 		 * Indicates that loading the {@link ManagedObject} from the
