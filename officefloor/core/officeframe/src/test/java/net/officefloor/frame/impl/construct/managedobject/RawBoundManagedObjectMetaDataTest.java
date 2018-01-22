@@ -29,19 +29,26 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagingOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
+import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -73,6 +80,11 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * {@link AssetManagerFactory}.
 	 */
 	private AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerFactory();
+
+	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * {@link RawOfficeMetaData}.
@@ -835,12 +847,71 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
 		configuration.preLoadAdminister(null, Object.class, () -> null);
-		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Pre-load administration added without a name");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Administration added without a name");
 
 		// Construct
 		this.replayMockObjects();
-		this.constructRawBoundManagedObjectMetaData(1, configuration);
+		ManagedObjectMetaData<?> metaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0]
+				.getRawBoundManagedObjectInstanceMetaData()[0].getManagedObjectMetaData();
 		this.verifyMockObjects();
+
+		// Ensure no pre-load administration
+		assertNull("Should be no pre-load administration", metaData.getPreLoadAdministration());
+	}
+
+	/**
+	 * Ensure able add pre-load {@link Administration}.
+	 */
+	public void testPreLoadAdministration() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister("ADMIN", Object.class, () -> null);
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+
+		// Construct
+		this.replayMockObjects();
+		ManagedObjectMetaData<?> metaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0]
+				.getRawBoundManagedObjectInstanceMetaData()[0].getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Ensure pre-load administration
+		ManagedObjectAdministrationMetaData<?, ?, ?>[] admins = metaData.getPreLoadAdministration();
+		assertEquals("Should be pre-load administration", 1, admins.length);
+		assertEquals("Incorrect pre-load adminstration", "ADMIN",
+				admins[0].getAdministrationMetaData().getAdministrationName());
+		assertEquals("Should not be managed object extensions", 0, admins[0].getRequiredManagedObjects().length);
+	}
+
+	/**
+	 * Ensure able to add pre-load {@link Administration}.
+	 */
+	public void testPreLoadAdministrationWithManagedObject() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister("ADMIN", Object.class, () -> null).administerManagedObject("ADMINISTERED_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> administered = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("ADMINISTERED_MO");
+		administered.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addExtension(Object.class, (mo) -> mo);
+
+		// Construct
+		this.replayMockObjects();
+		ManagedObjectMetaData<?> metaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0]
+				.getRawBoundManagedObjectInstanceMetaData()[0].getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Ensure pre-load administration
+		ManagedObjectAdministrationMetaData<?, ?, ?> admin = metaData.getPreLoadAdministration()[0];
+		assertEquals("Incorrect pre-load adminstration", "ADMIN",
+				admin.getAdministrationMetaData().getAdministrationName());
+		ManagedObjectIndex[] required = admin.getRequiredManagedObjects();
+		assertEquals("Should be managed object extensions", 1, admin.getRequiredManagedObjects().length);
+		assertSame("Incorrect reuqired managed object",
+				administered.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[0]);
 	}
 
 	/**
@@ -895,15 +966,32 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				: this.inputManagedObjectDefaults);
 
 		// Attempt to construct
-		RawBoundManagedObjectMetaData[] metaData = new RawBoundManagedObjectMetaDataFactory(this.assetManagerFactory,
-				this.rawOfficeMetaData.build().getManagedObjectMetaData(),
-				this.rawOfficeMetaData.build().getGovernanceMetaData()).constructBoundManagedObjectMetaData(
-						boundManagedObjectConfiguration, this.managedObjectScope,
-						this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), inputManagedObjects,
-						inputDefaults, AssetType.OFFICE, OFFICE_NAME, this.issues);
+		RawBoundManagedObjectMetaDataFactory factory = new RawBoundManagedObjectMetaDataFactory(
+				this.assetManagerFactory, this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				this.rawOfficeMetaData.build().getGovernanceMetaData());
+		RawBoundManagedObjectMetaData[] metaData = factory.constructBoundManagedObjectMetaData(
+				boundManagedObjectConfiguration, this.managedObjectScope,
+				this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), inputManagedObjects, inputDefaults,
+				AssetType.OFFICE, OFFICE_NAME, this.issues);
 
 		// Ensure correct number constructed
 		assertEquals("Incorrect number of bound managed objects", expectedNumberConstructed, metaData.length);
+
+		// Load the remaining state
+		OfficeMetaData officeMetaData = this.officeMetaData.build();
+		FlowMetaDataFactory flowFactory = new FlowMetaDataFactory(officeMetaData);
+		EscalationFlowFactory escalationFactory = new EscalationFlowFactory(officeMetaData);
+		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
+				flowFactory, escalationFactory, new HashMap<>());
+		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
+				rawAdminFactory, new HashMap<>(), this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
+		for (RawBoundManagedObjectMetaData bound : metaData) {
+			for (RawBoundManagedObjectInstanceMetaData<?> instance : bound.getRawBoundManagedObjectInstanceMetaData()) {
+				if (instance.getManagedObjectMetaData() != null) {
+					instance.loadRemainingState(officeMetaData, null, moAdminFactory, this.issues);
+				}
+			}
+		}
 
 		// Return the meta-data
 		return metaData;

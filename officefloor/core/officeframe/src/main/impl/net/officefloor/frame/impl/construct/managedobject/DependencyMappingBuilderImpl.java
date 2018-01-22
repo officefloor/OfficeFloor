@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.impl.construct.administration.AdministrationBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
@@ -57,6 +58,11 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	 * {@link ManagedObjectDependencyConfiguration} by index of dependency.
 	 */
 	private final Map<Integer, ManagedObjectDependencyConfiguration<O>> dependencies = new HashMap<>();
+
+	/**
+	 * Pre-load {@link AdministrationConfiguration} instances.
+	 */
+	private final List<AdministrationConfiguration<?, ?, ?>> preLoadAdministrations = new LinkedList<>();
 
 	/**
 	 * {@link ManagedObjectGovernanceConfiguration} instances.
@@ -115,8 +121,10 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	@Override
 	public <E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preLoadAdminister(
 			String administrationName, Class<E> extension, AdministrationFactory<E, f, G> administrationFactory) {
-		// TODO implement preLoadAdminister
-		throw new UnsupportedOperationException("TODO implement preLoadAdminister");
+		AdministrationBuilderImpl<E, f, G> admin = new AdministrationBuilderImpl<>(administrationName, extension,
+				administrationFactory);
+		this.preLoadAdministrations.add(admin);
+		return admin;
 	}
 
 	/**
@@ -170,8 +178,7 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 
 	@Override
 	public AdministrationConfiguration<?, ?, ?>[] getPreLoadAdministration() {
-		// TODO implement getPreLoadAdministration
-		return null;
+		return this.preLoadAdministrations.toArray(new AdministrationConfiguration[0]);
 	}
 
 	/**

@@ -32,10 +32,10 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
+import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextFactoryImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -104,10 +104,10 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	private RawManagedObjectMetaData<?, F> rawManagedObjectMetaData;
 
 	/**
-	 * Listing of {@link ManagedObjectMetaData} created before this is managed
-	 * by the {@link Office}.
+	 * {@link RawBoundManagedObjectInstanceMetaData} instances created before
+	 * this is managed by the {@link Office}.
 	 */
-	private List<OfficeManagedManagedObject<?>> managedObjectMetaDatas = new LinkedList<>();
+	private List<RawBoundManagedObjectInstanceMetaData<?>> managedObjectMetaDatas = new LinkedList<>();
 
 	/**
 	 * {@link OfficeMetaData} of the managing {@link Office}.
@@ -118,6 +118,16 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * {@link FlowMetaData} of the recycle {@link Flow}.
 	 */
 	private FlowMetaData recycleFlowMetaData = null;
+
+	/**
+	 * {@link ManagedObjectAdministrationMetaDataFactory}.
+	 */
+	private ManagedObjectAdministrationMetaDataFactory moAdminFactory = null;
+
+	/**
+	 * {@link OfficeFloorIssues}.
+	 */
+	private OfficeFloorIssues issues = null;
 
 	/**
 	 * {@link ManagedObjectExecuteContextFactory}.
@@ -165,24 +175,21 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Adds a {@link ManagedObjectMetaData} to be managed by the managing
 	 * {@link Office}.
 	 * 
-	 * @param moMetaData
-	 *            {@link ManagedObjectMetaData} to be managed by the managing
-	 *            {@link Office}.
 	 * @param boundInstanceMetaData
 	 *            {@link RawBoundManagedObjectInstanceMetaData} for the
 	 *            {@link ManagedObjectMetaData}.
 	 */
-	public <O extends Enum<O>> void manageManagedObject(ManagedObjectMetaDataImpl<O> moMetaData,
-			RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData) {
+	public void manageManagedObject(RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData) {
 
 		// Determine if being managed by an office
 		if (this.managedObjectMetaDatas != null) {
 			// Not yet managed by an office
-			this.managedObjectMetaDatas.add(new OfficeManagedManagedObject<>(moMetaData, boundInstanceMetaData));
+			this.managedObjectMetaDatas.add(boundInstanceMetaData);
 
 		} else {
 			// Already being managed, so load remaining state
-			moMetaData.loadRemainingState(this.managingOffice, this.recycleFlowMetaData);
+			boundInstanceMetaData.loadRemainingState(this.managingOffice, this.recycleFlowMetaData, this.moAdminFactory,
+					this.issues);
 		}
 	}
 
@@ -252,11 +259,14 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances of
 	 *            the managing {@link Office}.
+	 * @param moAdminFactory
+	 *            {@link ManagedObjectAdministrationMetaDataFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	public void manageByOffice(OfficeMetaData officeMetaData,
-			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData, OfficeFloorIssues issues) {
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
+			ManagedObjectAdministrationMetaDataFactory moAdminFactory, OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
 		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();
@@ -298,13 +308,15 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		}
 
 		// Load remaining state to existing managed object meta-data
-		for (OfficeManagedManagedObject<?> mo : this.managedObjectMetaDatas) {
-			mo.managedObjectMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData);
+		for (RawBoundManagedObjectInstanceMetaData<?> mo : this.managedObjectMetaDatas) {
+			mo.loadRemainingState(officeMetaData, recycleFlowMetaData, moAdminFactory, issues);
 		}
 
 		// Setup for further managed object meta-data to be managed
 		this.managingOffice = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
+		this.moAdminFactory = moAdminFactory;
+		this.issues = issues;
 		this.managedObjectMetaDatas = null;
 
 		// -----------------------------------------------------------
@@ -449,38 +461,6 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 */
 	public ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
 		return this.managedObjectExecuteContextFactory;
-	}
-
-	/**
-	 * {@link ManagedObject} to be managed by the {@link Office}.
-	 */
-	private static class OfficeManagedManagedObject<O extends Enum<O>> {
-
-		/**
-		 * {@link ManagedObjectMetaData}.
-		 */
-		private final ManagedObjectMetaDataImpl<O> managedObjectMetaData;
-
-		/**
-		 * {@link RawBoundManagedObjectInstanceMetaData} for the
-		 * {@link ManagedObjectMetaData}.
-		 */
-		private final RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param managedObjectMetaData
-		 *            {@link ManagedObjectMetaData}.
-		 * @param boundInstanceMetaData
-		 *            {@link RawBoundManagedObjectInstanceMetaData} for the
-		 *            {@link ManagedObjectMetaData}.
-		 */
-		private OfficeManagedManagedObject(ManagedObjectMetaDataImpl<O> managedObjectMetaData,
-				RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData) {
-			this.managedObjectMetaData = managedObjectMetaData;
-			this.boundInstanceMetaData = boundInstanceMetaData;
-		}
 	}
 
 }

@@ -31,11 +31,12 @@ import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuil
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
+import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
@@ -150,19 +151,20 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		this.recycleFunctionName = "RECYCLE_FUNCTION";
 		this.officeMetaData.addManagedFunction(this.recycleFunctionName, RecycleManagedObjectParameter.class);
-		final ManagedObjectMetaDataImpl<?> moMetaData = MockConstruct.mockManagedObjectMetaData("BOUND", String.class);
 		final ManagedObjectCleanup cleanup = new ManagedObjectCleanupImpl(null, this.officeMetaData.build());
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
 
 		// Manage by office
 		this.replayMockObjects();
 		RawManagingOfficeMetaData<Flows> rawOffice = this.createRawManagingOffice();
+		final RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> instance = this
+				.createRawBoundManagedObjectInstanceMetaData("MOS", rawOffice);
 
 		// Have managed before managed by office.
 		// This would be the possible case that used by same office.
-		rawOffice.manageManagedObject(moMetaData, null); // undertake first
+		rawOffice.manageManagedObject(instance.build()); // undertake first
 		this.run_manageByOffice(rawOffice, true);
-		FunctionState function = moMetaData.recycle(managedObject, cleanup);
+		FunctionState function = instance.build().getManagedObjectMetaData().recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
 		// Ensure have recycle function
@@ -177,16 +179,18 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record
 		this.recycleFunctionName = "RECYCLE_FUNCTION";
 		this.officeMetaData.addManagedFunction(this.recycleFunctionName, RecycleManagedObjectParameter.class);
-		final ManagedObjectMetaDataImpl<?> moMetaData = MockConstruct.mockManagedObjectMetaData("BOUND", String.class);
 		final ManagedObjectCleanup cleanup = new ManagedObjectCleanupImpl(null, this.officeMetaData.build());
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
 
 		// Manage by office
 		this.replayMockObjects();
 		RawManagingOfficeMetaData<Flows> rawOffice = this.createRawManagingOffice();
+		final RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> instance = this
+				.createRawBoundManagedObjectInstanceMetaData("MOS", rawOffice);
+
 		this.run_manageByOffice(rawOffice, true);
-		rawOffice.manageManagedObject(moMetaData, null); // undertake afterwards
-		FunctionState function = moMetaData.recycle(managedObject, cleanup);
+		rawOffice.manageManagedObject(instance.build()); // undertake afterwards
+		FunctionState function = instance.build().getManagedObjectMetaData().recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
 		// Ensure have recycle function
@@ -198,17 +202,18 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoRecycleFunction() {
 
-		final ManagedObjectMetaDataImpl<?> moMetaData = MockConstruct.mockManagedObjectMetaData("BOUND", String.class);
 		final ManagedObjectCleanup cleanup = new ManagedObjectCleanupImpl(null, this.officeMetaData.build());
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
 
 		// Manage by office
 		this.replayMockObjects();
-		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true);
+		RawManagingOfficeMetaData<Flows> rawOffice = this.createRawManagingOffice();
+		final RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> instance = this
+				.createRawBoundManagedObjectInstanceMetaData("MOS", rawOffice);
 
 		// Ensure not obtain recycle function
-		rawOffice.manageManagedObject(moMetaData, null);
-		FunctionState function = moMetaData.recycle(managedObject, cleanup);
+		rawOffice.manageManagedObject(instance.build());
+		FunctionState function = instance.build().getManagedObjectMetaData().recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
 		// Ensure no recycle function
@@ -437,10 +442,10 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * 
 	 * @param rawManaingOfficeMetaData
 	 *            {@link RawManagingOfficeMetaData}.
-	 * @return {@link RawBoundManagedObjectMetaData}.
+	 * @return {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
-	private RawBoundManagedObjectMetaData createRawBoundManagedObjectMetaData(String managedObjectSourceName,
-			RawManagingOfficeMetaData<Flows> rawManaingOfficeMetaData) {
+	private RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> createRawBoundManagedObjectInstanceMetaData(
+			String managedObjectSourceName, RawManagingOfficeMetaData<Flows> rawManaingOfficeMetaData) {
 		RawBoundManagedObjectMetaDataMockBuilder<Indexed, Flows> rawBoundManagedObjectMetaData = MockConstruct
 				.mockRawBoundManagedObjectMetaData(managedObjectSourceName, this.rawMoMetaData.getBuilt());
 		RawBoundManagedObjectInstanceMetaDataMockBuilder<Indexed, Flows> instance = rawBoundManagedObjectMetaData
@@ -448,7 +453,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		rawBoundManagedObjectMetaData.build();
 		instance.build().loadManagedObjectMetaData(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 				MockConstruct.mockAssetManagerFactory(), this.issues);
-		return rawBoundManagedObjectMetaData.build();
+		return instance;
 	}
 
 	/**
@@ -470,7 +475,10 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			RawBoundManagedObjectMetaData... processBoundMetaData) {
 
 		// Manage by office
-		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, this.issues);
+		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
+				new RawAdministrationMetaDataFactory(this.officeMetaData.build(), null, null, null), null, null);
+		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, moAdminFactory,
+				this.issues);
 
 		// Validate creation of execute context
 		if (isCreateExecuteContext) {
@@ -504,8 +512,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Create the process bound managed object instances
 		RawBoundManagedObjectMetaData[] managedObjects = new RawBoundManagedObjectMetaData[processBoundMetaDataNames.length];
 		for (int i = 0; i < processBoundMetaDataNames.length; i++) {
-			managedObjects[i] = this.createRawBoundManagedObjectMetaData(processBoundMetaDataNames[i],
-					rawManagingOfficeMetaData);
+			managedObjects[i] = this.createRawBoundManagedObjectInstanceMetaData(processBoundMetaDataNames[i],
+					rawManagingOfficeMetaData).getRawBoundManagedObjectMetaData().build();
 		}
 
 		// Manage by the office

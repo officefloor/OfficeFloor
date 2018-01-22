@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaData;
 import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
@@ -338,9 +339,9 @@ public class RawOfficeMetaDataFactory {
 						issues);
 
 		// Create the map of process bound managed objects by name
-		Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
+		Map<String, RawBoundManagedObjectMetaData> processScopeMo = new HashMap<>();
 		for (RawBoundManagedObjectMetaData mo : processBoundManagedObjects) {
-			scopeMo.put(mo.getBoundManagedObjectName(), mo);
+			processScopeMo.put(mo.getBoundManagedObjectName(), mo);
 		}
 
 		// Obtain the thread bound managed object instances
@@ -351,18 +352,19 @@ public class RawOfficeMetaDataFactory {
 			threadBoundManagedObjects = new RawBoundManagedObjectMetaData[0];
 		} else {
 			threadBoundManagedObjects = rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(
-					threadManagedObjectConfiguration, ManagedObjectScope.THREAD, scopeMo, null, null, AssetType.OFFICE,
-					officeName, issues);
+					threadManagedObjectConfiguration, ManagedObjectScope.THREAD, processScopeMo, null, null,
+					AssetType.OFFICE, officeName, issues);
 		}
 
 		// Load the thread bound managed objects to scope managed objects
+		Map<String, RawBoundManagedObjectMetaData> threadScopeMo = new HashMap<>(processScopeMo);
 		for (RawBoundManagedObjectMetaData mo : threadBoundManagedObjects) {
-			scopeMo.put(mo.getBoundManagedObjectName(), mo);
+			threadScopeMo.put(mo.getBoundManagedObjectName(), mo);
 		}
 
 		// Create the raw office meta-data
 		RawOfficeMetaData rawOfficeMetaData = new RawOfficeMetaData(officeName, this.rawOfficeFloorMetaData,
-				officeTeams, registeredMo, processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
+				officeTeams, registeredMo, processBoundManagedObjects, threadBoundManagedObjects, threadScopeMo,
 				isManuallyManageGovernance, rawGovernanceMetaData);
 
 		// Create the raw managed function factory
@@ -484,10 +486,13 @@ public class RawOfficeMetaDataFactory {
 		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
 				flowMetaDataFactory, escalationFlowFactory, officeTeams);
+		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
+				rawAdminFactory, threadScopeMo, processScopeMo);
 
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
-			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, issues);
+			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, moAdminFactory,
+					issues);
 		}
 
 		// Link functions within the meta-data of the office

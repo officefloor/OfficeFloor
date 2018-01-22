@@ -28,17 +28,18 @@ import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
-import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectGovernanceMetaDataImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -104,7 +105,7 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	/**
 	 * {@link ManagedObjectMetaData}.
 	 */
-	private ManagedObjectMetaData<O> managedObjectMetaData;
+	private ManagedObjectMetaDataImpl<O> managedObjectMetaData;
 
 	/**
 	 * Initiate.
@@ -380,6 +381,9 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 		this.managedObjectMetaData = this.rawMoMetaData.createManagedObjectMetaData(assetType, assetName,
 				this.rawBoundMetaData, this.instanceIndex, this, dependencyMappings, this.governanceMetaData,
 				assetManagerFactory, issues);
+
+		// Manage by the office
+		this.rawMoMetaData.getRawManagingOfficeMetaData().manageManagedObject(this);
 	}
 
 	/**
@@ -389,16 +393,21 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	 *            {@link OfficeMetaData}.
 	 * @param recycleFlowMetaData
 	 *            Recycle {@link FlowMetaData}.
+	 * @param managedObjectAdminFactory
+	 *            {@link ManagedObjectAdministrationMetaDataFactory}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 */
 	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo, RawAdministrationMetaDataFactory rawAdminFactory,
-			OfficeFloorIssues issues) {
+			ManagedObjectAdministrationMetaDataFactory managedObjectAdminFactory, OfficeFloorIssues issues) {
 
 		// Load the pre-load administration
-		RawAdministrationMetaData[] rawPreLoadAdministration = rawAdminFactory.constructRawAdministrationMetaData(
-				this.preLoadAdministrationConfiguration, scopeMo, AssetType.MANAGED_OBJECT,
-				this.managedObjectMetaData.getBoundManagedObjectName(), issues);
+		ManagedObjectAdministrationMetaData<?, ?, ?>[] preLoadAdmin = managedObjectAdminFactory
+				.createManagedObjectAdministrationMetaData(this.preLoadAdministrationConfiguration,
+						this.rawBoundMetaData, issues);
 
+		// Load the remaining state
+		this.managedObjectMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData, preLoadAdmin);
 	}
 
 	/**

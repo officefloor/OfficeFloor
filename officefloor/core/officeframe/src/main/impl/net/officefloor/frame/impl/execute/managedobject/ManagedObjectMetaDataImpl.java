@@ -227,10 +227,14 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} for the recycling of this
 	 *            {@link ManagedObject}.
+	 * @param preloadAdministration
+	 *            Pre-load {@link ManagedObjectAdministrationMetaData}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData) {
+	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
+			ManagedObjectAdministrationMetaData<?, ?, ?>[] preloadAdministration) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
+		this.preloadAdministration = preloadAdministration;
 	}
 
 	/*
