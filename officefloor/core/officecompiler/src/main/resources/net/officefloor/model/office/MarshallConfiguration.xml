@@ -43,7 +43,7 @@
 			</attributes>
 			<collection method="getAdministrations">
 				<item
-					type="net.officefloor.model.office.ExternalManagedObjectToAdministrationModel"
+					type="net.officefloor.model.office.AdministrationToExternalManagedObjectModel"
 					element="administer">
 					<attributes>
 						<attribute method="getAdministrationName" attribute="administration" />
@@ -51,9 +51,18 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getPreLoadAdministrations">
+				<item
+					type="net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel"
+					element="pre-load">
+					<attributes>
+						<attribute method="getAdministrationName" attribute="administration" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getGovernances">
 				<item
-					type="net.officefloor.model.office.ExternalManagedObjectToGovernanceModel"
+					type="net.officefloor.model.office.GovernanceToExternalManagedObjectModel"
 					element="govern">
 					<attributes>
 						<attribute method="getGovernanceName" attribute="governance" />
@@ -185,7 +194,7 @@
 			</collection>
 			<collection method="getAdministrations">
 				<item
-					type="net.officefloor.model.office.OfficeManagedObjectToAdministrationModel"
+					type="net.officefloor.model.office.AdministrationToOfficeManagedObjectModel"
 					element="administer">
 					<attributes>
 						<attribute method="getAdministrationName" attribute="administration" />
@@ -193,9 +202,18 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getPreLoadAdministrations">
+				<item
+					type="net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel"
+					element="pre-load">
+					<attributes>
+						<attribute method="getAdministrationName" attribute="administration" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getGovernances">
 				<item
-					type="net.officefloor.model.office.OfficeManagedObjectToGovernanceModel"
+					type="net.officefloor.model.office.GovernanceToOfficeManagedObjectModel"
 					element="govern">
 					<attributes>
 						<attribute method="getGovernanceName" attribute="governance" />
@@ -536,9 +554,18 @@
 								</attributes>
 							</item>
 						</collection>
+						<collection method="getPreLoadAdministrations">
+							<item
+								type="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel"
+								element="pre-load">
+								<attributes>
+									<attribute method="getAdministrationName" attribute="administration" />
+								</attributes>
+							</item>
+						</collection>
 						<collection method="getGovernances">
 							<item
-								type="net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel"
+								type="net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel"
 								element="govern">
 								<attributes>
 									<attribute method="getGovernanceName" attribute="governance" />

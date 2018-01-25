@@ -7,6 +7,7 @@
 		name="dependent office managed object" />
 	<list type="OfficeInputManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent office input managed object" />
-	<list type="ExternalManagedObjectToAdministrationModel" name="administration" />
-	<list type="ExternalManagedObjectToGovernanceModel" name="governance" />
+	<list type="AdministrationToExternalManagedObjectModel" name="administration" />
+	<list type="GovernanceToExternalManagedObjectModel" name="governance" />
+	<list type="ExternalManagedObjectToPreLoadAdministrationModel" name="pre load administration" />
 </model>

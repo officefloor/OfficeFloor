@@ -4,5 +4,5 @@
 	<field type="String" name="order" />
 	<field type="ExternalManagedObjectModel" name="external managed object"
 		end-list="administration" />
-	<field type="AdministrationModel" name="administration" end-list="external managed object" />
+	<field type="AdministrationModel" name="administration" end-list="administered external managed object" />
 </model>

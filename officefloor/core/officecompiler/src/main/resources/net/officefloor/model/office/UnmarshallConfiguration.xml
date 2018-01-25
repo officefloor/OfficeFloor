@@ -27,12 +27,16 @@
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
 		<object method="addAdministration" node="administer"
-			class="net.officefloor.model.office.ExternalManagedObjectToAdministrationModel">
+			class="net.officefloor.model.office.AdministrationToExternalManagedObjectModel">
 			<value method="setAdministrationName" node="administer@administration" />
 			<value method="setOrder" node="administer@order" />
 		</object>
+		<object method="addPreLoadAdministration" node="pre-load"
+			class="net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel">
+			<value method="setAdministrationName" node="pre-load@administration" />
+		</object>
 		<object method="addGovernance" node="govern"
-			class="net.officefloor.model.office.ExternalManagedObjectToGovernanceModel">
+			class="net.officefloor.model.office.GovernanceToExternalManagedObjectModel">
 			<value method="setGovernanceName" node="govern@governance" />
 		</object>
 	</object>
@@ -111,12 +115,16 @@
 			<value method="setType" node="type-qualification@type" />
 		</object>
 		<object method="addAdministration" node="administer"
-			class="net.officefloor.model.office.OfficeManagedObjectToAdministrationModel">
+			class="net.officefloor.model.office.AdministrationToOfficeManagedObjectModel">
 			<value method="setAdministrationName" node="administer@administration" />
 			<value method="setOrder" node="administer@order" />
 		</object>
+		<object method="addPreLoadAdministration" node="pre-load"
+			class="net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel">
+			<value method="setAdministrationName" node="pre-load@administration" />
+		</object>
 		<object method="addGovernance" node="govern"
-			class="net.officefloor.model.office.OfficeManagedObjectToGovernanceModel">
+			class="net.officefloor.model.office.GovernanceToOfficeManagedObjectModel">
 			<value method="setGovernanceName" node="govern@governance" />
 		</object>
 		<object method="addOfficeManagedObjectDependency" node="dependency"
@@ -325,8 +333,12 @@
 					class="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel">
 					<value method="setOfficeSectionManagedObjectTeamName" node="team@name" />
 				</object>
+				<object method="addPreLoadAdministration" node="pre-load"
+					class="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel">
+					<value method="setAdministrationName" node="pre-load@administration" />
+				</object>
 				<object method="addGovernance" node="govern"
-					class="net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel">
+					class="net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel">
 					<value method="setGovernanceName" node="govern@governance" />
 				</object>
 			</object>

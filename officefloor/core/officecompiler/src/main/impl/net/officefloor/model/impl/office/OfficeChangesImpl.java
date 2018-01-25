@@ -53,7 +53,7 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -70,7 +70,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -1926,18 +1926,18 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<ExternalManagedObjectToAdministrationModel> linkExternalManagedObjectToAdministration(
+	public Change<AdministrationToExternalManagedObjectModel> linkExternalManagedObjectToAdministration(
 			ExternalManagedObjectModel externalManagedObject, AdministrationModel administration) {
 
 		// TODO test this method (linkExternalManagedObjectToAdministration)
 
 		// Create the connection
-		final ExternalManagedObjectToAdministrationModel conn = new ExternalManagedObjectToAdministrationModel();
+		final AdministrationToExternalManagedObjectModel conn = new AdministrationToExternalManagedObjectModel();
 		conn.setExternalManagedObject(externalManagedObject);
 		conn.setAdministration(administration);
 
 		// Return change to add the connection
-		return new AbstractChange<ExternalManagedObjectToAdministrationModel>(conn, "Conect") {
+		return new AbstractChange<AdministrationToExternalManagedObjectModel>(conn, "Conect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1951,13 +1951,13 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<ExternalManagedObjectToAdministrationModel> removeExternalManagedObjectToAdministration(
-			final ExternalManagedObjectToAdministrationModel externalManagedObjectToAdministration) {
+	public Change<AdministrationToExternalManagedObjectModel> removeExternalManagedObjectToAdministration(
+			final AdministrationToExternalManagedObjectModel externalManagedObjectToAdministration) {
 
 		// TODO test this method (removeExternalManagedObjectToAdministration)
 
 		// Return change to remove the connection
-		return new AbstractChange<ExternalManagedObjectToAdministrationModel>(externalManagedObjectToAdministration,
+		return new AbstractChange<AdministrationToExternalManagedObjectModel>(externalManagedObjectToAdministration,
 				"Remove") {
 			@Override
 			public void apply() {
@@ -1972,18 +1972,18 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeManagedObjectToAdministrationModel> linkOfficeManagedObjectToAdministration(
+	public Change<AdministrationToOfficeManagedObjectModel> linkOfficeManagedObjectToAdministration(
 			OfficeManagedObjectModel managedObject, AdministrationModel administration) {
 
 		// TODO test this method (linkOfficeManagedObjectToAdministration)
 
 		// Create the connection
-		final OfficeManagedObjectToAdministrationModel conn = new OfficeManagedObjectToAdministrationModel();
+		final AdministrationToOfficeManagedObjectModel conn = new AdministrationToOfficeManagedObjectModel();
 		conn.setOfficeManagedObject(managedObject);
 		conn.setAdministration(administration);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeManagedObjectToAdministrationModel>(conn, "Connect") {
+		return new AbstractChange<AdministrationToOfficeManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1997,13 +1997,13 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeManagedObjectToAdministrationModel> removeOfficeManagedObjectToAdministration(
-			final OfficeManagedObjectToAdministrationModel managedObjectToAdministration) {
+	public Change<AdministrationToOfficeManagedObjectModel> removeOfficeManagedObjectToAdministration(
+			final AdministrationToOfficeManagedObjectModel managedObjectToAdministration) {
 
 		// TODO test this method (removeOfficeManagedObjectToAdministration)
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeManagedObjectToAdministrationModel>(managedObjectToAdministration, "Remove") {
+		return new AbstractChange<AdministrationToOfficeManagedObjectModel>(managedObjectToAdministration, "Remove") {
 			@Override
 			public void apply() {
 				managedObjectToAdministration.remove();

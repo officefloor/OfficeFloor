@@ -65,8 +65,8 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
-import net.officefloor.model.office.ExternalManagedObjectToGovernanceModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
 import net.officefloor.model.office.GovernanceAreaModel;
 import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.GovernanceToOfficeTeamModel;
@@ -93,13 +93,13 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
-import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
-import net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel;
+import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -210,7 +210,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			OfficeObject officeObject = architect.addOfficeObject(officeObjectName, object.getObjectType());
 
 			// Provide governance over managed object
-			for (ExternalManagedObjectToGovernanceModel moToGov : object.getGovernances()) {
+			for (GovernanceToExternalManagedObjectModel moToGov : object.getGovernances()) {
 				GovernanceModel govModel = moToGov.getGovernance();
 				if (govModel != null) {
 					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
@@ -345,7 +345,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			managedObjects.put(managedObjectName, managedObject);
 
 			// Provide governance over managed object
-			for (OfficeManagedObjectToGovernanceModel moToGov : moModel.getGovernances()) {
+			for (GovernanceToOfficeManagedObjectModel moToGov : moModel.getGovernances()) {
 				GovernanceModel govModel = moToGov.getGovernance();
 				if (govModel != null) {
 					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
@@ -697,7 +697,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			OfficeObject officeObject = officeObjects.get(extMo.getExternalManagedObjectName());
 
 			// Add the object for administration
-			for (ExternalManagedObjectToAdministrationModel extMoToAdmin : extMo.getAdministrations()) {
+			for (AdministrationToExternalManagedObjectModel extMoToAdmin : extMo.getAdministrations()) {
 				AdministrationModel adminModel = extMoToAdmin.getAdministration();
 				if (adminModel != null) {
 					String administrationName = adminModel.getAdministrationName();
@@ -716,7 +716,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			OfficeManagedObject mo = managedObjects.get(moModel.getOfficeManagedObjectName());
 
 			// Add the managed object for administration
-			for (OfficeManagedObjectToAdministrationModel moToAdmin : moModel.getAdministrations()) {
+			for (AdministrationToOfficeManagedObjectModel moToAdmin : moModel.getAdministrations()) {
 				AdministrationModel adminModel = moToAdmin.getAdministration();
 				if (adminModel != null) {
 					String administrationName = adminModel.getAdministrationName();
@@ -1322,7 +1322,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeSectionManagedObjectToGovernanceModel conn : managedObjectModel.getGovernances()) {
+			for (GovernanceToOfficeSectionManagedObjectModel conn : managedObjectModel.getGovernances()) {
 				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
