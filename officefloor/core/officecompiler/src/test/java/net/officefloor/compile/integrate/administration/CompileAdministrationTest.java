@@ -19,6 +19,8 @@ package net.officefloor.compile.integrate.administration;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.AdministrationBuilder;
@@ -134,6 +136,25 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensure can pre-load administer {@link OfficeObject}.
+	 */
+	public void testPreLoadAdministerOfficeObject() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.record_dependencyMappingBuilder_preLoadAdminister("ADMIN", SimpleManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
 	 * Tests administering an {@link OfficeManagedObject}.
 	 */
 	public void testAdministerOfficeManagedObject() {
@@ -153,6 +174,74 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
 				SimpleManagedObject.class);
 		admin.administerManagedObject("OFFICE.MANAGED_OBJECT");
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can pre-load administer {@link OfficeManagedObject}.
+	 */
+	public void testPreLoadAdministerOfficeManagedObject() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.record_dependencyMappingBuilder_preLoadAdminister("ADMIN", SimpleManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
+	 * Tests administering an {@link OfficeSectionManagedObject}.
+	 */
+	public void testAdministerOfficeSectionManagedObject() {
+
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
+				SimpleManagedObject.class);
+		office.registerManagedObjectSource("OFFICE.SECTION.MANAGED_OBJECT", "OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.MANAGED_OBJECT",
+				"OFFICE.SECTION.MANAGED_OBJECT");
+		admin.administerManagedObject("OFFICE.SECTION.MANAGED_OBJECT");
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can pre-load administer {@link OfficeSectionManagedObject}.
+	 */
+	public void testPreLoadAdministerOfficeSectionManagedObject() {
+
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.SECTION.MANAGED_OBJECT", "OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.MANAGED_OBJECT",
+				"OFFICE.SECTION.MANAGED_OBJECT");
+		this.record_dependencyMappingBuilder_preLoadAdminister("ADMIN", SimpleManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile
 		this.compile(true);

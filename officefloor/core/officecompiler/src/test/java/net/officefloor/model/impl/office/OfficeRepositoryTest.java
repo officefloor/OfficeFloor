@@ -64,6 +64,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamMod
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
 import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
@@ -303,6 +304,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionManagedObjectModel sectionMo = new OfficeSectionManagedObjectModel("SECTION_MO");
 		subSection.addOfficeSectionManagedObject(sectionMo);
 
+		// administration -> section managed object
+		AdministrationToOfficeSectionManagedObjectModel sectionMoToAdmin = new AdministrationToOfficeSectionManagedObjectModel(
+				"ADMINISTRATION", "1");
+		sectionMo.addAdministration(sectionMoToAdmin);
+
 		// section managed object -> pre-load administration
 		OfficeSectionManagedObjectToPreLoadAdministrationModel sectionMoToPreLoadAdmin = new OfficeSectionManagedObjectToPreLoadAdministrationModel(
 				"ADMINISTRATION");
@@ -459,6 +465,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the administration teams connected
 		assertEquals("administration <- team", admin, adminToTeam.getAdministration());
 		assertEquals("administration -> team", team, adminToTeam.getOfficeTeam());
+
+		// Ensure administer the section managed object
+		assertEquals("section managed object <- administration", sectionMo,
+				sectionMoToAdmin.getOfficeSectionManagedObject());
+		assertEquals("section managed object -> administration", admin, sectionMoToAdmin.getAdministration());
 
 		// Ensure section managed object connected to pre-load administration
 		assertEquals("section managed object <- pre-load admin", sectionMo,
@@ -702,6 +713,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionManagedObjectModel sectionMo = new OfficeSectionManagedObjectModel();
 		subSection.addOfficeSectionManagedObject(sectionMo);
 
+		// administration -> section managed object
+		AdministrationToOfficeSectionManagedObjectModel sectionMoToAdmin = new AdministrationToOfficeSectionManagedObjectModel();
+		sectionMoToAdmin.setAdministration(admin);
+		sectionMoToAdmin.setOfficeSectionManagedObject(sectionMo);
+		sectionMoToAdmin.connect();
+
 		// section managed object -> pre-load administration
 		OfficeSectionManagedObjectToPreLoadAdministrationModel sectionMoToPreLoadAdmin = new OfficeSectionManagedObjectToPreLoadAdministrationModel();
 		sectionMoToPreLoadAdmin.setAdministration(admin);
@@ -825,6 +842,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				extMoToAdmin.getAdministrationName());
 		assertEquals("office managed object - administration", "ADMINISTRATION", moToAdmin.getAdministrationName());
 		assertEquals("administration - team", "TEAM", adminToTeam.getOfficeTeamName());
+		assertEquals("section managed object - administration", "ADMINISTRATION",
+				sectionMoToAdmin.getAdministrationName());
 		assertEquals("section managed object - pre-load administration", "ADMINISTRATION",
 				sectionMoToPreLoadAdmin.getAdministrationName());
 		assertEquals("function - governance", "GOVERNANCE", functionToGov.getGovernanceName());

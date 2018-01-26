@@ -5,6 +5,27 @@
 		</offices>
 	</office-floor>
 	<office>
+		<administrations>
+			<administration name="ADMIN" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleAdmin" />
+				</properties>
+			</administration>
+		</administrations>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<sub-section>
+					<section-managed-object name="MANAGED_OBJECT">
+						<administer administration="ADMIN" order="1" />
+					</section-managed-object>
+					<function name="FUNCTION">
+						<pre-administer administration="ADMIN" />
+					</function>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+	<section>
 		<managed-object-sources>
 			<managed-object-source name="MANAGED_OBJECT_SOURCE"
 				source="CLASS">
@@ -16,27 +37,8 @@
 		<managed-objects>
 			<managed-object name="MANAGED_OBJECT" scope="THREAD">
 				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
-				<administer administration="ADMIN" order="1" />
 			</managed-object>
 		</managed-objects>
-		<administrations>
-			<administration name="ADMIN" source="CLASS">
-				<properties>
-					<property name="class.name" value="${testcase}$SimpleAdmin" />
-				</properties>
-			</administration>
-		</administrations>
-		<sections>
-			<section name="SECTION" source="SECTION" location="section">
-				<sub-section>
-					<function name="FUNCTION">
-						<pre-administer administration="ADMIN" />
-					</function>
-				</sub-section>
-			</section>
-		</sections>
-	</office>
-	<section>
 		<function-namespaces>
 			<function-namespace name="NAMESPACE" source="CLASS">
 				<properties>

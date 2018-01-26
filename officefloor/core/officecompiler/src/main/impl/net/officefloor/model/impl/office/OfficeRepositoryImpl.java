@@ -33,6 +33,7 @@ import net.officefloor.model.office.AdministrationFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
@@ -635,6 +636,18 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connection administration of sub section managed objects
+		for (OfficeSectionManagedObjectModel mo : subSection.getOfficeSectionManagedObjects()) {
+			for (AdministrationToOfficeSectionManagedObjectModel conn : mo.getAdministrations()) {
+				AdministrationModel admin = administrations.get(conn.getAdministrationName());
+				if (admin != null) {
+					conn.setOfficeSectionManagedObject(mo);
+					conn.setAdministration(admin);
+					conn.connect();
+				}
+			}
+		}
+
 		// Connect pre-load administration for sub section managed objects
 		for (OfficeSectionManagedObjectModel mo : subSection.getOfficeSectionManagedObjects()) {
 			for (OfficeSectionManagedObjectToPreLoadAdministrationModel conn : mo.getPreLoadAdministrations()) {
@@ -872,6 +885,14 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (GovernanceModel governance : office.getGovernances()) {
 			for (GovernanceToOfficeSectionManagedObjectModel conn : governance.getOfficeSectionManagedObjects()) {
 				conn.setGovernanceName(governance.getGovernanceName());
+			}
+		}
+
+		// Specify administration of section managed objects
+		for (AdministrationModel admin : office.getAdministrations()) {
+			for (AdministrationToOfficeSectionManagedObjectModel conn : admin
+					.getAdministeredOfficeSectionManagedObjects()) {
+				conn.setAdministrationName(admin.getAdministrationName());
 			}
 		}
 

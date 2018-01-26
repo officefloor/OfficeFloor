@@ -62,6 +62,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamMod
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
 import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
@@ -240,7 +241,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getAdministrationName", "getAdministrationSourceClassName", "getX", "getY" },
 				office.getAdministrations(),
 				new AdministrationModel("ADMINISTRATION", "net.example.ExampleAdministrationSource", null, null, null,
-						null, null, null, null, null, null, null, null, 700, 701));
+						null, null, null, null, null, null, null, null, null, 700, 701));
 		AdministrationModel admin = office.getAdministrations().get(0);
 		assertList(new String[] { "getName", "getValue" }, admin.getProperties(),
 				new PropertyModel("ADMIN_ONE", "VALUE_ONE"), new PropertyModel("ADMIN_TWO", "VALUE_TWO"));
@@ -328,6 +329,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeSectionManagedObjectName" }, officeSection.getOfficeSectionManagedObjects(),
 				new OfficeSectionManagedObjectModel("SECTION_MANAGED_OBJECT"));
 		OfficeSectionManagedObjectModel officeSectionMo = officeSection.getOfficeSectionManagedObjects().get(0);
+		assertList(new String[] { "getAdministrationName", "getOrder" }, officeSectionMo.getAdministrations(),
+				new AdministrationToOfficeSectionManagedObjectModel("ADMINISTRATION", "1"));
 		assertList(new String[] { "getGovernanceName" }, officeSectionMo.getGovernances(),
 				new GovernanceToOfficeSectionManagedObjectModel("GOVERNANCE"));
 		assertList(new String[] { "getOfficeSectionManagedObjectTeamName" },

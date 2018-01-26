@@ -361,6 +361,11 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	}
 
 	/**
+	 * Current {@link DependencyMappingBuilder}.
+	 */
+	private DependencyMappingBuilder dependencyMappingBuilder = null;
+
+	/**
 	 * Records adding a {@link ProcessState} {@link ManagedObject} to the
 	 * {@link Office}.
 	 * 
@@ -371,10 +376,11 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(String processManagedObjectName,
 			String officeManagedObjectName) {
-		DependencyMappingBuilder builder = this.createMock(DependencyMappingBuilder.class);
+		this.dependencyMappingBuilder = this.createMock(DependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
-				this.officeBuilder.addProcessManagedObject(processManagedObjectName, officeManagedObjectName), builder);
-		return builder;
+				this.officeBuilder.addProcessManagedObject(processManagedObjectName, officeManagedObjectName),
+				this.dependencyMappingBuilder);
+		return this.dependencyMappingBuilder;
 	}
 
 	/**
@@ -388,10 +394,53 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
 			String officeManagedObjectName) {
-		DependencyMappingBuilder builder = this.createMock(DependencyMappingBuilder.class);
+		this.dependencyMappingBuilder = this.createMock(DependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
-				this.officeBuilder.addThreadManagedObject(threadManagedObjectName, officeManagedObjectName), builder);
-		return builder;
+				this.officeBuilder.addThreadManagedObject(threadManagedObjectName, officeManagedObjectName),
+				this.dependencyMappingBuilder);
+		return this.dependencyMappingBuilder;
+	}
+
+	/**
+	 * Flags if the matcher has been specified to add pre-load
+	 * {@link Administration}.
+	 */
+	private boolean isMatcherSet_dependencyMappingBuilder_preLoadAdministration = false;
+
+	/**
+	 * Records adding pre-load {@link Administration}.
+	 * 
+	 * @param administrationName
+	 *            Name of the {@link Administration}.
+	 * @param extensionType
+	 *            Extension type.
+	 * @return {@link AdministrationBuilder} for the added
+	 *         {@link Administration}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_dependencyMappingBuilder_preLoadAdminister(
+			String administrationName, Class<E> extensionType) {
+
+		// Record adding pre-administration
+		final AdministrationBuilder<F, G> admin = this.createMock(AdministrationBuilder.class);
+		AdministrationFactory<E, F, G> adminFactory = null;
+		this.recordReturn(this.dependencyMappingBuilder,
+				this.dependencyMappingBuilder.preLoadAdminister(administrationName, extensionType, adminFactory),
+				admin);
+		if (!this.isMatcherSet_dependencyMappingBuilder_preLoadAdministration) {
+			this.control(this.dependencyMappingBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					assertNotNull("Must have administration factory", actual[2]);
+					// Match based on name and extension type
+					return expected[0].equals(actual[0]) && expected[1].equals(actual[1]);
+				}
+			});
+			this.isMatcherSet_dependencyMappingBuilder_preLoadAdministration = true;
+		}
+
+		// Return the admin builder
+		return admin;
 	}
 
 	/**
@@ -406,16 +455,16 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 *            Name of the {@link GovernanceSource}.
 	 * @param governanceSourceClass
 	 *            {@link GovernanceSource} class.
-	 * @param extensionInterface
-	 *            Extension interface.
+	 * @param extensionType
+	 *            Extension type.
 	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <E, F extends Enum<F>, S extends GovernanceSource<E, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
-			String governanceName, Class<S> governanceSourceClass, Class<?> extensionInterface) {
+			String governanceName, Class<S> governanceSourceClass, Class<?> extensionType) {
 		GovernanceBuilder<F> governanceBuilder = this.createMock(GovernanceBuilder.class);
-		this.recordReturn(this.officeBuilder, this.officeBuilder.addGovernance(governanceName,
-				(Class<E>) extensionInterface, (GovernanceFactory<E, F>) null), governanceBuilder);
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addGovernance(governanceName, (Class<E>) extensionType,
+				(GovernanceFactory<E, F>) null), governanceBuilder);
 		if (!this.isMatcherSet_officeBuilder_addGovernance) {
 			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
 				@Override
@@ -423,7 +472,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 					// Ensure have governance factory
 					assertNotNull("Must have governance factory", actual[2]);
 
-					// Match if name and extension interface same
+					// Match if name and extension type same
 					return this.argumentMatches(expected[0], actual[0]) && this.argumentMatches(expected[1], actual[1]);
 				}
 			});
@@ -441,14 +490,14 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 *            Name of {@link Team} responsible for {@link Governance}.
 	 * @param governanceSourceClass
 	 *            {@link GovernanceSource} class.
-	 * @param extensionInterface
-	 *            Extension interface.
+	 * @param extensionType
+	 *            Extension type.
 	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
 	 */
 	protected <E, F extends Enum<F>, S extends GovernanceSource<E, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
-			String governanceName, String teamName, Class<S> governanceSourceClass, Class<?> extensionInterface) {
+			String governanceName, String teamName, Class<S> governanceSourceClass, Class<?> extensionType) {
 		GovernanceBuilder<F> governanceBuilder = this.record_officeBuilder_addGovernance(governanceName,
-				governanceSourceClass, extensionInterface);
+				governanceSourceClass, extensionType);
 		if (teamName != null) {
 			governanceBuilder.setResponsibleTeam(teamName);
 		}
@@ -675,26 +724,26 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * 
 	 * @param administrationName
 	 *            Name of the {@link Administration}.
-	 * @param extensionInterface
-	 *            Extension interface.
+	 * @param extensionType
+	 *            Extension type.
 	 * @return {@link AdministrationBuilder} for the added
 	 *         {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_functionBuilder_preAdministration(
-			String administrationName, Class<E> extensionInterface) {
+			String administrationName, Class<E> extensionType) {
 
 		// Record adding pre-administration
 		final AdministrationBuilder<F, G> admin = this.createMock(AdministrationBuilder.class);
 		AdministrationFactory<E, F, G> adminFactory = null;
 		this.recordReturn(this.functionBuilder,
-				this.functionBuilder.preAdminister(administrationName, extensionInterface, adminFactory), admin);
+				this.functionBuilder.preAdminister(administrationName, extensionType, adminFactory), admin);
 		if (!this.isMatcherSet_functionBuilder_preAdministration) {
 			this.control(this.functionBuilder).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					assertNotNull("Must have administration factory", actual[2]);
-					// Match based on name and extension interface
+					// Match based on name and extension type
 					return expected[0].equals(actual[0]) && expected[1].equals(actual[1]);
 				}
 			});
@@ -716,26 +765,26 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * 
 	 * @param administrationName
 	 *            Name of the {@link Administration}.
-	 * @param extensionInterface
-	 *            Extension interface.
+	 * @param extensionType
+	 *            Extension type.
 	 * @return {@link AdministrationBuilder} for the added
 	 *         {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_functionBuilder_postAdministration(
-			String administrationName, Class<E> extensionInterface) {
+			String administrationName, Class<E> extensionType) {
 
 		// Record adding post-administration
 		final AdministrationBuilder<F, G> admin = this.createMock(AdministrationBuilder.class);
 		AdministrationFactory<E, F, G> adminFactory = null;
 		this.recordReturn(this.functionBuilder,
-				this.functionBuilder.postAdminister(administrationName, extensionInterface, adminFactory), admin);
+				this.functionBuilder.postAdminister(administrationName, extensionType, adminFactory), admin);
 		if (!this.isMatcherSet_functionBuilder_postAdministration) {
 			this.control(this.functionBuilder).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					assertNotNull("Must have administration factory", actual[2]);
-					// Match based on name and extension interface
+					// Match based on name and extension type
 					return expected[0].equals(actual[0]) && expected[1].equals(actual[1]);
 				}
 			});

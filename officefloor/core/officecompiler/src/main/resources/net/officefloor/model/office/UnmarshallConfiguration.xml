@@ -333,6 +333,11 @@
 					class="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel">
 					<value method="setOfficeSectionManagedObjectTeamName" node="team@name" />
 				</object>
+				<object method="addAdministration" node="administer"
+					class="net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel">
+					<value method="setAdministrationName" node="administer@administration" />
+					<value method="setOrder" node="administer@order" />
+				</object>
 				<object method="addPreLoadAdministration" node="pre-load"
 					class="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel">
 					<value method="setAdministrationName" node="pre-load@administration" />

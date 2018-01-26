@@ -125,12 +125,12 @@ public class AdministrationLoaderUtil {
 		AdministrationType<E, F, G> aType = loadAdministrationType(administratorSourceClass, propertyNameValues);
 
 		// Ensure correct administrator type
-		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionInterface(),
-				aType.getExtensionInterface());
+		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionType(),
+				aType.getExtensionType());
 
 		// Validate the type
-		Assert.assertEquals("Incorrect extension interface", eType.getExtensionInterface(),
-				aType.getExtensionInterface());
+		Assert.assertEquals("Incorrect extension interface", eType.getExtensionType(),
+				aType.getExtensionType());
 		Assert.assertEquals("Incorrect flow key class", eType.getFlowKeyClass(), aType.getFlowKeyClass());
 		Assert.assertEquals("Incorrect governance key class", eType.getGovernanceKeyClass(),
 				aType.getGovernanceKeyClass());
@@ -309,7 +309,7 @@ public class AdministrationLoaderUtil {
 		 */
 
 		@Override
-		public Class<E> getExtensionInterface() {
+		public Class<E> getExtensionType() {
 			return this.extensionInterface;
 		}
 

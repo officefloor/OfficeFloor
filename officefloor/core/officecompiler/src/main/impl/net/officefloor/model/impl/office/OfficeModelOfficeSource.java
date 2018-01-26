@@ -63,12 +63,17 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
-import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.GovernanceAreaModel;
 import net.officefloor.model.office.GovernanceModel;
+import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.GovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
@@ -93,13 +98,12 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
-import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
-import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
-import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -201,6 +205,43 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		// Add governance processing for sub sections
 		processors.addSubSectionProcessor(new GovernanceSubSectionProcessor(governances));
 
+		// Add the administration (keeping registry of administration)
+		Map<String, OfficeAdministration> administrations = new HashMap<String, OfficeAdministration>();
+		for (AdministrationModel adminModel : office.getAdministrations()) {
+
+			// Add the administration and register it
+			String adminName = adminModel.getAdministrationName();
+			OfficeAdministration admin = architect.addOfficeAdministration(adminName,
+					adminModel.getAdministrationSourceClassName());
+			for (PropertyModel property : adminModel.getProperties()) {
+				admin.addProperty(property.getName(), property.getValue());
+			}
+			administrations.put(adminName, admin);
+
+			// Obtain the office team responsible for this administration
+			OfficeTeam officeTeam = null;
+			AdministrationToOfficeTeamModel adminToTeam = adminModel.getOfficeTeam();
+			if (adminToTeam != null) {
+				OfficeTeamModel teamModel = adminToTeam.getOfficeTeam();
+				if (teamModel != null) {
+					officeTeam = teams.get(teamModel.getOfficeTeamName());
+				}
+			}
+			if (officeTeam != null) {
+				// Assign the team responsible for administration
+				architect.link(admin, officeTeam);
+			}
+		}
+
+		// Add processor to link administration with functions
+		processors.addSubSectionProcessor(new FunctionsToAdministrationSubSectionProcessor(teams, administrations));
+
+		// Add processor to administer the managed objects
+		processors.addSubSectionProcessor(new AdministerManagedObject(administrations));
+
+		// Add processor to link pre-load administration for managed objects
+		processors.addSubSectionProcessor(new PreLoadAdministerManagedObject(administrations));
+
 		// Add the external managed objects, keeping registry of them
 		Map<String, OfficeObject> officeObjects = new HashMap<String, OfficeObject>();
 		for (ExternalManagedObjectModel object : office.getExternalManagedObjects()) {
@@ -216,6 +257,17 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 						governance.governManagedObject(officeObject);
+					}
+				}
+			}
+
+			// Provide pre-load administration over managed object
+			for (ExternalManagedObjectToPreLoadAdministrationModel moToPreLoad : object.getPreLoadAdministrations()) {
+				AdministrationModel adminModel = moToPreLoad.getAdministration();
+				if (adminModel != null) {
+					OfficeAdministration administration = administrations.get(adminModel.getAdministrationName());
+					if (administration != null) {
+						officeObject.addPreLoadAdministration(administration);
 					}
 				}
 			}
@@ -351,6 +403,17 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 						governance.governManagedObject(managedObject);
+					}
+				}
+			}
+
+			// Add pre-load administration
+			for (OfficeManagedObjectToPreLoadAdministrationModel moToPreLoad : moModel.getPreLoadAdministrations()) {
+				AdministrationModel adminModel = moToPreLoad.getAdministration();
+				if (adminModel != null) {
+					OfficeAdministration administration = administrations.get(adminModel.getAdministrationName());
+					if (administration != null) {
+						managedObject.addPreLoadAdministration(administration);
 					}
 				}
 			}
@@ -657,37 +720,6 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				}
 			}
 		}
-
-		// Add the administration (keeping registry of administration)
-		Map<String, OfficeAdministration> administrations = new HashMap<String, OfficeAdministration>();
-		for (AdministrationModel adminModel : office.getAdministrations()) {
-
-			// Add the administration and register it
-			String adminName = adminModel.getAdministrationName();
-			OfficeAdministration admin = architect.addOfficeAdministration(adminName,
-					adminModel.getAdministrationSourceClassName());
-			for (PropertyModel property : adminModel.getProperties()) {
-				admin.addProperty(property.getName(), property.getValue());
-			}
-			administrations.put(adminName, admin);
-
-			// Obtain the office team responsible for this administration
-			OfficeTeam officeTeam = null;
-			AdministrationToOfficeTeamModel adminToTeam = adminModel.getOfficeTeam();
-			if (adminToTeam != null) {
-				OfficeTeamModel teamModel = adminToTeam.getOfficeTeam();
-				if (teamModel != null) {
-					officeTeam = teams.get(teamModel.getOfficeTeamName());
-				}
-			}
-			if (officeTeam != null) {
-				// Assign the team responsible for administration
-				architect.link(admin, officeTeam);
-			}
-		}
-
-		// Add processor to link administration with functions
-		processors.addSubSectionProcessor(new FunctionsToAdministrationSubSectionProcessor(teams, administrations));
 
 		// Create the listing of objects to be administered
 		Map<String, List<AdministeredManagedObject>> administration = new HashMap<String, List<AdministeredManagedObject>>();
@@ -1273,13 +1305,99 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
+	 * {@link SubSectionProcessor} to provide {@link Administration} of
+	 * {@link OfficeSectionManagedObject} instances.
+	 */
+	private static class AdministerManagedObject extends AbstractSubSectionProcessor {
+
+		/**
+		 * {@link OfficeAdministration} instances by their name.
+		 */
+		private final Map<String, OfficeAdministration> administrations;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param administrations
+		 *            {@link OfficeAdministration} instances by their name.
+		 */
+		public AdministerManagedObject(Map<String, OfficeAdministration> administrations) {
+			this.administrations = administrations;
+		}
+
+		/*
+		 * ================== SubSectionProcessor ======================
+		 */
+
+		@Override
+		public void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
+				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
+
+			// Link pre-load administration
+			for (AdministrationToOfficeSectionManagedObjectModel moToPreLoad : managedObjectModel
+					.getAdministrations()) {
+				AdministrationModel adminModel = moToPreLoad.getAdministration();
+				if (adminModel != null) {
+					OfficeAdministration administration = administrations.get(adminModel.getAdministrationName());
+					if (administration != null) {
+						administration.administerManagedObject(managedObject);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@link SubSectionProcessor} to provide pre-load {@link Administration} of
+	 * {@link OfficeSectionManagedObject} instances.
+	 */
+	private static class PreLoadAdministerManagedObject extends AbstractSubSectionProcessor {
+
+		/**
+		 * {@link OfficeAdministration} instances by their name.
+		 */
+		private final Map<String, OfficeAdministration> administrations;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param administrations
+		 *            {@link OfficeAdministration} instances by their name.
+		 */
+		public PreLoadAdministerManagedObject(Map<String, OfficeAdministration> administrations) {
+			this.administrations = administrations;
+		}
+
+		/*
+		 * ================== SubSectionProcessor ======================
+		 */
+
+		@Override
+		public void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
+				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
+
+			// Link pre-load administration
+			for (OfficeSectionManagedObjectToPreLoadAdministrationModel moToPreLoad : managedObjectModel
+					.getPreLoadAdministrations()) {
+				AdministrationModel adminModel = moToPreLoad.getAdministration();
+				if (adminModel != null) {
+					OfficeAdministration administration = administrations.get(adminModel.getAdministrationName());
+					if (administration != null) {
+						managedObject.addPreLoadAdministration(administration);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * {@link SubSectionProcessor} to provide {@link Governance} to the
 	 * {@link OfficeSubSection} instances.
 	 */
 	private static class GovernanceSubSectionProcessor extends AbstractSubSectionProcessor {
 
 		/**
-		 * {@link Governance} instances by their name.
+		 * {@link OfficeGovernance} instances by their name.
 		 */
 		private final Map<String, OfficeGovernance> governances;
 
@@ -1287,7 +1405,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		 * Initiate.
 		 * 
 		 * @param governances
-		 *            {@link Governance} instances by their name.
+		 *            {@link OfficeGovernance} instances by their name.
 		 */
 		public GovernanceSubSectionProcessor(Map<String, OfficeGovernance> governances) {
 			this.governances = governances;

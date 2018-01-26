@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
@@ -67,6 +68,20 @@ public interface InputManagedObjectNode extends LinkObjectNode, BoundManagedObje
 	 *         over this {@link InputManagedObjectNode}.
 	 */
 	GovernanceNode[] getGovernances(OfficeNode managingOffice);
+
+	/**
+	 * Obtains the pre-load {@link AdministrationNode} instances providing
+	 * {@link Administration} over this {@link InputManagedObjectNode}.
+	 * 
+	 * @param managingOffice
+	 *            {@link OfficeNode} managing the
+	 *            {@link InputManagedObjectNode}, which ensures that
+	 *            {@link Administration} does not extend beyond the particular
+	 *            {@link OfficeNode}.
+	 * @return {@link AdministrationNode} instances providing pre-load
+	 *         {@link Administration} over this {@link InputManagedObjectNode}.
+	 */
+	AdministrationNode[] getPreLoadAdministrations(OfficeNode managingOffice);
 
 	/**
 	 * Obtains the {@link TypeQualification} instances for the

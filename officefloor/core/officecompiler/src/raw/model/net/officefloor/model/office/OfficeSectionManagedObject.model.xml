@@ -3,6 +3,7 @@
 	<field type="String" name="office section managed object name" />
 	<list type="GovernanceToOfficeSectionManagedObjectModel" name="governance" />
 	<list type="OfficeSectionManagedObjectTeamModel" name="office section managed object team" />
+	<list type="AdministrationToOfficeSectionManagedObjectModel" name="administration" />
 	<list type="OfficeSectionManagedObjectToPreLoadAdministrationModel"
 		name="pre load administration" />
 </model>

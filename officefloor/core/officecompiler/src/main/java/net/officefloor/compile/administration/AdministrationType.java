@@ -38,7 +38,7 @@ public interface AdministrationType<E, F extends Enum<F>, G extends Enum<G>> {
 	 * 
 	 * @return Extension interface for the {@link ManagedObject}.
 	 */
-	Class<E> getExtensionInterface();
+	Class<E> getExtensionType();
 
 	/**
 	 * Obtains the {@link AdministrationFactory} to create the

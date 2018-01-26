@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -61,6 +62,19 @@ public interface BoundManagedObjectNode extends LinkObjectNode {
 	void addGovernance(GovernanceNode governance, OfficeNode office);
 
 	/**
+	 * Adds the {@link AdministrationNode} to provide pre-load
+	 * {@link Administration} for this {@link ManagedObjectNode} when used
+	 * within the {@link Office} of the {@link OfficeNode}.
+	 * 
+	 * @param preLoadAdministration
+	 *            Pre-load {@link AdministrationNode}.
+	 * @param office
+	 *            {@link OfficeNode} for which the pre-load
+	 *            {@link Administration} is applicable.
+	 */
+	void addPreLoadAdministration(AdministrationNode preLoadAdministration, OfficeNode office);
+
+	/**
 	 * Builds the {@link ManagedObject} into the {@link Office}.
 	 * 
 	 * @param office
@@ -73,8 +87,7 @@ public interface BoundManagedObjectNode extends LinkObjectNode {
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 */
-	void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+	void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			CompileContext compileContext);
 
 }

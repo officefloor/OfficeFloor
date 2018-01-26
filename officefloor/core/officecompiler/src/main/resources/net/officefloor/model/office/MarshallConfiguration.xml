@@ -554,6 +554,16 @@
 								</attributes>
 							</item>
 						</collection>
+						<collection method="getAdministrations">
+							<item
+								type="net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel"
+								element="administer">
+								<attributes>
+									<attribute method="getAdministrationName" attribute="administration" />
+									<attribute method="getOrder" attribute="order" />
+								</attributes>
+							</item>
+						</collection>
 						<collection method="getPreLoadAdministrations">
 							<item
 								type="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel"

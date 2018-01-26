@@ -968,6 +968,12 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 						managedObjectNode.addGovernance(governance, this);
 					}
 
+					// Load pre-load administration for linked Managed Object
+					AdministrationNode[] administrations = objectNode.getPreLoadAdministrations();
+					for (AdministrationNode administration : administrations) {
+						managedObjectNode.addPreLoadAdministration(administration, this);
+					}
+
 					// Build the managed object into the office
 					officeBindings.buildManagedObjectIntoOffice(managedObjectNode);
 				});

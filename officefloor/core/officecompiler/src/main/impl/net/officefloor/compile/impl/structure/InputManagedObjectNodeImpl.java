@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -35,7 +37,6 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -92,7 +93,13 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * Listing of {@link GovernanceNode} instances for the particular
 	 * {@link OfficeNode}.
 	 */
-	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<OfficeNode, List<GovernanceNode>>();
+	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<>();
+
+	/**
+	 * Listing of pre-load {@link AdministrationNode} instances for the
+	 * particular {@link OfficeNode}.
+	 */
+	private final Map<OfficeNode, List<AdministrationNode>> preLoadAdministrationsPerOffice = new HashMap<>();
 
 	/**
 	 * Initiate.
@@ -182,12 +189,26 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 		// Obtain the listing of governances for the office
 		List<GovernanceNode> governances = this.governancesPerOffice.get(office);
 		if (governances == null) {
-			governances = new LinkedList<GovernanceNode>();
+			governances = new LinkedList<>();
 			this.governancesPerOffice.put(office, governances);
 		}
 
 		// Add the governance
 		governances.add(governance);
+	}
+
+	@Override
+	public void addPreLoadAdministration(AdministrationNode preLoadAdministration, OfficeNode office) {
+
+		// Obtain the listing of pre-load administrations for the office
+		List<AdministrationNode> preLoadAdmins = this.preLoadAdministrationsPerOffice.get(office);
+		if (preLoadAdmins == null) {
+			preLoadAdmins = new LinkedList<>();
+			this.preLoadAdministrationsPerOffice.put(office, preLoadAdmins);
+		}
+
+		// Add the pre-load administration
+		preLoadAdmins.add(preLoadAdministration);
 	}
 
 	@Override
@@ -214,6 +235,17 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 		// Return the governances
 		return (governances == null ? new GovernanceNode[0]
 				: governances.toArray(new GovernanceNode[governances.size()]));
+	}
+
+	@Override
+	public AdministrationNode[] getPreLoadAdministrations(OfficeNode managingOffice) {
+
+		// Obtain the pre-load administrations
+		List<AdministrationNode> preLoadAdmins = this.preLoadAdministrationsPerOffice.get(managingOffice);
+
+		// Return the pre-load administrations
+		return (preLoadAdmins == null ? new AdministrationNode[0]
+				: preLoadAdmins.toArray(new AdministrationNode[preLoadAdmins.size()]));
 	}
 
 	@Override

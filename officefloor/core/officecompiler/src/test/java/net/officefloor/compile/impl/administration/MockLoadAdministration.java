@@ -54,7 +54,7 @@ public class MockLoadAdministration {
 	 */
 	public static void assertAdministrationType(AdministrationType<?, ?, ?> administrationType) {
 		Assert.assertEquals("Incorrect extension interface", MockExtensionInterface.class,
-				administrationType.getExtensionInterface());
+				administrationType.getExtensionType());
 	}
 
 }

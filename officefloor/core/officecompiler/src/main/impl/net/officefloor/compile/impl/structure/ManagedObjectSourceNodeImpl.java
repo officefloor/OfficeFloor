@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
@@ -773,12 +774,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					// Provide governance for office floor input managed object.
 					// For others, should be configured through Office (flows)
 					if (this.inputManagedObjectNode != null) {
-						// Get governances for input managed object of office
-						GovernanceNode[] governances = this.inputManagedObjectNode.getGovernances(managingOffice);
 
 						// Map in the governances
+						GovernanceNode[] governances = this.inputManagedObjectNode.getGovernances(managingOffice);
 						for (GovernanceNode governance : governances) {
 							inputDependencyMappings.mapGovernance(governance.getOfficeGovernanceName());
+						}
+
+						// Map in the pre-load administrations
+						AdministrationNode[] preLoadAdmins = this.inputManagedObjectNode
+								.getPreLoadAdministrations(managingOffice);
+						for (AdministrationNode preLoadAdmin : preLoadAdmins) {
+							preLoadAdmin.buildPreLoadManagedObjectAdministration(inputDependencyMappings,
+									compileContext);
 						}
 					}
 
