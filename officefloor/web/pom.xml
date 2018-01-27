@@ -14,11 +14,9 @@
 	<description>Web functionality for OfficeFloor</description>
 	<modules>
 		<module>officeweb</module>
-<!--  
-		<module>officeweb_resource</module>
 		<module>officeweb_security</module>
--->
 		<module>officeweb_template</module>
+		<module>officeweb_resource</module>
 <!--
 		<module>officeweb_rest</module>
 		<module>officeweb_application</module>
