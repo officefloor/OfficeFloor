@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
 /**
  * Manages the {@link Socket} interaction.
@@ -1005,7 +1006,7 @@ public class SocketManager {
 			// Prepare the pooled response buffers
 			StreamBuffer<ByteBuffer> prepareBuffer = headResponseBuffer;
 			while (prepareBuffer != null) {
-				if (prepareBuffer.isPooled) {
+				if (prepareBuffer.pooledBuffer != null) {
 					prepareBuffer.pooledBuffer.flip();
 				}
 				prepareBuffer = prepareBuffer.next;
@@ -1031,7 +1032,7 @@ public class SocketManager {
 				}
 
 				// Ensure have space to write content
-				if ((!writeBuffer.isPooled) || (writeBuffer.pooledBuffer.remaining() == 0)) {
+				if ((writeBuffer.pooledBuffer == null) || (writeBuffer.pooledBuffer.remaining() == 0)) {
 					// Require new write buffer
 					writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
 					writeBuffer = writeBuffer.next;
@@ -1058,45 +1059,65 @@ public class SocketManager {
 
 					// Obtain the next buffer
 					StreamBuffer<ByteBuffer> streamBuffer = this.head.headResponseBuffer;
-					ByteBuffer buffer = (streamBuffer.isPooled ? streamBuffer.pooledBuffer
-							: streamBuffer.unpooledByteBuffer);
-
-					// Compact the data into the write buffer
-					int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
-					int bytesToWrite = buffer.remaining();
-					if (writeBufferRemaining >= bytesToWrite) {
-						// Space available to write the entire buffer
-						writeBuffer.pooledBuffer.put(buffer);
+					boolean isReleaseStreamBuffer;
+					if (streamBuffer.fileBuffer != null) {
+						// Append the file buffer
+						// (avoids copying data into user space for DMA)
+						writeBuffer.next = streamBuffer;
+						isReleaseStreamBuffer = false;
+						writeBuffer = writeBuffer.next;
 
 					} else {
-						// Must slice up buffer to write
-						ByteBuffer slice = buffer.duplicate();
-						int slicePosition = slice.position();
-						do {
-							// Write the slice
-							slice.limit(slicePosition + writeBufferRemaining);
-							writeBuffer.pooledBuffer.put(slice);
+						// Pooled / Unpooled buffer
+						ByteBuffer buffer = (streamBuffer.pooledBuffer != null) ? streamBuffer.pooledBuffer
+								: streamBuffer.unpooledByteBuffer;
+						isReleaseStreamBuffer = true;
 
-							// Decrement bytes to write
-							slicePosition += writeBufferRemaining;
-							bytesToWrite -= writeBufferRemaining;
-
-							// Setup for next write
+						// Ensure have pooled buffer for writing (may be file)
+						if (writeBuffer.pooledBuffer == null) {
 							writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
 							writeBuffer = writeBuffer.next;
+						}
 
-							// Setup slice for next write
-							writeBufferRemaining = Math.min(writeBuffer.pooledBuffer.remaining(), bytesToWrite);
-							slice.position(slicePosition);
+						// Compact the data into the write buffer
+						int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
+						int bytesToWrite = buffer.remaining();
+						if (writeBufferRemaining >= bytesToWrite) {
+							// Space available to write the entire buffer
+							writeBuffer.pooledBuffer.put(buffer);
 
-						} while (bytesToWrite > 0);
+						} else {
+							// Must slice up buffer to write
+							ByteBuffer slice = buffer.duplicate();
+							int slicePosition = slice.position();
+							do {
+								// Write the slice
+								slice.limit(slicePosition + writeBufferRemaining);
+								writeBuffer.pooledBuffer.put(slice);
+
+								// Decrement bytes to write
+								slicePosition += writeBufferRemaining;
+								bytesToWrite -= writeBufferRemaining;
+
+								// Setup for next write
+								writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
+								writeBuffer = writeBuffer.next;
+
+								// Setup slice for next write
+								writeBufferRemaining = Math.min(writeBuffer.pooledBuffer.remaining(), bytesToWrite);
+								slice.position(slicePosition);
+
+							} while (bytesToWrite > 0);
+						}
 					}
 
 					// Buffer compacted, move next (releasing written)
 					this.head.headResponseBuffer = streamBuffer.next;
 
 					// Must release buffer (after released from chain)
-					streamBuffer.release();
+					if (isReleaseStreamBuffer) {
+						streamBuffer.release();
+					}
 				}
 
 				// Compacted head response, so move onto next request
@@ -1131,7 +1152,9 @@ public class SocketManager {
 
 			// Prepare compacted buffers for writing
 			while (this.compactedResponseHead != null) {
-				this.compactedResponseHead.pooledBuffer.flip();
+				if (this.compactedResponseHead.pooledBuffer != null) {
+					this.compactedResponseHead.pooledBuffer.flip();
+				}
 				this.compactedResponseHead = this.compactedResponseHead.next;
 			}
 			// compact response head should now be null
@@ -1182,28 +1205,71 @@ public class SocketManager {
 			// Flush the compacted buffers to the socket
 			while (this.writeResponseHead != null) {
 
-				// Obtain the write buffer
-				ByteBuffer writeBuffer = this.writeResponseHead.isPooled ? this.writeResponseHead.pooledBuffer
-						: this.writeResponseHead.unpooledByteBuffer;
+				// Determine if file buffer
+				if (this.writeResponseHead.fileBuffer != null) {
+					// File buffer
+					FileBuffer writeBuffer = this.writeResponseHead.fileBuffer;
 
-				// Write the buffer to the socket
-				try {
-					this.socketChannel.write(writeBuffer);
-				} catch (IOException ex) {
-					// Failed to write to channel, so close
-					this.closeConnection(ex);
-					return false; // terminating
-				}
+					// Write the file content to the socket
+					long bytesWritten;
+					try {
+						// Determine the position and count
+						long position = writeBuffer.position + writeBuffer.bytesWritten;
+						long count = (writeBuffer.count < 0 ? writeBuffer.file.size() - writeBuffer.position
+								: writeBuffer.count) - writeBuffer.bytesWritten;
 
-				// Determine if written all bytes
-				if (writeBuffer.remaining() != 0) {
-					// Not all bytes written, so write when buffer emptied
+						// Write the file content to the socket
+						bytesWritten = writeBuffer.file.transferTo(position, count, this.socketChannel);
 
-					// Flag interest in write (as buffer full)
-					this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+						// Increment the number of bytes written
+						writeBuffer.bytesWritten += bytesWritten;
 
-					// Can not write anything further
-					return false; // require further writes
+						// Determine if written all bytes
+						if (bytesWritten < count) {
+							// Not all bytes written, so write when emptied
+
+							// Flag interest in write (as buffer full)
+							this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+
+							// Can not write anything further
+							return false; // require further writes
+						}
+
+						// As here, file complete
+						if (writeBuffer.callback != null) {
+							writeBuffer.callback.complete(writeBuffer.file, true);
+						}
+
+					} catch (IOException ex) {
+						// Failed to write to channel, so close
+						this.closeConnection(ex);
+						return false; // terminating
+					}
+
+				} else {
+					// Pooled / Unpooled buffer
+					ByteBuffer writeBuffer = (this.writeResponseHead.pooledBuffer != null)
+							? this.writeResponseHead.pooledBuffer : this.writeResponseHead.unpooledByteBuffer;
+
+					// Write the buffer to the socket
+					try {
+						this.socketChannel.write(writeBuffer);
+					} catch (IOException ex) {
+						// Failed to write to channel, so close
+						this.closeConnection(ex);
+						return false; // terminating
+					}
+
+					// Determine if written all bytes
+					if (writeBuffer.remaining() != 0) {
+						// Not all bytes written, so write when buffer emptied
+
+						// Flag interest in write (as buffer full)
+						this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+
+						// Can not write anything further
+						return false; // require further writes
+					}
 				}
 
 				// Capture buffer for release, and move to next buffer
@@ -1378,7 +1444,7 @@ public class SocketManager {
 			// Prepare the pooled response buffers
 			StreamBuffer<ByteBuffer> streamBuffer = immediateHead;
 			while (streamBuffer != null) {
-				if (streamBuffer.isPooled) {
+				if (streamBuffer.pooledBuffer != null) {
 					streamBuffer.pooledBuffer.flip();
 				}
 				streamBuffer = streamBuffer.next;

@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.administration.AdministrationType;
@@ -46,8 +47,8 @@ import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -277,27 +278,54 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	@Override
 	public void buildPreFunctionAdministration(ManagedFunctionBuilder<?, ?> functionBuilder,
 			CompileContext compileContext) {
-		this.buildAdministration(true, functionBuilder, compileContext);
+		this.buildAdministration(compileContext,
+				(name, extensionType, factory) -> functionBuilder.preAdminister(name, extensionType, factory));
 	}
 
 	@Override
 	public void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> functionBuilder,
 			CompileContext compileContext) {
-		this.buildAdministration(false, functionBuilder, compileContext);
+		this.buildAdministration(compileContext,
+				(name, extensionType, factory) -> functionBuilder.postAdminister(name, extensionType, factory));
+	}
+
+	@Override
+	public void buildPreLoadManagedObjectAdministration(DependencyMappingBuilder dependencyMappingBuilder,
+			CompileContext compileContext) {
+		this.buildAdministration(compileContext, (name, extensionType, factory) -> dependencyMappingBuilder
+				.preLoadAdminister(name, extensionType, factory));
 	}
 
 	/**
-	 * Builds the {@link Administration} onto the {@link ManagedFunction}.
+	 * {@link Function} interface to create the {@link AdministrationBuilder}.
+	 */
+	private static interface AdministrationBuilderFactory {
+
+		/**
+		 * Creates the {@link AdministrationBuilder}.
+		 * 
+		 * @param administrationName
+		 *            Name of the {@link Administration}.
+		 * @param extensionType
+		 *            Extension type.
+		 * @param adminFactory
+		 *            {@link AdministrationFactory}.
+		 * @return {@link AdministrationBuilder}.
+		 */
+		AdministrationBuilder<?, ?> createAdministrationBuilder(String administrationName, Class<Object> extensionType,
+				AdministrationFactory<Object, ?, ?> adminFactory);
+	}
+
+	/**
+	 * Builds the {@link Administration}.
 	 * 
-	 * @param isPreNotPost
-	 *            <code>true</code> for pre {@link Administration}. Otherwise
-	 *            post {@link Administration}.
-	 * @param functionBuilder
-	 *            {@link ManagedFunctionBuilder}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @param adminBuilderFactory
+	 *            {@link AdministrationBuilderFactory}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void buildAdministration(boolean isPreNotPost, ManagedFunctionBuilder<?, ?> functionBuilder,
-			CompileContext compileContext) {
+	private void buildAdministration(CompileContext compileContext, AdministrationBuilderFactory adminBuilderFactory) {
 
 		// Build the administration type
 		AdministrationType<?, ?, ?> adminType = this.loadAdministrationType();
@@ -310,16 +338,12 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		compileContext.registerPossibleMBean(AdministrationSource.class, qualifiedName, this.usedAdministrationSource);
 
 		// Obtain the administration details
-		Class extension = adminType.getExtensionInterface();
+		Class extension = adminType.getExtensionType();
 		AdministrationFactory administrationFactory = adminType.getAdministrationFactory();
 
-		// Register the administration
-		AdministrationBuilder<?, ?> adminBuilder;
-		if (isPreNotPost) {
-			adminBuilder = functionBuilder.preAdminister(this.administrationName, extension, administrationFactory);
-		} else {
-			adminBuilder = functionBuilder.postAdminister(this.administrationName, extension, administrationFactory);
-		}
+		// Create the administration builder
+		AdministrationBuilder<?, ?> adminBuilder = adminBuilderFactory
+				.createAdministrationBuilder(this.administrationName, extension, administrationFactory);
 
 		// Obtain the office team responsible for this administration
 		OfficeTeamNode officeTeam = LinkUtil.findTarget(this, OfficeTeamNode.class, this.context.getCompilerIssues());

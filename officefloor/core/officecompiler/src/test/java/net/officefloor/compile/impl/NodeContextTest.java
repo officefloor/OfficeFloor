@@ -496,7 +496,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeFloorManagedObjectSourceName());
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertEquals("Incorrect Office managed object source name", "MOS", node.getOfficeManagedObjectSourceName());
-		assertEquals("Incorrect containing Office", this.office, node.getOfficeNode());
+		assertSame("Incorrect containing Office", this.office, node.getOfficeNode());
 		assertNull("Should not have office section name, as not contained in section",
 				node.getOfficeSectionManagedObjectSourceName());
 		assertNull("Should not have section name, as not contained in section",

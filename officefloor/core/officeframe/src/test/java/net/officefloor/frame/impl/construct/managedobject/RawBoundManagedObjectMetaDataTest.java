@@ -17,54 +17,55 @@
  */
 package net.officefloor.frame.impl.construct.managedobject;
 
-import java.sql.Connection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
-import org.easymock.AbstractMatcher;
-
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.ManagedObjectSourceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawManagingOfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
-import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Test the {@link RawBoundManagedObjectMetaDataImpl}.
+ * Test the {@link RawBoundManagedObjectMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
 public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link OfficeFloorIssues}.
+	 * Dependency key {@link Enum}.
 	 */
-	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
+	private enum DependencyKey {
+		KEY
+	}
 
 	/**
 	 * {@link ManagedObjectScope}.
@@ -72,30 +73,24 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	private ManagedObjectScope managedObjectScope = ManagedObjectScope.THREAD;
 
 	/**
-	 * {@link AssetType}.
+	 * Name of the managing {@link Office}.
 	 */
-	private AssetType assetType = AssetType.OFFICE;
-
-	/**
-	 * Name of the {@link Office}.
-	 */
-	private String assetName = "OFFICE";
+	private static final String OFFICE_NAME = "OFFICE";
 
 	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private AssetManagerFactory assetManagerFactory = this.createMock(AssetManagerFactory.class);
+	private AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerFactory();
 
 	/**
-	 * Registered {@link RawManagedObjectMetaData} instances by their name.
+	 * {@link OfficeMetaData}.
 	 */
-	private final Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(OFFICE_NAME);
 
 	/**
-	 * Scope bound {@link RawBoundManagedObjectMetaData} instances by their
-	 * scope name.
+	 * {@link RawOfficeMetaData}.
 	 */
-	private final Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects = new HashMap<String, RawBoundManagedObjectMetaData>();
+	private final RawOfficeMetaDataMockBuilder rawOfficeMetaData = MockConstruct.mockRawOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * Input {@link ManagedObject} defaults.
@@ -103,24 +98,21 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	private final Map<String, String> inputManagedObjectDefaults = new HashMap<String, String>();
 
 	/**
-	 * {@link RawGovernanceMetaData}.
+	 * {@link OfficeFloorIssues}.
 	 */
-	private final Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData<?, ?>>();
+	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
 	 * Ensure issue if no bound name.
 	 */
 	public void testNoBoundName() {
 
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
-
-		// Record construction
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), null);
-		this.issues.addIssue(this.assetType, this.assetName, "No bound name for managed object");
+		// Record
+		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME, "No bound name for managed object");
 
 		// Attempt to construct
 		this.replayMockObjects();
-		this.constructRawBoundManagedObjectMetaData(0, configuration);
+		this.constructRawBoundManagedObjectMetaData(0, new DependencyMappingBuilderImpl<>(null, null));
 		this.verifyMockObjects();
 	}
 
@@ -129,16 +121,12 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoOfficeName() {
 
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
-
-		// Record construction
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), "BOUND");
-		this.recordReturn(configuration, configuration.getOfficeManagedObjectName(), "");
-		this.issues.addIssue(this.assetType, this.assetName, "No office name for bound managed object of name 'BOUND'");
+		// Record
+		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME, "No office name for bound managed object of name 'BOUND'");
 
 		// Attempt to construct
 		this.replayMockObjects();
-		this.constructRawBoundManagedObjectMetaData(0, configuration);
+		this.constructRawBoundManagedObjectMetaData(0, new DependencyMappingBuilderImpl<>("BOUND", null));
 		this.verifyMockObjects();
 	}
 
@@ -147,17 +135,13 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoManagedObjectMetaData() {
 
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
-
-		// Record construction
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), "BOUND_MO");
-		this.recordReturn(configuration, configuration.getOfficeManagedObjectName(), "OFFICE_MO");
-		this.issues.addIssue(this.assetType, this.assetName,
-				"No managed object by name 'OFFICE_MO' registered with the Office");
+		// Record
+		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME,
+				"No managed object by name 'BOUND_MO' registered with the Office");
 
 		// Attempt to construct
 		this.replayMockObjects();
-		this.constructRawBoundManagedObjectMetaData(0, configuration);
+		this.constructRawBoundManagedObjectMetaData(0, new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO"));
 		this.verifyMockObjects();
 	}
 
@@ -166,26 +150,20 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNullScopeManagedObjects() {
 
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		// Record construction
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO");
-		this.record_getDependencyMetaData(rawMoMetaData);
-		ManagedObjectMetaData<?> moMetaData = this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null);
+		// Record
+		ManagedObjectConfiguration<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
 
 		// Construct bound meta-data without scope managed objects
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData[] rawBoundMoMetaData = RawBoundManagedObjectMetaDataImpl.getFactory()
-				.constructBoundManagedObjectMetaData(new ManagedObjectConfiguration[] { configuration }, this.issues,
-						this.managedObjectScope, this.assetType, this.assetName, this.assetManagerFactory,
-						this.registeredManagedObjects, null, null, null, null);
+		RawBoundManagedObjectMetaData[] rawBoundMoMetaData = this.constructRawBoundManagedObjectMetaData(1,
+				configuration);
 		ManagedObjectMetaData<?> boundMoMetaData = rawBoundMoMetaData[0].getRawBoundManagedObjectInstanceMetaData()[0]
 				.getManagedObjectMetaData();
 		this.verifyMockObjects();
 
-		// Verify correct managed object meta-data
-		assertEquals("Incorrect managed object meta-data", moMetaData, boundMoMetaData);
+		// Ensure have meta-data
+		assertEquals("Incorrect meta-data", "BOUND", boundMoMetaData.getBoundManagedObjectName());
 	}
 
 	/**
@@ -194,22 +172,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNameClashBetweenBoundManagedObjects() {
 
-		final ManagedObjectConfiguration<?> oneConfiguration = this.createMock(ManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> oneMetaData = this.registerRawManagedObjectMetaData("ONE_MO");
-		final ManagedObjectConfiguration<?> twoConfiguration = this.createMock(ManagedObjectConfiguration.class);
-
+		// Record
 		final String CLASH_NAME = "CLASH";
-
-		// Record clash between bound names
-		this.recordReturn(oneConfiguration, oneConfiguration.getBoundManagedObjectName(), CLASH_NAME);
-		this.recordReturn(oneConfiguration, oneConfiguration.getOfficeManagedObjectName(), "ONE_MO");
-		this.recordReturn(oneConfiguration, oneConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(oneConfiguration, oneConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(twoConfiguration, twoConfiguration.getBoundManagedObjectName(), CLASH_NAME);
+		ManagedObjectConfiguration<?> oneConfiguration = new DependencyMappingBuilderImpl<>(CLASH_NAME, "BOUND_MO");
+		ManagedObjectConfiguration<?> twoConfiguration = new DependencyMappingBuilderImpl<>(CLASH_NAME, "ANOTHER_MO");
+		RawManagedObjectMetaDataMockBuilder<?, ?> rawManagedObject = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, CLASH_NAME,
 				"Name clash between bound Managed Objects (name=" + CLASH_NAME + ")");
-		this.record_getDependencyMetaData(oneMetaData);
-		this.record_loadManagedObjectMetaData(oneMetaData, CLASH_NAME, 0, null);
 
 		// Construct
 		this.replayMockObjects();
@@ -222,7 +192,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				boundMetaData.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> instanceMetaData = boundMetaData
 				.getRawBoundManagedObjectInstanceMetaData()[0];
-		assertEquals("Should only return first bound managed object", oneMetaData,
+		assertSame("Should only return first bound managed object", rawManagedObject.getBuilt(),
 				instanceMetaData.getRawManagedObjectMetaData());
 	}
 
@@ -232,13 +202,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testBindManagedObject() {
 
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		// Record construction
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO");
-		this.record_getDependencyMetaData(rawMoMetaData);
-		ManagedObjectMetaData<?> moMetaData = this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null);
+		// Record
+		ManagedObjectConfiguration<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
 
 		// Construct and obtain the managed object meta-data
 		this.replayMockObjects();
@@ -249,8 +215,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> rawBoundMoInstanceMetaData = rawBoundMoMetaData
 				.getRawBoundManagedObjectInstanceMetaData()[0];
-		assertEquals("Incorrect managed object meta-data", moMetaData,
-				rawBoundMoInstanceMetaData.getManagedObjectMetaData());
+		ManagedObjectMetaData<?> metaData = rawBoundMoInstanceMetaData.getManagedObjectMetaData();
+		assertNotNull("Should have managed object meta-data", metaData);
+		assertEquals("Incorrect managed object meta-data", "BOUND", metaData.getBoundManagedObjectName());
 		this.verifyMockObjects();
 	}
 
@@ -260,16 +227,12 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testMissingDependencyConfiguration() {
 
 		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-		ManagedObjectDependencyMetaData<?> dependencyMetaData = this.createMock(ManagedObjectDependencyMetaData.class);
-
-		// Record construction
-		final ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO");
-		this.record_getDependencyMetaData(rawMoMetaData, dependencyMetaData);
-		this.record_dependencyMetaDataDetails(dependencyMetaData, DependencyKey.KEY, null);
+		ManagedObjectConfiguration<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> bound = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		bound.getMetaDataBuilder().addDependency(null, DependencyKey.KEY);
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND",
 				"No mapping configured for dependency 0 (key=" + DependencyKey.KEY + ", label=<no label>)");
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null);
 
 		// Construct and obtain the managed object meta-data
 		this.replayMockObjects();
@@ -284,23 +247,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testDependencyNotAvailable() {
 
 		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		ManagedObjectDependencyConfiguration<?> dependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		ManagedObjectDependencyMetaData<?> dependencyMetaData = this.createMock(ManagedObjectDependencyMetaData.class);
-
-		// Record construction
-		final ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				dependencyConfig);
-		this.record_getDependencyMetaData(rawMoMetaData, dependencyMetaData);
-		this.recordReturn(dependencyConfig, dependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(dependencyMetaData, DependencyKey.KEY, "LABEL");
-		this.recordReturn(dependencyConfig, dependencyConfig.getScopeManagedObjectName(), "NOT AVAILABLE");
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.mapDependency(DependencyKey.KEY, "NOT_AVAILABLE");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> bound = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		bound.getMetaDataBuilder().addDependency(null, DependencyKey.KEY);
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND",
-				"No dependent ManagedObject by name 'NOT AVAILABLE' for dependency 0 (key=" + DependencyKey.KEY
-						+ ", label=LABEL)");
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null);
+				"No dependent ManagedObject by name 'NOT_AVAILABLE' for dependency 0 (key=" + DependencyKey.KEY
+						+ ", label=<no label>)");
 
 		// Attempt to construct
 		this.replayMockObjects();
@@ -313,35 +267,21 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testIncompatibleDependency() {
 
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-		RawBoundManagedObjectMetaData dependency = this.scopeRawManagedObjectMetaData("DEPENDENCY");
-		RawBoundManagedObjectInstanceMetaData<?> dependencyInstance = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.mapDependency(DependencyKey.KEY, "DEPENDENCY");
 
-		ManagedObjectDependencyConfiguration<?> dependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		ManagedObjectDependencyMetaData<?> dependencyMetaData = this.createMock(ManagedObjectDependencyMetaData.class);
-		RawManagedObjectMetaData<?, ?> rawDependency = this.createMock(RawManagedObjectMetaData.class);
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> dependency = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		dependency.getMetaDataBuilder().addDependency(String.class, DependencyKey.KEY);
 
-		// Record construction
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				dependencyConfig);
-		this.record_getDependencyMetaData(rawMoMetaData, dependencyMetaData);
-		this.recordReturn(dependencyConfig, dependencyConfig.getDependencyKey(), null);
-		this.record_dependencyMetaDataDetails(dependencyMetaData, (DependencyKey) null, null);
-		this.recordReturn(dependencyConfig, dependencyConfig.getScopeManagedObjectName(), "DEPENDENCY");
-		this.recordReturn(dependencyMetaData, dependencyMetaData.getType(), Connection.class);
-		this.recordReturn(dependency, dependency.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { dependencyInstance });
-		this.recordReturn(dependencyInstance, dependencyInstance.getRawManagedObjectMetaData(), rawDependency);
-		this.recordReturn(rawDependency, rawDependency.getObjectType(), Integer.class);
-		this.recordReturn(rawDependency, rawDependency.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
+		this.rawOfficeMetaData.addScopeBoundManagedObject("DEPENDENCY").getRawBoundManagedObjectMetaData()
+				.getRawManagedObjectBuilder().getMetaDataBuilder().setObjectClass(Integer.class);
+
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND",
-				"Incompatible dependency for dependency 0 (key=<indexed>, label=<no label>) (required type="
-						+ Connection.class.getName() + ", dependency type=" + Integer.class.getName()
-						+ ", ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null);
+				"Incompatible dependency for dependency 0 (key=KEY, label=<no label>) (required type="
+						+ String.class.getName() + ", dependency type=" + Integer.class.getName()
+						+ ", ManagedObjectSource=DEPENDENCY)");
 
 		// Attempt to construct
 		this.replayMockObjects();
@@ -354,30 +294,18 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testExtraDependenciesConfigured() {
 
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-		RawBoundManagedObjectMetaData dependency = this.scopeRawManagedObjectMetaData("DEPENDENCY");
-
-		ManagedObjectDependencyConfiguration<?> dependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		ManagedObjectDependencyConfiguration<?> extraDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		ManagedObjectDependencyMetaData<?> dependencyMetaData = this.createMock(ManagedObjectDependencyMetaData.class);
-
-		// Record construction
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				dependencyConfig, extraDependencyConfig);
-		this.record_getDependencyMetaData(rawMoMetaData, dependencyMetaData);
-		this.recordReturn(dependencyConfig, dependencyConfig.getDependencyKey(), null);
-		this.recordReturn(extraDependencyConfig, extraDependencyConfig.getDependencyKey(), null);
-		this.record_dependencyMetaDataDetails(dependencyMetaData, (DependencyKey) null, null);
-		this.recordReturn(dependencyConfig, dependencyConfig.getScopeManagedObjectName(), "DEPENDENCY");
-		this.record_matchingDependencyType(dependencyMetaData, dependency);
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.mapDependency(DependencyKey.KEY, "DEPENDENCY");
+		configuration.mapDependency(1, "EXTRA");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> bound = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		bound.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
+		this.rawOfficeMetaData.addScopeBoundManagedObject("DEPENDENCY");
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND",
 				"Extra dependencies configured than required by ManagedObjectSourceMetaData");
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null);
 
-		// Attempt to construct
+		// Construct
 		this.replayMockObjects();
 		this.constructRawBoundManagedObjectMetaData(1, configuration);
 		this.verifyMockObjects();
@@ -389,31 +317,16 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testDependencyOnAnotherBound() {
 
-		final RawManagedObjectMetaData<?, ?> oneMetaData = this.registerRawManagedObjectMetaData("ONE");
-		final ManagedObjectDependencyMetaData<?> oneDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyConfiguration<?> oneDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> twoMetaData = this.registerRawManagedObjectMetaData("TWO");
+		// Record
+		DependencyMappingBuilderImpl<?> oneConfig = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		oneConfig.mapDependency(DependencyKey.KEY, "DEPENDENCY");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> bound = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		bound.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
+		DependencyMappingBuilderImpl<?> twoConfig = new DependencyMappingBuilderImpl<>("DEPENDENCY", "DEPENDENCY_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("DEPENDENCY_MO");
 
-		// Record construction
-		final ManagedObjectConfiguration<?> oneConfig = this.record_initManagedObject("MO_A", "ONE",
-				oneDependencyConfig);
-		final ManagedObjectConfiguration<?> twoConfig = this.record_initManagedObject("MO_B", "TWO");
-
-		// Record dependencies
-		this.record_getDependencyMetaData(oneMetaData, oneDependencyMetaData);
-		this.recordReturn(oneDependencyConfig, oneDependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(oneDependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(oneDependencyConfig, oneDependencyConfig.getScopeManagedObjectName(), "MO_B");
-		this.record_matchingDependencyType(oneDependencyMetaData, twoMetaData);
-		this.record_getDependencyMetaData(twoMetaData);
-
-		// Record loading meta-data
-		this.record_loadManagedObjectMetaData(oneMetaData, "MO_A", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
-		this.record_loadManagedObjectMetaData(twoMetaData, "MO_B", 0, null);
-
+		// Build
 		this.replayMockObjects();
 		RawBoundManagedObjectMetaData[] rawMetaData = this.constructRawBoundManagedObjectMetaData(2, oneConfig,
 				twoConfig);
@@ -421,10 +334,12 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Validate dependencies
 		RawBoundManagedObjectMetaData one = rawMetaData[0];
+		assertEquals("Incorrect first bound managed object", "BOUND", one.getBoundManagedObjectName());
 		assertEquals("Incorrect number of one instances", 1, one.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> oneInstance = one.getRawBoundManagedObjectInstanceMetaData()[0];
 		assertEquals("Incorrect number of dependencies", 1, oneInstance.getDependencies().length);
 		RawBoundManagedObjectMetaData two = rawMetaData[1];
+		assertEquals("Incorrect second bound managed object", "DEPENDENCY", two.getBoundManagedObjectName());
 		assertEquals("Incorrect number of two instances", 1, two.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> twoInstance = two.getRawBoundManagedObjectInstanceMetaData()[0];
 		assertEquals("Incorrect dependency", two, oneInstance.getDependencies()[0]);
@@ -437,61 +352,32 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testOrderingManagedObjectsByDependenciesForCleanup() {
 
-		final RawManagedObjectMetaData<?, ?> oneMetaData = this.registerRawManagedObjectMetaData("ONE");
-		final RawManagedObjectMetaData<?, ?> twoMetaData = this.registerRawManagedObjectMetaData("TWO");
-		final ManagedObjectDependencyConfiguration<?> twoDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		final ManagedObjectDependencyMetaData<?> twoDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final RawManagedObjectMetaData<?, ?> threeMetaData = this.registerRawManagedObjectMetaData("THREE");
-		final ManagedObjectDependencyConfiguration<?> threeDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		final ManagedObjectDependencyMetaData<?> threeDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
+		// Record
+		DependencyMappingBuilderImpl<?> oneConfig = new DependencyMappingBuilderImpl<>("ONE", "ONE_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("ONE_MO");
 
-		// Record construction
-		final ManagedObjectConfiguration<?> oneConfig = this.record_initManagedObject("MO_ONE", "ONE");
-		final ManagedObjectConfiguration<?> twoConfig = this.record_initManagedObject("MO_TWO", "TWO",
-				twoDependencyConfig);
-		final ManagedObjectConfiguration<?> threeConfig = this.record_initManagedObject("MO_THREE", "THREE",
-				threeDependencyConfig);
+		DependencyMappingBuilderImpl<?> twoConfig = new DependencyMappingBuilderImpl<>("TWO", "TWO_MO");
+		twoConfig.mapDependency(DependencyKey.KEY, "ONE");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> two = this.rawOfficeMetaData
+				.addRegisteredManagedObject("TWO_MO");
+		two.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
 
-		// Record loading dependencies for first managed object
-		this.record_getDependencyMetaData(oneMetaData);
+		DependencyMappingBuilderImpl<?> threeConfig = new DependencyMappingBuilderImpl<>("THREE", "THREE_MO");
+		threeConfig.mapDependency(DependencyKey.KEY, "TWO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> three = this.rawOfficeMetaData
+				.addRegisteredManagedObject("THREE_MO");
+		three.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
 
-		// Record loading dependencies for second managed object
-		this.record_getDependencyMetaData(twoMetaData, twoDependencyMetaData);
-		this.recordReturn(twoDependencyConfig, twoDependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(twoDependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(twoDependencyConfig, twoDependencyConfig.getScopeManagedObjectName(), "MO_ONE");
-		this.record_matchingDependencyType(twoDependencyMetaData, oneMetaData);
-
-		// Record loading dependencies for third managed object
-		this.record_getDependencyMetaData(threeMetaData, threeDependencyMetaData);
-		this.recordReturn(threeDependencyConfig, threeDependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(threeDependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(threeDependencyConfig, threeDependencyConfig.getScopeManagedObjectName(), "MO_TWO");
-		this.record_matchingDependencyType(threeDependencyMetaData, twoMetaData);
-
-		// Record loading the meta data
-		this.record_loadManagedObjectMetaData(threeMetaData, "MO_THREE", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
-		this.record_loadManagedObjectMetaData(twoMetaData, "MO_TWO", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 2));
-		this.record_loadManagedObjectMetaData(oneMetaData, "MO_ONE", 0, null);
-
+		// Construct
 		this.replayMockObjects();
 		RawBoundManagedObjectMetaData[] rawMetaData = this.constructRawBoundManagedObjectMetaData(3, oneConfig,
 				twoConfig, threeConfig);
 		this.verifyMockObjects();
 
-		// Validate order
-		RawBoundManagedObjectMetaData three = rawMetaData[0];
-		assertEquals("MO_THREE", three.getBoundManagedObjectName());
-		RawBoundManagedObjectMetaData two = rawMetaData[1];
-		assertEquals("MO_TWO", two.getBoundManagedObjectName());
-		RawBoundManagedObjectMetaData one = rawMetaData[2];
-		assertEquals("MO_ONE", one.getBoundManagedObjectName());
+		// Validate order (clean up to enable dependencies to be available)
+		assertEquals("THREE", rawMetaData[0].getBoundManagedObjectName());
+		assertEquals("TWO", rawMetaData[1].getBoundManagedObjectName());
+		assertEquals("ONE", rawMetaData[2].getBoundManagedObjectName());
 	}
 
 	/**
@@ -499,46 +385,21 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testDetectCyclicDependencies() {
 
-		final RawManagedObjectMetaData<?, ?> oneMetaData = this.registerRawManagedObjectMetaData("ONE");
-		final ManagedObjectDependencyMetaData<?> oneDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyConfiguration<?> oneDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> twoMetaData = this.registerRawManagedObjectMetaData("TWO");
-		final ManagedObjectDependencyMetaData<?> twoDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyConfiguration<?> twoDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
+		// Record
+		DependencyMappingBuilderImpl<?> oneConfig = new DependencyMappingBuilderImpl<>("ONE", "ONE_MO");
+		oneConfig.mapDependency(DependencyKey.KEY, "TWO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> one = this.rawOfficeMetaData
+				.addRegisteredManagedObject("ONE_MO");
+		one.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
 
-		// Record construction
-		final ManagedObjectConfiguration<?> oneConfig = this.record_initManagedObject("MO_A", "ONE",
-				oneDependencyConfig);
-		final ManagedObjectConfiguration<?> twoConfig = this.record_initManagedObject("MO_B", "TWO",
-				twoDependencyConfig);
+		DependencyMappingBuilderImpl<?> twoConfig = new DependencyMappingBuilderImpl<>("TWO", "TWO_MO");
+		twoConfig.mapDependency(DependencyKey.KEY, "ONE");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> two = this.rawOfficeMetaData
+				.addRegisteredManagedObject("TWO_MO");
+		two.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
 
-		// Record managed object one
-		this.record_getDependencyMetaData(oneMetaData, oneDependencyMetaData);
-		this.recordReturn(oneDependencyConfig, oneDependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(oneDependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(oneDependencyConfig, oneDependencyConfig.getScopeManagedObjectName(), "MO_B");
-		this.record_matchingDependencyType(oneDependencyMetaData, twoMetaData);
-
-		// Record managed object two
-		this.record_getDependencyMetaData(twoMetaData, twoDependencyMetaData);
-		this.recordReturn(twoDependencyConfig, twoDependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(twoDependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(twoDependencyConfig, twoDependencyConfig.getScopeManagedObjectName(), "MO_A");
-		this.record_matchingDependencyType(twoDependencyMetaData, oneMetaData);
-
-		// Record issue in cyclic dependencies
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Cyclic dependency between bound ManagedObjects (MO_B, MO_A)");
-
-		// Record loading meta data
-		this.record_loadManagedObjectMetaData(oneMetaData, "MO_A", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
-		this.record_loadManagedObjectMetaData(twoMetaData, "MO_B", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 0));
+		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME,
+				"Cyclic dependency between bound ManagedObjects (TWO, ONE)");
 
 		this.replayMockObjects();
 		this.constructRawBoundManagedObjectMetaData(2, oneConfig, twoConfig);
@@ -551,24 +412,15 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testDependencyOnScopeBound() {
 
-		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-		ManagedObjectDependencyMetaData<?> dependencyMetaData = this.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyConfiguration<?> dependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("ONE", "ONE_MO");
+		configuration.mapDependency(DependencyKey.KEY, "TWO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> one = this.rawOfficeMetaData
+				.addRegisteredManagedObject("ONE_MO");
+		one.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
 
-		final RawBoundManagedObjectMetaData scopeMoMetaData = this.scopeRawManagedObjectMetaData("SCOPE");
-		final ManagedObjectIndex dependencyMoIndex = this.createMock(ManagedObjectIndex.class);
-
-		// Record construction
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				dependencyConfig);
-		this.record_getDependencyMetaData(rawMoMetaData, dependencyMetaData);
-		this.recordReturn(dependencyConfig, dependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(dependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(dependencyConfig, dependencyConfig.getScopeManagedObjectName(), "SCOPE");
-		this.record_matchingDependencyType(dependencyMetaData, scopeMoMetaData);
-		this.recordReturn(scopeMoMetaData, scopeMoMetaData.getManagedObjectIndex(), dependencyMoIndex);
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, null, dependencyMoIndex);
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> scopeMoMetaData = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("TWO").getRawBoundManagedObjectMetaData();
 
 		// Construct
 		this.replayMockObjects();
@@ -582,7 +434,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		RawBoundManagedObjectInstanceMetaData<?> dependencyInstance = dependency
 				.getRawBoundManagedObjectInstanceMetaData()[0];
 		assertEquals("Incorrect number of dependency keys", 1, dependencyInstance.getDependencies().length);
-		assertEquals("Incorrect dependency", scopeMoMetaData, dependencyInstance.getDependencies()[0]);
+		assertEquals("Incorrect dependency", scopeMoMetaData.build(), dependencyInstance.getDependencies()[0]);
 	}
 
 	/**
@@ -590,10 +442,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoInputManagedObjectConfiguration() {
 
-		final RawManagingOfficeMetaData<?> inputMo = this.createMock(RawManagingOfficeMetaData.class);
-
-		// Record no Input ManagedObject configuration
-		this.recordReturn(inputMo, inputMo.getInputManagedObjectConfiguration(), null);
+		RawManagingOfficeMetaData<?> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME, "MOS").build();
 
 		// Construct
 		this.replayMockObjects();
@@ -606,18 +455,15 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoInputManagedObjectName() {
 
-		final RawManagingOfficeMetaData<?> inputMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> inputConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-
-		// Record no Input ManagedObject name
-		this.recordReturn(inputMo, inputMo.getInputManagedObjectConfiguration(), inputConfiguration);
-		this.recordReturn(inputConfiguration, inputConfiguration.getBoundManagedObjectName(), null);
+		// Record
+		RawManagingOfficeMetaDataMockBuilder<?> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS");
+		inputMo.getBuilder().setInputManagedObjectName(null);
 		this.issues.addIssue(AssetType.OFFICE, "OFFICE", "No bound name for input managed object");
 
 		// Construct
 		this.replayMockObjects();
-		this.constructRawBoundManagedObjectMetaData(0, inputMo);
+		this.constructRawBoundManagedObjectMetaData(0, inputMo.build());
 		this.verifyMockObjects();
 	}
 
@@ -627,34 +473,23 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testClashBetweenBoundAndInputManagedObject() {
 
-		final ManagedObjectConfiguration<?> boundConfiguration = this.createMock(ManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawBoundMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		final RawManagingOfficeMetaData<?> inputMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> inputConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> inputRawMetaData = this.createMock(RawManagedObjectMetaData.class);
-
+		// Record
 		final String CLASH_NAME = "CLASH";
+		DependencyMappingBuilderImpl<?> boundConfig = new DependencyMappingBuilderImpl<>(CLASH_NAME, "BOUND_MO");
+		RawManagedObjectMetaDataMockBuilder<?, ?> bound = this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
 
-		// Record clash between bound and input names
-		this.recordReturn(boundConfiguration, boundConfiguration.getBoundManagedObjectName(), CLASH_NAME);
-		this.recordReturn(boundConfiguration, boundConfiguration.getOfficeManagedObjectName(), "OFFICE_MO");
-		this.recordReturn(boundConfiguration, boundConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(boundConfiguration, boundConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(inputMo, inputMo.getInputManagedObjectConfiguration(), inputConfiguration);
-		this.recordReturn(inputConfiguration, inputConfiguration.getBoundManagedObjectName(), CLASH_NAME);
-		this.recordReturn(inputMo, inputMo.getRawManagedObjectMetaData(), inputRawMetaData);
+		RawManagingOfficeMetaDataMockBuilder<?> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS");
+		inputMo.getBuilder().setInputManagedObjectName(CLASH_NAME);
+
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, CLASH_NAME,
 				"Name clash between bound and input Managed Objects (name=" + CLASH_NAME + ")");
-		this.record_getDependencyMetaData(rawBoundMetaData);
-		this.record_loadManagedObjectMetaData(rawBoundMetaData, CLASH_NAME, 0, null);
 
 		// Construct
 		this.replayMockObjects();
 		RawBoundManagedObjectMetaData boundMetaData = this.constructRawBoundManagedObjectMetaData(1,
-				new ManagedObjectConfiguration[] { boundConfiguration },
-				new RawManagingOfficeMetaData[] { inputMo })[0];
+				new ManagedObjectConfiguration[] { boundConfig },
+				new RawManagingOfficeMetaData[] { inputMo.build() })[0];
 		this.verifyMockObjects();
 
 		// Ensure only the bound managed object constructed
@@ -662,7 +497,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				boundMetaData.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> instanceMetaData = boundMetaData
 				.getRawBoundManagedObjectInstanceMetaData()[0];
-		assertEquals("Should only return bound managed object", rawBoundMetaData,
+		assertEquals("Should only return bound managed object", bound.getBuilt(),
 				instanceMetaData.getRawManagedObjectMetaData());
 	}
 
@@ -671,31 +506,21 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoClashBetweenSameBoundAndInputManagedObject() {
 
-		final ManagedObjectConfiguration<?> boundConfiguration = this.createMock(ManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawBoundMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		final RawManagingOfficeMetaData<?> inputMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> inputConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-
 		final String CLASH_NAME = "CLASH";
-
-		// Record clash between bound and input names
-		this.recordReturn(boundConfiguration, boundConfiguration.getBoundManagedObjectName(), CLASH_NAME);
-		this.recordReturn(boundConfiguration, boundConfiguration.getOfficeManagedObjectName(), "OFFICE_MO");
-		this.recordReturn(boundConfiguration, boundConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(boundConfiguration, boundConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(inputMo, inputMo.getInputManagedObjectConfiguration(), inputConfiguration);
-		this.recordReturn(inputConfiguration, inputConfiguration.getBoundManagedObjectName(), CLASH_NAME);
-		this.recordReturn(inputMo, inputMo.getRawManagedObjectMetaData(), rawBoundMetaData);
-		this.record_getDependencyMetaData(rawBoundMetaData);
-		this.record_loadManagedObjectMetaData(rawBoundMetaData, CLASH_NAME, 0, null);
+		DependencyMappingBuilderImpl<?> boundConfig = new DependencyMappingBuilderImpl<>(CLASH_NAME, "BOUND_MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> bound = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		RawManagingOfficeMetaDataMockBuilder<None> sameInputMo = MockConstruct
+				.mockRawManagingOfficeMetaData(OFFICE_NAME, "MOS");
+		sameInputMo.getBuilder().setInputManagedObjectName(CLASH_NAME);
+		RawManagedObjectMetaData<DependencyKey, None> sameMo = bound.build(sameInputMo.build());
+		sameInputMo.build().setRawManagedObjectMetaData(sameMo);
 
 		// Construct
 		this.replayMockObjects();
 		RawBoundManagedObjectMetaData boundMetaData = this.constructRawBoundManagedObjectMetaData(1,
-				new ManagedObjectConfiguration[] { boundConfiguration },
-				new RawManagingOfficeMetaData[] { inputMo })[0];
+				new ManagedObjectConfiguration[] { boundConfig },
+				new RawManagingOfficeMetaData[] { sameInputMo.build() })[0];
 		this.verifyMockObjects();
 
 		// Ensure only the bound managed object constructed
@@ -703,7 +528,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				boundMetaData.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> instanceMetaData = boundMetaData
 				.getRawBoundManagedObjectInstanceMetaData()[0];
-		assertEquals("Should only return bound managed object", rawBoundMetaData,
+		assertEquals("Should only return bound managed object", bound.getBuilt(),
 				instanceMetaData.getRawManagedObjectMetaData());
 	}
 
@@ -712,23 +537,17 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testBindInputManagedObject() {
 
-		final RawManagingOfficeMetaData<?> inputMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> inputConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		// Record bind Input ManagedObject
-		this.recordReturn(inputMo, inputMo.getInputManagedObjectConfiguration(), inputConfiguration);
-		this.recordReturn(inputConfiguration, inputConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(inputMo, inputMo.getRawManagedObjectMetaData(), rawMetaData);
-		this.recordReturn(inputConfiguration, inputConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(inputConfiguration, inputConfiguration.getGovernanceConfiguration(), null);
-		this.record_getDependencyMetaData(rawMetaData);
-		ManagedObjectMetaData<?> moMetaData = this.record_loadManagedObjectMetaData(rawMetaData, "MO", 0, null);
+		// Record
+		RawManagingOfficeMetaDataMockBuilder<None> inputMo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS");
+		inputMo.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> rawManagedObject = MockConstruct
+				.mockRawManagedObjectMetaData("MOS");
+		inputMo.build().setRawManagedObjectMetaData(rawManagedObject.build(inputMo.build()));
 
 		// Construct
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, inputMo)[0];
+		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, inputMo.build())[0];
 		this.verifyMockObjects();
 
 		// Verify raw bound meta-data
@@ -741,9 +560,11 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		RawBoundManagedObjectInstanceMetaData<?> instanceMetaData = metaData
 				.getRawBoundManagedObjectInstanceMetaData()[0];
 		assertEquals("Should be no dependencies", 0, instanceMetaData.getDependencies().length);
-		assertEquals("Incorrect raw managed object meta-data", rawMetaData,
+		assertEquals("Incorrect raw managed object meta-data", rawManagedObject.getBuilt(),
 				instanceMetaData.getRawManagedObjectMetaData());
-		assertEquals("Incorrect managed object meta-data", moMetaData, instanceMetaData.getManagedObjectMetaData());
+		assertNotNull("Should have managed object meta-data", instanceMetaData.getManagedObjectMetaData());
+		assertEquals("Incorrect bound instance", "MO",
+				instanceMetaData.getManagedObjectMetaData().getBoundManagedObjectName());
 	}
 
 	/**
@@ -752,33 +573,28 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testBindInputManagedObjectInstancesWithNoDefault() {
 
-		final RawManagingOfficeMetaData<?> oneMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> oneConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawOneMetaData = this.registerRawManagedObjectMetaData("ONE_MO");
+		// Record
+		RawManagingOfficeMetaDataMockBuilder<None> inputOne = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS_ONE");
+		inputOne.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moOne = MockConstruct
+				.mockRawManagedObjectMetaData("MOS_ONE");
+		inputOne.build().setRawManagedObjectMetaData(moOne.build(inputOne.build()));
 
-		final RawManagingOfficeMetaData<?> twoMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> twoConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawTwoMetaData = this.registerRawManagedObjectMetaData("ONE_MO");
+		RawManagingOfficeMetaDataMockBuilder<None> inputTwo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS_TWO");
+		inputTwo.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moTwo = MockConstruct
+				.mockRawManagedObjectMetaData("MOS_TWO");
+		inputTwo.build().setRawManagedObjectMetaData(moTwo.build(inputOne.build()));
 
-		// Record bind Input ManagedObject instances
-		this.recordReturn(oneMo, oneMo.getInputManagedObjectConfiguration(), oneConfiguration);
-		this.recordReturn(oneConfiguration, oneConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(oneMo, oneMo.getRawManagedObjectMetaData(), rawOneMetaData);
-		this.recordReturn(oneConfiguration, oneConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(oneConfiguration, oneConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(twoMo, twoMo.getInputManagedObjectConfiguration(), twoConfiguration);
-		this.recordReturn(twoConfiguration, twoConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(twoMo, twoMo.getRawManagedObjectMetaData(), rawTwoMetaData);
-		this.recordReturn(twoConfiguration, twoConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(twoConfiguration, twoConfiguration.getGovernanceConfiguration(), null);
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "MO",
 				"Bound Managed Object Source must be specified for Input Managed Object 'MO'");
 
 		// Construct
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, oneMo, twoMo)[0];
+		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, inputOne.build(),
+				inputTwo.build())[0];
 		this.verifyMockObjects();
 
 		// Verify instances
@@ -793,38 +609,30 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testBindInputManagedObjectInstancesWithUnknownBoundManagedObjectSource() {
 
-		// Specify second managed object source as default
+		// Record
+		RawManagingOfficeMetaDataMockBuilder<None> inputOne = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS_ONE");
+		inputOne.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moOne = MockConstruct
+				.mockRawManagedObjectMetaData("MOS_ONE");
+		inputOne.build().setRawManagedObjectMetaData(moOne.build(inputOne.build()));
+
+		RawManagingOfficeMetaDataMockBuilder<None> inputTwo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS_TWO");
+		inputTwo.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moTwo = MockConstruct
+				.mockRawManagedObjectMetaData("MOS_TWO");
+		inputTwo.build().setRawManagedObjectMetaData(moTwo.build(inputOne.build()));
+
 		this.inputManagedObjectDefaults.put("MO", "UNKNOWN_MANAGED_OBJECT_SOURCE");
 
-		final RawManagingOfficeMetaData<?> oneMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> oneConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawOneMetaData = this.registerRawManagedObjectMetaData("ONE_MO");
-
-		final RawManagingOfficeMetaData<?> twoMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> twoConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawTwoMetaData = this.registerRawManagedObjectMetaData("ONE_MO");
-
-		// Record bind Input ManagedObject instances
-		this.recordReturn(oneMo, oneMo.getInputManagedObjectConfiguration(), oneConfiguration);
-		this.recordReturn(oneConfiguration, oneConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(oneMo, oneMo.getRawManagedObjectMetaData(), rawOneMetaData);
-		this.recordReturn(oneConfiguration, oneConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(oneConfiguration, oneConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(twoMo, twoMo.getInputManagedObjectConfiguration(), twoConfiguration);
-		this.recordReturn(twoConfiguration, twoConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(twoMo, twoMo.getRawManagedObjectMetaData(), rawTwoMetaData);
-		this.recordReturn(twoConfiguration, twoConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(twoConfiguration, twoConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(rawOneMetaData, rawOneMetaData.getManagedObjectName(), "ONE_MO");
-		this.recordReturn(rawTwoMetaData, rawTwoMetaData.getManagedObjectName(), "TWO_MO");
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "MO",
 				"Managed Object Source 'UNKNOWN_MANAGED_OBJECT_SOURCE' not linked to Input Managed Object 'MO' for being the bound instance");
 
 		// Construct
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, oneMo, twoMo)[0];
+		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, inputOne.build(),
+				inputTwo.build())[0];
 		this.verifyMockObjects();
 
 		// Verify instances
@@ -838,40 +646,28 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testBindInputManagedObjectInstances() {
 
+		// Record
+		RawManagingOfficeMetaDataMockBuilder<None> inputOne = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS_ONE");
+		inputOne.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moOne = MockConstruct
+				.mockRawManagedObjectMetaData("MOS_ONE");
+		inputOne.build().setRawManagedObjectMetaData(moOne.build(inputOne.build()));
+
+		RawManagingOfficeMetaDataMockBuilder<None> inputTwo = MockConstruct.mockRawManagingOfficeMetaData(OFFICE_NAME,
+				"MOS_TWO");
+		inputTwo.getBuilder().setInputManagedObjectName("MO");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> moTwo = MockConstruct
+				.mockRawManagedObjectMetaData("MOS_TWO");
+		inputTwo.build().setRawManagedObjectMetaData(moTwo.build(inputOne.build()));
+
 		// Specify second managed object source as default
-		this.inputManagedObjectDefaults.put("MO", "TWO_MO");
-
-		final RawManagingOfficeMetaData<?> oneMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> oneConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawOneMetaData = this.registerRawManagedObjectMetaData("ONE_MO");
-
-		final RawManagingOfficeMetaData<?> twoMo = this.createMock(RawManagingOfficeMetaData.class);
-		final InputManagedObjectConfiguration<?> twoConfiguration = this
-				.createMock(InputManagedObjectConfiguration.class);
-		final RawManagedObjectMetaData<?, ?> rawTwoMetaData = this.registerRawManagedObjectMetaData("TWO_MO");
-
-		// Record bind Input ManagedObject instances
-		this.recordReturn(oneMo, oneMo.getInputManagedObjectConfiguration(), oneConfiguration);
-		this.recordReturn(oneConfiguration, oneConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(oneMo, oneMo.getRawManagedObjectMetaData(), rawOneMetaData);
-		this.recordReturn(oneConfiguration, oneConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(oneConfiguration, oneConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(twoMo, twoMo.getInputManagedObjectConfiguration(), twoConfiguration);
-		this.recordReturn(twoConfiguration, twoConfiguration.getBoundManagedObjectName(), "MO");
-		this.recordReturn(twoMo, twoMo.getRawManagedObjectMetaData(), rawTwoMetaData);
-		this.recordReturn(twoConfiguration, twoConfiguration.getDependencyConfiguration(), null);
-		this.recordReturn(twoConfiguration, twoConfiguration.getGovernanceConfiguration(), null);
-		this.recordReturn(rawOneMetaData, rawOneMetaData.getManagedObjectName(), "ONE_MO");
-		this.recordReturn(rawTwoMetaData, rawTwoMetaData.getManagedObjectName(), "TWO_MO");
-		this.record_getDependencyMetaData(rawOneMetaData);
-		ManagedObjectMetaData<?> moOneMetaData = this.record_loadManagedObjectMetaData(rawOneMetaData, "MO", 0, null);
-		this.record_getDependencyMetaData(rawTwoMetaData);
-		ManagedObjectMetaData<?> moTwoMetaData = this.record_loadManagedObjectMetaData(rawTwoMetaData, "MO", 1, null);
+		this.inputManagedObjectDefaults.put("MO", "MOS_TWO");
 
 		// Construct
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, oneMo, twoMo)[0];
+		RawBoundManagedObjectMetaData metaData = this.constructRawBoundManagedObjectMetaData(1, inputOne.build(),
+				inputTwo.build())[0];
 		this.verifyMockObjects();
 
 		// Verify instances
@@ -883,14 +679,18 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify first instance
 		RawBoundManagedObjectInstanceMetaData<?> oneInstance = instanceMetaData[0];
-		assertEquals("Incorrect instance one raw meta-data", rawOneMetaData, oneInstance.getRawManagedObjectMetaData());
-		assertEquals("Incorrect instance one meta-data", moOneMetaData, oneInstance.getManagedObjectMetaData());
+		assertEquals("Incorrect instance one raw meta-data", moOne.getBuilt(),
+				oneInstance.getRawManagedObjectMetaData());
+		assertEquals("Incorrect instance one meta-data", "MO",
+				oneInstance.getManagedObjectMetaData().getBoundManagedObjectName());
 		assertEquals("Should be no dependencies for instance one", 0, oneInstance.getDependencies().length);
 
 		// Verify second instance
 		RawBoundManagedObjectInstanceMetaData<?> twoInstance = instanceMetaData[1];
-		assertEquals("Incorrect instance two raw meta-data", rawTwoMetaData, twoInstance.getRawManagedObjectMetaData());
-		assertEquals("Incorrect instance two meta-data", moTwoMetaData, twoInstance.getManagedObjectMetaData());
+		assertEquals("Incorrect instance two raw meta-data", moTwo.getBuilt(),
+				twoInstance.getRawManagedObjectMetaData());
+		assertEquals("Incorrect instance two meta-data", "MO",
+				twoInstance.getManagedObjectMetaData().getBoundManagedObjectName());
 		assertEquals("Should be no dependencies for instance two", 0, twoInstance.getDependencies().length);
 	}
 
@@ -900,34 +700,25 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testBoundDependentOnInput() {
 
-		final RawManagedObjectMetaData<?, ?> boundMetaData = this.registerRawManagedObjectMetaData("BOUND_MO");
+		// Record
+		DependencyMappingBuilderImpl<?> boundConfig = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		boundConfig.mapDependency(DependencyKey.KEY, "INPUT");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, ?> boundMo = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		boundMo.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
 
-		final RawManagingOfficeMetaData<?> inputMetaData = this.createMock(RawManagingOfficeMetaData.class);
-		final RawManagedObjectMetaData<?, ?> rawInputMetaData = this.registerRawManagedObjectMetaData("INPUT_MO");
-
-		final ManagedObjectDependencyMetaData<?> boundDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyConfiguration<?> boundDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-
-		// Record construction
-		final ManagedObjectConfiguration<?> boundConfig = this.record_initManagedObject("BOUND", "BOUND_MO",
-				boundDependencyConfig);
-		this.record_initInputManagedObject("INPUT", inputMetaData, rawInputMetaData);
-		this.record_getDependencyMetaData(boundMetaData, boundDependencyMetaData);
-		this.recordReturn(boundDependencyConfig, boundDependencyConfig.getDependencyKey(), null);
-		this.record_dependencyMetaDataDetails(boundDependencyMetaData, (Indexed) null, "DEPENDENCY");
-		this.recordReturn(boundDependencyConfig, boundDependencyConfig.getScopeManagedObjectName(), "INPUT");
-		this.record_matchingDependencyType(boundDependencyMetaData, rawInputMetaData);
-		this.record_loadManagedObjectMetaData(boundMetaData, "BOUND", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
-		this.record_getDependencyMetaData(rawInputMetaData);
-		this.record_loadManagedObjectMetaData(rawInputMetaData, "INPUT", 0, null);
+		RawManagingOfficeMetaDataMockBuilder<None> inputOffice = MockConstruct
+				.mockRawManagingOfficeMetaData(OFFICE_NAME, "INPUT_MO");
+		inputOffice.getBuilder().setInputManagedObjectName("INPUT");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> inputMo = MockConstruct
+				.mockRawManagedObjectMetaData("INPUT_MO");
+		inputOffice.build().setRawManagedObjectMetaData(inputMo.build(inputOffice.build()));
 
 		// Construct
 		this.replayMockObjects();
 		RawBoundManagedObjectMetaData[] rawMetaData = this.constructRawBoundManagedObjectMetaData(2,
-				new ManagedObjectConfiguration[] { boundConfig }, new RawManagingOfficeMetaData[] { inputMetaData });
+				new ManagedObjectConfiguration[] { boundConfig },
+				new RawManagingOfficeMetaData[] { inputOffice.build() });
 		this.verifyMockObjects();
 
 		// Validate dependencies
@@ -949,37 +740,23 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testInputDependentOnBound() {
 
-		final RawManagedObjectMetaData<?, ?> boundMetaData = this.registerRawManagedObjectMetaData("BOUND_MO");
+		// Record
+		DependencyMappingBuilderImpl<?> boundConfig = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
 
-		final RawManagingOfficeMetaData<?> inputMetaData = this.createMock(RawManagingOfficeMetaData.class);
-		final RawManagedObjectMetaData<?, ?> rawInputMetaData = this.registerRawManagedObjectMetaData("INPUT_MO");
-
-		final ManagedObjectDependencyMetaData<?> inputDependencyMetaData = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyConfiguration<?> inputDependencyConfig = this
-				.createMock(ManagedObjectDependencyConfiguration.class);
-
-		// Record construction
-		final ManagedObjectConfiguration<?> boundConfig = this.record_initManagedObject("BOUND", "BOUND_MO");
-		this.record_initInputManagedObject("INPUT", inputMetaData, rawInputMetaData, inputDependencyConfig);
-
-		// Record dependencies
-		this.record_getDependencyMetaData(boundMetaData);
-		this.record_getDependencyMetaData(rawInputMetaData, inputDependencyMetaData);
-		this.recordReturn(inputDependencyConfig, inputDependencyConfig.getDependencyKey(), DependencyKey.KEY);
-		this.record_dependencyMetaDataDetails(inputDependencyMetaData, DependencyKey.KEY, null);
-		this.recordReturn(inputDependencyConfig, inputDependencyConfig.getScopeManagedObjectName(), "BOUND");
-		this.record_matchingDependencyType(inputDependencyMetaData, boundMetaData);
-
-		// Record loading meta data
-		this.record_loadManagedObjectMetaData(boundMetaData, "BOUND", 0, null);
-		this.record_loadManagedObjectMetaData(rawInputMetaData, "INPUT", 0, null,
-				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
+		RawManagingOfficeMetaDataMockBuilder<None> inputOffice = MockConstruct
+				.mockRawManagingOfficeMetaData(OFFICE_NAME, "INPUT_MO");
+		inputOffice.getBuilder().setInputManagedObjectName("INPUT").mapDependency(DependencyKey.KEY, "BOUND");
+		RawManagedObjectMetaDataMockBuilder<DependencyKey, None> inputMo = MockConstruct
+				.mockRawManagedObjectMetaData("INPUT_MO");
+		inputMo.getMetaDataBuilder().addDependency(Object.class, DependencyKey.KEY);
+		inputOffice.build().setRawManagedObjectMetaData(inputMo.build(inputOffice.build()));
 
 		// Construct
 		this.replayMockObjects();
 		RawBoundManagedObjectMetaData[] rawMetaData = this.constructRawBoundManagedObjectMetaData(2,
-				new ManagedObjectConfiguration[] { boundConfig }, new RawManagingOfficeMetaData[] { inputMetaData });
+				new ManagedObjectConfiguration[] { boundConfig },
+				new RawManagingOfficeMetaData[] { inputOffice.build() });
 		this.verifyMockObjects();
 
 		// Validate dependencies
@@ -998,42 +775,32 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure {@link Governance} for the {@link ManagedObject}.
 	 */
-	public void testGovernManagedObject() {
+	public void testGovernManagedObject() throws Throwable {
 
-		final ManagedObjectGovernanceConfiguration governanceConfiguration = this
-				.createMock(ManagedObjectGovernanceConfiguration.class);
-		final ManagedObjectGovernanceStruct[] governances = new ManagedObjectGovernanceStruct[] {
-				new ManagedObjectGovernanceStruct(1) };
-		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final Object extensionInterface = "EXTENSION INTERFACE";
+		// Record
+		this.rawOfficeMetaData.addGovernance("GOVERNANCE", Object.class);
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.mapGovernance("GOVERNANCE");
+		RawManagedObjectMetaDataMockBuilder<?, ?> rawMoMetaData = this.rawOfficeMetaData
+				.addRegisteredManagedObject("BOUND_MO");
+		Closure<ManagedObject> closure = new Closure<>();
+		rawMoMetaData.getMetaDataBuilder().addExtension(Object.class, (mo) -> {
+			closure.value = mo;
+			return mo;
+		});
 
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		// Record construction
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				governanceConfiguration);
-		this.record_getDependencyMetaData(rawMoMetaData);
-		ExtensionInterfaceFactory<?>[] eiFactories = this.record_governManagedObject(String.class, rawMoMetaData,
-				configuration, new ManagedObjectGovernanceConfiguration[] { governanceConfiguration }, String.class);
-		ManagedObjectMetaData<?> moMetaData = this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0,
-				governances);
-
-		// Record using extension interface factory
-		ExtensionInterfaceFactory<?> eiFactory = eiFactories[0];
-		this.recordReturn(eiFactory, eiFactory.createExtensionInterface(managedObject), extensionInterface);
-
-		// Construct and obtain the managed object meta-data
+		// Construct
 		this.replayMockObjects();
-
-		// Construction of ManagedObjectMetaData tests governance
-		this.constructRawBoundManagedObjectMetaData(1, configuration);
-
-		// Ensure correct extension factory
-		Object ei = governances[0].extensionInterfaceExtractor.extractExtension(managedObject, moMetaData);
-		assertEquals("Incorrect extension interface", extensionInterface, ei);
-
+		RawBoundManagedObjectMetaData rawMetaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0];
 		this.verifyMockObjects();
+
+		// Ensure have governance
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.getRawBoundManagedObjectInstanceMetaData()[0]
+				.getManagedObjectMetaData();
+		ManagedObject mo = this.createMock(ManagedObject.class);
+		assertSame("Ensure have governance", mo, moMetaData.getGovernanceMetaData()[0].getExtensionInterfaceExtractor()
+				.extractExtension(mo, moMetaData));
+		assertSame("Ensure extension factory invoked", mo, closure.value);
 	}
 
 	/**
@@ -1041,439 +808,158 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownGovernance() {
 
-		final ManagedObjectGovernanceConfiguration governanceConfiguration = this
-				.createMock(ManagedObjectGovernanceConfiguration.class);
-
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		// Record unknown Governance
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				governanceConfiguration);
-		this.record_getDependencyMetaData(rawMoMetaData);
-		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.mapGovernance("GOVERNANCE");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Unknown governance 'GOVERNANCE'");
 
-		// Record remaining aspect of loading Managed Object
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, new ManagedObjectGovernanceStruct[] { null });
-
-		// Construct and obtain the managed object meta-data
+		// Construct
 		this.replayMockObjects();
-
-		// Construction of ManagedObjectMetaData tests governance
 		this.constructRawBoundManagedObjectMetaData(1, configuration);
-
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure issue if extension interface for {@link Governance} is not
-	 * available for the {@link ManagedObject}.
+	 * Ensure issue if extension for {@link Governance} is not available for the
+	 * {@link ManagedObject}.
 	 */
 	public void testUnsupportedGovernance() {
 
-		final ManagedObjectGovernanceStruct[] governances = new ManagedObjectGovernanceStruct[] { null };
-		final ManagedObjectGovernanceConfiguration governanceConfiguration = this
-				.createMock(ManagedObjectGovernanceConfiguration.class);
-		final ManagedObjectGovernanceConfiguration[] governanceConfigurations = new ManagedObjectGovernanceConfiguration[] {
-				governanceConfiguration };
-
-		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMoMetaData = this.registerRawManagedObjectMetaData("OFFICE_MO");
-
-		// Record unsupported Governance by Managed Object
-		ManagedObjectConfiguration<?> configuration = this.record_initManagedObject("BOUND", "OFFICE_MO",
-				governanceConfiguration);
-		this.record_getDependencyMetaData(rawMoMetaData);
-		this.record_governManagedObject(String.class, rawMoMetaData, configuration, governanceConfigurations,
-				Integer.class);
-		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Extension interface of type " + String.class.getName()
+		// Record
+		this.rawOfficeMetaData.addGovernance("GOVERNANCE", String.class);
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.mapGovernance("GOVERNANCE");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Extension of type " + String.class.getName()
 				+ " is not available from Managed Object for Governance 'GOVERNANCE'");
 
-		// Record remaining aspect of loading Managed Object
-		this.record_loadManagedObjectMetaData(rawMoMetaData, "BOUND", 0, governances);
-
-		// Construct and obtain the managed object meta-data
+		// Construct
 		this.replayMockObjects();
-
-		// Construction of ManagedObjectMetaData tests governance
 		this.constructRawBoundManagedObjectMetaData(1, configuration);
-
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Dependency key {@link Enum}.
+	 * Ensure issue if no pre-load {@link Administration}.
 	 */
-	private enum DependencyKey {
-		KEY
+	public void testNoPreLoadAdministrationName() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister(null, Object.class, () -> null);
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND", "Administration added without a name");
+
+		// Construct
+		this.replayMockObjects();
+		ManagedObjectMetaData<?> metaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0]
+				.getRawBoundManagedObjectInstanceMetaData()[0].getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Ensure no pre-load administration
+		assertNull("Should be no pre-load administration", metaData.getPreLoadAdministration());
 	}
 
 	/**
-	 * Provides a scope {@link RawBoundManagedObjectMetaData}.
-	 * 
-	 * @param scopeManagedObjectName
-	 *            Name of the scope {@link RawBoundManagedObjectMetaData}.
-	 * @return Scope {@link RawBoundManagedObjectMetaData}.
+	 * Ensure able add pre-load {@link Administration}.
 	 */
-	private RawBoundManagedObjectMetaData scopeRawManagedObjectMetaData(String scopeManagedObjectName) {
-		RawBoundManagedObjectMetaData metaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		this.scopeManagedObjects.put(scopeManagedObjectName, metaData);
-		return metaData;
+	public void testPreLoadAdministration() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister("ADMIN", Object.class, () -> null);
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+
+		// Construct
+		this.replayMockObjects();
+		ManagedObjectMetaData<?> metaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0]
+				.getRawBoundManagedObjectInstanceMetaData()[0].getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Ensure pre-load administration
+		ManagedObjectAdministrationMetaData<?, ?, ?>[] admins = metaData.getPreLoadAdministration();
+		assertEquals("Should be pre-load administration", 1, admins.length);
+		assertEquals("Incorrect pre-load adminstration", "ADMIN",
+				admins[0].getAdministrationMetaData().getAdministrationName());
+		assertEquals("Should not be managed object extensions", 0, admins[0].getRequiredManagedObjects().length);
 	}
 
 	/**
-	 * Registers and returns a {@link RawManagedObjectMetaData}.
-	 * 
-	 * @param registeredManagedObjectName
-	 *            Name to registered the {@link RawManagedObjectMetaData} under.
-	 * @return Registered {@link RawManagedObjectMetaData}.
+	 * Ensure able to add pre-load {@link Administration} with administered
+	 * {@link ManagedObject}.
 	 */
-	private RawManagedObjectMetaData<?, ?> registerRawManagedObjectMetaData(String registeredManagedObjectName) {
-		RawManagedObjectMetaData<?, ?> metaData = this.createMock(RawManagedObjectMetaData.class);
-		this.registeredManagedObjects.put(registeredManagedObjectName, metaData);
-		return metaData;
+	public void testPreLoadAdministrationWithManagedObject() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister("ADMIN", Object.class, () -> null).administerManagedObject("ADMINISTERED_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> administered = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("ADMINISTERED_MO");
+		administered.getRawBoundManagedObjectMetaData().getRawManagedObjectBuilder().getMetaDataBuilder()
+				.addExtension(Object.class, (mo) -> mo);
+
+		// Construct
+		this.replayMockObjects();
+		ManagedObjectMetaData<?> metaData = this.constructRawBoundManagedObjectMetaData(1, configuration)[0]
+				.getRawBoundManagedObjectInstanceMetaData()[0].getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Ensure pre-load administration
+		ManagedObjectAdministrationMetaData<?, ?, ?> admin = metaData.getPreLoadAdministration()[0];
+		assertEquals("Incorrect pre-load adminstration", "ADMIN",
+				admin.getAdministrationMetaData().getAdministrationName());
+		ManagedObjectIndex[] required = admin.getRequiredManagedObjects();
+		assertEquals("Should be managed object extensions", 1, admin.getRequiredManagedObjects().length);
+		assertSame("Incorrect reuqired managed object",
+				administered.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[0]);
 	}
 
 	/**
-	 * Records initialising the {@link RawBoundManagedObjectMetaData} for the
-	 * bound {@link ManagedObject}.
-	 * 
-	 * @param boundName
-	 *            Bound name.
-	 * @param officeName
-	 *            {@link Office} name.
-	 * @param configurations
-	 *            {@link ManagedObjectDependencyConfiguration} and
-	 *            {@link ManagedObjectGovernanceConfiguration} for the bound
-	 *            {@link ManagedObject}.
-	 * @return {@link ManagedObjectConfiguration}.
+	 * Ensure able to add pre-load {@link Administration} with administered
+	 * {@link ManagedObject} that has a dependency.
 	 */
-	private ManagedObjectConfiguration<?> record_initManagedObject(String boundName, String officeName,
-			Object... configurations) {
+	public void testPreLoadAdministrationWithManagedObjectAndDependency() {
 
-		// Create the listing of configurations
-		List<ManagedObjectDependencyConfiguration<?>> dependencyConfigurations = new LinkedList<ManagedObjectDependencyConfiguration<?>>();
-		List<ManagedObjectGovernanceConfiguration> governanceConfigurations = new LinkedList<ManagedObjectGovernanceConfiguration>();
-		for (Object configuration : configurations) {
-			if (configuration instanceof ManagedObjectDependencyConfiguration) {
-				dependencyConfigurations.add((ManagedObjectDependencyConfiguration<?>) configuration);
-			} else if (configuration instanceof ManagedObjectGovernanceConfiguration) {
-				governanceConfigurations.add((ManagedObjectGovernanceConfiguration) configuration);
-			} else {
-				fail("Unknown configuration type " + configuration.getClass().getName());
-			}
-		}
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister("ADMIN", Object.class, () -> null).administerManagedObject("ADMINISTERED_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
 
-		// Create the mock objects
-		final ManagedObjectConfiguration<?> configuration = this.createMock(ManagedObjectConfiguration.class);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> administered = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("ADMINISTERED_MO");
+		ManagedObjectSourceMetaDataMockBuilder<?, ?> metaDataBuilder = administered.getRawBoundManagedObjectMetaData()
+				.getRawManagedObjectBuilder().getMetaDataBuilder();
+		metaDataBuilder.addExtension(Object.class, (mo) -> mo);
+		metaDataBuilder.addDependency(Object.class, null);
+		administered.getBuilder().mapDependency(0, "DEPENDENCY_MO");
 
-		// Record initiating the managed object meta-data
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), boundName);
-		this.recordReturn(configuration, configuration.getOfficeManagedObjectName(), officeName);
-		this.recordReturn(configuration, configuration.getDependencyConfiguration(), dependencyConfigurations
-				.toArray(new ManagedObjectDependencyConfiguration<?>[dependencyConfigurations.size()]));
-		this.recordReturn(configuration, configuration.getGovernanceConfiguration(), governanceConfigurations
-				.toArray(new ManagedObjectGovernanceConfiguration[governanceConfigurations.size()]));
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> dependency = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("DEPENDENCY_MO");
 
-		// Return the configuration
-		return configuration;
-	}
+		Map<String, RawBoundManagedObjectMetaData> dependencies = new HashMap<>();
+		dependencies.put("DEPENDENCY_MO", dependency.getRawBoundManagedObjectMetaData().build());
+		administered.build().loadDependencies(this.issues, dependencies);
 
-	/**
-	 * Records initialising the {@link RawBoundManagedObjectMetaData} for the
-	 * Input {@link ManagedObject}.
-	 * 
-	 * @param inputName
-	 *            Input name.
-	 * @param inputMo
-	 *            {@link RawManagingOfficeMetaData} of the Input
-	 *            {@link ManagedObject}.
-	 * @param rawInputMetaData
-	 *            {@link RawManagedObjectMetaData} for the Input
-	 *            {@link ManagedObject}.
-	 * @param dependencyConfiguration
-	 *            {@link ManagedObjectDependencyConfiguration} instances of the
-	 *            Input {@link ManagedObject}.
-	 * @return {@link InputManagedObjectConfiguration}.
-	 */
-	private InputManagedObjectConfiguration<?> record_initInputManagedObject(String inputName,
-			RawManagingOfficeMetaData<?> inputMo, RawManagedObjectMetaData<?, ?> rawInputMetaData,
-			ManagedObjectDependencyConfiguration<?>... dependencyConfiguration) {
+		// Construct
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData[] bound = this.constructRawBoundManagedObjectMetaData(1, configuration);
+		ManagedObjectMetaData<?> metaData = bound[0].getRawBoundManagedObjectInstanceMetaData()[0]
+				.getManagedObjectMetaData();
+		this.verifyMockObjects();
 
-		// Create the mock objects
-		final InputManagedObjectConfiguration<?> configuration = this.createMock(InputManagedObjectConfiguration.class);
-
-		// Record initiating the input managed object meta-data
-		this.recordReturn(inputMo, inputMo.getInputManagedObjectConfiguration(), configuration);
-		this.recordReturn(configuration, configuration.getBoundManagedObjectName(), inputName);
-		this.recordReturn(inputMo, inputMo.getRawManagedObjectMetaData(), rawInputMetaData);
-		this.recordReturn(configuration, configuration.getDependencyConfiguration(), dependencyConfiguration);
-		this.recordReturn(configuration, configuration.getGovernanceConfiguration(), null);
-
-		// Return the configuration
-		return configuration;
-	}
-
-	/**
-	 * Records obtaining the {@link ManagedObjectDependencyMetaData}.
-	 * 
-	 * @param rawMoMetaData
-	 *            {@link RawManagedObjectMetaData}.
-	 * @param dependencyMetaData
-	 *            {@link ManagedObjectDependencyMetaData} instances.
-	 */
-	private void record_getDependencyMetaData(RawManagedObjectMetaData<?, ?> rawMoMetaData,
-			ManagedObjectDependencyMetaData<?>... dependencyMetaData) {
-
-		// Create the mocks
-		final ManagedObjectSourceMetaData<?, ?> mosMetaData = this.createMock(ManagedObjectSourceMetaData.class);
-
-		// Record obtaining the dependency meta-data
-		this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectSourceMetaData(), mosMetaData);
-		this.recordReturn(mosMetaData, mosMetaData.getDependencyMetaData(), dependencyMetaData);
-	}
-
-	/**
-	 * Records obtaining the {@link ManagedObjectDependencyMetaData} details.
-	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependencyMetaData}.
-	 * @param key
-	 *            Dependency key.
-	 * @param label
-	 *            Label for the dependency.
-	 */
-	private <D extends Enum<D>> void record_dependencyMetaDataDetails(
-			ManagedObjectDependencyMetaData<?> dependencyMetaData, D key, String label) {
-		// Record obtaining the dependency meta-data key and label
-		this.recordReturn(dependencyMetaData, dependencyMetaData.getKey(), key);
-		this.recordReturn(dependencyMetaData, dependencyMetaData.getLabel(), label);
-	}
-
-	/**
-	 * Records matching type for a dependency on another
-	 * {@link RawManagedObjectMetaData} in same bounding scope.
-	 * 
-	 * @param dependencyMetaData
-	 *            {@link ManagedObjectDependencyMetaData}.
-	 * @param dependency
-	 *            {@link RawManagedObjectMetaData} of dependency is same bound
-	 *            scope.
-	 */
-	private void record_matchingDependencyType(ManagedObjectDependencyMetaData<?> dependencyMetaData,
-			RawManagedObjectMetaData<?, ?> dependency) {
-
-		// Records matching type for the dependency
-		this.recordReturn(dependencyMetaData, dependencyMetaData.getType(), Connection.class);
-		this.recordReturn(dependency, dependency.getObjectType(), Connection.class);
-	}
-
-	/**
-	 * Records matching type for a dependency on another scope.
-	 * 
-	 * @param dependencyMetaData
-	 *            {@link ManagedObjectDependencyMetaData}.
-	 * @param dependency
-	 *            {@link RawBoundManagedObjectMetaData} of another scope.
-	 */
-	private void record_matchingDependencyType(ManagedObjectDependencyMetaData<?> dependencyMetaData,
-			RawBoundManagedObjectMetaData dependency) {
-
-		RawBoundManagedObjectInstanceMetaData<?> dependencyInstance = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		RawManagedObjectMetaData<?, ?> rawDependency = this.createMock(RawManagedObjectMetaData.class);
-
-		// Records matching type for the dependency (for single instance)
-		this.recordReturn(dependencyMetaData, dependencyMetaData.getType(), Connection.class);
-		this.recordReturn(dependency, dependency.getRawBoundManagedObjectInstanceMetaData(),
-				new RawBoundManagedObjectInstanceMetaData[] { dependencyInstance });
-		this.recordReturn(dependencyInstance, dependencyInstance.getRawManagedObjectMetaData(), rawDependency);
-		this.recordReturn(rawDependency, rawDependency.getObjectType(), Connection.class);
-	}
-
-	/**
-	 * Records mapping the {@link Governance} for the {@link ManagedObject}.
-	 */
-	private ExtensionInterfaceFactory<?>[] record_governManagedObject(Class<?> governanceExtensionInterfaceType,
-			RawManagedObjectMetaData<?, ?> rawMoMetaData, ManagedObjectConfiguration<?> configuration,
-			ManagedObjectGovernanceConfiguration[] governanceConfigurations, Class<?>... extensionInterfaceTypes) {
-
-		// Governance meta-data
-		final RawGovernanceMetaData<?, ?> rawGovernanceMetaData = this.createMock(RawGovernanceMetaData.class);
-		final String GOVERNANCE_NAME = "GOVERNANCE";
-		this.rawGovernanceMetaDatas.put(GOVERNANCE_NAME, rawGovernanceMetaData);
-
-		// Extension interface meta-data
-		ManagedObjectExtensionInterfaceMetaData<?>[] eiMetaDatas = new ManagedObjectExtensionInterfaceMetaData<?>[extensionInterfaceTypes.length];
-		for (int i = 0; i < eiMetaDatas.length; i++) {
-			eiMetaDatas[i] = this.createMock(ManagedObjectExtensionInterfaceMetaData.class);
-		}
-
-		// Ensure have Managed Object Governance configuration
-		governanceConfigurations = (governanceConfigurations == null ? new ManagedObjectGovernanceConfiguration[0]
-				: governanceConfigurations);
-
-		// Configure the governance
-		ExtensionInterfaceFactory<?>[] eiFactories = new ExtensionInterfaceFactory<?>[governanceConfigurations.length];
-		for (int i = 0; i < governanceConfigurations.length; i++) {
-			ManagedObjectGovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
-
-			// Obtain the governance name
-			this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), GOVERNANCE_NAME);
-
-			// Obtain the Governance Index
-			final int GOVERNANCE_INDEX = 1;
-			this.recordReturn(rawGovernanceMetaData, rawGovernanceMetaData.getGovernanceIndex(), GOVERNANCE_INDEX);
-
-			// Obtain the governance extension interface
-			this.recordReturn(rawGovernanceMetaData, rawGovernanceMetaData.getExtensionInterfaceType(),
-					governanceExtensionInterfaceType);
-
-			// Mocks for extension interface extractor
-			final ManagedObjectSourceMetaData<?, ?> moSourceMetaData = this
-					.createMock(ManagedObjectSourceMetaData.class);
-
-			// Obtain the extension interface extractor
-			this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectSourceMetaData(), moSourceMetaData);
-			this.recordReturn(moSourceMetaData, moSourceMetaData.getExtensionInterfacesMetaData(), eiMetaDatas);
-
-			// Iterate over extensions to find match
-			NEXT_GOVERNANCE: for (int e = 0; e < eiMetaDatas.length; e++) {
-				ManagedObjectExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[e];
-				Class<?> extensionInterfaceType = extensionInterfaceTypes[e];
-				this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(), extensionInterfaceType);
-
-				// Determine if a match
-				if (governanceExtensionInterfaceType.isAssignableFrom(extensionInterfaceType)) {
-					// Match, so load governance
-					final ExtensionInterfaceFactory<?> eiFactory = this.createMock(ExtensionInterfaceFactory.class);
-					this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceFactory(), eiFactory);
-
-					// Set factory for return
-					eiFactories[i] = eiFactory;
-
-					// Mapped in governance
-					continue NEXT_GOVERNANCE;
-				}
-			}
-		}
-
-		// Return the Extension Interface Factories
-		return eiFactories;
-	}
-
-	/**
-	 * Records loading the {@link ManagedObjectMetaData} from the
-	 * {@link RawManagedObjectMetaData}.
-	 * 
-	 * @param rawMoMetaData
-	 *            {@link RawManagedObjectMetaData}.
-	 * @param instanceIndex
-	 *            Instance index of the
-	 *            {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param governanceMetaData
-	 *            {@link ManagedObjectGovernanceMetaData}.
-	 * @param dependencies
-	 *            Dependency {@link ManagedObjectIndex}.
-	 * @param {@link
-	 * 			ManagedObjectMetaData} created.
-	 */
-	private ManagedObjectMetaData<?> record_loadManagedObjectMetaData(RawManagedObjectMetaData<?, ?> rawMoMetaData,
-			final String boundName, final int instanceIndex, final ManagedObjectGovernanceStruct[] governanceMetaData,
-			final ManagedObjectIndex... dependencies) {
-
-		// Create the necessary mock objects
-		ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);
-
-		// Record creating the managed object meta-data
-		this.recordReturn(rawMoMetaData,
-				rawMoMetaData.createManagedObjectMetaData(this.assetType, this.assetName, null, instanceIndex, null,
-						dependencies, new ManagedObjectGovernanceMetaData<?>[0], this.assetManagerFactory, this.issues),
-				moMetaData, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-
-						// Ensure asset type and name are correct
-						assertEquals("Incorrect asset type", RawBoundManagedObjectMetaDataTest.this.assetType,
-								actual[0]);
-						assertEquals("Incorrect asset name", RawBoundManagedObjectMetaDataTest.this.assetName,
-								actual[1]);
-
-						// Verify the raw bound managed object
-						RawBoundManagedObjectMetaData boundMo = (RawBoundManagedObjectMetaData) actual[2];
-						assertEquals("Incorrect bound managed object", boundName, boundMo.getBoundManagedObjectName());
-
-						// Verify the instance index
-						Integer actualInstanceIndex = (Integer) actual[3];
-						assertEquals("Incorrect instance index", instanceIndex, actualInstanceIndex.intValue());
-
-						// Verify the raw bound managed object instance
-						RawBoundManagedObjectInstanceMetaData<?> boundMoInstance = (RawBoundManagedObjectInstanceMetaData<?>) actual[4];
-						assertTrue("Should have bound managed object instance",
-								(boundMoInstance instanceof RawBoundManagedObjectInstanceMetaData<?>));
-
-						// Verify the dependencies
-						ManagedObjectIndex[] indexes = (ManagedObjectIndex[]) actual[5];
-						assertEquals("Incorrect number of dependencies", dependencies.length,
-								(indexes == null ? 0 : indexes.length));
-						for (int i = 0; i < dependencies.length; i++) {
-							ManagedObjectIndex dependency = dependencies[i];
-							ManagedObjectIndex index = indexes[i];
-							if (dependency == index) {
-								return true; // same as from another scope
-							}
-							// Verify created index of same scope is correct
-							assertEquals("Incorrect dependency scope for " + i, dependency.getManagedObjectScope(),
-									index.getManagedObjectScope());
-							assertEquals("Incorrect dependency index for " + i,
-									dependency.getIndexOfManagedObjectWithinScope(),
-									index.getIndexOfManagedObjectWithinScope());
-						}
-
-						// Verify the governance
-						ManagedObjectGovernanceMetaData<?>[] moGovernance = (ManagedObjectGovernanceMetaData[]) actual[6];
-						if (governanceMetaData == null) {
-							assertEquals("Should not have governance meta data", 0, moGovernance.length);
-						} else {
-							// Ensure correct governance meta-data
-							assertEquals("Incorrect number of governance meta-data instances",
-									governanceMetaData.length, moGovernance.length);
-							for (int i = 0; i < governanceMetaData.length; i++) {
-								ManagedObjectGovernanceStruct expectedGovernance = governanceMetaData[i];
-								ManagedObjectGovernanceMetaData<?> actualGovernance = moGovernance[i];
-								if (expectedGovernance == null) {
-									// Expecting issue with governance
-									assertNull("Should not have Governance for Managed Object Governance " + i,
-											actualGovernance);
-
-								} else {
-									// Expecting governance
-									assertEquals("Incorrect Governance index for Managed Object Governance " + i,
-											expectedGovernance.governanceIndex, actualGovernance.getGovernanceIndex());
-
-									// Load extractor for testing correct
-									// factory
-									expectedGovernance.extensionInterfaceExtractor = actualGovernance
-											.getExtensionInterfaceExtractor();
-								}
-							}
-						}
-
-						// Ensure other items are correct
-						AssetManagerFactory actualFactory = (AssetManagerFactory) actual[7];
-						assertEquals("Incorrect asset manager factory",
-								RawBoundManagedObjectMetaDataTest.this.assetManagerFactory, actualFactory);
-						OfficeFloorIssues actualIssues = (OfficeFloorIssues) actual[8];
-						assertEquals("Incorrect issues", RawBoundManagedObjectMetaDataTest.this.issues, actualIssues);
-
-						// Matches if at this point
-						return true;
-					}
-				});
-
-		// Return the managed object meta-data
-		return moMetaData;
+		// Ensure pre-load administration
+		ManagedObjectAdministrationMetaData<?, ?, ?> admin = metaData.getPreLoadAdministration()[0];
+		assertEquals("Incorrect pre-load adminstration", "ADMIN",
+				admin.getAdministrationMetaData().getAdministrationName());
+		ManagedObjectIndex[] required = admin.getRequiredManagedObjects();
+		assertEquals("Should be managed object extension and its dependency", 2,
+				admin.getRequiredManagedObjects().length);
+		assertSame("Should have dependency",
+				dependency.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[0]);
+		assertSame("Extension after the dependency",
+				administered.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[1]);
 	}
 
 	/**
@@ -1528,44 +1014,35 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				: this.inputManagedObjectDefaults);
 
 		// Attempt to construct
-		RawBoundManagedObjectMetaData[] metaData = RawBoundManagedObjectMetaDataImpl.getFactory()
-				.constructBoundManagedObjectMetaData(boundManagedObjectConfiguration, this.issues,
-						this.managedObjectScope, this.assetType, this.assetName, this.assetManagerFactory,
-						this.registeredManagedObjects, this.scopeManagedObjects, inputManagedObjects, inputDefaults,
-						this.rawGovernanceMetaDatas);
+		RawBoundManagedObjectMetaDataFactory factory = new RawBoundManagedObjectMetaDataFactory(
+				this.assetManagerFactory, this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				this.rawOfficeMetaData.build().getGovernanceMetaData());
+		RawBoundManagedObjectMetaData[] metaData = factory.constructBoundManagedObjectMetaData(
+				boundManagedObjectConfiguration, this.managedObjectScope,
+				this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), inputManagedObjects, inputDefaults,
+				AssetType.OFFICE, OFFICE_NAME, this.issues);
 
 		// Ensure correct number constructed
 		assertEquals("Incorrect number of bound managed objects", expectedNumberConstructed, metaData.length);
 
+		// Load the remaining state
+		OfficeMetaData officeMetaData = this.officeMetaData.build();
+		FlowMetaDataFactory flowFactory = new FlowMetaDataFactory(officeMetaData);
+		EscalationFlowFactory escalationFactory = new EscalationFlowFactory(officeMetaData);
+		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
+				flowFactory, escalationFactory, new HashMap<>());
+		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
+				rawAdminFactory, new HashMap<>(), this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
+		for (RawBoundManagedObjectMetaData bound : metaData) {
+			for (RawBoundManagedObjectInstanceMetaData<?> instance : bound.getRawBoundManagedObjectInstanceMetaData()) {
+				if (instance.getManagedObjectMetaData() != null) {
+					instance.loadRemainingState(officeMetaData, null, moAdminFactory, this.issues);
+				}
+			}
+		}
+
 		// Return the meta-data
 		return metaData;
-	}
-
-	/**
-	 * Struct to contain details for testing the
-	 * {@link ManagedObjectGovernanceMetaData}.
-	 */
-	private static class ManagedObjectGovernanceStruct {
-
-		/**
-		 * Expected {@link Governance} index.
-		 */
-		public final int governanceIndex;
-
-		/**
-		 * Actual {@link ManagedObjectExtensionExtractor}.
-		 */
-		public ManagedObjectExtensionExtractor<?> extensionInterfaceExtractor = null;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param governanceIndex
-		 *            Expected {@link Governance} index.
-		 */
-		public ManagedObjectGovernanceStruct(int governanceIndex) {
-			this.governanceIndex = governanceIndex;
-		}
 	}
 
 }

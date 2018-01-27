@@ -204,6 +204,13 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	ObjectRegistry<O> createObjectRegistry(ManagedFunctionContainer currentContainer);
 
 	/**
+	 * Obtains the pre-load {@link ManagedObjectAdministrationMetaData}.
+	 * 
+	 * @return Pre-load {@link ManagedObjectAdministrationMetaData}.
+	 */
+	ManagedObjectAdministrationMetaData<?, ?, ?>[] getPreLoadAdministration();
+
+	/**
 	 * Creates the {@link FunctionState} for the recycling of the
 	 * {@link ManagedObject}.
 	 * 

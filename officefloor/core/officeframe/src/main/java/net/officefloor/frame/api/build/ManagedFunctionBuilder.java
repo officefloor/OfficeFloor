@@ -38,7 +38,7 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 
 	/**
 	 * <p>
-	 * Specifies the differentiator for this {@link ManagedFunction}.
+	 * Adds the annotation for this {@link ManagedFunction}.
 	 * <p>
 	 * This is exposed as is on the {@link FunctionManager} interface for this
 	 * {@link ManagedFunction} to allow reflective:
@@ -49,10 +49,10 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * can expose functionality to be invoked)</li>
 	 * </ol>
 	 * 
-	 * @param differentiator
-	 *            Differentiator.
+	 * @param annotation
+	 *            Annotation.
 	 */
-	void setDifferentiator(Object differentiator);
+	void addAnnotation(Object annotation);
 
 	/**
 	 * Links in the parameter for this {@link ManagedFunction}.

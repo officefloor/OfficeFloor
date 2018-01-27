@@ -66,8 +66,8 @@ public class FunctionManagerImpl implements FunctionManager {
 	 */
 
 	@Override
-	public Object getDifferentiator() {
-		return this.functionMetaData.getDifferentiator();
+	public Object[] getAnnotations() {
+		return this.functionMetaData.getAnnotations();
 	}
 
 	@Override

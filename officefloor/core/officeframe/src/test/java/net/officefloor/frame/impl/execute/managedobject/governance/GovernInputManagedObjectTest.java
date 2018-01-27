@@ -40,7 +40,7 @@ public class GovernInputManagedObjectTest extends AbstractOfficeConstructTestCas
 		TestObject object = new TestObject("MO", this);
 		object.enhanceMetaData = (metaData) -> {
 			metaData.addFlow(String.class);
-			metaData.addManagedObjectExtensionInterface(TestObject.class,
+			metaData.addManagedObjectExtension(TestObject.class,
 					(managedObject) -> (TestObject) managedObject);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO").mapGovernance("GOVERNANCE");

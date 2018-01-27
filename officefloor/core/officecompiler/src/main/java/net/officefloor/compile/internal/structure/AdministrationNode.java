@@ -22,8 +22,10 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
 
 /**
@@ -91,6 +93,18 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	 *            {@link CompileContext}.
 	 */
 	void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder,
+			CompileContext compileContext);
+
+	/**
+	 * Builds the pre-load {@link ManagedObject} {@link Administration}.
+	 * 
+	 * @param dependencyMappingBuilder
+	 *            {@link DependencyMappingBuilder} for the
+	 *            {@link ManagedObject}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void buildPreLoadManagedObjectAdministration(DependencyMappingBuilder dependencyMappingBuilder,
 			CompileContext compileContext);
 
 }

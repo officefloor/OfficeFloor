@@ -21,6 +21,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
 
 /**
@@ -49,13 +50,22 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	 * {@link OfficeManagedObjectType}.
 	 * <p>
 	 * This allows the {@link OfficeManagedObjectType} to report the extension
-	 * interfaces required to be supported by the
-	 * {@link OfficeFloorManagedObject} for the {@link OfficeObject}.
+	 * types required to be supported by the {@link OfficeFloorManagedObject}
+	 * for the {@link OfficeObject}.
 	 * 
 	 * @param administrator
 	 *            {@link AdministrationNode}.
 	 */
 	void addAdministrator(AdministrationNode administrator);
+
+	/**
+	 * Obtains the {@link AdministrationNode} instances to provide pre-load
+	 * {@link Administration} over {@link BoundManagedObjectNode} linked to this
+	 * {@link OfficeObjectNode}.
+	 * 
+	 * @return {@link AdministrationNode} instances.
+	 */
+	AdministrationNode[] getPreLoadAdministrations();
 
 	/**
 	 * <p>

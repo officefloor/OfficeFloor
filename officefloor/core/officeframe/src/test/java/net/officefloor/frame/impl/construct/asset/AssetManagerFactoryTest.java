@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.construct.asset;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -28,7 +27,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link AssetManagerFactoryImpl}.
+ * Tests the {@link AssetManagerFactory}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -52,7 +51,7 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private final AssetManagerFactoryImpl factory = new AssetManagerFactoryImpl(this.processState, this.clock,
+	private final AssetManagerFactory factory = new AssetManagerFactory(this.processState, this.clock,
 			this.functionLoop);
 
 	/**

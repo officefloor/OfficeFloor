@@ -17,11 +17,16 @@
  */
 package net.officefloor.server.stream.impl;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.stream.TemporaryFiles;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
@@ -51,8 +56,8 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ThreadLocalStreamBufferPool} to test.
 	 */
-	private final ThreadLocalStreamBufferPool pool = new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE),
-			THREAD_LOCAL_POOL_SIZE, CORE_POOL_SIZE);
+	private final ThreadLocalStreamBufferPool pool = new ThreadLocalStreamBufferPool(
+			() -> ByteBuffer.allocate(BUFFER_SIZE), THREAD_LOCAL_POOL_SIZE, CORE_POOL_SIZE);
 
 	/**
 	 * Obtains the unpooled {@link StreamBuffer}.
@@ -65,7 +70,7 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Ensure have buffer
 		assertNotNull("Should have buffer", buffer);
-		assertFalse("Should be unpooled", buffer.isPooled);
+		assertNotNull("Should be unpooled", buffer.unpooledByteBuffer);
 
 		// Ensure correct byte buffer
 		assertSame("Incorrect byte buffer", content, buffer.unpooledByteBuffer);
@@ -81,13 +86,36 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Ensure have buffer
 		assertNotNull("Should have buffer", buffer);
-		assertTrue("Should be pooled", buffer.isPooled);
+		assertNotNull("Should be pooled", buffer.pooledBuffer);
 
 		// Ensure have correct byte buffer by size
 		ByteBuffer content = buffer.pooledBuffer;
 		assertEquals("Incorrect capacity", BUFFER_SIZE, content.capacity());
 		assertEquals("Retrieved buffer should be ready to use", 0, content.position());
 		assertEquals("Should have full use of buffer", BUFFER_SIZE, content.remaining());
+	}
+
+	/**
+	 * Obtains a file {@link StreamBuffer}.
+	 */
+	public void testGetFileBuffer() throws IOException {
+
+		// Ensure can obtain a byte buffer
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testGetFileBuffer", "test");
+		FileCompleteCallback callback = (completedFile, isWritten) -> {
+		};
+		StreamBuffer<ByteBuffer> buffer = this.pool.getFileStreamBuffer(file, 0, -1, callback);
+
+		// Ensure have buffer
+		assertNotNull("Should have buffer", buffer);
+		assertNotNull("Should be file", buffer.fileBuffer);
+
+		// Ensure have correct file buffer by size
+		FileBuffer content = buffer.fileBuffer;
+		assertSame("Incorrect file", file, content.file);
+		assertEquals("Incorrect position", 0, content.position);
+		assertEquals("Incorrect count", -1, content.count);
+		assertSame("Incorrect callback", callback, content.callback);
 	}
 
 	/**

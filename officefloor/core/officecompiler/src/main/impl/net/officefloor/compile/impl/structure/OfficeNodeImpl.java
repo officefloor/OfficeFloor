@@ -43,9 +43,9 @@ import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -63,7 +63,9 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -76,6 +78,9 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.ManagedFunctionAugmentor;
+import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -120,7 +125,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeNodeImpl implements OfficeNode {
+public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 	/**
 	 * Name of this {@link DeployedOffice}.
@@ -261,6 +266,11 @@ public class OfficeNodeImpl implements OfficeNode {
 	private final List<OfficeSectionTransformer> officeSectionTransformers = new LinkedList<>();
 
 	/**
+	 * {@link ManagedFunctionAugmentor} instances.
+	 */
+	private final List<ManagedFunctionAugmentor> managedFunctionAugmentors = new LinkedList<>();
+
+	/**
 	 * Indicates whether to {@link AutoWire} the objects.
 	 */
 	private boolean isAutoWireObjects = false;
@@ -292,6 +302,39 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Create additional objects
 		this.properties = this.context.createPropertyList();
+	}
+
+	/**
+	 * Adds a {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName
+	 *            {@link Class} name of the {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectSourceNode}.
+	 */
+	private ManagedObjectSourceNode addManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName) {
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
+				(managedObjectSource) -> managedObjectSource.initialise(managedObjectSourceClassName, null));
+	}
+
+	/**
+	 * Adds a {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectSourceNode}.
+	 */
+	private ManagedObjectSourceNode addManagedObjectSource(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
+				(managedObjectSourceNode) -> managedObjectSourceNode
+						.initialise(managedObjectSource.getClass().getName(), managedObjectSource));
 	}
 
 	/*
@@ -379,6 +422,65 @@ public class OfficeNodeImpl implements OfficeNode {
 		final String newOfficeTeamName = uniqueOfficeTeamName;
 		return NodeUtil.getInitialisedNode(newOfficeTeamName, this.teams, this.context,
 				() -> this.context.createOfficeTeamNode(newOfficeTeamName, this), (team) -> team.initialise());
+	}
+
+	/*
+	 * ============= ManagedFunctionVisitor ============================
+	 */
+
+	@Override
+	public void visit(ManagedFunctionType<?, ?> managedFunctionType, ManagedFunctionNode managedFunctionNode,
+			CompileContext compileContext) {
+
+		// Create the managed function augmentor context
+		ManagedFunctionAugmentorContext context = new ManagedFunctionAugmentorContext() {
+
+			@Override
+			public String getManagedFunctionName() {
+				return managedFunctionNode.getQualifiedFunctionName();
+			}
+
+			@Override
+			public ManagedFunctionType<?, ?> getManagedFunctionType() {
+				return managedFunctionType;
+			}
+
+			@Override
+			public AugmentedFunctionObject getFunctionObject(String objectName) {
+				return managedFunctionNode.getAugmentedFunctionObject(objectName);
+			}
+
+			@Override
+			public void addPreAdministration(OfficeAdministration administration) {
+				managedFunctionNode.addPreAdministration(administration);
+			}
+
+			@Override
+			public void addPostAdministration(OfficeAdministration administration) {
+				managedFunctionNode.addPostAdministration(administration);
+			}
+
+			@Override
+			public void link(AugmentedFunctionObject object, OfficeManagedObject managedObject) {
+				LinkUtil.linkObject(object, managedObject, OfficeNodeImpl.this.context.getCompilerIssues(),
+						managedFunctionNode);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription) {
+				return OfficeNodeImpl.this.addIssue(issueDescription);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription, Throwable cause) {
+				return OfficeNodeImpl.this.addIssue(issueDescription, cause);
+			}
+		};
+
+		// Augment the managed function
+		for (ManagedFunctionAugmentor augmentor : this.managedFunctionAugmentors) {
+			augmentor.augmentManagedFunction(context);
+		}
 	}
 
 	/*
@@ -487,6 +589,9 @@ public class OfficeNodeImpl implements OfficeNode {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
 
+		} catch (CompileError ex) {
+			return false; // issue already reported
+
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + OfficeType.class.getSimpleName() + " definition from "
 					+ OfficeSource.class.getSimpleName() + " " + source.getClass().getName(), ex);
@@ -526,7 +631,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Source the top level sections
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSection(compileContext));
+				(section) -> section.sourceSection(this, compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -547,9 +652,9 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Transform the office sections
 		this.transformOfficeSections();
 
-		// Source the all section trees
+		// Source all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSectionTree(compileContext));
+				(section) -> section.sourceSectionTree(this, compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -623,6 +728,17 @@ public class OfficeNodeImpl implements OfficeNode {
 					(a, b) -> CompileUtil.sortCompare(a.getOfficeManagedObjectName(), b.getOfficeManagedObjectName()))
 					.forEachOrdered(
 							(managedObject) -> managedObject.autoWireDependencies(autoWirer, this, compileContext));
+
+			// Iterate over mo sources (auto-wiring unlinked input dependencies)
+			this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
+					.sortCompare(a.getOfficeFloorManagedObjectSourceName(), b.getOfficeFloorManagedObjectSourceName()))
+					.forEachOrdered((managedObjectSource) -> {
+						// This office will manage the managed object
+						OfficeNode officeNode = this;
+
+						// Load input dependencies for managed object source
+						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
+					});
 		}
 
 		// Undertake auto-wire of teams
@@ -676,53 +792,22 @@ public class OfficeNodeImpl implements OfficeNode {
 		OfficeInputNode[] inputs = this.inputs.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeInputName(), b.getOfficeInputName()))
 				.toArray(OfficeInputNode[]::new);
-		OfficeInputNode[] originalInputs = new OfficeInputNode[inputs.length];
-		System.arraycopy(inputs, 0, originalInputs, 0, inputs.length);
 
 		// Copy the outputs into an array (in deterministic order)
 		OfficeOutputNode[] outputs = this.outputs.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeOutputName(), b.getOfficeOutputName()))
 				.toArray(OfficeOutputNode[]::new);
-		OfficeOutputNode[] originalOutputs = new OfficeOutputNode[outputs.length];
-		System.arraycopy(outputs, 0, originalOutputs, 0, outputs.length);
-
-		// Remove inputs used to handle response
-		for (int o = 0; o < outputs.length; o++) {
-			OfficeOutputNode output = originalOutputs[o];
-			LinkSynchronousNode possibleInput = output.getLinkedSynchronousNode();
-			if (possibleInput != null) {
-				for (int i = 0; i < inputs.length; i++) {
-					if (inputs[i] == possibleInput) {
-						inputs[i] = null; // not include in input types
-					}
-				}
-			}
-		}
-
-		// Remove outputs used to send responses
-		for (int i = 0; i < inputs.length; i++) {
-			OfficeInputNode input = originalInputs[i];
-			LinkSynchronousNode possibleOuput = input.getLinkedSynchronousNode();
-			if (possibleOuput != null) {
-				for (int o = 0; o < outputs.length; o++) {
-					if (outputs[o] == possibleOuput) {
-						outputs[o] = null; // not include in output types
-					}
-				}
-			}
-		}
 
 		// Create the listing of input types
-		OfficeInputType[] inputTypes = CompileUtil.loadTypes(
-				Arrays.asList(inputs).stream().filter((input) -> input != null), (input) -> input.getOfficeInputName(),
-				(input) -> input.loadOfficeInputType(compileContext), OfficeInputType[]::new);
+		OfficeInputType[] inputTypes = CompileUtil.loadTypes(Arrays.asList(inputs).stream(),
+				(input) -> input.getOfficeInputName(), (input) -> input.loadOfficeInputType(compileContext),
+				OfficeInputType[]::new);
 		if (inputTypes == null) {
 			return null;
 		}
 
 		// Create the listing of output types
-		OfficeOutputType[] outputTypes = CompileUtil.loadTypes(
-				Arrays.asList(outputs).stream().filter((output) -> output != null),
+		OfficeOutputType[] outputTypes = CompileUtil.loadTypes(Arrays.asList(outputs).stream(),
 				(output) -> output.getOfficeOutputName(), (output) -> output.loadOfficeOutputType(compileContext),
 				OfficeOutputType[]::new);
 		if (outputTypes == null) {
@@ -810,6 +895,21 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
+	public boolean runExecutionExplorers(CompileContext compileContext) {
+
+		// Create the map of all managed functions
+		Map<String, ManagedFunctionNode> managedFunctions = new HashMap<>();
+		this.sections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctions));
+
+		// Run execution explorers for the sections (in deterministic order)
+		return this.sections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.allMatch((section) -> section.runExecutionExplorers(managedFunctions, compileContext));
+	}
+
+	@Override
 	public OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler) {
 
 		// Register as possible MBean
@@ -866,6 +966,12 @@ public class OfficeNodeImpl implements OfficeNode {
 					GovernanceNode[] governances = objectNode.getGovernances();
 					for (GovernanceNode governance : governances) {
 						managedObjectNode.addGovernance(governance, this);
+					}
+
+					// Load pre-load administration for linked Managed Object
+					AdministrationNode[] administrations = objectNode.getPreLoadAdministrations();
+					for (AdministrationNode administration : administrations) {
+						managedObjectNode.addPreLoadAdministration(administration, this);
 					}
 
 					// Build the managed object into the office
@@ -1036,20 +1142,20 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
+	public void addManagedFunctionAugmentor(ManagedFunctionAugmentor managedFunctionAugmentor) {
+		this.managedFunctionAugmentors.add(managedFunctionAugmentor);
+	}
+
+	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
 			String managedObjectSourceClassName) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
-				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
-				(managedObjectSource) -> managedObjectSource.initialise(managedObjectSourceClassName, null));
+		return this.addManagedObjectSource(managedObjectSourceName, managedObjectSourceClassName);
 	}
 
 	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
-				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
-				(managedObjectSourceNode) -> managedObjectSourceNode
-						.initialise(managedObjectSource.getClass().getName(), managedObjectSource));
+		return this.addManagedObjectSource(managedObjectSourceName, managedObjectSource);
 	}
 
 	@Override
@@ -1126,18 +1232,8 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public void link(OfficeInput input, OfficeOutput output) {
-		LinkUtil.linkSynchronous(input, output, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
 	public void link(OfficeInput input, OfficeSectionInput sectionInput) {
 		LinkUtil.linkFlow(input, sectionInput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(OfficeOutput output, OfficeInput input) {
-		LinkUtil.linkSynchronous(output, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
@@ -1211,13 +1307,13 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription);
+	public CompileError addIssue(String issueDescription) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
+	public CompileError addIssue(String issueDescription, Throwable cause) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
 	}
 
 	/*

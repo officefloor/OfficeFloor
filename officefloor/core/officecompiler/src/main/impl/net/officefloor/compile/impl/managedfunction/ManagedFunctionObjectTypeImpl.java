@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.managedfunction;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
@@ -26,8 +29,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionObjectTypeImpl<M extends Enum<M>> implements
-		ManagedFunctionObjectType<M>, ManagedFunctionObjectTypeBuilder<M> {
+public class ManagedFunctionObjectTypeImpl<M extends Enum<M>>
+		implements ManagedFunctionObjectType<M>, ManagedFunctionObjectTypeBuilder<M> {
 
 	/**
 	 * Type of the dependency {@link Object}.
@@ -55,6 +58,11 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>> implements
 	private M key = null;
 
 	/**
+	 * Annotations.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
+
+	/**
 	 * Initiate with the index of the {@link ManagedFunctionObjectType}.
 	 * 
 	 * @param objectType
@@ -68,7 +76,7 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>> implements
 	}
 
 	/*
-	 * ================= TaskObjectTypeBuilder ==========================
+	 * ================= ManagedFunctionObjectTypeBuilder =================
 	 */
 
 	@Override
@@ -87,8 +95,13 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>> implements
 		this.label = label;
 	}
 
+	@Override
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
+	}
+
 	/*
-	 * ================== TaskObjectType ==================================
+	 * ================== ManagedFunctionObjectType ==================
 	 */
 
 	@Override
@@ -121,6 +134,11 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>> implements
 	@Override
 	public M getKey() {
 		return this.key;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations.toArray(new Object[this.annotations.size()]);
 	}
 
 }

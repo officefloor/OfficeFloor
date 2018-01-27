@@ -29,8 +29,8 @@ public interface HttpRequestHeaders extends Iterable<HttpHeader> {
 	 * 
 	 * @param name
 	 *            Name of the {@link HttpHeader}.
-	 * @return First {@link HttpHeader} or <code>null</code> if not
-	 *         {@link HttpHeader}.
+	 * @return First {@link HttpHeader} or <code>null</code> if no
+	 *         {@link HttpHeader} by the name.
 	 */
 	HttpHeader getHeader(CharSequence name);
 

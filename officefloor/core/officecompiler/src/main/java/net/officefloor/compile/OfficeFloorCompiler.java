@@ -793,6 +793,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract PropertyList createPropertyList();
 
 	/**
+	 * Obtains the {@link CompilerIssues}.
+	 * 
+	 * @return {@link CompilerIssues}.
+	 */
+	public abstract CompilerIssues getCompilerIssues();
+
+	/**
 	 * Obtains the {@link TypeLoader}.
 	 * 
 	 * @return {@link TypeLoader}.

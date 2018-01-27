@@ -41,8 +41,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	private static final HttpHeaderValue textPlain = new HttpHeaderValue("text/plain");
 
 	@Override
-	protected HttpServerImplementation createHttpServerImplementation() {
-		return new OfficeFloorHttpServerImplementation();
+	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
+		return OfficeFloorHttpServerImplementation.class;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	}
 
 	@Override
-	protected SocketManager startRawHttpServer(int httpPort) throws Exception {
+	protected SocketManager startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 
 		// Create the socket manager
 		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager();
@@ -60,8 +60,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		final int serviceBufferSize = 256;
 		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocateDirect(serviceBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serviceBufferPool);
-		manager.bindServerSocket(httpPort, null, null, serviceFactory, serviceFactory);
+		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serverLocation, serviceBufferPool);
+		manager.bindServerSocket(serverLocation.getClusterHttpPort(), null, null, serviceFactory, serviceFactory);
 
 		// Start servicing
 		Executor executor = Executors.newCachedThreadPool();
@@ -96,11 +96,14 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		/**
 		 * Instantiate.
 		 *
+		 * @param serverLocation
+		 *            {@link HttpServerLocation}.
 		 * @param serviceBufferPool
 		 *            {@link StreamBufferPool}.
 		 */
-		public RawHttpServicerFactory(StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool);
+		public RawHttpServicerFactory(HttpServerLocation serverLocation,
+				StreamBufferPool<ByteBuffer> serviceBufferPool) {
+			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, true);
 		}
 
 		/*
@@ -115,7 +118,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 			connection.setProcessAwareContext(processAwareContext);
 
 			// Service the connection
-			HttpResponse response = connection.getHttpResponse();
+			HttpResponse response = connection.getResponse();
 			response.getEntity().write(helloWorld);
 			response.setContentType(textPlain, null);
 

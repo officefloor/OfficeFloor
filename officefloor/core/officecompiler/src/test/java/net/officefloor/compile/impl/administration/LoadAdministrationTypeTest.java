@@ -271,7 +271,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		// Validate simple details of type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
 		assertEquals("Incorrect administration factory", this.factory, type.getAdministrationFactory());
-		assertEquals("Incorrect extension interface", XAResource.class, type.getExtensionInterface());
+		assertEquals("Incorrect extension interface", XAResource.class, type.getExtensionType());
 		assertNull("No flow key class", type.getFlowKeyClass());
 		assertEquals("No flow meta-data", 0, type.getFlowTypes().length);
 		assertEquals("No escalation meta-data", 0, type.getEscalationTypes().length);

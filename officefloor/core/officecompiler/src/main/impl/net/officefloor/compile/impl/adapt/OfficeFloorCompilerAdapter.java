@@ -254,6 +254,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
+	public CompilerIssues getCompilerIssues() {
+		return (CompilerIssues) this.invokeMethod("getCompilerIssues", null);
+	}
+
+	@Override
 	public TypeLoader getTypeLoader() {
 		return (TypeLoader) this.invokeMethod("getTypeLoader", null);
 	}

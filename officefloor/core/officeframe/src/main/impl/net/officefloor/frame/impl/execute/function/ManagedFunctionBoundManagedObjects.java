@@ -17,20 +17,22 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionInterest;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -68,27 +70,49 @@ public class ManagedFunctionBoundManagedObjects {
 	/**
 	 * {@link ManagedFunctionContainer}.
 	 */
-	public final ManagedFunctionContainerImpl<ManagedFunctionMetaData<?, ?>> managedFunctionContainer;
+	public final ManagedFunctionContainerImpl<ManagedFunctionLogicMetaData> managedFunctionContainer;
 
 	/**
 	 * Instantiate.
 	 * 
+	 * @param managedFunctionLogic
+	 *            {@link ManagedFunctionLogic}.
 	 * @param managedObjectMetaData
 	 *            {@link ManagedObjectMetaData} of the
 	 *            {@link ManagedObjectContainer} instances bound to the
 	 *            {@link ManagedFunctionContainer}.
-	 * @param threadState
-	 *            {@link ThreadState} for the {@link ManagedFunctionContainer}.
+	 * @param requiredManagedObjects
+	 *            {@link ManagedObjectIndex} instances to the
+	 *            {@link ManagedObject} instances that must be loaded before the
+	 *            {@link ManagedFunction} may be executed.
+	 * @param requiredGovernance
+	 *            Identifies the required activation state of the
+	 *            {@link Governance} for this {@link ManagedFunction}.
+	 * @param isEnforceGovernance
+	 *            <code>true</code> to enforce {@link Governance} on
+	 *            deactivation. <code>false</code> to disregard
+	 *            {@link Governance} on deactivation.
+	 * @param functionLogicMetaData
+	 *            {@link ManagedFunctionLogicMetaData}.
+	 * @param parallelOwner
+	 *            Parallel owner of this {@link ManagedFunctionContainer}. May
+	 *            be <code>null</code> if no owner.
+	 * @param flow
+	 *            {@link Flow} for the {@link ManagedFunctionContainer}.
+	 * @param isUnloadManagedObjects
+	 *            Indicates whether this {@link ManagedObjectContainer} is
+	 *            responsible for unloading the {@link ManagedObject} instances.
 	 */
-	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBoundManagedObjects(Object parameter,
-			ManagedFunctionMetaData<O, F> managedFunctionMetaData, boolean isEnforceGovernance,
-			ManagedFunctionContainer parallelOwner, boolean isUnloadManagedObjects, Flow flow) {
+	public ManagedFunctionBoundManagedObjects(ManagedFunctionLogic managedFunctionLogic,
+			ManagedObjectMetaData<?>[] managedObjectMetaData, ManagedObjectIndex[] requiredManagedObjects,
+			boolean[] requiredGovernance, boolean isEnforceGovernance,
+			ManagedFunctionLogicMetaData functionLogicMetaData, ManagedFunctionContainer parallelOwner, Flow flow,
+			boolean isUnloadManagedObjects) {
 
 		// Obtain the thread state
 		ThreadState threadState = flow.getThreadState();
 
 		// Load the managed object containers bound to the function
-		ManagedObjectMetaData<?>[] managedObjectMetaData = managedFunctionMetaData.getManagedObjectMetaData();
 		if (managedObjectMetaData.length == 0) {
 			// Reduce object creation as rarely bound to function
 			this.managedObjects = NO_FUNCTION_BOUND_MANAGED_OBJECTS;
@@ -102,11 +126,9 @@ public class ManagedFunctionBoundManagedObjects {
 		}
 
 		// Load the managed function container
-		ManagedFunctionLogic managedFunctionLogic = new ManagedFunctionLogicImpl<>(managedFunctionMetaData, parameter);
-		this.managedFunctionContainer = new ManagedFunctionContainerImpl<ManagedFunctionMetaData<?, ?>>(null,
-				managedFunctionLogic, this, managedFunctionMetaData.getRequiredManagedObjects(),
-				managedFunctionMetaData.getRequiredGovernance(), isEnforceGovernance, managedFunctionMetaData,
-				parallelOwner, flow, isUnloadManagedObjects);
+		this.managedFunctionContainer = new ManagedFunctionContainerImpl<>(null, managedFunctionLogic, this,
+				requiredManagedObjects, requiredGovernance, isEnforceGovernance, functionLogicMetaData, parallelOwner,
+				flow, isUnloadManagedObjects);
 	}
 
 	/**

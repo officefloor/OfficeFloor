@@ -50,6 +50,7 @@ import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
@@ -203,11 +204,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionInput() {
 
 		// Load the office section with an office section input
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionInput("INPUT", String.class.getName());
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionInput("INPUT", String.class.getName());
 		});
 
 		// Validate results
@@ -217,6 +215,27 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect office section input parameter type", String.class.getName(), input.getParameterType());
 		assertEquals("Should be no office section outputs", 0, section.getOfficeSectionOutputTypes().length);
 		assertEquals("Should have no office section objects", 0, section.getOfficeSectionObjectTypes().length);
+	}
+
+	/**
+	 * Ensure can create input with annotations.
+	 */
+	public void testInputWithAnnotations() {
+
+		// Load office section type
+		OfficeSectionType type = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionInput("NO_ANNOTATION", null);
+			context.getBuilder().addSectionInput("ANNOTATION", null).addAnnotation("TEST");
+		});
+
+		// Ensure correct input with annotation
+		assertEquals("Incorrect number of inputs", 2, type.getOfficeSectionInputTypes().length);
+		OfficeSectionInputType annotation = type.getOfficeSectionInputTypes()[0];
+		assertEquals("Incorrect input", "ANNOTATION", annotation.getOfficeSectionInputName());
+		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
+		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		OfficeSectionInputType noAnnotation = type.getOfficeSectionInputTypes()[1];
+		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
 	}
 
 	/**
@@ -241,6 +260,27 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				output.getArgumentType());
 		assertTrue("Incorrect office section output escalation only flag", output.isEscalationOnly());
 		assertEquals("Should have no office section objects", 0, section.getOfficeSectionObjectTypes().length);
+	}
+
+	/**
+	 * Ensure can create output with annotations.
+	 */
+	public void testOutputWithAnnotations() {
+
+		// Load office section type
+		OfficeSectionType type = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionOutput("NO_ANNOTATION", null, false);
+			context.getBuilder().addSectionOutput("ANNOTATION", null, false).addAnnotation("TEST");
+		});
+
+		// Ensure correct output with annotation
+		assertEquals("Incorrect number of outputs", 2, type.getOfficeSectionOutputTypes().length);
+		OfficeSectionOutputType annotation = type.getOfficeSectionOutputTypes()[0];
+		assertEquals("Incorrect input", "ANNOTATION", annotation.getOfficeSectionOutputName());
+		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
+		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		OfficeSectionOutputType noAnnotation = type.getOfficeSectionOutputTypes()[1];
+		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
 	}
 
 	/**
@@ -341,7 +381,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 							public void make(ManagedObjectMakerContext context) {
 
 								// Qualified dependency
-								DependencyLabeller qualified = context.getContext().addDependency(Connection.class);
+								DependencyLabeller<Indexed> qualified = context.getContext()
+										.addDependency(Connection.class);
 								qualified.setLabel("QUALIFIED-DEPENDENCY");
 								qualified.setTypeQualifier("QUALIFIED");
 

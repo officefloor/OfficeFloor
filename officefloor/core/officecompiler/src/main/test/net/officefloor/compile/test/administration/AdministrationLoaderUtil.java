@@ -31,7 +31,6 @@ import net.officefloor.compile.impl.administrator.AdministrationEscalationTypeIm
 import net.officefloor.compile.impl.administrator.AdministrationFlowTypeImpl;
 import net.officefloor.compile.impl.administrator.AdministrationGovernanceTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
@@ -126,12 +125,12 @@ public class AdministrationLoaderUtil {
 		AdministrationType<E, F, G> aType = loadAdministrationType(administratorSourceClass, propertyNameValues);
 
 		// Ensure correct administrator type
-		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionInterface(),
-				aType.getExtensionInterface());
+		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionType(),
+				aType.getExtensionType());
 
 		// Validate the type
-		Assert.assertEquals("Incorrect extension interface", eType.getExtensionInterface(),
-				aType.getExtensionInterface());
+		Assert.assertEquals("Incorrect extension interface", eType.getExtensionType(),
+				aType.getExtensionType());
 		Assert.assertEquals("Incorrect flow key class", eType.getFlowKeyClass(), aType.getFlowKeyClass());
 		Assert.assertEquals("Incorrect governance key class", eType.getGovernanceKeyClass(),
 				aType.getGovernanceKeyClass());
@@ -310,7 +309,7 @@ public class AdministrationLoaderUtil {
 		 */
 
 		@Override
-		public Class<E> getExtensionInterface() {
+		public Class<E> getExtensionType() {
 			return this.extensionInterface;
 		}
 
@@ -325,13 +324,14 @@ public class AdministrationLoaderUtil {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public AdministrationFlowType<F>[] getFlowTypes() {
-			return CompileUtil.toArray(this.flows, new AdministrationFlowType[0]);
+			return this.flows.stream().toArray(AdministrationFlowType[]::new);
 		}
 
 		@Override
 		public AdministrationEscalationType[] getEscalationTypes() {
-			return CompileUtil.toArray(this.escalations, new AdministrationEscalationType[0]);
+			return this.escalations.stream().toArray(AdministrationEscalationType[]::new);
 		}
 
 		@Override
@@ -340,8 +340,9 @@ public class AdministrationLoaderUtil {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public AdministrationGovernanceType<G>[] getGovernanceTypes() {
-			return CompileUtil.toArray(this.governances, new AdministrationGovernanceType[0]);
+			return this.governances.stream().toArray(AdministrationGovernanceType[]::new);
 		}
 	}
 

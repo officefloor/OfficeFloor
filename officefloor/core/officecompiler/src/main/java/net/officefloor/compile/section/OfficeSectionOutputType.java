@@ -51,4 +51,11 @@ public interface OfficeSectionOutputType {
 	 */
 	boolean isEscalationOnly();
 
+	/**
+	 * Obtains the annotations for the {@link OfficeSectionOutput}.
+	 * 
+	 * @return Annotations for the {@link OfficeSectionOutput}.
+	 */
+	Object[] getAnnotations();
+
 }

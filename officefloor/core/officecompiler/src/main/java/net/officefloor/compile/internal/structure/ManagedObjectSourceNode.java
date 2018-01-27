@@ -18,9 +18,11 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
@@ -205,6 +207,18 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	 *            {@link CompilerIssues}.
 	 */
 	void autoWireToOffice(OfficeNode officeNode, CompilerIssues issues);
+
+	/**
+	 * Creates the {@link ExecutionManagedFunction}.
+	 * 
+	 * @param flowType
+	 *            {@link ManagedObjectFlowType}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link ExecutionManagedFunction}.
+	 */
+	ExecutionManagedFunction createExecutionManagedFunction(ManagedObjectFlowType<?> flowType,
+			CompileContext compileContext);
 
 	/**
 	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.

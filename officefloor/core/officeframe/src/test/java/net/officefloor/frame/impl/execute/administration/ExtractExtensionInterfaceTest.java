@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.administration;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -70,7 +70,7 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
 		object.enhanceMetaData = (metaData) -> {
-			metaData.addManagedObjectExtensionInterface(ManagedObjectExtension.class, new ManagedObjectExtension(null));
+			metaData.addManagedObjectExtension(ManagedObjectExtension.class, new ManagedObjectExtension(null));
 		};
 
 		// Construct the function
@@ -125,7 +125,7 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 	/**
 	 * Extension for the {@link ManagedObject}.
 	 */
-	public static class ManagedObjectExtension implements ExtensionInterfaceFactory<ManagedObjectExtension> {
+	public static class ManagedObjectExtension implements ExtensionFactory<ManagedObjectExtension> {
 
 		public ManagedObject managedObject;
 
@@ -134,7 +134,7 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 		}
 
 		@Override
-		public ManagedObjectExtension createExtensionInterface(ManagedObject managedObject) {
+		public ManagedObjectExtension createExtension(ManagedObject managedObject) {
 			assertNotNull("Must be provided managed object", managedObject);
 			return new ManagedObjectExtension(managedObject);
 		}

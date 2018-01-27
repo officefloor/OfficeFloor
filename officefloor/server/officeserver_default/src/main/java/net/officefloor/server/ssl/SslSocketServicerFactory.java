@@ -44,6 +44,7 @@ import net.officefloor.server.ResponseWriter;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
 /**
@@ -338,7 +339,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							// Prepare the response buffers for writing
 							StreamBuffer<ByteBuffer> buffer = responseHead;
 							while (buffer != null) {
-								if (buffer.isPooled) {
+								if (buffer.pooledBuffer != null) {
 									buffer.pooledBuffer.flip();
 								}
 								buffer = buffer.next;
@@ -479,7 +480,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 						} else {
 							// Obtain the buffer (could be overflow unpooled)
-							unwrapBuffer = this.currentUnwrapToAppBuffer.isPooled
+							unwrapBuffer = (this.currentUnwrapToAppBuffer.pooledBuffer != null)
 									? this.currentUnwrapToAppBuffer.pooledBuffer
 									: this.currentUnwrapToAppBuffer.unpooledByteBuffer;
 
@@ -554,7 +555,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							if (unwrapBuffer.position() > 0) {
 
 								// Determine if unpooled (transform to pooled)
-								StreamBuffer<ByteBuffer> serviceStreamBuffer = this.currentUnwrapToAppBuffer.isPooled
+								StreamBuffer<ByteBuffer> serviceStreamBuffer = (this.currentUnwrapToAppBuffer.pooledBuffer != null)
 										? this.currentUnwrapToAppBuffer
 										: new ServiceUnpooledStreamBuffer(this.currentUnwrapToAppBuffer);
 
@@ -627,18 +628,50 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						StreamBuffer<ByteBuffer> responseTail = null;
 						while (this.currentAppToWrapBuffer != null) {
 
-							// Obtain the application data
-							appToWrapBuffer = (this.currentAppToWrapBuffer.isPooled
-									? this.currentAppToWrapBuffer.pooledBuffer
-									: this.currentAppToWrapBuffer.unpooledByteBuffer);
-
 							// Obtain the response stream buffer
 							StreamBuffer<ByteBuffer> wrapToResponseBuffer = SslSocketServicerFactory.this.bufferPool
 									.getPooledStreamBuffer();
 
-							// Wrap the written data
-							SSLEngineResult sslEngineResult = this.engine.wrap(appToWrapBuffer,
-									wrapToResponseBuffer.pooledBuffer);
+							// Determine if file buffer
+							SSLEngineResult sslEngineResult;
+							StreamBuffer<ByteBuffer> fileContents;
+							long fileBytesCount;
+							if (this.currentAppToWrapBuffer.fileBuffer != null) {
+								// Obtain the file content
+								FileBuffer fileBuffer = this.currentAppToWrapBuffer.fileBuffer;
+
+								// Obtain the app to wrap buffer
+								fileContents = SslSocketServicerFactory.this.bufferPool.getPooledStreamBuffer();
+								appToWrapBuffer = fileContents.pooledBuffer;
+
+								// Obtain the position and count
+								long position = fileBuffer.position + fileBuffer.bytesWritten;
+								fileBytesCount = (fileBuffer.count < 0 ? fileBuffer.file.size() - fileBuffer.position
+										: fileBuffer.count);
+								long count = fileBytesCount - fileBuffer.bytesWritten;
+
+								// Read bytes from file
+								int bytesRead = fileBuffer.file.read(appToWrapBuffer, position);
+								appToWrapBuffer.flip();
+								if (bytesRead > count) {
+									// Truncate off additional read data
+									appToWrapBuffer.limit((int) count);
+								}
+
+								// Wrap the written data
+								sslEngineResult = this.engine.wrap(appToWrapBuffer, wrapToResponseBuffer.pooledBuffer);
+
+							} else {
+								// Obtain the Pooled / Unpooled application data
+								fileContents = null;
+								fileBytesCount = -1;
+								appToWrapBuffer = (this.currentAppToWrapBuffer.pooledBuffer != null)
+										? this.currentAppToWrapBuffer.pooledBuffer
+										: this.currentAppToWrapBuffer.unpooledByteBuffer;
+
+								// Wrap the written data
+								sslEngineResult = this.engine.wrap(appToWrapBuffer, wrapToResponseBuffer.pooledBuffer);
+							}
 
 							// Handle underflow / overflow
 							status = sslEngineResult.getStatus();
@@ -650,9 +683,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 								// Create buffer with enough space
 								int packetBufferSize = session.getPacketBufferSize();
-								byte[] packetData = new byte[packetBufferSize];
 								wrapToResponseBuffer = SslSocketServicerFactory.this.bufferPool
-										.getUnpooledStreamBuffer(ByteBuffer.wrap(packetData));
+										.getUnpooledStreamBuffer(ByteBuffer.allocate(packetBufferSize));
 
 								// Wrap the data
 								sslEngineResult = this.engine.wrap(appToWrapBuffer,
@@ -664,6 +696,28 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							default:
 								// Carry on to process
 								break;
+							}
+
+							// Determine if stream buffer written
+							boolean isStreamBufferWritten;
+							if (fileContents != null) {
+								// Release the file contents (as written)
+								fileContents.release();
+
+								// Increment the number of bytes read from file
+								int bytesConsumed = sslEngineResult.bytesConsumed();
+								FileBuffer fileBuffer = this.currentAppToWrapBuffer.fileBuffer;
+								fileBuffer.bytesWritten += bytesConsumed;
+								isStreamBufferWritten = (fileBuffer.bytesWritten == fileBytesCount);
+
+								// Callback once stream buffer written
+								if ((isStreamBufferWritten) && (fileBuffer.callback != null)) {
+									fileBuffer.callback.complete(fileBuffer.file, true);
+								}
+
+							} else {
+								// Determine if pooled / unpooled written
+								isStreamBufferWritten = (appToWrapBuffer.remaining() == 0);
 							}
 
 							// Handle wrap
@@ -688,7 +742,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							}
 
 							// Move to next buffer, only if written all
-							if (appToWrapBuffer.remaining() == 0) {
+							if (isStreamBufferWritten) {
 
 								// Move to next buffer to wrap
 								StreamBuffer<ByteBuffer> release = this.currentAppToWrapBuffer;
@@ -869,7 +923,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 *            Unpooled {@link StreamBuffer}.
 		 */
 		public ServiceUnpooledStreamBuffer(StreamBuffer<ByteBuffer> unpooledStreamBuffer) {
-			super(unpooledStreamBuffer.unpooledByteBuffer, null);
+			super(unpooledStreamBuffer.unpooledByteBuffer, null, null);
 			this.unpooledStreamBuffer = unpooledStreamBuffer;
 		}
 

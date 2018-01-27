@@ -71,4 +71,11 @@ public interface ManagedFunctionObjectType<M extends Enum<M>> {
 	 */
 	M getKey();
 
+	/**
+	 * Obtains the annotations for the {@link ManagedFunctionObjectType}.
+	 * 
+	 * @return Annotations for the {@link ManagedFunctionObjectType}.
+	 */
+	Object[] getAnnotations();
+
 }

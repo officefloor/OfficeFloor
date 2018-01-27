@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="administration name" />
+	<field type="OfficeManagedObjectModel" name="office managed object"
+		end-list="pre load administration" />
+	<field type="AdministrationModel" name="administration" end-list="pre load office managed object" />
+</model>

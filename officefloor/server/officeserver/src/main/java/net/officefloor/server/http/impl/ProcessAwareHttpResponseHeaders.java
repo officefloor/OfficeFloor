@@ -17,7 +17,6 @@
  */
 package net.officefloor.server.http.impl;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -31,7 +30,7 @@ import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.WritableHttpHeader;
 
 /**
- * {@link Serializable} {@link HttpResponseHeaders}.
+ * {@link ProcessAwareContext} {@link HttpResponseHeaders}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,11 +45,6 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	 * Tail {@link WritableHttpHeader} instance.
 	 */
 	private WritableHttpHeader tail = null;
-
-	/**
-	 * Count of the number of headers.
-	 */
-	private int headerCount = 0;
 
 	/**
 	 * {@link ProcessAwareContext}.
@@ -96,7 +90,6 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 			if (this.head == null) {
 				this.tail = null; // only header
 			}
-			this.headerCount--;
 			return null; // removed first (no previous)
 
 		} else {
@@ -115,7 +108,6 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 				// Removed last, so update list
 				this.tail = prev;
 			}
-			this.headerCount--;
 			return prev; // removed
 		}
 	}
@@ -131,20 +123,16 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	 *             {@link ProcessSafeOperation}.
 	 */
 	private final <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
-		return ProcessAwareHttpResponseHeaders.this.context.run(operation);
+		return this.context.run(operation);
 	}
 
 	/**
 	 * Safely adds a {@link HttpHeader}.
 	 * 
-	 * @param name
-	 *            Name of {@link HttpHeader}.
 	 * @param headerName
-	 *            Optional {@link HttpHeaderName}.
-	 * @param value
-	 *            Value of {@link HttpHeader}.
+	 *            {@link HttpHeaderName}.
 	 * @param headerValue
-	 *            Optional {@link HttpHeaderValue}.
+	 *            {@link HttpHeaderValue}.
 	 * @return Added {@link HttpHeader}.
 	 */
 	private final HttpHeader safeAddHeader(HttpHeaderName headerName, HttpHeaderValue headerValue) {
@@ -159,7 +147,6 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 				this.tail.next = header;
 				this.tail = header;
 			}
-			this.headerCount++;
 			return header;
 		});
 	}
@@ -405,22 +392,6 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 				this.current = ProcessAwareHttpResponseHeaders.this.removeHttpHeader(this.current);
 			}
 		});
-	}
-
-	@Override
-	public HttpHeader headerAt(int index) {
-		return this.safe(() -> {
-			WritableHttpHeader header = this.head;
-			for (int i = 0; i < index; i++) {
-				header = header.next;
-			}
-			return header;
-		});
-	}
-
-	@Override
-	public int length() {
-		return this.safe(() -> this.headerCount);
 	}
 
 }

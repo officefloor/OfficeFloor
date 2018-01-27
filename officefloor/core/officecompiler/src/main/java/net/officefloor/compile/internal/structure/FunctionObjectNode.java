@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.ObjectDependencyType;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.function.ManagedFunction;
 
@@ -27,7 +28,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface FunctionObjectNode extends LinkObjectNode, FunctionObject {
+public interface FunctionObjectNode extends LinkObjectNode, AugmentedFunctionObject, FunctionObject {
 
 	/**
 	 * {@link Node} type.

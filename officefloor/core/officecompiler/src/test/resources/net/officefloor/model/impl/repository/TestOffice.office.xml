@@ -15,6 +15,7 @@
 			object-type="java.sql.Connection" object-scope="PROCESS" x="100" y="101">
 			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
+			<pre-load administration="ADMINISTRATION" />
 		</external-managed-object>
 	</external-managed-objects>
 
@@ -74,6 +75,7 @@
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
+			<pre-load administration="ADMINISTRATION" />
 			<type-qualification qualifier="QUALIFIED"
 				type="java.sql.SpecificConnection" />
 			<type-qualification type="java.sql.GenericConnection" />
@@ -185,6 +187,8 @@
 				<section-managed-object name="SECTION_MANAGED_OBJECT">
 					<team name="MO_TEAM" />
 					<govern governance="GOVERNANCE" />
+					<administer administration="ADMINISTRATION" order="1" />
+					<pre-load administration="ADMINISTRATION" />
 				</section-managed-object>
 				<function name="FUNCTION">
 					<team name="TEAM" />

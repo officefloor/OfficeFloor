@@ -31,28 +31,35 @@ public interface HttpRequest {
 	 * 
 	 * @return {@link HttpMethod}.
 	 */
-	HttpMethod getHttpMethod();
+	HttpMethod getMethod();
 
 	/**
-	 * Obtains the Request URI as provided on the request.
+	 * Obtains the request URI as provided on the request.
 	 * 
 	 * @return Request URI as provided on the request.
 	 */
-	String getRequestURI();
+	String getUri();
 
 	/**
 	 * Obtains the {@link HttpVersion}.
 	 * 
 	 * @return {@link HttpVersion}.
 	 */
-	HttpVersion getHttpVersion();
+	HttpVersion getVersion();
 
 	/**
 	 * Obtains the {@link HttpRequestHeaders}.
 	 * 
 	 * @return {@link HttpRequestHeaders}.
 	 */
-	HttpRequestHeaders getHttpHeaders();
+	HttpRequestHeaders getHeaders();
+
+	/**
+	 * Obtains the {@link HttpRequestCookies}.
+	 * 
+	 * @return {@link HttpRequestCookies}.
+	 */
+	HttpRequestCookies getCookies();
 
 	/**
 	 * Obtains the {@link ServerInputStream} to the entity of the HTTP request.

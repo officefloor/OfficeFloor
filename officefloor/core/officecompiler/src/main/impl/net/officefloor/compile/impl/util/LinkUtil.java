@@ -30,7 +30,6 @@ import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -109,46 +108,6 @@ public class LinkUtil {
 
 		// Link the nodes together
 		return ((LinkFlowNode) linkSource).linkFlowNode((LinkFlowNode) linkTarget);
-	}
-
-	/**
-	 * Ensures both inputs are a {@link LinkSynchronousNode} and if so links
-	 * them.
-	 * 
-	 * @param linkSource
-	 *            Source {@link LinkSynchronousNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkSynchronousNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link Flow}.
-	 * @return <code>true</code> if linked.
-	 */
-	@Deprecated // no synchronous OfficeFloor interaction (as always via queues)
-	public static boolean linkSynchronous(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
-
-		// Obtain the node
-		if (linkSource instanceof Node) {
-			node = (Node) linkSource;
-		}
-
-		// Ensure the link source is link synchronous node
-		if (!(linkSource instanceof LinkSynchronousNode)) {
-			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
-					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
-			return false; // can not link
-		}
-
-		// Ensure the link target is link synchronous node
-		if (!(linkTarget instanceof LinkSynchronousNode)) {
-			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
-					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
-			return false; // can not link
-		}
-
-		// Link the nodes together
-		return ((LinkSynchronousNode) linkSource).linkSynchronousNode((LinkSynchronousNode) linkTarget);
 	}
 
 	/**

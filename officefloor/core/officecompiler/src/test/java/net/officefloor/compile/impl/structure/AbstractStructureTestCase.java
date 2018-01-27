@@ -27,7 +27,6 @@ import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
-import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -41,7 +40,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
-import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -94,7 +93,7 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -177,23 +176,6 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static void assertFlowLink(String msg, Object linkSource, Object linkTarget) {
 		assertTrue(msg + ": source must be " + LinkFlowNode.class.getSimpleName(), linkSource instanceof LinkFlowNode);
 		assertEquals(msg, linkTarget, ((LinkFlowNode) linkSource).getLinkedFlowNode());
-	}
-
-	/**
-	 * Asserts the {@link LinkSynchronousNode} source is linked to the target
-	 * {@link LinkSynchronousNode}.
-	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkSynchronousNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkSynchronousNode}.
-	 */
-	protected static void assertSynchronousLink(String msg, Object linkSource, Object linkTarget) {
-		assertTrue(msg + ": source must be " + LinkSynchronousNode.class.getSimpleName(),
-				linkSource instanceof LinkSynchronousNode);
-		assertEquals(msg, linkTarget, ((LinkSynchronousNode) linkSource).getLinkedSynchronousNode());
 	}
 
 	/**
@@ -1047,10 +1029,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addExtensionInterface(Class<?> extensionInterface) {
-			// Add the extension interface
-			this.context.addManagedObjectExtensionInterface(extensionInterface, new ExtensionInterfaceFactory() {
+			// Add the extension
+			this.context.addManagedObjectExtension(extensionInterface, new ExtensionFactory() {
 				@Override
-				public Object createExtensionInterface(ManagedObject managedObject) {
+				public Object createExtension(ManagedObject managedObject) {
 					fail("Should not require to create extension interface");
 					return null;
 				}
@@ -1631,7 +1613,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link AdministrationSource}.
 	 */
 	@TestSource
-	public static class MakerAdministrationSource extends AbstractAdministratorSource<Object, Indexed, Indexed>
+	public static class MakerAdministrationSource extends AbstractAdministrationSource<Object, Indexed, Indexed>
 			implements AdministrationMakerContext {
 
 		/**

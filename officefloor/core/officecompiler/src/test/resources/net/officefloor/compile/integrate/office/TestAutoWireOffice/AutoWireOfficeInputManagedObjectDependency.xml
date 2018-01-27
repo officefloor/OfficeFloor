@@ -1,0 +1,61 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENCY_OBJECT"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$DependencyProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="DEPENDENCY_OBJECT" />
+				<flow name="doFlow">
+					<section-input section="SECTION" input="INPUT" />
+				</flow>
+				<input-dependency name="dependency">
+					<!-- auto-wire the dependency -->
+					<!-- <managed-object name="SIMPLE_OBJECT" /> -->
+				</input-dependency>
+			</managed-object-source>
+			<managed-object-source name="SIMPLE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="SIMPLE_OBJECT" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<input name="INPUT" />
+			</section>
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$ProcessClass" />
+				</properties>
+				<managed-function name="process">
+					<managed-function-object name="java.lang.Integer"
+						parameter="true" />
+				</managed-function>
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="process" public="true" />
+		</functions>
+	</section>
+</context>

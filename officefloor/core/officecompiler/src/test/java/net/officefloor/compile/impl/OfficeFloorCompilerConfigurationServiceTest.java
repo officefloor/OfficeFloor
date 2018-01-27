@@ -19,7 +19,6 @@ package net.officefloor.compile.impl;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
-import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.OfficeFloorEvent;

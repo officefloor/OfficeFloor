@@ -42,6 +42,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -53,6 +54,7 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -360,7 +362,7 @@ public class SectionNodeImpl implements SectionNode {
 	 */
 
 	@Override
-	public boolean sourceSection(CompileContext compileContext) {
+	public boolean sourceSection(ManagedFunctionVisitor visitor, CompileContext compileContext) {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
@@ -421,6 +423,9 @@ public class SectionNodeImpl implements SectionNode {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
 
+		} catch (CompileError ex) {
+			return false; // issue already reported
+
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + SectionType.class.getSimpleName() + " definition from "
 					+ SectionSource.class.getSimpleName() + " " + source.getClass().getName(), ex);
@@ -432,17 +437,17 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public boolean sourceSectionTree(CompileContext compileContext) {
+	public boolean sourceSectionTree(ManagedFunctionVisitor visitor, CompileContext compileContext) {
 
 		// Source this section
-		boolean isSourced = this.sourceSection(compileContext);
+		boolean isSourced = this.sourceSection(visitor, compileContext);
 		if (!isSourced) {
 			return false;
 		}
 
 		// Ensure all functions are sourced
 		isSourced = CompileUtil.source(this.functionNodes, (function) -> function.getSectionFunctionName(),
-				(function) -> function.souceManagedFunction(compileContext));
+				(function) -> function.souceManagedFunction(visitor, compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -465,7 +470,7 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Successful only if all sub sections are also sourced
 		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
-				(subSection) -> subSection.sourceSectionTree(compileContext));
+				(subSection) -> subSection.sourceSectionTree(visitor, compileContext));
 	}
 
 	@Override
@@ -662,15 +667,15 @@ public class SectionNodeImpl implements SectionNode {
 		}
 
 		// Add the office context for the functions
-		OfficeFunctionType[] taskTypes = CompileUtil.loadTypes(this.functionNodes,
+		OfficeFunctionType[] functionTypes = CompileUtil.loadTypes(this.functionNodes,
 				(function) -> function.getOfficeFunctionName(),
 				function -> function.loadOfficeFunctionType(sectionType, compileContext), OfficeFunctionType[]::new);
-		if (taskTypes == null) {
+		if (functionTypes == null) {
 			return false;
 		}
 
 		// Initialise the sub section state
-		sectionType.initialiseAsOfficeSubSectionType(parentSectionType, subSections, taskTypes, managedObjectTypes);
+		sectionType.initialiseAsOfficeSubSectionType(parentSectionType, subSections, functionTypes, managedObjectTypes);
 		return true;
 	}
 
@@ -784,6 +789,33 @@ public class SectionNodeImpl implements SectionNode {
 		this.subSections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
 				.forEachOrdered((subSection) -> subSection.autoWireTeams(autoWirer, compileContext));
+	}
+
+	@Override
+	public void loadManagedFunctionNodes(Map<String, ManagedFunctionNode> managedFunctionNodes) {
+
+		// Load the managed functions from this section
+		this.functionNodes.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionFunctionName(), b.getSectionFunctionName()))
+				.forEachOrdered((function) -> {
+					String functionName = function.getQualifiedFunctionName();
+					managedFunctionNodes.put(functionName, function);
+				});
+
+		// Load the sub section managed functions
+		this.subSections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
+				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctionNodes));
+	}
+
+	@Override
+	public boolean runExecutionExplorers(Map<String, ManagedFunctionNode> managedFunctions,
+			CompileContext compileContext) {
+
+		// Run execution explorers for the inputs (in deterministic order)
+		return this.inputs.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionInputName(), b.getSectionInputName()))
+				.allMatch((input) -> input.runExecutionExplorers(managedFunctions, compileContext));
 	}
 
 	@Override
@@ -1109,13 +1141,13 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription);
+	public CompileError addIssue(String issueDescription) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
+	public CompileError addIssue(String issueDescription, Throwable cause) {
+		return this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
 	}
 
 	/*
@@ -1216,7 +1248,19 @@ public class SectionNodeImpl implements SectionNode {
 		this.state = new InitialisedState(sectionSourceClassName, null, sectionLocation);
 		this.propertyList.clear();
 		for (Property property : sectionProperties) {
-			this.propertyList.addProperty(property.getName()).setValue(property.getValue());
+			this.propertyList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
+		}
+	}
+
+	@Override
+	public void setTransformedOfficeSection(SectionSource sectionSource, String sectionLocation,
+			PropertyList sectionProperties) {
+
+		// Load the transformation
+		this.state = new InitialisedState(sectionSource.getClass().getName(), sectionSource, sectionLocation);
+		this.propertyList.clear();
+		for (Property property : sectionProperties) {
+			this.propertyList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
 		}
 	}
 

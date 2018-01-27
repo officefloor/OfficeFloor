@@ -75,6 +75,20 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 			GovernanceMetaData<?, F> governanceMetaData);
 
 	/**
+	 * Creates a new {@link ManagedFunctionContainer} contained in this
+	 * {@link Flow} for the {@link ManagedObjectAdministrationMetaData}.
+	 * 
+	 * @param adminMetaData
+	 *            {@link ManagedObjectAdministrationMetaData}.
+	 * @param parallelFunctionOwner
+	 *            {@link ManagedFunctionContainer} that is the parallel owner of
+	 *            the new {@link ManagedFunction}.
+	 * @return New {@link ManagedFunctionContainer}.
+	 */
+	<E, F extends Enum<F>, G extends Enum<G>> ManagedFunctionContainer createAdministrationFunction(
+			ManagedObjectAdministrationMetaData<E, F, G> adminMetaData, ManagedFunctionContainer parallelFunctionOwner);
+
+	/**
 	 * Flags that the input {@link FunctionState} has completed.
 	 * 
 	 * @param function

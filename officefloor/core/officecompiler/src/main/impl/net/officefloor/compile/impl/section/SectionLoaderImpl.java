@@ -139,20 +139,27 @@ public class SectionLoaderImpl implements SectionLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the specification
+		return this.loadSpecification(sectionSource);
+	}
+
+	@Override
+	public PropertyList loadSpecification(SectionSource sectionSource) {
+
 		// Obtain the specification
 		SectionSourceSpecification specification;
 		try {
 			specification = sectionSource.getSpecification();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + SectionSourceSpecification.class.getSimpleName() + " from "
-					+ sectionSourceClass.getName(), ex);
+					+ sectionSource.getClass().getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
 			this.addIssue("No " + SectionSourceSpecification.class.getSimpleName() + " returned from "
-					+ sectionSourceClass.getName());
+					+ sectionSource.getClass().getName());
 			return null; // no specification obtained
 		}
 
@@ -161,9 +168,8 @@ public class SectionLoaderImpl implements SectionLoader {
 		try {
 			sectionProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to obtain " + SectionSourceProperty.class.getSimpleName() + " instances from "
-							+ SectionSourceSpecification.class.getSimpleName() + " for " + sectionSourceClass.getName(),
+			this.addIssue("Failed to obtain " + SectionSourceProperty.class.getSimpleName() + " instances from "
+					+ SectionSourceSpecification.class.getSimpleName() + " for " + sectionSource.getClass().getName(),
 					ex);
 			return null; // failed to obtain properties
 		}
@@ -178,7 +184,7 @@ public class SectionLoaderImpl implements SectionLoader {
 				if (sectionProperty == null) {
 					this.addIssue(SectionSourceProperty.class.getSimpleName() + " " + i + " is null from "
 							+ SectionSourceSpecification.class.getSimpleName() + " for "
-							+ sectionSourceClass.getName());
+							+ sectionSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -189,13 +195,13 @@ public class SectionLoaderImpl implements SectionLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get name for " + SectionSourceProperty.class.getSimpleName() + " " + i
 							+ " from " + SectionSourceSpecification.class.getSimpleName() + " for "
-							+ sectionSourceClass.getName(), ex);
+							+ sectionSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
 					this.addIssue(SectionSourceProperty.class.getSimpleName() + " " + i + " provided blank name from "
 							+ SectionSourceSpecification.class.getSimpleName() + " for "
-							+ sectionSourceClass.getName());
+							+ sectionSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -206,7 +212,7 @@ public class SectionLoaderImpl implements SectionLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for " + SectionSourceProperty.class.getSimpleName() + " " + i
 							+ " (" + name + ") from " + SectionSourceSpecification.class.getSimpleName() + " for "
-							+ sectionSourceClass.getName(), ex);
+							+ sectionSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -246,7 +252,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSection(compileContext);
+		boolean isSourced = sectionNode.sourceSection(null, compileContext);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
@@ -283,7 +289,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSectionTree(compileContext);
+		boolean isSourced = sectionNode.sourceSectionTree(null, compileContext);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}

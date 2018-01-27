@@ -67,10 +67,8 @@ public interface OfficeSectionTransformerContext {
 	PropertyList createPropertyList();
 
 	/**
-	 * Creates an {@link OfficeSection}.
+	 * Specifies the transformed {@link OfficeSection}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName
 	 *            {@link SectionSource} {@link Class} name.
 	 * @param sectionLocation
@@ -79,6 +77,19 @@ public interface OfficeSectionTransformerContext {
 	 *            {@link OfficeSection} {@link PropertyList}.
 	 */
 	void setTransformedOfficeSection(String sectionSourceClassName, String sectionLocation,
+			PropertyList sectionProperties);
+
+	/**
+	 * Specifies the transformed {@link OfficeSection}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource}.
+	 * @param sectionLocation
+	 *            {@link SectionSource} location.
+	 * @param sectionProperties
+	 *            {@link OfficeSection} {@link PropertyList}.
+	 */
+	void setTransformedOfficeSection(SectionSource sectionSource, String sectionLocation,
 			PropertyList sectionProperties);
 
 }

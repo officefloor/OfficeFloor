@@ -31,15 +31,20 @@ import net.officefloor.model.office.AdministrationEscalationToOfficeSectionInput
 import net.officefloor.model.office.AdministrationFlowModel;
 import net.officefloor.model.office.AdministrationFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
-import net.officefloor.model.office.ExternalManagedObjectToGovernanceModel;
+import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.GovernanceEscalationModel;
 import net.officefloor.model.office.GovernanceEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.GovernanceFlowModel;
 import net.officefloor.model.office.GovernanceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.GovernanceModel;
+import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.GovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -63,14 +68,13 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
-import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
-import net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -417,7 +421,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Connect the external managed objects to administrations
 		for (ExternalManagedObjectModel extMo : office.getExternalManagedObjects()) {
-			for (ExternalManagedObjectToAdministrationModel conn : extMo.getAdministrations()) {
+			for (AdministrationToExternalManagedObjectModel conn : extMo.getAdministrations()) {
+				AdministrationModel admin = administrations.get(conn.getAdministrationName());
+				if (admin != null) {
+					conn.setExternalManagedObject(extMo);
+					conn.setAdministration(admin);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect pre-load administration for external managed objects
+		for (ExternalManagedObjectModel extMo : office.getExternalManagedObjects()) {
+			for (ExternalManagedObjectToPreLoadAdministrationModel conn : extMo.getPreLoadAdministrations()) {
 				AdministrationModel admin = administrations.get(conn.getAdministrationName());
 				if (admin != null) {
 					conn.setExternalManagedObject(extMo);
@@ -429,7 +445,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Connect the managed objects to administrators
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
-			for (OfficeManagedObjectToAdministrationModel conn : mo.getAdministrations()) {
+			for (AdministrationToOfficeManagedObjectModel conn : mo.getAdministrations()) {
+				AdministrationModel admin = administrations.get(conn.getAdministrationName());
+				if (admin != null) {
+					conn.setOfficeManagedObject(mo);
+					conn.setAdministration(admin);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect pre-load administration for external managed objects
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectToPreLoadAdministrationModel conn : mo.getPreLoadAdministrations()) {
 				AdministrationModel admin = administrations.get(conn.getAdministrationName());
 				if (admin != null) {
 					conn.setOfficeManagedObject(mo);
@@ -486,7 +514,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Connect the external managed objects to governances
 		for (ExternalManagedObjectModel extMo : office.getExternalManagedObjects()) {
-			for (ExternalManagedObjectToGovernanceModel conn : extMo.getGovernances()) {
+			for (GovernanceToExternalManagedObjectModel conn : extMo.getGovernances()) {
 				GovernanceModel gov = governances.get(conn.getGovernanceName());
 				if (gov != null) {
 					conn.setExternalManagedObject(extMo);
@@ -498,7 +526,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Connect the managed objects to governances
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
-			for (OfficeManagedObjectToGovernanceModel conn : mo.getGovernances()) {
+			for (GovernanceToOfficeManagedObjectModel conn : mo.getGovernances()) {
 				GovernanceModel gov = governances.get(conn.getGovernanceName());
 				if (gov != null) {
 					conn.setOfficeManagedObject(mo);
@@ -608,9 +636,33 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connection administration of sub section managed objects
+		for (OfficeSectionManagedObjectModel mo : subSection.getOfficeSectionManagedObjects()) {
+			for (AdministrationToOfficeSectionManagedObjectModel conn : mo.getAdministrations()) {
+				AdministrationModel admin = administrations.get(conn.getAdministrationName());
+				if (admin != null) {
+					conn.setOfficeSectionManagedObject(mo);
+					conn.setAdministration(admin);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect pre-load administration for sub section managed objects
+		for (OfficeSectionManagedObjectModel mo : subSection.getOfficeSectionManagedObjects()) {
+			for (OfficeSectionManagedObjectToPreLoadAdministrationModel conn : mo.getPreLoadAdministrations()) {
+				AdministrationModel admin = administrations.get(conn.getAdministrationName());
+				if (admin != null) {
+					conn.setOfficeSectionManagedObject(mo);
+					conn.setAdministration(admin);
+					conn.connect();
+				}
+			}
+		}
+
 		// Connect the section managed objects to governance
 		for (OfficeSectionManagedObjectModel mo : subSection.getOfficeSectionManagedObjects()) {
-			for (OfficeSectionManagedObjectToGovernanceModel conn : mo.getGovernances()) {
+			for (GovernanceToOfficeSectionManagedObjectModel conn : mo.getGovernances()) {
 				GovernanceModel governance = governances.get(conn.getGovernanceName());
 				if (governance != null) {
 					conn.setOfficeSectionManagedObject(mo);
@@ -684,11 +736,25 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Specify external managed objects to pre-load administration
+		for (AdministrationModel admin : office.getAdministrations()) {
+			for (ExternalManagedObjectToPreLoadAdministrationModel conn : admin.getPreLoadExternalManagedObjects()) {
+				conn.setAdministrationName(admin.getAdministrationName());
+			}
+		}
+
 		// Specify managed objects to input dependencies
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
 			for (OfficeInputManagedObjectDependencyToOfficeManagedObjectModel conn : mo
 					.getDependentOfficeInputManagedObjects()) {
 				conn.setOfficeManagedObjectName(mo.getOfficeManagedObjectName());
+			}
+		}
+
+		// Specify managed objects to pre-load administration
+		for (AdministrationModel admin : office.getAdministrations()) {
+			for (OfficeManagedObjectToPreLoadAdministrationModel conn : admin.getPreLoadOfficeManagedObjects()) {
+				conn.setAdministrationName(admin.getAdministrationName());
 			}
 		}
 
@@ -762,14 +828,14 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Specify external managed objects to administrations
 		for (AdministrationModel admin : office.getAdministrations()) {
-			for (ExternalManagedObjectToAdministrationModel conn : admin.getExternalManagedObjects()) {
+			for (AdministrationToExternalManagedObjectModel conn : admin.getAdministeredExternalManagedObjects()) {
 				conn.setAdministrationName(admin.getAdministrationName());
 			}
 		}
 
 		// Specify managed objects to administrators
 		for (AdministrationModel admin : office.getAdministrations()) {
-			for (OfficeManagedObjectToAdministrationModel conn : admin.getOfficeManagedObjects()) {
+			for (AdministrationToOfficeManagedObjectModel conn : admin.getAdministeredOfficeManagedObjects()) {
 				conn.setAdministrationName(admin.getAdministrationName());
 			}
 		}
@@ -817,21 +883,37 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Specify governance to section managed objects
 		for (GovernanceModel governance : office.getGovernances()) {
-			for (OfficeSectionManagedObjectToGovernanceModel conn : governance.getOfficeSectionManagedObjects()) {
+			for (GovernanceToOfficeSectionManagedObjectModel conn : governance.getOfficeSectionManagedObjects()) {
 				conn.setGovernanceName(governance.getGovernanceName());
+			}
+		}
+
+		// Specify administration of section managed objects
+		for (AdministrationModel admin : office.getAdministrations()) {
+			for (AdministrationToOfficeSectionManagedObjectModel conn : admin
+					.getAdministeredOfficeSectionManagedObjects()) {
+				conn.setAdministrationName(admin.getAdministrationName());
+			}
+		}
+
+		// Specify section managed objects to pre-load administration
+		for (AdministrationModel admin : office.getAdministrations()) {
+			for (OfficeSectionManagedObjectToPreLoadAdministrationModel conn : admin
+					.getPreLoadOfficeSectionManagedObjects()) {
+				conn.setAdministrationName(admin.getAdministrationName());
 			}
 		}
 
 		// Specify external managed objects to governances
 		for (GovernanceModel gov : office.getGovernances()) {
-			for (ExternalManagedObjectToGovernanceModel conn : gov.getExternalManagedObjects()) {
+			for (GovernanceToExternalManagedObjectModel conn : gov.getExternalManagedObjects()) {
 				conn.setGovernanceName(gov.getGovernanceName());
 			}
 		}
 
 		// Specify managed objects to governances
 		for (GovernanceModel gov : office.getGovernances()) {
-			for (OfficeManagedObjectToGovernanceModel conn : gov.getOfficeManagedObjects()) {
+			for (GovernanceToOfficeManagedObjectModel conn : gov.getOfficeManagedObjects()) {
 				conn.setGovernanceName(gov.getGovernanceName());
 			}
 		}

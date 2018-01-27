@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
@@ -65,6 +66,7 @@ import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -433,12 +435,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					() -> this.context.createManagedObjectTeamNode(teamName, this), (team) -> team.initialise());
 		}
 
-		// Initialise the input dependencies
-		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
-			String dependencyName = dependencyType.getDependencyName();
-			NodeUtil.getInitialisedNode(dependencyName, this.inputDependencies, this.context,
-					() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
-					(dependency) -> dependency.initialise());
+		// Initialise the input dependencies (if input)
+		if (managedObjectType.isInput()) {
+			for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
+				String dependencyName = dependencyType.getDependencyName();
+				NodeUtil.getInitialisedNode(dependencyName, this.inputDependencies, this.context,
+						() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
+						(dependency) -> dependency.initialise());
+			}
 		}
 
 		// Successfully sourced
@@ -649,6 +653,28 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public ExecutionManagedFunction createExecutionManagedFunction(ManagedObjectFlowType<?> flowType,
+			CompileContext compileContext) {
+
+		// Obtain the flow
+		String flowName = flowType.getFlowName();
+		ManagedObjectFlowNode flow = this.flows.get(flowName);
+		if (flow == null) {
+			return null;
+		}
+
+		// Obtain the managed function
+		ManagedFunctionNode function = LinkUtil.findTarget(flow, ManagedFunctionNode.class,
+				this.context.getCompilerIssues());
+		if (function == null) {
+			return null;
+		}
+
+		// Create and return the execution function
+		return function.createExecutionManagedFunction(compileContext);
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder officeBuilder,
 			OfficeBindings officeBindings, CompileContext compileContext) {
@@ -748,12 +774,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					// Provide governance for office floor input managed object.
 					// For others, should be configured through Office (flows)
 					if (this.inputManagedObjectNode != null) {
-						// Get governances for input managed object of office
-						GovernanceNode[] governances = this.inputManagedObjectNode.getGovernances(managingOffice);
 
 						// Map in the governances
+						GovernanceNode[] governances = this.inputManagedObjectNode.getGovernances(managingOffice);
 						for (GovernanceNode governance : governances) {
 							inputDependencyMappings.mapGovernance(governance.getOfficeGovernanceName());
+						}
+
+						// Map in the pre-load administrations
+						AdministrationNode[] preLoadAdmins = this.inputManagedObjectNode
+								.getPreLoadAdministrations(managingOffice);
+						for (AdministrationNode preLoadAdmin : preLoadAdmins) {
+							preLoadAdmin.buildPreLoadManagedObjectAdministration(inputDependencyMappings,
+									compileContext);
 						}
 					}
 

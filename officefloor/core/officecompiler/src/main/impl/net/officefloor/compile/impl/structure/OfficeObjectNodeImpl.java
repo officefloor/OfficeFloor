@@ -71,6 +71,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
+	 * Pre-load {@link OfficeAdministration}.
+	 */
+	private final List<OfficeAdministration> preLoadAdministrations = new LinkedList<>();
+
+	/**
 	 * Parent {@link OfficeNode}.
 	 */
 	private final OfficeNode officeNode;
@@ -186,6 +191,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
+	public AdministrationNode[] getPreLoadAdministrations() {
+		return this.preLoadAdministrations.toArray(new AdministrationNode[this.preLoadAdministrations.size()]);
+	}
+
+	@Override
 	public String getTypeQualifier() {
 		return this.typeQualifier;
 	}
@@ -224,7 +234,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 			}
 
 			// Add the extension interface
-			Class<?> extensionInterface = adminType.getExtensionInterface();
+			Class<?> extensionInterface = adminType.getExtensionType();
 			extensionInterfaces.add(extensionInterface.getName());
 		}
 
@@ -263,6 +273,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	@Override
 	public void setTypeQualifier(String qualifier) {
 		this.typeQualifier = qualifier;
+	}
+
+	@Override
+	public void addPreLoadAdministration(OfficeAdministration administration) {
+		this.preLoadAdministrations.add(administration);
 	}
 
 	/*

@@ -20,9 +20,15 @@ package net.officefloor.server.stream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
+import net.officefloor.server.http.stream.TemporaryFiles;
 
 /**
  * Tests the write functionality of the {@link StreamBuffer}.
@@ -80,7 +86,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	public void testWriteOnlyToLastBuffer() {
 		this.head.next = this.bufferPool.getPooledStreamBuffer();
 		this.head.next.next = this.bufferPool.getPooledStreamBuffer();
-		write(1);
+		this.write(1);
 		assertEquals("Not write to first buffer", 0, this.head.pooledBuffer.position());
 		assertEquals("Not write to second buffer", 0, this.head.next.pooledBuffer.position());
 		assertEquals("Should write only to last buffer", 1, this.head.next.next.pooledBuffer.position());
@@ -96,7 +102,20 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 		this.write(2);
 		assertEquals("Should not write to head", 0, this.head.pooledBuffer.position());
 		assertNotNull("Should append pooled buffer", this.head.next.next);
-		assertTrue("Should be pooled buffer appended", this.head.next.next.isPooled);
+		assertNotNull("Should be pooled buffer appended", this.head.next.next.pooledBuffer);
+		this.assertBytes(1, 2);
+	}
+
+	/**
+	 * Ensure if last buffer is file, that a pooled buffer is added.
+	 */
+	public void testNotWriteFileBuffer() throws IOException {
+		this.head.next = this.bufferPool
+				.getFileStreamBuffer(TemporaryFiles.getDefault().createTempFile("test", new byte[] { 1 }), 0, -1, null);
+		this.write(2);
+		assertEquals("Should not write to head", 0, this.head.pooledBuffer.position());
+		assertNotNull("Should append pooled buffer", this.head.next.next);
+		assertNotNull("Should be pooled buffer appended", this.head.next.next.pooledBuffer);
 		this.assertBytes(1, 2);
 	}
 
@@ -110,6 +129,106 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can write {@link CharSequence}.
+	 */
+	public void testCharSequence() {
+		final String text = "AbCd09";
+		StreamBuffer.write(text, this.head, this.bufferPool);
+		this.assertBytes(text.getBytes(Charset.forName("US-ASCII")));
+	}
+
+	/**
+	 * Ensure can write sub sequence of {@link CharSequence}.
+	 */
+	public void testCharSubSequence() {
+		final String text = "_ignore_text_ignore_";
+		StreamBuffer.write(text, "_ignore_".length(), "text".length(), this.head, this.bufferPool);
+		this.assertBytes("text".getBytes(Charset.forName("US-ASCII")));
+	}
+
+	/**
+	 * Ensure can use {@link Appendable}.
+	 */
+	public void testAppendable() {
+		Instant time = Instant.now();
+		String expected = DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.of("GMT")).format(time);
+		DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.of("GMT")).formatTo(time,
+				StreamBuffer.getAppendable(this.head, this.bufferPool));
+		this.assertBytes(expected.getBytes(Charset.forName("US-ASCII")));
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testZero() {
+		this.doIntegerTest(0);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testOne() {
+		this.doIntegerTest(1);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testTen() {
+		this.doIntegerTest(10);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testEachDigit() {
+		this.doIntegerTest(123456789);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testLargeValue() {
+		this.doIntegerTest(Long.MAX_VALUE);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testNegative() {
+		this.doIntegerTest(-1);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testWithinBoundLargeNegative() {
+		this.doIntegerTest(Long.MIN_VALUE + 1);
+	}
+
+	/**
+	 * Ensure can write value.
+	 */
+	public void testLargeNegative() {
+		this.doIntegerTest(Long.MIN_VALUE);
+	}
+
+	/**
+	 * Undertakes test of value.
+	 * 
+	 * @param value
+	 *            value.
+	 */
+	private void doIntegerTest(long value) {
+		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
+		StreamBuffer<ByteBuffer> head = bufferPool.getPooledStreamBuffer();
+		StreamBuffer.write(value, head, bufferPool);
+		MockStreamBufferPool.releaseStreamBuffers(head);
+		String actual = MockStreamBufferPool.getContent(head, ServerHttpConnection.HTTP_CHARSET);
+		assertEquals("Incorrect integer", String.valueOf(value), actual);
+	}
+
+	/**
 	 * Writes bytes to the linked list.
 	 * 
 	 * @param bytes
@@ -120,7 +239,21 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (byte) bytes[i];
 		}
-		StreamBuffer.write(data, 0, data.length, this.head, this.bufferPool);
+		StreamBuffer.write(data, this.head, this.bufferPool);
+	}
+
+	/**
+	 * Verifies the bytes.
+	 * 
+	 * @param bytes
+	 *            Expected bytes.
+	 */
+	private void assertBytes(byte... bytes) {
+		int[] transformed = new int[bytes.length];
+		for (int i = 0; i < transformed.length; i++) {
+			transformed[i] = bytes[i];
+		}
+		assertBytes(transformed);
 	}
 
 	/**

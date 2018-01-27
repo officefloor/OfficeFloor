@@ -42,6 +42,7 @@ import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -59,6 +60,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
@@ -213,6 +215,48 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Should auto-wire the dependency
 		dependency.mapDependency(0, "OFFICE.SIMPLE_OBJECT");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectDependency} for an input
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testAutoWireOfficeInputManagedObjectDependency() {
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeExtensionService.enableAutoWireObjects();
+
+		// Record obtaining the Section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Build the Managed Object
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_OBJECT", ClassManagedObjectSource.class, 0,
+				"class.name", DependencyProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder inputMo = this
+				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DEPENDENCY_OBJECT");
+
+		// Build the Managed Object
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
+
+		// Map the auto-wired dependency
+		inputMo.mapDependency(0, "OFFICE.SIMPLE_OBJECT");
+
+		// Link the input
+		managingOffice.linkFlow(0, "SECTION.INPUT");
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
+		function.linkParameter(0, Integer.class);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -431,6 +475,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY");
 
 		// Should not supply managed object as requires flow configuration
+		// (both instance and input require dependency)
 		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
 		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
@@ -913,6 +958,24 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	public static class DependencyManagedObject {
 		@Dependency
 		private CompileManagedObject dependency;
+	}
+
+	public static class DependencyProcessManagedObject {
+
+		@FlowInterface
+		public static interface Flows {
+			void doFlow();
+		}
+
+		Flows flows;
+
+		@Dependency
+		private CompileManagedObject dependency;
+	}
+
+	public static class ProcessClass {
+		public void process(Integer value) {
+		}
 	}
 
 	public static class CompileGovernance {

@@ -17,12 +17,12 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -37,7 +37,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeArchitect {
+public interface OfficeArchitect extends SourceIssues {
 
 	/**
 	 * Flags to attempt to auto wire any non-configured object links.
@@ -136,6 +136,14 @@ public interface OfficeArchitect {
 	 *            {@link OfficeSectionTransformer}.
 	 */
 	void addOfficeSectionTransformer(OfficeSectionTransformer transformer);
+
+	/**
+	 * Adds a {@link ManagedFunctionAugmentor}.
+	 * 
+	 * @param managedFunctionAugmentor
+	 *            {@link ManagedFunctionAugmentor}.
+	 */
+	void addManagedFunctionAugmentor(ManagedFunctionAugmentor managedFunctionAugmentor);
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
@@ -272,18 +280,6 @@ public interface OfficeArchitect {
 	OfficeStart addOfficeStart(String startName);
 
 	/**
-	 * Links the {@link OfficeOutput} for synchronous response to an
-	 * {@link OfficeInput}.
-	 * 
-	 * @param input
-	 *            {@link OfficeInput} to receive request.
-	 * @param output
-	 *            {@link OfficeOutput} to provide response.
-	 */
-	@Deprecated // integration via queues so no synchronous communication
-	void link(OfficeInput input, OfficeOutput output);
-
-	/**
 	 * Links the {@link OfficeInput} to be handled by the
 	 * {@link OfficeSectionInput}.
 	 * 
@@ -293,18 +289,6 @@ public interface OfficeArchitect {
 	 *            {@link OfficeSectionInput}.
 	 */
 	void link(OfficeInput input, OfficeSectionInput sectionInput);
-
-	/**
-	 * Links the {@link OfficeInput} for synchronous request to an
-	 * {@link OfficeOutput}.
-	 * 
-	 * @param output
-	 *            {@link OfficeOutput} to make request.
-	 * @param input
-	 *            {@link OfficeInput} to handle response.
-	 */
-	@Deprecated // integration via queues so no synchronous communication
-	void link(OfficeOutput output, OfficeInput input);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to be handled by the
@@ -454,33 +438,5 @@ public interface OfficeArchitect {
 	 *            {@link OfficeTeam}.
 	 */
 	void link(OfficeAdministration administrator, OfficeTeam officeTeam);
-
-	/**
-	 * <p>
-	 * Allows the {@link OfficeSource} to add an issue in attempting to
-	 * architect the {@link Office}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to
-	 * architect the rest of the {@link Office}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	void addIssue(String issueDescription);
-
-	/**
-	 * <p>
-	 * Allows the {@link OfficeSource} to add an issue along with its cause in
-	 * attempting to architect the {@link Office}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to
-	 * architect the rest of the {@link Office}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	void addIssue(String issueDescription, Throwable cause);
 
 }

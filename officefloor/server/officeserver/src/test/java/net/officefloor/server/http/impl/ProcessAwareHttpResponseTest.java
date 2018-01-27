@@ -28,13 +28,17 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
@@ -55,10 +59,17 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	private final MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 
 	/**
+	 * {@link ProcessAwareServerHttpConnectionManagedObject}.
+	 */
+	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
+			new HttpServerLocationImpl(), false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null,
+			true, this, this.bufferPool);
+
+	/**
 	 * {@link ProcessAwareHttpResponse} to test.
 	 */
-	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1,
-			this.bufferPool, new MockProcessAwareContext(), this);
+	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<ByteBuffer>(
+			this.connection, HttpVersion.HTTP_1_1, new MockProcessAwareContext());
 
 	/**
 	 * Ensure correct defaults on writing.
@@ -72,6 +83,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertEquals("Incorrect status", HttpStatus.NO_CONTENT, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookeis", this.httpCookie);
 		assertNull("Should be no entity data", this.contentHeadStreamBuffer);
 	}
 
@@ -90,8 +102,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		};
 
 		// Ensure disallow null values
-		checkNull.accept(() -> this.response.setHttpStatus(null));
-		checkNull.accept(() -> this.response.setHttpVersion(null));
+		checkNull.accept(() -> this.response.setStatus(null));
+		checkNull.accept(() -> this.response.setVersion(null));
 	}
 
 	/**
@@ -100,9 +112,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testChangeStatus() throws IOException {
 
 		// Validate mutating status
-		assertEquals("Incorrect default status", HttpStatus.OK, this.response.getHttpStatus());
-		this.response.setHttpStatus(HttpStatus.CONTINUE);
-		assertEquals("Should have status changed", HttpStatus.CONTINUE, this.response.getHttpStatus());
+		assertEquals("Incorrect default status", HttpStatus.OK, this.response.getStatus());
+		this.response.setStatus(HttpStatus.CONTINUE);
+		assertEquals("Should have status changed", HttpStatus.CONTINUE, this.response.getStatus());
 
 		// Ensure writes the changes status
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -115,9 +127,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testChangeVersion() throws IOException {
 
 		// Validate mutating version
-		assertEquals("Incorrect default version", HttpVersion.HTTP_1_1, this.response.getHttpVersion());
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
-		assertEquals("Should have version changed", HttpVersion.HTTP_1_0, this.response.getHttpVersion());
+		assertEquals("Incorrect default version", HttpVersion.HTTP_1_1, this.response.getVersion());
+		this.response.setVersion(HttpVersion.HTTP_1_0);
+		assertEquals("Should have version changed", HttpVersion.HTTP_1_0, this.response.getVersion());
 
 		// Ensure writes the changed version
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -130,7 +142,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testAddHeader() throws IOException {
 
 		// Add header
-		this.response.getHttpHeaders().addHeader("test", "value");
+		this.response.getHeaders().addHeader("test", "value");
 
 		// Ensure writes have HTTP header
 		this.response.flushResponseToHttpResponseWriter(null);
@@ -138,6 +150,24 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect header name", "test", this.httpHeader.getName());
 		assertEquals("Incorrect header value", "value", this.httpHeader.getValue());
 		assertNull("Should be no further headers", this.httpHeader.next);
+	}
+
+	/**
+	 * Set a {@link HttpResponseCookie}.
+	 */
+	public void testSetCookie() throws IOException {
+
+		// Set the cookie
+		HttpResponseCookie initial = this.response.getCookies().setCookie("test", "initial");
+		HttpResponseCookie value = this.response.getCookies().setCookie("test", "value");
+		assertSame("Should be same cookie as same name", initial, value);
+
+		// Ensure writes have HTTP header
+		this.response.flushResponseToHttpResponseWriter(null);
+		assertNotNull("Should have cookie", this.httpCookie);
+		assertEquals("Incorrect cookie name", "test", this.httpCookie.getName());
+		assertEquals("Incorrect cookie value", "value", this.httpCookie.getValue());
+		assertNull("Should be no further cookies", this.httpCookie.next);
 	}
 
 	/**
@@ -314,7 +344,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testSendOnlyOnce() throws IOException {
 
 		// Set altered status (to check does not change on sending again)
-		this.response.setHttpStatus(HttpStatus.BAD_REQUEST);
+		this.response.setStatus(HttpStatus.BAD_REQUEST);
 
 		// Obtain the entity (must be before close, otherwise exception)
 		ServerOutputStream entity = this.response.getEntity();
@@ -325,7 +355,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertTrue("Should be sent", this.response.isClosed());
 
 		// Change response and send (but now should not send)
-		response.setHttpStatus(HttpStatus.OK);
+		response.setStatus(HttpStatus.OK);
 		this.response.flushResponseToHttpResponseWriter(null);
 		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
 
@@ -348,33 +378,37 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
 
 		// Mutate the response
-		this.response.setHttpStatus(HttpStatus.CONTINUE);
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
+		this.response.setStatus(HttpStatus.CONTINUE);
+		this.response.setVersion(HttpVersion.HTTP_1_0);
 		this.response.setContentType("text/html", charset);
-		this.response.getHttpHeaders().addHeader("name", "value");
+		this.response.getHeaders().addHeader("name", "value");
+		this.response.getCookies().setCookie("name", "value");
 		ServerWriter writer = this.response.getEntityWriter();
 		writer.write("TEST");
 		writer.flush();
 
 		// Ensure response mutated
-		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getHttpStatus());
-		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getHttpVersion());
-		assertEquals("Incorrect mutated heders", 1, this.response.getHttpHeaders().length());
+		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getStatus());
+		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getVersion());
+		assertEquals("Incorrect mutated heders", "value", this.response.getHeaders().getHeader("name").getValue());
+		assertEquals("Incorrect mutated cookies", "value", this.response.getCookies().getCookie("name").getValue());
 		assertTrue("Should be using buffers for entity content", this.bufferPool.isActiveBuffers());
 
 		// Reset
 		this.response.reset();
 
 		// Ensure response reset
-		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getHttpStatus());
-		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getHttpVersion());
-		assertEquals("Should clear headers", 0, this.response.getHttpHeaders().length());
+		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getStatus());
+		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getVersion());
+		assertFalse("Should clear headers", this.response.getHeaders().iterator().hasNext());
+		assertFalse("Should clear cookies", this.response.getCookies().iterator().hasNext());
 		assertFalse("No entity, as should release all buffers", this.bufferPool.isActiveBuffers());
 
 		// Ensure able to continue forming response (typically an error)
-		this.response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
-		this.response.getHttpHeaders().addHeader("error", "occurred");
+		this.response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		this.response.setVersion(HttpVersion.HTTP_1_0);
+		this.response.getHeaders().addHeader("error", "occurred");
+		this.response.getCookies().setCookie("store", "failure");
 		this.response.getEntityWriter().write("ERROR: something");
 
 		// Send response (to ensure reset entity)
@@ -387,6 +421,10 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect header name", "error", this.httpHeader.getName());
 		assertEquals("incorrect header value", "occurred", this.httpHeader.getValue());
 		assertNull("Should only be one header", this.httpHeader.next);
+		assertNotNull("Should be a cookie", this.httpCookie);
+		assertEquals("Incorrect cookie name", "store", this.httpCookie.getName());
+		assertEquals("Incorrect cookie value", "failure", this.httpCookie.getValue());
+		assertNull("Should only be one cookie", this.httpCookie.next);
 
 		// Ensure only entity content after the reset is sent
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
@@ -423,9 +461,43 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookies", this.httpCookie);
 		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
 		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+	}
+
+	/**
+	 * Ensure can provide {@link HttpEscalationHandler}.
+	 */
+	public void testHandleEscalation() throws IOException {
+
+		final Exception escalation = new Exception("TEST");
+
+		// Configure escalation handling
+		Closure<Boolean> isInvoked = new Closure<>(false);
+		this.response.setEscalationHandler((context) -> {
+			assertSame("Incorrect escalation", escalation, context.getEscalation());
+			isInvoked.value = true;
+			this.response.setContentType("application/mock", null);
+			this.response.getEntityWriter().write("{error: '" + escalation.getMessage() + "'}");
+			return true; // handled
+		});
+
+		// Send escalation
+		this.response.flushResponseToHttpResponseWriter(escalation);
+
+		// Obtain the escalation content
+		final String expected = "{error: 'TEST'}";
+
+		// Ensure correct escalation
+		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
+		assertSame("Should default to internal status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
+		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookies", this.httpCookie);
+		assertEquals("Incorrect content-type", "application/mock", this.contentType.getValue());
 		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
 				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 	}
@@ -436,9 +508,10 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	public void testResetForSendingEscalation() throws IOException {
 
 		// Provide details and send response
-		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
-		this.response.setHttpStatus(HttpStatus.NOT_FOUND);
-		this.response.getHttpHeaders().addHeader("TEST", "VALUE");
+		this.response.setVersion(HttpVersion.HTTP_1_0);
+		this.response.setStatus(HttpStatus.NOT_FOUND);
+		this.response.getHeaders().addHeader("TEST", "VALUE");
+		this.response.getCookies().setCookie("TEST", "VALUE");
 		this.response.getEntityWriter().write("TEST");
 
 		// Send escalation
@@ -456,6 +529,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
 		assertNull("Should be no headers", this.httpHeader);
+		assertNull("Should be no cookies", this.httpCookie);
 		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
 		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
@@ -473,6 +547,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 	private WritableHttpHeader httpHeader = null;
 
+	private WritableHttpCookie httpCookie = null;
+
 	private long contentLength;
 
 	private HttpHeaderValue contentType = null;
@@ -481,10 +557,12 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 	@Override
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader httpHeader,
-			long contentLength, HttpHeaderValue contentType, StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
+			WritableHttpCookie httpCookie, long contentLength, HttpHeaderValue contentType,
+			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 		this.version = version;
 		this.status = status;
 		this.httpHeader = httpHeader;
+		this.httpCookie = httpCookie;
 		this.contentLength = contentLength;
 		this.contentType = contentType;
 		this.contentHeadStreamBuffer = contentHeadStreamBuffer;

@@ -26,15 +26,15 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionObjectConfiguration<D> {
+public interface ManagedFunctionObjectConfiguration<O> {
 
 	/**
 	 * Indicates if this dependent {@link Object} is the argument passed to the
 	 * {@link ManagedFunction}.
 	 * 
-	 * @return <code>true</code> if is argument passed to the {@link ManagedFunction}.
-	 *         <code>false</code> indicates it is a {@link ManagedObject}
-	 *         dependency.
+	 * @return <code>true</code> if is argument passed to the
+	 *         {@link ManagedFunction}. <code>false</code> indicates it is a
+	 *         {@link ManagedObject} dependency.
 	 */
 	boolean isParameter();
 
@@ -51,7 +51,8 @@ public interface ManagedFunctionObjectConfiguration<D> {
 	String getScopeManagedObjectName();
 
 	/**
-	 * Obtains the type of {@link Object} required by the {@link ManagedFunction}.
+	 * Obtains the type of {@link Object} required by the
+	 * {@link ManagedFunction}.
 	 * 
 	 * @return Type of {@link Object} required by the {@link ManagedFunction}.
 	 */
@@ -70,6 +71,6 @@ public interface ManagedFunctionObjectConfiguration<D> {
 	 * @return Key identifying the dependent {@link Object}. <code>null</code>
 	 *         if indexed.
 	 */
-	D getKey();
+	O getKey();
 
 }

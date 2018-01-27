@@ -36,7 +36,9 @@ public interface ManagedObjectExtensionExtractor<E> {
 	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject} to
 	 *            aid in extracting the extension interface.
 	 * @return Extension Interface.
+	 * @throws Throwable
+	 *             If fails to extract the extension.
 	 */
-	E extractExtension(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData);
+	E extractExtension(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData) throws Throwable;
 
 }

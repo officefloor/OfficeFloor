@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
@@ -79,8 +80,7 @@ public abstract class AbstractCompilerIssues implements CompilerIssues {
 		}
 
 		// Obtain the possible captured issues
-		final CompilerIssue[] issues = invocationContext
-				.toArray(new CompilerIssue[invocationContext.size()]);
+		final CompilerIssue[] issues = invocationContext.toArray(new CompilerIssue[invocationContext.size()]);
 
 		// Return the issue capture
 		return new IssueCapture<R>() {
@@ -98,16 +98,15 @@ public abstract class AbstractCompilerIssues implements CompilerIssues {
 	}
 
 	@Override
-	public void addIssue(Node node, String issueDescription,
-			CompilerIssue... causes) {
-		this.addIssue(this.createCompilerIssue(node, issueDescription, null,
-				causes));
+	public CompileError addIssue(Node node, String issueDescription, CompilerIssue... causes) {
+		this.addIssue(this.createCompilerIssue(node, issueDescription, null, causes));
+		return new CompileError(issueDescription);
 	}
 
 	@Override
-	public void addIssue(Node node, String issueDescription, Throwable cause) {
-		this.addIssue(this.createCompilerIssue(node, issueDescription, cause,
-				new DefaultCompilerIssue[0]));
+	public CompileError addIssue(Node node, String issueDescription, Throwable cause) {
+		this.addIssue(this.createCompilerIssue(node, issueDescription, cause, new DefaultCompilerIssue[0]));
+		return new CompileError(issueDescription);
 	}
 
 	/**
@@ -147,8 +146,8 @@ public abstract class AbstractCompilerIssues implements CompilerIssues {
 	 * @return {@link CompilerIssue}, with default implementation providing a
 	 *         {@link DefaultCompilerIssue}.
 	 */
-	protected CompilerIssue createCompilerIssue(Node node,
-			String issueDescription, Throwable cause, CompilerIssue[] causes) {
+	protected CompilerIssue createCompilerIssue(Node node, String issueDescription, Throwable cause,
+			CompilerIssue[] causes) {
 		return new DefaultCompilerIssue(node, issueDescription, cause, causes);
 	}
 

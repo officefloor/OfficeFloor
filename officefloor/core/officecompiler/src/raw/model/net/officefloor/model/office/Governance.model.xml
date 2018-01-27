@@ -9,9 +9,9 @@
 	<list type="GovernanceEscalationModel" name="governance escalation"
 		cascade-remove="true" />
 	<list type="GovernanceAreaModel" name="governance area" />
-	<list type="ExternalManagedObjectToGovernanceModel" name="external managed object" />
-	<list type="OfficeManagedObjectToGovernanceModel" name="office managed object" />
-	<list type="OfficeSectionManagedObjectToGovernanceModel" name="office section managed object" />
+	<list type="GovernanceToExternalManagedObjectModel" name="external managed object" />
+	<list type="GovernanceToOfficeManagedObjectModel" name="office managed object" />
+	<list type="GovernanceToOfficeSectionManagedObjectModel" name="office section managed object" />
 	<list type="OfficeSubSectionToGovernanceModel" name="office sub section" />
 	<list type="OfficeFunctionToGovernanceModel" name="office function" />
 </model>

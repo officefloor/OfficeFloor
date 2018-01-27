@@ -22,16 +22,14 @@ import java.sql.Connection;
 import javax.transaction.xa.XAResource;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
@@ -86,16 +84,12 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		OfficeInputType input = officeType.getOfficeInputTypes()[0];
 		TestCase.assertEquals("Incorrect input name", "INPUT", input.getOfficeInputName());
 		TestCase.assertEquals("Incorrect input parameter type", Integer.class.getName(), input.getParameterType());
-		TestCase.assertEquals("Incorrect input response", "OUTPUT_LINK",
-				input.getResponseOfficeOutputType().getOfficeOutputName());
 
 		// Ensure correct outputs
 		TestCase.assertEquals("Incorrect number of outputs", 1, officeType.getOfficeOutputTypes().length);
 		OfficeOutputType output = officeType.getOfficeOutputTypes()[0];
 		TestCase.assertEquals("Incorrect output name", "OUTPUT", output.getOfficeOutputName());
 		TestCase.assertEquals("Incorrect output argument type", Long.class.getName(), output.getArgumentType());
-		TestCase.assertEquals("Incorrect output handler", "INPUT_LINK",
-				output.getHandlingOfficeInputType().getOfficeInputName());
 	}
 
 	/*
@@ -127,12 +121,10 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		architect.addOfficeTeam("team");
 
 		// Add the input
-		OfficeInput input = architect.addOfficeInput("INPUT", Integer.class.getName());
-		architect.link(input, architect.addOfficeOutput("OUTPUT_LINK", Character.class.getName()));
+		architect.addOfficeInput("INPUT", Integer.class.getName());
 
 		// Add the output
-		OfficeOutput output = architect.addOfficeOutput("OUTPUT", Long.class.getName());
-		architect.link(output, architect.addOfficeInput("INPUT_LINK", Short.class.getName()));
+		architect.addOfficeOutput("OUTPUT", Long.class.getName());
 	}
 
 	/**

@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.stream.ServerInputStream;
@@ -65,6 +66,11 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	private final HttpRequestHeaders headers;
 
 	/**
+	 * {@link HttpRequestCookies}.
+	 */
+	private final HttpRequestCookies cookies;
+
+	/**
 	 * {@link ByteSequence} for the HTTP entity.
 	 */
 	private final ByteSequence entity;
@@ -85,15 +91,18 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	 *            {@link HttpVersion}.
 	 * @param headers
 	 *            {@link HttpRequestHeaders}.
+	 * @param cookies
+	 *            {@link HttpRequestCookies}.
 	 * @param entity
 	 *            {@link ByteSequence} for the HTTP entity.
 	 */
 	public MaterialisingHttpRequest(Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier,
-			HttpVersion version, HttpRequestHeaders headers, ByteSequence entity) {
+			HttpVersion version, HttpRequestHeaders headers, HttpRequestCookies cookies, ByteSequence entity) {
 		this.methodSupplier = methodSupplier;
 		this.requestUriSupplier = requestUriSupplier;
 		this.version = version;
 		this.headers = headers;
+		this.cookies = cookies;
 		this.entity = entity;
 		this.entityStream = new ByteSequenceServerInputStream(this.entity, 0);
 	}
@@ -103,7 +112,7 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	 */
 
 	@Override
-	public HttpMethod getHttpMethod() {
+	public HttpMethod getMethod() {
 		if (this.method == null) {
 			this.method = this.methodSupplier.get();
 		}
@@ -111,7 +120,7 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public String getRequestURI() {
+	public String getUri() {
 		if (this.requestUri == null) {
 			this.requestUri = this.requestUriSupplier.get();
 		}
@@ -119,13 +128,18 @@ public class MaterialisingHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public HttpVersion getHttpVersion() {
+	public HttpVersion getVersion() {
 		return this.version;
 	}
 
 	@Override
-	public HttpRequestHeaders getHttpHeaders() {
+	public HttpRequestHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public HttpRequestCookies getCookies() {
+		return this.cookies;
 	}
 
 	@Override

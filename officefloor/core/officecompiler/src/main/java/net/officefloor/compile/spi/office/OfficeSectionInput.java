@@ -39,4 +39,13 @@ public interface OfficeSectionInput {
 	 */
 	String getOfficeSectionInputName();
 
+	/**
+	 * Adds an {@link ExecutionExplorer} for the execution tree from this
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @param executionExplorer
+	 *            {@link ExecutionExplorer}.
+	 */
+	void addExecutionExplorer(ExecutionExplorer executionExplorer);
+
 }

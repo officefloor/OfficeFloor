@@ -40,4 +40,11 @@ public interface OfficeSectionInputType {
 	 */
 	String getParameterType();
 
+	/**
+	 * Obtains the annotations for the {@link OfficeSectionInput}.
+	 * 
+	 * @return Annotations for the {@link OfficeSectionInput}.
+	 */
+	Object[] getAnnotations();
+
 }

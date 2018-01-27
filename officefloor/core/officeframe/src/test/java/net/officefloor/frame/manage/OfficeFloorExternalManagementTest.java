@@ -49,9 +49,9 @@ public class OfficeFloorExternalManagementTest extends AbstractOfficeConstructTe
 	private MockWork mockWork;
 
 	/**
-	 * Differentiator.
+	 * Annotation.
 	 */
-	private final Object differentiator = "Differentiator";
+	private final Object annotation = "Annotation";
 
 	/**
 	 * {@link OfficeFloor} to test management.
@@ -69,7 +69,7 @@ public class OfficeFloorExternalManagementTest extends AbstractOfficeConstructTe
 		this.mockWork = new MockWork();
 		ReflectiveFunctionBuilder initialTask = this.constructFunction(this.mockWork, "initialTask");
 		initialTask.buildParameter();
-		initialTask.getBuilder().setDifferentiator(this.differentiator);
+		initialTask.getBuilder().addAnnotation(this.annotation);
 		this.constructFunction(this.mockWork, "anotherTask").buildParameter();
 
 		// Compile OfficeFloor
@@ -157,19 +157,19 @@ public class OfficeFloorExternalManagementTest extends AbstractOfficeConstructTe
 	/**
 	 * Ensure able to obtain {@link ManagedFunction} differentiator.
 	 */
-	public void testTaskDifferentiator() throws UnknownOfficeException, UnknownFunctionException {
+	public void testFunctionAnnotation() throws UnknownOfficeException, UnknownFunctionException {
 
 		// Obtain the Function Manager
 		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
 
-		// Ensure correct differentiator
-		assertEquals("Incorrect differentiator", this.differentiator, function.getDifferentiator());
+		// Ensure correct annotation
+		assertEquals("Incorrect annotation", this.annotation, function.getAnnotations()[0]);
 	}
 
 	/**
 	 * Ensure able to obtain {@link ManagedFunction} parameter type.
 	 */
-	public void testTaskParameterType() throws UnknownOfficeException, UnknownFunctionException {
+	public void testFunctionParameterType() throws UnknownOfficeException, UnknownFunctionException {
 
 		// Obtain the Function Manager
 		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");

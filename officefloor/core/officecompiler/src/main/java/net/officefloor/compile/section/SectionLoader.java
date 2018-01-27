@@ -46,8 +46,20 @@ public interface SectionLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	<S extends SectionSource> PropertyList loadSpecification(
-			Class<S> sectionSourceClass);
+	<S extends SectionSource> PropertyList loadSpecification(Class<S> sectionSourceClass);
+
+	/**
+	 * Loads and returns the {@link PropertyList} from the
+	 * {@link SectionSourceSpecification} for the {@link SectionSource}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource}.
+	 * @return {@link PropertyList} of the {@link SectionSourceProperty}
+	 *         instances of the {@link SectionSourceSpecification} or
+	 *         <code>null</code> if issue, which is reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	PropertyList loadSpecification(SectionSource sectionSource);
 
 	/**
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
@@ -64,8 +76,7 @@ public interface SectionLoader {
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<S extends SectionSource> SectionType loadSectionType(
-			Class<S> sectionSourceClass, String sectionLocation,
+	<S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass, String sectionLocation,
 			PropertyList propertyList);
 
 	/**
@@ -81,8 +92,7 @@ public interface SectionLoader {
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	SectionType loadSectionType(SectionSource sectionSource,
-			String sectionLocation, PropertyList propertyList);
+	SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList);
 
 	/**
 	 * <p>
@@ -106,8 +116,7 @@ public interface SectionLoader {
 	 *            {@link OfficeSectionType}.
 	 * @return {@link OfficeSectionType}.
 	 */
-	<S extends SectionSource> OfficeSectionType loadOfficeSectionType(
-			String sectionName, Class<S> sectionSourceClass,
+	<S extends SectionSource> OfficeSectionType loadOfficeSectionType(String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation, PropertyList propertyList);
 
 	/**
@@ -130,8 +139,7 @@ public interface SectionLoader {
 	 *            {@link OfficeSectionType}.
 	 * @return {@link OfficeSectionType}.
 	 */
-	OfficeSectionType loadOfficeSectionType(String sectionName,
-			SectionSource sectionSource, String sectionLocation,
+	OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource, String sectionLocation,
 			PropertyList propertyList);
 
 }

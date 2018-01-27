@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -140,6 +141,15 @@ public interface OfficeNode
 	 *            {@link CompileContext}.
 	 */
 	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Runs the {@link ExecutionExplorer} instances.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully explored execution.
+	 */
+	boolean runExecutionExplorers(CompileContext compileContext);
 
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.

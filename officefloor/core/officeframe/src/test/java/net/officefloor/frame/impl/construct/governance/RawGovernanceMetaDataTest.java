@@ -18,8 +18,6 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -27,18 +25,18 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
-import net.officefloor.frame.internal.configuration.FlowConfiguration;
+import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.construct.EscalationFlowFactory;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -52,9 +50,15 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link Governance} name.
+	 */
+	private final String GOVERNANCE_NAME = "GOVERNANCE";
+
+	/**
 	 * {@link GovernanceConfiguration}.
 	 */
-	private final GovernanceConfiguration<?, ?> configuration = this.createMock(GovernanceConfiguration.class);
+	private GovernanceBuilderImpl<?, ?> configuration = new GovernanceBuilderImpl<>(GOVERNANCE_NAME, Object.class,
+			() -> null);
 
 	/**
 	 * {@link Governance} index within the {@link ProcessState}.
@@ -62,45 +66,19 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private final int GOVERNANCE_INDEX = 3;
 
 	/**
-	 * {@link Governance} name.
-	 */
-	private final String GOVERNANCE_NAME = "GOVERNANCE";
-
-	/**
-	 * {@link GovernanceFactory}.
-	 */
-	private final GovernanceFactory<?, ?> governanceFactory = this.createMock(GovernanceFactory.class);
-
-	/**
 	 * {@link Office} name.
 	 */
 	private final String OFFICE_NAME = "OFFICE";
 
 	/**
-	 * {@link Team} name.
+	 * {@link RawOfficeMetaData}.
 	 */
-	private final String TEAM_NAME = "TEAM";
-
-	/**
-	 * {@link TeamManagement}. May be set to <code>null</code> to not be
-	 * available.
-	 */
-	private TeamManagement responsibleTeam = this.createMock(TeamManagement.class);
+	private final RawOfficeMetaDataMockBuilder rawOfficeMetaData = MockConstruct.mockRawOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * {@link OfficeMetaData}.
 	 */
-	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
-
-	/**
-	 * {@link FlowMetaDataFactory}.
-	 */
-	private final FlowMetaDataFactory flowMetaDataFactory = this.createMock(FlowMetaDataFactory.class);
-
-	/**
-	 * {@link EscalationFlowFactory}.
-	 */
-	private final EscalationFlowFactory escalationFlowFactory = this.createMock(EscalationFlowFactory.class);
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -110,11 +88,26 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures issue if no {@link GovernanceSource} name.
 	 */
-	public void testNoGovernanceSourceName() {
+	public void testNoGovernanceName() {
 
-		// Record no name
-		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), null);
+		// Record
+		this.configuration = new GovernanceBuilderImpl<>(null, Object.class, () -> null);
 		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME, "Governance added without a name");
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		this.constructRawGovernanceMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if no extension type.
+	 */
+	public void testNoExtensionType() {
+
+		// Record no extension type
+		this.configuration = new GovernanceBuilderImpl<>(GOVERNANCE_NAME, null, () -> null);
+		this.record_issue("No extension type provided for governance " + GOVERNANCE_NAME);
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -127,27 +120,9 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoGovernanceFactory() {
 
-		// Record no class
-		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), null);
-		this.record_issue("No GovernanceFactory provided");
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensures issue if no extension interface.
-	 */
-	public void testNoExtensionInterface() {
-
-		// Record no class
-		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), null);
-		this.record_issue("No extension interface type provided");
+		// Record no factory
+		this.configuration = new GovernanceBuilderImpl<>(GOVERNANCE_NAME, Object.class, null);
+		this.record_issue("No GovernanceFactory provided for governance " + GOVERNANCE_NAME);
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -160,15 +135,10 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoTeamName() {
 
-		// Record no team name
-		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
-		this.record_flows(0);
-		this.record_escalations(0);
+		// Record
+		this.configuration.setResponsibleTeam(null);
 
-		// Attempt to construct governance
+		// Construct
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData(true);
 		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData.getGovernanceMetaData();
@@ -183,17 +153,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownTeam() {
 
-		// No team
-		this.responsibleTeam = null;
+		// Record
+		this.configuration.setResponsibleTeam("UNKNOWN");
+		this.record_issue("Can not find Team by name 'UNKNOWN' for governance " + GOVERNANCE_NAME);
 
-		// Record no team name
-		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
-		this.record_issue("Can not find Team by name '" + TEAM_NAME + "'");
-
-		// Attempt to construct governance
+		// Construct
 		this.replayMockObjects();
 		this.constructRawGovernanceMetaData(false);
 		this.verifyMockObjects();
@@ -202,14 +166,13 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures able to handle simple {@link Governance} without {@link Flow}.
 	 */
-	public void testSimpleGovernance() {
+	public void testGovernanceWithTeam() {
 
-		// Record simple governance
-		this.record_initGovernance();
-		this.record_flows(0);
-		this.record_escalations(0);
+		// Record
+		this.configuration.setResponsibleTeam("TEAM");
+		TeamManagement responsibleTeam = this.rawOfficeMetaData.addTeam("TEAM");
 
-		// Attempt to construct governance
+		// Construct
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData(true);
 		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData.getGovernanceMetaData();
@@ -217,26 +180,21 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify the content of the raw meta data
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME, rawMetaData.getGovernanceName());
-		assertEquals("Incorrect extension interface type", String.class, rawMetaData.getExtensionInterfaceType());
+		assertEquals("Incorrect extension type", Object.class, rawMetaData.getExtensionType());
 
 		// Verify governance meta-data
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME, governanceMetaData.getGovernanceName());
-		assertSame("Incorrect responsible team", this.responsibleTeam, governanceMetaData.getResponsibleTeam());
+		assertSame("Incorrect responsible team", responsibleTeam, governanceMetaData.getResponsibleTeam());
 	}
 
 	/**
 	 * Ensure handle no {@link FlowMetaData}.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testIssueWithFlows() {
 
-		final FlowConfiguration[] flowConfigurations = new FlowConfiguration<?>[0];
-
-		// Record failure in obtaining flows
-		this.record_initGovernance();
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfigurations);
-		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfigurations,
-				this.officeMetaData, AssetType.GOVERNANCE, GOVERNANCE_NAME, this.issues), null);
+		// Record
+		this.configuration.linkFlow(0, "FUNCTION", null, false);
+		this.record_issue("Can not find function meta-data FUNCTION for flow index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -249,12 +207,13 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testGovernanceFlow() {
 
-		// Record flows for governance
-		this.record_initGovernance();
-		FlowMetaData[] flowMetaDatas = this.record_flows(2);
-		this.record_escalations(0);
+		// Record
+		this.configuration.linkFlow(0, "ONE", null, false);
+		this.configuration.linkFlow(1, "TWO", null, false);
+		ManagedFunctionMetaData<?, ?> one = this.officeMetaData.addManagedFunction("ONE", null);
+		ManagedFunctionMetaData<?, ?> two = this.officeMetaData.addManagedFunction("TWO", null);
 
-		// Attempt to construct governance
+		// Construct
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData(true);
 		this.verifyMockObjects();
@@ -264,11 +223,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify the first flow
 		FlowMetaData flowOne = governanceMetaData.getFlow(0);
-		assertSame("Incorrect first flow", flowMetaDatas[0], flowOne);
+		assertSame("Incorrect first flow", one, flowOne.getInitialFunctionMetaData());
 
 		// Verify the second flow
 		FlowMetaData flowTwo = governanceMetaData.getFlow(1);
-		assertSame("Incorrect second flow", flowMetaDatas[1], flowTwo);
+		assertSame("Incorrect second flow", two, flowTwo.getInitialFunctionMetaData());
 
 		// Should not be a third flow
 		try {
@@ -284,17 +243,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueWithEscalation() {
 
-		final EscalationConfiguration[] escalations = new EscalationConfiguration[] {
-				this.createMock(EscalationConfiguration.class) };
+		// Record
+		this.configuration.addEscalation(null, null);
+		this.record_issue("No escalation type for escalation index 0");
 
-		// Record issue with escalation
-		this.record_initGovernance();
-		this.record_flows(0);
-		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalations);
-		this.recordReturn(this.escalationFlowFactory, this.escalationFlowFactory.createEscalationFlows(escalations,
-				this.officeMetaData, AssetType.GOVERNANCE, GOVERNANCE_NAME, this.issues), null);
-
-		// Attempt to construct governance
+		// Construct
 		this.replayMockObjects();
 		this.fullyConstructRawGovernanceMetaData(false);
 		this.verifyMockObjects();
@@ -305,87 +258,20 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testEscalationFlow() {
 
-		// Record escalation flow
-		this.record_initGovernance();
-		this.record_flows(0);
-		EscalationFlow escalationFlow = this.record_escalations(1)[0];
-		this.recordReturn(escalationFlow, escalationFlow.getTypeOfCause(), SQLException.class);
+		// Record
+		this.configuration.addEscalation(Throwable.class, "FUNCTION");
+		ManagedFunctionMetaData<?, ?> function = this.officeMetaData.addManagedFunction("FUNCTION", Throwable.class);
 
-		// Attempt to construct governance
+		// Construct
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawGovernance = this.fullyConstructRawGovernanceMetaData(true);
 
 		// Ensure correct escalation flow
 		EscalationFlow flow = rawGovernance.getGovernanceMetaData().getEscalationProcedure()
 				.getEscalation(new SQLException());
-		assertSame("Incorrect escalation flow", escalationFlow, flow);
+		assertSame("Incorrect escalation flow", function, flow.getManagedFunctionMetaData());
 
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records initialising the {@link GovernanceSource}.
-	 */
-	private void record_initGovernance() {
-
-		// Record instantiating governance
-		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
-		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
-	}
-
-	/**
-	 * Records the flows.
-	 * 
-	 * @param flowCount
-	 *            Number of {@link Flow} instances.
-	 * @return {@link FlowMetaData} for the {@link Flow} instances.
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private FlowMetaData[] record_flows(int flowCount) {
-
-		// Create the listing of mocks
-		final FlowConfiguration[] flowConfigurations = new FlowConfiguration<?>[flowCount];
-		final FlowMetaData[] flowMetaData = new FlowMetaData[flowCount];
-		for (int i = 0; i < flowCount; i++) {
-			flowConfigurations[i] = this.createMock(FlowConfiguration.class);
-			flowMetaData[i] = this.createMock(FlowMetaData.class);
-		}
-
-		// Record creation of the flow meta-data
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfigurations);
-		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfigurations,
-				this.officeMetaData, AssetType.GOVERNANCE, GOVERNANCE_NAME, this.issues), flowMetaData);
-
-		// Return the flow meta-data
-		return flowMetaData;
-	}
-
-	/**
-	 * Records the {@link EscalationProcedure}.
-	 * 
-	 * @param escalationCount
-	 *            Number of {@link EscalationFlow} instances.
-	 * @return {@link EscalationFlow} for the {@link Throwable} instances.
-	 */
-	private EscalationFlow[] record_escalations(int escalationCount) {
-
-		// Create the mocks for the exceptions
-		EscalationConfiguration[] escalations = new EscalationConfiguration[escalationCount];
-		EscalationFlow[] flows = new EscalationFlow[escalationCount];
-		for (int i = 0; i < escalationCount; i++) {
-			escalations[i] = this.createMock(EscalationConfiguration.class);
-			flows[i] = this.createMock(EscalationFlow.class);
-		}
-
-		// Record obtain the escalations
-		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalations);
-		this.recordReturn(this.escalationFlowFactory, this.escalationFlowFactory.createEscalationFlows(escalations,
-				this.officeMetaData, AssetType.GOVERNANCE, GOVERNANCE_NAME, this.issues), flows);
-
-		// Return the flows
-		return flows;
 	}
 
 	/**
@@ -406,19 +292,12 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 *            {@link RawGovernanceMetaData}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private RawGovernanceMetaData constructRawGovernanceMetaData(boolean isCreated) {
-
-		// Create the map of office teams
-		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
-		if (this.responsibleTeam != null) {
-			officeTeams.put(TEAM_NAME, this.responsibleTeam);
-		}
+	private RawGovernanceMetaData<?, ?> constructRawGovernanceMetaData(boolean isCreated) {
 
 		// Create the raw governance meta-data
-		RawGovernanceMetaData rawGovernanceMetaData = RawGovernanceMetaDataImpl.getFactory()
-				.createRawGovernanceMetaData((GovernanceConfiguration) this.configuration, GOVERNANCE_INDEX,
-						officeTeams, OFFICE_NAME, this.issues);
+		RawGovernanceMetaData<?, ?> rawGovernanceMetaData = new RawGovernanceMetaDataFactory(OFFICE_NAME,
+				this.rawOfficeMetaData.build().getTeams()).createRawGovernanceMetaData(this.configuration,
+						GOVERNANCE_INDEX, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data", rawGovernanceMetaData);
@@ -442,11 +321,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 *            {@link OfficeMetaData}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private RawGovernanceMetaData fullyConstructRawGovernanceMetaData(boolean isSuccessful) {
-		RawGovernanceMetaData governanceMetaData = this.constructRawGovernanceMetaData(true);
-		boolean isLoaded = governanceMetaData.loadOfficeMetaData(this.officeMetaData, this.flowMetaDataFactory,
-				this.escalationFlowFactory, this.issues);
+	private RawGovernanceMetaData<?, ?> fullyConstructRawGovernanceMetaData(boolean isSuccessful) {
+		RawGovernanceMetaData<?, ?> governanceMetaData = this.constructRawGovernanceMetaData(true);
+		boolean isLoaded = governanceMetaData.loadOfficeMetaData(this.officeMetaData.build(),
+				new FlowMetaDataFactory(this.officeMetaData.build()),
+				new EscalationFlowFactory(this.officeMetaData.build()), this.issues);
 		assertEquals("Incorrectly loaded", isSuccessful, isLoaded);
 		return governanceMetaData;
 	}

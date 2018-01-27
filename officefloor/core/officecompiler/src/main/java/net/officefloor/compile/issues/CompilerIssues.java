@@ -50,10 +50,13 @@ public interface CompilerIssues {
 	 *            Description of the issue.
 	 * @param causes
 	 *            Possible {@link CompilerIssue} instances causing this issue.
+	 * @return {@link CompileError} to be used in <code>throw</code>
+	 *         statement when adding {@link CompilerIssue} to avoid further
+	 *         compiling of the {@link Node}.
 	 * @throws Error
 	 *             If fail compile fast.
 	 */
-	void addIssue(Node node, String issueDescription, CompilerIssue... causes);
+	CompileError addIssue(Node node, String issueDescription, CompilerIssue... causes);
 
 	/**
 	 * Adds an issue regarding a particular {@link Node}.
@@ -64,9 +67,12 @@ public interface CompilerIssues {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
+	 * @return {@link CompileError} to be used in <code>throw</code>
+	 *         statement when adding {@link CompilerIssue} to avoid further
+	 *         compiling of the {@link Node}.
 	 * @throws Error
 	 *             If fail compile fast.
 	 */
-	void addIssue(Node node, String issueDescription, Throwable cause);
+	CompileError addIssue(Node node, String issueDescription, Throwable cause);
 
 }

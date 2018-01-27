@@ -49,6 +49,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -106,7 +107,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the issue
 		this.replayMockObjects();
-		this.node.addIssue("TEST_ISSUE");
+		assertNotNull("Should be provided compile error", this.node.addIssue("TEST_ISSUE"));
 		this.verifyMockObjects();
 	}
 
@@ -123,7 +124,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the issue
 		this.replayMockObjects();
-		this.node.addIssue("TEST_ISSUE", failure);
+		assertNotNull("Should be provided compile error", this.node.addIssue("TEST_ISSUE", failure));
 		this.verifyMockObjects();
 	}
 
@@ -707,54 +708,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can link {@link OfficeInput} to {@link OfficeOutput} for
-	 * synchronous response.
-	 */
-	public void testLinkInputToOutput() {
-
-		// Record already being linked
-		this.issues.recordIssue("INPUT", OfficeInputNodeImpl.class, "Input INPUT linked more than once");
-
-		this.replayMockObjects();
-
-		// Link
-		OfficeInput input = this.node.addOfficeInput("INPUT", Integer.class.getName());
-		OfficeOutput output = this.node.addOfficeOutput("OUTPUT", Long.class.getName());
-		this.node.link(input, output);
-		assertSynchronousLink("input -> output", input, output);
-
-		// Ensure only can link once
-		this.node.link(input, this.node.addOfficeOutput("ANOHTER", Character.class.getName()));
-		assertSynchronousLink("input -> output", input, output);
-
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can link {@link OfficeOutput} to {@link OfficeInput} for
-	 * synchronous request.
-	 */
-	public void testLinkOutputToInput() {
-
-		// Record already being linked
-		this.issues.recordIssue("OUTPUT", OfficeOutputNodeImpl.class, "Output OUTPUT linked more than once");
-
-		this.replayMockObjects();
-
-		// Link
-		OfficeOutput output = this.node.addOfficeOutput("OUTPUT", Long.class.getName());
-		OfficeInput input = this.node.addOfficeInput("INPUT", Integer.class.getName());
-		this.node.link(output, input);
-		assertSynchronousLink("output -> input", output, input);
-
-		// Ensure only can link once
-		this.node.link(output, this.node.addOfficeInput("ANOTHER", Character.class.getName()));
-		assertSynchronousLink("output -> input", output, input);
-
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensure can link the {@link ResponsibleTeam} to an {@link OfficeTeam}.
 	 */
 	public void testLinkFunctionTeamToOfficeTeam() {
@@ -904,7 +857,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensure can specify pre {@link OfficeAdministration} for the
 	 * {@link OfficeSectionFunction}.
 	 */
-	public void testLinkPreOfficeAdministrationForOfficeFunction() {
+	public void testLinkPreAdministrationForOfficeFunction() {
 		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		this.replayMockObjects();
@@ -930,7 +883,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensure can specify post {@link OfficeAdministration} for the
 	 * {@link OfficeSectionFunction}.
 	 */
-	public void testLinkPostOfficeAdministrationForOfficeFunction() {
+	public void testLinkPostAdministrationForOfficeFunction() {
 		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		this.replayMockObjects();
@@ -947,6 +900,83 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// May have many post administrations
 		function.addPostAdministration(
+				this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, factory, null));
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify pre-load {@link Administration} for
+	 * {@link OfficeObject}.
+	 */
+	public void testLinkPreLoadAdministrationForOfficeObject() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
+		this.replayMockObjects();
+
+		// Add office object
+		OfficeObject object = this.node.addOfficeObject("MO", Connection.class.getName());
+
+		// Link
+		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION_A", Connection.class,
+				factory, null);
+		object.addPreLoadAdministration(administration);
+		// TODO test that pre-load administration specified
+
+		// May have many pre-load administrations
+		object.addPreLoadAdministration(
+				this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, factory, null));
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify pre-load {@link Administration} for
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testLinkPreLoadAdministrationForOfficeManagedObject() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
+		this.replayMockObjects();
+
+		// Add office managed object
+		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO", null);
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO", ManagedObjectScope.PROCESS);
+
+		// Link
+		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION_A", Connection.class,
+				factory, null);
+		mo.addPreLoadAdministration(administration);
+		// TODO test that pre-load administration specified
+
+		// May have many pre-load administrations
+		mo.addPreLoadAdministration(
+				this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, factory, null));
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify pre-load {@link Administration} for
+	 * {@link OfficeSectionManagedObject}.
+	 */
+	public void testLinkPreLoadAdministrationForOfficeSectionManagedObject() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
+		this.replayMockObjects();
+
+		// Add office section managed object
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeSectionManagedObject mo = section.getOfficeSectionManagedObject("MO");
+
+		// Link
+		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION_A", Connection.class,
+				factory, null);
+		mo.addPreLoadAdministration(administration);
+		// TODO test that pre-load administration specified
+
+		// May have many pre-load administrations
+		mo.addPreLoadAdministration(
 				this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, factory, null));
 
 		this.verifyMockObjects();

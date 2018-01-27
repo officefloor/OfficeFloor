@@ -26,7 +26,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -55,9 +55,9 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final Class<E> extensionInterface;
 
 	/**
-	 * {@link ManagedObjectExtensionMetaData}.
+	 * {@link ManagedObjectExtensionExtractorMetaData}.
 	 */
-	private final ManagedObjectExtensionMetaData<E>[] eiMetaData;
+	private final ManagedObjectExtensionExtractorMetaData<E>[] eiMetaData;
 
 	/**
 	 * {@link TeamManagement} of {@link Team} responsible for the
@@ -95,7 +95,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 * @param extensionInterface
 	 *            Extension interface.
 	 * @param eiMetaData
-	 *            {@link ManagedObjectExtensionMetaData}.
+	 *            {@link ManagedObjectExtensionExtractorMetaData}.
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity}.
@@ -111,7 +111,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 *            {@link OfficeMetaData}.
 	 */
 	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
-			Class<E> extensionInterface, ManagedObjectExtensionMetaData<E>[] eiMetaData, TeamManagement responsibleTeam,
+			Class<E> extensionInterface, ManagedObjectExtensionExtractorMetaData<E>[] eiMetaData, TeamManagement responsibleTeam,
 			FlowMetaData[] flowMetaData, int[] governanceIndexes, EscalationProcedure escalationProcedure,
 			OfficeMetaData officeMetaData) {
 		this.administrationName = administrationName;
@@ -164,7 +164,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 */
 
 	@Override
-	public ManagedObjectExtensionMetaData<E>[] getManagedObjectExtensionMetaData() {
+	public ManagedObjectExtensionExtractorMetaData<E>[] getManagedObjectExtensionExtractorMetaData() {
 		return this.eiMetaData;
 	}
 

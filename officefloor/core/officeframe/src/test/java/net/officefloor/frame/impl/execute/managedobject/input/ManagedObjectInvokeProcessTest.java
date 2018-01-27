@@ -401,7 +401,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 			// Determine if load the flow
 			if (isLoadFlow) {
 				// Load the flow
-				Labeller labeller = context.addFlow(Flows.FLOW, Object.class);
+				Labeller<Flows> labeller = context.addFlow(Flows.FLOW, Object.class);
+				assertEquals("Incorrect flow key", Flows.FLOW, labeller.getKey());
 				assertEquals("Incorrect flow index", Flows.FLOW.ordinal(), labeller.getIndex());
 			}
 		}

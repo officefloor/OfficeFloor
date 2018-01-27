@@ -21,14 +21,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpHeader;
+import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -43,12 +42,7 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	 * {@link ProcessAwareHttpResponseHeaders} to be tested.
 	 */
 	private final ProcessAwareHttpResponseHeaders headers = new ProcessAwareHttpResponseHeaders(
-			new ProcessAwareContext() {
-				@Override
-				public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-					return operation.run();
-				}
-			});
+			new MockProcessAwareContext());
 
 	@Override
 	protected void setUp() throws Exception {
@@ -60,22 +54,12 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 		this.headers.addHeader("same", new HttpHeaderValue("First"));
 		this.headers.addHeader(new HttpHeaderName("three"), new HttpHeaderValue("3"));
 		this.headers.addHeader("same", "Second");
-
-		// Should have all headers added
-		assertEquals("Incorrect number of headers", 5, this.headers.length());
 	}
 
 	/**
 	 * Ensure can add headers and iterate over them.
 	 */
 	public void testGetHeaders() {
-
-		// Ensure correct index access
-		assertEquals("Incorrect header 0", "1", this.headers.headerAt(0).getValue());
-		assertEquals("Incorrect header 1", "2", this.headers.headerAt(1).getValue());
-		assertEquals("Incorrect header 2", "First", this.headers.headerAt(2).getValue());
-		assertEquals("Incorrect header 3", "3", this.headers.headerAt(3).getValue());
-		assertEquals("Incorrect header 4", "Second", this.headers.headerAt(4).getValue());
 
 		// Ensure can iterate over all headers
 		assertHeaderNames(this.headers, "one", "two", "same", "three", "same");

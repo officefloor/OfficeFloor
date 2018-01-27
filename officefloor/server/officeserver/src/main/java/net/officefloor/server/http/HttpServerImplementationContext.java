@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationH
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -34,19 +35,24 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public interface HttpServerImplementationContext {
 
 	/**
-	 * Obtains the HTTP port.
+	 * Obtains the {@link HttpServerLocation}.
 	 * 
-	 * @return HTTP port.
+	 * @return {@link HttpServerLocation}.
 	 */
-	int getHttpPort();
+	HttpServerLocation getHttpServerLocation();
 
 	/**
-	 * Obtains the HTTPS port.
+	 * <p>
+	 * Indicates whether the {@link HttpServerImplementation} should include the
+	 * stack trace in {@link Escalation} responses.
+	 * <p>
+	 * For development, stack traces should be enabled for easier debugging of
+	 * issues. However, in production, they should be hidden.
 	 * 
-	 * @return HTTPS port. May be <code>-1</code> if separate HTTPS port is not
-	 *         required.
+	 * @return <code>true</code> to include the stack traces. <code>false</code>
+	 *         should hide stack traces.
 	 */
-	int getHttpsPort();
+	boolean isIncludeEscalationStackTrace();
 
 	/**
 	 * <p>
@@ -57,8 +63,8 @@ public interface HttpServerImplementationContext {
 	 * via non-secure HTTP.
 	 * 
 	 * @return {@link SSLContext} to use for HTTPS. May be <code>null</code> if
-	 *         behind Reverse Proxy handling SSL (with communication to Reverse
-	 *         Proxy over non-secure HTTP).
+	 *         behind Reverse Proxy handling SSL (with communication from
+	 *         Reverse Proxy over non-secure HTTP).
 	 */
 	SSLContext getSslContext();
 

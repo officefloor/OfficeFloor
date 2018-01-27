@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +44,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -390,6 +389,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            {@link OfficeConfiguration}.
 	 * @return Filtered {@link ManagedObjectFlowType}.
 	 */
+	@SuppressWarnings("unchecked")
 	private <F extends Enum<F>> ManagedObjectFlowType<F>[] filterLinkedProcesses(
 			ManagedObjectFlowType<F>[] metaDataFlows, ManagingOfficeConfiguration<F> managingOffice,
 			OfficeConfiguration office) {
@@ -484,7 +484,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		}
 
 		// Return the filtered list of flows
-		return CompileUtil.toArray(filteredFlows, new ManagedObjectFlowType[0]);
+		return filteredFlows.stream().toArray(ManagedObjectFlowType[]::new);
 	}
 
 	/**
@@ -500,7 +500,6 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	private boolean ensureFunctionFlowsLinked(OfficeConfiguration office) {
 
 		// Obtain the flows instigated by the functions
-		List<ManagedObjectFlowType<?>> functionFlows = new LinkedList<ManagedObjectFlowType<?>>();
 		for (ManagedFunctionConfiguration<?, ?> function : office.getManagedFunctionConfiguration()) {
 			FlowConfiguration<?>[] flows = function.getFlowConfiguration();
 			for (int i = 0; i < flows.length; i++) {
@@ -854,7 +853,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 		// Obtain the extension interface meta-data
 		Class<?>[] extensionInterfaces;
-		ManagedObjectExtensionInterfaceMetaData<?>[] eiMetaDatas = metaData.getExtensionInterfacesMetaData();
+		ManagedObjectExtensionMetaData<?>[] eiMetaDatas = metaData.getExtensionInterfacesMetaData();
 		if (eiMetaDatas == null) {
 			// No extension interfaces supported
 			extensionInterfaces = new Class[0];
@@ -863,7 +862,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			// Obtain the extension interfaces supported
 			extensionInterfaces = new Class[eiMetaDatas.length];
 			for (int i = 0; i < extensionInterfaces.length; i++) {
-				ManagedObjectExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
+				ManagedObjectExtensionMetaData<?> eiMetaData = eiMetaDatas[i];
 
 				// Ensure have the interface meta-data
 				if (eiMetaData == null) {
@@ -872,15 +871,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				}
 
 				// Obtain the extension interface type
-				Class<?> eiType = eiMetaData.getExtensionInterfaceType();
+				Class<?> eiType = eiMetaData.getExtensionType();
 				if (eiType == null) {
 					this.addIssue("Null extension interface type");
 					return null; // must have type
 				}
 
 				// Ensure an extension factory
-				if (eiMetaData.getExtensionInterfaceFactory() == null) {
-					this.addIssue("No extension interface factory (type=" + eiType.getName() + ")");
+				if (eiMetaData.getExtensionFactory() == null) {
+					this.addIssue("No extension factory (type=" + eiType.getName() + ")");
 					return null; // must have factory
 				}
 

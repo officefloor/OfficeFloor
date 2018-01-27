@@ -35,7 +35,7 @@ public interface HttpResponse {
 	 * 
 	 * @return {@link HttpVersion}.
 	 */
-	HttpVersion getHttpVersion();
+	HttpVersion getVersion();
 
 	/**
 	 * <p>
@@ -46,7 +46,7 @@ public interface HttpResponse {
 	 * @param version
 	 *            {@link HttpVersion}.
 	 */
-	void setHttpVersion(HttpVersion version);
+	void setVersion(HttpVersion version);
 
 	/**
 	 * <p>
@@ -58,7 +58,7 @@ public interface HttpResponse {
 	 * 
 	 * @return Current {@link HttpStatus}.
 	 */
-	HttpStatus getHttpStatus();
+	HttpStatus getStatus();
 
 	/**
 	 * <p>
@@ -70,14 +70,21 @@ public interface HttpResponse {
 	 * @param status
 	 *            {@link HttpStatus}.
 	 */
-	void setHttpStatus(HttpStatus status);
+	void setStatus(HttpStatus status);
 
 	/**
 	 * Obtains the {@link HttpResponseHeaders}.
 	 * 
 	 * @return {@link HttpResponseHeaders}.
 	 */
-	HttpResponseHeaders getHttpHeaders();
+	HttpResponseHeaders getHeaders();
+
+	/**
+	 * Obtains the {@link HttpResponseCookies}.
+	 * 
+	 * @return {@link HttpResponseCookies}.
+	 */
+	HttpResponseCookies getCookies();
 
 	/**
 	 * <p>
@@ -179,6 +186,22 @@ public interface HttpResponse {
 	 * @see #send()
 	 */
 	ServerWriter getEntityWriter() throws IOException;
+
+	/**
+	 * Obtains the {@link HttpEscalationHandler}.
+	 * 
+	 * @return {@link HttpEscalationHandler} or <code>null</code> if no
+	 *         {@link HttpEscalationHandler} configured.
+	 */
+	HttpEscalationHandler getEscalationHandler();
+
+	/**
+	 * Sets the {@link HttpEscalationHandler} for the response.
+	 * 
+	 * @param escalationHandler
+	 *            {@link HttpEscalationHandler} for the response.
+	 */
+	void setEscalationHandler(HttpEscalationHandler escalationHandler);
 
 	/**
 	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances

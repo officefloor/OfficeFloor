@@ -49,6 +49,6 @@ public interface GovernanceConfiguration<E, F extends Enum<F>> extends FunctionC
 	 * @return Extension interface type for {@link ManagedObject} to provide to
 	 *         enable {@link Governance}.
 	 */
-	Class<E> getExtensionInterface();
+	Class<E> getExtensionType();
 
 }

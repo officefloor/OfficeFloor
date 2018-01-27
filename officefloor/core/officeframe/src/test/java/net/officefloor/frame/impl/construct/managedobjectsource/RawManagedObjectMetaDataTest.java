@@ -19,12 +19,12 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -36,12 +36,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
-import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -52,17 +48,22 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownResourceError;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.ConstructManagedObjectSource;
+import net.officefloor.frame.impl.construct.MockConstruct.ManagedObjectSourceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.officefloor.OfficeFloorBuilderImpl;
+import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
-import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
@@ -70,10 +71,9 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
- * Tests the creation of a {@link RawManagedObjectMetaDataImpl}.
+ * Tests the creation of a {@link RawManagedObjectMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -87,9 +87,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedObjectSourceConfiguration}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private final ManagedObjectSourceConfiguration configuration = this
-			.createMock(ManagedObjectSourceConfiguration.class);
+	private ManagedObjectBuilderImpl<?, ?, ?> configuration = new ManagedObjectBuilderImpl<>(MANAGED_OBJECT_NAME,
+			MockManagedObjectSource.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -104,84 +103,24 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeFloorConfiguration}.
 	 */
-	private final OfficeFloorConfiguration officeFloorConfiguration = this.createMock(OfficeFloorConfiguration.class);
+	private final OfficeFloorBuilderImpl officeFloorConfiguration = new OfficeFloorBuilderImpl("OfficeFloor");
 
 	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private final AssetManagerFactory assetManagerFactory = this.createMock(AssetManagerFactory.class);
+	private final AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerFactory();
 
 	/**
 	 * {@link ManagedObjectSourceMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
-	private final ManagedObjectSourceMetaData<Indexed, FlowKey> metaData = this
-			.createMock(ManagedObjectSourceMetaData.class);
-
-	/**
-	 * {@link ManagedObjectPoolConfiguration}.
-	 */
-	private final ManagedObjectPoolConfiguration managedObjectPoolConfiguration = this
-			.createMock(ManagedObjectPoolConfiguration.class);
-
-	/**
-	 * {@link ManagedObjectPoolFactory}.
-	 */
-	private final ManagedObjectPoolFactory managedObjectPoolFactory = this.createMock(ManagedObjectPoolFactory.class);
-
-	/**
-	 * {@link ManagedObjectPool}.
-	 */
-	private final ManagedObjectPool managedObjectPool = this.createMock(ManagedObjectPool.class);
-
-	/**
-	 * {@link ThreadCompletionListenerFactory}.
-	 */
-	private final ThreadCompletionListenerFactory threadCompletionListenerFactory = this
-			.createMock(ThreadCompletionListenerFactory.class);
-
-	/**
-	 * {@link ThreadCompletionListener}.
-	 */
-	private final ThreadCompletionListener threadCompletionListener = this.createMock(ThreadCompletionListener.class);
-
-	/**
-	 * {@link ManagingOfficeConfiguration}.
-	 */
-	private final ManagingOfficeConfiguration<?> managingOfficeConfiguration = this
-			.createMock(ManagingOfficeConfiguration.class);
-
-	/**
-	 * {@link ManagingOfficeBuilder}.
-	 */
-	private final ManagingOfficeBuilder<?> managingOfficeBuilder = this.createMock(ManagingOfficeBuilder.class);
-
-	/**
-	 * {@link OfficeConfiguration}.
-	 */
-	private final OfficeConfiguration officeConfiguration = this.createMock(OfficeConfiguration.class);
-
-	/**
-	 * {@link OfficeBuilder}.
-	 */
-	private final OfficeBuilder officeBuilder = this.createMock(OfficeBuilder.class);
+	private final ManagedObjectSourceMetaDataMockBuilder<Indexed, FlowKey> metaData = MockConstruct
+			.mockManagedObjectSourceMetaData();
 
 	/**
 	 * {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
 	private final ManagedFunctionFactory<None, Indexed> functionFactory = this.createMock(ManagedFunctionFactory.class);
-
-	/**
-	 * {@link ManagedFunctionBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final ManagedFunctionBuilder<None, Indexed> functionBuilder = this.createMock(ManagedFunctionBuilder.class);
-
-	/**
-	 * {@link ManagedObjectSource} instance to use for testing.
-	 */
-	private MockManagedObjectSource managedObjectSourceInstance = null;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -195,8 +134,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoManagedObjectSourceName() {
 
 		// Record no name
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), null);
-		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor", "ManagedObject added without a name");
+		this.configuration = MockConstruct.mockManagedObjectBuilder(null);
+		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OFFICE_FLOOR", "ManagedObject added without a name");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -210,9 +149,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoManagedObjectSourceClass() {
 
 		// Record no class
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), MANAGED_OBJECT_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSource(), null);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceClass(), null);
+		this.configuration = new ManagedObjectBuilderImpl<>(MANAGED_OBJECT_NAME,
+				(ConstructManagedObjectSource<?, ?>) null);
 		this.record_issue("No ManagedObjectSource class provided");
 
 		// Attempt to construct managed object
@@ -229,15 +167,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		final Exception failure = new Exception("instantiate failure");
 
 		// Record fail instantiate
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), MANAGED_OBJECT_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSource(), null);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceClass(),
-				MockManagedObjectSource.class);
+		MockManagedObjectSource.instantiateFailure = failure;
 		this.record_issue("Failed to instantiate " + MockManagedObjectSource.class.getName(), failure);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.instantiateFailure = failure;
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -248,12 +182,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoManagingOfficeConfiguration() {
 
 		// Record no managing office configuration
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), MANAGED_OBJECT_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSource(), null);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceClass(),
-				MockManagedObjectSource.class);
-		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
-		this.recordReturn(this.configuration, this.configuration.getManagingOfficeConfiguration(), null);
 		this.record_issue("No managing office configuration");
 
 		// Attempt to construct managed object
@@ -268,14 +196,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoManagingOfficeName() {
 
 		// Record no managing office name provided
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), MANAGED_OBJECT_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSource(), null);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceClass(),
-				MockManagedObjectSource.class);
-		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
-		this.recordReturn(this.configuration, this.configuration.getManagingOfficeConfiguration(),
-				this.managingOfficeConfiguration);
-		this.recordReturn(this.managingOfficeConfiguration, this.managingOfficeConfiguration.getOfficeName(), null);
+		this.configuration.setManagingOffice(null);
 		this.record_issue("No managing office specified");
 
 		// Attempt to construct managed object
@@ -290,16 +211,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoManagingOfficeFound() {
 
 		// Record no managing office found
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), MANAGED_OBJECT_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSource(), null);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceClass(),
-				MockManagedObjectSource.class);
-		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
-		this.recordReturn(this.configuration, this.configuration.getManagingOfficeConfiguration(),
-				this.managingOfficeConfiguration);
-		this.recordReturn(this.managingOfficeConfiguration, this.managingOfficeConfiguration.getOfficeName(), "OFFICE");
-		this.recordReturn(this.officeFloorConfiguration, this.officeFloorConfiguration.getOfficeConfiguration(),
-				new OfficeConfiguration[0]);
+		this.configuration.setManagingOffice("OFFICE");
 		this.record_issue("Can not find managing office 'OFFICE'");
 
 		// Attempt to construct managed object
@@ -314,12 +226,13 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record fail instantiate due to missing property
-		this.record_initManagedObject();
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.requiredPropertyName = "required.property";
 		this.record_issue("Property 'required.property' must be specified");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.requiredPropertyName = "required.property";
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -333,16 +246,17 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		final String CLASS_NAME = "UNKNOWN CLASS";
 
 		// Record fail instantiate due to missing class
-		this.record_initManagedObject();
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), classLoader);
 		this.sourceContext.loadClass(CLASS_NAME);
 		this.control(this.sourceContext).setThrowable(new UnknownClassError("TEST ERROR", CLASS_NAME));
+		MockManagedObjectSource.classLoader = classLoader;
+		MockManagedObjectSource.requiredClassName = CLASS_NAME;
 		this.record_issue("Can not load class '" + CLASS_NAME + "'");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.classLoader = classLoader;
-		MockManagedObjectSource.requiredClassName = CLASS_NAME;
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -355,14 +269,15 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		final String RESOURCE_LOCATION = "RESOURCE LOCATION";
 
 		// Record fail instantiate due to missing resource
-		this.record_initManagedObject();
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.sourceContext.getResource(RESOURCE_LOCATION);
 		this.control(this.sourceContext).setThrowable(new UnknownResourceError("TEST ERROR", RESOURCE_LOCATION));
+		MockManagedObjectSource.requiredResourceLocation = RESOURCE_LOCATION;
 		this.record_issue("Can not obtain resource at location '" + RESOURCE_LOCATION + "'");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.requiredResourceLocation = RESOURCE_LOCATION;
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -375,12 +290,13 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		final Exception failure = new Exception("init failure");
 
 		// Record fail instantiate
-		this.record_initManagedObject();
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.initFailure = failure;
 		this.record_issue("Failed to initialise " + MockManagedObjectSource.class.getName(), failure);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.initFailure = failure;
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -391,12 +307,13 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNullMetaData() {
 
 		// Record null meta-data
-		this.record_initManagedObject();
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.metaData = null;
 		this.record_issue("Must provide meta-data");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.metaData = null;
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -407,8 +324,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoObjectType() {
 
 		// Record no object type
-		this.record_initManagedObject();
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), null);
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setObjectClass(null);
 		this.record_issue("No object type provided");
 
 		// Attempt to construct managed object
@@ -423,9 +341,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNoManagedObjectClass() {
 
 		// Record no managed object class
-		this.record_initManagedObject();
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(), null);
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setManagedObjectClass(null);
 		this.record_issue("No managed object class provided");
 
 		// Attempt to construct managed object
@@ -440,10 +358,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testNegativeTimeout() {
 
 		// Record negative default timeout
-		this.record_initManagedObject();
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(), ManagedObject.class);
-		this.recordReturn(this.configuration, this.configuration.getTimeout(), -1);
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.configuration.setTimeout(-1);
 		this.record_issue("Must not have negative timeout");
 
 		// Attempt to construct managed object
@@ -458,10 +375,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	public void testAsynchronousManagedObjectWithZeroTimeout() {
 
 		// Record asynchronous managed object with no timeout
-		this.record_initManagedObject();
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(), AsynchronousManagedObject.class);
-		this.recordReturn(this.configuration, this.configuration.getTimeout(), 0);
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setManagedObjectClass(AsynchronousManagedObject.class);
+		this.configuration.setTimeout(0);
 		this.record_issue("Non-zero timeout must be provided for AsynchronousManagedObject");
 
 		// Attempt to construct managed object
@@ -475,17 +392,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoInputConfiguration() {
 
-		ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
-
 		// Record no process bound name
-		this.record_initManagedObject();
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(), ManagedObject.class);
-		this.recordReturn(this.configuration, this.configuration.getTimeout(), 0);
-		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowMetaData });
-		this.recordReturn(this.managingOfficeConfiguration,
-				this.managingOfficeConfiguration.getInputManagedObjectConfiguration(), null);
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.addFlow(Object.class, null);
 		this.record_issue("Must provide Input configuration as Managed Object Source requires flows");
 
 		// Attempt to construct managed object
@@ -499,19 +409,22 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testAddFunction() {
 
-		final String TASK_NAME = MANAGED_OBJECT_NAME + ".TASK";
+		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
 
-		// Record adding a task
-		this.record_initManagedObject();
-		this.recordReturn(this.officeBuilder, this.officeBuilder.addManagedFunction(TASK_NAME, this.functionFactory),
-				this.functionBuilder);
-		this.record_createRawMetaData(ManagedObject.class, 0, null);
+		// Record adding a function
+		this.configuration.setManagingOffice("OFFICE");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.addFunctionName = "TASK";
 		this.constructRawManagedObjectMetaData(true);
 		this.verifyMockObjects();
+
+		// Ensure function added to office
+		ManagedFunctionConfiguration<?, ?>[] functions = office.getManagedFunctionConfiguration();
+		assertEquals("Should have added function", 1, functions.length);
+		assertEquals("Incorrect function", FUNCTION_NAME, functions[0].getFunctionName());
 	}
 
 	/**
@@ -519,22 +432,26 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkParameterToAddedFunction() {
 
-		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".TASK";
+		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
 		final Class<?> parameterType = String.class;
 
-		// Record linking a parameter to the added task
-		this.record_initManagedObject();
-		this.recordReturn(this.officeBuilder,
-				this.officeBuilder.addManagedFunction(FUNCTION_NAME, this.functionFactory), this.functionBuilder);
-		this.functionBuilder.linkParameter(0, parameterType);
-		this.record_createRawMetaData(ManagedObject.class, 0, null);
+		// Record linking a parameter to the added function
+		this.configuration.setManagingOffice("OFFICE");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		MockManagedObjectSource.addFunctionLinkedParameter = parameterType;
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.addFunctionName = "TASK";
-		MockManagedObjectSource.addFunctionLinkedParameter = parameterType;
 		this.constructRawManagedObjectMetaData(true);
 		this.verifyMockObjects();
+
+		// Ensure added parameter to function
+		ManagedFunctionConfiguration<?, ?> function = office.getManagedFunctionConfiguration()[0];
+		assertEquals("Incorrect function", FUNCTION_NAME, function.getFunctionName());
+		ManagedFunctionObjectConfiguration<?>[] parameters = function.getObjectConfiguration();
+		assertEquals("Incorrect number of parameters", 1, parameters.length);
+		assertTrue("Ensure is a parameter", parameters[0].isParameter());
 	}
 
 	/**
@@ -542,23 +459,28 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkFlowToAddedFunction() {
 
-		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".TASK";
-		final String LINK_FUNCTION_NAME = MANAGED_OBJECT_NAME + ".LINK_TASK";
+		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
+		final String LINK_FUNCTION_NAME = MANAGED_OBJECT_NAME + ".LINK_FUNCTION";
 
-		// Record linking a parameter to the added task
-		this.record_initManagedObject();
-		this.recordReturn(this.officeBuilder,
-				this.officeBuilder.addManagedFunction(FUNCTION_NAME, this.functionFactory), this.functionBuilder);
-		this.functionBuilder.linkFlow(0, LINK_FUNCTION_NAME, Object.class, false);
-		this.record_createRawMetaData(ManagedObject.class, 0, null);
+		// Record linking a parameter to the added function
+		this.configuration.setManagingOffice("OFFICE");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		MockManagedObjectSource.addFunctionLinkFunctionName = "LINK_FUNCTION";
+		MockManagedObjectSource.addFunctionLinkedParameter = null;
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.addFunctionName = "TASK";
-		MockManagedObjectSource.addFunctionLinkFunctionName = "LINK_TASK";
-		MockManagedObjectSource.addFunctionLinkedParameter = null;
 		this.constructRawManagedObjectMetaData(true);
 		this.verifyMockObjects();
+
+		// Ensure added parameter to function
+		ManagedFunctionConfiguration<?, ?> function = office.getManagedFunctionConfiguration()[0];
+		assertEquals("Incorrect function", FUNCTION_NAME, function.getFunctionName());
+		FlowConfiguration<?>[] flows = function.getFlowConfiguration();
+		assertEquals("Incorrect number of flows", 1, flows.length);
+		assertEquals("Flow linked to incorrect function", LINK_FUNCTION_NAME,
+				flows[0].getInitialFunction().getFunctionName());
 	}
 
 	/**
@@ -566,16 +488,51 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testAddStartupFunction() {
 
-		// Record registering a start up task
-		this.record_initManagedObject();
-		this.officeBuilder.addStartupFunction(MANAGED_OBJECT_NAME + ".STARTUP_FUNCTION");
-		this.record_createRawMetaData(ManagedObject.class, 0, null);
+		// Record registering a start up function
+		this.configuration.setManagingOffice("OFFICE");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.startupFunctionName = "STARTUP_FUNCTION";
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		MockManagedObjectSource.startupFunctionName = "STARTUP_FUNCTION";
 		this.constructRawManagedObjectMetaData(true);
 		this.verifyMockObjects();
+
+		// Ensure start up function added
+		ManagedFunctionReference[] startUps = office.getStartupFunctions();
+		assertEquals("Should add start up function", 1, startUps.length);
+		assertEquals("Incorrect start up function", MANAGED_OBJECT_NAME + ".STARTUP_FUNCTION",
+				startUps[0].getFunctionName());
+	}
+
+	/**
+	 * Ensures able to handle plain {@link ManagedObject} instance (ie not
+	 * {@link AsynchronousManagedObject} or {@link CoordinatingManagedObject}).
+	 */
+	public void testManagedObjectPool() throws Exception {
+
+		// Record plain managed object
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+
+		// Configure the pool with thread completion listener
+		ManagedObjectPool managedObjectPool = this.createMock(ManagedObjectPool.class);
+		ThreadCompletionListener threadCompletionListener = this.createMock(ThreadCompletionListener.class);
+		this.configuration.setManagedObjectPool((context) -> managedObjectPool).addThreadCompletionListener((pool) -> {
+			assertSame("Incorrect pool for thread completion listener", managedObjectPool, pool);
+			return threadCompletionListener;
+		});
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		RawManagedObjectMetaData<?, ?> rawMetaData = this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Verify the managed object pool
+		assertEquals("Incorrect managed object pool", managedObjectPool, rawMetaData.getManagedObjectPool());
+		ThreadCompletionListener[] threadCompletionListeners = rawMetaData.getThreadCompletionListeners();
+		assertEquals("Incorrect number of thread completion listeners", 1, threadCompletionListeners.length);
+		assertEquals("Incorrect thread completion listener", threadCompletionListener, threadCompletionListeners[0]);
 	}
 
 	/**
@@ -585,32 +542,28 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testPlainManagedObject() {
 
-		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 0;
-		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final String BOUND_NAME = "BOUND_NAME";
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
-
 		// Record plain managed object
-		this.record_initManagedObject();
-		this.record_createRawMetaData(ManagedObject.class, 0, null);
-		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
-		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
-		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
-						this.issues),
-				assetManager);
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
+
+		// Provide the bound configuration
+		final int INSTANCE_INDEX = 0;
+		final String BOUND_NAME = "BOUND_NAME";
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
+		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
+				.addRawBoundManagedObjectInstanceMetaData();
+
+		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
-				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
+				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -620,7 +573,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertTrue("Incorrect managed object source",
 				(rawMetaData.getManagedObjectSource() instanceof MockManagedObjectSource));
 		assertEquals("Incorrect source meta-data", this.metaData, rawMetaData.getManagedObjectSourceMetaData());
-		assertEquals("Incorrect managed object pool", this.managedObjectPool, rawMetaData.getManagedObjectPool());
+		assertNull("Should be no managed object pool", rawMetaData.getManagedObjectPool());
+		assertNull("Should be no thread completion listeners", rawMetaData.getThreadCompletionListeners());
 		assertEquals("Ensure round trip managing office details", rawMetaData,
 				rawMetaData.getRawManagingOfficeMetaData().getRawManagedObjectMetaData());
 
@@ -631,76 +585,28 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect object type", Object.class, moMetaData.getObjectType());
 		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData.getInstanceIndex());
 		assertEquals("Incorrect timeout", 0, moMetaData.getTimeout());
+		assertFalse("Should not be process aware", moMetaData.isProcessAwareManagedObject());
+		assertFalse("Should not be name aware", moMetaData.isNameAwareManagedObject());
 		assertFalse("Should not be asynchronous", moMetaData.isManagedObjectAsynchronous());
 		assertFalse("Should not be coordinating", moMetaData.isCoordinatingManagedObject());
-		assertEquals("Incorrect source asset manager", assetManager, moMetaData.getSourcingManager());
+
+		// Verify the assets
+		AssetManager[] assetManagers = this.assetManagerFactory.getAssetManagers();
+		assertEquals("Should have asset manager", 1, assetManagers.length);
+		assertEquals("Incorrect source asset manager", assetManagers[0], moMetaData.getSourcingManager());
 		assertNull("Not asynchronous so no operations asset manager", moMetaData.getOperationsManager());
 	}
 
 	/**
-	 * Ensures able to handle plain {@link ManagedObject} instance (ie not
-	 * {@link AsynchronousManagedObject} or {@link CoordinatingManagedObject}).
+	 * Ensure can load with {@link ManagedObjectSource} instantiated.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testPlainManagedObjectInstance() throws Exception {
 
 		// Use ManagedObjectSource instance
-		this.managedObjectSourceInstance = new MockManagedObjectSource();
+		this.configuration = new ManagedObjectBuilderImpl<>(MANAGED_OBJECT_NAME, new MockManagedObjectSource());
 
-		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 0;
-		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final String BOUND_NAME = "BOUND_NAME";
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
-
-		// Record plain managed object instance
-		this.record_initManagedObject();
-		this.record_createRawMetaData(ManagedObject.class, 0, null);
-		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
-		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
-		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
-						this.issues),
-				assetManager);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
-				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		assertEquals("Incorrect managed object name", MANAGED_OBJECT_NAME, rawMetaData.getManagedObjectName());
-		assertEquals("Incorrect managed object source configuration", this.configuration,
-				rawMetaData.getManagedObjectSourceConfiguration());
-		assertSame("Incorrect managed object source", rawMetaData.getManagedObjectSource(),
-				this.managedObjectSourceInstance);
-		assertEquals("Incorrect source meta-data", this.metaData, rawMetaData.getManagedObjectSourceMetaData());
-		assertEquals("Incorrect managed object pool", this.managedObjectPool, rawMetaData.getManagedObjectPool());
-		assertEquals("Incorrect number of thread completion listeners", 1,
-				rawMetaData.getThreadCompletionListeners().length);
-		assertEquals("Incorrect thread completion listener", this.threadCompletionListener,
-				rawMetaData.getThreadCompletionListeners()[0]);
-		assertEquals("Ensure round trip managing office details", rawMetaData,
-				rawMetaData.getRawManagingOfficeMetaData().getRawManagedObjectMetaData());
-
-		// Verify managed object meta-data
-		assertEquals("Incorrect bound name", BOUND_NAME, moMetaData.getBoundManagedObjectName());
-		assertSame("Incorrect managed object source", moMetaData.getManagedObjectSource(),
-				this.managedObjectSourceInstance);
-		assertEquals("Incorrect object type", Object.class, moMetaData.getObjectType());
-		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData.getInstanceIndex());
-		assertEquals("Incorrect timeout", 0, moMetaData.getTimeout());
-		assertFalse("Should not be asynchronous", moMetaData.isManagedObjectAsynchronous());
-		assertFalse("Should not be coordinating", moMetaData.isCoordinatingManagedObject());
-		assertEquals("Incorrect source asset manager", assetManager, moMetaData.getSourcingManager());
-		assertNull("Not asynchronous so no operations asset manager", moMetaData.getOperationsManager());
+		// Undertake test
+		this.testPlainManagedObject();
 	}
 
 	/**
@@ -709,32 +615,29 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testProcessAwareManagedObject() {
 
-		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 0;
-		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final String BOUND_NAME = "BOUND_NAME";
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-		final AssetManager sourceAssetManager = this.createMock(AssetManager.class);
-
-		// Record name aware managed object
-		this.record_initManagedObject();
-		this.record_createRawMetaData(ProcessAwareManagedObject.class, 0, null);
-		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
-		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
-		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
-						this.issues),
-				sourceAssetManager);
+		// Record plain managed object
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setManagedObjectClass(ProcessAwareManagedObject.class);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
+
+		// Provide the bound configuration
+		final int INSTANCE_INDEX = 0;
+		final String BOUND_NAME = "BOUND_NAME";
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
+		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
+				.addRawBoundManagedObjectInstanceMetaData();
+
+		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
-				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
+				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				this.issues);
 		this.verifyMockObjects();
 
 		// Verify is process aware
@@ -747,32 +650,29 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNameAwareManagedObject() {
 
-		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 0;
-		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final String BOUND_NAME = "BOUND_NAME";
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-		final AssetManager sourceAssetManager = this.createMock(AssetManager.class);
-
-		// Record name aware managed object
-		this.record_initManagedObject();
-		this.record_createRawMetaData(NameAwareManagedObject.class, 0, null);
-		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
-		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
-		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
-						this.issues),
-				sourceAssetManager);
+		// Record plain managed object
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setManagedObjectClass(NameAwareManagedObject.class);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
+
+		// Provide the bound configuration
+		final int INSTANCE_INDEX = 0;
+		final String BOUND_NAME = "BOUND_NAME";
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
+		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
+				.addRawBoundManagedObjectInstanceMetaData();
+
+		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
-				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
+				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				this.issues);
 		this.verifyMockObjects();
 
 		// Verify is name aware
@@ -785,44 +685,41 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testAsynchronousManagedObject() {
 
-		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 3;
-		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final String BOUND_NAME = "BOUND_NAME";
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-		final AssetManager sourceAssetManager = this.createMock(AssetManager.class);
-		final AssetManager operationsAssetManager = this.createMock(AssetManager.class);
-
-		// Record asynchronous managed object
-		this.record_initManagedObject();
-		this.record_createRawMetaData(AsynchronousManagedObject.class, 1000, null);
-		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
-		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
-		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.THREAD);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.THREAD + ":" + INSTANCE_INDEX + ":" + BOUND_NAME, "source", this.issues),
-				sourceAssetManager);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.THREAD + ":" + INSTANCE_INDEX + ":" + BOUND_NAME, "operations", this.issues),
-				operationsAssetManager);
+		// Record plain managed object
+		this.configuration.setManagingOffice("OFFICE");
+		this.configuration.setTimeout(1000);
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setManagedObjectClass(AsynchronousManagedObject.class);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
+
+		// Provide the bound configuration
+		final int INSTANCE_INDEX = 0;
+		final String BOUND_NAME = "BOUND_NAME";
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
+		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
+				.addRawBoundManagedObjectInstanceMetaData();
+
+		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
-				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
+				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				this.issues);
 		this.verifyMockObjects();
 
 		// Verify different index
 		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData.getInstanceIndex());
 
 		// Verify is asynchronous with operations manager
+		Set<AssetManager> assetManagers = new HashSet<>(Arrays.asList(this.assetManagerFactory.getAssetManagers()));
 		assertTrue("Should be asynchronous", moMetaData.isManagedObjectAsynchronous());
-		assertEquals("Incorrect operations asset manager", operationsAssetManager, moMetaData.getOperationsManager());
+		AssetManager operationsAssetManager = moMetaData.getOperationsManager();
+		assertNotNull("SHould have operations asset manager", operationsAssetManager);
+		assertTrue("Incorrect operations asset manager", assetManagers.contains(operationsAssetManager));
 		assertEquals("Incorrect timeout", 1000, moMetaData.getTimeout());
 	}
 
@@ -832,100 +729,33 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCoordinatingManagedObject() {
 
-		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 2;
-		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
-				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final String BOUND_NAME = "BOUND_NAME";
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-		final AssetManager sourceAssetManager = this.createMock(AssetManager.class);
-
-		// Record coordinating managed object
-		this.record_initManagedObject();
-		this.record_createRawMetaData(CoordinatingManagedObject.class, 0, null);
-		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
-		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
-		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.PROCESS);
-		this.recordReturn(this.assetManagerFactory,
-				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.PROCESS + ":" + INSTANCE_INDEX + ":" + BOUND_NAME, "source", this.issues),
-				sourceAssetManager);
+		// Record plain managed object
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.metaData.setManagedObjectClass(CoordinatingManagedObject.class);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
+
+		// Provide the bound configuration
+		final int INSTANCE_INDEX = 0;
+		final String BOUND_NAME = "BOUND_NAME";
+		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
+				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
+		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
+				.addRawBoundManagedObjectInstanceMetaData();
+
+		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
-				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
+				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				this.issues);
 		this.verifyMockObjects();
 
 		// Verify flagged as coordinating
 		assertTrue("Should be coordinating", moMetaData.isCoordinatingManagedObject());
-	}
-
-	/**
-	 * Records initialising the {@link ManagedObjectSource}.
-	 */
-	private void record_initManagedObject() {
-
-		// Record instantiating managed object
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceName(), MANAGED_OBJECT_NAME);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectSource(),
-				this.managedObjectSourceInstance);
-		if (this.managedObjectSourceInstance == null) {
-			this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceClass(),
-					MockManagedObjectSource.class);
-		}
-
-		// Record obtaining details from configuration to init
-		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
-
-		// Record obtaining the managing office
-		final String managingOfficeName = "OFFICE";
-		this.recordReturn(this.configuration, this.configuration.getManagingOfficeConfiguration(),
-				this.managingOfficeConfiguration);
-		this.recordReturn(this.managingOfficeConfiguration, this.managingOfficeConfiguration.getOfficeName(),
-				managingOfficeName);
-		this.recordReturn(this.managingOfficeConfiguration, this.managingOfficeConfiguration.getBuilder(),
-				this.managingOfficeBuilder);
-		this.recordReturn(this.officeFloorConfiguration, this.officeFloorConfiguration.getOfficeConfiguration(),
-				new OfficeConfiguration[] { this.officeConfiguration });
-		this.recordReturn(this.officeConfiguration, this.officeConfiguration.getOfficeName(), managingOfficeName);
-		this.recordReturn(this.officeConfiguration, this.officeConfiguration.getBuilder(), this.officeBuilder);
-	}
-
-	/**
-	 * Records creating the {@link RawManagedObjectMetaData} after initialising.
-	 * 
-	 * @param managedObjectClass
-	 *            {@link ManagedObject} class.
-	 * @param timeout
-	 *            Timeout for the {@link ManagedObjectSource}.
-	 * @param processBoundName
-	 *            Process bound name for {@link ManagedObject}.
-	 * @param {@link
-	 * 			ManagedObjectFlowMetaData} for the
-	 *            {@link ManagedObjectSource}.
-	 */
-	private <MO extends ManagedObject> void record_createRawMetaData(Class<MO> managedObjectClass, long timeout,
-			String processBoundName, ManagedObjectFlowMetaData<?>... moFlowMetaData) {
-		// Record completing creating raw meta data
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(), managedObjectClass);
-		this.recordReturn(this.configuration, this.configuration.getTimeout(), timeout);
-		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), moFlowMetaData);
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectPoolConfiguration(),
-				this.managedObjectPoolConfiguration);
-		this.recordReturn(this.managedObjectPoolConfiguration,
-				this.managedObjectPoolConfiguration.getManagedObjectPoolFactory(), this.managedObjectPoolFactory);
-		this.recordReturn(this.managedObjectPoolFactory, this.managedObjectPoolFactory.createManagedObjectPool(null),
-				this.managedObjectPool, new TypeMatcher(ManagedObjectPoolContext.class));
-		this.recordReturn(this.managedObjectPoolConfiguration,
-				this.managedObjectPoolConfiguration.getThreadCompletionListenerFactories(),
-				new ThreadCompletionListenerFactory[] { this.threadCompletionListenerFactory });
-		this.recordReturn(this.threadCompletionListenerFactory,
-				this.threadCompletionListenerFactory.createThreadCompletionListener(this.managedObjectPool),
-				this.threadCompletionListener);
 	}
 
 	/**
@@ -1155,17 +985,17 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Constructs the {@link RawManagedObjectMetaDataImpl} with the mock
-	 * objects.
+	 * Constructs the {@link RawManagedObjectMetaData} with the mock objects.
 	 * 
 	 * @return {@link RawManagedObjectMetaData}.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("rawtypes")
 	private RawManagedObjectMetaData constructRawManagedObjectMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawManagedObjectMetaData metaData = RawManagedObjectMetaDataImpl.getFactory().constructRawManagedObjectMetaData(
-				this.configuration, this.sourceContext, this.issues, this.officeFloorConfiguration);
+		RawManagedObjectMetaData metaData = new RawManagedObjectMetaDataFactory(this.sourceContext,
+				this.officeFloorConfiguration).constructRawManagedObjectMetaData(this.configuration, "OFFICE_FLOOR",
+						this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

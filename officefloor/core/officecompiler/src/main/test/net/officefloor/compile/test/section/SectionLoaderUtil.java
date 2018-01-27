@@ -53,6 +53,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.compile.test.util.LoaderUtil;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 
 /**
@@ -80,6 +81,29 @@ public class SectionLoaderUtil {
 
 		// Load the specification
 		PropertyList propertyList = getOfficeFloorCompiler().getSectionLoader().loadSpecification(sectionSourceClass);
+
+		// Verify the properties
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
+
+		// Return the property list
+		return propertyList;
+	}
+
+	/**
+	 * Validates the {@link SectionSourceSpecification} for the
+	 * {@link SectionSource}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource}.
+	 * @param propertyNameLabels
+	 *            Listing of name/label pairs for the {@link Property}
+	 *            instances.
+	 * @return Loaded {@link PropertyList}.
+	 */
+	public static PropertyList validateSpecification(SectionSource sectionSource, String... propertyNameLabels) {
+
+		// Load the specification
+		PropertyList propertyList = getOfficeFloorCompiler().getSectionLoader().loadSpecification(sectionSource);
 
 		// Verify the properties
 		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
@@ -255,7 +279,7 @@ public class SectionLoaderUtil {
 		// Validate section inputs are as expected
 		SectionInputType[] eInputs = expectedSection.getSectionInputTypes();
 		SectionInputType[] aInputs = actualSection.getSectionInputTypes();
-		Assert.assertEquals("Incorrect number of inputs", eInputs.length, aInputs.length);
+		LoaderUtil.assertLength("Incorrect number of inputs", eInputs, aInputs, (input) -> input.getSectionInputName());
 		for (int i = 0; i < eInputs.length; i++) {
 			SectionInputType eInput = eInputs[i];
 			SectionInputType aInput = aInputs[i];
@@ -263,12 +287,23 @@ public class SectionLoaderUtil {
 					aInput.getSectionInputName());
 			Assert.assertEquals("Incorrect parameter type for input " + i, eInput.getParameterType(),
 					aInput.getParameterType());
+
+			// Validate the input annotations
+			Object[] eAnnotations = eInput.getAnnotations();
+			Object[] aAnnotations = aInput.getAnnotations();
+			Assert.assertEquals("Incorrect number of annoations for input " + eInput.getSectionInputName(),
+					eAnnotations.length, aAnnotations.length);
+			for (int a = 0; a < eAnnotations.length; a++) {
+				Assert.assertEquals("Incorrect annotation " + a + " for input " + eInput.getSectionInputName(),
+						eAnnotations[a].getClass(), aAnnotations[a].getClass());
+			}
 		}
 
 		// Validate the section outputs are as expected
 		SectionOutputType[] eOutputs = expectedSection.getSectionOutputTypes();
 		SectionOutputType[] aOutputs = actualSection.getSectionOutputTypes();
-		Assert.assertEquals("Incorrect number of outputs", eOutputs.length, aOutputs.length);
+		LoaderUtil.assertLength("Incorrect number of outputs", eOutputs, aOutputs,
+				(output) -> output.getSectionOutputName());
 		for (int i = 0; i < eOutputs.length; i++) {
 			SectionOutputType eOutput = eOutputs[i];
 			SectionOutputType aOutput = aOutputs[i];
@@ -283,16 +318,18 @@ public class SectionLoaderUtil {
 		// Validate the section objects are as expected
 		SectionObjectType[] eObjects = expectedSection.getSectionObjectTypes();
 		SectionObjectType[] aObjects = actualSection.getSectionObjectTypes();
-		Assert.assertEquals("Incorrect number of objects", eObjects.length, aObjects.length);
+		LoaderUtil.assertLength("Incorrect number of objects", eObjects, aObjects,
+				(object) -> object.getSectionObjectName());
 		for (int i = 0; i < eObjects.length; i++) {
 			SectionObjectType eObject = eObjects[i];
 			SectionObjectType aObject = aObjects[i];
 			Assert.assertEquals("Incorrect name for object " + i, eObject.getSectionObjectName(),
 					aObject.getSectionObjectName());
-			Assert.assertEquals("Incorrect object type for object " + i, eObject.getObjectType(),
-					aObject.getObjectType());
-			Assert.assertEquals("Incorrect type qualifier for object " + i, eObject.getTypeQualifier(),
-					aObject.getTypeQualifier());
+			String objectName = eObject.getSectionObjectName();
+			Assert.assertEquals("Incorrect object type for object " + i + " (" + objectName + ")",
+					eObject.getObjectType(), aObject.getObjectType());
+			Assert.assertEquals("Incorrect type qualifier for object " + i + " (" + objectName + ")",
+					eObject.getTypeQualifier(), aObject.getTypeQualifier());
 		}
 	}
 

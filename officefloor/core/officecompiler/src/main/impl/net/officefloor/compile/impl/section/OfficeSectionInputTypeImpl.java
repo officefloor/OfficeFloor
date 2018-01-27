@@ -39,16 +39,24 @@ public class OfficeSectionInputTypeImpl implements OfficeSectionInputType {
 	private final String parameterType;
 
 	/**
+	 * Annotations.
+	 */
+	private final Object[] annotations;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link OfficeSectionInput}.
 	 * @param parameterType
 	 *            Parameter type of the {@link OfficeSectionInput}.
+	 * @param annotations
+	 *            Annotations.
 	 */
-	public OfficeSectionInputTypeImpl(String inputName, String parameterType) {
+	public OfficeSectionInputTypeImpl(String inputName, String parameterType, Object[] annotations) {
 		this.inputName = inputName;
 		this.parameterType = parameterType;
+		this.annotations = annotations;
 	}
 
 	/*
@@ -63,6 +71,11 @@ public class OfficeSectionInputTypeImpl implements OfficeSectionInputType {
 	@Override
 	public String getParameterType() {
 		return this.parameterType;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations;
 	}
 
 }

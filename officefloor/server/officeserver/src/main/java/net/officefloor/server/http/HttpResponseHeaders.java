@@ -126,20 +126,4 @@ public interface HttpResponseHeaders extends Iterable<HttpHeader> {
 	 */
 	Iterable<HttpHeader> getHeaders(String name);
 
-	/**
-	 * Obtains the {@link HttpHeader} at the index.
-	 * 
-	 * @param index
-	 *            Index of the {@link HttpHeader}.
-	 * @return {@link HttpHeader} at the index.
-	 */
-	HttpHeader headerAt(int index);
-
-	/**
-	 * Obtains the number of {@link HttpHeader} instances.
-	 * 
-	 * @return Number of {@link HttpHeader} instances.
-	 */
-	int length();
-
 }

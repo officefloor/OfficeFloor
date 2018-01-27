@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -51,5 +52,14 @@ public interface InputManagedObjectConfiguration<O extends Enum<O>> {
 	 * @return {@link ManagedObjectGovernanceConfiguration} instances.
 	 */
 	ManagedObjectGovernanceConfiguration[] getGovernanceConfiguration();
+
+	/**
+	 * Obtains the listing of the {@link Administration} to be done before the
+	 * {@link ManagedObject} is loaded.
+	 * 
+	 * @return Listing of the {@link Administration} to be done before the
+	 *         {@link ManagedObject} is loaded.
+	 */
+	AdministrationConfiguration<?, ?, ?>[] getPreLoadAdministration();
 
 }

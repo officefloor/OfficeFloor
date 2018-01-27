@@ -468,7 +468,7 @@ public class HttpStatus {
 	 *            {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
-		StreamBuffer.write(this.byteContent, 0, this.byteContent.length, head, bufferPool);
+		StreamBuffer.write(this.byteContent, head, bufferPool);
 	}
 
 	/*

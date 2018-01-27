@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -59,6 +60,11 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 	private final HttpRequestHeaders headers = this.createMock(HttpRequestHeaders.class);
 
 	/**
+	 * {@link HttpRequestCookies}.
+	 */
+	private final HttpRequestCookies cookies = this.createMock(HttpRequestCookies.class);
+
+	/**
 	 * {@link ByteSequence}.
 	 */
 	private final ByteSequence entity = new ByteArrayByteSequence("TEST".getBytes(ServerHttpConnection.HTTP_CHARSET));
@@ -67,7 +73,7 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 	 * {@link MaterialisingHttpRequest} to test.
 	 */
 	private final MaterialisingHttpRequest request = new MaterialisingHttpRequest(this.methodSupplier,
-			this.requestUriSupplier, this.version, this.headers, this.entity);
+			this.requestUriSupplier, this.version, this.headers, this.cookies, this.entity);
 
 	/**
 	 * Ensure can obtain {@link HttpMethod}.
@@ -76,8 +82,8 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 		HttpMethod method = new HttpMethod("TEST");
 		this.recordReturn(this.methodSupplier, this.methodSupplier.get(), method);
 		this.replayMockObjects();
-		assertSame("Incorrect HTTP method", method, this.request.getHttpMethod());
-		assertSame("Should now cache HTTP method", method, this.request.getHttpMethod());
+		assertSame("Incorrect HTTP method", method, this.request.getMethod());
+		assertSame("Should now cache HTTP method", method, this.request.getMethod());
 		this.verifyMockObjects();
 	}
 
@@ -88,8 +94,8 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 		String requestUri = "/test";
 		this.recordReturn(this.requestUriSupplier, this.requestUriSupplier.get(), requestUri);
 		this.replayMockObjects();
-		assertSame("Incorrect request URI", requestUri, this.request.getRequestURI());
-		assertSame("Should now cache request URI", requestUri, this.request.getRequestURI());
+		assertSame("Incorrect request URI", requestUri, this.request.getUri());
+		assertSame("Should now cache request URI", requestUri, this.request.getUri());
 		this.verifyMockObjects();
 	}
 
@@ -98,8 +104,8 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpVersion() {
 		this.replayMockObjects();
-		assertSame("Incorrect HTTP version", this.version, this.request.getHttpVersion());
-		assertSame("Should continue to be same HTTP version", this.version, this.request.getHttpVersion());
+		assertSame("Incorrect HTTP version", this.version, this.request.getVersion());
+		assertSame("Should continue to be same HTTP version", this.version, this.request.getVersion());
 		this.verifyMockObjects();
 	}
 
@@ -108,7 +114,7 @@ public class MaterialisingHttpRequestTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpRequestHeaders() {
 		this.replayMockObjects();
-		assertSame("Incorrect HTTP headers", this.headers, this.request.getHttpHeaders());
+		assertSame("Incorrect HTTP headers", this.headers, this.request.getHeaders());
 		this.verifyMockObjects();
 	}
 

@@ -46,12 +46,11 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	ManagedFunctionFactory<O, F> getManagedFunctionFactory();
 
 	/**
-	 * Obtains the differentiator for the {@link ManagedFunction}.
+	 * Obtains the annotations for the {@link ManagedFunction}.
 	 * 
-	 * @return Differentiator or <code>null</code> if no differentiator for the
-	 *         {@link ManagedFunction}.
+	 * @return Annotations for the {@link ManagedFunction}.
 	 */
-	Object getDifferentiator();
+	Object[] getAnnotations();
 
 	/**
 	 * Obtains the configuration of the dependent {@link Object} instances for
@@ -84,7 +83,7 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	 * Obtains the listing of the {@link Administration} to be done before the
 	 * {@link ManagedFunction} is executed.
 	 * 
-	 * @return Listing of the {@link Administration} to be done after the
+	 * @return Listing of the {@link Administration} to be done before the
 	 *         {@link ManagedFunction} is executed.
 	 */
 	AdministrationConfiguration<?, ?, ?>[] getPreAdministration();

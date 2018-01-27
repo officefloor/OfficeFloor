@@ -20,12 +20,15 @@ package net.officefloor.frame.impl.construct.flow;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.function.FlowConfigurationImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -38,14 +41,30 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 
 	/**
+	 * Name of {@link Flow}.
+	 */
+	private static final String FLOW_NAME = "FLOW";
+
+	/**
+	 * Name of the referenced {@link ManagedFunction}.
+	 */
+	private static final String FUNCTION_NAME = "FUNCTION";
+
+	/**
 	 * {@link FlowConfiguration}.
 	 */
-	private final FlowConfiguration<?> configuration = this.createMock(FlowConfiguration.class);
+	private FlowConfiguration<?> configuration = new FlowConfigurationImpl<>(FLOW_NAME,
+			new ManagedFunctionReferenceImpl(FUNCTION_NAME, null), false, 0, null);
+
+	/**
+	 * Name of the {@link Office}.
+	 */
+	private static final String OFFICE_NAME = "OFFICE";
 
 	/**
 	 * {@link OfficeMetaData}.
 	 */
-	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
+	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(OFFICE_NAME);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -53,28 +72,12 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
-	 * {@link ManagedFunctionReference}.
-	 */
-	private final ManagedFunctionReference functionReference = this.createMock(ManagedFunctionReference.class);
-
-	/**
-	 * {@link ManagedFunctionLocator}.
-	 */
-	private final ManagedFunctionLocator functionLocator = this.createMock(ManagedFunctionLocator.class);
-
-	/**
-	 * {@link ManagedFunctionMetaData}.
-	 */
-	private final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
-
-	/**
 	 * Ensure issue if no {@link Flow} {@link ManagedFunctionReference}.
 	 */
 	public void testNoFlowFunctionReference() {
 
-		// Record no task node reference
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getInitialFunction(), null);
+		// Record
+		this.configuration = new FlowConfigurationImpl<>(FLOW_NAME, null, false, 0, null);
 		this.record_issue("No function referenced for flow index 0");
 
 		// Attempt to construct flows
@@ -88,10 +91,9 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNoFlowFunctionName() {
 
-		// Record flow
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getInitialFunction(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), null);
+		// Record
+		this.configuration = new FlowConfigurationImpl<>(FLOW_NAME, new ManagedFunctionReferenceImpl(null, null), false,
+				0, null);
 		this.record_issue("No function name provided for flow index 0");
 
 		// Attempt to construct flows
@@ -105,12 +107,8 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNoFlowFunction() {
 
-		// Record flow
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getInitialFunction(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), null);
-		this.record_issue("Can not find function meta-data TASK for flow index 0");
+		// Record
+		this.record_issue("Can not find function meta-data " + FUNCTION_NAME + " for flow index 0");
 
 		// Attempt to construct flows
 		this.replayMockObjects();
@@ -123,16 +121,12 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testFlowIncorrectParameter() {
 
-		// Record incorrect parameter for flow
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getInitialFunction(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
-				this.functionMetaData);
-		this.recordReturn(this.functionReference, this.functionReference.getArgumentType(), String.class);
-		this.recordReturn(this.functionMetaData, this.functionMetaData.getParameterType(), Integer.class);
+		// Record
+		this.configuration = new FlowConfigurationImpl<>(FLOW_NAME,
+				new ManagedFunctionReferenceImpl(FUNCTION_NAME, String.class), false, 0, null);
+		this.officeMetaData.addManagedFunction(FUNCTION_NAME, Integer.class);
 		this.record_issue("Argument is not compatible with function parameter (argument=" + String.class.getName()
-				+ ", parameter=" + Integer.class.getName() + ", function=TASK) for flow index 0");
+				+ ", parameter=" + Integer.class.getName() + ", function=" + FUNCTION_NAME + ") for flow index 0");
 
 		// Attempt to construct flows
 		this.replayMockObjects();
@@ -145,15 +139,10 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateFlowMetaData() {
 
-		// Record incorrect parameter for flow
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getInitialFunction(), this.functionReference);
-		this.recordReturn(this.functionReference, this.functionReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
-				this.functionMetaData);
-		this.recordReturn(this.functionReference, this.functionReference.getArgumentType(), Integer.class);
-		this.recordReturn(this.functionMetaData, this.functionMetaData.getParameterType(), Integer.class);
-		this.recordReturn(this.configuration, this.configuration.isSpawnThreadState(), true);
+		// Record
+		this.configuration = new FlowConfigurationImpl<>(FLOW_NAME,
+				new ManagedFunctionReferenceImpl(FUNCTION_NAME, null), true, 0, null);
+		ManagedFunctionMetaData<?, ?> function = this.officeMetaData.addManagedFunction(FUNCTION_NAME, null);
 
 		// Attempt to construct flows
 		this.replayMockObjects();
@@ -161,7 +150,7 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure correct information on flows
-		assertSame("Incorrect function meta-data", this.functionMetaData, flow.getInitialFunctionMetaData());
+		assertSame("Incorrect function meta-data", function, flow.getInitialFunctionMetaData());
 		assertTrue("Should spawn throw", flow.isSpawnThreadState());
 	}
 
@@ -184,9 +173,9 @@ public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private FlowMetaData[] constructFlowMetaData(boolean isCreate) {
-		FlowMetaDataFactory factory = new FlowMetaDataFactoryImpl();
+		FlowMetaDataFactory factory = new FlowMetaDataFactory(this.officeMetaData.build());
 		FlowMetaData[] flowMetaData = factory.createFlowMetaData(new FlowConfiguration[] { this.configuration },
-				this.officeMetaData, AssetType.FUNCTION, "FUNCTION", this.issues);
+				AssetType.FUNCTION, "FUNCTION", this.issues);
 		if (isCreate) {
 			assertNotNull("Should have create the flow meta-data", flowMetaData);
 			assertEquals("Incorrect number of flow meta-data", 1, flowMetaData.length);

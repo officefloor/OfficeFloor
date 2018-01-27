@@ -23,9 +23,9 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectDependencyMetaDataImpl;
@@ -150,23 +150,23 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
+	public ManagedObjectExtensionMetaData<?>[] getExtensionInterfacesMetaData() {
 		// Use interfaces of object
-		List<ManagedObjectExtensionInterfaceMetaData<?>> metaData = new LinkedList<ManagedObjectExtensionInterfaceMetaData<?>>();
+		List<ManagedObjectExtensionMetaData<?>> metaData = new LinkedList<ManagedObjectExtensionMetaData<?>>();
 		for (Class<?> type : this.objectClass.getInterfaces()) {
 			metaData.add(new MockManagedObjectExtensionInterfaceMetaData(type));
 		}
 
 		// Return the extension interface meta-data
-		return metaData.toArray(new ManagedObjectExtensionInterfaceMetaData[0]);
+		return metaData.toArray(new ManagedObjectExtensionMetaData[0]);
 	}
 
 	/**
-	 * Mock {@link ManagedObjectExtensionInterfaceMetaData}.
+	 * Mock {@link ManagedObjectExtensionMetaData}.
 	 */
 	private class MockManagedObjectExtensionInterfaceMetaData<I> implements
-			ManagedObjectExtensionInterfaceMetaData<I>,
-			ExtensionInterfaceFactory<I> {
+			ManagedObjectExtensionMetaData<I>,
+			ExtensionFactory<I> {
 
 		/**
 		 * Extension interface type.
@@ -189,12 +189,12 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 		 */
 
 		@Override
-		public Class<I> getExtensionInterfaceType() {
+		public Class<I> getExtensionType() {
 			return this.extensionInterfaceType;
 		}
 
 		@Override
-		public ExtensionInterfaceFactory<I> getExtensionInterfaceFactory() {
+		public ExtensionFactory<I> getExtensionFactory() {
 			return this;
 		}
 
@@ -204,7 +204,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public I createExtensionInterface(ManagedObject managedObject) {
+		public I createExtension(ManagedObject managedObject) {
 			try {
 				return (I) managedObject.getObject();
 			} catch (Throwable ex) {

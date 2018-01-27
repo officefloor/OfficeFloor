@@ -55,10 +55,13 @@
 	<modules>
 		<module>core</module>
 		<module>server</module>
+		<module>web</module>
+<!--  
 		<module>plugins</module>
 		<module>eclipse</module>
 		<module>maven</module>
 		<module>tutorials</module>
+-->
 	</modules>
 	<properties>
 		<current.year>2015</current.year>
@@ -145,6 +148,57 @@
 				<artifactId>officeserver_netty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<!-- Web -->
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>web</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_resource</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_cookie</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_session</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_security</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_template</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_rest</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_application</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officewoof</artifactId>
+				<version>${project.version}</version>
+			</dependency>			
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
@@ -210,16 +264,6 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_war</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_web</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_woof</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

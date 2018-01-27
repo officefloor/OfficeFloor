@@ -23,11 +23,13 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.function.Function;
 
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.RequestHandler.Execution;
+import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -341,6 +343,135 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	}
 
 	/**
+	 * Ensure can send header and file.
+	 */
+	public void testSendHeaderAndFile() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Create file
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFile", new byte[] { 3 });
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1, null);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			assertEquals("Incorrect file value", 3, inputStream.read());
+
+			// Ensure the file is still open
+			assertTrue("File should still be open", file.isOpen());
+		}
+	}
+
+	/**
+	 * Ensure can send header and large file.
+	 */
+	public void testSendHeaderAndLargeFile() throws Exception {
+		this.tester = new SocketManagerTester(1);
+
+		// Transform index into byte value
+		Function<Integer, Byte> transform = (value) -> (byte) (value % Byte.MAX_VALUE);
+
+		// Create the larger file than buffer size
+		int fileSize = this.getBufferSize() < 10 ? 5 : 2 * 1000 * 1000;
+		byte[] data = new byte[fileSize];
+		for (int i = 0; i < fileSize; i++) {
+			data[i] = transform.apply(i);
+		}
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndLargeFile", data);
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1,
+				(completedFile, isWritten) -> completedFile.close());
+		fileBuffer.next = this.tester.createStreamBuffer(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			for (int i = 0; i < fileSize; i++) {
+				byte expected = transform.apply(i);
+				assertEquals("Incorrect file value for byte " + i, expected, inputStream.read());
+			}
+			assertEquals("Incorrect final value", 1, inputStream.read());
+
+			// File should be closed
+			assertFalse("File should be closed", file.isOpen());
+		}
+	}
+
+	/**
+	 * Ensure can send header and file segment.
+	 */
+	public void testSendHeaderAndFileSegment() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Create file
+		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFileSegment",
+				new byte[] { 1, 2, 3 });
+		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 2, 1,
+				(completedFile, isWritten) -> completedFile.close());
+		fileBuffer.next = this.tester.createStreamBuffer(4);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, isNewBuffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			assertEquals("Incorrect file value", 3, inputStream.read());
+			assertEquals("Incorrect further value", 4, inputStream.read());
+
+			// File should be closed
+			assertFalse("File should be closed", file.isOpen());
+		}
+	}
+
+	/**
 	 * Ensure can pipeline response. Ensure responses are sent in the same order
 	 * requests are received.
 	 */
@@ -564,7 +695,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			this.delay(() -> responseWriter.write((buffer, pool) -> {
-				StreamBuffer.write(new byte[] { 1, 2, 3 }, 0, 3, buffer, pool);
+				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool);
 			}, null));
 		});
 
@@ -606,7 +737,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Create the header response
 			ResponseHeaderWriter header = (buffer, pool) -> {
-				StreamBuffer.write(new byte[] { index, (byte) '*' }, 0, 2, buffer, pool);
+				StreamBuffer.write(new byte[] { index, (byte) '*' }, buffer, pool);
 			};
 
 			// Delay only the even responses

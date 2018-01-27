@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.managedfunction.clazz;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,12 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>
  * Enables qualifying dependencies.
- * <p>
- * TODO consider following JSR299 specification to use the
- * javax.inject.Qualifier annotation. Until available and not tied to the heavy
- * JEE specification using this annotation.
  * 
  * @author Daniel Sagenschneider
  */
@@ -37,4 +33,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface Qualifier {
+
+	/**
+	 * {@link QualifierNameFactory} to derive the name from the
+	 * {@link Annotation}.
+	 * 
+	 * @return {@link QualifierNameFactory} {@link Class} to be instantiated by
+	 *         default constructor.
+	 */
+	@SuppressWarnings("rawtypes")
+	Class<? extends QualifierNameFactory> nameFactory() default ClassNameQualifierNameFactory.class;
+
 }

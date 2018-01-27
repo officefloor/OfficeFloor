@@ -23,14 +23,17 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -61,6 +64,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	/**
+	 * {@link HttpServerLocation}.
+	 */
+	private final HttpServerLocation serverLocation;
+
+	/**
 	 * Indicates if secure.
 	 */
 	private final boolean isSecure;
@@ -69,6 +77,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * {@link HttpRequest}.
 	 */
 	private HttpRequest request;
+
+	/**
+	 * Client {@link HttpRequest}.
+	 */
+	private final HttpRequest clientRequest;
 
 	/**
 	 * {@link HttpRequest} entity {@link ByteSequence}.
@@ -81,29 +94,20 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private ProcessAwareHttpResponse<B> response;
 
 	/**
-	 * {@link Supplier} for the {@link HttpMethod}.
-	 */
-	private final Supplier<HttpMethod> methodSupplier;
-
-	/**
-	 * Client {@link HttpMethod}.
-	 */
-	private HttpMethod clientMethod = null;
-
-	/**
-	 * Client {@link HttpRequestHeaders}.
-	 */
-	private final HttpRequestHeaders clientHeaders;
-
-	/**
 	 * {@link StreamBufferPool}.
 	 */
-	private final StreamBufferPool<B> bufferPool;
+	final StreamBufferPool<B> bufferPool;
+
+	/**
+	 * Indicates whether to include the stack trace in {@link Escalation}
+	 * {@link HttpResponse}.
+	 */
+	final boolean isIncludeStackTraceOnEscalation;
 
 	/**
 	 * {@link HttpResponseWriter}.
 	 */
-	private final HttpResponseWriter<B> httpResponseWriter;
+	final HttpResponseWriter<B> httpResponseWriter;
 
 	/**
 	 * {@link ProcessAwareContext}.
@@ -113,6 +117,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	/**
 	 * Instantiate.
 	 * 
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
 	 * @param isSecure
 	 *            Indicates if secure.
 	 * @param methodSupplier
@@ -127,27 +133,34 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 *            {@link HttpRequest}.
 	 * @param requestEntity
 	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
+	 * @param isIncludeStackTraceOnEscalation
+	 *            <code>true</code> to include the {@link Escalation} stack
+	 *            trace in the {@link HttpResponse}.
 	 * @param writer
 	 *            {@link HttpResponseWriter}.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 */
-	public ProcessAwareServerHttpConnectionManagedObject(boolean isSecure, Supplier<HttpMethod> methodSupplier,
-			Supplier<String> requestUriSupplier, HttpVersion version, NonMaterialisedHttpHeaders requestHeaders,
-			ByteSequence requestEntity, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
+	public ProcessAwareServerHttpConnectionManagedObject(HttpServerLocation serverLocation, boolean isSecure,
+			Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier, HttpVersion version,
+			NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity,
+			boolean isIncludeStackTraceOnEscalation, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
+		this.serverLocation = serverLocation;
 
 		// Indicate if secure
 		this.isSecure = isSecure;
 
 		// Create the HTTP request
-		this.clientHeaders = new MaterialisingHttpRequestHeaders(requestHeaders);
-		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, this.clientHeaders,
+		HttpRequestHeaders headers = new MaterialisingHttpRequestHeaders(requestHeaders);
+		HttpRequestCookies cookies = new MaterialisingHttpRequestCookies(headers);
+		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, headers, cookies,
 				requestEntity);
-		this.methodSupplier = methodSupplier;
+		this.clientRequest = this.request;
 		this.requestEntity = requestEntity;
 
 		// Store remaining state
 		this.bufferPool = bufferPool;
+		this.isIncludeStackTraceOnEscalation = isIncludeStackTraceOnEscalation;
 		this.httpResponseWriter = writer;
 	}
 
@@ -182,8 +195,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.processAwareContext = context;
 
 		// Create the HTTP response (with context awareness)
-		this.response = new ProcessAwareHttpResponse<B>(this.request.getHttpVersion(), this.bufferPool, context,
-				this.httpResponseWriter);
+		this.response = new ProcessAwareHttpResponse<B>(this, this.request.getVersion(), context);
 	}
 
 	@Override
@@ -196,23 +208,28 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 */
 
 	@Override
+	public HttpServerLocation getServerLocation() {
+		return this.serverLocation;
+	}
+
+	@Override
 	public boolean isSecure() {
 		return this.isSecure;
 	}
 
 	@Override
-	public HttpRequest getHttpRequest() {
+	public HttpRequest getRequest() {
 		return this.processAwareContext.run(() -> this.request);
 	}
 
 	@Override
-	public HttpResponse getHttpResponse() {
+	public HttpResponse getResponse() {
 		return this.response;
 	}
 
 	@Override
 	public Serializable exportState() throws IOException {
-		return new SerialisableHttpRequest(this.request, this.requestEntity);
+		return new SerialisableHttpRequest(this.request, this.request.getCookies(), this.requestEntity);
 	}
 
 	@Override
@@ -222,7 +239,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 				throw new IllegalArgumentException("Invalid momento to import state");
 			}
 			SerialisableHttpRequest state = (SerialisableHttpRequest) momento;
-			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getHttpVersion());
+			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getVersion(),
+					this.clientRequest.getCookies());
 			this.request = serialisableRequest;
 			this.requestEntity = serialisableRequest.getEntityByteSequence();
 			return null;
@@ -230,16 +248,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	@Override
-	public HttpMethod getClientHttpMethod() {
-		if (this.clientMethod == null) {
-			this.clientMethod = this.methodSupplier.get();
-		}
-		return this.clientMethod;
-	}
-
-	@Override
-	public HttpRequestHeaders getClientHttpHeaders() {
-		return this.clientHeaders;
+	public HttpRequest getClientRequest() {
+		return this.clientRequest;
 	}
 
 	/*

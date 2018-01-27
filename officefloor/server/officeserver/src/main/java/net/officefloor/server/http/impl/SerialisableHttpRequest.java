@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.stream.ServerInputStream;
@@ -61,6 +62,11 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	private final SerialisableHttpRequestHeaders headers;
 
 	/**
+	 * {@link HttpRequestCookies}.
+	 */
+	private transient final HttpRequestCookies cookies;
+
+	/**
 	 * {@link ByteArrayByteSequence} for the HTTP entity.
 	 */
 	private final ByteArrayByteSequence entity;
@@ -75,16 +81,19 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	 * 
 	 * @param request
 	 *            {@link HttpRequest}.
+	 * @param cookies
+	 *            {@link HttpRequestCookies}.
 	 * @param entity
 	 *            {@link ByteSequence} to entity of {@link HttpRequest}.
 	 */
-	public SerialisableHttpRequest(HttpRequest request, ByteSequence entity) {
-		this.method = request.getHttpMethod();
-		this.requestUri = request.getRequestURI();
-		this.version = request.getHttpVersion();
+	public SerialisableHttpRequest(HttpRequest request, HttpRequestCookies cookies, ByteSequence entity) {
+		this.method = request.getMethod();
+		this.requestUri = request.getUri();
+		this.version = request.getVersion();
+		this.cookies = cookies;
 
 		// Ensure have serializable headers
-		HttpRequestHeaders headers = request.getHttpHeaders();
+		HttpRequestHeaders headers = request.getHeaders();
 		if (headers instanceof SerialisableHttpRequestHeaders) {
 			// Use immutable serialisable instance
 			this.headers = (SerialisableHttpRequestHeaders) headers;
@@ -121,15 +130,18 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	 *            {@link HttpVersion}.
 	 * @param headers
 	 *            {@link SerialisableHttpRequestHeaders}.
+	 * @param cookies
+	 *            {@link HttpRequestCookies}.
 	 * @param entity
 	 *            {@link ByteArrayByteSequence} for the entity.
 	 */
 	public SerialisableHttpRequest(HttpMethod method, String requestUri, HttpVersion version,
-			SerialisableHttpRequestHeaders headers, ByteArrayByteSequence entity) {
+			SerialisableHttpRequestHeaders headers, HttpRequestCookies cookies, ByteArrayByteSequence entity) {
 		this.method = method;
 		this.requestUri = requestUri;
 		this.version = version;
 		this.headers = headers;
+		this.cookies = cookies;
 		this.entity = entity;
 		this.entityStream = new ByteSequenceServerInputStream(this.entity, 0);
 	}
@@ -140,10 +152,13 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	 * 
 	 * @param clientHttpVersion
 	 *            {@link HttpVersion} that the client is currently using.
+	 * @param cookies
+	 *            {@link HttpRequestCookies}.
 	 * @return {@link SerialisableHttpRequest}.
 	 */
-	public SerialisableHttpRequest createHttpRequest(HttpVersion clientHttpVersion) {
-		return new SerialisableHttpRequest(this.method, this.requestUri, clientHttpVersion, this.headers, entity);
+	public SerialisableHttpRequest createHttpRequest(HttpVersion clientHttpVersion, HttpRequestCookies cookies) {
+		return new SerialisableHttpRequest(this.method, this.requestUri, clientHttpVersion, this.headers, cookies,
+				entity);
 	}
 
 	/**
@@ -160,23 +175,28 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	 */
 
 	@Override
-	public HttpMethod getHttpMethod() {
+	public HttpMethod getMethod() {
 		return this.method;
 	}
 
 	@Override
-	public String getRequestURI() {
+	public String getUri() {
 		return this.requestUri;
 	}
 
 	@Override
-	public HttpVersion getHttpVersion() {
+	public HttpVersion getVersion() {
 		return this.version;
 	}
 
 	@Override
-	public HttpRequestHeaders getHttpHeaders() {
+	public HttpRequestHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public HttpRequestCookies getCookies() {
+		return this.cookies;
 	}
 
 	@Override

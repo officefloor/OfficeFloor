@@ -30,6 +30,7 @@ import io.netty.util.CharsetUtil;
 import net.officefloor.server.http.AbstractHttpServerImplementationTest;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
+import net.officefloor.server.http.HttpServerLocation;
 
 /**
  * Tests the {@link NettyHttpServerImplementation}.
@@ -40,8 +41,8 @@ public class NettyHttpServerImplementationTest
 		extends AbstractHttpServerImplementationTest<NettyHttpServerImplementationTest.RawNettyHttpServer> {
 
 	@Override
-	protected HttpServerImplementation createHttpServerImplementation() {
-		return new NettyHttpServerImplementation();
+	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
+		return NettyHttpServerImplementation.class;
 	}
 
 	@Override
@@ -50,9 +51,9 @@ public class NettyHttpServerImplementationTest
 	}
 
 	@Override
-	protected RawNettyHttpServer startRawHttpServer(int httpPort) throws Exception {
+	protected RawNettyHttpServer startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		RawNettyHttpServer server = new RawNettyHttpServer();
-		server.startHttpServer(httpPort, -1, null);
+		server.startHttpServer(serverLocation.getClusterHttpPort(), -1, null);
 		return server;
 	}
 
@@ -73,6 +74,10 @@ public class NettyHttpServerImplementationTest
 				.unreleasableBuffer(Unpooled.directBuffer().writeBytes(HELLO_WORLD));
 		private static final CharSequence CONTENT_TYPE = new AsciiString("Content-Type");
 		private static final CharSequence TYPE_PLAIN = new AsciiString("text/plain");
+
+		public RawNettyHttpServer() {
+			super(1024);
+		}
 
 		@Override
 		protected void service(ChannelHandlerContext context, HttpRequest request) throws Exception {

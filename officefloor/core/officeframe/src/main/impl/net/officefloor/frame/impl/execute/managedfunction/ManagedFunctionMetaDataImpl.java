@@ -53,9 +53,9 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final ManagedFunctionFactory<O, F> functionFactory;
 
 	/**
-	 * Differentiator.
+	 * Annotations.
 	 */
-	private final Object differentiator;
+	private final Object[] annotations;
 
 	/**
 	 * Parameter type of this {@link ManagedFunction}.
@@ -139,8 +139,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link ManagedFunctionFactory} to create the
 	 *            {@link ManagedFunction} of the
 	 *            {@link ManagedFunctionMetaData}.
-	 * @param differentiator
-	 *            Differentiator. May be <code>null</code>.
+	 * @param annotations
+	 *            Differentiators.
 	 * @param parameterType
 	 *            Parameter type of this {@link ManagedFunction}.
 	 * @param responsibleTeam
@@ -155,12 +155,12 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            Required {@link Governance}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
-			Object differentiator, Class<?> parameterType, TeamManagement responsibleTeam,
+			Object[] annotations, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
 			boolean[] requiredGovernance) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
-		this.differentiator = differentiator;
+		this.annotations = annotations;
 		this.parameterType = parameterType;
 		this.responsibleTeam = responsibleTeam;
 		this.functionIndexedManagedObjects = functionIndexedManagedObjects;
@@ -224,8 +224,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public Object getDifferentiator() {
-		return this.differentiator;
+	public Object[] getAnnotations() {
+		return this.annotations;
 	}
 
 	@Override

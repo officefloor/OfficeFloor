@@ -102,7 +102,7 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 	 */
 
 	@Override
-	public Class<E> getExtensionInterface() {
+	public Class<E> getExtensionType() {
 		return this.extensionInterface;
 	}
 

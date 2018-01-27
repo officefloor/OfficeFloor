@@ -11,7 +11,6 @@
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleManagedObject" />
 				</properties>
-				<managing-office name="OFFICE" />
 			</managed-object-source>
 		</managed-object-sources>
 		<managed-objects>

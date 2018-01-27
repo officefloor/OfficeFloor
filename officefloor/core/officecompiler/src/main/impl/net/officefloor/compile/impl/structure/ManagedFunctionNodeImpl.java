@@ -40,6 +40,8 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -47,6 +49,7 @@ import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
@@ -55,6 +58,9 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
@@ -179,6 +185,18 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		this.teamResponsible = this.context.createResponsibleTeamNode("Team for function " + this.functionName, this);
 	}
 
+	/**
+	 * Obtains the {@link FunctionObjectNode}.
+	 * 
+	 * @param functionObjectName
+	 *            Name of the {@link FunctionObjectNode}.
+	 * @return {@link FunctionObjectNode}.
+	 */
+	private FunctionObjectNode getFunctionObjectNode(String functionObjectName) {
+		return NodeUtil.getNode(functionObjectName, this.functionObjects,
+				() -> this.context.createFunctionObjectNode(functionObjectName, this));
+	}
+
 	/*
 	 * ========================== Node ===================================
 	 */
@@ -234,6 +252,11 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
+	public AugmentedFunctionObject getAugmentedFunctionObject(String objectName) {
+		return this.getFunctionObjectNode(objectName);
+	}
+
+	@Override
 	public ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext) {
 
 		// Ensure initialised
@@ -285,7 +308,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public boolean souceManagedFunction(CompileContext compileContext) {
+	public boolean souceManagedFunction(ManagedFunctionVisitor visitor, CompileContext compileContext) {
 
 		// Obtain the type for this function
 		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
@@ -315,6 +338,16 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 					(escalation) -> escalation.initialise());
 		}
 
+		// Visit this managed function
+		if (visitor != null) {
+			try {
+				visitor.visit(functionType, this, compileContext);
+			} catch (CompileError error) {
+				// Issue should already be provided
+				return false;
+			}
+		}
+
 		// Successfully sourced
 		return true;
 	}
@@ -338,6 +371,11 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			LinkUtil.linkTeam(this.teamResponsible, links[0].getTargetNode(office), this.context.getCompilerIssues(),
 					this);
 		}
+	}
+
+	@Override
+	public ExecutionManagedFunction createExecutionManagedFunction(CompileContext compileContext) {
+		return new ExecutionManagedFunctionImpl(this, compileContext);
 	}
 
 	@Override
@@ -368,10 +406,12 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			functionBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());
 		}
 
-		// Add differentiator (if available)
-		Object differentiator = functionType.getDifferentiator();
-		if (differentiator != null) {
-			functionBuilder.setDifferentiator(differentiator);
+		// Add annotations (if available)
+		Object[] annotations = functionType.getAnnotations();
+		if (annotations != null) {
+			for (Object annotation : annotations) {
+				functionBuilder.addAnnotation(annotation);
+			}
 		}
 
 		// Build the flows
@@ -553,8 +593,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public FunctionObject getFunctionObject(String functionObjectName) {
-		return NodeUtil.getNode(functionObjectName, this.functionObjects,
-				() -> this.context.createFunctionObjectNode(functionObjectName, this));
+		return this.getFunctionObjectNode(functionObjectName);
 	}
 
 	@Override
@@ -640,6 +679,112 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// Add the governance
 		this.governances.add(governanceNode);
+	}
+
+	/**
+	 * {@link ExecutionManagedFunction} implementation.
+	 */
+	private static class ExecutionManagedFunctionImpl implements ExecutionManagedFunction {
+
+		/**
+		 * {@link ManagedFunctionNodeImpl}.
+		 */
+		private final ManagedFunctionNodeImpl node;
+
+		/**
+		 * {@link CompileContext}.
+		 */
+		private final CompileContext compileContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param node
+		 *            {@link ManagedFunctionNodeImpl}.
+		 * @param compileContext
+		 *            {@link CompileContext}.
+		 */
+		public ExecutionManagedFunctionImpl(ManagedFunctionNodeImpl node, CompileContext compileContext) {
+			this.node = node;
+			this.compileContext = compileContext;
+		}
+
+		/*
+		 * ==================== ExecutionManagedFunction ===================
+		 */
+
+		@Override
+		public String getManagedFunctionName() {
+			return this.node.getQualifiedFunctionName();
+		}
+
+		@Override
+		public ManagedFunctionType<?, ?> getManagedFunctionType() {
+			return this.node.loadManagedFunctionType(compileContext);
+		}
+
+		@Override
+		public ExecutionManagedFunction getManagedFunction(ManagedFunctionFlowType<?> flowType) {
+
+			// Obtain the flow
+			String flowName = flowType.getFlowName();
+			FunctionFlowNode flow = this.node.functionFlows.get(flowName);
+			if (flow == null) {
+				return null;
+			}
+
+			// Obtain the managed function node
+			ManagedFunctionNode function = LinkUtil.findTarget(flow, ManagedFunctionNode.class,
+					this.node.context.getCompilerIssues());
+			if (function == null) {
+				return null;
+			}
+
+			// Return the execution managed function
+			return function.createExecutionManagedFunction(this.compileContext);
+		}
+
+		@Override
+		public ExecutionManagedFunction getManagedFunction(ManagedFunctionEscalationType escalationType) {
+
+			// Obtain the escalation
+			String escalationName = escalationType.getEscalationType().getName();
+			FunctionFlowNode flow = this.node.functionEscalations.get(escalationName);
+			if (flow == null) {
+				return null;
+			}
+
+			// Obtain the managed function node
+			ManagedFunctionNode function = LinkUtil.findTarget(flow, ManagedFunctionNode.class,
+					this.node.context.getCompilerIssues());
+			if (function == null) {
+				return null;
+			}
+
+			// Return the execution managed function
+			return function.createExecutionManagedFunction(this.compileContext);
+		}
+
+		@Override
+		public ExecutionManagedObject getManagedObject(ManagedFunctionObjectType<?> objectType) {
+
+			// Obtain the object
+			String objectName = objectType.getObjectName();
+			FunctionObjectNode dependency = this.node.functionObjects.get(objectName);
+			if (dependency == null) {
+				return null;
+			}
+
+			// Obtain the managed object node
+			ManagedObjectNode object = LinkUtil.retrieveTarget(dependency, ManagedObjectNode.class,
+					this.node.context.getCompilerIssues());
+			if (object == null) {
+				return null;
+			}
+
+			// Return the execution managed object
+			return object.createExecutionManagedObject(this.compileContext);
+		}
 	}
 
 }

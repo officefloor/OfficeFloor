@@ -118,7 +118,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * {@link SectionFunction} instances by name.
 	 */
-	private final Map<String, SectionFunction> _functionsByName = new HashMap<String, SectionFunction>();
+	private final Map<String, SectionFunction> _functionsByName = new HashMap<>();
 
 	/**
 	 * Obtains the {@link SectionFunction} by its name.
@@ -133,9 +133,28 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
+	 * {@link ManagedFunctionType} instances for the {@link SectionFunction}
+	 * instances by name.
+	 */
+	private final Map<String, ManagedFunctionType<?, ?>> _functionTypesByName = new HashMap<>();
+
+	/**
+	 * Obtains the {@link ManagedFunctionType} for the {@link SectionFunction}
+	 * by its name.
+	 * 
+	 * @param functionName
+	 *            Name of the {@link SectionFunction}.
+	 * @return {@link ManagedFunctionType} or <code>null</code> if no
+	 *         {@link SectionFunction} by the name.
+	 */
+	public ManagedFunctionType<?, ?> getFunctionTypeByName(String functionName) {
+		return this._functionTypesByName.get(functionName);
+	}
+
+	/**
 	 * {@link SectionFunction} instances by {@link ManagedFunctionType} name.
 	 */
-	private final Map<String, SectionFunction> _functionsByTypeName = new HashMap<String, SectionFunction>();
+	private final Map<String, SectionFunction> _functionsByTypeName = new HashMap<>();
 
 	/**
 	 * Obtains the {@link SectionFunction} by its {@link ManagedFunctionType}
@@ -226,9 +245,36 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
+	 * {@link SectionInput} instances by name.
+	 */
+	private final Map<String, SectionInput> _inputsByName = new HashMap<>();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SectionInput}.
+	 * <p>
+	 * Should the {@link SectionInput} not yet be added, it is added.
+	 * 
+	 * @param name
+	 *            Name of the {@link SectionInput}.
+	 * @param argumentType
+	 *            Type of the argument. May be <code>null</code> if no argument.
+	 * @return {@link SectionInput}.
+	 */
+	public SectionInput getOrCreateInput(String name, String argumentType) {
+		SectionInput sectionInput = this._inputsByName.get(name);
+		if (sectionInput == null) {
+			// Not yet added, so add section input
+			sectionInput = this.getDesigner().addSectionInput(name, argumentType);
+			this._inputsByName.put(name, sectionInput);
+		}
+		return sectionInput;
+	}
+
+	/**
 	 * {@link SectionOutput} instances by name.
 	 */
-	private final Map<String, SectionOutput> _outputsByName = new HashMap<String, SectionOutput>();
+	private final Map<String, SectionOutput> _outputsByName = new HashMap<>();
 
 	/**
 	 * <p>
@@ -441,7 +487,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		String parameterTypeName = (parameterType == null ? null : parameterType.getName());
 
 		// Add input for function
-		SectionInput sectionInput = this.getDesigner().addSectionInput(inputName, parameterTypeName);
+		SectionInput sectionInput = this.getOrCreateInput(inputName, parameterTypeName);
 		this.getDesigner().link(sectionInput, function);
 	}
 
@@ -828,6 +874,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			// Add function (both by name and type name for internal linking)
 			SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
 			this._functionsByName.put(functionName, function);
+			this._functionTypesByName.put(functionName, functionType);
 			this.registerFunctionByTypeName(functionTypeName, function);
 
 			// Obtain the parameter for the function

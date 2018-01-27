@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
@@ -100,6 +101,17 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	 *            {@link CompileContext}.
 	 */
 	void autoWireDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext);
+
+	/**
+	 * Creates the {@link ExecutionManagedObject} for this
+	 * {@link ManagedObjectNode}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link ExecutionManagedObject} for this
+	 *         {@link ManagedObjectNode}.
+	 */
+	ExecutionManagedObject createExecutionManagedObject(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionManagedObjectType}.

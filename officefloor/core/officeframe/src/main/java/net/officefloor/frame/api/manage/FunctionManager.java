@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -30,15 +29,11 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public interface FunctionManager {
 
 	/**
-	 * Obtains the differentiator for this {@link ManagedFunction}.
+	 * Obtains the annotations for this {@link ManagedFunction}.
 	 * 
-	 * @return Differentiator for this {@link ManagedFunction}. May be
-	 *         <code>null</code> if no differentiator for
-	 *         {@link ManagedFunction}.
-	 * 
-	 * @see ManagedFunctionBuilder#setDifferentiator(Object)
+	 * @return Annotations for this {@link ManagedFunction}.
 	 */
-	Object getDifferentiator();
+	Object[] getAnnotations();
 
 	/**
 	 * Obtains the parameter type for invoking this {@link ManagedFunction}.

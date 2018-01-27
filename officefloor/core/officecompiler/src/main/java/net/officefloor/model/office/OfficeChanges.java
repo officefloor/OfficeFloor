@@ -627,21 +627,21 @@ public interface OfficeChanges {
 	 * @param administration
 	 *            {@link AdministrationModel}.
 	 * @return {@link Change} to add the
-	 *         {@link ExternalManagedObjectToAdministrationModel}.
+	 *         {@link AdministrationToExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectToAdministrationModel> linkExternalManagedObjectToAdministration(
+	Change<AdministrationToExternalManagedObjectModel> linkExternalManagedObjectToAdministration(
 			ExternalManagedObjectModel externalManagedObject, AdministrationModel administration);
 
 	/**
-	 * Removes the {@link ExternalManagedObjectToAdministrationModel}.
+	 * Removes the {@link AdministrationToExternalManagedObjectModel}.
 	 * 
 	 * @param externalManagedObjectToAdministration
-	 *            {@link ExternalManagedObjectToAdministrationModel} to remove.
+	 *            {@link AdministrationToExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link ExternalManagedObjectToAdministrationModel}.
+	 *         {@link AdministrationToExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectToAdministrationModel> removeExternalManagedObjectToAdministration(
-			ExternalManagedObjectToAdministrationModel externalManagedObjectToAdministration);
+	Change<AdministrationToExternalManagedObjectModel> removeExternalManagedObjectToAdministration(
+			AdministrationToExternalManagedObjectModel externalManagedObjectToAdministration);
 
 	/**
 	 * Links the {@link OfficeManagedObjectModel} to the
@@ -652,21 +652,21 @@ public interface OfficeChanges {
 	 * @param administration
 	 *            {@link AdministrationModel}.
 	 * @return {@link Change} to remove the
-	 *         {@link OfficeManagedObjectToAdministrationModel}.
+	 *         {@link AdministrationToOfficeManagedObjectModel}.
 	 */
-	Change<OfficeManagedObjectToAdministrationModel> linkOfficeManagedObjectToAdministration(
+	Change<AdministrationToOfficeManagedObjectModel> linkOfficeManagedObjectToAdministration(
 			OfficeManagedObjectModel managedObject, AdministrationModel administration);
 
 	/**
-	 * Removes the {@link OfficeManagedObjectToAdministrationModel}.
+	 * Removes the {@link AdministrationToOfficeManagedObjectModel}.
 	 * 
 	 * @param managedObjectToAdministration
-	 *            {@link OfficeManagedObjectToAdministrationModel} to remove.
+	 *            {@link AdministrationToOfficeManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link OfficeManagedObjectToAdministrationModel}.
+	 *         {@link AdministrationToOfficeManagedObjectModel}.
 	 */
-	Change<OfficeManagedObjectToAdministrationModel> removeOfficeManagedObjectToAdministration(
-			OfficeManagedObjectToAdministrationModel managedObjectToAdministration);
+	Change<AdministrationToOfficeManagedObjectModel> removeOfficeManagedObjectToAdministration(
+			AdministrationToOfficeManagedObjectModel managedObjectToAdministration);
 
 	/**
 	 * Links the {@link OfficeFunctionModel} to the {@link OfficeTeamModel}.

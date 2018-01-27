@@ -124,8 +124,6 @@ public class HttpRequestParser extends StreamBufferScanner {
 			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Method too long"));
 	private static final Supplier<HttpException> exceptionRequestUriTooLong = () -> new HttpException(
 			HttpStatus.REQUEST_URI_TOO_LARGE);
-	private static final Function<String, HttpException> exceptionDecodeUri = (result) -> new HttpException(
-			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), result + " for URI"));
 	private static final Function<CoderResult, HttpException> exceptionUriString = (message) -> new HttpException(
 			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Can not decode URI to UTF-8 text"));
 	private static final Supplier<HttpException> exceptionVersionTooLong = () -> new HttpException(
@@ -431,7 +429,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 			if (uriSequence.length() <= 0) {
 				throw new HttpException(new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "No request URI"));
 			}
-			this.requestUri = () -> uriSequence.decodeUri(exceptionDecodeUri).toUriString(exceptionUriString);
+			this.requestUri = () -> uriSequence.toUriString(exceptionUriString);
 			this.skipBytes(1); // skip the space
 
 			this.stateRequest = RequestParseState.VERSION;

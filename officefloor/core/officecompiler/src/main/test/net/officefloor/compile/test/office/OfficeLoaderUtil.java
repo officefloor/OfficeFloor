@@ -214,15 +214,6 @@ public class OfficeLoaderUtil {
 					aInput.getOfficeInputName());
 			TestCase.assertEquals("Incorrect parameter type for input " + i, eInput.getParameterType(),
 					aInput.getParameterType());
-			OfficeOutputType eResponse = eInput.getResponseOfficeOutputType();
-			if (eResponse == null) {
-				TestCase.assertNull("Should not have response output for input " + i,
-						aInput.getResponseOfficeOutputType());
-			} else {
-				OfficeOutputType aResponse = aInput.getResponseOfficeOutputType();
-				TestCase.assertEquals("Incorrect response output for input " + i, eResponse.getOfficeOutputName(),
-						(aResponse == null ? null : aResponse.getOfficeOutputName()));
-			}
 		}
 
 		// Validate the outputs
@@ -236,15 +227,6 @@ public class OfficeLoaderUtil {
 					aOutput.getOfficeOutputName());
 			TestCase.assertEquals("Incorrect argument type for output " + i, eOutput.getArgumentType(),
 					aOutput.getArgumentType());
-			OfficeInputType eHandler = eOutput.getHandlingOfficeInputType();
-			if (eHandler == null) {
-				TestCase.assertEquals("Should not have handler input for output " + i,
-						aOutput.getHandlingOfficeInputType());
-			} else {
-				OfficeInputType aHandler = aOutput.getHandlingOfficeInputType();
-				TestCase.assertEquals("Incorrect handler input for output " + i, eHandler.getOfficeInputName(),
-						(aHandler == null ? null : aHandler.getOfficeInputName()));
-			}
 		}
 
 		// Validate the managed objects

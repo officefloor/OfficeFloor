@@ -17,13 +17,13 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -38,7 +38,7 @@ import net.officefloor.frame.api.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorDeployer {
+public interface OfficeFloorDeployer extends SourceIssues {
 
 	/**
 	 * Flags to attempt to auto wire any non-configured object links.
@@ -306,33 +306,5 @@ public interface OfficeFloorDeployer {
 	 *            {@link OfficeFloorInputManagedObject}.
 	 */
 	void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject);
-
-	/**
-	 * <p>
-	 * Allows the {@link OfficeFloorSource} to add an issue in attempting to
-	 * deploy the {@link OfficeFloor}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to deploy
-	 * the rest of the {@link OfficeFloor}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	void addIssue(String issueDescription);
-
-	/**
-	 * <p>
-	 * Allows the {@link OfficeFloorSource} to add an issue along with its cause
-	 * in attempting to deploy the {@link OfficeFloor}.
-	 * <p>
-	 * This is available to report invalid configuration but continue to deploy
-	 * the rest of the {@link OfficeFloor}.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	void addIssue(String issueDescription, Throwable cause);
 
 }

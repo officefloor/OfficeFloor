@@ -21,6 +21,8 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -60,13 +62,24 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	/**
 	 * Sources the {@link ManagedFunction}.
 	 * 
+	 * @param managedFunctionVisitor
+	 *            {@link ManagedFunctionVisitor}.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced the
 	 *         {@link ManagedFunction}. <code>false</code> if failed to source
 	 *         with issues reported to the {@link CompilerIssues}.
 	 */
-	boolean souceManagedFunction(CompileContext compileContext);
+	boolean souceManagedFunction(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link AugmentedFunctionObject}.
+	 * 
+	 * @param objectName
+	 *            Name of the {@link AugmentedFunctionObject}.
+	 * @return {@link AugmentedFunctionObject}.
+	 */
+	AugmentedFunctionObject getAugmentedFunctionObject(String objectName);
 
 	/**
 	 * Auto wires the {@link ResponsibleTeam} for this {@link ManagedFunction}.
@@ -111,6 +124,17 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	 *         {@link ManagedFunctionType}.
 	 */
 	ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext);
+
+	/**
+	 * Creates an {@link ExecutionManagedFunction} for this
+	 * {@link ManagedFunctionNode}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link ExecutionManagedFunction} for this
+	 *         {@link ManagedFunctionNode}.
+	 */
+	ExecutionManagedFunction createExecutionManagedFunction(CompileContext compileContext);
 
 	/**
 	 * Builds the {@link ManagedFunction} for this {@link ManagedFunctionNode}.

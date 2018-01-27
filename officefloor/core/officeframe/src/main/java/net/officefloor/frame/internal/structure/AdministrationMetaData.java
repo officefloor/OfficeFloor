@@ -53,15 +53,15 @@ public interface AdministrationMetaData<E, F extends Enum<F>, G extends Enum<G>>
 	Class<E> getExtensionInterface();
 
 	/**
-	 * Obtains the {@link ManagedObjectExtensionMetaData} over the
+	 * Obtains the {@link ManagedObjectExtensionExtractorMetaData} over the
 	 * {@link ManagedObject} instances to be administered by this
 	 * {@link Administration}.
 	 * 
-	 * @return {@link ManagedObjectExtensionMetaData} over the
+	 * @return {@link ManagedObjectExtensionExtractorMetaData} over the
 	 *         {@link ManagedObject} instances to be administered by this
 	 *         {@link Administration}.
 	 */
-	ManagedObjectExtensionMetaData<E>[] getManagedObjectExtensionMetaData();
+	ManagedObjectExtensionExtractorMetaData<E>[] getManagedObjectExtensionExtractorMetaData();
 
 	/**
 	 * Translates the {@link Administration} {@link Governance} index to the

@@ -26,6 +26,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
@@ -43,6 +44,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
@@ -50,6 +52,9 @@ import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.compile.spi.office.ExecutionManagedObject;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
@@ -152,7 +157,19 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * {@link GovernanceNode} instances to provide {@link Governance} over this
 	 * {@link ManagedObjectNode} within the specified {@link OfficeNode}.
 	 */
-	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<OfficeNode, List<GovernanceNode>>();
+	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<>();
+
+	/**
+	 * Pre-load {@link AdministrationNode} instances configured directly to this
+	 * {@link ManagedObjectNode}.
+	 */
+	private final List<AdministrationNode> preLoadAdministrations = new LinkedList<>();
+
+	/**
+	 * Pre-load {@link AdministrationNode} instances over
+	 * {@link ManagedObjectNode} within the specified {@link OfficeNode}.
+	 */
+	private final Map<OfficeNode, List<AdministrationNode>> preLoadAdministrationsPerOffice = new HashMap<>();
 
 	/**
 	 * Initiate.
@@ -310,6 +327,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	public ExecutionManagedObject createExecutionManagedObject(CompileContext compileContext) {
+		return new ExecutionManagedObjectImpl(this, compileContext);
+	}
+
+	@Override
 	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(CompileContext compileContext) {
 
 		// Obtain the managed object type
@@ -397,6 +419,21 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	public void addPreLoadAdministration(AdministrationNode preLoadAdministration, OfficeNode office) {
+
+		// Obtain the listing of pre-load administration for the office
+		List<AdministrationNode> preLoadAdmins = this.preLoadAdministrationsPerOffice.get(office);
+		if (preLoadAdmins == null) {
+			// Create and register listing to add the pre-load administration
+			preLoadAdmins = new LinkedList<>();
+			this.preLoadAdministrationsPerOffice.put(office, preLoadAdmins);
+		}
+
+		// Add the pre-load administration for the specified office
+		preLoadAdmins.add(preLoadAdministration);
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			CompileContext compileContext) {
@@ -467,6 +504,20 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				mapper.mapGovernance(governance.getOfficeGovernanceName());
 			}
 		}
+
+		// Load the pre-load administration for the managed object
+		if (this.state.containingOfficeNode == office) {
+			for (AdministrationNode administration : this.preLoadAdministrations) {
+				administration.buildPreLoadManagedObjectAdministration(mapper, compileContext);
+			}
+		}
+		List<AdministrationNode> administrations = this.preLoadAdministrationsPerOffice.get(office);
+		if (administrations != null) {
+			// Load the pre-load administration for the managed object
+			for (AdministrationNode administration : administrations) {
+				administration.buildPreLoadManagedObjectAdministration(mapper, compileContext);
+			}
+		}
 	}
 
 	/*
@@ -482,6 +533,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public ManagedObjectDependency getManagedObjectDependency(String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
 				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	@Override
+	public void addPreLoadAdministration(OfficeAdministration administration) {
+
+		// Ensure adminstration node
+		if (!(administration instanceof AdministrationNode)) {
+			// Unknown administration node
+			this.context.getCompilerIssues().addIssue(this, "Illegal " + AdministrationNode.class.getSimpleName()
+					+ " node - " + administration.getClass().getName());
+			return;
+		}
+
+		// Add the administration node
+		AdministrationNode adminNode = (AdministrationNode) administration;
+		this.preLoadAdministrations.add(adminNode);
 	}
 
 	/*
@@ -565,6 +632,76 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
 		return this.linkedObjectNode;
+	}
+
+	/**
+	 * {@link ExecutionManagedObject} implementation.
+	 */
+	private static class ExecutionManagedObjectImpl implements ExecutionManagedObject {
+
+		/**
+		 * {@link ManagedObjectNodeImpl}.
+		 */
+		private final ManagedObjectNodeImpl node;
+
+		/**
+		 * {@link CompileContext}.
+		 */
+		private final CompileContext compileContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param node
+		 *            {@link ManagedObjectNodeImpl}.
+		 * @param compileContext
+		 *            {@link CompileContext}.
+		 */
+		public ExecutionManagedObjectImpl(ManagedObjectNodeImpl node, CompileContext compileContext) {
+			this.node = node;
+			this.compileContext = compileContext;
+		}
+
+		/*
+		 * ================== ExecutionManagedObject ========================
+		 */
+
+		@Override
+		public String getManagedObjectName() {
+			return this.node.getBoundManagedObjectName();
+		}
+
+		@Override
+		public ManagedObjectType<?> getManagedObjectType() {
+			return this.node.state.managedObjectSourceNode.loadManagedObjectType(compileContext);
+		}
+
+		@Override
+		public ExecutionManagedObject getManagedObject(ManagedObjectDependencyType<?> dependencyType) {
+
+			// Obtain the dependency
+			String dependencyName = dependencyType.getDependencyName();
+			ManagedObjectDependencyNode dependency = this.node.dependencies.get(dependencyName);
+			if (dependency == null) {
+				return null;
+			}
+
+			// Obtain the managed object node
+			ManagedObjectNode object = LinkUtil.retrieveTarget(dependency, ManagedObjectNode.class,
+					this.node.context.getCompilerIssues());
+			if (object == null) {
+				return null;
+			}
+
+			// Return the execution managed object
+			return object.createExecutionManagedObject(this.compileContext);
+		}
+
+		@Override
+		public ExecutionManagedFunction getManagedFunction(ManagedObjectFlowType<?> flowType) {
+			return this.node.state.managedObjectSourceNode.createExecutionManagedFunction(flowType,
+					this.compileContext);
+		}
 	}
 
 }

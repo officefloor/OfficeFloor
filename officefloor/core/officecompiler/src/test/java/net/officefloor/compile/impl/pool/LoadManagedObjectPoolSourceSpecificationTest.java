@@ -347,12 +347,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 		}
 
 		@Override
-		public void init(ManagedObjectPoolSourceContext context) throws Exception {
-			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public ManagedObjectPoolSourceMetaData getMetaData() {
+		public ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

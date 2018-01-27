@@ -190,7 +190,7 @@ public class HttpClientTestUtil {
 		provider.setCredentials(new AuthScope(null, -1, realm, scheme),
 				new UsernamePasswordCredentials(username, password));
 		builder.setDefaultCredentialsProvider(provider);
-
+				
 		// Return the credentials provider
 		return provider;
 	}

@@ -47,7 +47,18 @@
 							<sources>
 								<source>src/main/impl</source>
 								<source>src/main/test</source>
-								<source>src/main/stress</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/test/stress</source>
 							</sources>
 						</configuration>
 					</execution>

@@ -66,7 +66,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start non-secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7878));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(7878));
 		});
 
 		// Ensure can get response
@@ -74,6 +74,8 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
 			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
 					response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect header", "header", response.getFirstHeader("test").getValue());
+			assertEquals("Incorrect cookie", "test=cookie", response.getFirstHeader("set-cookie").getValue());
 			assertEquals("Incorrect content", "test", HttpClientTestUtil.getEntityBody(response));
 		}
 	}
@@ -85,7 +87,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 		});
 
@@ -119,7 +121,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 		});
 
@@ -136,7 +138,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		// Start secure server
 		this.startServer((httpMos) -> {
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 		});
 
@@ -201,7 +203,10 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	public static class MockSection {
 
 		public void service(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("test");
+			net.officefloor.server.http.HttpResponse response = connection.getResponse();
+			response.getHeaders().addHeader("test", "header");
+			response.getCookies().setCookie("test", "cookie");
+			response.getEntityWriter().write("test");
 		}
 	}
 

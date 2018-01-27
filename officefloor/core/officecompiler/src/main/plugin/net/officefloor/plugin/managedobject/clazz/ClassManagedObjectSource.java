@@ -276,7 +276,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		this.dependencyMetaData = this.extractDependencyMetaData(objectClass);
 		for (DependencyMetaData dependency : this.dependencyMetaData) {
 			// Register the dependency
-			DependencyLabeller labeller = context.addDependency(dependency.field.getType());
+			DependencyLabeller<Indexed> labeller = context.addDependency(dependency.field.getType());
 
 			// Use field name as name of dependency
 			labeller.setLabel(dependency.name);
@@ -321,7 +321,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		this.classLoader = mosContext.getClassLoader();
 
 		// Add the object class as extension interface.
-		ClassExtensionInterfaceFactory.registerExtensionInterface(context, objectClass);
+		ClassExtensionFactory.registerExtension(context, objectClass);
 	}
 
 	@Override

@@ -94,6 +94,21 @@ public class HttpException extends RuntimeException {
 	 * 
 	 * @param status
 	 *            {@link HttpStatus}.
+	 * @param cause
+	 *            {@link Throwable} cause.
+	 */
+	public HttpException(HttpStatus status, Throwable cause) {
+		super(cause);
+		this.status = status;
+		this.headers = NO_HEADERS;
+		this.entity = null;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param status
+	 *            {@link HttpStatus}.
 	 * @param headers
 	 *            {@link HttpHeader} instances. May be <code>null</code>.
 	 * @param entity
@@ -104,6 +119,17 @@ public class HttpException extends RuntimeException {
 		this.status = status;
 		this.headers = (headers == null ? NO_HEADERS : headers);
 		this.entity = entity;
+	}
+
+	/**
+	 * Enable wrapping {@link Throwable} in a {@link HttpException} for
+	 * {@link HttpStatus#INTERNAL_SERVER_ERROR}.
+	 * 
+	 * @param cause
+	 *            {@link Throwable} cause.
+	 */
+	public HttpException(Throwable cause) {
+		this(HttpStatus.INTERNAL_SERVER_ERROR, cause);
 	}
 
 	/**
@@ -127,8 +153,7 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Obtains the entity for the {@link HttpResponse}.
 	 * 
-	 * @return Entity for the {@link HttpResponse}. May be <code>null</code> for
-	 *         no entity.
+	 * @return Entity for the {@link HttpResponse}.
 	 */
 	public String getEntity() {
 		return this.entity;
@@ -152,9 +177,9 @@ public class HttpException extends RuntimeException {
 
 		// Write the status line
 		version.write(head, bufferPool);
-		StreamBuffer.write(SPACE, 0, SPACE.length, head, bufferPool);
+		StreamBuffer.write(SPACE, head, bufferPool);
 		this.status.write(head, bufferPool);
-		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 
 		// Write the headers
 		for (int i = 0; i < this.headers.length; i++) {
@@ -164,7 +189,7 @@ public class HttpException extends RuntimeException {
 		// Determine if include the stack trace
 		if (!isIncludeStackTrace) {
 			// Complete request without entity
-			StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+			StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 			return;
 		}
 
@@ -177,15 +202,15 @@ public class HttpException extends RuntimeException {
 
 		// Write header for the content length
 		CONTENT_LENGTH.write(head, bufferPool);
-		StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, head, bufferPool);
-		HttpHeaderValue.writeInteger(stackTraceBytes.length, head, bufferPool);
-		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+		StreamBuffer.write(COLON_SPACE, head, bufferPool);
+		StreamBuffer.write(stackTraceBytes.length, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 
 		// Write end of headers
-		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 
 		// Write the stack trace
-		StreamBuffer.write(stackTraceBytes, 0, stackTraceBytes.length, head, bufferPool);
+		StreamBuffer.write(stackTraceBytes, head, bufferPool);
 	}
 
 }

@@ -43,6 +43,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -57,10 +58,9 @@ import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ServerSocketDecorator;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.SocketServicerFactory;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
-import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
-import net.officefloor.server.ssl.SslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -131,27 +131,9 @@ public class HttpServerSocketManagedObjectSource
 	public static final String SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE = "officefloor.socket.core.buffer.pool.max.size";
 
 	/**
-	 * Name of {@link Property} for the port.
-	 */
-	public static final String PROPERTY_PORT = "port";
-
-	/**
 	 * Name of {@link Property} indicating if secure.
 	 */
 	public static final String PROPERTY_SECURE = "secure";
-
-	/**
-	 * Name of {@link Property} for the {@link SslContextSource}.
-	 */
-	public static final String PROPERTY_SSL_CONTEXT_SOURCE = "ssl.context.source";
-
-	/**
-	 * Value for {@link #PROPERTY_SSL_CONTEXT_SOURCE} to indicate that this
-	 * server is behind a reverse proxy. This enables the reverse proxy to
-	 * handle SSL and communicate with this server via insecure {@link Socket}
-	 * (but stll appear as a secure {@link ServerHttpConnection}).
-	 */
-	public static final String SSL_REVERSE_PROXIED = "reverse-proxied";
 
 	/**
 	 * Name of {@link Property} for the maximum {@link HttpHeader} per
@@ -511,9 +493,15 @@ public class HttpServerSocketManagedObjectSource
 	}
 
 	/**
-	 * Port.
+	 * {@link HttpServerLocation}.
 	 */
-	private int port = -1;
+	private HttpServerLocation serverLocation;
+
+	/**
+	 * Indicates whether to include the {@link Escalation} stack trace in the
+	 * {@link HttpResponse}.
+	 */
+	private boolean isIncludeEscalationStackTrace = true;
 
 	/**
 	 * {@link HttpRequestParserMetaData}.
@@ -565,11 +553,16 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Instantiate for non-secure servicing.
 	 * 
-	 * @param port
-	 *            Port.
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
+	 * @param isIncludeEscalationStackTrace
+	 *            Indicates if include the {@link Escalation} stack trace on the
+	 *            {@link HttpResponse}.
 	 */
-	public HttpServerSocketManagedObjectSource(int port) {
-		this.port = port;
+	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation,
+			boolean isIncludeEscalationStackTrace) {
+		this.serverLocation = serverLocation;
+		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.isSecure = false;
 		this.sslContext = null;
 	}
@@ -577,14 +570,19 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Instantiate for secure servicing.
 	 * 
-	 * @param port
-	 *            Port.
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
+	 * @param isIncludeEscalationStackTrace
+	 *            Indicates if include the {@link Escalation} stack trace on the
+	 *            {@link HttpResponse}.
 	 * @param sslContext
 	 *            {@link SSLContext}. May be <code>null</code> if behind reverse
 	 *            proxy handling secure communication.
 	 */
-	public HttpServerSocketManagedObjectSource(int port, SSLContext sslContext) {
-		this.port = port;
+	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, boolean isIncludeEscalationStackTrace,
+			SSLContext sslContext) {
+		this.serverLocation = serverLocation;
+		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.isSecure = true;
 		this.sslContext = sslContext;
 	}
@@ -617,7 +615,7 @@ public class HttpServerSocketManagedObjectSource
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_PORT, "Port");
+		// All properties have reasonable defaults
 	}
 
 	@Override
@@ -652,31 +650,15 @@ public class HttpServerSocketManagedObjectSource
 		this.serverSocketDecorator = this.getServerSocketDecorator(context);
 		this.acceptedSocketDecorator = this.getAcceptedSocketDecorator(context);
 
-		// Determine if need to configure from properties
-		if (this.port == -1) {
+		// Determine if configured via default constructor
+		if (this.serverLocation == null) {
 
-			// Default constructor, so load the configuration
-			this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
+			// Default constructor so load configuration
+			this.serverLocation = new HttpServerLocationImpl(mosContext);
+			this.isIncludeEscalationStackTrace = Boolean.parseBoolean(mosContext.getProperty(
+					HttpServer.PROPERTY_INCLUDE_STACK_TRACE, String.valueOf(this.isIncludeEscalationStackTrace)));
 			this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
-
-			// Obtain the SSL context
-			if (this.isSecure) {
-				String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_CONTEXT_SOURCE, null);
-				if (sslContextSourceClassName == null) {
-					sslContextSourceClassName = OfficeFloorDefaultSslContextSource.class.getName();
-				}
-				switch (sslContextSourceClassName) {
-				case SSL_REVERSE_PROXIED:
-					// Let be secure, without SSL
-					break;
-				default:
-					// Create the SSL context
-					Class<?> sslContextSourceClass = mosContext.loadClass(sslContextSourceClassName);
-					SslContextSource sslContextSource = (SslContextSource) sslContextSourceClass.newInstance();
-					this.sslContext = sslContextSource.createSslContext(mosContext);
-					break;
-				}
-			}
+			this.sslContext = this.isSecure ? HttpServer.getSslContext(mosContext) : null;
 		}
 
 		// Add recycle function (to capture clean up failures)
@@ -700,7 +682,8 @@ public class HttpServerSocketManagedObjectSource
 				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
 				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.isSecure, this.httpRequestParserMetaData, serviceBufferPool);
+				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool,
+				this.isIncludeEscalationStackTrace);
 
 		// Create the SSL servicer factory
 		SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -713,7 +696,9 @@ public class HttpServerSocketManagedObjectSource
 		}
 
 		// Bind server socket for this managed object source
-		socketManager.bindServerSocket(this.port, this.serverSocketDecorator, this.acceptedSocketDecorator,
+		int port = (this.isSecure ? this.serverLocation.getClusterHttpsPort()
+				: this.serverLocation.getClusterHttpPort());
+		socketManager.bindServerSocket(port, this.serverSocketDecorator, this.acceptedSocketDecorator,
 				socketServicerFactory, requestServicerFactory);
 	}
 
@@ -773,16 +758,24 @@ public class HttpServerSocketManagedObjectSource
 		/**
 		 * Instantiate.
 		 * 
+		 * @param context
+		 *            {@link ManagedObjectExecuteContext}.
+		 * @param serverLocation
+		 *            {@link HttpServerLocation}.
 		 * @param isSecure
 		 *            Indicates if a secure {@link ServerHttpConnection}.
 		 * @param metaData
 		 *            {@link HttpRequestParserMetaData}.
 		 * @param serviceBufferPool
 		 *            Service {@link StreamBufferPool}.
+		 * @param isIncludeEscalationStackTrace
+		 *            Indicates whether to include the {@link Escalation} stack
+		 *            trace in the {@link HttpResponse}.
 		 */
-		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context, boolean isSecure,
-				HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(isSecure, metaData, serviceBufferPool);
+		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
+				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
+				StreamBufferPool<ByteBuffer> serviceBufferPool, boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serviceBufferPool, isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 

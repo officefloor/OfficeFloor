@@ -38,16 +38,24 @@ public class SectionInputTypeImpl implements SectionInputType {
 	private final String parameterType;
 
 	/**
+	 * Annotations.
+	 */
+	private final Object[] annotations;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link SectionInput}.
 	 * @param parameterType
 	 *            Parameter type of the {@link SectionInput}.
+	 * @param annotations
+	 *            Annotations.
 	 */
-	public SectionInputTypeImpl(String inputName, String parameterType) {
+	public SectionInputTypeImpl(String inputName, String parameterType, Object[] annotations) {
 		this.inputName = inputName;
 		this.parameterType = parameterType;
+		this.annotations = annotations;
 	}
 
 	/*
@@ -62,6 +70,11 @@ public class SectionInputTypeImpl implements SectionInputType {
 	@Override
 	public String getParameterType() {
 		return this.parameterType;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations;
 	}
 
 }

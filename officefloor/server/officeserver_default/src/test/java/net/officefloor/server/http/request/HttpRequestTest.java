@@ -41,7 +41,9 @@ import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServer;
+import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.OfficeFloorHttpServerImplementation;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.request.config.CommunicationConfig;
 import net.officefloor.server.http.request.config.HeaderConfig;
@@ -79,6 +81,9 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			XmlUnmarshaller unmarshaller = TreeXmlUnmarshallerFactory.getInstance()
 					.createUnmarshaller(new FileInputStream(unmarshallerConfigFile));
 
+			// Create the test HTTP server location details
+			HttpServerLocation serverLocation = new HttpServerLocationImpl();
+
 			// Add test to start server
 			Closure<OfficeFloor> officeFloor = new Closure<>();
 			suite.addTest(new TestCase("Startup HTTP Server") {
@@ -90,7 +95,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 					compile.officeFloor((extension) -> {
 						DeployedOfficeInput serviceInput = extension.getDeployedOffice()
 								.getDeployedOfficeInput("SECTION", "service");
-						HttpServer.configureHttpServer(7878, 7979, new OfficeFloorHttpServerImplementation(),
+						new HttpServer(new OfficeFloorHttpServerImplementation(), serverLocation, true,
 								OfficeFloorDefaultSslContextSource.createServerSslContext(null), serviceInput,
 								extension.getOfficeFloorDeployer(), extension.getOfficeFloorSourceContext());
 					});
@@ -102,10 +107,10 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			});
 
 			// Load non-secure tests
-			loadTests("http", unmarshallerConfigFile.getParentFile(), unmarshaller, false, suite);
+			loadTests("http", unmarshallerConfigFile.getParentFile(), unmarshaller, false, serverLocation, suite);
 
 			// Load the secure tests
-			loadTests("https", unmarshallerConfigFile.getParentFile(), unmarshaller, true, suite);
+			loadTests("https", unmarshallerConfigFile.getParentFile(), unmarshaller, true, serverLocation, suite);
 
 			// Add test to shutdown server
 			suite.addTest(new TestCase("Shutdown HTTP Server") {
@@ -138,11 +143,13 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            {@link XmlUnmarshaller} to unmarshal the test.
 	 * @param isSecure
 	 *            Indicates if to be secure.
+	 * @param serverLocation
+	 *            {@link HttpServerLocation}.
 	 * @param suite
 	 *            {@link TestSuite} to add the tests.
 	 */
 	private static void loadTests(String testNamePrefix, File directory, XmlUnmarshaller unmarshaller, boolean isSecure,
-			TestSuite suite) throws Exception {
+			HttpServerLocation serverLocation, TestSuite suite) throws Exception {
 
 		// Obtain the tests
 		for (File file : directory.listFiles()) {
@@ -153,7 +160,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			// Determine if child directory
 			if (file.isDirectory()) {
 				// Child directory, so find tests recursively
-				loadTests(testName, file, unmarshaller, isSecure, suite);
+				loadTests(testName, file, unmarshaller, isSecure, serverLocation, suite);
 
 			} else {
 				// File and ensure is a test file
@@ -167,8 +174,8 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				unmarshaller.unmarshall(new FileInputStream(file), configuration);
 
 				// Create the test
-				suite.addTest(new HttpRequestTest(testName, configuration,
-						(isSecure ? "https://localhost:7979" : "http://localhost:7878"), isSecure));
+				suite.addTest(new HttpRequestTest(testName, configuration, serverLocation.createClientUrl(isSecure, ""),
+						isSecure));
 			}
 		}
 	}
@@ -222,7 +229,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 		// Create the HTTP Client to send requests
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(this.isSecure)) {
-			
+
 			System.out.println("====== " + this.getName() + " ======");
 
 			// Run the communications

@@ -20,6 +20,7 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * {@link Object} required by the {@link Office} that is to be provided by the
@@ -27,8 +28,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeObject extends DependentManagedObject,
-		AdministerableManagedObject, GovernerableManagedObject {
+public interface OfficeObject extends DependentManagedObject, AdministerableManagedObject, GovernerableManagedObject {
 
 	/**
 	 * Obtains the name that the {@link OfficeSource} refers to this
@@ -45,5 +45,19 @@ public interface OfficeObject extends DependentManagedObject,
 	 *            Type qualifier.
 	 */
 	void setTypeQualifier(String qualifier);
+
+	/**
+	 * <p>
+	 * Adds an {@link OfficeAdministration} to be done before attempting load
+	 * this {@link ManagedObject}.
+	 * <p>
+	 * The order that the {@link OfficeAdministration} instances are added is
+	 * the order they will be done.
+	 * 
+	 * @param administration
+	 *            {@link OfficeAdministration} to be done before attempting load
+	 *            this {@link ManagedObject}.
+	 */
+	void addPreLoadAdministration(OfficeAdministration administration);
 
 }
