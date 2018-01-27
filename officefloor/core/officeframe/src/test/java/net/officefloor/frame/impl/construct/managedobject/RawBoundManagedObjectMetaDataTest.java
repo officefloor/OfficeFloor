@@ -29,6 +29,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.MockConstruct;
+import net.officefloor.frame.impl.construct.MockConstruct.ManagedObjectSourceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
@@ -885,7 +886,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to add pre-load {@link Administration}.
+	 * Ensure able to add pre-load {@link Administration} with administered
+	 * {@link ManagedObject}.
 	 */
 	public void testPreLoadAdministrationWithManagedObject() {
 
@@ -912,6 +914,52 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Should be managed object extensions", 1, admin.getRequiredManagedObjects().length);
 		assertSame("Incorrect reuqired managed object",
 				administered.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[0]);
+	}
+
+	/**
+	 * Ensure able to add pre-load {@link Administration} with administered
+	 * {@link ManagedObject} that has a dependency.
+	 */
+	public void testPreLoadAdministrationWithManagedObjectAndDependency() {
+
+		// Record
+		DependencyMappingBuilderImpl<?> configuration = new DependencyMappingBuilderImpl<>("BOUND", "BOUND_MO");
+		configuration.preLoadAdminister("ADMIN", Object.class, () -> null).administerManagedObject("ADMINISTERED_MO");
+		this.rawOfficeMetaData.addRegisteredManagedObject("BOUND_MO");
+
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> administered = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("ADMINISTERED_MO");
+		ManagedObjectSourceMetaDataMockBuilder<?, ?> metaDataBuilder = administered.getRawBoundManagedObjectMetaData()
+				.getRawManagedObjectBuilder().getMetaDataBuilder();
+		metaDataBuilder.addExtension(Object.class, (mo) -> mo);
+		metaDataBuilder.addDependency(Object.class, null);
+		administered.getBuilder().mapDependency(0, "DEPENDENCY_MO");
+
+		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> dependency = this.rawOfficeMetaData
+				.addScopeBoundManagedObject("DEPENDENCY_MO");
+
+		Map<String, RawBoundManagedObjectMetaData> dependencies = new HashMap<>();
+		dependencies.put("DEPENDENCY_MO", dependency.getRawBoundManagedObjectMetaData().build());
+		administered.build().loadDependencies(this.issues, dependencies);
+
+		// Construct
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData[] bound = this.constructRawBoundManagedObjectMetaData(1, configuration);
+		ManagedObjectMetaData<?> metaData = bound[0].getRawBoundManagedObjectInstanceMetaData()[0]
+				.getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Ensure pre-load administration
+		ManagedObjectAdministrationMetaData<?, ?, ?> admin = metaData.getPreLoadAdministration()[0];
+		assertEquals("Incorrect pre-load adminstration", "ADMIN",
+				admin.getAdministrationMetaData().getAdministrationName());
+		ManagedObjectIndex[] required = admin.getRequiredManagedObjects();
+		assertEquals("Should be managed object extension and its dependency", 2,
+				admin.getRequiredManagedObjects().length);
+		assertSame("Should have dependency",
+				dependency.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[0]);
+		assertSame("Extension after the dependency",
+				administered.getRawBoundManagedObjectMetaData().build().getManagedObjectIndex(), required[1]);
 	}
 
 	/**

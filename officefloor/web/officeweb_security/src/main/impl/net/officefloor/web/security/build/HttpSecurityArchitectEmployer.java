@@ -112,6 +112,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private List<HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> securities = new ArrayList<>();
 
 	/**
+	 * {@link HttpSecurerBuilderImpl} instances.
+	 */
+	private final List<HttpSecurerBuilderImpl> securers = new LinkedList<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param webArchitect
@@ -167,6 +172,13 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Return the HTTP security builder
 		return security;
+	}
+
+	@Override
+	public HttpSecurerBuilder secure(HttpSecurer securer) {
+		HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securer);
+		HttpSecurityArchitectEmployer.this.securers.add(builder);
+		return builder;
 	}
 
 	@Override
@@ -317,39 +329,81 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				if (annotation instanceof HttpAccess) {
 					HttpAccess httpAccess = (HttpAccess) annotation;
 
-					// Obtain the administration
-					HttpAccessKey key = new HttpAccessKey(httpAccess);
-					OfficeAdministration administration = httpAccessAdministrators.get(key);
-					if (administration == null) {
-
-						// Create and register the administration
-						administration = this.officeArchitect.addOfficeAdministration(key.getName(),
-								new HttpAccessAdministrationSource(httpAccess));
-						httpAccessAdministrators.put(key, administration);
-
-						// Obtain the HTTP access control
-						String httpSecurityName = httpAccess.withQualifier();
-						OfficeManagedObject httpAccessControl;
-						if ("".equals(httpSecurityName)) {
-							// Use default HTTP access control
-							httpAccessControl = finalAccessControlManagedObject;
-						} else {
-							// Use the qualified HTTP access control
-							HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = nameToHttpSecurity.get(httpSecurityName);
-							if (security == null) {
-								throw context.addIssue("No " + HttpSecurity.class.getSimpleName()
-										+ " configured for qualifier '" + httpSecurityName + "'");
-							}
-							httpAccessControl = security.httpAccessControl;
-						}
-
-						// Provide the HTTP access control
-						administration.administerManagedObject(httpAccessControl);
-					}
-
-					// Configure access administration
-					context.addPreAdministration(administration);
+					// Secure access to function
+					this.secure(httpAccess.withQualifier(), httpAccess.ifRole(), httpAccess.ifAllRoles(),
+							finalAccessControlManagedObject, httpAccessAdministrators, nameToHttpSecurity,
+							(securerContext) -> context.addPreAdministration(securerContext.getAdministration()));
 				}
+			}
+		});
+
+		// Secure remaining aspects of application
+		for (HttpSecurerBuilderImpl securer : this.securers) {
+			String[] anyRoles = securer.anyRoles.toArray(new String[securer.anyRoles.size()]);
+			String[] allRoles = securer.allRoles.toArray(new String[securer.allRoles.size()]);
+			this.secure(securer.qualifier, anyRoles, allRoles, finalAccessControlManagedObject,
+					httpAccessAdministrators, nameToHttpSecurity, securer.httpSecurer);
+		}
+	}
+
+	/**
+	 * Undertakes securing.
+	 * 
+	 * @param qualifier
+	 *            {@link HttpSecurity} qualifier. May be <code>null</code>.
+	 * @param anyRoles
+	 *            Any roles.
+	 * @param allRoles
+	 *            All roles.
+	 * @param httpAccessControlManagedObject
+	 *            {@link HttpAccessControl} {@link OfficeManagedObject}.
+	 * @param administrators
+	 *            Already created {@link OfficeAdministration}.
+	 * @param nameToHttpSecurity
+	 *            {@link HttpSecurerBuilderImpl} instances by their name.
+	 * @param securer
+	 *            {@link HttpSecurer}.
+	 */
+	private void secure(String qualifier, String[] anyRoles, String[] allRoles,
+			OfficeManagedObject httpAccessControlManagedObject, Map<HttpAccessKey, OfficeAdministration> administrators,
+			Map<String, HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> nameToHttpSecurity, HttpSecurer securer) {
+
+		// Obtain the administration
+		HttpAccessKey key = new HttpAccessKey(anyRoles, allRoles, qualifier);
+		OfficeAdministration administration = administrators.get(key);
+		if (administration == null) {
+
+			// Create and register the administration
+			administration = this.officeArchitect.addOfficeAdministration(key.getName(),
+					new HttpAccessAdministrationSource(anyRoles, allRoles));
+			administrators.put(key, administration);
+
+			// Obtain the HTTP access control
+			String httpSecurityName = qualifier == null ? "" : qualifier;
+			OfficeManagedObject httpAccessControl;
+			if ("".equals(httpSecurityName)) {
+				// Use default HTTP access control
+				httpAccessControl = httpAccessControlManagedObject;
+			} else {
+				// Use the qualified HTTP access control
+				HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = nameToHttpSecurity.get(httpSecurityName);
+				if (security == null) {
+					throw this.officeArchitect.addIssue("No " + HttpSecurity.class.getSimpleName()
+							+ " configured for qualifier '" + httpSecurityName + "'");
+				}
+				httpAccessControl = security.httpAccessControl;
+			}
+
+			// Provide the HTTP access control
+			administration.administerManagedObject(httpAccessControl);
+		}
+
+		// Configure access administration
+		final OfficeAdministration finalAdministration = administration;
+		securer.secure(new HttpSecurerContext() {
+			@Override
+			public OfficeAdministration getAdministration() {
+				return finalAdministration;
 			}
 		});
 	}
@@ -360,18 +414,34 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private class HttpAccessKey {
 
 		/**
-		 * {@link HttpAccess}.
+		 * Any roles.
 		 */
-		private final HttpAccess access;
+		private final String[] anyRoles;
+
+		/**
+		 * All roles.
+		 */
+		private final String[] allRoles;
+
+		/**
+		 * Qualifier.
+		 */
+		private final String qualifier;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param access
-		 *            {@link HttpAccess}.
+		 * @param anyRoles
+		 *            Any roles.
+		 * @param allRoles
+		 *            All roles.
+		 * @param qualifier
+		 *            Qualifier. May be <code>null</code>.
 		 */
-		private HttpAccessKey(HttpAccess access) {
-			this.access = access;
+		private HttpAccessKey(String[] anyRoles, String[] allRoles, String qualifier) {
+			this.anyRoles = anyRoles;
+			this.allRoles = allRoles;
+			this.qualifier = qualifier == null ? "" : qualifier;
 		}
 
 		/**
@@ -382,12 +452,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		private String getName() {
 			StringBuilder name = new StringBuilder();
 			name.append(HttpAccess.class.getSimpleName());
-			String qualifier = this.access.withQualifier();
-			if (!("".equals(qualifier))) {
+			if (!("".equals(this.qualifier))) {
 				name.append("-" + qualifier);
 			}
 			boolean isFirst = true;
-			for (String role : this.access.ifRole()) {
+			for (String role : this.anyRoles) {
 				if (isFirst) {
 					name.append("-");
 					isFirst = false;
@@ -397,7 +466,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				name.append(role);
 			}
 			isFirst = true;
-			for (String role : this.access.ifAllRoles()) {
+			for (String role : this.allRoles) {
 				if (isFirst) {
 					name.append("-");
 					isFirst = false;
@@ -415,11 +484,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		@Override
 		public int hashCode() {
-			int hash = this.access.withQualifier().hashCode();
-			for (String role : this.access.ifRole()) {
+			int hash = this.qualifier.hashCode();
+			for (String role : this.anyRoles) {
 				hash += role.hashCode();
 			}
-			for (String role : this.access.ifAllRoles()) {
+			for (String role : this.allRoles) {
 				hash += role.hashCode();
 			}
 			return hash;
@@ -435,13 +504,13 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			HttpAccessKey that = (HttpAccessKey) obj;
 
 			// Ensure match on qualifier
-			if (!(this.access.withQualifier().equals(that.access.withQualifier()))) {
+			if (!(this.qualifier.equals(that.qualifier))) {
 				return false;
 			}
 
 			// Ensure match on roles
-			String[] thisRoles = this.access.ifRole();
-			String[] thatRoles = that.access.ifRole();
+			String[] thisRoles = this.anyRoles;
+			String[] thatRoles = that.anyRoles;
 			if (thisRoles.length != thatRoles.length) {
 				return false;
 			}
@@ -455,8 +524,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			}
 
 			// Ensure match on all roles
-			String[] thisAllRoles = this.access.ifAllRoles();
-			String[] thatAllRoles = that.access.ifAllRoles();
+			String[] thisAllRoles = this.allRoles;
+			String[] thatAllRoles = that.allRoles;
 			if (thisAllRoles.length != thatAllRoles.length) {
 				return false;
 			}
@@ -675,6 +744,18 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			return this.section.getOfficeSectionOutput(outputName);
 		}
 
+		@Override
+		public HttpSecurerBuilder secure(HttpSecurer securer) {
+
+			// Create securer, qualifying to this security
+			HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securer);
+			builder.setQualifier(this.name);
+
+			// Register and return securer builder
+			HttpSecurityArchitectEmployer.this.securers.add(builder);
+			return builder;
+		}
+
 		/*
 		 * =============== HttpSecurityConfiguration ====================
 		 */
@@ -687,6 +768,61 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		@Override
 		public HttpSecurityType<A, AC, C, O, F> getHttpSecurityType() {
 			return this.type;
+		}
+	}
+
+	/**
+	 * {@link HttpSecurerBuilder} implementation.
+	 */
+	private static class HttpSecurerBuilderImpl implements HttpSecurerBuilder {
+
+		/**
+		 * {@link HttpSecurer}.
+		 */
+		private final HttpSecurer httpSecurer;
+
+		/**
+		 * Qualifier.
+		 */
+		private String qualifier = null;
+
+		/**
+		 * Any roles.
+		 */
+		private List<String> anyRoles = new LinkedList<>();
+
+		/**
+		 * All roles.
+		 */
+		private List<String> allRoles = new LinkedList<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param httpSecurer
+		 *            {@link HttpSecurer}.
+		 */
+		private HttpSecurerBuilderImpl(HttpSecurer httpSecurer) {
+			this.httpSecurer = httpSecurer;
+		}
+
+		/*
+		 * ================ HttpSecurerBuilder ==========================
+		 */
+
+		@Override
+		public void addRole(String role) {
+			this.anyRoles.add(role);
+		}
+
+		@Override
+		public void addRequiredRole(String role) {
+			this.allRoles.add(role);
+		}
+
+		@Override
+		public void setQualifier(String securityName) {
+			this.qualifier = securityName;
 		}
 	}
 

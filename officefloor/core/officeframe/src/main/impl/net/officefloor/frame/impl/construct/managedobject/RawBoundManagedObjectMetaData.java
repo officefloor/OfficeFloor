@@ -17,9 +17,18 @@
  */
 package net.officefloor.frame.impl.construct.managedobject;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
@@ -36,6 +45,186 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * @author Daniel Sagenschneider
  */
 public class RawBoundManagedObjectMetaData {
+
+	/**
+	 * Recursively loads all the {@link ManagedObjectIndex} instances for the
+	 * {@link RawBoundManagedObjectMetaData}.
+	 * 
+	 * @param boundMo
+	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param requiredManagedObjects
+	 *            Mapping of the required {@link ManagedObjectIndex} instances
+	 *            by the {@link ManagedFunction} to their respective
+	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @return {@link ManagedObjectIndex} of the input
+	 *         {@link RawBoundManagedObjectMetaData}.
+	 */
+	public static ManagedObjectIndex loadRequiredManagedObjects(RawBoundManagedObjectMetaData boundMo,
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
+
+		// Obtain the bound managed object index
+		ManagedObjectIndex boundMoIndex = boundMo.getManagedObjectIndex();
+		if (!requiredManagedObjects.containsKey(boundMoIndex)) {
+
+			// Not yet required, so add and include all its dependencies
+			requiredManagedObjects.put(boundMoIndex, boundMo);
+			for (RawBoundManagedObjectInstanceMetaData<?> boundMoInstance : boundMo
+					.getRawBoundManagedObjectInstanceMetaData()) {
+				RawBoundManagedObjectMetaData[] dependencies = boundMoInstance.getDependencies();
+				if (dependencies != null) {
+					for (RawBoundManagedObjectMetaData dependency : dependencies) {
+						loadRequiredManagedObjects(dependency, requiredManagedObjects);
+					}
+				}
+			}
+		}
+
+		// Return the managed object index for the bound managed object
+		return boundMoIndex;
+	}
+
+	/**
+	 * <p>
+	 * Sorts the required {@link ManagedObjectIndex} instances for the
+	 * {@link ManagedFunction} so that dependency {@link ManagedObject}
+	 * instances are before the {@link ManagedObject} instances using them. In
+	 * essence this is a topological sort so that dependencies are first.
+	 * <p>
+	 * This is necessary for coordinating so that dependencies are coordinated
+	 * before the {@link ManagedObject} instances using them are coordinated.
+	 * 
+	 * @param requiredManagedObjects
+	 *            Mapping of the {@link ManagedObjectIndex} to its
+	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of asset to issues.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return Listing of required {@link ManagedObject} instances to be sorted,
+	 *         or <code>null</code> indicating unable to sort, possible because
+	 *         of cyclic dependencies.
+	 */
+	public static ManagedObjectIndex[] createSortedRequiredManagedObjects(
+			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects, AssetType assetType,
+			String assetName, OfficeFloorIssues issues) {
+
+		// Create the required managed object indexes
+		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[requiredManagedObjects.size()];
+		int requiredIndex = 0;
+		for (ManagedObjectIndex requiredManagedObjectIndex : requiredManagedObjects.keySet()) {
+			requiredManagedObjectIndexes[requiredIndex++] = requiredManagedObjectIndex;
+		}
+
+		// Initially sort by scope and index
+		Arrays.sort(requiredManagedObjectIndexes, new Comparator<ManagedObjectIndex>() {
+			@Override
+			public int compare(ManagedObjectIndex a, ManagedObjectIndex b) {
+				int value = a.getManagedObjectScope().ordinal() - b.getManagedObjectScope().ordinal();
+				if (value == 0) {
+					value = a.getIndexOfManagedObjectWithinScope() - b.getIndexOfManagedObjectWithinScope();
+				}
+				return value;
+			}
+		});
+
+		// Create the set of dependencies for each required managed object
+		final Map<ManagedObjectIndex, Set<ManagedObjectIndex>> dependencies = new HashMap<ManagedObjectIndex, Set<ManagedObjectIndex>>();
+		for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
+
+			// Obtain the managed object for index
+			RawBoundManagedObjectMetaData managedObject = requiredManagedObjects.get(index);
+
+			// Load the dependencies
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> moDependencies = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
+			loadRequiredManagedObjects(managedObject, moDependencies);
+
+			// Register the dependencies for the index
+			dependencies.put(index, new HashSet<ManagedObjectIndex>(moDependencies.keySet()));
+		}
+
+		try {
+			// Sort so dependencies are first (detecting cyclic dependencies)
+			Arrays.sort(requiredManagedObjectIndexes, new Comparator<ManagedObjectIndex>() {
+				@Override
+				public int compare(ManagedObjectIndex a, ManagedObjectIndex b) {
+
+					// Obtain the dependencies
+					Set<ManagedObjectIndex> aDep = dependencies.get(a);
+					Set<ManagedObjectIndex> bDep = dependencies.get(b);
+
+					// Determine dependency relationship
+					boolean isAdepB = bDep.contains(a);
+					boolean isBdepA = aDep.contains(b);
+
+					// Compare based on relationship
+					if (isAdepB && isBdepA) {
+						// Cyclic dependency
+						String[] names = new String[2];
+						names[0] = requiredManagedObjects.get(a).getBoundManagedObjectName();
+						names[1] = requiredManagedObjects.get(b).getBoundManagedObjectName();
+						Arrays.sort(names);
+						throw new CyclicDependencyException(
+								"Can not have cyclic dependencies (" + names[0] + ", " + names[1] + ")");
+					} else if (isAdepB) {
+						// A dependent on B, so B must come first
+						return -1;
+					} else if (isBdepA) {
+						// B dependent on A, so A must come first
+						return 1;
+					} else {
+						/*
+						 * No dependency relationship. As the sorting only
+						 * changes on differences (non 0 value) then need means
+						 * to differentiate when no dependency relationship.
+						 * This is especially the case with the merge sort used
+						 * by default by Java.
+						 */
+
+						// Least number of dependencies first.
+						// Note: this pushes no dependencies to start.
+						int value = aDep.size() - bDep.size();
+						if (value == 0) {
+							// Same dependencies, so base on scope
+							value = a.getManagedObjectScope().ordinal() - b.getManagedObjectScope().ordinal();
+							if (value == 0) {
+								// Same scope, so arbitrary order
+								value = a.getIndexOfManagedObjectWithinScope() - b.getIndexOfManagedObjectWithinScope();
+							}
+						}
+						return value;
+					}
+				}
+			});
+
+		} catch (CyclicDependencyException ex) {
+			// Register issue that cyclic dependency
+			issues.addIssue(assetType, assetName, ex.getMessage());
+
+			// Not sorted as cyclic dependency
+			return null;
+		}
+
+		// Return the sorted required managed object indexes
+		return requiredManagedObjectIndexes;
+	}
+
+	/**
+	 * Thrown to indicate a cyclic dependency.
+	 */
+	private static class CyclicDependencyException extends RuntimeException {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param message
+		 *            Initiate with description for {@link OfficeFloorIssues}.
+		 */
+		public CyclicDependencyException(String message) {
+			super(message);
+		}
+	}
 
 	/**
 	 * Name that the {@link ManagedObject} is bound under.

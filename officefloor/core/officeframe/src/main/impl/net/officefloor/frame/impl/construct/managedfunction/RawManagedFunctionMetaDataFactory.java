@@ -146,7 +146,7 @@ public class RawManagedFunctionMetaDataFactory {
 		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
 
 		// Obtain the managed objects used directly by this function.
-		// Also obtain the parameter type for the task if specified.
+		// Also obtain the parameter type for the function if specified.
 		ManagedFunctionObjectConfiguration<?>[] objectConfigurations = configuration.getObjectConfiguration();
 		ManagedObjectIndex[] functionIndexedManagedObjects = new ManagedObjectIndex[objectConfigurations.length];
 		Class<?> parameterType = null;
@@ -235,7 +235,7 @@ public class RawManagedFunctionMetaDataFactory {
 			}
 
 			// Specify index for function translated index
-			functionIndexedManagedObjects[i] = RawManagedFunctionMetaData.loadRequiredManagedObjects(scopeMo,
+			functionIndexedManagedObjects[i] = RawBoundManagedObjectMetaData.loadRequiredManagedObjects(scopeMo,
 					requiredManagedObjects);
 		}
 

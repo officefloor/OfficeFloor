@@ -48,7 +48,7 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 	 * 
 	 * @return Extension interface.
 	 */
-	Class<E> getExtensionInterface();
+	Class<E> getExtensionType();
 
 	/**
 	 * Obtains the names of the {@link ManagedObject} instances to be

@@ -19,8 +19,11 @@ package net.officefloor.web.security;
 
 import java.io.IOException;
 
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -30,6 +33,7 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.web.security.build.HttpSecurerBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
@@ -534,6 +538,86 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		public void challenge(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("User name and password please");
+		}
+	}
+
+	/**
+	 * Ensure can secure {@link OfficeManagedObject}.
+	 */
+	public void testHttpSecurerManagedObject() throws Exception {
+		this.compile((context, security) -> {
+
+			// Provide security
+			HttpSecurityBuilder builder = security.addHttpSecurity("api",
+					new MockChallengeHttpSecuritySource("secure"));
+
+			// Provide servicer
+			OfficeSection section = context.addSection("service", HttpSecurerManagedObjectServicer.class);
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+
+			// Provide object
+			OfficeManagedObject mo = context.addManagedObject("MO", HttpSecurerObject.class, ManagedObjectScope.THREAD);
+
+			// Secure the managed object
+			builder.secure((secureContext) -> mo.addPreLoadAdministration(secureContext.getAdministration()));
+		});
+
+		// Ensure use of managed object is secured
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
+		assertEquals("Should include the negotiated security challenge",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("secure"),
+				response.getHeader("www-authenticate").getValue());
+
+		// Ensure can access once providing credentials
+		response = this.server.send(this.mockRequest("/path", "test", "test"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", "SECURE", response.getEntity(null));
+	}
+
+	public static class HttpSecurerObject {
+	}
+
+	public static class HttpSecurerManagedObjectServicer {
+		public void service(HttpSecurerObject object, ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("SECURE");
+		}
+	}
+
+	/**
+	 * Ensure can secure {@link OfficeSectionFunction}.
+	 */
+	public void testHttpSecurerFunction() throws Exception {
+		this.compile((context, security) -> {
+
+			// Provide security
+			HttpSecurityBuilder builder = security.addHttpSecurity("api",
+					new MockChallengeHttpSecuritySource("secure"));
+
+			// Provide servicer
+			OfficeSection section = context.addSection("servicer", HttpSecurerFunctionServicer.class);
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+
+			// Secure the function
+			OfficeSectionFunction function = section.getOfficeSectionFunction("service");
+			HttpSecurerBuilder securer = builder
+					.secure((secureContext) -> function.addPreAdministration(secureContext.getAdministration()));
+			securer.addRole("role");
+		});
+
+		// Ensure not access if do not have role
+		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
+		assertEquals("Should not be authenticated", 403, response.getStatus().getStatusCode());
+
+		// May access if have role
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect response", "SECURE", response.getEntity(null));
+	}
+
+	public static class HttpSecurerFunctionServicer {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("SECURE");
 		}
 	}
 

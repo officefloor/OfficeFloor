@@ -61,4 +61,13 @@ public interface HttpSecurityBuilder extends PropertyConfigurable {
 	 */
 	OfficeSectionOutput getOutput(String outputName);
 
+	/**
+	 * Registers {@link HttpSecurer} for this {@link HttpSecurity}.
+	 * 
+	 * @param securer
+	 *            {@link HttpSecurer}.
+	 * @return {@link HttpSecurerBuilder} to configure the {@link HttpSecurer}.
+	 */
+	HttpSecurerBuilder secure(HttpSecurer securer);
+
 }

@@ -60,6 +60,15 @@ public interface HttpSecurityArchitect {
 			String securityName, HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
 
 	/**
+	 * Registers {@link HttpSecurer}.
+	 * 
+	 * @param securer
+	 *            {@link HttpSecurer}.
+	 * @return {@link HttpSecurerBuilder} to configure the {@link HttpSecurer}.
+	 */
+	HttpSecurerBuilder secure(HttpSecurer securer);
+
+	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be
 	 * invoked once all security is configured.
 	 */

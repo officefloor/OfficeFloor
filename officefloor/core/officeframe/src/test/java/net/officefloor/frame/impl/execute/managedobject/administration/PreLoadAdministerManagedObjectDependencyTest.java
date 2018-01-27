@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.managedobject.administration;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -35,7 +34,7 @@ import net.officefloor.frame.test.TestObject;
  *
  * @author Daniel Sagenschneider
  */
-public class PreLoadAdministerAnotherManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class PreLoadAdministerManagedObjectDependencyTest extends AbstractOfficeConstructTestCase {
 
 	// ProcessState pre-load administration can not depend on managed objects
 
@@ -74,31 +73,21 @@ public class PreLoadAdministerAnotherManagedObjectTest extends AbstractOfficeCon
 
 		// Construct administered object
 		TestObject administered = new TestObject("ADMINISTERED", this);
-		administered.isCoordinatingManagedObject = true;
-		administered.enhanceMetaData = (metaData) -> {
-			metaData.addDependency(TestObject.class);
-			metaData.addManagedObjectExtension(TestObject.class, (mo) -> (TestObject) mo);
-		};
-		DependencyMappingBuilder extension;
+		administered.enhanceMetaData = (metaData) -> metaData.addManagedObjectExtension(TestObject.class,
+				(mo) -> (TestObject) mo);
 		switch (administerScope) {
 		case PROCESS:
-			extension = this.getOfficeBuilder().addProcessManagedObject("ADMINISTERED", "ADMINISTERED");
+			this.getOfficeBuilder().addProcessManagedObject("ADMINISTERED", "ADMINISTERED");
 			break;
 		case THREAD:
-			extension = this.getOfficeBuilder().addProcessManagedObject("ADMINISTERED", "ADMINISTERED");
+			this.getOfficeBuilder().addProcessManagedObject("ADMINISTERED", "ADMINISTERED");
 			break;
 		default:
 			fail("Illegal administered scope " + administerScope);
-			return;
 		}
 
-		// Construct dependency
-		TestObject dependency = new TestObject("DEPENDENCY", this);
-		this.getOfficeBuilder().addProcessManagedObject("DEPENDENCY", "DEPENDENCY");
-		extension.mapDependency(0, "DEPENDENCY");
-
 		// Construct the functions
-		TestWork work = new TestWork(load, administered, dependency);
+		TestWork work = new TestWork(load, administered);
 		this.constructFunction(work, "function").buildObject("MO", loadScope)
 				.preLoadAdminister("ADMIN", TestObject.class, () -> work).administerManagedObject("ADMINISTERED");
 
@@ -115,14 +104,11 @@ public class PreLoadAdministerAnotherManagedObjectTest extends AbstractOfficeCon
 
 		private final TestObject administered;
 
-		private final TestObject dependency;
-
 		private boolean isPreLoadAdministered = false;
 
-		public TestWork(TestObject object, TestObject administered, TestObject dependency) {
+		public TestWork(TestObject object, TestObject administered) {
 			this.object = object;
 			this.administered = administered;
-			this.dependency = dependency;
 		}
 
 		@Override
@@ -130,8 +116,6 @@ public class PreLoadAdministerAnotherManagedObjectTest extends AbstractOfficeCon
 			assertEquals("Should be an administered managed object", 1, context.getExtensions().length);
 			TestObject extension = context.getExtensions()[0];
 			assertSame("Incorrect administered managed object", this.administered, extension);
-			Object dependency = extension.objectRegistry.getObject(0);
-			assertSame("Incorrect administered dependency", this.dependency, dependency);
 			this.isPreLoadAdministered = true;
 		}
 

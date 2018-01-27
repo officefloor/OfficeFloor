@@ -51,12 +51,14 @@ public class HttpAccessAdministrationSource extends AbstractAdministrationSource
 	/**
 	 * Instantiate with the {@link HttpAccess}.
 	 * 
-	 * @param httpAccess
-	 *            {@link HttpAccess}.
+	 * @param anyRoles
+	 *            Any roles.
+	 * @param allRoles
+	 *            All roles.
 	 */
-	public HttpAccessAdministrationSource(HttpAccess httpAccess) {
-		this.anyRoles = httpAccess.ifRole();
-		this.allRoles = httpAccess.ifAllRoles();
+	public HttpAccessAdministrationSource(String[] anyRoles, String[] allRoles) {
+		this.anyRoles = anyRoles;
+		this.allRoles = allRoles;
 	}
 
 	/*

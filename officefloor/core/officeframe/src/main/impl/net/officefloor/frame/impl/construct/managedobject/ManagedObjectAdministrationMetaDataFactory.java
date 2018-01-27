@@ -26,6 +26,7 @@ import net.officefloor.frame.impl.construct.administration.RawAdministrationMeta
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectAdministrationMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -123,16 +124,24 @@ public class ManagedObjectAdministrationMetaDataFactory {
 		for (int a = 0; a < rawAdministrations.length; a++) {
 			RawAdministrationMetaData rawAdministration = rawAdministrations[a];
 
+			// Obtain the administration
+			AdministrationMetaData<?, ?, ?> adminMetaData = rawAdministration.getAdministrationMetaData();
+
 			// Obtain the required managed objects
-			RawBoundManagedObjectMetaData[] rawRequired = rawAdministration.getRawBoundManagedObjectMetaData();
-			ManagedObjectIndex[] required = new ManagedObjectIndex[rawRequired.length];
-			for (int m = 0; m < rawRequired.length; m++) {
-				required[m] = rawRequired[m].getManagedObjectIndex();
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects = new HashMap<>();
+			for (RawBoundManagedObjectMetaData extension : rawAdministration.getRawBoundManagedObjectMetaData()) {
+				RawBoundManagedObjectMetaData.loadRequiredManagedObjects(extension, requiredManagedObjects);
+			}
+
+			// Create the sorted required managed objects
+			ManagedObjectIndex[] required = RawBoundManagedObjectMetaData.createSortedRequiredManagedObjects(
+					requiredManagedObjects, AssetType.ADMINISTRATOR, adminMetaData.getAdministrationName(), issues);
+			if (required == null) {
+				return null;
 			}
 
 			// Create the managed object administration
-			metaDatas[a] = new ManagedObjectAdministrationMetaDataImpl<>(required,
-					rawAdministration.getAdministrationMetaData());
+			metaDatas[a] = new ManagedObjectAdministrationMetaDataImpl<>(required, adminMetaData);
 		}
 
 		// Return the managed object administration

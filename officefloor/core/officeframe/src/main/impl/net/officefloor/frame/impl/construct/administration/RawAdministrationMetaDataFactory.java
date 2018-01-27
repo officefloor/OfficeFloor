@@ -188,12 +188,12 @@ public class RawAdministrationMetaDataFactory {
 			}
 		}
 
-		// Obtain the extension interface
-		Class<E> extensionInterfaceType = configuration.getExtensionInterface();
-		if (extensionInterfaceType == null) {
+		// Obtain the extension type
+		Class<E> extensionType = configuration.getExtensionType();
+		if (extensionType == null) {
 			issues.addIssue(AssetType.ADMINISTRATOR, adminName,
 					"Administration " + adminName + " did not provide extension type");
-			return null; // no extension interface
+			return null; // no extension type
 		}
 
 		// Obtain the managed objects being administered
@@ -233,7 +233,7 @@ public class RawAdministrationMetaDataFactory {
 
 						// Obtain the extension interface
 						Class<?> moEiType = moEiMetaData.getExtensionType();
-						if ((moEiType != null) && (extensionInterfaceType.isAssignableFrom(moEiType))) {
+						if ((moEiType != null) && (extensionType.isAssignableFrom(moEiType))) {
 
 							// Specify the extension interface factory
 							extensionInterfaceFactory = (ExtensionFactory<E>) moEiMetaData.getExtensionFactory();
@@ -258,9 +258,8 @@ public class RawAdministrationMetaDataFactory {
 					// Managed Object invalid
 					isExtensionInterfaceFactoryIssue = true;
 					issues.addIssue(AssetType.ADMINISTRATOR, adminName,
-							"Managed Object " + moName + " does not support extension type "
-									+ extensionInterfaceType.getName() + " required by Administration " + adminName
-									+ " (ManagedObjectSource="
+							"Managed Object " + moName + " does not support extension type " + extensionType.getName()
+									+ " required by Administration " + adminName + " (ManagedObjectSource="
 									+ moInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 					continue NEXT_INSTANCE; // invalid
 				}
@@ -327,7 +326,7 @@ public class RawAdministrationMetaDataFactory {
 
 		// Create the administrator meta-data
 		AdministrationMetaDataImpl<E, F, G> adminMetaData = new AdministrationMetaDataImpl<E, F, G>(adminName,
-				adminFactory, extensionInterfaceType,
+				adminFactory, extensionType,
 				ConstructUtil.toArray(eiMetaDatas, new ManagedObjectExtensionExtractorMetaData[0]), responsibleTeam,
 				flows, governanceMapping, escalationProcedure, this.officeMetaData);
 

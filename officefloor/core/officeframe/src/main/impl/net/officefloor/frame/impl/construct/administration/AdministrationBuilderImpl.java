@@ -133,7 +133,7 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>> 
 	}
 
 	@Override
-	public Class<E> getExtensionInterface() {
+	public Class<E> getExtensionType() {
 		return this.extensionInterface;
 	}
 
