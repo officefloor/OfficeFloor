@@ -26,7 +26,7 @@ package net.officefloor.frame.api.source;
  * 
  * @author Daniel Sagenschneider
  */
-public class UnknownResourceError extends Error {
+public class UnknownResourceError extends AbstractSourceError {
 
 	/**
 	 * Location of the unknown resource.
@@ -36,14 +36,26 @@ public class UnknownResourceError extends Error {
 	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Message.
 	 * @param unknownResourceLocation
 	 *            Location of the unknown resource.
 	 */
-	public UnknownResourceError(String message, String unknownResourceLocation) {
-		super(message);
+	public UnknownResourceError(String unknownResourceLocation) {
+		super("Can not obtain resource at location '" + unknownResourceLocation + "'");
 		this.unknownResourceLocation = unknownResourceLocation;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param error
+	 *            Triggering {@link UnknownResourceError} from
+	 *            {@link ServiceFactory}.
+	 * @param serviceFactory
+	 *            {@link ServiceFactory}.
+	 */
+	public UnknownResourceError(UnknownResourceError error, ServiceFactory<?> serviceFactory) {
+		super(error, serviceFactory);
+		this.unknownResourceLocation = error.unknownResourceLocation;
 	}
 
 	/**

@@ -100,15 +100,12 @@ import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -400,24 +397,9 @@ public class SectionNodeImpl implements SectionNode {
 			// Source the section type
 			source.sourceSection(this, context);
 
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
-					+ SectionSource.class.getSimpleName() + " " + source.getClass().getName());
-			return false; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
-					+ SectionSource.class.getSimpleName() + " " + source.getClass().getName());
-			return false; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
-					+ SectionSource.class.getSimpleName() + " " + source.getClass().getName());
-			return false; // must have resource
-
-		} catch (ConfigurationError ex) {
-			ex.addConfigurationIssue(this, this.context.getCompilerIssues());
-			return false; // must have configuration
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(new SourceIssuesIssueTarget(this));
+			return false; // can not carry on
 
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());

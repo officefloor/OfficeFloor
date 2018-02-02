@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.resource.build;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,7 +29,14 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceCache;
+import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
+import net.officefloor.web.resource.impl.HttpResourceStoreImpl;
+import net.officefloor.web.resource.spi.FileCacheFactory;
+import net.officefloor.web.resource.spi.FileCacheService;
 import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceTransformer;
 
 /**
  * Employs a {@link HttpResourceArchitect}.
@@ -67,6 +75,11 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	 * {@link OfficeSourceContext}.
 	 */
 	private final OfficeSourceContext officeSourceContext;
+
+	/**
+	 * {@link HttpResourceSource} nstances.
+	 */
+	private final List<HttpResourceSource> httpResourceSources = new LinkedList<>();
 
 	/**
 	 * {@link ResourceLink} instances.
@@ -111,7 +124,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	@Override
-	public HttpResourcesBuilder addHttpResources(ResourceSystemService resourceSystemFactory) {
+	public HttpResourcesBuilder addHttpResources(ResourceSystemService resourceSystemService, String location) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -123,10 +136,127 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	@Override
-	public void informWebArchitect() {
+	public void informWebArchitect() throws IOException {
+
+		// Ensure at least one resource source
+		if (this.httpResourceSources.size() == 0) {
+			// None configured, so use default class path
+			HttpResourceSource defaultResourceSource = new HttpResourceSource(new ClasspathResourceSystemService(),
+					"PUBLIC");
+			this.httpResourceSources.add(defaultResourceSource);
+		}
+
+		// Obtain the file cache factory
+		FileCacheFactory fileCacheFactory = this.officeSourceContext.loadService(FileCacheService.class,
+				new TemporaryDirectoryFileCacheService());
+
+		// Load the resource sources
+		for (HttpResourceSource httpResourceSource : this.httpResourceSources) {
+
+			// Build the resource store
+			ResourceTransformer[] resourceTransformers = httpResourceSource.resourceTransformers
+					.toArray(new ResourceTransformer[httpResourceSource.resourceTransformers.size()]);
+			HttpResourceStoreImpl store = new HttpResourceStoreImpl(httpResourceSource.location,
+					httpResourceSource.resourceSystemService, httpResourceSource.contextPath, fileCacheFactory,
+					resourceTransformers, httpResourceSource.directoryDefaultResourceNames);
+
+			// Obtain the cache
+			HttpResourceCache cache = store.getCache();
+
+		}
 
 		// Link to resources
 		if ((this.resourceLinks.size() > 0) || (this.escalationResources.size() > 0)) {
+
+		}
+	}
+
+	/**
+	 * Source of {@link HttpResource} instances.
+	 */
+	private static class HttpResourceSource implements HttpResourcesBuilder {
+
+		/**
+		 * {@link ResourceSystemService}.
+		 */
+		private final ResourceSystemService resourceSystemService;
+
+		/**
+		 * Location.
+		 */
+		private final String location;
+
+		/**
+		 * Context path of resources within the application.
+		 */
+		private String contextPath = null;
+
+		/**
+		 * {@link ResourceTransformer} instances.
+		 */
+		private final List<ResourceTransformer> resourceTransformers = new LinkedList<>();
+
+		/**
+		 * Directory default resource names.
+		 */
+		private final String[] directoryDefaultResourceNames = new String[] { "index.html" };
+
+		/**
+		 * Instantiate
+		 * 
+		 * @param resourceSystemService
+		 *            {@link ResourceSystemService}.
+		 * @param location
+		 *            Location.
+		 */
+		private HttpResourceSource(ResourceSystemService resourceSystemService, String location) {
+			this.resourceSystemService = resourceSystemService;
+			this.location = location;
+		}
+
+		/*
+		 * ================ HttpResourcesBuilder =====================
+		 */
+
+		@Override
+		public void setContextPath(String contextPath) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addTypeQualifier(String qualifier) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addResourceTransformer(ResourceTransformer transformer) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addResourceTransformer(String name) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setDirectoryDefaultResourceNames(String... defaultResourceNames) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setHttpSecurityName(String httpSecurityName) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addRole(String role) {
+			// TODO Auto-generated method stub
 
 		}
 	}

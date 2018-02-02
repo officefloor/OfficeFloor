@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.resource.build;
 
+import java.io.IOException;
+
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.web.build.WebArchitect;
@@ -58,13 +60,16 @@ public interface HttpResourceArchitect {
 	 * The {@link ResourceSystem} instances will be interrogated in the order
 	 * they are added for a {@link HttpResource}.
 	 * 
-	 * @param resourceSystemFactory
+	 * @param resourceSystemService
 	 *            {@link ResourceSystemService} to create the
 	 *            {@link ResourceSystem} to provide the resources backing the
 	 *            {@link HttpResource} instances.
+	 * @param location
+	 *            {@link ResourceSystemService} specific location of the
+	 *            resources.
 	 * @return {@link HttpResourcesBuilder}.
 	 */
-	HttpResourcesBuilder addHttpResources(ResourceSystemService resourceSystemFactory);
+	HttpResourcesBuilder addHttpResources(ResourceSystemService resourceSystemService, String location);
 
 	/**
 	 * <p>
@@ -87,7 +92,10 @@ public interface HttpResourceArchitect {
 	 * Informs the {@link WebArchitect} of the necessary {@link HttpResource}
 	 * instances. This is to be invoked once all {@link HttpResource} instances
 	 * are configured.
+	 * 
+	 * @throws IOException
+	 *             If fails to configure resources.
 	 */
-	void informWebArchitect();
+	void informWebArchitect() throws IOException;
 
 }

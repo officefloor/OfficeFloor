@@ -116,8 +116,7 @@ public class SourcePropertiesImpl implements SourceProperties {
 
 		// Ensure have property
 		if (value == null) {
-			throw new UnknownPropertyError("Unknown property '" + name + "'",
-					name);
+			throw new UnknownPropertyError(name);
 		}
 
 		// Return the property value
@@ -142,8 +141,7 @@ public class SourcePropertiesImpl implements SourceProperties {
 		// Load up the properties
 		Properties props = new Properties();
 		for (PropertyStruct property : this.properties) {
-			props.setProperty(property.name, (property.value == null ? ""
-					: property.value));
+			props.setProperty(property.name, (property.value == null ? "" : property.value));
 		}
 
 		// Return the properties

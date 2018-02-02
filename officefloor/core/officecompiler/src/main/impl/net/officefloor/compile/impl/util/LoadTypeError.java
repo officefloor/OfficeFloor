@@ -58,8 +58,8 @@ public class LoadTypeError extends Error {
 	 *            {@link CompilerIssue} instances indicating cause of not
 	 *            loading type.
 	 */
-	public LoadTypeError(Class<?> type, String sourceClassName,
-			CompilerIssue[] causes) {
+	public LoadTypeError(Class<?> type, String sourceClassName, CompilerIssue[] causes) {
+		super("Failure loading " + type.getSimpleName() + " from source " + sourceClassName);
 		this.type = type;
 		this.sourceClassName = sourceClassName;
 		this.causes = causes;
@@ -74,8 +74,7 @@ public class LoadTypeError extends Error {
 	 *            {@link CompilerIssues}.
 	 */
 	public void addLoadTypeIssue(Node node, CompilerIssues issues) {
-		issues.addIssue(node, "Failure loading " + this.type.getSimpleName()
-				+ " from source " + this.sourceClassName, this.causes);
+		issues.addIssue(node, this.getMessage(), this.causes);
 	}
 
 	/**

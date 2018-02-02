@@ -15,26 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.impl;
+package net.officefloor.web.resource.spi;
 
-import java.io.IOException;
+import java.util.ServiceLoader;
+
+import net.officefloor.frame.api.source.ServiceFactory;
 
 /**
- * Factory for the creation of a new {@link FileCache}.
+ * {@link ServiceLoader} interface for providing a {@link FileCacheFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FileCacheFactory {
-
-	/**
-	 * Creates a new {@link FileCache}.
-	 * 
-	 * @param name
-	 *            Name for the {@link FileCache}.
-	 * @return New {@link FileCache}.
-	 * @throws IOException
-	 *             If fails to create a new {@link FileCache}.
-	 */
-	FileCache createFileCache(String name) throws IOException;
-
+public interface FileCacheService extends ServiceFactory<FileCacheFactory> {
 }

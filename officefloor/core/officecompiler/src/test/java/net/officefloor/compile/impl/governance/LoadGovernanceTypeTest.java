@@ -20,6 +20,8 @@ package net.officefloor.compile.impl.governance;
 import java.sql.Connection;
 import java.util.Properties;
 
+import net.officefloor.compile.FailServiceFactory;
+import net.officefloor.compile.MissingServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceEscalationType;
 import net.officefloor.compile.governance.GovernanceFlowType;
@@ -88,7 +90,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("Property 'missing' must be specified");
+		this.issues.recordIssue("Must specify property 'missing'");
 
 		// Attempt to load
 		this.loadGovernanceType(false, new Init<None>() {
@@ -174,6 +176,40 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect resource locator",
 						LoadGovernanceTypeTest.class.getClassLoader().getResource(objectPath),
 						context.getClassLoader().getResource(objectPath));
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing service.
+	 */
+	public void testMissingService() {
+
+		// Record missing service
+		this.issues.recordIssue(MissingServiceFactory.getIssueDescription());
+
+		// Attempt to load
+		this.loadGovernanceType(false, new Init<None>() {
+			@Override
+			public void init(GovernanceSourceContext context) {
+				context.loadService(MissingServiceFactory.class, null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fail to load service.
+	 */
+	public void testFailLoadService() {
+
+		// Record load issue for service
+		this.issues.recordIssue(FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
+
+		// Attempt to load
+		this.loadGovernanceType(false, new Init<None>() {
+			@Override
+			public void init(GovernanceSourceContext context) {
+				context.loadService(FailServiceFactory.class, null);
 			}
 		});
 	}

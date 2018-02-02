@@ -22,6 +22,8 @@ import java.util.Properties;
 
 import javax.transaction.xa.XAResource;
 
+import net.officefloor.compile.FailServiceFactory;
+import net.officefloor.compile.MissingServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -152,14 +154,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("Missing property 'missing'");
+		this.issues.recordIssue("Must specify property 'missing'");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.getProperty("missing");
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.getProperty("missing");
 		});
 	}
 
@@ -172,17 +171,14 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
-			}
+		this.loadManagedObjectType(true, (context, util) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
 	}
 
@@ -195,11 +191,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not load class 'missing'");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.loadClass("missing");
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.loadClass("missing");
 		});
 	}
 
@@ -212,11 +205,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.getResource("missing");
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.getResource("missing");
 		});
 	}
 
@@ -232,14 +222,35 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		final String objectPath = Object.class.getName().replace('.', '/') + ".class";
 
 		// Attempt to load
-		this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				assertEquals("Incorrect resource locator",
-						LoadManagedObjectTypeTest.class.getClassLoader().getResource(objectPath),
-						context.getClassLoader().getResource(objectPath));
-			}
+		this.loadManagedObjectType(true, (context, util) -> {
+			assertEquals("Incorrect resource locator",
+					LoadManagedObjectTypeTest.class.getClassLoader().getResource(objectPath),
+					context.getClassLoader().getResource(objectPath));
 		});
+	}
+
+	/**
+	 * Ensure issue if missing service.
+	 */
+	public void testMissingService() {
+
+		// Record missing service
+		this.issues.recordIssue(MissingServiceFactory.getIssueDescription());
+
+		// Attempt to load
+		this.loadManagedObjectType(false, (context, util) -> context.loadService(MissingServiceFactory.class, null));
+	}
+
+	/**
+	 * Ensure issue if fail to load service.
+	 */
+	public void testFailLoadService() {
+
+		// Record load issue for service
+		this.issues.recordIssue(FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
+
+		// Attempt to load
+		this.loadManagedObjectType(false, (context, util) -> context.loadService(FailServiceFactory.class, null));
 	}
 
 	/**
@@ -253,11 +264,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Failed to init", failure);
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				throw failure;
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			throw failure;
 		});
 	}
 
@@ -270,11 +278,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Returned null ManagedObjectSourceMetaData");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				MockManagedObjectSource.metaData = null;
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			MockManagedObjectSource.metaData = null;
 		});
 	}
 
@@ -289,11 +294,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Failed to init", failure);
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				MockManagedObjectSource.metaDataFailure = failure;
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			MockManagedObjectSource.metaDataFailure = failure;
 		});
 	}
 
@@ -849,11 +851,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Function added without a name");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.addManagedFunction(null, util.getManagedFunctionFactory());
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.addManagedFunction(null, util.getManagedFunctionFactory());
 		});
 	}
 
@@ -866,11 +865,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory());
-			}
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory());
 		});
 
 		// Ensure only team added
@@ -889,11 +885,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
-			}
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
 		});
 
 		// Ensure only team added
@@ -914,11 +907,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				context.getRecycleFunction(util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
-			}
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			context.getRecycleFunction(util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
 		});
 
 		// Ensure only team added
@@ -941,18 +931,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				// Recycle function uses same team
-				context.getRecycleFunction(util.getManagedFunctionFactory()).setResponsibleTeam(TEAM_NAME);
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			// Recycle function uses same team
+			context.getRecycleFunction(util.getManagedFunctionFactory()).setResponsibleTeam(TEAM_NAME);
 
-				// Two functions (both using team)
-				context.addManagedFunction("FUNCTION_ONE", util.getManagedFunctionFactory())
-						.setResponsibleTeam(TEAM_NAME);
-				context.addManagedFunction("FUNCTION_TWO", util.getManagedFunctionFactory())
-						.setResponsibleTeam(TEAM_NAME);
-			}
+			// Two functions (both using team)
+			context.addManagedFunction("FUNCTION_ONE", util.getManagedFunctionFactory()).setResponsibleTeam(TEAM_NAME);
+			context.addManagedFunction("FUNCTION_TWO", util.getManagedFunctionFactory()).setResponsibleTeam(TEAM_NAME);
 		});
 
 		// Ensure only team added
@@ -977,15 +962,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				// Two functions (using different teams)
-				context.addManagedFunction("FUNCTION_ONE", util.getManagedFunctionFactory())
-						.setResponsibleTeam(TEAM_ONE);
-				context.addManagedFunction("FUNCTION_TWO", util.getManagedFunctionFactory())
-						.setResponsibleTeam(TEAM_TWO);
-			}
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			// Two functions (using different teams)
+			context.addManagedFunction("FUNCTION_ONE", util.getManagedFunctionFactory()).setResponsibleTeam(TEAM_ONE);
+			context.addManagedFunction("FUNCTION_TWO", util.getManagedFunctionFactory()).setResponsibleTeam(TEAM_TWO);
 		});
 
 		// Ensure only team added
@@ -1001,6 +981,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Ensures issue if an added {@link ManagedFunction} is linking an unknown
 	 * added {@link ManagedFunction}.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testAddFunctionLinkingUnknownFunction() {
 
 		// Record basic meta-data
@@ -1009,15 +990,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				.recordIssue("Unknown function being linked (function=FUNCTION, flow=0, link function=LINK_FUNCTION)");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
-			@Override
-			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				ManagedObjectFunctionBuilder function = context.addManagedFunction("FUNCTION",
-						util.getManagedFunctionFactory());
-				function.setResponsibleTeam("TEAM");
-				function.linkFlow(0, "LINK_FUNCTION", null, false);
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			ManagedObjectFunctionBuilder function = context.addManagedFunction("FUNCTION",
+					util.getManagedFunctionFactory());
+			function.setResponsibleTeam("TEAM");
+			function.linkFlow(0, "LINK_FUNCTION", null, false);
 		});
 	}
 
@@ -1026,27 +1003,24 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * {@link ManagedFunction} with a link to another added
 	 * {@link ManagedFunction}.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testAddFunctionWithLinkToAddedFunction() {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-				// Add function that links to other function
-				ManagedObjectFunctionBuilder linkFunction = context.addManagedFunction("FUNCTION",
-						util.getManagedFunctionFactory());
-				linkFunction.setResponsibleTeam("TEAM");
-				linkFunction.linkFlow(0, "LINK_FUNCTION", null, false);
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			// Add function that links to other function
+			ManagedObjectFunctionBuilder linkFunction = context.addManagedFunction("FUNCTION",
+					util.getManagedFunctionFactory());
+			linkFunction.setResponsibleTeam("TEAM");
+			linkFunction.linkFlow(0, "LINK_FUNCTION", null, false);
 
-				// Add function being linked too
-				ManagedObjectFunctionBuilder targetFunction = context.addManagedFunction("LINK_FUNCTION",
-						util.getManagedFunctionFactory());
-				targetFunction.setResponsibleTeam("TEAM");
-			}
+			// Add function being linked too
+			ManagedObjectFunctionBuilder targetFunction = context.addManagedFunction("LINK_FUNCTION",
+					util.getManagedFunctionFactory());
+			targetFunction.setResponsibleTeam("TEAM");
 		});
 
 		// Ensure only team added
@@ -1097,10 +1071,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
-			@Override
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
-			}
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
 		});
 
 		// Ensure is input (but no flows/teams)
@@ -1123,11 +1094,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("ManagedObjectFlowMetaData requires linking by keys (not indexes)");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<OneKey>() {
-			@Override
-			public void init(ManagedObjectSourceContext<OneKey> context, InitUtil util) {
-				context.getFlow(0).linkFunction("FUNCTION");
-			}
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.getFlow(0).linkFunction("FUNCTION");
 		});
 	}
 
@@ -1185,15 +1153,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("ManagedObjectFlowMetaData does not define index (index=1)");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<Indexed>() {
-			@Override
-			public void init(ManagedObjectSourceContext<Indexed> context, InitUtil util) {
-				context.getFlow(0).linkFunction("LINKED");
-				context.getFlow(1).linkFunction("FUNCTION");
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.getFlow(0).linkFunction("LINKED");
+			context.getFlow(1).linkFunction("FUNCTION");
 
-				// Add the linked function
-				context.addManagedFunction("LINKED", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
-			}
+			// Add the linked function
+			context.addManagedFunction("LINKED", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
 		});
 	}
 
@@ -1246,15 +1211,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData((Indexed) null);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<Indexed>() {
-			@Override
-			public void init(ManagedObjectSourceContext<Indexed> context, InitUtil util) {
-				// Add function being linked too
-				context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			// Add function being linked too
+			context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
 
-				// Link to function
-				context.getFlow(0).linkFunction("FUNCTION");
-			}
+			// Link to function
+			context.getFlow(0).linkFunction("FUNCTION");
 		});
 
 		// Should only have team of function (as linked process hidden)

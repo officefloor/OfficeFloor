@@ -26,7 +26,7 @@ package net.officefloor.frame.api.source;
  * 
  * @author Daniel Sagenschneider
  */
-public class UnknownPropertyError extends Error {
+public class UnknownPropertyError extends AbstractSourceError {
 
 	/**
 	 * Name of the unknown property.
@@ -36,14 +36,25 @@ public class UnknownPropertyError extends Error {
 	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Message.
 	 * @param unknownPropertyName
 	 *            Name of the unknown property.
 	 */
-	public UnknownPropertyError(String message, String unknownPropertyName) {
-		super(message);
+	public UnknownPropertyError(String unknownPropertyName) {
+		super("Must specify property '" + unknownPropertyName + "'");
 		this.unknownPropertyName = unknownPropertyName;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param unknownPropertyError
+	 *            Triggering {@link UnknownPropertyError}.
+	 * @param serviceFactory
+	 *            {@link ServiceFactory} requiring the property.
+	 */
+	public UnknownPropertyError(UnknownPropertyError unknownPropertyError, ServiceFactory<?> serviceFactory) {
+		super(unknownPropertyError, serviceFactory);
+		this.unknownPropertyName = unknownPropertyError.unknownPropertyName;
 	}
 
 	/**

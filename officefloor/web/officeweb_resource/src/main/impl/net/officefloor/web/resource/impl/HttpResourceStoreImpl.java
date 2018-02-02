@@ -43,6 +43,8 @@ import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
+import net.officefloor.web.resource.spi.FileCache;
+import net.officefloor.web.resource.spi.FileCacheFactory;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
 import net.officefloor.web.resource.spi.ResourceSystemService;

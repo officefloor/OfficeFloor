@@ -21,6 +21,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
+import net.officefloor.compile.AvailableServiceFactory;
+import net.officefloor.compile.FailServiceFactory;
+import net.officefloor.compile.MissingServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
@@ -54,6 +57,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.test.Closure;
 
 /**
  * Tests loading the {@link OfficeFloorType}.
@@ -106,7 +110,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 
 		// Record missing property
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
-				"Missing property 'missing' for OfficeFloorSource " + MockOfficeFloorSource.class.getName());
+				"Must specify property 'missing'");
 
 		// Attempt to load office floor type
 		this.loadType((officeFloor, context) -> {
@@ -167,7 +171,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 */
 	public void testMissingClass() {
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
-				"Can not load class 'missing' for OfficeFloorSource " + MockOfficeFloorSource.class.getName());
+				"Can not load class 'missing'");
 		this.loadType((officeFloor, context) -> {
 			context.loadClass("missing");
 		}, null);
@@ -179,8 +183,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	public void testMissingResource() {
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
-				"Can not obtain resource at location 'missing' for OfficeFloorSource "
-						+ MockOfficeFloorSource.class.getName());
+				"Can not obtain resource at location 'missing'");
 		this.loadType((officeFloor, context) -> {
 			context.getResource("missing");
 		}, null);
@@ -196,6 +199,43 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		this.loadType((officeFloor, context) -> {
 			assertSame("Incorrect resource", resource, context.getResource(location));
 		}, new LoadedValidator());
+	}
+
+	/**
+	 * Ensure issue if missing service.
+	 */
+	public void testMissingService() {
+
+		// Record missing service
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				MissingServiceFactory.getIssueDescription());
+
+		// Attempt to load
+		this.loadType((officeFloor, context) -> context.loadService(MissingServiceFactory.class, null), null);
+	}
+
+	/**
+	 * Ensure issue if fail to load service.
+	 */
+	public void testFailLoadService() {
+
+		// Record load issue for service
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
+
+		// Attempt to load
+		this.loadType((officeFloor, context) -> context.loadService(FailServiceFactory.class, null), null);
+	}
+
+	/**
+	 * Ensure can load service.
+	 */
+	public void testLoadService() {
+		Closure<Object> service = new Closure<>();
+		this.loadType((section, context) -> {
+			service.value = context.loadService(AvailableServiceFactory.class, null);
+		}, new LoadedValidator());
+		assertSame("Incorrect service", AvailableServiceFactory.getService(), service.value);
 	}
 
 	/**

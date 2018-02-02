@@ -18,22 +18,29 @@
 package net.officefloor.frame.impl.construct.source;
 
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
+import net.officefloor.frame.api.source.LoadServiceError;
 import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.frame.api.source.ServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.source.UnknownServiceError;
 
 /**
  * {@link SourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SourceContextImpl extends SourcePropertiesImpl implements
-		SourceContext {
+public class SourceContextImpl extends SourcePropertiesImpl implements SourceContext {
 
 	/**
 	 * Delegate {@link SourceContext}.
@@ -51,10 +58,8 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 	 * @param resourceSources
 	 *            {@link ResourceSource} instances.
 	 */
-	public SourceContextImpl(boolean isLoadingType, ClassLoader classLoader,
-			ResourceSource... resourceSources) {
-		this.delegate = new DelegateSourceContext(isLoadingType, classLoader,
-				resourceSources);
+	public SourceContextImpl(boolean isLoadingType, ClassLoader classLoader, ResourceSource... resourceSources) {
+		this.delegate = new DelegateSourceContext(isLoadingType, classLoader, resourceSources);
 	}
 
 	/**
@@ -68,8 +73,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 	 * @param sourceProperties
 	 *            {@link SourceProperties}.
 	 */
-	public SourceContextImpl(boolean isLoadingType, SourceContext delegate,
-			SourceProperties sourceProperties) {
+	public SourceContextImpl(boolean isLoadingType, SourceContext delegate, SourceProperties sourceProperties) {
 		super(sourceProperties);
 		this.delegate = new DelegateWrapSourceContext(isLoadingType, delegate);
 	}
@@ -104,6 +108,29 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 	}
 
 	@Override
+	public <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
+			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
+		return this.delegate.loadService(serviceFactoryType, defaultServiceFactory);
+	}
+
+	@Override
+	public <S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType) throws LoadServiceError {
+		return this.delegate.loadOptionalService(serviceFactoryType);
+	}
+
+	@Override
+	public <S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
+			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
+		return this.delegate.loadServices(serviceFactoryType, defaultServiceFactory);
+	}
+
+	@Override
+	public <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
+			throws LoadServiceError {
+		return this.delegate.loadOptionalServices(serviceFactoryType);
+	}
+
+	@Override
 	public ClassLoader getClassLoader() {
 		return this.delegate.getClassLoader();
 	}
@@ -131,8 +158,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		 * @param delegate
 		 *            Delegate {@link SourceContext}.
 		 */
-		public DelegateWrapSourceContext(boolean isLoadingType,
-				SourceContext delegate) {
+		public DelegateWrapSourceContext(boolean isLoadingType, SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
 		}
@@ -182,8 +208,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		}
 
 		@Override
-		public InputStream getResource(String location)
-				throws UnknownResourceError {
+		public InputStream getResource(String location) throws UnknownResourceError {
 			return this.delegate.getResource(location);
 		}
 
@@ -191,13 +216,36 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		public ClassLoader getClassLoader() {
 			return this.delegate.getClassLoader();
 		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
+				D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
+			return this.delegate.loadService(serviceFactoryType, defaultServiceFactory);
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType)
+				throws LoadServiceError {
+			return this.delegate.loadOptionalService(serviceFactoryType);
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
+				D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
+			return this.delegate.loadServices(serviceFactoryType, defaultServiceFactory);
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
+				throws LoadServiceError {
+			return this.loadOptionalServices(serviceFactoryType);
+		}
 	}
 
 	/**
 	 * Delegate {@link SourceContext}.
 	 */
-	private static class DelegateSourceContext extends SourcePropertiesImpl
-			implements SourceContext {
+	private static class DelegateSourceContext extends SourcePropertiesImpl implements SourceContext, ServiceContext {
 
 		/**
 		 * Indicates if loading type.
@@ -224,8 +272,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		 * @param resourceSources
 		 *            {@link ResourceSource} instances.
 		 */
-		public DelegateSourceContext(boolean isLoadingType,
-				ClassLoader classLoader, ResourceSource[] resourceSources) {
+		public DelegateSourceContext(boolean isLoadingType, ClassLoader classLoader, ResourceSource[] resourceSources) {
 			this.isLoadingType = isLoadingType;
 			this.classLoader = classLoader;
 			this.resourceSources = resourceSources;
@@ -257,8 +304,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 
 			// Ensure have class
 			if (clazz == null) {
-				throw new UnknownClassError("Unknown class '" + name + "'",
-						name);
+				throw new UnknownClassError(name);
 			}
 
 			// Return the class
@@ -277,24 +323,21 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 			}
 
 			// Attempt to load from class loader
-			InputStream resource = this.classLoader
-					.getResourceAsStream(location);
+			InputStream resource = this.classLoader.getResourceAsStream(location);
 
 			// Return the resource
 			return resource;
 		}
 
 		@Override
-		public InputStream getResource(String location)
-				throws UnknownResourceError {
+		public InputStream getResource(String location) throws UnknownResourceError {
 
 			// Attempt to obtain the resource
 			InputStream resource = this.getOptionalResource(location);
 
 			// Ensure have resource
 			if (resource == null) {
-				throw new UnknownResourceError("Unknown resource '" + location
-						+ "'", location);
+				throw new UnknownResourceError(location);
 			}
 
 			// Return the resource
@@ -302,8 +345,261 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		}
 
 		@Override
+		public <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
+				D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
+
+			// Attempt to load the service
+			S service = this.loadOptionalService(serviceFactoryType);
+			if (service != null) {
+				return service;
+			}
+
+			// Provide default service (if available)
+			if (defaultServiceFactory != null) {
+				return createService(defaultServiceFactory, this);
+			}
+
+			// No configured service
+			throw new UnknownServiceError(serviceFactoryType);
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType)
+				throws LoadServiceError {
+
+			// Obtain the service factories
+			Iterator<F> serviceFactories = this.loadServiceFactories(serviceFactoryType);
+			if (!serviceFactories.hasNext()) {
+				return null; // no service configured
+			}
+
+			// Obtain the service
+			S service = nextService(serviceFactories, serviceFactoryType, this);
+
+			// Ensure only the one service factory configured
+			if (serviceFactories.hasNext()) {
+				throw new LoadServiceError(serviceFactoryType.getName(), new Exception(
+						"Multiple services configured for single required service " + serviceFactoryType.getName()));
+			}
+
+			// Return the service
+			return service;
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
+				D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
+
+			// Obtain the service factories
+			Iterator<F> serviceFactories = this.loadServiceFactories(serviceFactoryType);
+			if (serviceFactories.hasNext()) {
+				// Services configured
+				return () -> new ServiceIterator<>(serviceFactories, serviceFactoryType, this);
+			}
+
+			// No services configured, so attempt default service
+			if (defaultServiceFactory != null) {
+				return () -> new DefaultServiceIterator<>(defaultServiceFactory, this);
+			}
+
+			// No configured services
+			throw new UnknownServiceError(serviceFactoryType);
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
+				throws LoadServiceError {
+
+			// Obtain the service factories
+			Iterator<F> serviceFactories = this.loadServiceFactories(serviceFactoryType);
+
+			// Return iterator over the services
+			return () -> new ServiceIterator<>(serviceFactories, serviceFactoryType, this);
+		}
+
+		/**
+		 * Loads the {@link Iterator} over the {@link ServiceFactory} instances.
+		 * 
+		 * @param serviceFactoryType
+		 *            Type of {@link ServiceFactory}.
+		 * @return {@link Iterator} over the {@link ServiceFactory} instances.
+		 */
+		private <S, F extends ServiceFactory<S>> Iterator<F> loadServiceFactories(Class<F> serviceFactoryType) {
+			return ServiceLoader.load(serviceFactoryType, this.classLoader).iterator();
+		}
+
+		@Override
 		public ClassLoader getClassLoader() {
 			return this.classLoader;
+		}
+	}
+
+	/**
+	 * Loads the next service from the {@link Iterator}.
+	 * 
+	 * @param serviceFactories
+	 *            {@link Iterator} over the {@link ServiceFactory} instances.
+	 * @param serviceContext
+	 *            {@link ServiceContext}.
+	 * @return Next service.
+	 */
+	private static <S, F extends ServiceFactory<S>> S nextService(Iterator<F> serviceFactories,
+			Class<F> serviceFactoryType, ServiceContext serviceContext) {
+
+		// Obtain the next service factory
+		F serviceFactory;
+		try {
+			serviceFactory = serviceFactories.next();
+		} catch (ServiceConfigurationError error) {
+			Throwable cause = error.getCause();
+			throw new LoadServiceError(serviceFactoryType.getName(), cause != null ? cause : error);
+		}
+
+		// Create the service
+		return createService(serviceFactory, serviceContext);
+	}
+
+	/**
+	 * Creates the service from the {@link ServiceFactory}.
+	 * 
+	 * @param serviceFactory
+	 *            {@link ServiceFactory}.
+	 * @param serviceContext
+	 *            {@link ServiceContext}.
+	 * @return Service.
+	 */
+	private static <S> S createService(ServiceFactory<S> serviceFactory, ServiceContext serviceContext) {
+
+		// Create the service
+		S service;
+		try {
+			service = serviceFactory.createService(serviceContext);
+
+		} catch (UnknownPropertyError ex) {
+			// Propagate as unknown property for service
+			throw new UnknownPropertyError(ex, serviceFactory);
+
+		} catch (Throwable ex) {
+			// Propagate as load error
+			throw new LoadServiceError(serviceFactory.getClass().getName(), ex);
+		}
+
+		// Ensure have service
+		if (service == null) {
+			throw new LoadServiceError(serviceFactory.getClass().getName(),
+					new Exception("No service created from " + serviceFactory.getClass().getName()));
+		}
+
+		// Return the service
+		return service;
+	}
+
+	/**
+	 * Service {@link Iterator}.
+	 */
+	private static class ServiceIterator<S, F extends ServiceFactory<S>> implements Iterator<S> {
+
+		/**
+		 * {@link Iterator} over the {@link ServiceFactory} instances.
+		 */
+		private final Iterator<F> serviceFactories;
+
+		/**
+		 * Type of {@link ServiceFactory}.
+		 */
+		private final Class<F> serviceFactoryType;
+
+		/**
+		 * {@link ServiceContext}.
+		 */
+		private final ServiceContext serviceContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param serviceFactories
+		 *            {@link Iterator} over the {@link ServiceFactory}
+		 *            instances.
+		 * @param serviceFactoryType
+		 *            Type of {@link ServiceFactory}.
+		 * @param serviceContext
+		 *            {@link ServiceContext}.
+		 */
+		private ServiceIterator(Iterator<F> serviceFactories, Class<F> serviceFactoryType,
+				ServiceContext serviceContext) {
+			this.serviceFactories = serviceFactories;
+			this.serviceFactoryType = serviceFactoryType;
+			this.serviceContext = serviceContext;
+		}
+
+		/*
+		 * ================= Iterator ===================
+		 */
+
+		@Override
+		public boolean hasNext() {
+			return this.serviceFactories.hasNext();
+		}
+
+		@Override
+		public S next() {
+			return nextService(this.serviceFactories, serviceFactoryType, this.serviceContext);
+		}
+	}
+
+	/**
+	 * Default service {@link Iterator}.
+	 */
+	private static class DefaultServiceIterator<S, F extends ServiceFactory<S>> implements Iterator<S> {
+
+		/**
+		 * {@link ServiceFactory}.
+		 */
+		private F defaultServiceFactory;
+
+		/**
+		 * {@link ServiceContext}.
+		 */
+		private final ServiceContext serviceContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param defaultServiceFactory
+		 *            Default {@link ServiceFactory}.
+		 * @param serviceContext
+		 *            {@link ServiceContext}.
+		 */
+		private DefaultServiceIterator(F defaultServiceFactory, ServiceContext serviceContext) {
+			this.defaultServiceFactory = defaultServiceFactory;
+			this.serviceContext = serviceContext;
+		}
+
+		/*
+		 * ================= Iterator ===================
+		 */
+
+		@Override
+		public boolean hasNext() {
+			return this.defaultServiceFactory != null;
+		}
+
+		@Override
+		public S next() {
+
+			// Ensure have next
+			if (this.defaultServiceFactory == null) {
+				throw new NoSuchElementException();
+			}
+
+			// Create the service
+			S service = createService(this.defaultServiceFactory, serviceContext);
+
+			// Clear default, as is next
+			this.defaultServiceFactory = null;
+
+			// Return the service
+			return service;
 		}
 	}
 

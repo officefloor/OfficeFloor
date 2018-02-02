@@ -31,7 +31,9 @@ public interface CompileWebExtension {
 	 * 
 	 * @param context
 	 *            {@link CompileWebContext}.
+	 * @throws Exception
+	 *             If fails to extend.
 	 */
-	void extend(CompileWebContext context);
+	void extend(CompileWebContext context) throws Exception;
 
 }

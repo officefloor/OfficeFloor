@@ -22,14 +22,13 @@ import java.util.function.Consumer;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.impl.construct.source.OfficeFloorIssueTarget;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
@@ -153,20 +152,8 @@ public class RawTeamMetaDataFactory {
 				isRequireThreadLocalAwareness = true;
 			}
 
-		} catch (UnknownPropertyError ex) {
-			// Indicate an unknown property
-			issues.addIssue(AssetType.TEAM, teamName, "Must specify property '" + ex.getUnknownPropertyName() + "'");
-			return null; // can not carry on
-
-		} catch (UnknownClassError ex) {
-			// Indicate an unknown class
-			issues.addIssue(AssetType.TEAM, teamName, "Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // can not carry on
-
-		} catch (UnknownResourceError ex) {
-			// Indicate an unknown resource
-			issues.addIssue(AssetType.TEAM, teamName,
-					"Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(new OfficeFloorIssueTarget(issues, AssetType.TEAM, teamName));
 			return null; // can not carry on
 
 		} catch (Throwable ex) {

@@ -42,11 +42,10 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.source.AbstractSourceError;
+import net.officefloor.frame.api.source.IssueTarget;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
@@ -54,7 +53,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceLoaderImpl implements GovernanceLoader {
+public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 
 	/**
 	 * {@link Node} requiring the {@link Governance}.
@@ -204,16 +203,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			// Initialise the governance source
 			metaData = governanceSource.init(context);
 
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Property '" + ex.getUnknownPropertyName() + "' must be specified");
-			return null; // can not carry on
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // can not carry on
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(this);
 			return null; // can not carry on
 
 		} catch (Throwable ex) {
@@ -430,25 +421,17 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		return escalationTypes;
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	/*
+	 * =================== IssueTarget =========================
 	 */
-	private void addIssue(String issueDescription) {
+
+	@Override
+	public void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void addIssue(String issueDescription, Throwable cause) {
+	@Override
+	public void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 

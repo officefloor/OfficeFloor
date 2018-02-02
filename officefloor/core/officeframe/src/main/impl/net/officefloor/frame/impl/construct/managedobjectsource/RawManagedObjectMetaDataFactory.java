@@ -34,11 +34,10 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFact
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.impl.construct.source.OfficeFloorIssueTarget;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.pool.ManagedObjectPoolContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
@@ -166,19 +165,8 @@ public class RawManagedObjectMetaDataFactory {
 			// Initialise the managed object source
 			metaData = managedObjectSource.init(context);
 
-		} catch (UnknownPropertyError ex) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"Property '" + ex.getUnknownPropertyName() + "' must be specified");
-			return null; // can not carry on
-
-		} catch (UnknownClassError ex) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // can not carry on
-
-		} catch (UnknownResourceError ex) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(new OfficeFloorIssueTarget(issues, AssetType.MANAGED_OBJECT, managedObjectSourceName));
 			return null; // can not carry on
 
 		} catch (Throwable ex) {

@@ -229,7 +229,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.requiredPropertyName = "required.property";
-		this.record_issue("Property 'required.property' must be specified");
+		this.record_issue("Must specify property 'required.property'");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -250,7 +250,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), classLoader);
 		this.sourceContext.loadClass(CLASS_NAME);
-		this.control(this.sourceContext).setThrowable(new UnknownClassError("TEST ERROR", CLASS_NAME));
+		this.control(this.sourceContext).setThrowable(new UnknownClassError(CLASS_NAME));
 		MockManagedObjectSource.classLoader = classLoader;
 		MockManagedObjectSource.requiredClassName = CLASS_NAME;
 		this.record_issue("Can not load class '" + CLASS_NAME + "'");
@@ -272,7 +272,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.sourceContext.getResource(RESOURCE_LOCATION);
-		this.control(this.sourceContext).setThrowable(new UnknownResourceError("TEST ERROR", RESOURCE_LOCATION));
+		this.control(this.sourceContext).setThrowable(new UnknownResourceError(RESOURCE_LOCATION));
 		MockManagedObjectSource.requiredResourceLocation = RESOURCE_LOCATION;
 		this.record_issue("Can not obtain resource at location '" + RESOURCE_LOCATION + "'");
 

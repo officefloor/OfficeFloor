@@ -40,8 +40,7 @@ public class SourcePropertiesTest extends OfficeFrameTestCase {
 	 */
 	public void testAddAndGetProperty() {
 		this.properties.addProperty("name", "value");
-		assertEquals("Should retrieve property", "value",
-				this.properties.getProperty("name"));
+		assertEquals("Should retrieve property", "value", this.properties.getProperty("name"));
 	}
 
 	/**
@@ -52,10 +51,8 @@ public class SourcePropertiesTest extends OfficeFrameTestCase {
 			this.properties.getProperty("unknown");
 			fail("Should not successful obtain unknown property");
 		} catch (UnknownPropertyError ex) {
-			assertEquals("Incorrect property", "unknown",
-					ex.getUnknownPropertyName());
-			assertEquals("Incorrect message", "Unknown property 'unknown'",
-					ex.getMessage());
+			assertEquals("Incorrect property", "unknown", ex.getUnknownPropertyName());
+			assertEquals("Incorrect message", "Must specify property 'unknown'", ex.getMessage());
 		}
 	}
 
@@ -64,16 +61,14 @@ public class SourcePropertiesTest extends OfficeFrameTestCase {
 	 */
 	public void testNotDefaultProperty() {
 		this.properties.addProperty("name", "value");
-		assertEquals("Should use property value", "value",
-				this.properties.getProperty("name", "default"));
+		assertEquals("Should use property value", "value", this.properties.getProperty("name", "default"));
 	}
 
 	/**
 	 * Ensure defaults property name.
 	 */
 	public void testDefaultProperty() {
-		assertEquals("Should default property", "default",
-				this.properties.getProperty("unknown", "default"));
+		assertEquals("Should default property", "default", this.properties.getProperty("unknown", "default"));
 	}
 
 	/**

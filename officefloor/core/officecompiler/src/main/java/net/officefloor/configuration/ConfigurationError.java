@@ -17,8 +17,7 @@
  */
 package net.officefloor.configuration;
 
-import net.officefloor.compile.internal.structure.Node;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.api.source.AbstractSourceError;
 
 /**
  * <p>
@@ -29,7 +28,7 @@ import net.officefloor.compile.issues.CompilerIssues;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConfigurationError extends Error {
+public class ConfigurationError extends AbstractSourceError {
 
 	/**
 	 * Location of the configuration.
@@ -50,6 +49,7 @@ public class ConfigurationError extends Error {
 	 *            Location of missing {@link ConfigurationItem}.
 	 */
 	public ConfigurationError(String missingLocation) {
+		super("Can not obtain " + ConfigurationItem.class.getSimpleName() + " at location '" + missingLocation + "'");
 		this.configurationLocation = missingLocation;
 		this.nonconfiguredTagName = null;
 	}
@@ -63,7 +63,8 @@ public class ConfigurationError extends Error {
 	 *            {@link Throwable} cause.
 	 */
 	public ConfigurationError(String configurationLocation, Throwable cause) {
-		super(cause);
+		super("Failed to obtain " + ConfigurationItem.class.getSimpleName() + " at location '" + configurationLocation
+				+ "': " + cause.getMessage(), cause);
 		this.configurationLocation = configurationLocation;
 		this.nonconfiguredTagName = null;
 	}
@@ -77,6 +78,8 @@ public class ConfigurationError extends Error {
 	 *            Name of tag in configuration that is not configured.
 	 */
 	public ConfigurationError(String configurationLocation, String nonconfiguredTagName) {
+		super("Can not obtain " + ConfigurationItem.class.getSimpleName() + " at location '" + configurationLocation
+				+ "' as missing property '" + nonconfiguredTagName + "'");
 		this.configurationLocation = configurationLocation;
 		this.nonconfiguredTagName = nonconfiguredTagName;
 	}
@@ -97,34 +100,6 @@ public class ConfigurationError extends Error {
 	 */
 	public String getNonconfiguredTagName() {
 		return this.nonconfiguredTagName;
-	}
-
-	/**
-	 * Convenience method to add this as an issue to the {@link CompilerIssues}.
-	 * 
-	 * @param node
-	 *            {@link Node} handling this.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 */
-	public void addConfigurationIssue(Node node, CompilerIssues issues) {
-
-		// Determine if failure
-		Throwable failure = this.getCause();
-		if (failure != null) {
-			issues.addIssue(node, "Failed to obtain " + ConfigurationItem.class.getSimpleName() + " at location '"
-					+ this.configurationLocation + "': " + failure.getMessage(), failure);
-
-		} else {
-			// Obtain details of configuration issue
-			StringBuilder message = new StringBuilder();
-			message.append("Can not obtain " + ConfigurationItem.class.getSimpleName() + " at location '"
-					+ this.configurationLocation + "'");
-			if (this.nonconfiguredTagName != null) {
-				message.append(" as missing property '" + this.nonconfiguredTagName + "'");
-			}
-			issues.addIssue(node, message.toString());
-		}
 	}
 
 }

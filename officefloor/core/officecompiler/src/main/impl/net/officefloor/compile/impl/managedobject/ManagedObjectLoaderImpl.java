@@ -51,9 +51,8 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.source.AbstractSourceError;
+import net.officefloor.frame.api.source.IssueTarget;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
@@ -70,7 +69,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
+public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget {
 
 	/**
 	 * {@link Node} requiring the {@link ManagedObject}.
@@ -242,17 +241,9 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			// Initialise the managed object source
 			metaData = managedObjectSource.init(sourceContext);
 
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "'");
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(this);
 			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
-			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to init", ex);
@@ -893,25 +884,17 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		return extensionInterfaces;
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	/*
+	 * ================== IssueTarget ==================
 	 */
-	private void addIssue(String issueDescription) {
+
+	@Override
+	public void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void addIssue(String issueDescription, Throwable cause) {
+	@Override
+	public void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 

@@ -29,9 +29,8 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.source.AbstractSourceError;
+import net.officefloor.frame.api.source.IssueTarget;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceProperty;
@@ -44,7 +43,7 @@ import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamLoaderImpl implements TeamLoader {
+public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 
 	/**
 	 * {@link Node} requiring the {@link Team}.
@@ -194,24 +193,12 @@ public class TeamLoaderImpl implements TeamLoader {
 					new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]),
 					new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
 
-		} catch (UnknownPropertyError ex) {
-			this.nodeContext.getCompilerIssues().addIssue(this.node,
-					"Missing property '" + ex.getUnknownPropertyName() + "'");
-			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.nodeContext.getCompilerIssues().addIssue(this.node,
-					"Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.nodeContext.getCompilerIssues().addIssue(this.node,
-					"Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
-			return null; // must have resource
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(this);
+			return null; // can not carry on
 
 		} catch (Throwable ex) {
-			this.nodeContext.getCompilerIssues().addIssue(this.node,
-					"Failed to initialise " + teamSource.getClass().getName(), ex);
+			this.addIssue("Failed to initialise " + teamSource.getClass().getName(), ex);
 			return null; // failed loading team
 		}
 
@@ -271,25 +258,17 @@ public class TeamLoaderImpl implements TeamLoader {
 		return new OfficeFloorTeamSourceTypeImpl(teamName, PropertyNode.constructPropertyNodes(properties));
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	/*
+	 * ==================== IssueTarget ==========================
 	 */
-	private void addIssue(String issueDescription) {
+
+	@Override
+	public void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void addIssue(String issueDescription, Throwable cause) {
+	@Override
+	public void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 

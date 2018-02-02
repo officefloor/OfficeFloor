@@ -23,6 +23,8 @@ import java.util.Properties;
 
 import javax.transaction.xa.XAResource;
 
+import net.officefloor.compile.FailServiceFactory;
+import net.officefloor.compile.MissingServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administration.AdministrationEscalationType;
 import net.officefloor.compile.administration.AdministrationFlowType;
@@ -102,14 +104,11 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("Missing property 'missing'");
+		this.issues.recordIssue("Must specify property 'missing'");
 
 		// Attempt to load
-		this.loadAdministrationType(false, new Init() {
-			@Override
-			public void init(AdministrationSourceContext context) {
-				context.getProperty("missing");
-			}
+		this.loadAdministrationType(false, (context) -> {
+			context.getProperty("missing");
 		});
 	}
 
@@ -128,17 +127,14 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 				new AdministrationGovernanceMetaData[0]);
 
 		// Attempt to load
-		this.loadAdministrationType(true, new Init() {
-			@Override
-			public void init(AdministrationSourceContext context) {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
-			}
+		this.loadAdministrationType(true, (context) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
 	}
 
@@ -151,11 +147,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not load class 'missing'");
 
 		// Attempt to load
-		this.loadAdministrationType(false, new Init() {
-			@Override
-			public void init(AdministrationSourceContext context) {
-				context.loadClass("missing");
-			}
+		this.loadAdministrationType(false, (context) -> {
+			context.loadClass("missing");
 		});
 	}
 
@@ -168,12 +161,33 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
-		this.loadAdministrationType(false, new Init() {
-			@Override
-			public void init(AdministrationSourceContext context) {
-				context.getResource("missing");
-			}
+		this.loadAdministrationType(false, (context) -> {
+			context.getResource("missing");
 		});
+	}
+
+	/**
+	 * Ensure issue if missing service.
+	 */
+	public void testMissingService() {
+
+		// Record missing service
+		this.issues.recordIssue(MissingServiceFactory.getIssueDescription());
+
+		// Attempt to load
+		this.loadAdministrationType(false, (context) -> context.loadService(MissingServiceFactory.class, null));
+	}
+
+	/**
+	 * Ensure issue if fail to load service.
+	 */
+	public void testFailLoadService() {
+
+		// Record load issue for service
+		this.issues.recordIssue(FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
+
+		// Attempt to load
+		this.loadAdministrationType(false, (context) -> context.loadService(FailServiceFactory.class, null));
 	}
 
 	/**
@@ -187,11 +201,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Failed to init", failure);
 
 		// Attempt to load
-		this.loadAdministrationType(false, new Init() {
-			@Override
-			public void init(AdministrationSourceContext context) {
-				throw failure;
-			}
+		this.loadAdministrationType(false, (context) -> {
+			throw failure;
 		});
 	}
 
@@ -204,11 +215,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Returned null AdministrationSourceMetaData");
 
 		// Attempt to load
-		this.loadAdministrationType(false, new Init() {
-			@Override
-			public void init(AdministrationSourceContext context) {
-				MockAdministrationSource.metaData = null;
-			}
+		this.loadAdministrationType(false, (context) -> {
+			MockAdministrationSource.metaData = null;
 		});
 	}
 

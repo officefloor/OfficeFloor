@@ -42,11 +42,10 @@ import net.officefloor.compile.spi.administration.source.AdministrationSourceSpe
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.source.AbstractSourceError;
+import net.officefloor.frame.api.source.IssueTarget;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
@@ -54,7 +53,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationLoaderImpl implements AdministrationLoader {
+public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarget {
 
 	/**
 	 * {@link Node} requiring the {@link Administration}.
@@ -214,17 +213,9 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 			// Initialise the administrator source
 			metaData = administratorSource.init(context);
 
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "'");
-			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
-			return null; // must have resource
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(this);
+			return null; // can not carry on
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to init", ex);
@@ -411,25 +402,17 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 				escalationTypes, governanceKeyClass, governanceTypes);
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	/*
+	 * =================== IssueTarget =======================
 	 */
-	private void addIssue(String issueDescription) {
+
+	@Override
+	public void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void addIssue(String issueDescription, Throwable cause) {
+	@Override
+	public void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 

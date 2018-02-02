@@ -41,9 +41,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceS
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.source.AbstractSourceError;
+import net.officefloor.frame.api.source.IssueTarget;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -51,7 +50,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
+public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTarget {
 
 	/**
 	 * {@link Node} requiring the {@link ManagedFunction} instances.
@@ -206,20 +205,9 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 			// Source the managed function type
 			managedFunctionSource.sourceManagedFunctions(namespaceType, context);
 
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(this);
 			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
-			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + FunctionNamespaceType.class.getSimpleName() + " definition from "
@@ -767,23 +755,17 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 				functionIndex, functionName, managedFunctionSourceClass));
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	/*
+	 * ================== IssueTarget ========================
 	 */
-	private void addIssue(String issueDescription) {
+
+	@Override
+	public void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void addIssue(String issueDescription, Throwable cause) {
+	@Override
+	public void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 

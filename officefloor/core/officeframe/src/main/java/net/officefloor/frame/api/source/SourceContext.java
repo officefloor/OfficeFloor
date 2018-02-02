@@ -19,6 +19,7 @@ package net.officefloor.frame.api.source;
 
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
+import java.util.ServiceLoader;
 
 /**
  * Generic context for a source.
@@ -85,6 +86,72 @@ public interface SourceContext extends SourceProperties {
 	 *             will handle it.
 	 */
 	InputStream getResource(String location) throws UnknownResourceError;
+
+	/**
+	 * Loads a single service.
+	 * 
+	 * @param serviceFactoryType
+	 *            Type of {@link ServiceFactory}.
+	 * @param defaultServiceFactory
+	 *            Default {@link ServiceFactory} implementation. May be
+	 *            <code>null</code> to indicate no default service (one must be
+	 *            configured).
+	 * @return Service.
+	 * @throws UnknownServiceError
+	 *             If service is not configured and no default provided. Will
+	 *             also be thrown if more than one service is configured.
+	 * @throws LoadServiceError
+	 *             If fails to load the service.
+	 */
+	<S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType, D defaultServiceFactory)
+			throws UnknownServiceError, LoadServiceError;
+
+	/**
+	 * Optionally loads a single service.
+	 * 
+	 * @param serviceFactoryType
+	 *            Type of {@link ServiceFactory}.
+	 * @param defaultServiceFactory
+	 *            Default {@link ServiceFactory} implementation. May be
+	 *            <code>null</code> for service to optional.
+	 * @return Service or <code>null</code> if no service configured.
+	 * @throws LoadServiceError
+	 *             If fails to load the service or {@link ServiceLoader} finds
+	 *             more than one service configured.
+	 */
+	<S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType) throws LoadServiceError;
+
+	/**
+	 * Loads multiple services.
+	 * 
+	 * @param serviceFactoryType
+	 *            Type of {@link ServiceFactory}.
+	 * @param defaultServiceFactory
+	 *            Default {@link ServiceFactory} implementation. May be
+	 *            <code>null</code> to indicate no default service.
+	 * @return {@link Iterable} over the services. The {@link Iterable} may also
+	 *         throw {@link LoadServiceError} if fails to create next service.
+	 * @throws UnknownServiceError
+	 *             If no services are configured and no default provided.
+	 * @throws LoadServiceError
+	 *             If fails to load a service.
+	 */
+	<S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
+			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError;
+
+	/**
+	 * Optionally loads multiple services.
+	 * 
+	 * @param serviceFactoryType
+	 *            Type of {@link ServiceFactory}.
+	 * @return {@link Iterable} over the services. May be no entries available.
+	 *         The {@link Iterable} may also throw {@link LoadServiceError} if
+	 *         fails to create next service.
+	 * @throws LoadServiceError
+	 *             If fails to load a service.
+	 */
+	<S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
+			throws LoadServiceError;
 
 	/**
 	 * <p>

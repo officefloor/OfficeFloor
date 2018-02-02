@@ -78,7 +78,6 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionSer
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
-import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -88,9 +87,7 @@ import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -515,24 +512,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 				extensionService.extendOfficeFloor(this, sourceContext);
 			}
 
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
-					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
-			return false; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
-					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
-			return false; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
-					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
-			return false; // must have resource
-
-		} catch (ConfigurationError ex) {
-			ex.addConfigurationIssue(this, this.context.getCompilerIssues());
-			return false; // must have configuration
+		} catch (AbstractSourceError ex) {
+			ex.addIssue(new SourceIssuesIssueTarget(this));
+			return false; // can not carry on
 
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());

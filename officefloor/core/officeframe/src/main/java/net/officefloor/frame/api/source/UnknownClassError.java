@@ -26,7 +26,7 @@ package net.officefloor.frame.api.source;
  * 
  * @author Daniel Sagenschneider
  */
-public class UnknownClassError extends Error {
+public class UnknownClassError extends AbstractSourceError {
 
 	/**
 	 * Name of the unknown {@link Class}.
@@ -36,14 +36,25 @@ public class UnknownClassError extends Error {
 	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Message.
 	 * @param unknownClassName
 	 *            Name of the unknown {@link Class}.
 	 */
-	public UnknownClassError(String message, String unknownClassName) {
-		super(message);
+	public UnknownClassError(String unknownClassName) {
+		super("Can not load class '" + unknownClassName + "'");
 		this.unknownClassName = unknownClassName;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param unknownClassError
+	 *            Triggering {@link UnknownClassError}.
+	 * @param serviceFactory
+	 *            {@link ServiceFactory} requiring the property.
+	 */
+	public UnknownClassError(UnknownClassError unknownClassError, ServiceFactory<?> serviceFactory) {
+		super(unknownClassError, serviceFactory);
+		this.unknownClassName = unknownClassError.unknownClassName;
 	}
 
 	/**

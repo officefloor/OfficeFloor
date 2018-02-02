@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.team;
 
+import net.officefloor.compile.FailServiceFactory;
+import net.officefloor.compile.MissingServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -51,14 +53,11 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("Missing property 'missing'");
+		this.issues.recordIssue("Must specify property 'missing'");
 
 		// Attempt to load
-		this.loadTeamType(false, new Loader() {
-			@Override
-			public void sourceTeam(TeamSourceContext context) throws Exception {
-				context.getProperty("missing");
-			}
+		this.loadTeamType(false, (context) -> {
+			context.getProperty("missing");
 		});
 	}
 
@@ -71,11 +70,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not load class 'missing'");
 
 		// Attempt to load
-		this.loadTeamType(false, new Loader() {
-			@Override
-			public void sourceTeam(TeamSourceContext context) throws Exception {
-				context.loadClass("missing");
-			}
+		this.loadTeamType(false, (context) -> {
+			context.loadClass("missing");
 		});
 	}
 
@@ -88,12 +84,33 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
-		this.loadTeamType(false, new Loader() {
-			@Override
-			public void sourceTeam(TeamSourceContext context) throws Exception {
-				context.getResource("missing");
-			}
+		this.loadTeamType(false, (context) -> {
+			context.getResource("missing");
 		});
+	}
+
+	/**
+	 * Ensure issue if missing service.
+	 */
+	public void testMissingService() {
+
+		// Record missing service
+		this.issues.recordIssue(MissingServiceFactory.getIssueDescription());
+
+		// Attempt to load
+		this.loadTeamType(false, (context) -> context.loadService(MissingServiceFactory.class, null));
+	}
+
+	/**
+	 * Ensure issue if fail to load service.
+	 */
+	public void testFailLoadService() {
+
+		// Record load issue for service
+		this.issues.recordIssue(FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
+
+		// Attempt to load
+		this.loadTeamType(false, (context) -> context.loadService(FailServiceFactory.class, null));
 	}
 
 	/**
