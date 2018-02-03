@@ -55,7 +55,8 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 		OfficeFloorManagedObjectSource http = deployer.addManagedObjectSource("HTTP",
 				new HttpServerSocketManagedObjectSource(serverLocation, isIncludeEscalationStackTrace));
 		deployer.link(http.getManagingOffice(), office);
-		deployer.link(http.getSectionManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
+		deployer.link(
+				http.getOfficeFloorManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
 				serviceInput);
 		deployer.link(http, input);
 
@@ -66,8 +67,8 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 					new HttpServerSocketManagedObjectSource(serverLocation, isIncludeEscalationStackTrace,
 							context.getSslContext()));
 			deployer.link(https.getManagingOffice(), office);
-			deployer.link(https.getSectionManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
-					serviceInput);
+			deployer.link(https.getOfficeFloorManagedObjectFlow(
+					HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()), serviceInput);
 			deployer.link(https, input);
 
 			// Specify default bound name
