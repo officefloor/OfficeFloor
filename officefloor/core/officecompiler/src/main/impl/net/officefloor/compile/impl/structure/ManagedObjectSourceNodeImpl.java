@@ -73,6 +73,8 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
@@ -1022,6 +1024,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public OfficeFloorManagedObject addOfficeFloorManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
+	}
+
+	@Override
+	public OfficeFloorManagedObjectFlow getOfficeFloorManagedObjectFlow(String managedObjectSourceFlowName) {
+		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
+				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+	}
+
+	@Override
+	public OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(
+			String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
 	}
 
 	/*

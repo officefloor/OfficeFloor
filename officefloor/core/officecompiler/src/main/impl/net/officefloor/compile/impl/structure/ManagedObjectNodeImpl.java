@@ -56,6 +56,7 @@ import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -593,6 +594,13 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getOfficeFloorManagedObjectName() {
 		return this.managedObjectName;
+	}
+
+	@Override
+	public OfficeFloorManagedObjectDependency getOfficeFloorManagedObjectDependency(
+			String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
 	}
 
 	/*

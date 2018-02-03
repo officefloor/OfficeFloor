@@ -18,11 +18,6 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.issues.SourceIssues;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -200,16 +195,6 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	DeployedOffice getDeployedOffice(String officeName);
 
 	/**
-	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeFloorTeam}.
-	 * 
-	 * @param team
-	 *            {@link ManagedObjectTeam}.
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeam}.
-	 */
-	void link(ManagedObjectTeam team, OfficeFloorTeam officeFloorTeam);
-
-	/**
 	 * Links the {@link OfficeFloorInputManagedObject} to be input by the
 	 * {@link OfficeFloorManagedObjectSource}.
 	 * 
@@ -232,37 +217,38 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	void link(OfficeFloorManagedObjectSource managedObjectSource, OfficeFloorManagedObjectPool managedObjectPool);
 
 	/**
-	 * Links the {@link ManagedObjectDependency} to be the
-	 * {@link OfficeFloorManagedObject}.
+	 * Links the {@link OfficeFloorFlowSourceNode} to be undertake by the
+	 * {@link OfficeFloorFlowSinkNode}.
 	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependency}.
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject}.
+	 * @param flowSourceNode
+	 *            {@link OfficeFloorFlowSourceNode}.
+	 * @param flowSinkNode
+	 *            {@link OfficeFloorFlowSinkNode}.
 	 */
-	void link(ManagedObjectDependency dependency, OfficeFloorManagedObject managedObject);
+	void link(OfficeFloorFlowSourceNode flowSourceNode, OfficeFloorFlowSinkNode flowSinkNode);
 
 	/**
-	 * Links the {@link ManagedObjectDependency} to be the
-	 * {@link OfficeFloorInputManagedObject}.
+	 * Links the {@link OfficeFloorDependencyObjectNode} to be fulfilled by the
+	 * {@link OfficeFloorDependencyObjectNode}.
 	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependency}.
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObject}.
+	 * @param dependencyRequireNode
+	 *            {@link OfficeFloorDependencyRequireNode}.
+	 * @param dependencyObjectNode
+	 *            {@link OfficeFloorDependencyObjectNode}.
 	 */
-	void link(ManagedObjectDependency dependency, OfficeFloorInputManagedObject inputManagedObject);
+	void link(OfficeFloorDependencyRequireNode dependencyRequireNode,
+			OfficeFloorDependencyObjectNode dependencyObjectNode);
 
 	/**
-	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link DeployedOfficeInput}.
+	 * Links the {@link OfficeFloorResponsibility} to the
+	 * {@link OfficeFloorTeam}.
 	 * 
-	 * @param flow
-	 *            {@link ManagedObjectFlow}.
-	 * @param input
-	 *            {@link DeployedOfficeInput}.
+	 * @param responsibility
+	 *            {@link OfficeFloorResponsibility}.
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeam}.
 	 */
-	void link(ManagedObjectFlow flow, DeployedOfficeInput input);
+	void link(OfficeFloorResponsibility responsibility, OfficeFloorTeam officeFloorTeam);
 
 	/**
 	 * Links the {@link ManagingOffice} to be managed by the
@@ -274,37 +260,5 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	 *            {@link DeployedOffice}.
 	 */
 	void link(ManagingOffice managingOffice, DeployedOffice office);
-
-	/**
-	 * Links the {@link OfficeTeam} to be the {@link OfficeFloorTeam}.
-	 * 
-	 * @param team
-	 *            {@link OfficeTeam}.
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeam}.
-	 */
-	void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam);
-
-	/**
-	 * Links the {@link OfficeObject} to be the {@link OfficeFloorManagedObject}
-	 * .
-	 * 
-	 * @param officeObject
-	 *            {@link OfficeObject}.
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject}.
-	 */
-	void link(OfficeObject officeObject, OfficeFloorManagedObject managedObject);
-
-	/**
-	 * Links the {@link OfficeObject} to be the
-	 * {@link OfficeFloorInputManagedObject}.
-	 * 
-	 * @param officeObject
-	 *            {@link OfficeObject}.
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObject}.
-	 */
-	void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject);
 
 }

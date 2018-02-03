@@ -20,6 +20,7 @@ package net.officefloor.compile.spi.managedobject;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeResponsibility;
+import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.frame.api.team.Team;
 
 /**
@@ -27,7 +28,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectTeam extends OfficeResponsibility {
+public interface ManagedObjectTeam extends OfficeResponsibility, OfficeFloorResponsibility {
 
 	/**
 	 * Obtains the name of the {@link ManagedObjectTeam}.

@@ -34,6 +34,8 @@ import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -562,7 +564,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeFloorManagedObject mo = moSource.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
-		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
+		OfficeFloorManagedObjectDependency dependency = mo.getOfficeFloorManagedObjectDependency("DEPENDENCY");
 		OfficeFloorManagedObjectSource moSourceTarget = this.addManagedObjectSource(this.node, "MO_SOURCE_TARGET",
 				null);
 		OfficeFloorManagedObject moTarget = moSourceTarget.addOfficeFloorManagedObject("MO_TARGET",
@@ -593,7 +595,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeFloorManagedObject mo = moSource.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
-		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
+		OfficeFloorManagedObjectDependency dependency = mo.getOfficeFloorManagedObjectDependency("DEPENDENCY");
 		OfficeFloorInputManagedObject inputMoTarget = this.node.addInputManagedObject("INPUT_TARGET",
 				String.class.getName());
 		this.node.link(dependency, inputMoTarget);
@@ -620,7 +622,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
-		ManagedObjectDependency dependency = moSource.getInputSectionManagedObjectDependency("DEPENDENCY");
+		OfficeFloorManagedObjectDependency dependency = moSource
+				.getInputOfficeFloorManagedObjectDependency("DEPENDENCY");
 		OfficeFloorManagedObjectSource moSourceTarget = this.addManagedObjectSource(this.node, "MO_SOURCE_TARGET",
 				null);
 		OfficeFloorManagedObject moTarget = moSourceTarget.addOfficeFloorManagedObject("MO_TARGET",
@@ -649,7 +652,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO", null);
-		ManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
+		OfficeFloorManagedObjectFlow flow = moSource.getOfficeFloorManagedObjectFlow("FLOW");
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE", null);
 		DeployedOfficeInput input = office.getDeployedOfficeInput("SECTION", "INPUT");
 		this.node.link(flow, input);

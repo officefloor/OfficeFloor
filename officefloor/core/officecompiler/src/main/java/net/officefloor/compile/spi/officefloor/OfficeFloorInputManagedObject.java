@@ -27,7 +27,7 @@ import net.officefloor.frame.api.team.Team;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorInputManagedObject {
+public interface OfficeFloorInputManagedObject extends OfficeFloorDependencyObjectNode {
 
 	/**
 	 * Obtains the name of this {@link OfficeFloorInputManagedObject}.

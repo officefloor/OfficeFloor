@@ -18,6 +18,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
 
@@ -26,7 +27,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeam {
+public interface OfficeTeam extends OfficeFloorResponsibility {
 
 	/**
 	 * Obtains the name of this {@link OfficeTeam}.

@@ -30,7 +30,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DeployedOfficeInput {
+public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 
 	/**
 	 * Obtains the name of the {@link DeployedOfficeInput}.

@@ -18,6 +18,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -28,8 +29,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeObject extends OfficeDependencyObjectNode, DependentManagedObject, AdministerableManagedObject,
-		GovernerableManagedObject {
+public interface OfficeObject extends OfficeDependencyObjectNode, OfficeFloorDependencyRequireNode,
+		DependentManagedObject, AdministerableManagedObject, GovernerableManagedObject {
 
 	/**
 	 * Obtains the name that the {@link OfficeSource} refers to this

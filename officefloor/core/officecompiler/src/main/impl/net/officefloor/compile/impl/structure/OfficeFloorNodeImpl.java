@@ -59,19 +59,18 @@ import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyObjectNode;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
+import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSinkNode;
+import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSourceNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
@@ -400,43 +399,24 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public void link(ManagedObjectTeam team, OfficeFloorTeam officeFloorTeam) {
-		LinkUtil.linkTeam(team, officeFloorTeam, this.context.getCompilerIssues(), this);
+	public void link(OfficeFloorFlowSourceNode flowSourceNode, OfficeFloorFlowSinkNode flowSinkNode) {
+		LinkUtil.linkFlow(flowSourceNode, flowSinkNode, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(ManagedObjectDependency dependency, OfficeFloorManagedObject managedObject) {
-		LinkUtil.linkObject(dependency, managedObject, this.context.getCompilerIssues(), this);
+	public void link(OfficeFloorDependencyRequireNode dependencyRequireNode,
+			OfficeFloorDependencyObjectNode dependencyObjectNode) {
+		LinkUtil.linkObject(dependencyRequireNode, dependencyObjectNode, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(ManagedObjectDependency dependency, OfficeFloorInputManagedObject inputManagedObject) {
-		LinkUtil.linkObject(dependency, inputManagedObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(ManagedObjectFlow flow, DeployedOfficeInput input) {
-		LinkUtil.linkFlow(flow, input, this.context.getCompilerIssues(), this);
+	public void link(OfficeFloorResponsibility responsibility, OfficeFloorTeam officeFloorTeam) {
+		LinkUtil.linkTeam(responsibility, officeFloorTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagingOffice managingOffice, DeployedOffice office) {
 		LinkUtil.linkOffice(managingOffice, office, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam) {
-		LinkUtil.linkTeam(team, officeFloorTeam, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(OfficeObject requiredManagedObject, OfficeFloorManagedObject officeFloorManagedObject) {
-		LinkUtil.linkObject(requiredManagedObject, officeFloorManagedObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject) {
-		LinkUtil.linkObject(officeObject, inputManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
