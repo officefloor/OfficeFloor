@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,13 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.frame.api.manage.Office;
+
 /**
- * Input into the {@link OfficeSection}.
+ * {@link Office} {@link ManagedObjectFlow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionInput extends OfficeFlowSinkNode {
-
-	/**
-	 * Obtains the {@link OfficeSection} containing this
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @return {@link OfficeSection} containing this {@link OfficeSectionInput}.
-	 */
-	OfficeSection getOfficeSection();
-
-	/**
-	 * Obtains the name of this {@link OfficeSectionInput}.
-	 * 
-	 * @return Name of this {@link OfficeSectionInput}.
-	 */
-	String getOfficeSectionInputName();
-
-	/**
-	 * Adds an {@link ExecutionExplorer} for the execution tree from this
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @param executionExplorer
-	 *            {@link ExecutionExplorer}.
-	 */
-	void addExecutionExplorer(ExecutionExplorer executionExplorer);
-
+public interface OfficeManagedObjectFlow extends ManagedObjectFlow, OfficeFlowSourceNode {
 }

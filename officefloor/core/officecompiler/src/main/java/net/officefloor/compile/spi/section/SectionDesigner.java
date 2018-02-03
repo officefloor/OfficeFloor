@@ -231,11 +231,11 @@ public interface SectionDesigner extends SourceIssues {
 	 * Links the {@link SectionDependencyRequireNode} to be fulfilled by the
 	 * {@link SectionDependencyObjectNode}.
 	 * 
-	 * @param sectionRequireNode
+	 * @param dependencyRequireNode
 	 *            {@link SectionDependencyRequireNode}.
-	 * @param sectionObjectNode
+	 * @param dependencyObjectNode
 	 *            {@link SectionDependencyObjectNode}.
 	 */
-	void link(SectionDependencyRequireNode sectionRequireNode, SectionDependencyObjectNode sectionObjectNode);
+	void link(SectionDependencyRequireNode dependencyRequireNode, SectionDependencyObjectNode dependencyObjectNode);
 
 }

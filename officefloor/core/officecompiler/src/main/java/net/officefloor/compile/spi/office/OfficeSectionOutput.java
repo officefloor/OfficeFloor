@@ -22,7 +22,7 @@ package net.officefloor.compile.spi.office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionOutput {
+public interface OfficeSectionOutput extends OfficeFlowSourceNode {
 
 	/**
 	 * Obtains the {@link OfficeSection} containing this

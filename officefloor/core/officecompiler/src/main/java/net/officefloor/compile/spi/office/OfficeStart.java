@@ -25,7 +25,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeStart {
+public interface OfficeStart extends OfficeFlowSourceNode {
 
 	/**
 	 * Obtains the name of this {@link Office} start-up trigger.

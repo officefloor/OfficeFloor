@@ -28,7 +28,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeObject extends DependentManagedObject, AdministerableManagedObject, GovernerableManagedObject {
+public interface OfficeObject extends OfficeDependencyObjectNode, DependentManagedObject, AdministerableManagedObject,
+		GovernerableManagedObject {
 
 	/**
 	 * Obtains the name that the {@link OfficeSource} refers to this

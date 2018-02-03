@@ -22,7 +22,7 @@ package net.officefloor.compile.spi.office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionObject {
+public interface OfficeSectionObject extends OfficeDependencyRequireNode {
 
 	/**
 	 * Obtains the {@link OfficeSection} containing this

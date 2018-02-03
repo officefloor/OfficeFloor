@@ -68,6 +68,8 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
+import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
@@ -924,24 +926,6 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		this.timeout = timeout;
 	}
 
-	@Override
-	public SectionManagedObjectFlow getSectionManagedObjectFlow(String managedObjectSourceFlowName) {
-		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
-				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
-	}
-
-	@Override
-	public ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName) {
-		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
-				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
-	}
-
-	@Override
-	public SectionManagedObjectDependency getInputSectionManagedObjectDependency(String managedObjectDependencyName) {
-		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
-				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
-	}
-
 	/*
 	 * ==================== SectionManagedObjectSource =========================
 	 */
@@ -955,6 +939,18 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public SectionManagedObject addSectionManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
+	}
+
+	@Override
+	public SectionManagedObjectFlow getSectionManagedObjectFlow(String managedObjectSourceFlowName) {
+		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
+				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+	}
+
+	@Override
+	public SectionManagedObjectDependency getInputSectionManagedObjectDependency(String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
 	}
 
 	/*
@@ -988,6 +984,24 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public OfficeManagedObject addOfficeManagedObject(String managedObjectName, ManagedObjectScope managedObjectScope) {
 		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
+	}
+
+	@Override
+	public OfficeManagedObjectFlow getOfficeManagedObjectFlow(String managedObjectSourceFlowName) {
+		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
+				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+	}
+
+	@Override
+	public OfficeManagedObjectDependency getInputOfficeManagedObjectDependency(String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	@Override
+	public ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName) {
+		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
+				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
 	}
 
 	/*

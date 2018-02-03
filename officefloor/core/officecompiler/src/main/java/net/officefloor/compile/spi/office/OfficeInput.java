@@ -24,7 +24,7 @@ import net.officefloor.frame.api.manage.Office;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeInput {
+public interface OfficeInput extends OfficeFlowSourceNode {
 
 	/**
 	 * Obtains the name of this {@link OfficeInput}.

@@ -1008,8 +1008,9 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void link(SectionDependencyRequireNode sectionRequireNode, SectionDependencyObjectNode sectionObjectNode) {
-		LinkUtil.linkObject(sectionRequireNode, sectionObjectNode, this.context.getCompilerIssues(), this);
+	public void link(SectionDependencyRequireNode dependencyRequireNode,
+			SectionDependencyObjectNode dependencyObjectNode) {
+		LinkUtil.linkObject(dependencyRequireNode, dependencyObjectNode, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

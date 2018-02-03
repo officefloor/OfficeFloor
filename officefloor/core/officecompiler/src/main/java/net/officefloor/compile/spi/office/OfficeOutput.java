@@ -22,7 +22,7 @@ package net.officefloor.compile.spi.office;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeOutput {
+public interface OfficeOutput extends OfficeFlowSinkNode {
 
 	/**
 	 * Obtains the name of this {@link OfficeOutput}.

@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 
 /**
@@ -28,7 +29,7 @@ import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectDependencyNode
-		extends LinkObjectNode, ManagedObjectDependency, SectionManagedObjectDependency {
+		extends LinkObjectNode, ManagedObjectDependency, SectionManagedObjectDependency, OfficeManagedObjectDependency {
 
 	/**
 	 * {@link Node} type.

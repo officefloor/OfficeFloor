@@ -25,5 +25,5 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResponsibleTeam {
+public interface ResponsibleTeam extends OfficeResponsibility {
 }

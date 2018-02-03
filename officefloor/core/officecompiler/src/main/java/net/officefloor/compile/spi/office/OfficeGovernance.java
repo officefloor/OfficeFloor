@@ -26,7 +26,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeGovernance extends PropertyConfigurable {
+public interface OfficeGovernance extends PropertyConfigurable, OfficeResponsibility {
 
 	/**
 	 * Obtains the name of this {@link OfficeGovernance}.

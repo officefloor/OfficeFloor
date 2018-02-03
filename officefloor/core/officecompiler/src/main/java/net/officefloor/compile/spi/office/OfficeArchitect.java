@@ -20,9 +20,6 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -280,49 +277,6 @@ public interface OfficeArchitect extends SourceIssues {
 	OfficeStart addOfficeStart(String startName);
 
 	/**
-	 * Links the {@link OfficeInput} to be handled by the
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @param input
-	 *            {@link OfficeInput}.
-	 * @param sectionInput
-	 *            {@link OfficeSectionInput}.
-	 */
-	void link(OfficeInput input, OfficeSectionInput sectionInput);
-
-	/**
-	 * Links the {@link OfficeSectionOutput} to be handled by the
-	 * {@link OfficeOutput}.
-	 * 
-	 * @param sectionOutput
-	 *            {@link OfficeSectionOutput}.
-	 * @param output
-	 *            {@link OfficeOutput}.
-	 */
-	void link(OfficeSectionOutput sectionOutput, OfficeOutput output);
-
-	/**
-	 * Links the {@link OfficeSectionObject} to be the
-	 * {@link OfficeManagedObject}.
-	 * 
-	 * @param sectionObject
-	 *            {@link OfficeSectionObject}.
-	 * @param managedObject
-	 *            {@link OfficeManagedObject}.
-	 */
-	void link(OfficeSectionObject sectionObject, OfficeManagedObject managedObject);
-
-	/**
-	 * Links the {@link OfficeSectionObject} to be the {@link OfficeObject}.
-	 * 
-	 * @param sectionObject
-	 *            {@link OfficeSectionObject}.
-	 * @param managedObject
-	 *            {@link OfficeObject}.
-	 */
-	void link(OfficeSectionObject sectionObject, OfficeObject managedObject);
-
-	/**
 	 * Links the {@link OfficeManagedObjectSource} to be pooled by the
 	 * {@link OfficeManagedObjectPool}.
 	 * 
@@ -334,109 +288,35 @@ public interface OfficeArchitect extends SourceIssues {
 	void link(OfficeManagedObjectSource managedObjectSource, OfficeManagedObjectPool managedObjectPool);
 
 	/**
-	 * Links the {@link ManagedObjectDependency} to be the
-	 * {@link OfficeManagedObject}.
+	 * Links the {@link OfficeFlowSourceNode} to be undertaken by the
+	 * {@link OfficeFlowSinkNode}.
 	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependency}.
-	 * @param managedObject
-	 *            {@link OfficeManagedObject}.
+	 * @param flowSourceNode
+	 *            {@link OfficeFlowSourceNode}.
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode}.
 	 */
-	void link(ManagedObjectDependency dependency, OfficeManagedObject managedObject);
+	void link(OfficeFlowSourceNode flowSourceNode, OfficeFlowSinkNode flowSinkNode);
 
 	/**
-	 * Links the {@link ManagedObjectDependency} to be the {@link OfficeObject}.
+	 * Links the {@link OfficeDependencyRequireNode} to be fulfilled by the
+	 * {@link OfficeDependencyObjectNode}.
 	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependency}.
-	 * @param managedObject
-	 *            {@link OfficeObject}.
+	 * @param dependencyRequiredNode
+	 *            {@link OfficeDependencyRequireNode}.
+	 * @param dependencyObjectNode
+	 *            {@link OfficeDependencyObjectNode}.
 	 */
-	void link(ManagedObjectDependency dependency, OfficeObject managedObject);
+	void link(OfficeDependencyRequireNode dependencyRequiredNode, OfficeDependencyObjectNode dependencyObjectNode);
 
 	/**
-	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link OfficeSectionInput}.
+	 * Links the {@link OfficeResponsibility} to the {@link OfficeTeam}.
 	 * 
-	 * @param flow
-	 *            {@link ManagedObjectFlow}.
-	 * @param input
-	 *            {@link OfficeSectionInput}.
-	 */
-	void link(ManagedObjectFlow flow, OfficeSectionInput input);
-
-	/**
-	 * Links the {@link OfficeSectionObject} to be undertaken by the
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @param output
-	 *            {@link OfficeSectionOutput}.
-	 * @param input
-	 *            {@link OfficeSectionInput}.
-	 */
-	void link(OfficeSectionOutput output, OfficeSectionInput input);
-
-	/**
-	 * Links the {@link OfficeEscalation} to be undertaken by the
-	 * {@link OfficeSectionInput}.
-	 * 
-	 * @param escalation
-	 *            {@link OfficeEscalation}.
-	 * @param input
-	 *            {@link OfficeSectionInput}.
-	 */
-	void link(OfficeEscalation escalation, OfficeSectionInput input);
-
-	/**
-	 * Links the {@link OfficeStart} to trigger the {@link OfficeSectionInput}.
-	 * 
-	 * @param start
-	 *            {@link OfficeStart}.
-	 * @param input
-	 *            {@link OfficeSectionInput}.
-	 */
-	void link(OfficeStart start, OfficeSectionInput input);
-
-	/**
-	 * Links the {@link ResponsibleTeam} to be the {@link OfficeTeam}.
-	 * 
-	 * @param team
-	 *            {@link ResponsibleTeam}.
+	 * @param responsibility
+	 *            {@link OfficeResponsibility}.
 	 * @param officeTeam
 	 *            {@link OfficeTeam}.
 	 */
-	void link(ResponsibleTeam team, OfficeTeam officeTeam);
-
-	/**
-	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeTeam}.
-	 * 
-	 * @param team
-	 *            {@link ManagedObjectTeam}.
-	 * @param officeTeam
-	 *            {@link OfficeTeam}.
-	 */
-	void link(ManagedObjectTeam team, OfficeTeam officeTeam);
-
-	/**
-	 * Links the {@link OfficeTeam} to be responsible for the
-	 * {@link OfficeGovernance}.
-	 * 
-	 * @param governance
-	 *            {@link OfficeGovernance}.
-	 * @param officeTeam
-	 *            {@link OfficeTeam}.
-	 */
-	void link(OfficeGovernance governance, OfficeTeam officeTeam);
-
-	/**
-	 * Links the {@link OfficeTeam} to be responsible for the
-	 * {@link OfficeAdministration}.
-	 * 
-	 * @param administrator
-	 *            {@link OfficeAdministration}.
-	 * @param officeTeam
-	 *            {@link OfficeTeam}.
-	 */
-	void link(OfficeAdministration administrator, OfficeTeam officeTeam);
+	void link(OfficeResponsibility responsibility, OfficeTeam officeTeam);
 
 }

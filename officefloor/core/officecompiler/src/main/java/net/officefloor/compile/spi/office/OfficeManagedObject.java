@@ -19,7 +19,6 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
@@ -29,8 +28,8 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeManagedObject
-		extends DependentManagedObject, AdministerableManagedObject, GovernerableManagedObject {
+public interface OfficeManagedObject extends OfficeDependencyObjectNode, DependentManagedObject,
+		AdministerableManagedObject, GovernerableManagedObject {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
@@ -54,14 +53,14 @@ public interface OfficeManagedObject
 	void addTypeQualification(String qualifier, String type);
 
 	/**
-	 * Obtains the {@link ManagedObjectDependency} for the
+	 * Obtains the {@link OfficeManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType}.
 	 * 
 	 * @param managedObjectDependencyName
 	 *            Name of the {@link ManagedObjectDependencyType}.
-	 * @return {@link ManagedObjectDependency}.
+	 * @return {@link OfficeManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getSectionManagedObjectDependency(String managedObjectDependencyName);
+	OfficeManagedObjectDependency getOfficeManagedObjectDependency(String managedObjectDependencyName);
 
 	/**
 	 * <p>

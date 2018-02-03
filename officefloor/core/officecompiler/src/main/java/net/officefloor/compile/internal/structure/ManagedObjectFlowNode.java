@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
 
 /**
@@ -25,7 +26,8 @@ import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectFlowNode extends LinkFlowNode, ManagedObjectFlow, SectionManagedObjectFlow {
+public interface ManagedObjectFlowNode
+		extends LinkFlowNode, ManagedObjectFlow, SectionManagedObjectFlow, OfficeManagedObjectFlow {
 
 	/**
 	 * {@link Node} type.

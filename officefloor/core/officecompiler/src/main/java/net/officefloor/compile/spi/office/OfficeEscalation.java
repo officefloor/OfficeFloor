@@ -26,7 +26,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeEscalation {
+public interface OfficeEscalation extends OfficeFlowSourceNode {
 
 	/**
 	 * Obtains the type of escalation.

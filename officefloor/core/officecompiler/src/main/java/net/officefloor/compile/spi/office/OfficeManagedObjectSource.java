@@ -21,8 +21,6 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -52,14 +50,14 @@ public interface OfficeManagedObjectSource extends PropertyConfigurable {
 	void setTimeout(long timeout);
 
 	/**
-	 * Obtains the {@link ManagedObjectFlow} for the
+	 * Obtains the {@link OfficeManagedObjectFlow} for the
 	 * {@link ManagedObjectFlowType}.
 	 * 
 	 * @param managedObjectSourceFlowName
 	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
+	 * @return {@link OfficeManagedObjectFlow}.
 	 */
-	ManagedObjectFlow getSectionManagedObjectFlow(String managedObjectSourceFlowName);
+	OfficeManagedObjectFlow getOfficeManagedObjectFlow(String managedObjectSourceFlowName);
 
 	/**
 	 * Obtains the {@link ManagedObjectTeam} for the
@@ -72,15 +70,14 @@ public interface OfficeManagedObjectSource extends PropertyConfigurable {
 	ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName);
 
 	/**
-	 * Obtains the {@link ManagedObjectDependency} for the
-	 * {@link ManagedObjectDependencyType} for the Input {@link ManagedObject}.
+	 * Obtains the {@link OfficeManagedObjectDependency} for the
+	 * {@link ManagedObjectDependencyType} for the Input {@link OfficeManagedObject}.
 	 * 
 	 * @param managedObjectDependencyName
 	 *            Name of the {@link ManagedObjectDependencyType}.
-	 * @return {@link ManagedObjectDependency}.
+	 * @return {@link OfficeManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getInputSectionManagedObjectDependency(
-			String managedObjectDependencyName);
+	OfficeManagedObjectDependency getInputOfficeManagedObjectDependency(String managedObjectDependencyName);
 
 	/**
 	 * Obtains the {@link OfficeManagedObject} representing an instance use of a
@@ -95,7 +92,6 @@ public interface OfficeManagedObjectSource extends PropertyConfigurable {
 	 *            within the {@link Office}.
 	 * @return {@link OfficeManagedObject}.
 	 */
-	OfficeManagedObject addOfficeManagedObject(String managedObjectName,
-			ManagedObjectScope managedObjectScope);
+	OfficeManagedObject addOfficeManagedObject(String managedObjectName, ManagedObjectScope managedObjectScope);
 
 }
