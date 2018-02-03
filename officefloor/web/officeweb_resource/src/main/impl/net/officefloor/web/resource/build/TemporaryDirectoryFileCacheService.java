@@ -17,7 +17,16 @@
  */
 package net.officefloor.web.resource.build;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
+
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.web.resource.spi.FileCache;
 import net.officefloor.web.resource.spi.FileCacheFactory;
 import net.officefloor.web.resource.spi.FileCacheService;
 
@@ -26,12 +35,82 @@ import net.officefloor.web.resource.spi.FileCacheService;
  * 
  * @author Daniel Sagenschneider
  */
-public class TemporaryDirectoryFileCacheService implements FileCacheService {
+public class TemporaryDirectoryFileCacheService implements FileCacheService, FileCacheFactory {
+
+	/**
+	 * Directory {@link FileAttribute}.
+	 */
+	private static final FileAttribute<Set<PosixFilePermission>> DIRECTORY_ATTRIBUTE = PosixFilePermissions
+			.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
+
+	/**
+	 * File {@link FileAttribute}.
+	 */
+	private static final FileAttribute<Set<PosixFilePermission>> FILE_ATTRIBUTE = PosixFilePermissions
+			.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
+
+	/*
+	 * =================== FileCacheService ========================
+	 */
 
 	@Override
 	public FileCacheFactory createService(ServiceContext context) throws Throwable {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
+	}
+
+	/*
+	 * =================== FileCacheFactory ========================
+	 */
+
+	@Override
+	public FileCache createFileCache(String name) throws IOException {
+		return new TemporaryDirectoryFileCache(name);
+	}
+
+	/**
+	 * Temporary directory {@link FileCache}.
+	 */
+	private class TemporaryDirectoryFileCache implements FileCache {
+
+		/**
+		 * Temporary directory {@link Path}.
+		 */
+		private final Path tempDirectory;
+
+		/**
+		 * Instantiate with the name of {@link FileCache}.
+		 * 
+		 * @param name
+		 *            Name of {@link FileCache}.
+		 * @throws IOException
+		 *             If fails to create {@link FileCache}.
+		 */
+		public TemporaryDirectoryFileCache(String name) throws IOException {
+			this.tempDirectory = Files.createTempDirectory(name + "-", DIRECTORY_ATTRIBUTE);
+		}
+
+		/*
+		 * ============== FileCache =========================
+		 */
+
+		@Override
+		public Path createFile(String name) throws IOException {
+			String suffix = name.replace('/', '_');
+			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix, DIRECTORY_ATTRIBUTE);
+			return file;
+		}
+
+		@Override
+		public Path createDirectory(String name) throws IOException {
+			String prefix = name.replace('/', '_');
+			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-", FILE_ATTRIBUTE);
+			return directory;
+		}
+
+		@Override
+		public void close() throws IOException {
+			Files.delete(this.tempDirectory);
+		}
 	}
 
 }

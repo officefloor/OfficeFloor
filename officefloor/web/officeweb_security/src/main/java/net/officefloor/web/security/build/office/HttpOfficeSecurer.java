@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.security.build;
+package net.officefloor.web.security.build.office;
 
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
- * Context for the {@link HttpSecurer}.
+ * Provides {@link OfficeAdministration} for the {@link HttpSecurity}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurerContext {
+public interface HttpOfficeSecurer {
 
 	/**
-	 * Obtains the {@link OfficeAdministration} to undertake
-	 * {@link HttpSecurity}.
+	 * Undertakes securing.
 	 * 
-	 * @return {@link OfficeAdministration}.
+	 * @param context
+	 *            {@link HttpOfficeSecurerContext}.
 	 */
-	OfficeAdministration getAdministration();
+	void secure(HttpOfficeSecurerContext context);
 
 }

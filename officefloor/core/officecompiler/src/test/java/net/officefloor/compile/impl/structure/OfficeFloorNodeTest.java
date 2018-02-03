@@ -562,7 +562,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeFloorManagedObject mo = moSource.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		OfficeFloorManagedObjectSource moSourceTarget = this.addManagedObjectSource(this.node, "MO_SOURCE_TARGET",
 				null);
 		OfficeFloorManagedObject moTarget = moSourceTarget.addOfficeFloorManagedObject("MO_TARGET",
@@ -593,7 +593,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeFloorManagedObject mo = moSource.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		OfficeFloorInputManagedObject inputMoTarget = this.node.addInputManagedObject("INPUT_TARGET",
 				String.class.getName());
 		this.node.link(dependency, inputMoTarget);
@@ -620,7 +620,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
-		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = moSource.getInputSectionManagedObjectDependency("DEPENDENCY");
 		OfficeFloorManagedObjectSource moSourceTarget = this.addManagedObjectSource(this.node, "MO_SOURCE_TARGET",
 				null);
 		OfficeFloorManagedObject moTarget = moSourceTarget.addOfficeFloorManagedObject("MO_TARGET",
@@ -649,7 +649,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO", null);
-		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
+		ManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE", null);
 		DeployedOfficeInput input = office.getDeployedOfficeInput("SECTION", "INPUT");
 		this.node.link(flow, input);

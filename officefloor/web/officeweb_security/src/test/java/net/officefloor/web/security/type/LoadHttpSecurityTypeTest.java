@@ -82,7 +82,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Missing property 'missing'");
+		this.record_issue("Must specify property 'missing'");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, new Init() {

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,12 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.frame.internal.structure.Flow;
+
 /**
- * Object for a {@link SubSection}.
+ * Tags a node as a section {@link Flow} sink.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SubSectionObject extends SectionDependencyRequireNode {
-
-	/**
-	 * Obtains the name of this {@link SubSectionObject}.
-	 * 
-	 * @return Name of this {@link SubSectionObject}.
-	 */
-	String getSubSectionObjectName();
-
+public interface SectionFlowSinkNode {
 }

@@ -25,7 +25,7 @@ import net.officefloor.compile.section.SectionOutputType;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionOutput {
+public interface SectionOutput extends SectionFlowSinkNode {
 
 	/**
 	 * Obtains the name of this {@link SectionOutput}.

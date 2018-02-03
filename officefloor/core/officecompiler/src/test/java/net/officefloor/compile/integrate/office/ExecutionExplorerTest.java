@@ -231,7 +231,7 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, FlowObject.class.getName());
 			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
 			OfficeSection section = context.addSection("SECTION", ObjectFlow.class);
-			office.link(mos.getManagedObjectFlow("doFlow"), section.getOfficeSectionInput("input"));
+			office.link(mos.getSectionManagedObjectFlow("doFlow"), section.getOfficeSectionInput("input"));
 			return section.getOfficeSectionInput("function");
 		}, (context) -> {
 			ExecutionManagedFunction function = context.getInitialManagedFunction();

@@ -22,7 +22,7 @@ package net.officefloor.compile.spi.section;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SubSectionInput {
+public interface SubSectionInput extends SectionFlowSinkNode {
 
 	/**
 	 * Obtains the name of this {@link SubSectionInput}.

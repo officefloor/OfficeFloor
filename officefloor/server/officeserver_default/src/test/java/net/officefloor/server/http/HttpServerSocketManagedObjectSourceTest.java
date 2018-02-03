@@ -187,7 +187,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			deployer.link(httpMos.getManagingOffice(), office);
 
 			// Configure handling request
-			deployer.link(httpMos.getManagedObjectFlow(Flows.HANDLE_REQUEST.name()),
+			deployer.link(httpMos.getSectionManagedObjectFlow(Flows.HANDLE_REQUEST.name()),
 					office.getDeployedOfficeInput("SECTION", "service"));
 
 		});

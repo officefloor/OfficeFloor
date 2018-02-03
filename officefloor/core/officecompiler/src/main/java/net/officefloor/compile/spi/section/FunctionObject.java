@@ -24,7 +24,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface FunctionObject {
+public interface FunctionObject extends SectionDependencyRequireNode {
 
 	/**
 	 * Obtains the name of this {@link FunctionObject}.

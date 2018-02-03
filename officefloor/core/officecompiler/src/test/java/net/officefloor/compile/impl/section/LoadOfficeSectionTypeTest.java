@@ -46,6 +46,7 @@ import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
@@ -391,8 +392,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 							}
 						});
 				SectionManagedObject mo = source.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
-				mo.getManagedObjectDependency("QUALIFIED-DEPENDENCY");
-				mo.getManagedObjectDependency("UNQUALIFIED-DEPENDENCY");
+				mo.getSectionManagedObjectDependency("QUALIFIED-DEPENDENCY");
+				mo.getSectionManagedObjectDependency("UNQUALIFIED-DEPENDENCY");
 			}
 		});
 		assertNull("Should not load section", section);
@@ -588,7 +589,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 							}
 						});
 				SectionManagedObject moOne = sourceOne.addSectionManagedObject("MO_ONE", ManagedObjectScope.PROCESS);
-				ManagedObjectDependency dependency = moOne.getManagedObjectDependency("DEPENDENCY");
+				SectionManagedObjectDependency dependency = moOne.getSectionManagedObjectDependency("DEPENDENCY");
 
 				// Add the second managed object (no dependency)
 				SectionManagedObjectSource sourceTwo = context.addManagedObjectSource("MO_SOURCE_TWO", null);
@@ -658,7 +659,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 							}
 						});
 				SectionManagedObject moOne = moSourceOne.addSectionManagedObject("MO_ONE", ManagedObjectScope.THREAD);
-				ManagedObjectDependency dependency = moOne.getManagedObjectDependency("DEPENDENCY");
+				SectionManagedObjectDependency dependency = moOne.getSectionManagedObjectDependency("DEPENDENCY");
 
 				// Add the second managed object (no dependency)
 				SectionManagedObjectSource sourceTwo = context.addManagedObjectSource("MO_SOURCE_TWO", null);

@@ -21,8 +21,6 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -51,25 +49,24 @@ public interface SectionManagedObjectSource extends PropertyConfigurable {
 	void setTimeout(long timeout);
 
 	/**
-	 * Obtains the {@link ManagedObjectFlow} for the
+	 * Obtains the {@link SectionManagedObjectFlow} for the
 	 * {@link ManagedObjectFlowType}.
 	 * 
 	 * @param managedObjectSourceFlowName
 	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
+	 * @return {@link SectionManagedObjectFlow}.
 	 */
-	ManagedObjectFlow getManagedObjectFlow(String managedObjectSourceFlowName);
+	SectionManagedObjectFlow getSectionManagedObjectFlow(String managedObjectSourceFlowName);
 
 	/**
-	 * Obtains the {@link ManagedObjectDependency} for the
+	 * Obtains the {@link SectionManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType} for the Input {@link ManagedObject}.
 	 * 
 	 * @param managedObjectDependencyName
 	 *            Name of the {@link ManagedObjectDependencyType}.
-	 * @return {@link ManagedObjectDependency}.
+	 * @return {@link SectionManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getInputManagedObjectDependency(
-			String managedObjectDependencyName);
+	SectionManagedObjectDependency getInputSectionManagedObjectDependency(String managedObjectDependencyName);
 
 	/**
 	 * Obtains the {@link SectionManagedObject} representing an instance use of
@@ -84,7 +81,6 @@ public interface SectionManagedObjectSource extends PropertyConfigurable {
 	 *            within the {@link Office}.
 	 * @return {@link SectionManagedObject}.
 	 */
-	SectionManagedObject addSectionManagedObject(String managedObjectName,
-			ManagedObjectScope managedObjectScope);
+	SectionManagedObject addSectionManagedObject(String managedObjectName, ManagedObjectScope managedObjectScope);
 
 }

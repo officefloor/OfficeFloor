@@ -22,7 +22,9 @@ import java.io.IOException;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -619,6 +621,20 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("SECURE");
 		}
+	}
+
+	/**
+	 * Ensure can secure {@link Office} {@link Flow}.
+	 */
+	public void testHttpOfficeSecurerFlow() throws Exception {
+		this.compile((context, security) -> {
+
+			// Provide security
+			HttpSecurityBuilder builder = security.addHttpSecurity("app",
+					new MockChallengeHttpSecuritySource("secure"));
+
+			fail("TODO implement test");
+		});
 	}
 
 	/**

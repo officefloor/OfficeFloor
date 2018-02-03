@@ -20,7 +20,6 @@ package net.officefloor.compile.spi.section;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
 
@@ -29,7 +28,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionManagedObject {
+public interface SectionManagedObject extends SectionDependencyObjectNode {
 
 	/**
 	 * Obtains the name of this {@link SectionManagedObject}.
@@ -53,14 +52,13 @@ public interface SectionManagedObject {
 	void addTypeQualification(String qualifier, String type);
 
 	/**
-	 * Obtains the {@link ManagedObjectDependency} for the
+	 * Obtains the {@link SectionManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType}.
 	 * 
 	 * @param managedObjectDependencyName
 	 *            Name of the {@link ManagedObjectDependencyType}.
-	 * @return {@link ManagedObjectDependency}.
+	 * @return {@link SectionManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getManagedObjectDependency(
-			String managedObjectDependencyName);
+	SectionManagedObjectDependency getSectionManagedObjectDependency(String managedObjectDependencyName);
 
 }

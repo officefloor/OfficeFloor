@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.section;
+package net.officefloor.web.security.build.office;
+
+import net.officefloor.compile.spi.office.OfficeAdministration;
+import net.officefloor.web.security.HttpAccessControl;
 
 /**
- * Object for a {@link SubSection}.
+ * Context for the {@link HttpOfficeSecurer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SubSectionObject extends SectionDependencyRequireNode {
+public interface HttpOfficeSecurerContext {
 
 	/**
-	 * Obtains the name of this {@link SubSectionObject}.
+	 * Obtains the {@link OfficeAdministration} to undertake
+	 * {@link HttpAccessControl} for the {@link HttpOfficeSecurer}.
 	 * 
-	 * @return Name of this {@link SubSectionObject}.
+	 * @return {@link OfficeAdministration}.
 	 */
-	String getSubSectionObjectName();
+	OfficeAdministration getAdministration();
 
 }

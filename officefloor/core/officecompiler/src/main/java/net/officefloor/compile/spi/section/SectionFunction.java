@@ -28,7 +28,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionFunction {
+public interface SectionFunction extends SectionFlowSinkNode, SectionFlowSourceNode {
 
 	/**
 	 * Obtains the name of this {@link SectionFunction}.

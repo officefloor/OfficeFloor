@@ -15,24 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.security.build;
+package net.officefloor.compile.spi.section;
 
-import net.officefloor.compile.spi.office.OfficeAdministration;
-import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
- * Provides {@link OfficeAdministration} for the {@link HttpSecurity}.
+ * Dependency for a section {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurer {
-
-	/**
-	 * Undertakes securing.
-	 * 
-	 * @param context
-	 *            {@link HttpSecurerContext}.
-	 */
-	void secure(HttpSecurerContext context);
-
+public interface SectionManagedObjectDependency extends ManagedObjectDependency, SectionDependencyRequireNode {
 }

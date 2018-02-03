@@ -118,7 +118,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 			deployer.link(internalMos, deployer.addInputManagedObject("INPUT_INTERNAL", MockObject.class.getName()));
 			DeployedOfficeInput internalMoInput = office.getDeployedOfficeInput("SECTION",
 					"managedObjectInternalThread");
-			deployer.link(internalMos.getManagedObjectFlow("doProcess"), internalMoInput);
+			deployer.link(internalMos.getSectionManagedObjectFlow("doProcess"), internalMoInput);
 
 			// Externally invoke from managed object
 			this.externalManagdObjectSource = new ExternalManagedObjectSource();
@@ -129,7 +129,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 					deployer.addInputManagedObject("INPUT_EXTERNAL", ExternalManagedObjectSource.class.getName()));
 			DeployedOfficeInput externalMoInput = office.getDeployedOfficeInput("SECTION",
 					"managedObjectExternalThread");
-			deployer.link(externalMos.getManagedObjectFlow("0"), externalMoInput);
+			deployer.link(externalMos.getSectionManagedObjectFlow("0"), externalMoInput);
 		});
 
 		// Open the OfficeFloor

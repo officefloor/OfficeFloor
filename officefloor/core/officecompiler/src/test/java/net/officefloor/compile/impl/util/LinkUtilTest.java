@@ -535,7 +535,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		ManagedObjectNode dependency = (ManagedObjectNode) dependencySource.addOfficeFloorManagedObject("DEPENDENCY",
 				ManagedObjectScope.PROCESS);
 		dependency.addTypeQualification("DEPENDENCY", Object.class.getName());
-		((LinkObjectNode) direct.getManagedObjectDependency("dependency")).linkObjectNode(dependency);
+		((LinkObjectNode) direct.getSectionManagedObjectDependency("dependency")).linkObjectNode(dependency);
 
 		// Create the transitive dependency
 		ManagedObjectSourceNode transitiveSource = context.createManagedObjectSourceNode("TRANSITIVE_SOURCE",
@@ -545,11 +545,11 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		ManagedObjectNode transitive = (ManagedObjectNode) transitiveSource.addOfficeFloorManagedObject("TRANSITIVE",
 				ManagedObjectScope.PROCESS);
 		transitive.addTypeQualification("TRANSITIVE", Object.class.getName());
-		((LinkObjectNode) dependency.getManagedObjectDependency("dependency")).linkObjectNode(transitive);
+		((LinkObjectNode) dependency.getSectionManagedObjectDependency("dependency")).linkObjectNode(transitive);
 
 		// Create the ignored Office Object (as linked to managed object)
 		OfficeObjectNode linkedOfficeObject = context.createOfficeObjectNode("IGNORED", office);
-		((LinkObjectNode) direct.getManagedObjectDependency("implemented")).linkObjectNode(linkedOfficeObject);
+		((LinkObjectNode) direct.getSectionManagedObjectDependency("implemented")).linkObjectNode(linkedOfficeObject);
 		ManagedObjectSourceNode implementingSource = context.createManagedObjectSourceNode("IMPLEMENTING_SOURCE",
 				officeFloor);
 		implementingSource.initialise(ClassManagedObjectSource.class.getName(), null);
@@ -563,7 +563,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		OfficeObjectNode officeObject = context.createOfficeObjectNode("NOT_LINKED", office);
 		officeObject.initialise(Object.class.getName());
 		officeObject.setTypeQualifier("OFFICE_OBJECT");
-		((LinkObjectNode) direct.getManagedObjectDependency("object")).linkObjectNode(officeObject);
+		((LinkObjectNode) direct.getSectionManagedObjectDependency("object")).linkObjectNode(officeObject);
 
 		// Ensure handle cycle and not infinite loop
 		ManagedObjectSourceNode cycleSource = context.createManagedObjectSourceNode("CYCLE_SOURCE", officeFloor);
@@ -572,8 +572,8 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		ManagedObjectNode cycle = (ManagedObjectNode) cycleSource.addOfficeFloorManagedObject("CYCLE",
 				ManagedObjectScope.PROCESS);
 		cycle.addTypeQualification("CYCLE", Object.class.getName());
-		((LinkObjectNode) direct.getManagedObjectDependency("cycle")).linkObjectNode(cycle);
-		((LinkObjectNode) cycle.getManagedObjectDependency("cycle")).linkObjectNode(direct);
+		((LinkObjectNode) direct.getSectionManagedObjectDependency("cycle")).linkObjectNode(cycle);
+		((LinkObjectNode) cycle.getSectionManagedObjectDependency("cycle")).linkObjectNode(direct);
 
 		// Load the auto wire objects
 		Set<AutoWire> allAutoWires = new HashSet<>();

@@ -24,8 +24,6 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -195,217 +193,6 @@ public interface SectionDesigner extends SourceIssues {
 	SubSection addSubSection(String subSectionName, SectionSource sectionSource, String location);
 
 	/**
-	 * Links the {@link SectionInput} to be undertaken by the
-	 * {@link SectionFunction}.
-	 * 
-	 * @param sectionInput
-	 *            {@link SectionInput}.
-	 * @param task
-	 *            {@link SectionFunction}.
-	 */
-	void link(SectionInput sectionInput, SectionFunction task);
-
-	/**
-	 * Links the {@link SectionInput} to be undertaken by the
-	 * {@link SubSectionInput}.
-	 * 
-	 * @param sectionInput
-	 *            {@link SectionInput}.
-	 * @param subSectionInput
-	 *            {@link SubSectionInput}.
-	 */
-	void link(SectionInput sectionInput, SubSectionInput subSectionInput);
-
-	/**
-	 * Links the {@link SubSectionInput} to be undertaken by the
-	 * {@link SectionOutput}.
-	 * 
-	 * @param sectionInput
-	 *            {@link SectionInput}.
-	 * @param sectionOutput
-	 *            {@link SectionOutput}.
-	 */
-	void link(SectionInput sectionInput, SectionOutput sectionOutput);
-
-	/**
-	 * Links the {@link FunctionFlow} to be undertaken by the
-	 * {@link SectionFunction}.
-	 * 
-	 * @param functionFlow
-	 *            {@link FunctionFlow}.
-	 * @param function
-	 *            {@link SectionFunction}.
-	 * @param isSpawnThreadState
-	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
-	 */
-	void link(FunctionFlow functionFlow, SectionFunction task, boolean isSpawnThreadState);
-
-	/**
-	 * Links the {@link FunctionFlow} to be undertaken by the
-	 * {@link SubSectionInput}.
-	 * 
-	 * @param functionFlow
-	 *            {@link FunctionFlow}.
-	 * @param subSectionInput
-	 *            {@link SectionFunction}.
-	 * @param isSpawnThreadState
-	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
-	 */
-	void link(FunctionFlow functionFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState);
-
-	/**
-	 * Links the {@link FunctionFlow} to be undertaken by the
-	 * {@link SectionOutput}.
-	 * 
-	 * @param functionFlow
-	 *            {@link FunctionFlow}.
-	 * @param sectionOutput
-	 *            {@link SectionOutput}.
-	 * @param isSpawnThreadState
-	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
-	 */
-	void link(FunctionFlow functionFlow, SectionOutput sectionOutput, boolean isSpawnThreadState);
-
-	/**
-	 * Links the {@link SectionFunction} with the next {@link SectionFunction}
-	 * to be undertaken.
-	 * 
-	 * @param task
-	 *            {@link SectionFunction}.
-	 * @param nextTask
-	 *            Next {@link SectionFunction}.
-	 */
-	void link(SectionFunction task, SectionFunction nextTask);
-
-	/**
-	 * Links the {@link SectionFunction} with the next {@link SubSectionInput}
-	 * to be undertaken.
-	 * 
-	 * @param task
-	 *            {@link SectionFunction}.
-	 * @param subSectionInput
-	 *            Next {@link SubSectionInput}.
-	 */
-	void link(SectionFunction task, SubSectionInput subSectionInput);
-
-	/**
-	 * Links the {@link SectionFunction} with the next {@link SectionOutput} to
-	 * be undertaken.
-	 * 
-	 * @param task
-	 *            {@link SectionFunction}.
-	 * @param sectionOutput
-	 *            Next {@link SectionOutput}.
-	 */
-	void link(SectionFunction task, SectionOutput sectionOutput);
-
-	/**
-	 * Links the {@link SubSectionOutput} to be undertaken by the
-	 * {@link SectionFunction}.
-	 * 
-	 * @param subSectionOutput
-	 *            {@link SubSectionOutput}.
-	 * @param task
-	 *            {@link SectionFunction}.
-	 */
-	void link(SubSectionOutput subSectionOutput, SectionFunction task);
-
-	/**
-	 * Links the {@link SubSectionOutput} to be undertaken by the
-	 * {@link SubSectionInput}.
-	 * 
-	 * @param subSectionOutput
-	 *            {@link SubSectionOutput}.
-	 * @param subSectionInput
-	 *            {@link SubSectionInput}.
-	 */
-	void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput);
-
-	/**
-	 * Links the {@link SubSectionOutput} to be undertaken by the
-	 * {@link SectionOutput}.
-	 * 
-	 * @param subSectionOutput
-	 *            {@link SubSectionOutput}.
-	 * @param sectionOutput
-	 *            {@link SectionOutput}.
-	 */
-	void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput);
-
-	/**
-	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link SectionFunction}.
-	 * 
-	 * @param managedObjectFlow
-	 *            {@link ManagedObjectFlow}.
-	 * @param task
-	 *            {@link SectionFunction}.
-	 */
-	void link(ManagedObjectFlow managedObjectFlow, SectionFunction task);
-
-	/**
-	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link SubSectionInput}.
-	 * 
-	 * @param managedObjectFlow
-	 *            {@link ManagedObjectFlow}.
-	 * @param subSectionInput
-	 *            {@link SubSectionInput}.
-	 */
-	void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput);
-
-	/**
-	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link SectionOutput}.
-	 * 
-	 * @param managedObjectFlow
-	 *            {@link ManagedObjectFlow}.
-	 * @param sectionOutput
-	 *            {@link SectionOutput}.
-	 */
-	void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput);
-
-	/**
-	 * Links the {@link FunctionObject} to be the {@link SectionObject}.
-	 * 
-	 * @param taskObject
-	 *            {@link FunctionObject}.
-	 * @param sectionObject
-	 *            {@link SectionObject}.
-	 */
-	void link(FunctionObject taskObject, SectionObject sectionObject);
-
-	/**
-	 * Links the {@link FunctionObject} to be the {@link SectionManagedObject}.
-	 * 
-	 * @param taskObject
-	 *            {@link FunctionObject}.
-	 * @param sectionManagedObject
-	 *            {@link SectionManagedObject}.
-	 */
-	void link(FunctionObject taskObject, SectionManagedObject sectionManagedObject);
-
-	/**
-	 * Links the {@link SubSectionObject} to be the {@link SectionObject}.
-	 * 
-	 * @param subSectionObject
-	 *            {@link SubSectionObject}.
-	 * @param sectionObject
-	 *            {@link SectionObject}.
-	 */
-	void link(SubSectionObject subSectionObject, SectionObject sectionObject);
-
-	/**
-	 * Links {@link SubSectionObject} to be the {@link SectionManagedObject}.
-	 * 
-	 * @param subSectionObject
-	 *            {@link SubSectionObject}.
-	 * @param sectionManagedObject
-	 *            {@link SectionManagedObject}.
-	 */
-	void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject);
-
-	/**
 	 * Links the {@link SectionManagedObjectSource} to be pooled by the
 	 * {@link SectionManagedObjectPool}.
 	 * 
@@ -417,24 +204,38 @@ public interface SectionDesigner extends SourceIssues {
 	void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool);
 
 	/**
-	 * Links {@link ManagedObjectDependency} to be the {@link SectionObject}.
+	 * Links the {@link FunctionFlow} to be undertaken by the
+	 * {@link SectionFlowSinkNode}.
 	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependency}.
-	 * @param sectionObject
-	 *            {@link SectionObject}.
+	 * @param functionFlow
+	 *            {@link FunctionFlow}.
+	 * @param sectionSinkNode
+	 *            {@link SectionFlowSinkNode}.
+	 * @param isSpawnThreadState
+	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
 	 */
-	void link(ManagedObjectDependency dependency, SectionObject sectionObject);
+	void link(FunctionFlow functionFlow, SectionFlowSinkNode sectionSinkNode, boolean isSpawnThreadState);
 
 	/**
-	 * Links the {@link ManagedObjectDependency} to be the
-	 * {@link SectionManagedObject}.
+	 * Links the {@link SectionFlowSourceNode} to undertaken by the
+	 * {@link SectionFlowSinkNode}.
 	 * 
-	 * @param dependency
-	 *            {@link ManagedObjectDependency}.
-	 * @param sectionManagedObject
-	 *            {@link SectionManagedObject}.
+	 * @param flowSourceNode
+	 *            {@link SectionFlowSourceNode}.
+	 * @param flowSinkNode
+	 *            {@link SectionFlowSinkNode}.
 	 */
-	void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject);
+	void link(SectionFlowSourceNode flowSourceNode, SectionFlowSinkNode flowSinkNode);
+
+	/**
+	 * Links the {@link SectionDependencyRequireNode} to be fulfilled by the
+	 * {@link SectionDependencyObjectNode}.
+	 * 
+	 * @param sectionRequireNode
+	 *            {@link SectionDependencyRequireNode}.
+	 * @param sectionObjectNode
+	 *            {@link SectionDependencyObjectNode}.
+	 */
+	void link(SectionDependencyRequireNode sectionRequireNode, SectionDependencyObjectNode sectionObjectNode);
 
 }

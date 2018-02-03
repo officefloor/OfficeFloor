@@ -22,24 +22,20 @@ import java.util.Map;
 
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.FunctionFlow;
-import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.compile.spi.section.SectionDependencyObjectNode;
+import net.officefloor.compile.spi.section.SectionDependencyRequireNode;
 import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
+import net.officefloor.compile.spi.section.SectionFlowSourceNode;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.section.SubSectionInput;
-import net.officefloor.compile.spi.section.SubSectionObject;
-import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
@@ -204,113 +200,23 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(SectionInput sectionInput, SectionFunction function) {
-		this.delegate.link(sectionInput, function);
-	}
-
-	@Override
-	public void link(SectionInput sectionInput, SubSectionInput subSectionInput) {
-		this.delegate.link(sectionInput, subSectionInput);
-	}
-
-	@Override
-	public void link(SectionInput sectionInput, SectionOutput sectionOutput) {
-		this.delegate.link(sectionInput, sectionOutput);
-	}
-
-	@Override
-	public void link(FunctionFlow functionFlow, SectionFunction function, boolean isSpawnThreadState) {
-		this.delegate.link(functionFlow, function, isSpawnThreadState);
-	}
-
-	@Override
-	public void link(FunctionFlow functionFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState) {
-		this.delegate.link(functionFlow, subSectionInput, isSpawnThreadState);
-	}
-
-	@Override
-	public void link(FunctionFlow functionFlow, SectionOutput sectionOutput, boolean isSpawnThreadState) {
-		this.delegate.link(functionFlow, sectionOutput, isSpawnThreadState);
-	}
-
-	@Override
-	public void link(SectionFunction function, SectionFunction nextFunction) {
-		this.delegate.link(function, nextFunction);
-	}
-
-	@Override
-	public void link(SectionFunction function, SubSectionInput subSectionInput) {
-		this.delegate.link(function, subSectionInput);
-	}
-
-	@Override
-	public void link(SectionFunction function, SectionOutput sectionOutput) {
-		this.delegate.link(function, sectionOutput);
-	}
-
-	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionFunction function) {
-		this.delegate.link(subSectionOutput, function);
-	}
-
-	@Override
-	public void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput) {
-		this.delegate.link(subSectionOutput, subSectionInput);
-	}
-
-	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
-		this.delegate.link(subSectionOutput, sectionOutput);
-	}
-
-	@Override
 	public void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool) {
 		this.delegate.link(managedObjectSource, managedObjectPool);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction function) {
-		this.delegate.link(managedObjectFlow, function);
+	public void link(SectionFlowSourceNode flowSourceNode, SectionFlowSinkNode flowSinkNode) {
+		this.delegate.link(flowSourceNode, flowSinkNode);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput) {
-		this.delegate.link(managedObjectFlow, subSectionInput);
+	public void link(FunctionFlow functionFlow, SectionFlowSinkNode sectionSinkNode, boolean isSpawnThreadState) {
+		this.delegate.link(functionFlow, sectionSinkNode, isSpawnThreadState);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput) {
-		this.delegate.link(managedObjectFlow, sectionOutput);
-	}
-
-	@Override
-	public void link(FunctionObject functionObject, SectionObject sectionObject) {
-		this.delegate.link(functionObject, sectionObject);
-	}
-
-	@Override
-	public void link(FunctionObject functionObject, SectionManagedObject sectionManagedObject) {
-		this.delegate.link(functionObject, sectionManagedObject);
-	}
-
-	@Override
-	public void link(SubSectionObject subSectionObject, SectionObject sectionObject) {
-		this.delegate.link(subSectionObject, sectionObject);
-	}
-
-	@Override
-	public void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject) {
-		this.delegate.link(subSectionObject, sectionManagedObject);
-	}
-
-	@Override
-	public void link(ManagedObjectDependency dependency, SectionObject sectionObject) {
-		this.delegate.link(dependency, sectionObject);
-	}
-
-	@Override
-	public void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject) {
-		this.delegate.link(dependency, sectionManagedObject);
+	public void link(SectionDependencyRequireNode sectionRequireNode, SectionDependencyObjectNode sectionObjectNode) {
+		this.delegate.link(sectionRequireNode, sectionObjectNode);
 	}
 
 	@Override

@@ -61,7 +61,7 @@ public interface OfficeManagedObject
 	 *            Name of the {@link ManagedObjectDependencyType}.
 	 * @return {@link ManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getManagedObjectDependency(String managedObjectDependencyName);
+	ManagedObjectDependency getSectionManagedObjectDependency(String managedObjectDependencyName);
 
 	/**
 	 * <p>

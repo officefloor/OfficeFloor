@@ -23,8 +23,6 @@ import java.util.Map;
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -32,6 +30,8 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
+import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -256,8 +256,8 @@ public class SectionModelSectionSource extends AbstractSectionSource
 			for (SectionManagedObjectDependencyModel dependencyModel : moModel.getSectionManagedObjectDependencies()) {
 
 				// Obtain the managed object dependency
-				ManagedObjectDependency dependency = mo
-						.getManagedObjectDependency(dependencyModel.getSectionManagedObjectDependencyName());
+				SectionManagedObjectDependency dependency = mo
+						.getSectionManagedObjectDependency(dependencyModel.getSectionManagedObjectDependencyName());
 
 				// Link the dependency to managed object
 				SectionManagedObject linkedManagedObject = null;
@@ -633,8 +633,8 @@ public class SectionModelSectionSource extends AbstractSectionSource
 			for (SectionManagedObjectSourceFlowModel mosFlowModel : mosModel.getSectionManagedObjectSourceFlows()) {
 
 				// Obtain the managed object source flow
-				ManagedObjectFlow mosFlow = mos
-						.getManagedObjectFlow(mosFlowModel.getSectionManagedObjectSourceFlowName());
+				SectionManagedObjectFlow mosFlow = mos
+						.getSectionManagedObjectFlow(mosFlowModel.getSectionManagedObjectSourceFlowName());
 
 				// Link managed object source flow to sub section input
 				SubSectionInput linkedInput = null;

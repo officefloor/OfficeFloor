@@ -369,7 +369,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + objectType.getName();
 		OfficeFloorManagedObjectSource mos = officeFloor.addManagedObjectSource(inputObjectName, input);
 		LinkUtil.linkOffice(mos.getManagingOffice(), office, this.context.getCompilerIssues(), this);
-		LinkUtil.linkFlow(mos.getManagedObjectFlow(Flows.SERVICE.name()), this, this.context.getCompilerIssues(), this);
+		LinkUtil.linkFlow(mos.getSectionManagedObjectFlow(Flows.SERVICE.name()), this, this.context.getCompilerIssues(), this);
 
 		// Configure external service input
 		OfficeFloorInputManagedObject inputMo = officeFloor.addInputManagedObject(inputObjectName,

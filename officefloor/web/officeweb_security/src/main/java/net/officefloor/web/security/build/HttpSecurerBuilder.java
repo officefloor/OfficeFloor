@@ -19,10 +19,11 @@ package net.officefloor.web.security.build;
 
 import java.security.Principal;
 
+import net.officefloor.web.security.build.office.HttpOfficeSecurer;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
- * Configures the {@link HttpSecurer}.
+ * Configures the {@link HttpOfficeSecurer}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -1253,7 +1253,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		OfficeManagedObjectSource moSourceTarget = this.addManagedObjectSource(this.node, "MO_SOURCE_TARGET", null);
 		OfficeManagedObject moTarget = moSourceTarget.addOfficeManagedObject("MO_TARGET", ManagedObjectScope.THREAD);
 		this.node.link(dependency, moTarget);
@@ -1281,7 +1281,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO", ManagedObjectScope.FUNCTION);
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		OfficeObject moTarget = this.node.addOfficeObject("MO_TARGET", Connection.class.getName());
 		this.node.link(dependency, moTarget);
 		assertObjectLink("managed object dependency -> office floor managed object", dependency, moTarget);
@@ -1307,7 +1307,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
-		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = moSource.getInputSectionManagedObjectDependency("DEPENDENCY");
 		OfficeManagedObjectSource moSourceTarget = this.addManagedObjectSource(this.node, "MO_SOURCE_TARGET", null);
 		OfficeManagedObject moTarget = moSourceTarget.addOfficeManagedObject("MO_TARGET", ManagedObjectScope.PROCESS);
 		this.node.link(dependency, moTarget);
@@ -1334,7 +1334,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
-		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = moSource.getInputSectionManagedObjectDependency("DEPENDENCY");
 		OfficeObject moTarget = this.node.addOfficeObject("MO_TARGET", Connection.class.getName());
 		this.node.link(dependency, moTarget);
 		assertObjectLink("input managed object dependency -> office floor managed object", dependency, moTarget);
@@ -1366,7 +1366,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO", null);
-		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
+		ManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
 		this.node.link(flow, sectionInput);
 		assertFlowLink("managed object source flow -> section input", flow, sectionInput);
 

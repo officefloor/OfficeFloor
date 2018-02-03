@@ -433,7 +433,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 				// Obtain the dependency
 				ManagedObjectDependency dependency = managedObject
-						.getManagedObjectDependency(dependencyModel.getOfficeManagedObjectDependencyName());
+						.getSectionManagedObjectDependency(dependencyModel.getOfficeManagedObjectDependencyName());
 
 				// Determine if linked to managed object
 				OfficeManagedObject linkedManagedObject = null;
@@ -482,7 +482,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 				// Obtain the input dependency
 				ManagedObjectDependency dependency = mos
-						.getInputManagedObjectDependency(dependencyModel.getOfficeInputManagedObjectDependencyName());
+						.getInputSectionManagedObjectDependency(dependencyModel.getOfficeInputManagedObjectDependencyName());
 
 				// Determine if linked to managed object
 				OfficeManagedObject linkedManagedObject = null;
@@ -664,7 +664,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 				// Obtain the managed object source flow
 				ManagedObjectFlow mosFlow = mos
-						.getManagedObjectFlow(mosFlowModel.getOfficeManagedObjectSourceFlowName());
+						.getSectionManagedObjectFlow(mosFlowModel.getOfficeManagedObjectSourceFlowName());
 
 				// Link to section input
 				OfficeSectionInput sectionInput = null;

@@ -24,7 +24,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionObject {
+public interface SectionObject extends SectionDependencyObjectNode {
 
 	/**
 	 * Obtains the name of this {@link SectionObject}.

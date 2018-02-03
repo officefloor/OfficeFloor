@@ -38,7 +38,6 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -46,6 +45,7 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -735,7 +735,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			String dependencyTypeName = dependency.field.getType().getName();
 
 			// Obtain the managed object dependency
-			ManagedObjectDependency moDependency = managedObject.getManagedObjectDependency(dependencyName);
+			SectionManagedObjectDependency moDependency = managedObject
+					.getSectionManagedObjectDependency(dependencyName);
 
 			// Determine if managed object
 			ManagedObject moAnnotation = dependency.field.getAnnotation(ManagedObject.class);
@@ -816,8 +817,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 				String dependencyTypeQualifier = dependencyType.getTypeQualifier();
 
 				// Obtain the managed object dependency
-				ManagedObjectDependency moDependency = mo
-						.getManagedObjectDependency(dependencyType.getDependencyName());
+				SectionManagedObjectDependency moDependency = mo
+						.getSectionManagedObjectDependency(dependencyType.getDependencyName());
 
 				// First attempt to link internally
 				SectionManagedObject dependencyMo = this.getManagedObject(dependencyTypeName);

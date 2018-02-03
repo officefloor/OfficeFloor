@@ -70,8 +70,6 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
@@ -84,8 +82,11 @@ import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.FunctionFlow;
-import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.compile.spi.section.SectionDependencyObjectNode;
+import net.officefloor.compile.spi.section.SectionDependencyRequireNode;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
+import net.officefloor.compile.spi.section.SectionFlowSourceNode;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -107,7 +108,6 @@ import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link SectionNode} implementation.
@@ -983,143 +983,33 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void link(SectionInput sectionInput, SectionFunction task) {
-		LinkUtil.linkFlow(sectionInput, task, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SectionInput sectionInput, SubSectionInput subSectionInput) {
-		LinkUtil.linkFlow(sectionInput, subSectionInput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SectionInput sectionInput, SectionOutput sectionOutput) {
-		LinkUtil.linkFlow(sectionInput, sectionOutput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(FunctionFlow taskFlow, SectionFunction task, boolean isSpawnThreadState) {
-		if (LinkUtil.linkFlow(taskFlow, task, this.context.getCompilerIssues(), this)) {
-			// Linked so specify spawn thread state
-			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
-		}
-	}
-
-	@Override
-	public void link(FunctionFlow taskFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState) {
-		if (LinkUtil.linkFlow(taskFlow, subSectionInput, this.context.getCompilerIssues(), this)) {
-			// Linked so specify spawn thread state
-			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
-		}
-	}
-
-	@Override
-	public void link(FunctionFlow taskFlow, SectionOutput sectionOutput, boolean isSpawnThreadState) {
-		if (LinkUtil.linkFlow(taskFlow, sectionOutput, this.context.getCompilerIssues(), this)) {
-			// Linked so specify spawn thread state
-			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
-		}
-	}
-
-	@Override
-	public void link(SectionFunction task, SectionFunction nextTask) {
-		LinkUtil.linkFlow(task, nextTask, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SectionFunction task, SubSectionInput subSectionInput) {
-		LinkUtil.linkFlow(task, subSectionInput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SectionFunction task, SectionOutput sectionOutput) {
-		LinkUtil.linkFlow(task, sectionOutput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionFunction task) {
-		LinkUtil.linkFlow(subSectionOutput, task, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput) {
-		LinkUtil.linkFlow(subSectionOutput, subSectionInput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
-		LinkUtil.linkFlow(subSectionOutput, sectionOutput, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
 	public void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool) {
 		LinkUtil.linkPool(managedObjectSource, managedObjectPool, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction task) {
-		LinkUtil.linkFlow(managedObjectFlow, task, this.context.getCompilerIssues(), this);
+	public void link(SectionFlowSourceNode flowSourceNode, SectionFlowSinkNode flowSinkNode) {
+		LinkUtil.linkFlow(flowSourceNode, flowSinkNode, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput) {
-		LinkUtil.linkFlow(managedObjectFlow, subSectionInput, this.context.getCompilerIssues(), this);
-	}
+	public void link(FunctionFlow functionFlow, SectionFlowSinkNode sectionSinkNode, boolean isSpawnThreadState) {
+		if (LinkUtil.linkFlow(functionFlow, sectionSinkNode, this.context.getCompilerIssues(), this)) {
+			// Ensure a function flow node
+			if (!(functionFlow instanceof FunctionFlowNode)) {
+				this.addIssue("Invalid function flow: " + functionFlow + " ["
+						+ (functionFlow == null ? null : functionFlow.getClass().getName()) + "]");
+				return; // can not load spawning
+			}
 
-	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput) {
-		LinkUtil.linkFlow(managedObjectFlow, sectionOutput, this.context.getCompilerIssues(), this);
-	}
-
-	/**
-	 * Loads whether the {@link FunctionFlow} will spawn a {@link ThreadState}.
-	 * 
-	 * @param functionFlow
-	 *            {@link FunctionFlow}.
-	 * @param isSpawnThreadState
-	 *            <code>true</code> to spawn a {@link ThreadState}.
-	 */
-	private void loadSpawnThreadState(FunctionFlow functionFlow, boolean isSpawnThreadState) {
-
-		// Ensure a function flow node
-		if (!(functionFlow instanceof FunctionFlowNode)) {
-			this.addIssue("Invalid function flow: " + functionFlow + " ["
-					+ (functionFlow == null ? null : functionFlow.getClass().getName()) + "]");
-			return; // can not load spawning
+			// Load whether spawns thread state
+			((FunctionFlowNode) functionFlow).setSpawnThreadState(isSpawnThreadState);
 		}
-
-		// Load whether spawns thread state
-		((FunctionFlowNode) functionFlow).setSpawnThreadState(isSpawnThreadState);
 	}
 
 	@Override
-	public void link(FunctionObject taskObject, SectionObject sectionObject) {
-		LinkUtil.linkObject(taskObject, sectionObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SubSectionObject subSectionObject, SectionObject sectionObject) {
-		LinkUtil.linkObject(subSectionObject, sectionObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(FunctionObject taskObject, SectionManagedObject sectionManagedObject) {
-		LinkUtil.linkObject(taskObject, sectionManagedObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject) {
-		LinkUtil.linkObject(subSectionObject, sectionManagedObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(ManagedObjectDependency dependency, SectionObject sectionObject) {
-		LinkUtil.linkObject(dependency, sectionObject, this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject) {
-		LinkUtil.linkObject(dependency, sectionManagedObject, this.context.getCompilerIssues(), this);
+	public void link(SectionDependencyRequireNode sectionRequireNode, SectionDependencyObjectNode sectionObjectNode) {
+		LinkUtil.linkObject(sectionRequireNode, sectionObjectNode, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

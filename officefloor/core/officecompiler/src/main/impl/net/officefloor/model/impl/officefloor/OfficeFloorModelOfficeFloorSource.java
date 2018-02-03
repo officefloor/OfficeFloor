@@ -295,7 +295,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 						String dependencyName = inputDependencyModel
 								.getOfficeFloorManagedObjectSourceInputDependencyName();
 						ManagedObjectDependency inputDependency = inputMos
-								.getInputManagedObjectDependency(dependencyName);
+								.getInputSectionManagedObjectDependency(dependencyName);
 
 						// Obtain the dependent managed object
 						OfficeFloorManagedObject dependentManagedObject = null;
@@ -333,7 +333,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Add the dependency
 				String dependencyName = dependencyModel.getOfficeFloorManagedObjectDependencyName();
-				ManagedObjectDependency dependency = managedObject.getManagedObjectDependency(dependencyName);
+				ManagedObjectDependency dependency = managedObject.getSectionManagedObjectDependency(dependencyName);
 
 				// Link the dependent managed object
 				OfficeFloorManagedObject dependentManagedObject = null;
@@ -525,7 +525,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Add the OfficeFloor managed object source flow
 				String flowName = flowModel.getOfficeFloorManagedObjectSourceFlowName();
-				ManagedObjectFlow flow = managedObjectSource.getManagedObjectFlow(flowName);
+				ManagedObjectFlow flow = managedObjectSource.getSectionManagedObjectFlow(flowName);
 
 				// Obtain the office input
 				DeployedOfficeInput officeInput = null;

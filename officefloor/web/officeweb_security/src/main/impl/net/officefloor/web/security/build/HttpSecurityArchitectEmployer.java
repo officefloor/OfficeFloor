@@ -46,6 +46,8 @@ import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.build.office.HttpOfficeSecurer;
+import net.officefloor.web.security.build.office.HttpOfficeSecurerContext;
 import net.officefloor.web.security.impl.AccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.security.impl.AuthenticationManagedObjectSource;
@@ -175,7 +177,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	}
 
 	@Override
-	public HttpSecurerBuilder secure(HttpSecurer securer) {
+	public HttpSecurerBuilder secure(HttpOfficeSecurer securer) {
 		HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securer);
 		HttpSecurityArchitectEmployer.this.securers.add(builder);
 		return builder;
@@ -302,7 +304,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			defaultHttpAuthentication = defaultHttpAuthenticationMos
 					.addOfficeManagedObject(defaultHttpAuthenticationName, ManagedObjectScope.PROCESS);
 			for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : this.securities) {
-				this.officeArchitect.link(defaultHttpAuthentication.getManagedObjectDependency(security.name),
+				this.officeArchitect.link(defaultHttpAuthentication.getSectionManagedObjectDependency(security.name),
 						security.httpAuthentication);
 			}
 
@@ -314,7 +316,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			defaultHttpAccessControl = defaultHttpAccessControlMos.addOfficeManagedObject(defaultHttpAccessControlName,
 					ManagedObjectScope.PROCESS);
 			this.officeArchitect.link(
-					defaultHttpAccessControl.getManagedObjectDependency(Dependencies.HTTP_AUTHENTICATION.name()),
+					defaultHttpAccessControl.getSectionManagedObjectDependency(Dependencies.HTTP_AUTHENTICATION.name()),
 					defaultHttpAuthentication);
 		}
 
@@ -362,11 +364,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	 * @param nameToHttpSecurity
 	 *            {@link HttpSecurerBuilderImpl} instances by their name.
 	 * @param securer
-	 *            {@link HttpSecurer}.
+	 *            {@link HttpOfficeSecurer}.
 	 */
 	private void secure(String qualifier, String[] anyRoles, String[] allRoles,
 			OfficeManagedObject httpAccessControlManagedObject, Map<HttpAccessKey, OfficeAdministration> administrators,
-			Map<String, HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> nameToHttpSecurity, HttpSecurer securer) {
+			Map<String, HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> nameToHttpSecurity, HttpOfficeSecurer securer) {
 
 		// Obtain the administration
 		HttpAccessKey key = new HttpAccessKey(anyRoles, allRoles, qualifier);
@@ -400,7 +402,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Configure access administration
 		final OfficeAdministration finalAdministration = administration;
-		securer.secure(new HttpSecurerContext() {
+		securer.secure(new HttpOfficeSecurerContext() {
 			@Override
 			public OfficeAdministration getAdministration() {
 				return finalAdministration;
@@ -648,9 +650,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					authenticationContextName,
 					new AuthenticationContextManagedObjectSource<>(this.name, this.security));
 			authenticationContextMos.setTimeout(this.timeout);
-			office.link(authenticationContextMos.getManagedObjectFlow("AUTHENTICATE"),
+			office.link(authenticationContextMos.getSectionManagedObjectFlow("AUTHENTICATE"),
 					this.section.getOfficeSectionInput("ManagedObjectAuthenticate"));
-			office.link(authenticationContextMos.getManagedObjectFlow("LOGOUT"),
+			office.link(authenticationContextMos.getSectionManagedObjectFlow("LOGOUT"),
 					this.section.getOfficeSectionInput("ManagedObjectLogout"));
 			OfficeManagedObject authenticationContext = authenticationContextMos
 					.addOfficeManagedObject(authenticationContextName, ManagedObjectScope.PROCESS);
@@ -664,7 +666,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					new AuthenticationManagedObjectSource<>(this.name, this.security, this.type));
 			OfficeManagedObject authentication = authenticationMos.addOfficeManagedObject(authenticationName,
 					ManagedObjectScope.PROCESS);
-			office.link(authentication.getManagedObjectDependency("AUTHENTICATION_CONTEXT"), authenticationContext);
+			office.link(authentication.getSectionManagedObjectDependency("AUTHENTICATION_CONTEXT"), authenticationContext);
 
 			// Add the HTTP authentication
 			Class<A> authenticationType = this.type.getAuthenticationType();
@@ -676,7 +678,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 						httpAuthenticationName, new HttpAuthenticationManagedObjectSource<>(this.type));
 				this.httpAuthentication = httpAuthenticationMos.addOfficeManagedObject(httpAuthenticationName,
 						ManagedObjectScope.PROCESS);
-				office.link(this.httpAuthentication.getManagedObjectDependency("AUTHENTICATION"), authentication);
+				office.link(this.httpAuthentication.getSectionManagedObjectDependency("AUTHENTICATION"), authentication);
 			}
 
 			// Add the access control managed object
@@ -690,7 +692,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			if (isRequireTypeQualification) {
 				accessControl.addTypeQualification(this.name, accessControlType.getName());
 			}
-			office.link(accessControl.getManagedObjectDependency("AUTHENTICATION_CONTEXT"), authenticationContext);
+			office.link(accessControl.getSectionManagedObjectDependency("AUTHENTICATION_CONTEXT"), authenticationContext);
 
 			// Add the HTTP access control
 			if (HttpAccessControl.class.isAssignableFrom(accessControlType)) {
@@ -701,7 +703,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 						httpAccessControlName, new HttpAccessControlManagedObjectSource<>(this.type));
 				this.httpAccessControl = httpAccessControlMos.addOfficeManagedObject(httpAccessControlName,
 						ManagedObjectScope.PROCESS);
-				office.link(httpAccessControl.getManagedObjectDependency("ACCESS_CONTROL"), accessControl);
+				office.link(httpAccessControl.getSectionManagedObjectDependency("ACCESS_CONTROL"), accessControl);
 				if (isRequireTypeQualification) {
 					httpAccessControl.addTypeQualification(this.name, HttpAccessControl.class.getSimpleName());
 				}
@@ -745,7 +747,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		}
 
 		@Override
-		public HttpSecurerBuilder secure(HttpSecurer securer) {
+		public HttpSecurerBuilder secure(HttpOfficeSecurer securer) {
 
 			// Create securer, qualifying to this security
 			HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securer);
@@ -777,9 +779,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private static class HttpSecurerBuilderImpl implements HttpSecurerBuilder {
 
 		/**
-		 * {@link HttpSecurer}.
+		 * {@link HttpOfficeSecurer}.
 		 */
-		private final HttpSecurer httpSecurer;
+		private final HttpOfficeSecurer httpSecurer;
 
 		/**
 		 * Qualifier.
@@ -800,9 +802,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 * Instantiate.
 		 * 
 		 * @param httpSecurer
-		 *            {@link HttpSecurer}.
+		 *            {@link HttpOfficeSecurer}.
 		 */
-		private HttpSecurerBuilderImpl(HttpSecurer httpSecurer) {
+		private HttpSecurerBuilderImpl(HttpOfficeSecurer httpSecurer) {
 			this.httpSecurer = httpSecurer;
 		}
 

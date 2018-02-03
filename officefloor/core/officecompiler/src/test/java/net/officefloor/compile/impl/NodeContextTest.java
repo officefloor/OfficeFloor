@@ -326,7 +326,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertTypeQualifications(node.getTypeQualifications(compileContext), "QUALIFIER", "TYPE");
 
 		// Validate children
-		assertChildren(node, node.getManagedObjectDependency("DEPENDENCY"));
+		assertChildren(node, node.getSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -413,7 +413,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getInputManagedObjectDependency("DEPENDENCY"));
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -442,8 +442,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
-				node.getInputManagedObjectDependency("DEPENDENCY"));
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -529,8 +529,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
-				node.getInputManagedObjectDependency("DEPENDENCY"));
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**

@@ -25,7 +25,7 @@ import net.officefloor.compile.section.SectionInputType;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionInput {
+public interface SectionInput extends SectionFlowSourceNode {
 
 	/**
 	 * Obtains the name of this {@link SectionInput}.

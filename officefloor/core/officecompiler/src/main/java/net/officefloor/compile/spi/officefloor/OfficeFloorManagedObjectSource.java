@@ -68,7 +68,7 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	 *            Name of the {@link ManagedObjectFlowType}.
 	 * @return {@link ManagedObjectFlow}.
 	 */
-	ManagedObjectFlow getManagedObjectFlow(String managedObjectSourceFlowName);
+	ManagedObjectFlow getSectionManagedObjectFlow(String managedObjectSourceFlowName);
 
 	/**
 	 * Obtains the {@link ManagedObjectTeam} for the
@@ -88,7 +88,7 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	 *            Name of the {@link ManagedObjectDependencyType}.
 	 * @return {@link ManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getInputManagedObjectDependency(
+	ManagedObjectDependency getInputSectionManagedObjectDependency(
 			String managedObjectDependencyName);
 
 	/**

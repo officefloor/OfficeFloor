@@ -77,7 +77,7 @@ public class SendCachedHttpFileFunction
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 
 		// Obtain the HTTP resource
-		HttpResource resource = cache.getHttpResource(path);
+		HttpResource resource = cache.getHttpResource(this.path);
 
 		// Obtain the HTTP file
 		HttpFile file = null;

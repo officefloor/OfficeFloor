@@ -55,6 +55,7 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
+import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
@@ -530,12 +531,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public ManagedObjectDependency getManagedObjectDependency(String managedObjectDependencyName) {
-		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
-				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
-	}
-
-	@Override
 	public void addPreLoadAdministration(OfficeAdministration administration) {
 
 		// Ensure adminstration node
@@ -558,6 +553,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getSectionManagedObjectName() {
 		return this.managedObjectName;
+	}
+
+	@Override
+	public SectionManagedObjectDependency getSectionManagedObjectDependency(String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
 	}
 
 	/*

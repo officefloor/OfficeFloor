@@ -38,6 +38,8 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
+import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -49,6 +51,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -416,20 +419,21 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
 
 		// Ensure can get dependency
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		assertNotNull("Must have dependency", dependency);
 		assertEquals("Incorrect dependency name", "DEPENDENCY", dependency.getManagedObjectDependencyName());
 		assertEquals("Should get same managed object dependency again", dependency,
-				mo.getManagedObjectDependency("DEPENDENCY"));
+				mo.getSectionManagedObjectDependency("DEPENDENCY"));
 		assertNotSame("Should not be same dependency for different name", dependency,
-				mo.getManagedObjectDependency("ANOTHER"));
+				mo.getSectionManagedObjectDependency("ANOTHER"));
 
 		// Ensure can get flow
-		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
+		ManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
 		assertNotNull("Must have flow", flow);
 		assertEquals("Incorrect flow name", "FLOW", flow.getManagedObjectFlowName());
-		assertEquals("Should get same function flow again", flow, moSource.getManagedObjectFlow("FLOW"));
-		assertNotSame("Should not be same flow for different name", flow, moSource.getManagedObjectFlow("ANOTHER"));
+		assertEquals("Should get same function flow again", flow, moSource.getSectionManagedObjectFlow("FLOW"));
+		assertNotSame("Should not be same flow for different name", flow,
+				moSource.getSectionManagedObjectFlow("ANOTHER"));
 
 		this.verifyMockObjects();
 	}
@@ -1078,7 +1082,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Link
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO",
 				NotUseManagedObjectSource.class.getName());
-		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
+		SectionManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
 		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
 				NotUseManagedFunctionSource.class.getName());
 		SectionFunction function = namespace.addSectionFunction("FUNCTION", "TYPE");
@@ -1109,7 +1113,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Link
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO",
 				NotUseManagedObjectSource.class.getName());
-		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
+		SectionManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
 		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
 				SECTION_LOCATION);
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
@@ -1140,7 +1144,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Link
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO",
 				NotUseManagedObjectSource.class.getName());
-		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
+		SectionManagedObjectFlow flow = moSource.getSectionManagedObjectFlow("FLOW");
 		SectionOutput output = this.node.addSectionOutput("OUTPUT", Object.class.getName(), false);
 		this.node.link(flow, output);
 		assertFlowLink("managed object flow -> section output", flow, output);
@@ -1285,7 +1289,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
 				NotUseManagedObjectSource.class.getName());
 		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		SectionObject sectionObject = this.node.addSectionObject("OBJECT", Connection.class.getName());
 		this.node.link(dependency, sectionObject);
 		assertObjectLink("managed object dependency -> section object", dependency, sectionObject);
@@ -1320,7 +1324,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
 				NotUseManagedObjectSource.class.getName());
 		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
-		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectDependency dependency = mo.getSectionManagedObjectDependency("DEPENDENCY");
 		SectionManagedObjectSource moSourceTarget = this.node.addSectionManagedObjectSource("MO_SOURCE_TARGET",
 				NotUseManagedObjectSource.class.getName());
 		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject("MO_TARGET", ManagedObjectScope.PROCESS);
@@ -1351,7 +1355,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE", (String) null);
-		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectDependency dependency = moSource.getInputSectionManagedObjectDependency("DEPENDENCY");
 		SectionObject moTarget = this.node.addSectionObject("MO_TARGET", Connection.class.getName());
 		this.node.link(dependency, moTarget);
 		assertObjectLink("input managed object dependency -> office floor managed object", dependency, moTarget);
@@ -1383,7 +1387,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE", (String) null);
-		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectDependency dependency = moSource.getInputSectionManagedObjectDependency("DEPENDENCY");
 		SectionManagedObjectSource moSourceTarget = this.node.addSectionManagedObjectSource("MO_SOURCE_TARGET",
 				(String) null);
 		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject("MO_TARGET", ManagedObjectScope.PROCESS);
