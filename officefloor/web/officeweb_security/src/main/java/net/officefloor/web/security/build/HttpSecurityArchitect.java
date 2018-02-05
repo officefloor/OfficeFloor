@@ -20,7 +20,6 @@ package net.officefloor.web.security.build;
 import java.io.Serializable;
 
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.security.build.office.HttpOfficeSecurer;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
@@ -61,13 +60,11 @@ public interface HttpSecurityArchitect {
 			String securityName, HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
 
 	/**
-	 * Registers {@link HttpOfficeSecurer}.
+	 * Creates a {@link HttpSecurerBuilder}.
 	 * 
-	 * @param securer
-	 *            {@link HttpOfficeSecurer}.
-	 * @return {@link HttpSecurerBuilder} to configure the {@link HttpOfficeSecurer}.
+	 * @return {@link HttpSecurerBuilder}.
 	 */
-	HttpSecurerBuilder secure(HttpOfficeSecurer securer);
+	HttpSecurerBuilder createHttpSecurer();
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be

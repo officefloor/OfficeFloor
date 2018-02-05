@@ -20,7 +20,6 @@ package net.officefloor.web.security.build;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.web.security.build.office.HttpOfficeSecurer;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -63,12 +62,10 @@ public interface HttpSecurityBuilder extends PropertyConfigurable {
 	OfficeSectionOutput getOutput(String outputName);
 
 	/**
-	 * Registers {@link HttpOfficeSecurer} for this {@link HttpSecurity}.
+	 * Creates a {@link HttpSecurerBuilder} for this {@link HttpSecurity}.
 	 * 
-	 * @param securer
-	 *            {@link HttpOfficeSecurer}.
-	 * @return {@link HttpSecurerBuilder} to configure the {@link HttpOfficeSecurer}.
+	 * @return {@link HttpSecurerBuilder}.
 	 */
-	HttpSecurerBuilder secure(HttpOfficeSecurer securer);
+	HttpSecurerBuilder createHttpSecurer();
 
 }

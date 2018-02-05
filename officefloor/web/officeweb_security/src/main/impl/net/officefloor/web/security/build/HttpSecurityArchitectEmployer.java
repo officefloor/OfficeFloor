@@ -19,6 +19,7 @@ package net.officefloor.web.security.build;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,15 +29,33 @@ import java.util.function.Consumer;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
+import net.officefloor.compile.spi.section.SectionFlowSourceNode;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.build.AcceptNegotiatorBuilder;
@@ -48,6 +67,7 @@ import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.build.office.HttpOfficeSecurer;
 import net.officefloor.web.security.build.office.HttpOfficeSecurerContext;
+import net.officefloor.web.security.build.section.HttpFlowSecurer;
 import net.officefloor.web.security.impl.AccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.security.impl.AuthenticationManagedObjectSource;
@@ -61,6 +81,9 @@ import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpChallengeContextManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
+import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction;
+import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction.Depdendencies;
+import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction.Flows;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.web.security.type.HttpSecurityType;
@@ -119,6 +142,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private final List<HttpSecurerBuilderImpl> securers = new LinkedList<>();
 
 	/**
+	 * Index of the next section to ensure unique names.
+	 */
+	private int nextSectionIndex = 1;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param webArchitect
@@ -133,6 +161,15 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		this.webArchitect = webArchitect;
 		this.officeArchitect = officeArchitect;
 		this.officeSourceContext = officeSourceContext;
+	}
+
+	/**
+	 * Obtains the name of the next section.
+	 * 
+	 * @return Name of the next section.
+	 */
+	private String nextUniqueName() {
+		return "_secure_" + (this.nextSectionIndex++);
 	}
 
 	/*
@@ -177,8 +214,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	}
 
 	@Override
-	public HttpSecurerBuilder secure(HttpOfficeSecurer securer) {
-		HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securer);
+	public HttpSecurerBuilder createHttpSecurer() {
+		HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl();
 		HttpSecurityArchitectEmployer.this.securers.add(builder);
 		return builder;
 	}
@@ -320,9 +357,22 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					defaultHttpAuthentication);
 		}
 
-		// Augment functions with HTTP access administration
+		// Obtain the default security
+		final OfficeManagedObject finalAuthenticationManagedObject = defaultHttpAuthentication;
 		final OfficeManagedObject finalAccessControlManagedObject = defaultHttpAccessControl;
 		final Map<HttpAccessKey, OfficeAdministration> httpAccessAdministrators = new HashMap<>();
+
+		// Secure remaining aspects of application
+		for (HttpSecurerBuilderImpl securer : this.securers) {
+			String[] anyRoles = securer.anyRoles.toArray(new String[securer.anyRoles.size()]);
+			String[] allRoles = securer.allRoles.toArray(new String[securer.allRoles.size()]);
+			for (HttpOfficeSecurer httpOfficeSecurer : securer.httpOfficeSecurers) {
+				this.secure(securer.qualifier, anyRoles, allRoles, finalAccessControlManagedObject,
+						httpAccessAdministrators, nameToHttpSecurity, httpOfficeSecurer);
+			}
+		}
+
+		// Augment functions with HTTP access administration
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 
 			// Determine if HTTP Access annotation
@@ -335,17 +385,32 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					this.secure(httpAccess.withQualifier(), httpAccess.ifRole(), httpAccess.ifAllRoles(),
 							finalAccessControlManagedObject, httpAccessAdministrators, nameToHttpSecurity,
 							(securerContext) -> context.addPreAdministration(securerContext.getAdministration()));
+
+				} else if (annotation instanceof HttpFlowSecurerAnnotation) {
+					HttpFlowSecurerAnnotation httpFlowSecurer = (HttpFlowSecurerAnnotation) annotation;
+
+					// Obtain the HTTP authentication
+					OfficeManagedObject httpAuthenticationManagedObject;
+					if (httpFlowSecurer.qualifier == null) {
+						// Use default HTTP security
+						httpAuthenticationManagedObject = finalAuthenticationManagedObject;
+					} else {
+						// Obtain based on qualifier
+						HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = nameToHttpSecurity
+								.get(httpFlowSecurer.qualifier);
+						if (security == null) {
+							throw context.addIssue("No " + HttpSecurity.class.getSimpleName() + " configured by name '"
+									+ httpFlowSecurer.qualifier + "'");
+						}
+						httpAuthenticationManagedObject = security.httpAuthentication;
+					}
+
+					// Link authentication to function
+					context.link(context.getFunctionObject(Depdendencies.HTTP_AUTHENTICATION.name()),
+							httpAuthenticationManagedObject);
 				}
 			}
 		});
-
-		// Secure remaining aspects of application
-		for (HttpSecurerBuilderImpl securer : this.securers) {
-			String[] anyRoles = securer.anyRoles.toArray(new String[securer.anyRoles.size()]);
-			String[] allRoles = securer.allRoles.toArray(new String[securer.allRoles.size()]);
-			this.secure(securer.qualifier, anyRoles, allRoles, finalAccessControlManagedObject,
-					httpAccessAdministrators, nameToHttpSecurity, securer.httpSecurer);
-		}
 	}
 
 	/**
@@ -400,12 +465,33 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			administration.administerManagedObject(httpAccessControl);
 		}
 
-		// Configure access administration
+		// Run securer
 		final OfficeAdministration finalAdministration = administration;
 		securer.secure(new HttpOfficeSecurerContext() {
 			@Override
 			public OfficeAdministration getAdministration() {
 				return finalAdministration;
+			}
+
+			@Override
+			public void link(OfficeFlowSourceNode flowSourceNode, OfficeFlowSinkNode secureFlowSink,
+					OfficeFlowSinkNode insecureFlowSink) {
+
+				// Obtain the office architect
+				OfficeArchitect office = HttpSecurityArchitectEmployer.this.officeArchitect;
+
+				// Create the section to handle access logic
+				String sectionName = HttpSecurityArchitectEmployer.this.nextUniqueName();
+				OfficeSection section = office.addOfficeSection(sectionName, new HttpFlowSecurerSectionSource(
+						new HttpFlowSecurerAnnotation(qualifier, Arrays.asList(anyRoles), Arrays.asList(allRoles))),
+						null);
+
+				// Link
+				office.link(flowSourceNode, section.getOfficeSectionInput(HttpFlowSecurerSectionSource.INPUT_NAME));
+				office.link(section.getOfficeSectionOutput(HttpFlowSecurerSectionSource.SECURE_OUTPUT_NAME),
+						secureFlowSink);
+				office.link(section.getOfficeSectionOutput(HttpFlowSecurerSectionSource.INSECURE_OUTPUT_NAME),
+						insecureFlowSink);
 			}
 		});
 	}
@@ -413,7 +499,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * Key to {@link HttpAccess} to determine uniqueness.
 	 */
-	private class HttpAccessKey {
+	private static class HttpAccessKey {
 
 		/**
 		 * Any roles.
@@ -749,10 +835,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		}
 
 		@Override
-		public HttpSecurerBuilder secure(HttpOfficeSecurer securer) {
+		public HttpSecurerBuilder createHttpSecurer() {
 
 			// Create securer, qualifying to this security
-			HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securer);
+			HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl();
 			builder.setQualifier(this.name);
 
 			// Register and return securer builder
@@ -778,12 +864,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * {@link HttpSecurerBuilder} implementation.
 	 */
-	private static class HttpSecurerBuilderImpl implements HttpSecurerBuilder {
-
-		/**
-		 * {@link HttpOfficeSecurer}.
-		 */
-		private final HttpOfficeSecurer httpSecurer;
+	private class HttpSecurerBuilderImpl implements HttpSecurerBuilder {
 
 		/**
 		 * Qualifier.
@@ -801,14 +882,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		private List<String> allRoles = new LinkedList<>();
 
 		/**
-		 * Instantiate.
-		 * 
-		 * @param httpSecurer
-		 *            {@link HttpOfficeSecurer}.
+		 * {@link HttpOfficeSecurer} instances.
 		 */
-		private HttpSecurerBuilderImpl(HttpOfficeSecurer httpSecurer) {
-			this.httpSecurer = httpSecurer;
-		}
+		private final List<HttpOfficeSecurer> httpOfficeSecurers = new LinkedList<>();
 
 		/*
 		 * ================ HttpSecurerBuilder ==========================
@@ -827,6 +903,207 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		@Override
 		public void setQualifier(String securityName) {
 			this.qualifier = securityName;
+		}
+
+		@Override
+		public void secure(HttpOfficeSecurer securer) {
+			this.httpOfficeSecurers.add(securer);
+		}
+
+		@Override
+		public HttpFlowSecurer createFlowSecurer() {
+			return new HttpFlowSecurerImpl(new HttpFlowSecurerAnnotation(this.qualifier, this.anyRoles, this.allRoles));
+		}
+	}
+
+	/**
+	 * {@link HttpFlowSecurer} implementation.
+	 */
+	private class HttpFlowSecurerImpl implements HttpFlowSecurer {
+
+		/**
+		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction}
+		 * annotation processing.
+		 */
+		private final HttpFlowSecurerAnnotation annotation;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param annotation
+		 *            {@link HttpFlowSecurerAnnotation}.
+		 */
+		private HttpFlowSecurerImpl(HttpFlowSecurerAnnotation annotation) {
+			this.annotation = annotation;
+		}
+
+		/*
+		 * =============== HttpFlowSecurer =============================
+		 */
+
+		@Override
+		public void link(SectionDesigner designer, SectionFlowSourceNode flowSourceNode,
+				SectionFlowSinkNode secureFlowSink, SectionFlowSinkNode insecureFlowSink) {
+
+			// Configure the function
+			String functionName = HttpSecurityArchitectEmployer.this.nextUniqueName();
+			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
+					new HttpFlowSecurerManagedFunctionSource(this.annotation));
+			SectionFunction function = namespace.addSectionFunction(functionName,
+					HttpFlowSecurerManagedFunctionSource.FUNCTION_NAME);
+
+			// Configure the function
+			designer.link(flowSourceNode, function);
+			designer.link(function.getFunctionFlow(Flows.SECURE.name()), secureFlowSink, false);
+			designer.link(function.getFunctionFlow(Flows.INSECURE.name()), insecureFlowSink, false);
+		}
+	}
+
+	/**
+	 * {@link HttpFlowSecurer} {@link SectionSource}.
+	 */
+	private class HttpFlowSecurerSectionSource extends AbstractSectionSource {
+
+		/**
+		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction}
+		 * annotation processing.
+		 */
+		private final HttpFlowSecurerAnnotation annotation;
+
+		/**
+		 * {@link SectionInput} name.
+		 */
+		private static final String INPUT_NAME = "input";
+
+		/**
+		 * Secure {@link SectionOutput} name.
+		 */
+		private static final String SECURE_OUTPUT_NAME = "secure";
+
+		/**
+		 * Insecure {@link SectionOutput} name.
+		 */
+		private static final String INSECURE_OUTPUT_NAME = "insecure";
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param annotation
+		 *            {@link HttpFlowSecurerAnnotation}.
+		 */
+		private HttpFlowSecurerSectionSource(HttpFlowSecurerAnnotation annotation) {
+			this.annotation = annotation;
+		}
+
+		/*
+		 * =================== SectionSource ============================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("secure",
+					new HttpFlowSecurerManagedFunctionSource(this.annotation));
+			SectionFunction function = namespace.addSectionFunction("secure",
+					HttpFlowSecurerManagedFunctionSource.FUNCTION_NAME);
+			designer.link(designer.addSectionInput(INPUT_NAME, null), function);
+			designer.link(function.getFunctionFlow(Flows.SECURE.name()),
+					designer.addSectionOutput(SECURE_OUTPUT_NAME, null, false), false);
+			designer.link(function.getFunctionFlow(Flows.INSECURE.name()),
+					designer.addSectionOutput(INSECURE_OUTPUT_NAME, null, false), false);
+		}
+	}
+
+	/**
+	 * {@link HttpFlowSecurer} {@link ManagedFunctionSource}.
+	 */
+	private class HttpFlowSecurerManagedFunctionSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * Name of the secure {@link ManagedFunction}.
+		 */
+		private static final String FUNCTION_NAME = "secure";
+
+		/**
+		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction}
+		 * annotation processing.
+		 */
+		private final HttpFlowSecurerAnnotation annotation;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param annotation
+		 *            {@link HttpFlowSecurerAnnotation}.
+		 */
+		private HttpFlowSecurerManagedFunctionSource(HttpFlowSecurerAnnotation annotation) {
+			this.annotation = annotation;
+		}
+
+		/*
+		 * ================= ManagedFunctionSource ======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Obtain the access roles
+			String[] anyRoles = this.annotation.anyRoles.toArray(new String[this.annotation.anyRoles.size()]);
+			String[] allRoles = this.annotation.allRoles.toArray(new String[this.annotation.allRoles.size()]);
+
+			// Register the function with the annotation
+			ManagedFunctionTypeBuilder<Depdendencies, Flows> function = functionNamespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, new HttpFlowSecurerManagedFunction(anyRoles, allRoles),
+							Depdendencies.class, Flows.class);
+			function.addFlow().setKey(Flows.SECURE);
+			function.addFlow().setKey(Flows.INSECURE);
+			function.addObject(HttpAuthentication.class).setKey(Depdendencies.HTTP_AUTHENTICATION);
+			function.addAnnotation(this.annotation);
+		}
+	}
+
+	/**
+	 * Annotation on the {@link HttpFlowSecurer} {@link ManagedFunction}.
+	 */
+	private static class HttpFlowSecurerAnnotation {
+
+		/**
+		 * Qualifier. May be <code>null</code>.
+		 */
+		private final String qualifier;
+
+		/**
+		 * Any roles.
+		 */
+		private final List<String> anyRoles;
+
+		/**
+		 * All roles.
+		 */
+		private final List<String> allRoles;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param qualifier
+		 *            Qualifier. May be <code>null</code>.
+		 * @param anyRoles
+		 *            Any roles.
+		 * @param allRoles
+		 *            All Roles.
+		 */
+		private HttpFlowSecurerAnnotation(String qualifier, List<String> anyRoles, List<String> allRoles) {
+			this.qualifier = qualifier;
+			this.anyRoles = anyRoles;
+			this.allRoles = allRoles;
 		}
 	}
 

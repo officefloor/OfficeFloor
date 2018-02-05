@@ -28,7 +28,11 @@ import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.administration.Administration;
@@ -123,6 +127,76 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		public void function(MockObject object) {
 			AugmentManagedFunctionTest.object = object;
 		}
+	}
+
+	/**
+	 * Ensure can augment the {@link ManagedFunction} within an
+	 * {@link OfficeSubSection}.
+	 */
+	public void testAugmentSubSectionManagedFunction() throws Exception {
+
+		// Create the managed object
+		MockObject mockObject = new MockObject();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add the managed object
+			OfficeManagedObject managedObject = architect
+					.addOfficeManagedObjectSource("OBJECT", new Singleton(mockObject))
+					.addOfficeManagedObject("OBJECT", ManagedObjectScope.PROCESS);
+
+			// Augment the function object
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+
+				// Ensure have managed function name (identify function)
+				assertEquals("Incorrect managed function name", "SECTION.SUB_SECTION.function",
+						augment.getManagedFunctionName());
+
+				// Validate can add objects for function parameters
+				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
+					Class<?> objectType = type.getObjectType();
+					if (objectType.isAnnotationPresent(MockAnnotation.class)) {
+
+						// Obtain the function object
+						AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
+						assertFalse("Should not be linked", object.isLinked());
+
+						// Link managed object
+						augment.link(object, managedObject);
+					}
+				}
+			});
+		});
+		compile.section((context) -> {
+			context.getSectionDesigner().addSubSection("SUB_SECTION", new AbstractSectionSource() {
+				@Override
+				protected void loadSpecification(SpecificationContext context) {
+				}
+
+				@Override
+				public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+					SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("NAMESPACE",
+							ClassManagedFunctionSource.class.getName());
+					namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+							MockFunction.class.getName());
+					namespace.addSectionFunction("function", "function");
+				}
+			}, null);
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Reset for test
+		object = null;
+
+		// Execute the method (with augmented object)
+		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.SUB_SECTION.function");
+		function.invokeProcess(null, null);
+
+		// Should have loaded the augmented object
+		assertSame("Should load augmented object", mockObject, object);
 	}
 
 	/**

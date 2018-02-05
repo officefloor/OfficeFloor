@@ -53,4 +53,46 @@ public interface HttpAccessControl extends Serializable {
 	 */
 	boolean inRole(String role);
 
+	/**
+	 * Indicates if have access.
+	 * 
+	 * @param anyRoles
+	 *            Listing of roles that must have access to at least one. May be
+	 *            <code>null</code>.
+	 * @param allRoles
+	 *            Listing of roles that must have access to all. May be
+	 *            <code>null</code>.
+	 * @return <code>true</code> if have access.
+	 */
+	default boolean isAccess(String[] anyRoles, String[] allRoles) {
+
+		// Ensure in all roles
+		if ((allRoles != null) && (allRoles.length > 0)) {
+			for (int i = 0; i < allRoles.length; i++) {
+				String role = allRoles[i];
+				boolean isInRole = this.inRole(role);
+				if (!isInRole) {
+					return false; // must be in all roles
+				}
+			}
+		}
+
+		// Ensure in any roles
+		if ((anyRoles != null) && (anyRoles.length > 0)) {
+			for (int i = 0; i < anyRoles.length; i++) {
+				String role = anyRoles[i];
+				boolean isInRole = this.inRole(role);
+				if (isInRole) {
+					return true; // allow access
+				}
+			}
+
+			// As here, not in any role
+			return false;
+		}
+
+		// As here, have access
+		return true;
+	}
+
 }

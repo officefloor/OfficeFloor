@@ -78,9 +78,9 @@ public interface SectionDesigner extends SourceIssues {
 	 * Adds a {@link SectionFunctionNamespace} to the {@link SectionNode} being
 	 * built.
 	 * 
-	 * @param workName
+	 * @param functionNamespaceName
 	 *            Name of the {@link SectionFunctionNamespace}.
-	 * @param workSourceClassName
+	 * @param managedFunctionSourceClassName
 	 *            Fully qualified class name of the
 	 *            {@link ManagedFunctionSource}. This allows adding the
 	 *            {@link SectionFunctionNamespace} without having to worry if
@@ -88,7 +88,8 @@ public interface SectionDesigner extends SourceIssues {
 	 *            path.
 	 * @return {@link SectionFunctionNamespace}.
 	 */
-	SectionFunctionNamespace addSectionFunctionNamespace(String workName, String workSourceClassName);
+	SectionFunctionNamespace addSectionFunctionNamespace(String functionNamespaceName,
+			String managedFunctionSourceClassName);
 
 	/**
 	 * Adds a {@link SectionFunctionNamespace} to the {@link SectionNode} being

@@ -107,32 +107,12 @@ public class HttpAccessAdministrationSource extends AbstractAdministrationSource
 			// Provide means to load access control
 			HttpAccessControl accessControl = accessControls[0];
 
-			// Ensure in all roles
-			if (allRoles.length > 0) {
-				for (int i = 0; i < allRoles.length; i++) {
-					String role = allRoles[i];
-					boolean isInRole = accessControl.inRole(role);
-					if (!isInRole) {
-						throw new HttpException(HttpStatus.FORBIDDEN);
-					}
-				}
-			}
-
-			// Ensure in any roles
-			if (anyRoles.length > 0) {
-				for (int i = 0; i < anyRoles.length; i++) {
-					String role = anyRoles[i];
-					boolean isInRole = accessControl.inRole(role);
-					if (isInRole) {
-						return; // allow access
-					}
-				}
-
-				// As here, not in any role
+			// Ensure has access
+			if (!accessControl.isAccess(anyRoles, allRoles)) {
 				throw new HttpException(HttpStatus.FORBIDDEN);
 			}
 
-			// No role required, so allow access
+			// As here, has access
 		}
 	}
 

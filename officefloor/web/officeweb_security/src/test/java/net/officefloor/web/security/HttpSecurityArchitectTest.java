@@ -22,12 +22,18 @@ import java.io.IOException;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -39,6 +45,7 @@ import net.officefloor.web.security.build.HttpSecurerBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
+import net.officefloor.web.security.build.section.HttpFlowSecurer;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
@@ -546,7 +553,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link OfficeManagedObject}.
 	 */
-	public void testHttpSecurerManagedObject() throws Exception {
+	public void testHttpOfficeSecurerManagedObject() throws Exception {
 		this.compile((context, security) -> {
 
 			// Provide security
@@ -561,7 +568,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			OfficeManagedObject mo = context.addManagedObject("MO", HttpSecurerObject.class, ManagedObjectScope.THREAD);
 
 			// Secure the managed object
-			builder.secure((secureContext) -> mo.addPreLoadAdministration(secureContext.getAdministration()));
+			builder.createHttpSecurer()
+					.secure((secureContext) -> mo.addPreLoadAdministration(secureContext.getAdministration()));
 		});
 
 		// Ensure use of managed object is secured
@@ -589,7 +597,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link OfficeSectionFunction}.
 	 */
-	public void testHttpSecurerFunction() throws Exception {
+	public void testHttpOfficeSecurerFunction() throws Exception {
 		this.compile((context, security) -> {
 
 			// Provide security
@@ -602,9 +610,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Secure the function
 			OfficeSectionFunction function = section.getOfficeSectionFunction("service");
-			HttpSecurerBuilder securer = builder
-					.secure((secureContext) -> function.addPreAdministration(secureContext.getAdministration()));
+			HttpSecurerBuilder securer = builder.createHttpSecurer();
 			securer.addRole("role");
+			securer.secure((secureContext) -> function.addPreAdministration(secureContext.getAdministration()));
 		});
 
 		// Ensure not access if do not have role
@@ -633,8 +641,113 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			HttpSecurityBuilder builder = security.addHttpSecurity("app",
 					new MockChallengeHttpSecuritySource("secure"));
 
-			fail("TODO implement test");
+			// Provide servicer
+			OfficeSection section = context.addSection("servicer", HttpOfficeSecurerFlowServicer.class);
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+
+			// Configure the secure decision
+			HttpSecurerBuilder securer = builder.createHttpSecurer();
+			securer.addRole("role");
+			securer.secure((securerContext) -> securerContext.link(section.getOfficeSectionOutput("decision"),
+					section.getOfficeSectionInput("secure"), section.getOfficeSectionInput("insecure")));
 		});
+
+		// Ensure insecure flow followed
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect insecure response", "INSECURE", response.getEntity(null));
+
+		// Ensure insecure flow if not in role
+		response = this.server.send(this.mockRequest("/path", "no_access", "no_access"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect insecure response", "INSECURE", response.getEntity(null));
+
+		// May access if have role
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect secure response", "SECURE", response.getEntity(null));
+	}
+
+	public static class HttpOfficeSecurerFlowServicer extends HttpSectionSecurerFlowServicer {
+		@NextFunction("decision")
+		public void service() {
+		}
+	}
+
+	public static class HttpSectionSecurerFlowServicer {
+		public void secure(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("SECURE");
+		}
+
+		public void insecure(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("INSECURE");
+		}
+	}
+
+	/**
+	 * Ensure can secure {@link Flow} section.
+	 */
+	public void testHttpSectionSecurerFlow() throws Exception {
+		this.compile((context, security) -> {
+
+			// Provide security
+			HttpSecurityBuilder builder = security.addHttpSecurity("app",
+					new MockChallengeHttpSecuritySource("secure"));
+
+			// Configure securer
+			HttpSecurerBuilder securer = builder.createHttpSecurer();
+			securer.addRole("role");
+
+			// Configure the section
+			OfficeSection section = context.getOfficeArchitect().addOfficeSection("section",
+					new HttpSectionSecurerFlowSection(securer.createFlowSecurer()), null);
+			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+		});
+
+		// Ensure insecure flow followed
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect insecure response", "INSECURE", response.getEntity(null));
+
+		// Ensure insecure flow if not in role
+		response = this.server.send(this.mockRequest("/path", "no_access", "no_access"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect insecure response", "INSECURE", response.getEntity(null));
+
+		// May access if have role
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals("Incorrect secure response", "SECURE", response.getEntity(null));
+	}
+
+	public class HttpSectionSecurerFlowSection extends AbstractSectionSource {
+
+		private final HttpFlowSecurer securer;
+
+		private HttpSectionSecurerFlowSection(HttpFlowSecurer securer) {
+			this.securer = securer;
+		}
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+
+			// Add the sub section
+			SubSection subSection = designer.addSubSection("sub_section", ClassSectionSource.class.getName(),
+					HttpSectionSecurerFlowServicer.class.getName());
+			designer.link(subSection.getSubSectionObject(ServerHttpConnection.class.getName()),
+					designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
+							ServerHttpConnection.class.getName()));
+			designer.link(subSection.getSubSectionOutput(IOException.class.getName()),
+					designer.addSectionOutput(IOException.class.getSimpleName(), IOException.class.getName(), true));
+
+			// Configure secure flow
+			this.securer.link(designer, designer.addSectionInput("service", null),
+					subSection.getSubSectionInput("secure"), subSection.getSubSectionInput("insecure"));
+		}
 	}
 
 	/**
