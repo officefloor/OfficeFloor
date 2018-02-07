@@ -40,7 +40,7 @@ import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.FileCache;
 import net.officefloor.web.resource.spi.ResourceSystem;
-import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 import net.officefloor.web.resource.spi.ResourceTransformer;
 
 /**
@@ -52,14 +52,14 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 
 	/**
 	 * <p>
-	 * Obtains the {@link ResourceSystemService} {@link Class}.
+	 * Obtains the {@link ResourceSystemFactory} {@link Class}.
 	 * <p>
-	 * As the {@link ResourceSystemService} is loaded via a
+	 * As the {@link ResourceSystemFactory} is loaded via a
 	 * {@link ServiceLoader} this ensures it can be.
 	 * 
-	 * @return {@link ResourceSystemService}.
+	 * @return {@link ResourceSystemFactory}.
 	 */
-	protected abstract Class<? extends ResourceSystemService> getResourceSystemService();
+	protected abstract Class<? extends ResourceSystemFactory> getResourceSystemService();
 
 	/**
 	 * Obtains the location to configure the {@link ResourceSystem}.
@@ -83,12 +83,12 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	private HttpResourceStoreImpl store;
 
 	/**
-	 * Creates the {@link ResourceSystemService}.
+	 * Creates the {@link ResourceSystemFactory}.
 	 * 
-	 * @return {@link ResourceSystemService}.
+	 * @return {@link ResourceSystemFactory}.
 	 */
-	protected ResourceSystemService createResourceSystemService() throws Exception {
-		Class<? extends ResourceSystemService> serviceClass = this.getResourceSystemService();
+	protected ResourceSystemFactory createResourceSystemService() throws Exception {
+		Class<? extends ResourceSystemFactory> serviceClass = this.getResourceSystemService();
 		return serviceClass.newInstance();
 	}
 
@@ -168,7 +168,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 
 		// Set up the new HTTP resource store
 		String contextPath = this.getContextPath();
-		ResourceSystemService factory = this.createResourceSystemService();
+		ResourceSystemFactory factory = this.createResourceSystemService();
 		this.store = new HttpResourceStoreImpl(location, factory, contextPath, (name) -> new MockFileCache(name),
 				transformers, directoryDefaultFileNames);
 	}

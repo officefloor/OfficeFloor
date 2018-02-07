@@ -25,29 +25,29 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceCache;
+import net.officefloor.web.resource.HttpResourceStore;
 
 /**
- * {@link ManagedFunction} to send the {@link HttpFile} from
- * {@link HttpResourceCache}.
+ * {@link ManagedFunction} to send the {@link HttpFile} from the
+ * {@link HttpResourceStore}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SendCachedHttpFileFunction
-		extends StaticManagedFunction<SendCachedHttpFileFunction.Dependencies, SendCachedHttpFileFunction.Flows> {
+public class SendHttpFileFunction
+		extends StaticManagedFunction<SendHttpFileFunction.Dependencies, SendHttpFileFunction.Flows> {
 
 	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		HTTP_PATH, HTTP_RESOURCE_CACHE, SERVER_HTTP_CONNECTION
+		HTTP_PATH, HTTP_RESOURCE_STORE, SERVER_HTTP_CONNECTION
 	}
 
 	/**
 	 * {@link Flow} keys.
 	 */
 	public static enum Flows {
-		NOT_CACHED
+		NOT_AVAILABLE
 	}
 
 	/*
@@ -59,11 +59,11 @@ public class SendCachedHttpFileFunction
 
 		// Obtain the dependencies
 		HttpPath path = (HttpPath) context.getObject(Dependencies.HTTP_PATH);
-		HttpResourceCache cache = (HttpResourceCache) context.getObject(Dependencies.HTTP_RESOURCE_CACHE);
+		HttpResourceStore store = (HttpResourceStore) context.getObject(Dependencies.HTTP_RESOURCE_STORE);
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 
 		// Obtain the HTTP resource
-		HttpResource resource = cache.getHttpResource(path.getPath());
+		HttpResource resource = store.getHttpResource(path.getPath());
 
 		// Obtain the HTTP file
 		HttpFile file = null;
@@ -83,7 +83,7 @@ public class SendCachedHttpFileFunction
 		// Determine if have HTTP file
 		if (file == null) {
 			// Not cached
-			context.doFlow(Flows.NOT_CACHED, path, null);
+			context.doFlow(Flows.NOT_AVAILABLE, path, null);
 			return null;
 		}
 

@@ -17,10 +17,48 @@
  */
 package net.officefloor.web.resource.source;
 
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.web.resource.HttpResource;
+
 /**
- *
+ * Path for a {@link HttpResource}.
+ * 
  * @author Daniel Sagenschneider
  */
-public class SendHttpFileManagedFunctionSource {
+public class HttpPath {
+
+	/**
+	 * Path.
+	 */
+	private final String path;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param path
+	 *            Path.
+	 */
+	public HttpPath(String path) {
+		this.path = path;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param request
+	 *            {@link HttpRequest} to extract the path.
+	 */
+	public HttpPath(HttpRequest request) {
+		this(request.getUri());
+	}
+
+	/**
+	 * Obtains the path.
+	 * 
+	 * @return Path.
+	 */
+	public String getPath() {
+		return this.path;
+	}
 
 }

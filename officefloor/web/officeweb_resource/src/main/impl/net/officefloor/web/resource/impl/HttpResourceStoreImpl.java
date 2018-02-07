@@ -47,7 +47,7 @@ import net.officefloor.web.resource.spi.FileCache;
 import net.officefloor.web.resource.spi.FileCacheFactory;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
-import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 import net.officefloor.web.resource.spi.ResourceTransformer;
 import net.officefloor.web.resource.spi.ResourceTransformerContext;
 import net.officefloor.web.route.WebRouter;
@@ -145,7 +145,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * @param location
 	 *            Location for the {@link ResourceSystemContext}.
 	 * @param resourceSystemService
-	 *            {@link ResourceSystemService}.
+	 *            {@link ResourceSystemFactory}.
 	 * @param contextPath
 	 *            Context path for {@link HttpResource} instances from this
 	 *            {@link HttpResourceStore}.
@@ -158,7 +158,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * @throws IOException
 	 *             If fails to instantiate the {@link HttpResourceStore}.
 	 */
-	public HttpResourceStoreImpl(String location, ResourceSystemService resourceSystemService, String contextPath,
+	public HttpResourceStoreImpl(String location, ResourceSystemFactory resourceSystemService, String contextPath,
 			FileCacheFactory fileCacheFactory, ResourceTransformer[] transformers,
 			String[] directoryDefaultResourceNames) throws IOException {
 		this.location = location;

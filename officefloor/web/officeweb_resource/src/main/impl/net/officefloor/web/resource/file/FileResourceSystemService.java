@@ -21,14 +21,14 @@ import java.io.IOException;
 
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
-import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
- * {@link ResourceSystemService} backed by files.
+ * {@link ResourceSystemFactory} backed by files.
  * 
  * @author Daniel Sagenschneider
  */
-public class FileResourceSystemService implements ResourceSystemService {
+public class FileResourceSystemService implements ResourceSystemFactory {
 
 	/**
 	 * Protocol name.

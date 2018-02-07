@@ -24,7 +24,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.spi.ResourceSystem;
-import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
  * Builds the {@link HttpResource} for {@link WebArchitect}.
@@ -61,19 +61,19 @@ public interface HttpResourceArchitect {
 	 * they are added for a {@link HttpResource}.
 	 * 
 	 * @param resourceSystemService
-	 *            {@link ResourceSystemService} to create the
+	 *            {@link ResourceSystemFactory} to create the
 	 *            {@link ResourceSystem} to provide the resources backing the
 	 *            {@link HttpResource} instances.
 	 * @param location
-	 *            {@link ResourceSystemService} specific location of the
+	 *            {@link ResourceSystemFactory} specific location of the
 	 *            resources.
 	 * @return {@link HttpResourcesBuilder}.
 	 */
-	HttpResourcesBuilder addHttpResources(ResourceSystemService resourceSystemService, String location);
+	HttpResourcesBuilder addHttpResources(ResourceSystemFactory resourceSystemService, String location);
 
 	/**
 	 * <p>
-	 * Adds {@link HttpResource} instances via a {@link ResourceSystemService}.
+	 * Adds {@link HttpResource} instances via a {@link ResourceSystemFactory}.
 	 * <p>
 	 * The {@link ResourceSystem} instances will be interrogated in the order
 	 * they are added for a {@link HttpResource}.
@@ -81,10 +81,10 @@ public interface HttpResourceArchitect {
 	 * @param protocolLocation
 	 *            String configuration of <code>[protocol]:location</code> to
 	 *            configure a {@link ResourceSystem} from
-	 *            {@link ResourceSystemService}.
+	 *            {@link ResourceSystemFactory}.
 	 * @return {@link HttpResourcesBuilder}.
 	 * 
-	 * @see ResourceSystemService
+	 * @see ResourceSystemFactory
 	 */
 	HttpResourcesBuilder addHttpResources(String protocolLocation);
 

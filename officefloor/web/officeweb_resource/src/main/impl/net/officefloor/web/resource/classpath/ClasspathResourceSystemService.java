@@ -21,15 +21,15 @@ import java.io.IOException;
 
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
-import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
 /**
- * {@link ResourceSystemService} to create a {@link ResourceSystem} from the
+ * {@link ResourceSystemFactory} to create a {@link ResourceSystem} from the
  * class path.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathResourceSystemService implements ResourceSystemService {
+public class ClasspathResourceSystemService implements ResourceSystemFactory {
 
 	/**
 	 * Protocol name.

@@ -20,6 +20,7 @@ package net.officefloor.web.resource.build;
 import java.io.File;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -50,6 +51,11 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 * {@link WebCompileOfficeFloor}.
 	 */
 	private final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+
+	/**
+	 * {@link HttpSecurityArchitect}.
+	 */
+	private HttpSecurityArchitect securityArchitect;
 
 	/**
 	 * {@link MockHttpServer}.
@@ -89,6 +95,10 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		// Send the request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		response.assertResponse(200, "TEST RESOURCE");
+
+		// Send again to service from cache
+		response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "TEST RESOURCE");
 	}
 
 	public static class OutputToResourceServicer {
@@ -101,11 +111,12 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 * Ensure issue if missing resource.
 	 */
 	public void testSectionOutputToMissingResource() throws Exception {
-		this.issue((issues) -> issues.recordIssue("Can not find resource 'mising.html'"), (context, resource) -> {
-			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
-			resource.link(section.getOfficeSectionOutput("resource"), "missing.html");
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
-		});
+		this.issue((issues) -> issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+				"Can not find HTTP resource '/missing.html'"), (context, resource) -> {
+					OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
+					resource.link(section.getOfficeSectionOutput("resource"), "missing.html");
+					context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+				});
 	}
 
 	/**
@@ -133,11 +144,29 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 * Ensure issue in missing resource.
 	 */
 	public void testEscalationToMissingResource() throws Exception {
-		this.issue((issues) -> issues.recordIssue("Can not find resource 'missing.html'"), (context, resource) -> {
-			context.link(false, "/path", EscalationToResourceServicer.class);
-			OfficeEscalation escalation = context.getOfficeArchitect().addOfficeEscalation(Exception.class.getName());
-			resource.link(escalation, "missing.html");
+		this.issue((issues) -> issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+				"Can not find HTTP resource '/missing.html'"), (context, resource) -> {
+					context.link(false, "/path", EscalationToResourceServicer.class);
+					OfficeEscalation escalation = context.getOfficeArchitect()
+							.addOfficeEscalation(Exception.class.getName());
+					resource.link(escalation, "missing.html");
+				});
+	}
+
+	/**
+	 * Ensure can service a resource.
+	 */
+	public void testServiceResource() throws Exception {
+		this.compile((context, resource) -> {
+			// Use default configuration
 		});
+
+		// Ensure can obtain resource
+		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200, "TEST RESOURCE");
+
+		// Ensure passes through if not found resource
+		this.server.send(MockHttpServer.mockRequest("/missing.html")).assertResponse(404,
+				"No resource found for /missing.html");
 	}
 
 	/**
@@ -216,8 +245,11 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	private void compile(Initialiser initialiser) throws Exception {
 		this.compile.web((context) -> {
-			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
+			this.securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
 					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
+					context.getWebArchitect(), this.securityArchitect, context.getOfficeArchitect(),
+					context.getOfficeSourceContext());
 			initialiser.initialise(context, resource);
 			resource.informWebArchitect();
 		});
@@ -242,8 +274,11 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
 		this.compile.web((context) -> {
-			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
+			this.securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
 					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
+					context.getWebArchitect(), this.securityArchitect, context.getOfficeArchitect(),
+					context.getOfficeSourceContext());
 			initialiser.initialise(context, resource);
 			resource.informWebArchitect();
 		});
