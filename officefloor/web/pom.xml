@@ -19,7 +19,6 @@
 		<module>officeweb_resource</module>
 <!--
 		<module>officeweb_rest</module>
-		<module>officeweb_application</module>
 		<module>officewoof</module>
 -->
 	</modules>
