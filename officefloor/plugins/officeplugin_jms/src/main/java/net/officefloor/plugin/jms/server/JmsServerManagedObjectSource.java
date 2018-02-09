@@ -177,7 +177,7 @@ public class JmsServerManagedObjectSource extends
 				RecycleManagedObjectParameter.class);
 
 		// Specify extension interfaces
-		context.addManagedObjectExtensionInterface(Transaction.class, (managedObject) -> (Transaction) managedObject);
+		context.addManagedObjectExtension(Transaction.class, (managedObject) -> (Transaction) managedObject);
 	}
 
 	@Override
