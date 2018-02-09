@@ -157,6 +157,7 @@ public abstract class AbstractVendorJdbcTest extends AbstractOfficeConstructTest
 		// Configure the JDBC managed object
 		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("JDBC", JdbcManagedObjectSource.class,
 				officeName);
+		this.getOfficeBuilder().addThreadManagedObject("JDBC", "JDBC");
 		Properties properties = this.getDataSourceProperties();
 		System.out.println("Loading " + JdbcManagedObjectSource.class.getSimpleName() + " with properties:");
 		for (String name : properties.stringPropertyNames()) {
@@ -167,8 +168,8 @@ public abstract class AbstractVendorJdbcTest extends AbstractOfficeConstructTest
 		moBuilder.addProperty(JdbcManagedObjectSource.DATA_SOURCE_INITIALISE_SCRIPT,
 				this.getFileLocation(AbstractVendorJdbcTest.class, "InitialiseDatabase.sql"));
 
-		// Configure the task for the connection
-		JdbcManagedFunction task = new JdbcManagedFunction(new ConnectionValidator() {
+		// Configure the function for the connection
+		JdbcManagedFunction function = new JdbcManagedFunction(new ConnectionValidator() {
 			@Override
 			public void validateConnection(Connection connection) throws Throwable {
 				// Obtain the product name to validate working
@@ -180,7 +181,7 @@ public abstract class AbstractVendorJdbcTest extends AbstractOfficeConstructTest
 				statement.close();
 			}
 		});
-		String functionName = task.construct(this.getOfficeBuilder(), null, "JDBC", "TEAM");
+		String functionName = function.construct(this.getOfficeBuilder(), null, "JDBC", "TEAM");
 
 		// Configure the necessary Teams
 		this.constructTeam("TEAM", PassiveTeamSource.createPassiveTeam());

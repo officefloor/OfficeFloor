@@ -61,14 +61,14 @@ public class DataSourceManagedObjectSourceTest extends AbstractOfficeConstructTe
 
 		// Construct the task to validate the connection
 		final List<Connection> connections = new LinkedList<Connection>();
-		DataSourceManagedFunction task = new DataSourceManagedFunction(new ConnectionValidator() {
+		DataSourceManagedFunction function = new DataSourceManagedFunction(new ConnectionValidator() {
 			@Override
 			public void validateConnection(Connection connection) throws Throwable {
 				// Record the connection being used
 				connections.add(connection);
 			}
 		});
-		String functionName = task.construct(this.getOfficeBuilder(), null, "DATA_SOURCE", "TEAM");
+		String functionName = function.construct(this.getOfficeBuilder(), null, "DATA_SOURCE", "TEAM");
 
 		// Configure the necessary Teams
 		this.constructTeam("TEAM", PassiveTeamSource.createPassiveTeam());
@@ -79,6 +79,7 @@ public class DataSourceManagedObjectSourceTest extends AbstractOfficeConstructTe
 		// Configure the DataSource managed object
 		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("DATA_SOURCE",
 				DataSourceManagedObjectSource.class, officeName);
+		this.getOfficeBuilder().addThreadManagedObject("mo", "DATA_SOURCE");
 		moBuilder.addProperty(DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_CLASS_NAME,
 				MockDataSource.class.getName());
 		moBuilder.addProperty("driver", Driver.class.getName());

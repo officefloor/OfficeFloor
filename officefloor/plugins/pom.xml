@@ -19,11 +19,9 @@
 		<module>officeplugin_jms</module>
 		<module>officeplugin_jndi</module>
 		<module>officeplugin_jpa</module>
-		<module>officeplugin_json</module>
 
 <!-- TODO: fix up to v3.0 of OfficeFloor 
-		<module>officeplugin_web</module>
-		<module>officeplugin_woof</module>
+		<module>officeplugin_json</module>
 		<module>officeplugin_servlet</module>
 		<module>officeplugin_war</module>
 		<module>officeplugin_woof_servlet</module>

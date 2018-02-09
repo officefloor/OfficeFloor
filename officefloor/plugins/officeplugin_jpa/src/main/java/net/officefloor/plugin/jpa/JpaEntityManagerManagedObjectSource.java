@@ -26,7 +26,7 @@ import javax.persistence.Persistence;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -43,7 +43,7 @@ import net.officefloor.plugin.jpa.CloseEntityManagerManagedFunction.CloseEntityM
  */
 // START SNIPPET: type
 public class JpaEntityManagerManagedObjectSource extends AbstractManagedObjectSource<None, None>
-		implements ExtensionInterfaceFactory<EntityTransaction> {
+		implements ExtensionFactory<EntityTransaction> {
 
 	/**
 	 * Name of property providing the persistence unit name.
@@ -100,7 +100,7 @@ public class JpaEntityManagerManagedObjectSource extends AbstractManagedObjectSo
 		recycleTask.setResponsibleTeam(TEAM_CLOSE);
 
 		// Extension interface
-		context.addManagedObjectExtensionInterface(EntityTransaction.class, this);
+		context.addManagedObjectExtension(EntityTransaction.class, this);
 	}
 	// END SNIPPET: type
 
@@ -122,11 +122,11 @@ public class JpaEntityManagerManagedObjectSource extends AbstractManagedObjectSo
 	}
 
 	/*
-	 * ======================= ExtensionInterfaceFactory =======================
+	 * ======================= ExtensionFactory =======================
 	 */
 
 	@Override
-	public EntityTransaction createExtensionInterface(ManagedObject managedObject) {
+	public EntityTransaction createExtension(ManagedObject managedObject) {
 		JpaEntityManagerManagedObject jpaEntityManagerMo = (JpaEntityManagerManagedObject) managedObject;
 		return jpaEntityManagerMo.getEntityTransaction();
 	}
