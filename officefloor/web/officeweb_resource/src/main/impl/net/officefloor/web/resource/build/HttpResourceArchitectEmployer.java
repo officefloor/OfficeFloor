@@ -34,12 +34,14 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -59,6 +61,7 @@ import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
+import net.officefloor.web.resource.file.FileResourceSystemService;
 import net.officefloor.web.resource.impl.HttpResourceStoreImpl;
 import net.officefloor.web.resource.source.HttpPath;
 import net.officefloor.web.resource.source.HttpResourceCacheManagedObjectSource;
@@ -71,8 +74,12 @@ import net.officefloor.web.resource.source.TriggerSendHttpFileFunction;
 import net.officefloor.web.resource.spi.FileCacheFactory;
 import net.officefloor.web.resource.spi.FileCacheService;
 import net.officefloor.web.resource.spi.ResourceSystemFactory;
+import net.officefloor.web.resource.spi.ResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceTransformer;
+import net.officefloor.web.security.build.AbstractHttpSecurable;
+import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.section.HttpFlowSecurer;
 
 /**
  * Employs a {@link HttpResourceArchitect}.
@@ -183,6 +190,24 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 	@Override
 	public HttpResourcesBuilder addHttpResources(String protocolLocation) {
+
+		// Obtain the protocol and location
+		int splitIndex = protocolLocation.indexOf(':');
+		if (splitIndex < 0) {
+			// No protocol specified, so consider file
+			return this.addHttpResources(new FileResourceSystemService(), protocolLocation);
+		}
+		String protocol = protocolLocation.substring(0, splitIndex);
+		String location = protocolLocation.substring(splitIndex + 1);
+
+		// Obtain the resource system factory
+		for (ResourceSystemFactory factory : this.officeSourceContext.loadServices(ResourceSystemService.class, null)) {
+			if (protocol.equalsIgnoreCase(factory.getProtocolName())) {
+				// Found resource system for protocol
+				return this.addHttpResources(factory, location);
+			}
+		}
+
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -202,6 +227,10 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		FileCacheFactory fileCacheFactory = this.officeSourceContext.loadService(FileCacheService.class,
 				new TemporaryDirectoryFileCacheService());
 
+		// Add the resource service section
+		HttpResourceSectionSource sectionSource = new HttpResourceSectionSource();
+		OfficeSection section = this.officeArchitect.addOfficeSection("_resources_", sectionSource, null);
+
 		// Load the resource sources
 		int nextStoreIndex = 1;
 		List<HttpResourceStore> stores = new ArrayList<>(this.httpResourceSources.size());
@@ -217,21 +246,27 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 			// Register the managed objects (for auto-wiring)
 			String resourceNameSuffix = "_" + String.valueOf(nextStoreIndex++) + "_" + httpResourceSource.location;
-			this.officeArchitect
+			OfficeManagedObject cacheManagedObject = this.officeArchitect
 					.addOfficeManagedObjectSource(HttpResourceCache.class.getSimpleName() + resourceNameSuffix,
 							new HttpResourceCacheManagedObjectSource(store.getCache()))
 					.addOfficeManagedObject(HttpResourceCache.class.getSimpleName() + resourceNameSuffix,
 							ManagedObjectScope.PROCESS);
-			this.officeArchitect
+			OfficeManagedObject storeManagedObject = this.officeArchitect
 					.addOfficeManagedObjectSource(HttpResourceStore.class.getSimpleName() + resourceNameSuffix,
 							new HttpResourceStoreManagedObjectSource(store))
 					.addOfficeManagedObject(HttpResourceStore.class.getSimpleName() + resourceNameSuffix,
 							ManagedObjectScope.PROCESS);
-		}
 
-		// Add the resource service section
-		HttpResourceSectionSource sectionSource = new HttpResourceSectionSource();
-		OfficeSection section = this.officeArchitect.addOfficeSection("_resources_", sectionSource, null);
+			// Link managed objects to section
+			this.officeArchitect.link(
+					section.getOfficeSectionObject(
+							HttpResourceCache.class.getSimpleName() + httpResourceSource.nameSuffix),
+					cacheManagedObject);
+			this.officeArchitect.link(
+					section.getOfficeSectionObject(
+							HttpResourceStore.class.getSimpleName() + httpResourceSource.nameSuffix),
+					storeManagedObject);
+		}
 
 		// Link to resources
 		Map<String, OfficeSectionInput> resourceSendTriggers = new HashMap<>();
@@ -299,7 +334,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	/**
 	 * Source of {@link HttpResource} instances.
 	 */
-	private class HttpResourceSource implements HttpResourcesBuilder {
+	private class HttpResourceSource extends AbstractHttpSecurable implements HttpResourcesBuilder {
 
 		/**
 		 * {@link ResourceSystemFactory}.
@@ -330,6 +365,11 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		 * Name suffix to use in configuring this {@link HttpResourceSource}.
 		 */
 		private final String nameSuffix;
+
+		/**
+		 * {@link AbstractHttpSecurable}.
+		 */
+		private AbstractHttpSecurable securable = null;
 
 		/**
 		 * Instantiate
@@ -383,15 +423,12 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		}
 
 		@Override
-		public void setHttpSecurityName(String httpSecurityName) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void addRole(String role) {
-			// TODO Auto-generated method stub
-
+		public HttpSecurableBuilder getHttpSecurer() {
+			if (this.securable == null) {
+				this.securable = new AbstractHttpSecurable() {
+				};
+			}
+			return this.securable;
 		}
 	}
 
@@ -481,70 +518,18 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		@Override
 		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-			// Create the section input to service requests
-			SectionInput input = designer.addSectionInput(INPUT_NAME, null);
-
 			// Create the common dependencies
 			SectionObject serverHttpConnection = designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
 					ServerHttpConnection.class.getName());
 
-			// Create the service HTTP request trigger function
-			SectionFunctionNamespace serviceNamespace = designer.addSectionFunctionNamespace("service",
-					new ServiceHttpRequestManagedFunctionSource());
-			SectionFunction serviceFunction = serviceNamespace.addSectionFunction("service",
-					ServiceHttpRequestManagedFunctionSource.FUNCTION_NAME);
-			designer.link(
-					serviceFunction
-							.getFunctionObject(ServiceHttpRequestFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
-					serverHttpConnection);
-			designer.link(input, serviceFunction);
+			// Configure not found section output
+			SectionOutput notFoundOutput = designer.addSectionOutput(NOT_FOUND_OUTPUT_NAME, HttpPath.class.getName(),
+					false);
 
-			// Build the cache functions
-			SectionFunction initialHandler = null;
-			FunctionFlow notFoundFunctionFlow = null;
-			for (HttpResourceSource source : HttpResourceArchitectEmployer.this.httpResourceSources) {
-
-				// Add the cache function
-				String functionName = "cache" + source.nameSuffix;
-				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
-						new SendCachedHttpFileManagedFunctionSource());
-				SectionFunction function = namespace.addSectionFunction(functionName,
-						SendCachedHttpFileManagedFunctionSource.FUNCTION_NAME);
-
-				// Capture the initial handler
-				if (initialHandler == null) {
-					initialHandler = function;
-				}
-
-				// Configure the dependencies
-				function.getFunctionObject(SendCachedHttpFileFunction.Dependencies.HTTP_PATH.name()).flagAsParameter();
-				designer.link(
-						function.getFunctionObject(
-								SendCachedHttpFileFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
-						serverHttpConnection);
-
-				// Configure dependency to resource cache
-				SectionObject httpResourceCache = designer.addSectionObject(
-						HttpResourceCache.class.getSimpleName() + source.nameSuffix, HttpResourceCache.class.getName());
-				designer.link(
-						function.getFunctionObject(SendCachedHttpFileFunction.Dependencies.HTTP_RESOURCE_CACHE.name()),
-						httpResourceCache);
-
-				// Configure as handling not available
-				if (notFoundFunctionFlow == null) {
-					// First function
-					designer.link(serviceFunction, function);
-				} else {
-					// Use as next attempt for resource
-					designer.link(notFoundFunctionFlow, function, false);
-				}
-
-				// Set function flow for next function
-				notFoundFunctionFlow = function.getFunctionFlow(SendCachedHttpFileFunction.Flows.NOT_CACHED.name());
-			}
-
-			// Build the store functions
-			for (HttpResourceSource source : HttpResourceArchitectEmployer.this.httpResourceSources) {
+			// Build store functions (in reverse order to get to chain input)
+			SectionFlowSinkNode nextHandler = notFoundOutput;
+			for (int i = 0; i < HttpResourceArchitectEmployer.this.httpResourceSources.size(); i++) {
+				HttpResourceSource source = HttpResourceArchitectEmployer.this.httpResourceSources.get(i);
 
 				// Add the store function
 				String functionName = "store" + source.nameSuffix;
@@ -566,26 +551,90 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 						httpResourceStore);
 
 				// Configure as handling not available
-				designer.link(notFoundFunctionFlow, function, false);
+				FunctionFlow notFoundFunctionFlow = function
+						.getFunctionFlow(SendHttpFileFunction.Flows.NOT_AVAILABLE.name());
+				designer.link(notFoundFunctionFlow, nextHandler, false);
 
-				// Set function flow for next
-				notFoundFunctionFlow = function.getFunctionFlow(SendHttpFileFunction.Flows.NOT_AVAILABLE.name());
+				// Determine if secure
+				if (source.securable == null) {
+					// Not secure, so function is next handler
+					nextHandler = function;
+
+				} else {
+					// Secure the access to the resources
+					HttpFlowSecurer securer = HttpResourceArchitectEmployer.this.securityArchitect
+							.createHttpSecurer(source.securable).createFlowSecurer();
+					nextHandler = securer.secureFlow(designer, HttpPath.class, function, nextHandler);
+				}
 			}
+
+			// Build store functions (in reverse order to get to chain input)
+			for (int i = 0; i < HttpResourceArchitectEmployer.this.httpResourceSources.size(); i++) {
+				HttpResourceSource source = HttpResourceArchitectEmployer.this.httpResourceSources.get(i);
+
+				// Add the cache function
+				String functionName = "cache" + source.nameSuffix;
+				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
+						new SendCachedHttpFileManagedFunctionSource());
+				SectionFunction function = namespace.addSectionFunction(functionName,
+						SendCachedHttpFileManagedFunctionSource.FUNCTION_NAME);
+
+				// Configure the dependencies
+				function.getFunctionObject(SendCachedHttpFileFunction.Dependencies.HTTP_PATH.name()).flagAsParameter();
+				designer.link(
+						function.getFunctionObject(
+								SendCachedHttpFileFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+						serverHttpConnection);
+
+				// Configure dependency to resource cache
+				SectionObject httpResourceCache = designer.addSectionObject(
+						HttpResourceCache.class.getSimpleName() + source.nameSuffix, HttpResourceCache.class.getName());
+				designer.link(
+						function.getFunctionObject(SendCachedHttpFileFunction.Dependencies.HTTP_RESOURCE_CACHE.name()),
+						httpResourceCache);
+
+				// Configure as handling not available
+				FunctionFlow notFoundFunctionFlow = function
+						.getFunctionFlow(SendCachedHttpFileFunction.Flows.NOT_CACHED.name());
+				designer.link(notFoundFunctionFlow, nextHandler, false);
+
+				// Determine if secure
+				if (source.securable == null) {
+					// Not secure, so function is next handler
+					nextHandler = function;
+
+				} else {
+					// Secure the access to the resources
+					HttpFlowSecurer securer = HttpResourceArchitectEmployer.this.securityArchitect
+							.createHttpSecurer(source.securable).createFlowSecurer();
+					nextHandler = securer.secureFlow(designer, HttpPath.class, function, nextHandler);
+				}
+			}
+
+			// Create the section input to service requests
+			SectionInput input = designer.addSectionInput(INPUT_NAME, null);
+
+			// Create the service HTTP request trigger function
+			SectionFunctionNamespace serviceNamespace = designer.addSectionFunctionNamespace("service",
+					new ServiceHttpRequestManagedFunctionSource());
+			SectionFunction serviceFunction = serviceNamespace.addSectionFunction("service",
+					ServiceHttpRequestManagedFunctionSource.FUNCTION_NAME);
+			designer.link(
+					serviceFunction
+							.getFunctionObject(ServiceHttpRequestFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+					serverHttpConnection);
+			designer.link(input, serviceFunction);
+			designer.link(serviceFunction, nextHandler);
 
 			// Configure triggering the resource
 			Set<String> configuredResourcePaths = new HashSet<>();
 			for (ResourceLink link : HttpResourceArchitectEmployer.this.resourceLinks) {
-				this.configureResourceTrigger(link.resourcePath, initialHandler, designer, configuredResourcePaths);
+				this.configureResourceTrigger(link.resourcePath, nextHandler, designer, configuredResourcePaths);
 			}
 			for (EscalationResource escalation : HttpResourceArchitectEmployer.this.escalationResources) {
-				this.configureResourceTrigger(escalation.resourcePath, initialHandler, designer,
-						configuredResourcePaths);
+				this.configureResourceTrigger(escalation.resourcePath, nextHandler, designer, configuredResourcePaths);
 			}
 
-			// Configure not found section output
-			SectionOutput notFoundOutput = designer.addSectionOutput(NOT_FOUND_OUTPUT_NAME, HttpPath.class.getName(),
-					false);
-			designer.link(notFoundFunctionFlow, notFoundOutput, false);
 		}
 
 		/**
@@ -600,7 +649,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		 * @param configuredResourcePaths
 		 *            {@link Set} of existing configured resources.
 		 */
-		private void configureResourceTrigger(String resourcePath, SectionFunction initialHandler,
+		private void configureResourceTrigger(String resourcePath, SectionFlowSinkNode initialHandler,
 				SectionDesigner designer, Set<String> configuredResourcePaths) {
 
 			// Determine if already configured resource path

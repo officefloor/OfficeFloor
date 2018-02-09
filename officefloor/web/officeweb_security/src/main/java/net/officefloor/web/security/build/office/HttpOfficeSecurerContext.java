@@ -19,7 +19,7 @@ package net.officefloor.web.security.build.office;
 
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
-import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.security.HttpAccessControl;
 
 /**
@@ -38,17 +38,20 @@ public interface HttpOfficeSecurerContext {
 	OfficeAdministration getAdministration();
 
 	/**
-	 * Links the {@link OfficeFlowSourceNode} to either a secure / insecure
+	 * Creates a {@link OfficeFlowSinkNode} to either a secure / insecure
 	 * {@link OfficeFlowSinkNode}.
 	 * 
-	 * @param flowSourceNode
-	 *            {@link OfficeFlowSourceNode}.
+	 * @param argumentType
+	 *            Type of argument to {@link Flow}. May be <code>null</code> if
+	 *            no argument.
 	 * @param secureFlowSink
 	 *            Secure {@link OfficeFlowSinkNode}.
 	 * @param insecureFlowSink
 	 *            Insecure {@link OfficeFlowSinkNode}.
+	 * @return {@link OfficeFlowSinkNode} to either a secure / insecure
+	 *         {@link OfficeFlowSinkNode}.
 	 */
-	void link(OfficeFlowSourceNode flowSourceNode, OfficeFlowSinkNode secureFlowSink,
+	OfficeFlowSinkNode secureFlow(Class<?> argumentType, OfficeFlowSinkNode secureFlowSink,
 			OfficeFlowSinkNode insecureFlowSink);
 
 }

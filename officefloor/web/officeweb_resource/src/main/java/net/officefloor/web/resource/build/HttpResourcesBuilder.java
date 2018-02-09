@@ -23,7 +23,7 @@ import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceTransformer;
 import net.officefloor.web.resource.spi.ResourceTransformerService;
-import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.security.build.HttpSecurableBuilder;
 
 /**
  * Builds the external {@link HttpResource} instances.
@@ -84,23 +84,14 @@ public interface HttpResourcesBuilder {
 
 	/**
 	 * <p>
-	 * Specifies a particular {@link HttpSecurity} to secure the
-	 * {@link HttpResource} instances.
+	 * Obtains the {@link HttpSecurableBuilder} to configure access controls to
+	 * the {@link HttpResource} instances.
 	 * <p>
-	 * Should this not be provided, then the default {@link HttpSecurity} is
-	 * used if role access specified.
+	 * Calling this method without providing configuration requires only
+	 * authentication to access {@link HttpResource} instances.
 	 * 
-	 * @param httpSecurityName
-	 *            Name of the {@link HttpSecurity}.
+	 * @return {@link HttpSecurableBuilder}.
 	 */
-	void setHttpSecurityName(String httpSecurityName);
-
-	/**
-	 * Adds a role to allow access.
-	 * 
-	 * @param role
-	 *            Role to allow access.
-	 */
-	void addRole(String role);
+	HttpSecurableBuilder getHttpSecurer();
 
 }

@@ -19,7 +19,6 @@ package net.officefloor.web.security.build.section;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFlowSinkNode;
-import net.officefloor.compile.spi.section.SectionFlowSourceNode;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.spi.security.HttpSecurity;
 
@@ -31,19 +30,22 @@ import net.officefloor.web.spi.security.HttpSecurity;
 public interface HttpFlowSecurer {
 
 	/**
-	 * Links the {@link SectionFlowSourceNode} to either a secure / insecure
+	 * Creates a {@link SectionFlowSinkNode} to either a secure / insecure
 	 * {@link SectionFlowSinkNode}.
 	 * 
 	 * @param designer
 	 *            {@link SectionDesigner}.
-	 * @param flowSourceNode
-	 *            {@link SectionFlowSourceNode}.
+	 * @param argumentType
+	 *            Type of argument to the {@link Flow}. May be <code>null</code>
+	 *            for no argument.
 	 * @param secureFlowSink
 	 *            Secure {@link SectionFlowSinkNode}.
 	 * @param insecureFlowSink
 	 *            Insecure {@link SectionFlowSinkNode}.
+	 * @return {@link SectionFlowSinkNode} to either a secure / insecure
+	 *         {@link SectionFlowSinkNode}.
 	 */
-	void link(SectionDesigner designer, SectionFlowSourceNode flowSourceNode, SectionFlowSinkNode secureFlowSink,
+	SectionFlowSinkNode secureFlow(SectionDesigner designer, Class<?> argumentType, SectionFlowSinkNode secureFlowSink,
 			SectionFlowSinkNode insecureFlowSink);
 
 }

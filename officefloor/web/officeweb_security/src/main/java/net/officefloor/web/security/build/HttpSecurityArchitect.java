@@ -60,11 +60,14 @@ public interface HttpSecurityArchitect {
 			String securityName, HttpSecuritySource<A, AC, C, O, F> httpSecuritySource);
 
 	/**
-	 * Creates a {@link HttpSecurerBuilder}.
+	 * Creates a {@link HttpSecurer}.
 	 * 
-	 * @return {@link HttpSecurerBuilder}.
+	 * @param securable
+	 *            {@link HttpSecurable} to provide the access configuration. May
+	 *            be <code>null</code> to just require authentication.
+	 * @return {@link HttpSecurer}.
 	 */
-	HttpSecurerBuilder createHttpSecurer();
+	HttpSecurer createHttpSecurer(HttpSecurable securable);
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be

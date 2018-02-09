@@ -35,6 +35,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
@@ -182,7 +183,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
 
 		// Ensure passes through if not found resource
-		this.server.send(MockHttpServer.mockRequest("/missing.html")).assertResponse(404, "");
+		this.server.send(MockHttpServer.mockRequest("/missing.html")).assertResponse(404,
+				"No resource found for /missing.html");
 	}
 
 	/**
@@ -194,12 +196,11 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.compile((context, resource) -> {
 
 			// Configure secured resources
-			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
-			security.addHttpSecurity("secure", new MockChallengeHttpSecuritySource("secure"));
+			this.securityArchitect.addHttpSecurity("secure", new MockChallengeHttpSecuritySource("secure"));
 			HttpResourcesBuilder external = resource.addHttpResources(securedDirectory.getAbsolutePath());
-			external.setHttpSecurityName("secure");
-			external.addRole("test");
+			HttpSecurableBuilder securable = external.getHttpSecurer();
+			securable.setHttpSecurityName("secure");
+			securable.addRole("test");
 
 			// Configure non-secured resources
 			resource.addHttpResources(resourcesDirectory.getAbsolutePath());
@@ -208,12 +209,13 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		// Ensure can obtain non-secured resource
 		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
 
-		// Ensure secured resources
-		this.server.send(MockHttpServer.mockRequest("/secured.html")).assertResponse(401, "");
+		// Ensure secured resources (not available to be found)
+		this.server.send(MockHttpServer.mockRequest("/secured.html")).assertResponse(404,
+				"No resource found for /secured.html");
 
 		// Ensure no access if not in roles
 		this.server.send(new MockCredentials("not", "not").loadHttpRequest(MockHttpServer.mockRequest("/secured.html")))
-				.assertResponse(401, "");
+				.assertResponse(404, "No resource found for /secured.html");
 
 		// Ensure can obtain once authenticated with appropriate role
 		this.server
@@ -252,6 +254,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 					context.getOfficeSourceContext());
 			initialiser.initialise(context, resource);
 			resource.informWebArchitect();
+			this.securityArchitect.informWebArchitect();
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 	}
@@ -281,6 +284,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 					context.getOfficeSourceContext());
 			initialiser.initialise(context, resource);
 			resource.informWebArchitect();
+			this.securityArchitect.informWebArchitect();
 		});
 		this.officeFloor = this.compile.compileOfficeFloor();
 		assertNull("Should not compile", this.officeFloor);

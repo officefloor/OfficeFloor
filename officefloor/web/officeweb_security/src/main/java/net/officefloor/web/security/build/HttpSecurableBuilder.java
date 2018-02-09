@@ -15,17 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.spi;
+package net.officefloor.web.security.build;
 
-import java.util.ServiceLoader;
-
-import net.officefloor.frame.api.source.ServiceFactory;
+import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
- * {@link ServiceLoader} interface for providing a
- * {@link ResourceSystemFactory}.
+ * Interface for {@link HttpSecurer} to correspond with the
+ * {@link HttpSecurable}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResourceSystemService extends ServiceFactory<ResourceSystemFactory> {
+public interface HttpSecurableBuilder {
+
+	/**
+	 * Specifies the particular {@link HttpSecurity}.
+	 * 
+	 * @param httpSecurityName
+	 *            Name of the {@link HttpSecurity} to use.
+	 */
+	void setHttpSecurityName(String httpSecurityName);
+
+	/**
+	 * Adds to listing of roles that must have at least one for access.
+	 * 
+	 * @param anyRole
+	 *            Any role.
+	 */
+	void addRole(String anyRole);
+
+	/**
+	 * Adds to listing of required roles that must have all for access.
+	 * 
+	 * @param requiredRole
+	 *            Required roles.
+	 */
+	void addRequiredRole(String requiredRole);
+
 }

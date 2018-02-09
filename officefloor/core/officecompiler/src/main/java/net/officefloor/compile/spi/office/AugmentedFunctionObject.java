@@ -18,6 +18,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Augmented {@link FunctionObject}.
@@ -32,6 +33,12 @@ public interface AugmentedFunctionObject {
 	 * @return Name of this {@link FunctionObject}.
 	 */
 	String getFunctionObjectName();
+
+	/**
+	 * Flags this {@link FunctionObject} as a parameter for the
+	 * {@link ManagedFunction}.
+	 */
+	void flagAsParameter();
 
 	/**
 	 * Indicates if the {@link FunctionObject} is already linked.

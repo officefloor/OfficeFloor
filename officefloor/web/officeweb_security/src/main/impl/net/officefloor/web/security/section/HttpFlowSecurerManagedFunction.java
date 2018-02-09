@@ -18,6 +18,7 @@
 package net.officefloor.web.security.section;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.web.security.HttpAccessControl;
@@ -29,15 +30,8 @@ import net.officefloor.web.security.build.section.HttpFlowSecurer;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFlowSecurerManagedFunction extends
-		StaticManagedFunction<HttpFlowSecurerManagedFunction.Depdendencies, HttpFlowSecurerManagedFunction.Flows> {
-
-	/**
-	 * Dependency keys.
-	 */
-	public static enum Depdendencies {
-		HTTP_AUTHENTICATION
-	}
+public class HttpFlowSecurerManagedFunction
+		extends StaticManagedFunction<Indexed, HttpFlowSecurerManagedFunction.Flows> {
 
 	/**
 	 * Flow keys.
@@ -45,6 +39,11 @@ public class HttpFlowSecurerManagedFunction extends
 	public static enum Flows {
 		SECURE, INSECURE
 	}
+
+	/**
+	 * Indicates if parameter to pass through.
+	 */
+	private final boolean isParameter;
 
 	/**
 	 * Any roles.
@@ -59,12 +58,15 @@ public class HttpFlowSecurerManagedFunction extends
 	/**
 	 * Instantiate.
 	 * 
+	 * @param isParameter
+	 *            Indicates that there is an argument to pass through.
 	 * @param anyRoles
 	 *            Any roles.
 	 * @param allRoles
 	 *            All roles.
 	 */
-	public HttpFlowSecurerManagedFunction(String[] anyRoles, String[] allRoles) {
+	public HttpFlowSecurerManagedFunction(boolean isParameter, String[] anyRoles, String[] allRoles) {
+		this.isParameter = isParameter;
 		this.anyRoles = anyRoles;
 		this.allRoles = allRoles;
 	}
@@ -74,11 +76,16 @@ public class HttpFlowSecurerManagedFunction extends
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Depdendencies, Flows> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, Flows> context) throws Throwable {
 
 		// Obtain the HTTP authentication
-		HttpAuthentication<?> authentication = (HttpAuthentication<?>) context
-				.getObject(Depdendencies.HTTP_AUTHENTICATION);
+		HttpAuthentication<?> authentication = (HttpAuthentication<?>) context.getObject(0);
+
+		// Obtain the possible argument
+		Object argument = null;
+		if (this.isParameter) {
+			argument = context.getObject(1);
+		}
 
 		// Determine if authenticated
 		boolean isAuthenticated = authentication.isAuthenticated();
@@ -89,13 +96,13 @@ public class HttpFlowSecurerManagedFunction extends
 			if (accessControl.isAccess(this.anyRoles, this.allRoles)) {
 
 				// Have access to secure path
-				context.doFlow(Flows.SECURE, null, null);
+				context.doFlow(Flows.SECURE, argument, null);
 				return null;
 			}
 		}
 
 		// No access
-		context.doFlow(Flows.INSECURE, null, null);
+		context.doFlow(Flows.INSECURE, argument, null);
 		return null;
 	}
 

@@ -17,50 +17,26 @@
  */
 package net.officefloor.web.security.build;
 
-import java.security.Principal;
-
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.web.security.build.office.HttpOfficeSecurer;
 import net.officefloor.web.security.build.section.HttpFlowSecurer;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
- * Configures the {@link HttpOfficeSecurer}.
+ * Configures {@link HttpSecurity} around configuration for the
+ * {@link OfficeArchitect} and {@link SectionDesigner}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurerBuilder {
-
-	/**
-	 * {@link Principal} requires only one of these roles.
-	 * 
-	 * @param role
-	 *            Role.
-	 */
-	void addRole(String role);
-
-	/**
-	 * {@link Principal} must have all these roles.
-	 * 
-	 * @param role
-	 *            Role.
-	 */
-	void addRequiredRole(String role);
-
-	/**
-	 * Optionally allows specifying which {@link HttpSecurity}.
-	 * 
-	 * @param securityName
-	 *            Name of the {@link HttpSecurity}.
-	 */
-	void setQualifier(String securityName);
+public interface HttpSecurer {
 
 	/**
 	 * Registers {@link HttpOfficeSecurer}.
 	 * 
 	 * @param securer
 	 *            {@link HttpOfficeSecurer}.
-	 * @return {@link HttpSecurerBuilder} to configure the
-	 *         {@link HttpOfficeSecurer}.
+	 * @return {@link HttpSecurer} to configure the {@link HttpOfficeSecurer}.
 	 */
 	void secure(HttpOfficeSecurer securer);
 
