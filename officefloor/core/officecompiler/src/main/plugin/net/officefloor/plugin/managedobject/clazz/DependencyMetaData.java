@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.QualifierNameFactory;
 
 /**
  * Meta-data for a {@link Dependency}.
@@ -68,7 +69,8 @@ public class DependencyMetaData {
 	 * @throws IllegalArgumentException
 	 *             If fails to obtain the type qualifier.
 	 */
-	public String getTypeQualifier() throws IllegalArgumentException {
+	@SuppressWarnings("unchecked")
+	public String getTypeQualifier() throws Exception {
 
 		// Determine type qualifier
 		String typeQualifier = null;
@@ -78,17 +80,22 @@ public class DependencyMetaData {
 			Class<?> annotationType = annotation.annotationType();
 
 			// Determine if qualifier annotation
-			if (annotationType.isAnnotationPresent(Qualifier.class)) {
+			Qualifier qualifierAnnotation = annotationType.getAnnotation(Qualifier.class);
+			if (qualifierAnnotation != null) {
 
 				// Allow only one qualifier
 				if (typeQualifier != null) {
-					throw new IllegalArgumentException("Dependency "
-							+ this.name + " has more than one "
-							+ Qualifier.class.getSimpleName());
+					throw new IllegalArgumentException(
+							"Dependency " + this.name + " has more than one " + Qualifier.class.getSimpleName());
 				}
 
+				// Obtain the qualifier name factory
+				@SuppressWarnings("rawtypes")
+				Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
+				QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.newInstance();
+
 				// Provide type qualifier
-				typeQualifier = annotationType.getName();
+				typeQualifier = nameFactory.getQualifierName(annotation);
 			}
 		}
 
@@ -106,8 +113,7 @@ public class DependencyMetaData {
 	 * @throws Exception
 	 *             If fails to inject the dependency.
 	 */
-	public void injectDependency(Object object, Object dependency)
-			throws Exception {
+	public void injectDependency(Object object, Object dependency) throws Exception {
 		this.field.set(object, dependency);
 	}
 

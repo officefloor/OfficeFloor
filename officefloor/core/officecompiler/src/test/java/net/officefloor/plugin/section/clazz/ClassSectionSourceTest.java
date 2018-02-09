@@ -54,6 +54,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
+import net.officefloor.plugin.managedfunction.clazz.Qualified;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -347,6 +348,45 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide qualified {@link SectionObject} by {@link Qualifier}
+	 * name.
+	 */
+	public void testQulifiedObjectByName() {
+
+		final String QUALIFIED_NAME = "test-" + Connection.class.getName();
+		final String UNQUALIFIED_NAME = Connection.class.getName();
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockQualifiedObjectByNameSection.class,
+				(designer, namespace) -> {
+					SectionFunction function = this.addClassSectionFunction(designer, namespace, "doInput", "doInput");
+
+					// Qualified dependency
+					FunctionObject qualifiedFunctionObject = function.getFunctionObject(QUALIFIED_NAME);
+					SectionObject qualifiedSectionObject = designer.addSectionObject(QUALIFIED_NAME,
+							Connection.class.getName());
+					qualifiedSectionObject.setTypeQualifier("test");
+					designer.link(qualifiedFunctionObject, qualifiedSectionObject);
+
+					// Unqualified dependency
+					FunctionObject unqualifiedFunctionObject = function.getFunctionObject(UNQUALIFIED_NAME);
+					SectionObject unqualifiedSectionObject = designer.addSectionObject(UNQUALIFIED_NAME,
+							Connection.class.getName());
+					designer.link(unqualifiedFunctionObject, unqualifiedSectionObject);
+				});
+		expected.addSectionInput("doInput", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockQualifiedObjectByNameSection.class.getName());
+	}
+
+	public static class MockQualifiedObjectByNameSection {
+		public void doInput(@Qualified("test") Connection qualified, Connection unqualified) {
+		}
+	}
+
+	/**
 	 * Ensure can provide same {@link Qualifier} on {@link SectionObject}
 	 * instances of different types.
 	 */
@@ -496,6 +536,36 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockQualifiedDependencySection {
 		@MockQualification
+		@Dependency
+		Connection connection;
+
+		public void doInput() {
+		}
+	}
+
+	/**
+	 * Ensure provide {@link SectionObject} via {@link Qualified} name.
+	 */
+	public void testQualifiedDependencyByName() {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockQualifiedDependencyByNameSection.class,
+				this.configureClassSectionFunction("doInput"));
+		expected.addSectionInput("doInput", null);
+		SectionObject object = expected.addSectionObject("test-" + Connection.class.getName(),
+				Connection.class.getName());
+		object.setTypeQualifier("test");
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockQualifiedDependencyByNameSection.class.getName());
+	}
+
+	/**
+	 * Section with {@link Qualified} {@link Dependency}.
+	 */
+	public static class MockQualifiedDependencyByNameSection {
+		@Qualified("test")
 		@Dependency
 		Connection connection;
 

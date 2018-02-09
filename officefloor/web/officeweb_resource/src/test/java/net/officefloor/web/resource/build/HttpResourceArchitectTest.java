@@ -18,6 +18,7 @@
 package net.officefloor.web.resource.build;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
@@ -29,12 +30,20 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceCache;
+import net.officefloor.web.resource.HttpResourceStore;
+import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceSystemService;
+import net.officefloor.web.resource.spi.ResourceTransformerService;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
@@ -173,7 +182,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can obtain external {@link HttpResource}.
 	 */
-	public void testExternalResources() throws Exception {
+	public void testDefaultFileResources() throws Exception {
 		File resourcesDirectory = this.findFile(this.getClass(), "resources");
 		this.compile((context, resource) -> {
 			resource.addHttpResources(resourcesDirectory.getAbsolutePath());
@@ -188,9 +197,31 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if protocol implementation not available.
+	 */
+	public void testProtocolNotAvailable() throws Exception {
+		this.issue((issues) -> issues.recordIssue(
+				"Resource 'missing protocol' not available.  Please ensure its " + ResourceSystemService.class.getName()
+						+ " implementation is on the class path and configured as a service."),
+				(context, resource) -> {
+					resource.addHttpResources("missing protocol:location");
+				});
+	}
+
+	public void testConfiguredProtocolResource() throws Exception {
+		File resourcesDirectory = this.findFile(this.getClass(), "resources");
+		this.compile((context, resource) -> {
+			resource.addHttpResources("file:" + resourcesDirectory.getAbsolutePath());
+		});
+
+		// Ensure can obtain resource
+		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
+	}
+
+	/**
 	 * Ensure can secure external {@link HttpResource}.
 	 */
-	public void testSecureExternalResources() throws Exception {
+	public void testSecureConfiguredResources() throws Exception {
 		File resourcesDirectory = this.findFile(this.getClass(), "resources");
 		File securedDirectory = this.findFile(this.getClass(), "secured");
 		this.compile((context, resource) -> {
@@ -221,6 +252,94 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.server
 				.send(new MockCredentials("test", "test").loadHttpRequest(MockHttpServer.mockRequest("/secured.html")))
 				.assertResponse(200, "TEST SECURED RESORUCE");
+	}
+
+	/**
+	 * Ensure can provide context path to resources in servicing.
+	 */
+	public void testContextPath() throws Exception {
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			resources.setContextPath("context");
+		});
+
+		// Ensure requires context path
+		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(404,
+				"No resource found for /resource.html");
+
+		// Ensure available with context path
+		this.server.send(MockHttpServer.mockRequest("/context/resource.html")).assertResponse(200, "TEST RESOURCE");
+
+		// Ensure default resource with context path
+		this.server.send(MockHttpServer.mockRequest("/context")).assertResponse(200, "<html><body>test</body></html>");
+	}
+
+	/**
+	 * Ensure can auto-wire specific resources via type qualification.
+	 */
+	public void testTypeQualifier() throws Exception {
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			resources.addTypeQualifier("qualifier");
+
+			// Configure linking servicer
+			OfficeSection servicer = context.addSection("servicer", TypeQualifierServicer.class);
+			context.getWebArchitect().link(false, "/store", servicer.getOfficeSectionInput("store"));
+			context.getWebArchitect().link(false, "/cache", servicer.getOfficeSectionInput("cache"));
+		});
+
+		// Ensure not cached
+		this.server.send(MockHttpServer.mockRequest("/cache")).assertResponse(200, "Not cached");
+
+		// Ensure can obtain from store
+		this.server.send(MockHttpServer.mockRequest("/store")).assertResponse(200, "TEST RESOURCE");
+
+		// Ensure can obtain from cache
+		this.server.send(MockHttpServer.mockRequest("/cache")).assertResponse(200, "TEST RESOURCE");
+	}
+
+	public static class TypeQualifierServicer {
+		public void store(@Parameter HttpResourceStore store, ServerHttpConnection connection) throws IOException {
+			HttpFile file = (HttpFile) store.getHttpResource("/resource.html");
+			file.writeTo(connection.getResponse());
+		}
+
+		public void cache(@Parameter HttpResourceCache cache, ServerHttpConnection connection) throws IOException {
+			HttpFile file = (HttpFile) cache.getHttpResource("/resource.html");
+			if (file == null) {
+				connection.getResponse().getEntityWriter().append("Not cached");
+			} else {
+				file.writeTo(connection.getResponse());
+			}
+		}
+	}
+
+	/**
+	 * Ensure can transform the resources.
+	 */
+	public void testResourceTransformer() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure issue if {@link ResourceTransformerService} is not available.
+	 */
+	public void testResourceTransformerServiceNotAvailable() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can configure {@link ResourceSystemService}.
+	 */
+	public void testResourceTransformerService() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can change the default directory resource name.
+	 */
+	public void testChangeDirectoryDefaultResource() {
+		fail("TODO impelement");
 	}
 
 	/**
