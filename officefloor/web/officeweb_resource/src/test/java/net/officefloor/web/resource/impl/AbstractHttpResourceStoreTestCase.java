@@ -69,15 +69,6 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	protected abstract String getLocation();
 
 	/**
-	 * Allows overriding to specify the context path.
-	 * 
-	 * @return Context path.
-	 */
-	protected String getContextPath() {
-		return "";
-	}
-
-	/**
 	 * {@link HttpResourceStore} to test.
 	 */
 	private HttpResourceStoreImpl store;
@@ -141,11 +132,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * @return Path with context path prefix.
 	 */
 	protected String path(String path) {
-		String contextPath = this.getContextPath();
-		if ((!("".equals(contextPath))) && (!contextPath.startsWith("/"))) {
-			contextPath = "/" + contextPath;
-		}
-		return contextPath + path;
+		return path.startsWith("/") ? path : "/" + path;
 	}
 
 	/**
@@ -167,10 +154,9 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 		}
 
 		// Set up the new HTTP resource store
-		String contextPath = this.getContextPath();
 		ResourceSystemFactory factory = this.createResourceSystemService();
-		this.store = new HttpResourceStoreImpl(location, factory, contextPath, (name) -> new MockFileCache(name),
-				transformers, directoryDefaultFileNames);
+		this.store = new HttpResourceStoreImpl(location, factory, (name) -> new MockFileCache(name), transformers,
+				directoryDefaultFileNames);
 	}
 
 	/**

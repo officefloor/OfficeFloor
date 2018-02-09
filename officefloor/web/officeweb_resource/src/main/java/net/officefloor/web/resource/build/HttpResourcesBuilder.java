@@ -22,7 +22,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceTransformer;
-import net.officefloor.web.resource.spi.ResourceTransformerService;
+import net.officefloor.web.resource.spi.ResourceTransformerFactory;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
 
 /**
@@ -64,13 +64,13 @@ public interface HttpResourcesBuilder {
 
 	/**
 	 * Registers a {@link ResourceTransformer} from a
-	 * {@link ResourceTransformerService} to transform the resources.
+	 * {@link ResourceTransformerFactory} to transform the resources.
 	 * 
 	 * @param name
-	 *            Name of the {@link ResourceTransformerService} to create the
+	 *            Name of the {@link ResourceTransformerFactory} to create the
 	 *            {@link ResourceTransformer}.
 	 * 
-	 * @see ResourceTransformerService
+	 * @see ResourceTransformerFactory
 	 */
 	void addResourceTransformer(String name);
 

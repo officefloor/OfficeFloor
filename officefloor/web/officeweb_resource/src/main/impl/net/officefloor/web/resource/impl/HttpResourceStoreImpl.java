@@ -109,11 +109,6 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	private final ResourceSystem resourceSystem;
 
 	/**
-	 * Context path.
-	 */
-	private final String contextPath;
-
-	/**
 	 * {@link ResourceTransformer} instances.
 	 */
 	private final ResourceTransformer[] transformers;
@@ -158,22 +153,10 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * @throws IOException
 	 *             If fails to instantiate the {@link HttpResourceStore}.
 	 */
-	public HttpResourceStoreImpl(String location, ResourceSystemFactory resourceSystemService, String contextPath,
+	public HttpResourceStoreImpl(String location, ResourceSystemFactory resourceSystemService,
 			FileCacheFactory fileCacheFactory, ResourceTransformer[] transformers,
 			String[] directoryDefaultResourceNames) throws IOException {
 		this.location = location;
-
-		// Obtain the context path
-		if (contextPath == null) {
-			contextPath = "/";
-		}
-		if (!contextPath.startsWith("/")) {
-			contextPath = "/" + contextPath;
-		}
-		while (contextPath.endsWith("/")) {
-			contextPath = contextPath.substring(0, contextPath.length() - "/".length());
-		}
-		this.contextPath = contextPath;
 
 		// Specify the transformers
 		this.transformers = transformers != null ? transformers : new ResourceTransformer[0];
@@ -242,20 +225,11 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		// Ensure path is canonical
 		path = WebRouter.transformToCanonicalPath(path);
 
-		// Determine if matching context path
-		if (!path.startsWith(this.contextPath)) {
-			// Not match context path (so not found)
-			return new NotExistHttpResource(path);
-		}
-
 		// Determine if have cached
 		HttpResource cachedResource = this.httpResourceCache.getSafeHttpResource(path);
 		if (cachedResource != null) {
 			return cachedResource;
 		}
-
-		// Obtain the resource path (minus context path)
-		String resourcePath = path.substring(this.contextPath.length());
 
 		// Obtain the create singleton
 		CreateSingleton singleton;
@@ -270,7 +244,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 			// Not cached, so resolve singleton
 			singleton = this.resolvingSingletons.get(path);
 			if (singleton == null) {
-				singleton = new CreateSingleton(path, resourcePath);
+				singleton = new CreateSingleton(path);
 				this.resolvingSingletons.put(path, singleton);
 			}
 		}
@@ -346,14 +320,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 		} else {
 			// Ensure path is canonical
-			resourcePath = WebRouter.transformToCanonicalPath(resourcePath);
-
-			// Add the context path
-			if (resourcePath.startsWith("/")) {
-				httpPath = this.contextPath + resourcePath;
-			} else {
-				httpPath = this.contextPath + "/" + resourcePath;
-			}
+			httpPath = WebRouter.transformToCanonicalPath(resourcePath);
 		}
 
 		// Clear HTTP resources
@@ -450,11 +417,6 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	private class CreateSingleton {
 
 		/**
-		 * Path for the {@link HttpResource}.
-		 */
-		private final String httpPath;
-
-		/**
 		 * Path for the resource within the {@link ResourceSystem}.
 		 */
 		private final String resourcePath;
@@ -472,13 +434,10 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		/**
 		 * Instantiate.
 		 * 
-		 * @param httpPath
-		 *            Path for the {@link HttpResource}.
 		 * @param resourcePath
 		 *            Path for the resource within the {@link ResourceSystem}.
 		 */
-		private CreateSingleton(String httpPath, String resourcePath) {
-			this.httpPath = httpPath;
+		private CreateSingleton(String resourcePath) {
 			this.resourcePath = resourcePath;
 		}
 
@@ -513,12 +472,12 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 				// Determine if have resource
 				if ((resource == null) || (Files.notExists(resource))) {
-					return new NotExistHttpResource(this.httpPath);
+					return new NotExistHttpResource(this.resourcePath);
 				}
 
 				// Determine if directory
 				if (Files.isDirectory(resource)) {
-					this.singletonHttpResource = new HttpDirectoryImpl(this.httpPath, store);
+					this.singletonHttpResource = new HttpDirectoryImpl(this.resourcePath, store);
 					return this.singletonHttpResource;
 				}
 
@@ -542,7 +501,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 				// (typically file per transform)
 				List<Path> cleanUpFiles = new ArrayList<>(
 						store.transformers.length == 0 ? 1 : store.transformers.length);
-				ResourceTransformerContextImpl context = new ResourceTransformerContextImpl(this.httpPath, resource,
+				ResourceTransformerContextImpl context = new ResourceTransformerContextImpl(this.resourcePath, resource,
 						contentTypeHeaderValue, cleanUpFiles);
 				for (int i = 0; i < store.transformers.length; i++) {
 					ResourceTransformer transformer = store.transformers[i];
@@ -577,7 +536,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 				// Create the HTTP file
 				FileChannel fileChannel = FileChannel.open(context.resource, OPEN_OPTIONS);
-				HttpFileImpl httpFile = new HttpFileImpl(this.httpPath, fileChannel, context.contentEncoding,
+				HttpFileImpl httpFile = new HttpFileImpl(this.resourcePath, fileChannel, context.contentEncoding,
 						context.contentType, context.getCharset());
 
 				// Flag HTTP resource as resolved
@@ -605,7 +564,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		 * Path of the {@link HttpResource} to use as name for cached files.
 		 * This aids identifying the file for debugging.
 		 */
-		private final String httpPath;
+		private final String resourcePath;
 
 		/**
 		 * Index of the next file. This aids identifying the file for debugging.
@@ -640,7 +599,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		/**
 		 * Instantiate.
 		 * 
-		 * @param httpPath
+		 * @param resourcePath
 		 *            Path to {@link HttpResource}.
 		 * @param resource
 		 *            {@link Path} to the {@link ResourceSystem} resource.
@@ -649,9 +608,9 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		 * @param cleanupFiles
 		 *            {@link List} of cleanup files.
 		 */
-		private ResourceTransformerContextImpl(String httpPath, Path resource, HttpHeaderValue contentType,
+		private ResourceTransformerContextImpl(String resourcePath, Path resource, HttpHeaderValue contentType,
 				List<Path> cleanupFiles) {
-			this.httpPath = httpPath;
+			this.resourcePath = resourcePath;
 			this.resource = resource;
 			this.contentType = contentType;
 			this.cleanupFiles = cleanupFiles;
@@ -670,7 +629,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		public Path createFile() throws IOException {
 
 			// Create the name for the file
-			String name = "_" + this.fileIndex + "-" + this.httpPath;
+			String name = "_" + this.fileIndex + "-" + this.resourcePath;
 			this.fileIndex++;
 			name = name.replace('/', '_');
 

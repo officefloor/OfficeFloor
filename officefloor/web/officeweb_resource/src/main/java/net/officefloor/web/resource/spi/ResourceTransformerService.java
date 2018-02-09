@@ -19,29 +19,13 @@ package net.officefloor.web.resource.spi;
 
 import java.util.ServiceLoader;
 
+import net.officefloor.frame.api.source.ServiceFactory;
+
 /**
- * <p>
- * {@link ServiceLoader} service for the creation of a
- * {@link ResourceTransformer}.
- * <p>
- * This is loaded by the {@link ServiceLoader}.
+ * {@link ServiceLoader} interface for providing a
+ * {@link ResourceTransformerFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResourceTransformerService {
-
-	/**
-	 * Obtains the name of transformation.
-	 * 
-	 * @return Name of transformation.
-	 */
-	String getName();
-
-	/**
-	 * Creates the {@link ResourceTransformer}.
-	 * 
-	 * @return {@link ResourceTransformer}.
-	 */
-	ResourceTransformer createResourceTransformer();
-
+public interface ResourceTransformerService extends ServiceFactory<ResourceTransformerFactory> {
 }

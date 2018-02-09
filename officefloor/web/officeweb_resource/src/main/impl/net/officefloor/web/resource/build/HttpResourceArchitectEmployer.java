@@ -63,12 +63,14 @@ import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
 import net.officefloor.web.resource.file.FileResourceSystemService;
 import net.officefloor.web.resource.impl.HttpResourceStoreImpl;
+import net.officefloor.web.resource.source.AbstractSendHttpFileFunction;
+import net.officefloor.web.resource.source.AbstractSendHttpFileFunction.Dependencies;
+import net.officefloor.web.resource.source.AbstractSendHttpFileFunction.Flows;
 import net.officefloor.web.resource.source.HttpPath;
 import net.officefloor.web.resource.source.HttpResourceCacheManagedObjectSource;
 import net.officefloor.web.resource.source.HttpResourceStoreManagedObjectSource;
 import net.officefloor.web.resource.source.SendCachedHttpFileFunction;
-import net.officefloor.web.resource.source.SendCachedHttpFileFunction.Dependencies;
-import net.officefloor.web.resource.source.SendHttpFileFunction;
+import net.officefloor.web.resource.source.SendStoreHttpFileFunction;
 import net.officefloor.web.resource.source.ServiceHttpRequestFunction;
 import net.officefloor.web.resource.source.TriggerSendHttpFileFunction;
 import net.officefloor.web.resource.spi.FileCacheFactory;
@@ -76,6 +78,9 @@ import net.officefloor.web.resource.spi.FileCacheService;
 import net.officefloor.web.resource.spi.ResourceSystemFactory;
 import net.officefloor.web.resource.spi.ResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceTransformer;
+import net.officefloor.web.resource.spi.ResourceTransformerFactory;
+import net.officefloor.web.resource.spi.ResourceTransformerService;
+import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.security.build.AbstractHttpSecurable;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -208,8 +213,10 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 			}
 		}
 
-		// TODO Auto-generated method stub
-		return null;
+		// As here, protocol not available
+		throw this.officeArchitect.addIssue("Resource '" + protocol + "' not available.  Please ensure its "
+				+ ResourceSystemService.class.getSimpleName()
+				+ " implementation is on the class path and configured as a service.");
 	}
 
 	@Override
@@ -240,8 +247,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 			ResourceTransformer[] resourceTransformers = httpResourceSource.resourceTransformers
 					.toArray(new ResourceTransformer[httpResourceSource.resourceTransformers.size()]);
 			HttpResourceStoreImpl store = new HttpResourceStoreImpl(httpResourceSource.location,
-					httpResourceSource.resourceSystemService, httpResourceSource.contextPath, fileCacheFactory,
-					resourceTransformers, httpResourceSource.directoryDefaultResourceNames);
+					httpResourceSource.resourceSystemService, fileCacheFactory, resourceTransformers,
+					httpResourceSource.directoryDefaultResourceNames);
 			stores.add(store);
 
 			// Register the managed objects (for auto-wiring)
@@ -256,6 +263,12 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 							new HttpResourceStoreManagedObjectSource(store))
 					.addOfficeManagedObject(HttpResourceStore.class.getSimpleName() + resourceNameSuffix,
 							ManagedObjectScope.PROCESS);
+
+			// Add any type qualifications
+			for (String typeQualification : httpResourceSource.typeQualifications) {
+				cacheManagedObject.addTypeQualification(typeQualification, HttpResourceCache.class.getName());
+				storeManagedObject.addTypeQualification(typeQualification, HttpResourceStore.class.getName());
+			}
 
 			// Link managed objects to section
 			this.officeArchitect.link(
@@ -347,19 +360,24 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		private final String location;
 
 		/**
-		 * Context path of resources within the application.
-		 */
-		private String contextPath = null;
-
-		/**
 		 * {@link ResourceTransformer} instances.
 		 */
 		private final List<ResourceTransformer> resourceTransformers = new LinkedList<>();
 
 		/**
+		 * Type qualifiers.
+		 */
+		private final List<String> typeQualifications = new LinkedList<>();
+
+		/**
+		 * Context path of resources within the application.
+		 */
+		private String contextPath = "/";
+
+		/**
 		 * Directory default resource names.
 		 */
-		private final String[] directoryDefaultResourceNames = new String[] { "index.html" };
+		private String[] directoryDefaultResourceNames = new String[] { "index.html" };
 
 		/**
 		 * Name suffix to use in configuring this {@link HttpResourceSource}.
@@ -394,32 +412,44 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 		@Override
 		public void setContextPath(String contextPath) {
-			// TODO Auto-generated method stub
-
+			this.contextPath = contextPath == null ? "/"
+					: WebRouter.transformToCanonicalPath(contextPath.startsWith("/") ? contextPath : "/" + contextPath);
 		}
 
 		@Override
 		public void addTypeQualifier(String qualifier) {
-			// TODO Auto-generated method stub
-
+			this.typeQualifications.add(qualifier);
 		}
 
 		@Override
 		public void addResourceTransformer(ResourceTransformer transformer) {
-			// TODO Auto-generated method stub
-
+			this.resourceTransformers.add(transformer);
 		}
 
 		@Override
 		public void addResourceTransformer(String name) {
-			// TODO Auto-generated method stub
 
+			// Search for appropriate resource transformer
+			for (ResourceTransformerFactory transformerFactory : HttpResourceArchitectEmployer.this.officeSourceContext
+					.loadServices(ResourceTransformerService.class, null)) {
+				if (name.equalsIgnoreCase(transformerFactory.getName())) {
+
+					// Create and add the resource transformer
+					ResourceTransformer transformer = transformerFactory.createResourceTransformer();
+					this.addResourceTransformer(transformer);
+					return;
+				}
+			}
+
+			// As here, resource transformer not available
+			throw HttpResourceArchitectEmployer.this.officeArchitect.addIssue("Resource transformer '" + name
+					+ "' not available.  Please ensure its " + ResourceTransformerFactory.class.getSimpleName()
+					+ " implementation is on the class path and configured as a service.");
 		}
 
 		@Override
 		public void setDirectoryDefaultResourceNames(String... defaultResourceNames) {
-			// TODO Auto-generated method stub
-
+			this.directoryDefaultResourceNames = defaultResourceNames;
 		}
 
 		@Override
@@ -534,25 +564,23 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				// Add the store function
 				String functionName = "store" + source.nameSuffix;
 				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
-						new SendHttpFileManagedFunctionSource());
+						new SendHttpFileManagedFunctionSource<>(new SendStoreHttpFileFunction(source.contextPath),
+								HttpResourceStore.class));
 				SectionFunction function = namespace.addSectionFunction(functionName,
 						SendHttpFileManagedFunctionSource.FUNCTION_NAME);
 
 				// Configure the dependencies
-				function.getFunctionObject(SendHttpFileFunction.Dependencies.HTTP_PATH.name()).flagAsParameter();
-				designer.link(
-						function.getFunctionObject(SendHttpFileFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+				function.getFunctionObject(Dependencies.HTTP_PATH.name()).flagAsParameter();
+				designer.link(function.getFunctionObject(Dependencies.SERVER_HTTP_CONNECTION.name()),
 						serverHttpConnection);
 
 				// Configure dependency to resources store
 				SectionObject httpResourceStore = designer.addSectionObject(
 						HttpResourceStore.class.getSimpleName() + source.nameSuffix, HttpResourceStore.class.getName());
-				designer.link(function.getFunctionObject(SendHttpFileFunction.Dependencies.HTTP_RESOURCE_STORE.name()),
-						httpResourceStore);
+				designer.link(function.getFunctionObject(Dependencies.HTTP_RESOURCES.name()), httpResourceStore);
 
 				// Configure as handling not available
-				FunctionFlow notFoundFunctionFlow = function
-						.getFunctionFlow(SendHttpFileFunction.Flows.NOT_AVAILABLE.name());
+				FunctionFlow notFoundFunctionFlow = function.getFunctionFlow(Flows.NOT_AVAILABLE.name());
 				designer.link(notFoundFunctionFlow, nextHandler, false);
 
 				// Determine if secure
@@ -575,27 +603,23 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				// Add the cache function
 				String functionName = "cache" + source.nameSuffix;
 				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
-						new SendCachedHttpFileManagedFunctionSource());
+						new SendHttpFileManagedFunctionSource<>(new SendCachedHttpFileFunction(source.contextPath),
+								HttpResourceCache.class));
 				SectionFunction function = namespace.addSectionFunction(functionName,
-						SendCachedHttpFileManagedFunctionSource.FUNCTION_NAME);
+						SendHttpFileManagedFunctionSource.FUNCTION_NAME);
 
 				// Configure the dependencies
-				function.getFunctionObject(SendCachedHttpFileFunction.Dependencies.HTTP_PATH.name()).flagAsParameter();
-				designer.link(
-						function.getFunctionObject(
-								SendCachedHttpFileFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+				function.getFunctionObject(Dependencies.HTTP_PATH.name()).flagAsParameter();
+				designer.link(function.getFunctionObject(Dependencies.SERVER_HTTP_CONNECTION.name()),
 						serverHttpConnection);
 
 				// Configure dependency to resource cache
 				SectionObject httpResourceCache = designer.addSectionObject(
 						HttpResourceCache.class.getSimpleName() + source.nameSuffix, HttpResourceCache.class.getName());
-				designer.link(
-						function.getFunctionObject(SendCachedHttpFileFunction.Dependencies.HTTP_RESOURCE_CACHE.name()),
-						httpResourceCache);
+				designer.link(function.getFunctionObject(Dependencies.HTTP_RESOURCES.name()), httpResourceCache);
 
 				// Configure as handling not available
-				FunctionFlow notFoundFunctionFlow = function
-						.getFunctionFlow(SendCachedHttpFileFunction.Flows.NOT_CACHED.name());
+				FunctionFlow notFoundFunctionFlow = function.getFunctionFlow(Flows.NOT_AVAILABLE.name());
 				designer.link(notFoundFunctionFlow, nextHandler, false);
 
 				// Determine if secure
@@ -619,9 +643,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 					new ServiceHttpRequestManagedFunctionSource());
 			SectionFunction serviceFunction = serviceNamespace.addSectionFunction("service",
 					ServiceHttpRequestManagedFunctionSource.FUNCTION_NAME);
-			designer.link(
-					serviceFunction
-							.getFunctionObject(ServiceHttpRequestFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
+			designer.link(serviceFunction.getFunctionObject(Dependencies.SERVER_HTTP_CONNECTION.name()),
 					serverHttpConnection);
 			designer.link(input, serviceFunction);
 			designer.link(serviceFunction, nextHandler);
@@ -706,14 +728,37 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} for the {@link SendCachedHttpFileFunction}.
+	 * {@link ManagedFunctionSource} for the
+	 * {@link AbstractSendHttpFileFunction}.
 	 */
-	private static class SendCachedHttpFileManagedFunctionSource extends AbstractManagedFunctionSource {
+	private static class SendHttpFileManagedFunctionSource<R> extends AbstractManagedFunctionSource {
 
 		/**
 		 * Name of the {@link ManagedFunction}.
 		 */
 		private static final String FUNCTION_NAME = "function";
+
+		/**
+		 * {@link AbstractSendHttpFileFunction}.
+		 */
+		private final AbstractSendHttpFileFunction<R> sendHttpFileFunction;
+
+		/**
+		 * Resources type.
+		 */
+		private final Class<R> resourcesType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sendHttpFileFunction
+		 *            {@link AbstractSendHttpFileFunction}.
+		 */
+		private SendHttpFileManagedFunctionSource(AbstractSendHttpFileFunction<R> sendHttpFileFunction,
+				Class<R> resourcesType) {
+			this.sendHttpFileFunction = sendHttpFileFunction;
+			this.resourcesType = resourcesType;
+		}
 
 		/*
 		 * ================ ManagedFunctionSource ================
@@ -728,51 +773,13 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Add the function
-			ManagedFunctionTypeBuilder<SendCachedHttpFileFunction.Dependencies, SendCachedHttpFileFunction.Flows> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION_NAME, new SendCachedHttpFileFunction(),
-							SendCachedHttpFileFunction.Dependencies.class, SendCachedHttpFileFunction.Flows.class);
-			function.addObject(HttpPath.class).setKey(SendCachedHttpFileFunction.Dependencies.HTTP_PATH);
-			function.addObject(HttpResourceCache.class).setKey(Dependencies.HTTP_RESOURCE_CACHE);
-			function.addObject(ServerHttpConnection.class)
-					.setKey(SendCachedHttpFileFunction.Dependencies.SERVER_HTTP_CONNECTION);
-			ManagedFunctionFlowTypeBuilder<SendCachedHttpFileFunction.Flows> flow = function.addFlow();
-			flow.setKey(SendCachedHttpFileFunction.Flows.NOT_CACHED);
-			flow.setArgumentType(HttpPath.class);
-		}
-	}
-
-	/**
-	 * {@link ManagedFunctionSource} for the {@link SendHttpFileFunction}.
-	 */
-	private static class SendHttpFileManagedFunctionSource extends AbstractManagedFunctionSource {
-
-		/**
-		 * Name of the {@link ManagedFunction}.
-		 */
-		private static final String FUNCTION_NAME = "function";
-
-		/*
-		 * =============== ManagedFunctionSource =================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-		}
-
-		@Override
-		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
-				ManagedFunctionSourceContext context) throws Exception {
-
-			// Add the function
-			ManagedFunctionTypeBuilder<SendHttpFileFunction.Dependencies, SendHttpFileFunction.Flows> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION_NAME, new SendHttpFileFunction(),
-							SendHttpFileFunction.Dependencies.class, SendHttpFileFunction.Flows.class);
-			function.addObject(HttpPath.class).setKey(SendHttpFileFunction.Dependencies.HTTP_PATH);
-			function.addObject(HttpResourceStore.class).setKey(SendHttpFileFunction.Dependencies.HTTP_RESOURCE_STORE);
-			function.addObject(ServerHttpConnection.class)
-					.setKey(SendHttpFileFunction.Dependencies.SERVER_HTTP_CONNECTION);
-			ManagedFunctionFlowTypeBuilder<SendHttpFileFunction.Flows> flow = function.addFlow();
-			flow.setKey(SendHttpFileFunction.Flows.NOT_AVAILABLE);
+			ManagedFunctionTypeBuilder<Dependencies, Flows> function = functionNamespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, this.sendHttpFileFunction, Dependencies.class, Flows.class);
+			function.addObject(HttpPath.class).setKey(Dependencies.HTTP_PATH);
+			function.addObject(this.resourcesType).setKey(Dependencies.HTTP_RESOURCES);
+			function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+			ManagedFunctionFlowTypeBuilder<Flows> flow = function.addFlow();
+			flow.setKey(Flows.NOT_AVAILABLE);
 			flow.setArgumentType(HttpPath.class);
 		}
 	}

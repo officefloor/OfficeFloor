@@ -22,15 +22,15 @@ import java.io.IOException;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
-import net.officefloor.web.resource.HttpResourceCache;
+import net.officefloor.web.resource.HttpResourceStore;
 
 /**
- * {@link ManagedFunction} to send the {@link HttpFile} from
- * {@link HttpResourceCache}.
+ * {@link ManagedFunction} to send the {@link HttpFile} from the
+ * {@link HttpResourceStore}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SendCachedHttpFileFunction extends AbstractSendHttpFileFunction<HttpResourceCache> {
+public class SendStoreHttpFileFunction extends AbstractSendHttpFileFunction<HttpResourceStore> {
 
 	/**
 	 * Instantiate.
@@ -38,7 +38,7 @@ public class SendCachedHttpFileFunction extends AbstractSendHttpFileFunction<Htt
 	 * @param contextPath
 	 *            Context path.
 	 */
-	public SendCachedHttpFileFunction(String contextPath) {
+	public SendStoreHttpFileFunction(String contextPath) {
 		super(contextPath);
 	}
 
@@ -47,7 +47,7 @@ public class SendCachedHttpFileFunction extends AbstractSendHttpFileFunction<Htt
 	 */
 
 	@Override
-	protected HttpResource getHttpResource(HttpResourceCache resources, String resourcePath) throws IOException {
+	protected HttpResource getHttpResource(HttpResourceStore resources, String resourcePath) throws IOException {
 		return resources.getHttpResource(resourcePath);
 	}
 

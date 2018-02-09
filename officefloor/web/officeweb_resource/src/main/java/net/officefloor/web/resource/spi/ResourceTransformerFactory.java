@@ -15,20 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.resource.impl;
-
-import net.officefloor.web.resource.HttpResourceStore;
+package net.officefloor.web.resource.spi;
 
 /**
- * Tests the {@link HttpResourceStore} with a context path.
+ * Factory to create the {@link ResourceTransformer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ContextPathResourceStoreTest extends MockHttpResourceStoreTest {
+public interface ResourceTransformerFactory {
 
-	@Override
-	protected String getContextPath() {
-		return "context/path";
-	}
+	/**
+	 * Obtains the name of transformation.
+	 * 
+	 * @return Name of transformation.
+	 */
+	String getName();
+
+	/**
+	 * Creates the {@link ResourceTransformer}.
+	 * 
+	 * @return {@link ResourceTransformer}.
+	 */
+	ResourceTransformer createResourceTransformer();
 
 }

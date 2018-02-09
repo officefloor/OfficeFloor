@@ -29,8 +29,8 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -43,7 +43,7 @@ import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceSystemService;
-import net.officefloor.web.resource.spi.ResourceTransformerService;
+import net.officefloor.web.resource.spi.ResourceTransformerFactory;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
@@ -200,15 +200,20 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 * Ensure issue if protocol implementation not available.
 	 */
 	public void testProtocolNotAvailable() throws Exception {
-		this.issue((issues) -> issues.recordIssue(
-				"Resource 'missing protocol' not available.  Please ensure its " + ResourceSystemService.class.getName()
-						+ " implementation is on the class path and configured as a service."),
+		this.issue(
+				(issues) -> issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+						"Resource 'missing protocol' not available.  Please ensure its "
+								+ ResourceSystemService.class.getSimpleName()
+								+ " implementation is on the class path and configured as a service."),
 				(context, resource) -> {
 					resource.addHttpResources("missing protocol:location");
 				});
 	}
 
-	public void testConfiguredProtocolResource() throws Exception {
+	/**
+	 * Ensure file resource protocol is available.
+	 */
+	public void testFileProtocolResource() throws Exception {
 		File resourcesDirectory = this.findFile(this.getClass(), "resources");
 		this.compile((context, resource) -> {
 			resource.addHttpResources("file:" + resourcesDirectory.getAbsolutePath());
@@ -219,9 +224,21 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure class path resource protocol is available.
+	 */
+	public void testClassPathProtocolResource() throws Exception {
+		this.compile((context, resource) -> {
+			resource.addHttpResources("classpath:PUBLIC");
+		});
+
+		// Ensure can obtain resource
+		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200, "TEST RESOURCE");
+	}
+
+	/**
 	 * Ensure can secure external {@link HttpResource}.
 	 */
-	public void testSecureConfiguredResources() throws Exception {
+	public void testSecureResources() throws Exception {
 		File resourcesDirectory = this.findFile(this.getClass(), "resources");
 		File securedDirectory = this.findFile(this.getClass(), "secured");
 		this.compile((context, resource) -> {
@@ -282,6 +299,9 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
 			resources.addTypeQualifier("qualifier");
 
+			// Add another resource to ensure picks appropriate
+			resource.addHttpResources(new ClasspathResourceSystemService(), "should not use");
+
 			// Configure linking servicer
 			OfficeSection servicer = context.addSection("servicer", TypeQualifierServicer.class);
 			context.getWebArchitect().link(false, "/store", servicer.getOfficeSectionInput("store"));
@@ -299,12 +319,14 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class TypeQualifierServicer {
-		public void store(@Parameter HttpResourceStore store, ServerHttpConnection connection) throws IOException {
+		public void store(@Qualified("qualifier") HttpResourceStore store, ServerHttpConnection connection)
+				throws IOException {
 			HttpFile file = (HttpFile) store.getHttpResource("/resource.html");
 			file.writeTo(connection.getResponse());
 		}
 
-		public void cache(@Parameter HttpResourceCache cache, ServerHttpConnection connection) throws IOException {
+		public void cache(@Qualified("qualifier") HttpResourceCache cache, ServerHttpConnection connection)
+				throws IOException {
 			HttpFile file = (HttpFile) cache.getHttpResource("/resource.html");
 			if (file == null) {
 				connection.getResponse().getEntityWriter().append("Not cached");
@@ -317,29 +339,58 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can transform the resources.
 	 */
-	public void testResourceTransformer() {
-		fail("TODO implement");
+	public void testResourceTransformer() throws Exception {
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			resources.addResourceTransformer(new MockResourceTransformerService());
+		});
+
+		// Ensure transforms resource
+		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200,
+				"TEST RESOURCE - transformed");
 	}
 
 	/**
-	 * Ensure issue if {@link ResourceTransformerService} is not available.
+	 * Ensure issue if {@link ResourceTransformerFactory} is not available.
 	 */
-	public void testResourceTransformerServiceNotAvailable() {
-		fail("TODO implement");
+	public void testResourceTransformerServiceNotAvailable() throws Exception {
+		this.issue(
+				(issues) -> issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+						"Resource transformer 'missing transformer' not available.  Please ensure its "
+								+ ResourceTransformerFactory.class.getSimpleName()
+								+ " implementation is on the class path and configured as a service."),
+				(context, resource) -> {
+					HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(),
+							"PUBLIC");
+					resources.addResourceTransformer("missing transformer");
+				});
 	}
 
 	/**
 	 * Ensure can configure {@link ResourceSystemService}.
 	 */
-	public void testResourceTransformerService() {
-		fail("TODO implement");
+	public void testResourceTransformerService() throws Exception {
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			resources.addResourceTransformer("mock");
+		});
+
+		// Ensure transforms resource
+		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200,
+				"TEST RESOURCE - transformed");
 	}
 
 	/**
 	 * Ensure can change the default directory resource name.
 	 */
-	public void testChangeDirectoryDefaultResource() {
-		fail("TODO impelement");
+	public void testChangeDirectoryDefaultResource() throws Exception {
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			resources.setDirectoryDefaultResourceNames("resource.html");
+		});
+
+		// Ensure transforms resource
+		this.server.send(MockHttpServer.mockRequest("/")).assertResponse(200, "TEST RESOURCE");
 	}
 
 	/**
