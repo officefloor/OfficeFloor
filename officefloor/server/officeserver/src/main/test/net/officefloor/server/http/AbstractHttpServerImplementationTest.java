@@ -1078,7 +1078,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 							if (noDataStart == -1) {
 								// Capture start time of no data
 								noDataStart = System.currentTimeMillis();
-							} else if ((System.currentTimeMillis() - noDataStart) > (10 * 1000)) {
+							} else if ((System.currentTimeMillis() - noDataStart) > (20 * 1000)) {
 								fail("Timed out waiting on data");
 							}
 						}
