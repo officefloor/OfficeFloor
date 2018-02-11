@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="woof template name" />
-	<field type="String" name="uri" />
-	<field type="String" name="template path" />
-	<field type="String" name="super template" />
+	<field type="String" name="application path" />
+	<field type="String" name="template location" />
 	<field type="String" name="template class name" />
+	<field type="String" name="redirect values function" />
 	<field type="String" name="template content type" />
+	<field type="String" name="template charset" />
+	<field type="String" name="link separator character" />
 	<field type="boolean" name="is template secure" />
-	<field type="boolean" name="is continue rendering" />
-	<list type="WoofTemplateOutputModel" name="output" />
+	<field type="WoofTemplateToSuperWoofTemplateModel" name="super woof template" />
+	<list type="WoofTemplateToSuperWoofTemplateModel" name="child woof template" />
 	<list type="WoofTemplateLinkModel" name="link" />
-	<list type="WoofTemplateRedirectModel" name="redirect" />
+	<list type="String" name="render http method" />
 	<list type="WoofTemplateExtensionModel" name="extension" />
 	<list type="WoofSectionOutputToWoofTemplateModel" name="woof section output" />
 	<list type="WoofTemplateOutputToWoofTemplateModel" name="woof template output" />
-	<list type="WoofAccessOutputToWoofTemplateModel" name="woof access output" />
+	<list type="WoofSecurityOutputToWoofTemplateModel" name="woof security output" />
+	<list type="WoofApplicationPathToWoofTemplateModel" name="woof application path" />
 	<list type="WoofExceptionToWoofTemplateModel" name="woof exception" />
+	<list type="WoofTemplateOutputModel" name="output" />
 </model>

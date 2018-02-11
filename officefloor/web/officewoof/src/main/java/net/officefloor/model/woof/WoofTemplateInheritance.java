@@ -21,7 +21,7 @@ import java.util.Set;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
  * Provides inheritance information regarding a {@link WoofTemplateModel} being
@@ -56,7 +56,7 @@ public interface WoofTemplateInheritance {
 
 	/**
 	 * Convenience method to provide the
-	 * {@link HttpTemplateSectionSource#PROPERTY_INHERITED_TEMPLATES}
+	 * {@link WebTemplateSectionSource#PROPERTY_INHERITED_TEMPLATES}
 	 * {@link Property} value.
 	 * 
 	 * @return Inherited template paths {@link Property} value.

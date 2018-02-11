@@ -140,12 +140,12 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		assertList(new String[] { "getAccessName", "getHttpSecuritySourceClassName", "getTimeout", "getX", "getY" },
 				woof.getWoofAccesses(),
-				new WoofAccessModel("ACCESS", "net.example.HttpSecuritySource", 2000, null, null, null, 500, 501));
-		WoofAccessModel access = woof.getWoofAccesses().get(0);
+				new WoofSecurityModel("ACCESS", "net.example.HttpSecuritySource", 2000, null, null, null, 500, 501));
+		WoofSecurityModel access = woof.getWoofAccesses().get(0);
 		assertList(new String[] { "getName", "getValue" }, access.getProperties(),
 				new PropertyModel("name.first", "value.first"), new PropertyModel("name.second", "value.second"));
 		assertList(new String[] { "getWoofAccessInputName", "getParameterType" }, access.getInputs(),
-				new WoofAccessInputModel("Authenticate", "net.example.HttpCredentials"));
+				new WoofSecurityModel("Authenticate", "net.example.HttpCredentials"));
 		assertList(new String[] { "getWoofAccessOutputName", "getArgumentType" }, access.getOutputs(),
 				new WoofAccessOutputModel("OUTPUT_ONE", "java.lang.String"),
 				new WoofAccessOutputModel("OUTPUT_TWO", null), new WoofAccessOutputModel("OUTPUT_THREE", null),

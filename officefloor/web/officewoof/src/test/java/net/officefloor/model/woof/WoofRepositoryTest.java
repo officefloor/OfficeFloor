@@ -64,9 +64,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
-		WoofAccessModel access = new WoofAccessModel("ACCESS", null, 1000);
+		WoofSecurityModel access = new WoofSecurityModel("ACCESS", null, 1000);
 		woof.addWoofAccess(access);
-		WoofAccessInputModel accessInput = new WoofAccessInputModel("ACCESS_INPUT", null);
+		WoofSecurityModel accessInput = new WoofSecurityModel("ACCESS_INPUT", null);
 		access.addInput(accessInput);
 		WoofAccessOutputModel accessOutput = new WoofAccessOutputModel("ACCESS_OUTPUT", null);
 		access.addOutput(accessOutput);
@@ -241,9 +241,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
-		WoofAccessModel access = new WoofAccessModel("ACCESS", null, 1000);
+		WoofSecurityModel access = new WoofSecurityModel("ACCESS", null, 1000);
 		woof.addWoofAccess(access);
-		WoofAccessInputModel accessInput = new WoofAccessInputModel("ACCESS_INPUT", null);
+		WoofSecurityModel accessInput = new WoofSecurityModel("ACCESS_INPUT", null);
 		access.addInput(accessInput);
 		WoofAccessOutputModel accessOutput = new WoofAccessOutputModel("ACCESS_OUTPUT", null);
 		access.addOutput(accessOutput);

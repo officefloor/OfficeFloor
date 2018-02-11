@@ -36,7 +36,7 @@ import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtensionChangeContextImpl;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
  * {@link WoofTemplateExtensionLoader} implementation.
@@ -250,16 +250,16 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		/**
 		 * Initiate.
 		 * 
-		 * @param templateUri
-		 *            {@link HttpTemplateSection} URI.
+		 * @param applicationPath
+		 *            {@link WebTemplate} application path.
 		 * @param woofTemplateExtensionSourceClassName
 		 *            {@link WoofTemplateExtensionSource} class name.
 		 * @param delegate
 		 *            {@link WoofChangeIssues} delegate.
 		 */
-		public ExtensionWoofChangeIssues(String templateUri, String woofTemplateExtensionSourceClassName,
+		public ExtensionWoofChangeIssues(String applicationPath, String woofTemplateExtensionSourceClassName,
 				WoofChangeIssues delegate) {
-			this.messagePrefix = "Template " + templateUri + " Extension " + woofTemplateExtensionSourceClassName
+			this.messagePrefix = "Template " + applicationPath + " Extension " + woofTemplateExtensionSourceClassName
 					+ ": ";
 			this.delegate = delegate;
 		}
@@ -326,13 +326,13 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	}
 
 	@Override
-	public void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath, HttpTemplateSection template,
-			OfficeArchitect officeArchitect, WebArchitect webArchitect, SourceContext sourceContext)
-			throws WoofTemplateExtensionException {
+	public void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath,
+			WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+			SourceContext sourceContext) throws WoofTemplateExtensionException {
 
 		// Create the context for the extension source
-		WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(templatePath,
-				template, officeArchitect, webArchitect, properties, sourceContext);
+		WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(
+				templatePath, template, officeArchitect, webArchitect, properties, sourceContext);
 
 		// Load the extension
 		try {
@@ -358,14 +358,14 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 			implements WoofTemplateExtensionSourceContext {
 
 		/**
-		 * URL path to the {@link HttpTemplateSection}.
+		 * URL path to the {@link WebTemplate}.
 		 */
-		private final String templatePath;
+		private final String applicationPath;
 
 		/**
-		 * {@link HttpTemplateSection}.
+		 * {@link WebTemplate}.
 		 */
-		private final HttpTemplateSection template;
+		private final WebTemplate template;
 
 		/**
 		 * {@link OfficeArchitect}.
@@ -380,10 +380,10 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		/**
 		 * Initiate.
 		 * 
-		 * @param templatePath
-		 *            URL path to the {@link HttpTemplateSection}.
+		 * @param applicationPath
+		 *            Application path to the {@link WebTemplate}.
 		 * @param template
-		 *            {@link HttpTemplateSection}.
+		 *            {@link WebTemplate}.
 		 * @param officeArchitect
 		 *            {@link OfficeArchitect}.
 		 * @param webArchitect
@@ -393,11 +393,11 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		 * @param classLoader
 		 *            {@link ClassLoader}.
 		 */
-		public WoofTemplateExtensionServiceContextImpl(String templatePath, HttpTemplateSection template,
+		public WoofTemplateExtensionServiceContextImpl(String applicationPath, WebTemplate template,
 				OfficeArchitect officeArchitect, WebArchitect webArchitect, PropertyList properties,
 				SourceContext sourceContext) {
 			super(sourceContext.isLoadingType(), sourceContext, new PropertyListSourceProperties(properties));
-			this.templatePath = templatePath;
+			this.applicationPath = applicationPath;
 			this.template = template;
 			this.officeArchitect = officeArchitect;
 			this.webArchitect = webArchitect;
@@ -408,12 +408,12 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		 */
 
 		@Override
-		public String getTemplatePath() {
-			return this.templatePath;
+		public String getApplicationPath() {
+			return this.applicationPath;
 		}
 
 		@Override
-		public HttpTemplateSection getTemplate() {
+		public WebTemplate getTemplate() {
 			return this.template;
 		}
 

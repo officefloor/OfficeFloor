@@ -20,12 +20,10 @@ package net.officefloor.plugin.woof.template;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
-import net.officefloor.web.state.HttpTemplateAutoWireSectionExtension;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
- * Source that allows extending behaviour of a
- * {@link HttpTemplateAutoWireSectionExtension}.
+ * Source that allows extending behaviour of a {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,7 +45,7 @@ public interface WoofTemplateExtensionSource {
 	 * <p>
 	 * This is only invoked by the WoOF editor to enable managing configuration
 	 * for the {@link WoofTemplateExtensionSource}. It is not used during
-	 * extension of the {@link HttpTemplateSection}.
+	 * extension of the {@link WebTemplate}.
 	 * <p>
 	 * This method is to create a potential {@link Change} to the configuration
 	 * necessary for the {@link WoofTemplateExtensionSource}. Should no
@@ -71,18 +69,16 @@ public interface WoofTemplateExtensionSource {
 	 *            {@link WoofTemplateExtensionChangeContext}.
 	 * @return {@link Change} or <code>null</code> if no change is necessary.
 	 */
-	Change<?> createConfigurationChange(
-			WoofTemplateExtensionChangeContext context);
+	Change<?> createConfigurationChange(WoofTemplateExtensionChangeContext context);
 
 	/**
-	 * Extends the {@link HttpTemplateSection}.
+	 * Extends the {@link WebTemplate}.
 	 * 
 	 * @param context
 	 *            {@link WoofTemplateExtensionSourceContext}.
 	 * @throws Exception
-	 *             If fails to extend the {@link HttpTemplateSection}.
+	 *             If fails to extend the {@link WebTemplate}.
 	 */
-	void extendTemplate(WoofTemplateExtensionSourceContext context)
-			throws Exception;
+	void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception;
 
 }

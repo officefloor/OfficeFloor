@@ -315,7 +315,7 @@ public class ModelGenerator {
 				} else {
 					write("    , ");
 				}
-				writeLine(list.getType() + " " + list.getPropertyName());
+				writeLine(list.getType() + "[] " + list.getPropertyName());
 			}
 		}
 		writeLine("    ) {");

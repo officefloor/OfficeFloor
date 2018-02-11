@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="http security name" />
+	<field type="String" name="http security source class name" />
+	<field type="long" name="timeout" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="String" name="content type" />
+	<list type="WoofSecurityOutputModel" name="output" />
+	<list type="WoofSectionOutputToWoofSecurityModel" name="woof section output" />
+	<list type="WoofTemplateOutputToWoofSecurityModel" name="woof template output" />
+	<list type="WoofSecurityOutputToWoofSecurityModel" name="woof security output" />
+	<list type="WoofApplicationPathToWoofSecurityModel" name="woof application path" />
+	<list type="WoofExceptionToWoofSecurityModel" name="woof exception" />
+</model>

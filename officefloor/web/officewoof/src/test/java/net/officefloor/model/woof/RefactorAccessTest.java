@@ -30,16 +30,16 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
- * Tests refactoring the {@link WoofAccessModel}.
+ * Tests refactoring the {@link WoofSecurityModel}.
  * 
  * @author Daniel Sagenschneider
  */
 public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 
 	/**
-	 * {@link WoofAccessModel}.
+	 * {@link WoofSecurityModel}.
 	 */
-	private WoofAccessModel access;
+	private WoofSecurityModel access;
 
 	/**
 	 * {@link WoofAccessOutputModel} name mapping.
@@ -89,7 +89,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 				HttpSecuritySectionSource.OUTPUT_FAILURE);
 
 		// Refactor the access with same details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.access, "test",
 				"net.example.HttpSecuritySource", 4000, properties, securityType, this.accessOutputNameMapping);
 
 		// Validate change
@@ -124,7 +124,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 		this.accessOutputNameMapping.put("OUTPUT_A", "OUTPUT_C");
 
 		// Refactor the section with same details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.access, "test",
 				"net.change.ChangeSecuritySource", 5000, properties, securityType, this.accessOutputNameMapping);
 
 		// Validate change
@@ -132,7 +132,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure handle remove {@link PropertyModel}, {@link WoofAccessInputModel}
+	 * Ensure handle remove {@link PropertyModel}, {@link WoofSecurityModel}
 	 * and {@link WoofAccessOutputModel} instances.
 	 */
 	public void testRemoveDetails() {
@@ -147,7 +147,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 				});
 
 		// Refactor the access removing details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.access, "test",
 				"net.example.RemoveSecuritySource", 4000, null, securityType, null);
 
 		// Validate change
@@ -155,7 +155,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure handle adding {@link PropertyModel}, {@link WoofAccessInputModel}
+	 * Ensure handle adding {@link PropertyModel}, {@link WoofSecurityModel}
 	 * and {@link WoofAccessOutputModel} instances.
 	 */
 	public void testAddDetails() {
@@ -178,7 +178,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Refactor the access with added details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.access, "test",
 				"net.example.AddSecuritySource", 5000, properties, securityType, this.accessOutputNameMapping);
 
 		// Validate change

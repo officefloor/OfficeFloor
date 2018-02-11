@@ -64,7 +64,7 @@ public class LinkAccessOutputTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 
 		// Link the access output to template
-		Change<WoofAccessOutputToWoofTemplateModel> change = this.operations.linkAccessOutputToTemplate(accessOutput,
+		Change<WoofAccessOutputToWoofTemplateModel> change = this.operations.linkSecurityOutputToTemplate(accessOutput,
 				template);
 
 		// Validate change
@@ -81,7 +81,7 @@ public class LinkAccessOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofTemplate();
 
 		// Remove the link
-		Change<WoofAccessOutputToWoofTemplateModel> change = this.operations.removeAccessOuputToTemplate(link);
+		Change<WoofAccessOutputToWoofTemplateModel> change = this.operations.removeSecurityOuputToTemplate(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Access Output to Template", true);
@@ -116,7 +116,7 @@ public class LinkAccessOutputTest extends AbstractWoofChangesTestCase {
 
 		// Link the access output to section input
 		Change<WoofAccessOutputToWoofSectionInputModel> change = this.operations
-				.linkAccessOutputToSectionInput(accessOutput, sectionInput);
+				.linkSecurityOutputToSectionInput(accessOutput, sectionInput);
 
 		// Validate change
 		this.assertChange(change, null, "Link Access Output to Section Input", true);
@@ -132,7 +132,7 @@ public class LinkAccessOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofSectionInput();
 
 		// Remove the link
-		Change<WoofAccessOutputToWoofSectionInputModel> change = this.operations.removeAccessOuputToSectionInput(link);
+		Change<WoofAccessOutputToWoofSectionInputModel> change = this.operations.removeSecurityOuputToSectionInput(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Access Output to Section Input", true);
@@ -166,7 +166,7 @@ public class LinkAccessOutputTest extends AbstractWoofChangesTestCase {
 		WoofResourceModel resource = this.model.getWoofResources().get(1);
 
 		// Link the access output to resource
-		Change<WoofAccessOutputToWoofResourceModel> change = this.operations.linkAccessOutputToResource(accessOutput,
+		Change<WoofAccessOutputToWoofResourceModel> change = this.operations.linkSecurityOutputToResource(accessOutput,
 				resource);
 
 		// Validate change
@@ -183,7 +183,7 @@ public class LinkAccessOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofResource();
 
 		// Remove the link
-		Change<WoofAccessOutputToWoofResourceModel> change = this.operations.removeAccessOuputToResource(link);
+		Change<WoofAccessOutputToWoofResourceModel> change = this.operations.removeSecurityOuputToResource(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Access Output to Resource", true);

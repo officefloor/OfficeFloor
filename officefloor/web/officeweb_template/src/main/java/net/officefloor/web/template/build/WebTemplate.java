@@ -21,9 +21,15 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
+import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 
@@ -119,13 +125,14 @@ public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * <p>
-	 * Adds a {@link HttpMethod} that will rendering the {@link WebTemplate}.
+	 * Adds a {@link HttpMethod} that will render the {@link WebTemplate}.
+	 * Should the {@link HttpMethod} not be in this list, a redirect will occur
+	 * to {@link HttpMethodEnum#GET}.
 	 * <p>
-	 * Note that {@link HttpMethod#GET} is added by default.
+	 * Note that {@link HttpMethodEnum#GET} is added by default.
 	 * 
 	 * @param method
-	 *            {@link HttpMethod} that will rendering the
-	 *            {@link WebTemplate}.
+	 *            {@link HttpMethod} that will render the {@link WebTemplate}.
 	 * @return <code>this</code>.
 	 */
 	WebTemplate addRenderMethod(HttpMethod method);
@@ -142,18 +149,18 @@ public interface WebTemplate extends PropertyConfigurable {
 	/**
 	 * Adds a {@link WebTemplateExtension} for this {@link WebTemplate}.
 	 * 
-	 * @param extensionClassName
-	 *            {@link Class} name of the {@link WebTemplateExtension}.
+	 * @param extension
+	 *            {@link WebTemplateExtension}.
 	 * @return {@link WebTemplateExtensionBuilder} to build the
 	 *         {@link WebTemplateExtension}.
 	 */
-	WebTemplateExtensionBuilder addExtension(String extensionClassName);
+	WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension);
 
 	/**
 	 * Links the {@link OfficeSectionOutput} to this {@link WebTemplate}.
 	 * 
-	 * @param sectionOutput
-	 *            {@link OfficeSectionOutput} to link to the
+	 * @param flowSourceNode
+	 *            {@link OfficeFlowSourceNode} to link to the
 	 *            {@link WebTemplate}.
 	 * @param valuesType
 	 *            Type provided as a parameter to the {@link OfficeSectionInput}
@@ -163,7 +170,7 @@ public interface WebTemplate extends PropertyConfigurable {
 	 *            parameters are required.
 	 * @return <code>this</code>.
 	 */
-	WebTemplate link(OfficeSectionOutput sectionOutput, Class<?> valuesType);
+	WebTemplate link(OfficeFlowSourceNode flowSourceNode, Class<?> valuesType);
 
 	/**
 	 * Obtains the {@link OfficeSectionOutput} from the {@link WebTemplate}.
@@ -173,5 +180,18 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * @return {@link OfficeSectionOutput} for the name.
 	 */
 	OfficeSectionOutput getOutput(String outputName);
+
+	/**
+	 * <p>
+	 * Adds {@link Governance} for this {@link WebTemplate}.
+	 * <p>
+	 * This enables providing {@link Governance} over all
+	 * {@link OfficeSectionFunction} instances within the {@link WebTemplate}
+	 * and all its subsequent {@link OfficeSubSection} instances.
+	 * 
+	 * @param governance
+	 *            {@link OfficeGovernance}.
+	 */
+	void addGovernance(OfficeGovernance governance);
 
 }

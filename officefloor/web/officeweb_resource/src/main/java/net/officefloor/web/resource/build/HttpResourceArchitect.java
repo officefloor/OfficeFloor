@@ -19,8 +19,7 @@ package net.officefloor.web.resource.build;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.office.OfficeEscalation;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.spi.ResourceSystem;
@@ -34,24 +33,14 @@ import net.officefloor.web.resource.spi.ResourceSystemFactory;
 public interface HttpResourceArchitect {
 
 	/**
-	 * Links the {@link OfficeSectionOutput} to the {@link HttpResource}.
+	 * Links the {@link OfficeFlowSourceNode} to the {@link HttpResource}.
 	 * 
-	 * @param output
-	 *            {@link OfficeSectionOutput}.
+	 * @param flowSourceNode
+	 *            {@link OfficeFlowSourceNode}.
 	 * @param resourcePath
 	 *            Path to the {@link HttpResource}.
 	 */
-	void link(OfficeSectionOutput output, String resourcePath);
-
-	/**
-	 * Links the {@link OfficeEscalation} to the {@link HttpResource}.
-	 * 
-	 * @param escalation
-	 *            {@link OfficeEscalation}.
-	 * @param resourcePath
-	 *            Path to the {@link HttpResource}.
-	 */
-	void link(OfficeEscalation escalation, String resourcePath);
+	void link(OfficeFlowSourceNode flowSourceNode, String resourcePath);
 
 	/**
 	 * <p>

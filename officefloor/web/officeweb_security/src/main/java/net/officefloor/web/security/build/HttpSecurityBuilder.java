@@ -20,6 +20,7 @@ package net.officefloor.web.security.build;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
@@ -28,6 +29,14 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * @author Daniel Sagenschneider
  */
 public interface HttpSecurityBuilder extends PropertyConfigurable {
+
+	/**
+	 * Time out in milliseconds to obtain {@link HttpAccessControl} information.
+	 * 
+	 * @param timeout
+	 *            Time out in milliseconds.
+	 */
+	void setTimeout(long timeout);
 
 	/**
 	 * Adds the a <code>Content-Type</code> supported by this

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="http security name" />
+	<field type="WoofSectionOutputModel" name="woof section output"
+		end-field="woof security" />
+	<field type="WoofSecurityModel" name="woof security"
+		end-list="woof section output" />
+</model>

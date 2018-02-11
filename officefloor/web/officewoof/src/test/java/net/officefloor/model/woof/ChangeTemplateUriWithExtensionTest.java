@@ -65,7 +65,7 @@ public class ChangeTemplateUriWithExtensionTest extends
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
 				this.template, TEMPLATE_URI,
 				this.getWoofTemplateChangeContext());
 
@@ -98,7 +98,7 @@ public class ChangeTemplateUriWithExtensionTest extends
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
 				this.template, TEMPLATE_URI,
 				this.getWoofTemplateChangeContext());
 
@@ -131,7 +131,7 @@ public class ChangeTemplateUriWithExtensionTest extends
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
 				this.template, TEMPLATE_URI,
 				this.getWoofTemplateChangeContext());
 

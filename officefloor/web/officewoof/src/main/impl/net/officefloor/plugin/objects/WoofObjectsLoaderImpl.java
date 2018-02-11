@@ -171,7 +171,7 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 
 		// Configure the flows
 		for (WoofFlowModel flow : managedObject.getFlows()) {
-			architect.link(mos.getManagedObjectFlow(flow.getName()),
+			architect.link(mos.getOfficeManagedObjectFlow(flow.getName()),
 					architect.getOfficeSection(flow.getSection()).getOfficeSectionInput(flow.getInput()));
 		}
 
@@ -194,7 +194,7 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 
 		// Configure the dependencies
 		for (WoofDependencyModel dependencyModel : managedObject.getDependencies()) {
-			ManagedObjectDependency dependency = mo.getManagedObjectDependency(dependencyModel.getName());
+			ManagedObjectDependency dependency = mo.getOfficeManagedObjectDependency(dependencyModel.getName());
 			dependency.setOverrideQualifier(dependencyModel.getQualifier());
 			String specificType = dependencyModel.getType();
 			if (!CompileUtil.isBlank(specificType)) {

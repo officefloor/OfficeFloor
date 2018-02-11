@@ -33,11 +33,10 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -51,7 +50,6 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -143,11 +141,6 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	private final List<ResourceLink> resourceLinks = new LinkedList<>();
 
 	/**
-	 * {@link EscalationResource} instances.
-	 */
-	private final List<EscalationResource> escalationResources = new LinkedList<>();
-
-	/**
 	 * Next {@link HttpResourceSource} index (to ensure unique names).
 	 */
 	private int nextResourceSourceIndex = 1;
@@ -177,13 +170,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	 */
 
 	@Override
-	public void link(OfficeSectionOutput output, String resourcePath) {
-		this.resourceLinks.add(new ResourceLink(output, resourcePath));
-	}
-
-	@Override
-	public void link(OfficeEscalation escalation, String resourcePath) {
-		this.escalationResources.add(new EscalationResource(escalation, resourcePath));
+	public void link(OfficeFlowSourceNode flowSourceNode, String resourcePath) {
+		this.resourceLinks.add(new ResourceLink(flowSourceNode, resourcePath));
 	}
 
 	@Override
@@ -286,12 +274,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		for (ResourceLink link : this.resourceLinks) {
 			OfficeSectionInput trigger = this.getResourceSender(link.resourcePath, section, stores,
 					resourceSendTriggers);
-			this.officeArchitect.link(link.sectionOutput, trigger);
-		}
-		for (EscalationResource escalation : this.escalationResources) {
-			OfficeSectionInput trigger = this.getResourceSender(escalation.resourcePath, section, stores,
-					resourceSendTriggers);
-			this.officeArchitect.link(escalation.escalation, trigger);
+			this.officeArchitect.link(link.flowSourceNode, trigger);
 		}
 
 		// Configure to service resources after the application
@@ -468,9 +451,9 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	private static class ResourceLink {
 
 		/**
-		 * {@link OfficeSectionOutput}.
+		 * {@link OfficeFlowSourceNode}.
 		 */
-		public final OfficeSectionOutput sectionOutput;
+		public final OfficeFlowSourceNode flowSourceNode;
 
 		/**
 		 * Resource path.
@@ -480,44 +463,13 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		/**
 		 * Initiate.
 		 * 
-		 * @param section
-		 *            {@link OfficeSection}.
-		 * @param outputName
-		 *            Name of the {@link SectionOutput}.
+		 * @param flowSourceNode
+		 *            {@link OfficeFlowSourceNode}.
 		 * @param resourcePath
 		 *            Resource path.
 		 */
-		public ResourceLink(OfficeSectionOutput sectionOutput, String resourcePath) {
-			this.sectionOutput = sectionOutput;
-			this.resourcePath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
-		}
-	}
-
-	/**
-	 * Resource to handle {@link Escalation}.
-	 */
-	private static class EscalationResource {
-
-		/**
-		 * {@link OfficeEscalation}.
-		 */
-		public final OfficeEscalation escalation;
-
-		/**
-		 * Resource path.
-		 */
-		public final String resourcePath;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param escalation
-		 *            {@link OfficeEscalation}.
-		 * @param resourcePath
-		 *            Resource path.
-		 */
-		public EscalationResource(OfficeEscalation escalation, String resourcePath) {
-			this.escalation = escalation;
+		public ResourceLink(OfficeFlowSourceNode flowSourceNode, String resourcePath) {
+			this.flowSourceNode = flowSourceNode;
 			this.resourcePath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
 		}
 	}
@@ -651,47 +603,26 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 			// Configure triggering the resource
 			Set<String> configuredResourcePaths = new HashSet<>();
 			for (ResourceLink link : HttpResourceArchitectEmployer.this.resourceLinks) {
-				this.configureResourceTrigger(link.resourcePath, nextHandler, designer, configuredResourcePaths);
+
+				// Determine if already configured resource path
+				if (configuredResourcePaths.contains(link.resourcePath)) {
+					return; // already configured
+				}
+
+				// Add the trigger function
+				String functionName = "trigger_" + link.resourcePath;
+				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
+						new TriggerSendHttpFileManagedFunctionSource(link.resourcePath));
+				SectionFunction function = namespace.addSectionFunction(functionName,
+						TriggerSendHttpFileManagedFunctionSource.FUNCTION_NAME);
+
+				// Configure triggering send
+				designer.link(function, nextHandler);
+
+				// Configure handling trigger
+				SectionInput send = designer.addSectionInput("send_" + link.resourcePath, null);
+				designer.link(send, function);
 			}
-			for (EscalationResource escalation : HttpResourceArchitectEmployer.this.escalationResources) {
-				this.configureResourceTrigger(escalation.resourcePath, nextHandler, designer, configuredResourcePaths);
-			}
-
-		}
-
-		/**
-		 * Configures the triggering of a resource.
-		 * 
-		 * @param resourcePath
-		 *            Path for the resource.
-		 * @param initialHandler
-		 *            {@link SectionFunction} for the initial handler.
-		 * @param designer
-		 *            {@link SectionDesigner}.
-		 * @param configuredResourcePaths
-		 *            {@link Set} of existing configured resources.
-		 */
-		private void configureResourceTrigger(String resourcePath, SectionFlowSinkNode initialHandler,
-				SectionDesigner designer, Set<String> configuredResourcePaths) {
-
-			// Determine if already configured resource path
-			if (configuredResourcePaths.contains(resourcePath)) {
-				return; // already configured
-			}
-
-			// Add the trigger function
-			String functionName = "trigger_" + resourcePath;
-			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
-					new TriggerSendHttpFileManagedFunctionSource(resourcePath));
-			SectionFunction function = namespace.addSectionFunction(functionName,
-					TriggerSendHttpFileManagedFunctionSource.FUNCTION_NAME);
-
-			// Configure triggering send
-			designer.link(function, initialHandler);
-
-			// Configure handling trigger
-			SectionInput send = designer.addSectionInput("send_" + resourcePath, null);
-			designer.link(send, function);
 		}
 	}
 

@@ -36,6 +36,8 @@ import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
@@ -258,11 +260,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private WebTemplateImpl superTemplate = null;
 
 		/**
-		 * Next {@link WebTemplateExtension} index.
-		 */
-		private int nextExtensionIndex = 0;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param applicationPath
@@ -445,7 +442,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 			// Link to template (redirect - should be different URL always)
 			for (LinkToTemplate link : this.linkToTemplates) {
-				WebTemplaterEmployer.this.webArchitect.link(link.sectionOutput, templateInput, link.valuesType);
+				WebTemplaterEmployer.this.webArchitect.link(link.flowSourceNode, templateInput, link.valuesType);
 			}
 		}
 
@@ -513,32 +510,25 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplateExtensionBuilder addExtension(String extensionClassName) {
-
-			// Obtain the next extension index
-			this.nextExtensionIndex++;
-			int extensionIndex = this.nextExtensionIndex;
-
-			// Add the extension
-			this.properties.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex)
-					.setValue(extensionClassName);
-
-			// Create and return the builder for the extension
-			return (name, value) -> this.properties
-					.addProperty(
-							WebTemplateSectionSource.PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex + "." + name)
-					.setValue(value);
+		public WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension) {
+			return this.webTemplateSectionSource.addWebTemplateExtension(extension,
+					WebTemplaterEmployer.this.sourceContext.createPropertyList());
 		}
 
 		@Override
-		public WebTemplate link(OfficeSectionOutput sectionOutput, Class<?> valuesType) {
-			this.linkToTemplates.add(new LinkToTemplate(sectionOutput, valuesType));
+		public WebTemplate link(OfficeFlowSourceNode flowSourceNode, Class<?> valuesType) {
+			this.linkToTemplates.add(new LinkToTemplate(flowSourceNode, valuesType));
 			return this;
 		}
 
 		@Override
 		public OfficeSectionOutput getOutput(String outputName) {
 			return this.section.getOfficeSectionOutput(outputName);
+		}
+
+		@Override
+		public void addGovernance(OfficeGovernance governance) {
+			this.section.addGovernance(governance);
 		}
 	}
 
@@ -548,9 +538,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 	private static class LinkToTemplate {
 
 		/**
-		 * {@link OfficeSectionOutput}.
+		 * {@link OfficeFlowSourceNode}.
 		 */
-		private final OfficeSectionOutput sectionOutput;
+		private final OfficeFlowSourceNode flowSourceNode;
 
 		/**
 		 * Values type.
@@ -560,13 +550,13 @@ public class WebTemplaterEmployer implements WebTemplater {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param sectionOutput
-		 *            {@link OfficeSectionOutput}.
+		 * @param flowSourceNode
+		 *            {@link OfficeFlowSourceNode}.
 		 * @param valuesType
 		 *            Values type.
 		 */
-		public LinkToTemplate(OfficeSectionOutput sectionOutput, Class<?> valuesType) {
-			this.sectionOutput = sectionOutput;
+		public LinkToTemplate(OfficeFlowSourceNode flowSourceNode, Class<?> valuesType) {
+			this.flowSourceNode = flowSourceNode;
 			this.valuesType = valuesType;
 		}
 	}

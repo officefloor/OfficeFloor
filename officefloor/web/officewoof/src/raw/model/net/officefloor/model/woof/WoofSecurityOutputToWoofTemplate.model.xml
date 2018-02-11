@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="application path" />
+	<field type="WoofSecurityOutputModel" name="woof security output"
+		end-field="woof template" />
+	<field type="WoofTemplateModel" name="woof template" end-list="woof security output" />
+</model>

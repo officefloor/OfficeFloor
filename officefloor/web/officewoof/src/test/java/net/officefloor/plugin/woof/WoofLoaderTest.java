@@ -353,7 +353,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		@Override
 		public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 			// Ensure correct template
-			assertEquals("Obtain location to ensure extending", "URI", context.getTemplatePath());
+			assertEquals("Obtain location to ensure extending", "URI", context.getApplicationPath());
 		}
 	}
 

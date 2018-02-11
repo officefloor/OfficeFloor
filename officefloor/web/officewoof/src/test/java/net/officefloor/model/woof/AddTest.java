@@ -324,7 +324,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure able to specify the {@link WoofAccessModel}.
+	 * Ensure able to specify the {@link WoofSecurityModel}.
 	 */
 	public void testSetAccess() {
 
@@ -349,7 +349,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Specify the access
-		Change<WoofAccessModel> change = this.operations.addAccess("test", "net.example.HttpSecuritySource", 2000,
+		Change<WoofSecurityModel> change = this.operations.addSecurity("test", "net.example.HttpSecuritySource", 2000,
 				properties, httpSecurityType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
@@ -359,12 +359,12 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Ensure appropriately specified access
 		change.apply();
-		WoofAccessModel woofAccess = this.model.getWoofAccesses().get(0);
+		WoofSecurityModel woofAccess = this.model.getWoofAccesses().get(0);
 		assertSame("Incorrect access", woofAccess, change.getTarget());
 	}
 
 	/**
-	 * Ensure able to specify the {@link WoofAccessModel} with no application
+	 * Ensure able to specify the {@link WoofSecurityModel} with no application
 	 * required behaviour.
 	 */
 	public void testSetAccessWithNoApplicationBehaviour() {
@@ -384,7 +384,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.b").setValue("value.b");
 
 		// Specify the access
-		Change<WoofAccessModel> change = this.operations.addAccess("test", "net.other.HttpSecuritySource", 3000,
+		Change<WoofSecurityModel> change = this.operations.addSecurity("test", "net.other.HttpSecuritySource", 3000,
 				properties, httpSecurityType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
@@ -394,7 +394,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Ensure appropriately specified access
 		change.apply();
-		WoofAccessModel woofAccess = this.model.getWoofAccesses().get(0);
+		WoofSecurityModel woofAccess = this.model.getWoofAccesses().get(0);
 		assertSame("Incorrect access", woofAccess, change.getTarget());
 	}
 

@@ -42,7 +42,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
  * Utility functions for testing a {@link WoofTemplateExtensionSource}
@@ -280,33 +280,33 @@ public class WoofTemplateExtensionLoaderUtil {
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateSection} by the
+	 * Undertakes the extending of the {@link WebTemplate} by the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
 	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param templatePath
-	 *            URL path to the {@link HttpTemplateSection}.
+	 * @param applicationPath
+	 *            Application path to the {@link WebTemplate}.
 	 * @param template
-	 *            {@link HttpTemplateSection}.
+	 *            {@link WebTemplate}.
 	 * @param webArchitect
 	 *            {@link WebArchitect}.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value pairs.
 	 * @throws Exception
-	 *             If fails to extend {@link HttpTemplateSection}.
+	 *             If fails to extend {@link WebTemplate}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			String templatePath, HttpTemplateSection template, OfficeArchitect officeArchitect,
-			WebArchitect webArchitect, String... propertyNameValues) throws Exception {
-		extendTemplate(extensionSourceClass, templatePath, template, officeArchitect, webArchitect, null, null,
+			String applicationPath, WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+			String... propertyNameValues) throws Exception {
+		extendTemplate(extensionSourceClass, applicationPath, template, officeArchitect, webArchitect, null, null,
 				propertyNameValues);
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateSection} by the
+	 * Undertakes the extending of the {@link WebTemplate} by the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
@@ -314,9 +314,9 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param templatePath
-	 *            URL path to the {@link HttpTemplateSection}.
+	 *            URL path to the {@link WebTemplate}.
 	 * @param template
-	 *            {@link HttpTemplateSection}.
+	 *            {@link WebTemplate}.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param webArchitect
@@ -328,12 +328,11 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param propertyNameValues
 	 *            {@link Property} name/value pairs.
 	 * @throws Exception
-	 *             If fails to extend {@link HttpTemplateSection}.
+	 *             If fails to extend {@link WebTemplate}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			String templatePath, HttpTemplateSection template, OfficeArchitect officeArchitect,
-			WebArchitect webArchitect, ClassLoader classLoader, ResourceSource[] resourceSources,
-			String... propertyNameValues) throws Exception {
+			String templatePath, WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+			ClassLoader classLoader, ResourceSource[] resourceSources, String... propertyNameValues) throws Exception {
 
 		// Obtains the source context
 		SourceContext sourceContext = getSourceContext(classLoader, resourceSources);

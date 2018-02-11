@@ -939,7 +939,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testExtendTemplate() throws Exception {
 		this.template("/extend", (context, templater) -> {
 			WebTemplate template = templater.addTemplate("/extend", new StringReader("original"));
-			template.addExtension(MockWebTemplateExtension.class.getName()).addProperty("test", "available");
+			template.addExtension(new MockWebTemplateExtension()).addProperty("test", "available");
 		}, "extended");
 	}
 

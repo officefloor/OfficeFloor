@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
+	<list type="WoofApplicationPathModel" name="woof appliation path" />
 	<list type="WoofTemplateModel" name="woof template" />
-	<list type="WoofAccessModel" name="woof access" plural="woof accesses" />
+	<list type="WoofSecurityModel" name="woof security" plural="woof securities" />
 	<list type="WoofSectionModel" name="woof section" />
 	<list type="WoofGovernanceModel" name="woof governance" />
 	<list type="WoofResourceModel" name="woof resource" />

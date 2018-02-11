@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -244,8 +245,8 @@ public abstract interface WebArchitect {
 	/**
 	 * Links the {@link OfficeSectionOutput} to the {@link HttpUrlContinuation}.
 	 * 
-	 * @param output
-	 *            {@link OfficeSectionOutput}.
+	 * @param flowSourceNode
+	 *            {@link OfficeFlowSourceNode}.
 	 * @param continuation
 	 *            {@link HttpUrlContinuation}.
 	 * @param parameterType
@@ -253,7 +254,7 @@ public abstract interface WebArchitect {
 	 *            {@link HttpUrlContinuation} path. May be <code>null</code> if
 	 *            {@link HttpUrlContinuation} path contains no parameters.
 	 */
-	void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType);
+	void link(OfficeFlowSourceNode flowSourceNode, HttpUrlContinuation continuation, Class<?> parameterType);
 
 	/**
 	 * <p>

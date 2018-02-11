@@ -17,11 +17,9 @@
  */
 package net.officefloor.plugin.woof.template;
 
-import net.officefloor.web.state.HttpTemplateAutoWireSectionExtension;
-
 /**
- * Flags that the {@link HttpTemplateAutoWireSectionExtension} is unknown or
- * unable to be obtained.
+ * Flags that the {@link WebTemplateExtensionSource} is unknown or unable to be
+ * obtained.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,5 +46,4 @@ public class WoofTemplateExtensionException extends Exception {
 	public WoofTemplateExtensionException(String message) {
 		super(message);
 	}
-
 }

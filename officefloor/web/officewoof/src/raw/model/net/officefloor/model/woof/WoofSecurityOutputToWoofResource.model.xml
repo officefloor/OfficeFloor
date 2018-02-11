@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="resource path" />
+	<field type="WoofSecurityOutputModel" name="woof security output"
+		end-field="woof resource" />
+	<field type="WoofResourceModel" name="woof resource" end-list="woof security output" />
+</model>

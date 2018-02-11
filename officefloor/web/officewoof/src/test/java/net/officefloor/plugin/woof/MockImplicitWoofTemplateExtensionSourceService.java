@@ -81,7 +81,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoof
 	public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 
 		// Obtain the template URI
-		String uri = context.getTemplatePath();
+		String uri = context.getApplicationPath();
 
 		// Ensure expecting the template
 		String expectedUri = templateUris.pollFirst();

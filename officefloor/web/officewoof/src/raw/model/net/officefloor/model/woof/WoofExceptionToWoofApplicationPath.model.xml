@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="application path" />
+	<field type="WoofExceptionModel" name="woof exception" end-field="woof application path" />
+	<field type="WoofApplicationPathModel" name="woof application path" end-list="woof exception" />
+</model>

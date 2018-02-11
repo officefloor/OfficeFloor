@@ -34,14 +34,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.properties.PropertiesUtil;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -65,7 +66,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
@@ -80,6 +81,7 @@ import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.template.NotRenderTemplateAfter;
 import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.build.WebTemplateExtensionBuilder;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.extension.WebTemplateExtensionContext;
 import net.officefloor.web.template.parse.BeanParsedTemplateSectionContent;
@@ -224,12 +226,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * {@link ParsedTemplate}.
 	 */
 	public static final String PROPERTY_CHARSET = "template.charset";
-
-	/**
-	 * Name of {@link Property} prefix for the {@link WebTemplateExtension}
-	 * {@link Property} instances.
-	 */
-	public static final String PROPERTY_TEMPLATE_EXTENSION_PREFIX = "template.extension.";
 
 	/**
 	 * Obtains the {@link WebTemplate} content.
@@ -433,17 +429,22 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * {@link TemplateClassFunction} for the section {@link Class} method by its
 	 * name.
 	 */
-	private final Map<String, TemplateClassFunction> sectionClassMethodFunctionsByName = new HashMap<String, TemplateClassFunction>();
+	private final Map<String, TemplateClassFunction> sectionClassMethodFunctionsByName = new HashMap<>();
 
 	/**
 	 * Listing of the {@link TemplateFlowLink} instances.
 	 */
-	private final List<TemplateFlowLink> flowLinks = new LinkedList<TemplateFlowLink>();
+	private final List<TemplateFlowLink> flowLinks = new LinkedList<>();
 
 	/**
 	 * {@link HttpInputPath}.
 	 */
 	private HttpInputPath inputPath;
+
+	/**
+	 * {@link WebTemplateExtensionBuilderImpl} instances.
+	 */
+	private List<WebTemplateExtensionBuilderImpl> extensions = new LinkedList<>();
 
 	/**
 	 * Specifies the {@link HttpInputPath}.
@@ -453,6 +454,22 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 */
 	public void setHttpInputPath(HttpInputPath inputPath) {
 		this.inputPath = inputPath;
+	}
+
+	/**
+	 * Adds a {@link WebTemplateExtensionBuilder}.
+	 * 
+	 * @param extension
+	 *            {@link WebTemplateExtension}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
+	 * @return {@link WebTemplateExtensionBuilder}.
+	 */
+	public WebTemplateExtensionBuilder addWebTemplateExtension(WebTemplateExtension extension,
+			PropertyList propertyList) {
+		WebTemplateExtensionBuilderImpl extensionBuilder = new WebTemplateExtensionBuilderImpl(extension, propertyList);
+		this.extensions.add(extensionBuilder);
+		return extensionBuilder;
 	}
 
 	/*
@@ -654,25 +671,15 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
 
 		// Extend the template content as necessary
-		int extensionIndex = 1;
-		String extensionClassName = context.getProperty(PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex, null);
-		while (extensionClassName != null) {
+		for (WebTemplateExtensionBuilderImpl extension : this.extensions) {
 
-			// Create an instance of the extension class
-			WebTemplateExtension extension = (WebTemplateExtension) context.loadClass(extensionClassName).newInstance();
-
-			// Extend the template
-			String extensionPropertyPrefix = PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex + ".";
+			// Run the extension of template
 			WebTemplateExtensionContext extensionContext = new WebTemplateSectionExtensionContextImpl(templateContent,
-					extensionPropertyPrefix, nonRenderTemplateTaskKeys);
-			extension.extendWebTemplate(extensionContext);
+					extension.propertyList, nonRenderTemplateTaskKeys);
+			extension.webTemplateExtension.extendWebTemplate(extensionContext);
 
 			// Override template details
 			templateContent = extensionContext.getTemplateContent();
-
-			// Initiate for next extension
-			extensionIndex++;
-			extensionClassName = context.getProperty(PROPERTY_TEMPLATE_EXTENSION_PREFIX + extensionIndex, null);
 		}
 
 		// Obtain the HTTP template
@@ -1172,17 +1179,13 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * {@link WebTemplateExtensionContext} implementation.
 	 */
-	private class WebTemplateSectionExtensionContextImpl implements WebTemplateExtensionContext {
+	private class WebTemplateSectionExtensionContextImpl extends SourcePropertiesImpl
+			implements WebTemplateExtensionContext {
 
 		/**
 		 * Raw {@link ParsedTemplate} content.
 		 */
 		private String templateContent;
-
-		/**
-		 * Prefix for a property of this extension.
-		 */
-		private final String extensionPropertyPrefix;
 
 		/**
 		 * {@link Set} to be populated with keys to {@link ManagedFunction}
@@ -1196,17 +1199,18 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * 
 		 * @param templateContent
 		 *            Raw {@link ParsedTemplate} content.
-		 * @param extensionPropertyPrefix
-		 *            Prefix for a property of this extension.
+		 * @param extensionProperties
+		 *            {@link PropertyList} to configure the
+		 *            {@link WebTemplateExtension}.
 		 * @param nonRenderTemplateTaskKeys
 		 *            {@link Set} to be populated with keys to
 		 *            {@link ManagedFunction} instances that are not to have the
 		 *            template rendered on their completion.
 		 */
-		private WebTemplateSectionExtensionContextImpl(String templateContent, String extensionPropertyPrefix,
+		private WebTemplateSectionExtensionContextImpl(String templateContent, PropertyList extensionProperties,
 				Set<String> nonRenderTemplateTaskKeys) {
+			super(new PropertyListSourceProperties(extensionProperties));
 			this.templateContent = templateContent;
-			this.extensionPropertyPrefix = extensionPropertyPrefix;
 			this.nonRenderTemplateTaskKeys = nonRenderTemplateTaskKeys;
 		}
 
@@ -1232,60 +1236,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		@Override
 		public void flagAsNonRenderTemplateMethod(String templateClassMethodName) {
 			this.nonRenderTemplateTaskKeys.add(createFunctionKey(templateClassMethodName));
-		}
-
-		@Override
-		public String[] getPropertyNames() {
-
-			// Obtain all the property names
-			String[] contextNames = WebTemplateSectionSource.this.getContext().getPropertyNames();
-
-			// Filter to just this extension's properties
-			List<String> extensionNames = new LinkedList<String>();
-			for (String contextName : contextNames) {
-				if (contextName.startsWith(this.extensionPropertyPrefix)) {
-					// Add the extension property name
-					String extensionName = contextName.substring(this.extensionPropertyPrefix.length());
-					extensionNames.add(extensionName);
-				}
-			}
-
-			// Return the extension names
-			return extensionNames.toArray(new String[extensionNames.size()]);
-		}
-
-		@Override
-		public String getProperty(String name) throws UnknownPropertyError {
-			// Obtain the extension property value
-			return WebTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name);
-		}
-
-		@Override
-		public String getProperty(String name, String defaultValue) {
-			// Obtain the extension property value
-			return WebTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name,
-					defaultValue);
-		}
-
-		@Override
-		public Properties getProperties() {
-
-			// Obtain all the properties
-			Properties properties = new Properties();
-
-			// Filter to just this extension's properties
-			String[] contextNames = WebTemplateSectionSource.this.getContext().getPropertyNames();
-			for (String contextName : contextNames) {
-				if (contextName.startsWith(this.extensionPropertyPrefix)) {
-					// Add the extension property name
-					String extensionName = contextName.substring(this.extensionPropertyPrefix.length());
-					String value = WebTemplateSectionSource.this.getContext().getProperty(contextName);
-					properties.setProperty(extensionName, value);
-				}
-			}
-
-			// Return the properties
-			return properties;
 		}
 
 		@Override
@@ -1826,6 +1776,45 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		// Therefore just keep track of flows for later linking.
 		this.flowLinks
 				.add(new TemplateFlowLink(functionFlow, functionType, flowInterfaceType, flowMethod, flowArgumentType));
+	}
+
+	/**
+	 * {@link WebTemplateExtensionBuilder} implementation.
+	 */
+	private static class WebTemplateExtensionBuilderImpl implements WebTemplateExtensionBuilder {
+
+		/**
+		 * {@link WebTemplateExtension}.
+		 */
+		private final WebTemplateExtension webTemplateExtension;
+
+		/**
+		 * {@link PropertyList} to configure the {@link WebTemplateExtension}.
+		 */
+		private final PropertyList propertyList;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param webTemplateExtension
+		 *            {@link WebTemplateExtension}.
+		 * @param propertyList
+		 *            {@link PropertyList} to configure the
+		 *            {@link WebTemplateExtension}.
+		 */
+		private WebTemplateExtensionBuilderImpl(WebTemplateExtension webTemplateExtension, PropertyList propertyList) {
+			this.webTemplateExtension = webTemplateExtension;
+			this.propertyList = propertyList;
+		}
+
+		/*
+		 * =============== WebTemplateExtensionBuilder ==================
+		 */
+
+		@Override
+		public void addProperty(String name, String value) {
+			this.propertyList.addProperty(name).setValue(value);
+		}
 	}
 
 }

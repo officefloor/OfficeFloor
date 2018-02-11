@@ -198,7 +198,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 			assertNull("Should not have non-defined property", context.getProperty("NOT DEFINED", null));
 
 			// Ensure correct details
-			assertEquals("Incorrect template URI", "URI", context.getTemplatePath());
+			assertEquals("Incorrect template URI", "URI", context.getApplicationPath());
 			String[] uris = context.getWebApplication().getURIs();
 			assertEquals("Incorrect number of application URIs", 1, uris.length);
 			assertEquals("Incorrect application URI", "URI", uris[0]);

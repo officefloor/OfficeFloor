@@ -140,7 +140,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure can link to {@link WoofAccessInputModel}.
+	 * Ensure can link to {@link WoofSecurityModel}.
 	 */
 	public void testLinkToAccessInput() {
 		this.doLinkToAccessInput(A);
@@ -155,7 +155,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Undertakes linking to a {@link WoofAccessInputModel}.
+	 * Undertakes linking to a {@link WoofSecurityModel}.
 	 * 
 	 * @param templateIndex
 	 *            {@link WoofTemplateModel} index.
@@ -164,11 +164,11 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 
 		// Obtain the items to link
 		WoofTemplateOutputModel templateOutput = this.model.getWoofTemplates().get(templateIndex).getOutputs().get(0);
-		WoofAccessInputModel accessInput = this.model.getWoofAccesses().get(0).getInputs().get(1);
+		WoofSecurityModel accessInput = this.model.getWoofAccesses().get(0).getInputs().get(1);
 
 		// Link the template output to access input
 		Change<WoofTemplateOutputToWoofAccessInputModel> change = this.operations
-				.linkTemplateOutputToAccessInput(templateOutput, accessInput);
+				.linkTemplateOutputToSecurity(templateOutput, accessInput);
 
 		// Validate change
 		this.assertChange(change, null, "Link Template Output to Access Input", true);
@@ -185,7 +185,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 
 		// Remove the link
 		Change<WoofTemplateOutputToWoofAccessInputModel> change = this.operations
-				.removeTemplateOuputToAccessInput(link);
+				.removeTemplateOuputToSecurity(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Template Output to Access Input", true);

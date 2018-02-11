@@ -36,12 +36,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.model.woof.PropertyModel;
-import net.officefloor.model.woof.WoofAccessInputModel;
-import net.officefloor.model.woof.WoofAccessModel;
-import net.officefloor.model.woof.WoofAccessOutputModel;
-import net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel;
-import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
-import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
@@ -54,30 +48,42 @@ import net.officefloor.model.woof.WoofResourceModel;
 import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofSectionOutputModel;
-import net.officefloor.model.woof.WoofSectionOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofSecurityModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofSecurityModel;
+import net.officefloor.model.woof.WoofSecurityOutputModel;
+import net.officefloor.model.woof.WoofSecurityOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofSecurityOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofSecurityOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofStartModel;
 import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
-import net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofSecurityModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.model.woof.WoofTemplateRedirectModel;
-import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.model.woof.WoofTemplateToSuperWoofTemplateModel;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.state.HttpSecuritySection;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.resource.build.HttpResourceArchitect;
+import net.officefloor.web.resource.build.HttpResourceArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
+import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.build.WebTemplater;
+import net.officefloor.web.template.build.WebTemplaterEmployer;
 
 /**
  * {@link WoofLoader} implementation.
@@ -114,9 +120,15 @@ public class WoofLoaderImpl implements WoofLoader {
 		this.repository.retrieveWoof(woof, context.getConfiguration());
 
 		// Obtain the office and web architect
-		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeArchitect officeArchitect = context.getOfficeArchitect();
 		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
-		WebArchitect web = WebArchitectEmployer.employWebArchitect(office, extensionContext);
+		WebArchitect webArchitect = WebArchitectEmployer.employWebArchitect(officeArchitect, extensionContext);
+		HttpSecurityArchitect securityArchitect = HttpSecurityArchitectEmployer
+				.employHttpSecurityArchitect(webArchitect, officeArchitect, extensionContext);
+		WebTemplater templaterArchitect = WebTemplaterEmployer.employWebTemplater(webArchitect, officeArchitect,
+				extensionContext);
+		HttpResourceArchitect resourceArchitect = HttpResourceArchitectEmployer
+				.employHttpResourceArchitect(webArchitect, securityArchitect, officeArchitect, extensionContext);
 
 		// Obtain the class loader
 		ClassLoader classLoader = extensionContext.getClassLoader();
@@ -134,7 +146,7 @@ public class WoofLoaderImpl implements WoofLoader {
 				extensionService = extensionIterator.next();
 			} catch (ServiceConfigurationError ex) {
 				// Issue that service not available
-				office.addIssue(WoofTemplateExtensionSource.class.getSimpleName() + " configuration failure: "
+				officeArchitect.addIssue(WoofTemplateExtensionSource.class.getSimpleName() + " configuration failure: "
 						+ ex.getMessage(), ex);
 
 				// Carry on to next service (likely not on class path)
@@ -157,8 +169,8 @@ public class WoofLoaderImpl implements WoofLoader {
 
 			} catch (Throwable ex) {
 				// Issue that error with service
-				office.addIssue("Failed loading extension from " + extensionService.getClass().getName() + " : "
-						+ ex.getMessage(), ex);
+				officeArchitect.addIssue("Failed loading extension from " + extensionService.getClass().getName()
+						+ " : " + ex.getMessage(), ex);
 
 				// Carry on to next service
 				continue;
@@ -168,42 +180,44 @@ public class WoofLoaderImpl implements WoofLoader {
 		// Create the template extension loader
 		WoofTemplateExtensionLoader extensionLoader = new WoofTemplateExtensionLoaderImpl();
 
-		// Configure the HTTP templates
-		Map<String, HttpTemplateSection> templates = new HashMap<String, HttpTemplateSection>();
+		// Configure the web templates
+		Map<String, WebTemplate> templates = new HashMap<String, WebTemplate>();
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 
 			// Obtain template details
-			String templateName = templateModel.getWoofTemplateName();
-			String templatePath = templateModel.getTemplatePath();
+			String applicationPath = templateModel.getApplicationPath();
+			String templateLocation = templateModel.getTemplateLocation();
 			String templateClassName = templateModel.getTemplateClassName();
-			String uri = templateModel.getUri();
 
 			// Obtain the template logic class (if provided)
 			Class<?> templateLogicClass = CompileUtil.isBlank(templateClassName) ? null
 					: classLoader.loadClass(templateClassName);
 
 			// Configure the template
-			HttpTemplateSection template = web.addHttpTemplate(uri, templatePath, templateLogicClass);
+			WebTemplate template = templaterArchitect.addTemplate(applicationPath, templateLocation);
+			if (!CompileUtil.isBlank(templateClassName)) {
+				template.setLogicClass(templateLogicClass);
+			}
 
 			// Configure content type for template
 			String contentType = templateModel.getTemplateContentType();
 			if (!CompileUtil.isBlank(contentType)) {
-				template.setTemplateContentType(contentType);
+				template.setContentType(contentType);
 			}
 
 			// Configure secure for template
-			template.setTemplateSecure(templateModel.getIsTemplateSecure());
+			template.setSecure(templateModel.getIsTemplateSecure());
 			for (WoofTemplateLinkModel linkModel : templateModel.getLinks()) {
 				template.setLinkSecure(linkModel.getWoofTemplateLinkName(), linkModel.getIsLinkSecure());
 			}
 
-			// Configure HTTP methods for redirect
-			for (WoofTemplateRedirectModel redirectModel : templateModel.getRedirects()) {
-				template.addRenderRedirectHttpMethod(redirectModel.getWoofTemplateRedirectHttpMethod());
+			// Configure HTTP methods for rendering
+			for (String renderMethodName : templateModel.getRenderHttpMethods()) {
+				template.addRenderMethod(HttpMethod.getHttpMethod(renderMethodName));
 			}
 
-			// Maintain reference to template by name
-			templates.put(templateName, template);
+			// Maintain reference to template by application path
+			templates.put(applicationPath, template);
 
 			// Keep track of the explicit HTTP template extensions
 			Set<String> explicitTemplateExtensions = new HashSet<String>();
@@ -224,8 +238,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				}
 
 				// Load the extension
-				extensionLoader.extendTemplate(extensionSourceClassName, properties, uri, template, office, web,
-						extensionContext);
+				extensionLoader.extendTemplate(extensionSourceClassName, properties, applicationPath, template,
+						officeArchitect, webArchitect, extensionContext);
 			}
 
 			// Include implicit extensions (in deterministic order)
@@ -240,7 +254,7 @@ public class WoofLoaderImpl implements WoofLoader {
 
 				// Extend the template with implicit extension
 				extensionLoader.extendTemplate(implicitExtensionSourceClassName, OfficeFloorCompiler.newPropertyList(),
-						uri, template, office, web, extensionContext);
+						applicationPath, template, officeArchitect, webArchitect, extensionContext);
 			}
 		}
 
@@ -255,7 +269,8 @@ public class WoofLoaderImpl implements WoofLoader {
 			String sectionLocation = sectionModel.getSectionLocation();
 
 			// Configure the section
-			OfficeSection section = office.addOfficeSection(sectionName, sectionSourceClassName, sectionLocation);
+			OfficeSection section = officeArchitect.addOfficeSection(sectionName, sectionSourceClassName,
+					sectionLocation);
 			for (PropertyModel property : sectionModel.getProperties()) {
 				section.addProperty(property.getName(), property.getValue());
 			}
@@ -263,59 +278,52 @@ public class WoofLoaderImpl implements WoofLoader {
 			// Maintain reference to section by name
 			sections.put(sectionName, section);
 
-			// Link URIs to inputs
+			// Maintain references from inputs to section
 			for (WoofSectionInputModel inputModel : sectionModel.getInputs()) {
-
-				// Obtain the name of the input
-				String inputName = inputModel.getWoofSectionInputName();
-
-				// Link to URI if configured
-				String uri = inputModel.getUri();
-				if ((uri != null) && (uri.trim().length() > 0)) {
-					web.linkUri(uri, section.getOfficeSectionInput(inputName));
-				}
-
-				// Maintain references from inputs to section
 				inputToSection.put(inputModel, sectionModel);
 			}
 		}
 
-		// Configure the Accesses
-		Map<String, HttpSecuritySection> securitySections = new HashMap<>();
-		for (WoofAccessModel accessModel : woof.getWoofAccesses()) {
+		// Configure the Security
+		Map<String, HttpSecurityBuilder> securityBuilders = new HashMap<>();
+		for (WoofSecurityModel securityModel : woof.getWoofSecurities()) {
 
-			// Obtain the access details
-			String httpSecurityName = accessModel.getAccessName();
-			String httpSecuritySourceClassName = accessModel.getHttpSecuritySourceClassName();
-			long timeout = accessModel.getTimeout();
+			// Obtain the security details
+			String httpSecurityName = securityModel.getHttpSecurityName();
+			String httpSecuritySourceClassName = securityModel.getHttpSecuritySourceClassName();
+			long timeout = securityModel.getTimeout();
 
 			// Obtain the HTTP Security Source class
-			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass = (Class<? extends HttpSecuritySource<?, ?, ?, ?>>) extensionContext
+			Class<? extends HttpSecuritySource<?, ?, ?, ?, ?>> httpSecuritySourceClass = (Class<? extends HttpSecuritySource<?, ?, ?, ?, ?>>) extensionContext
 					.loadClass(httpSecuritySourceClassName);
 
 			// Add the HTTP security
-			HttpSecuritySection securitySection = web.addHttpSecurity(httpSecurityName, httpSecuritySourceClass);
-			securitySection.setSecurityTimeout(timeout);
-			for (PropertyModel property : accessModel.getProperties()) {
-				securitySection.addProperty(property.getName(), property.getValue());
+			HttpSecurityBuilder securityBuilder = securityArchitect.addHttpSecurity(httpSecurityName,
+					httpSecuritySourceClass);
+			securityBuilder.setTimeout(timeout);
+			for (PropertyModel property : securityModel.getProperties()) {
+				securityBuilder.addProperty(property.getName(), property.getValue());
+			}
+			for (String contentType : securityModel.getContentTypes()) {
+				securityBuilder.addContentType(contentType);
 			}
 
 			// Register the HTTP security
-			securitySections.put(httpSecurityName, securitySection);
+			securityBuilders.put(httpSecurityName, securityBuilder);
 		}
 
 		// Link the template outputs
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 
 			// Obtain the auto-wire template
-			String templateName = templateModel.getWoofTemplateName();
-			HttpTemplateSection template = templates.get(templateName);
+			String applicationPath = templateModel.getApplicationPath();
+			WebTemplate template = templates.get(applicationPath);
 
 			// Provide link configuration inheritance
-			String superTemplateName = templateModel.getSuperTemplate();
-			if (superTemplateName != null) {
-				HttpTemplateSection superTemplate = templates.get(superTemplateName);
-				template.setSuperHttpTemplate(superTemplate);
+			WoofTemplateToSuperWoofTemplateModel superTemplateLink = templateModel.getSuperWoofTemplate();
+			if (superTemplateLink != null) {
+				WebTemplate superTemplate = templates.get(superTemplateLink.getSuperWoofTemplateApplicationPath());
+				template.setSuperTemplate(superTemplate);
 			}
 
 			// Link outputs for the template
@@ -338,7 +346,7 @@ public class WoofLoaderImpl implements WoofLoader {
 						OfficeSection targetSection = sections.get(sectionModel.getWoofSectionName());
 
 						// Link template output to section input
-						office.link(template.getOfficeSection().getOfficeSectionOutput(outputName),
+						officeArchitect.link(template.getOutput(outputName),
 								targetSection.getOfficeSectionInput(targetInputName));
 					}
 				}
@@ -348,22 +356,23 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (templateLink != null) {
 					WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 					if (targetTemplateModel != null) {
-						HttpTemplateSection targetTemplate = templates.get(targetTemplateModel.getWoofTemplateName());
-						web.linkToHttpTemplate(template.getOfficeSection().getOfficeSectionOutput(outputName),
-								targetTemplate);
+						WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
+
+						// TODO obtain template output argument type
+						Class<?> templateOutputArgumentType = null;
+
+						targetTemplate.link(template.getOutput(outputName), templateOutputArgumentType);
 					}
 				}
 
-				// Link access inputs
-				WoofTemplateOutputToWoofAccessInputModel accessLink = outputModel.getWoofAccessInput();
+				// Link security inputs
+				WoofTemplateOutputToWoofSecurityModel accessLink = outputModel.getWoofSecurity();
 				if (accessLink != null) {
-					WoofAccessInputModel targetAccessInputModel = accessLink.getWoofAccessInput();
-					if (targetAccessInputModel != null) {
-						// TODO obtain the access
-						HttpSecuritySection securitySection = null; // TODO
-						office.link(template.getOfficeSection().getOfficeSectionOutput(outputName),
-								securitySection.getOfficeSection()
-										.getOfficeSectionInput(targetAccessInputModel.getWoofAccessInputName()));
+					WoofSecurityModel targetSecurityModel = accessLink.getWoofSecurity();
+					if (targetSecurityModel != null) {
+						HttpSecurityBuilder securityBuilder = securityBuilders
+								.get(targetSecurityModel.getHttpSecurityName());
+						officeArchitect.link(template.getOutput(outputName), securityBuilder.getAuthenticateInput());
 					}
 				}
 
@@ -372,8 +381,7 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceLink != null) {
 					WoofResourceModel resourceModel = resourceLink.getWoofResource();
 					if (resourceModel != null) {
-						web.linkToResource(template.getOfficeSection().getOfficeSectionOutput(outputName),
-								resourceModel.getResourcePath());
+						resourceArchitect.link(template.getOutput(outputName), resourceModel.getResourcePath());
 					}
 				}
 			}
@@ -406,7 +414,7 @@ public class WoofLoaderImpl implements WoofLoader {
 						OfficeSection targetSection = sections.get(targetSectionModel.getWoofSectionName());
 
 						// Link section output to section input
-						office.link(section.getOfficeSectionOutput(outputName),
+						officeArchitect.link(section.getOfficeSectionOutput(outputName),
 								targetSection.getOfficeSectionInput(targetInputName));
 					}
 				}
@@ -416,20 +424,24 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (templateLink != null) {
 					WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 					if (targetTemplateModel != null) {
-						HttpTemplateSection targetTemplate = templates.get(targetTemplateModel.getWoofTemplateName());
-						web.linkToHttpTemplate(section.getOfficeSectionOutput(outputName), targetTemplate);
+						WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
+
+						// TODO obtain template output argument type
+						Class<?> templateOutputArgumentType = null;
+
+						targetTemplate.link(section.getOfficeSectionOutput(outputName), templateOutputArgumentType);
 					}
 				}
 
 				// Link potential access input
-				WoofSectionOutputToWoofAccessInputModel accessLink = outputModel.getWoofAccessInput();
-				if (accessLink != null) {
-					WoofAccessInputModel targetAccessInputModel = accessLink.getWoofAccessInput();
-					if (targetAccessInputModel != null) {
-						// TODO obtain the access
-						HttpSecuritySection securitySection = null; // TODO
-						office.link(section.getOfficeSectionOutput(outputName), securitySection.getOfficeSection()
-								.getOfficeSectionInput(targetAccessInputModel.getWoofAccessInputName()));
+				WoofSectionOutputToWoofSecurityModel securityLink = outputModel.getWoofSecurity();
+				if (securityLink != null) {
+					WoofSecurityModel targetSecurityModel = securityLink.getWoofSecurity();
+					if (targetSecurityModel != null) {
+						HttpSecurityBuilder securityBuilder = securityBuilders
+								.get(targetSecurityModel.getHttpSecurityName());
+						officeArchitect.link(section.getOfficeSectionOutput(outputName),
+								securityBuilder.getAuthenticateInput());
 					}
 				}
 
@@ -438,26 +450,27 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceLink != null) {
 					WoofResourceModel resourceModel = resourceLink.getWoofResource();
 					if (resourceModel != null) {
-						web.linkToResource(section.getOfficeSectionOutput(outputName), resourceModel.getResourcePath());
+						resourceArchitect.link(section.getOfficeSectionOutput(outputName),
+								resourceModel.getResourcePath());
 					}
 				}
 			}
 		}
 
-		// Link the access outputs
-		for (WoofAccessModel accessModel : woof.getWoofAccesses()) {
+		// Link the security outputs
+		for (WoofSecurityModel securityModel : woof.getWoofSecurities()) {
 
-			// Obtain the HTTP security section
-			HttpSecuritySection security = securitySections.get(accessModel.getAccessName());
+			// Obtain the HTTP security builder
+			HttpSecurityBuilder securityBuilder = securityBuilders.get(securityModel.getHttpSecurityName());
 
-			// Link outputs for the access
-			for (WoofAccessOutputModel outputModel : accessModel.getOutputs()) {
+			// Link outputs for the security
+			for (WoofSecurityOutputModel outputModel : securityModel.getOutputs()) {
 
 				// Obtain output name
-				String outputName = outputModel.getWoofAccessOutputName();
+				String outputName = outputModel.getWoofSecurityOutputName();
 
 				// Link potential section input
-				WoofAccessOutputToWoofSectionInputModel sectionLink = outputModel.getWoofSectionInput();
+				WoofSecurityOutputToWoofSectionInputModel sectionLink = outputModel.getWoofSectionInput();
 				if (sectionLink != null) {
 					WoofSectionInputModel sectionInput = sectionLink.getWoofSectionInput();
 					if (sectionInput != null) {
@@ -469,30 +482,32 @@ public class WoofLoaderImpl implements WoofLoader {
 						WoofSectionModel targetSectionModel = inputToSection.get(sectionInput);
 						OfficeSection targetSection = sections.get(targetSectionModel.getWoofSectionName());
 
-						// Link access output to section input
-						office.link(security.getOfficeSection().getOfficeSectionOutput(outputName),
+						// Link security output to section input
+						officeArchitect.link(securityBuilder.getOutput(outputName),
 								targetSection.getOfficeSectionInput(targetInputName));
 					}
 				}
 
 				// Link potential template
-				WoofAccessOutputToWoofTemplateModel templateLink = outputModel.getWoofTemplate();
+				WoofSecurityOutputToWoofTemplateModel templateLink = outputModel.getWoofTemplate();
 				if (templateLink != null) {
 					WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 					if (targetTemplateModel != null) {
-						HttpTemplateSection targetTemplate = templates.get(targetTemplateModel.getWoofTemplateName());
-						web.linkToHttpTemplate(security.getOfficeSection().getOfficeSectionOutput(outputName),
-								targetTemplate);
+						WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
+
+						// TODO obtain template output argument type
+						Class<?> templateOutputArgumentType = null;
+
+						targetTemplate.link(securityBuilder.getOutput(outputName), templateOutputArgumentType);
 					}
 				}
 
 				// Link potential resource
-				WoofAccessOutputToWoofResourceModel resourceLink = outputModel.getWoofResource();
+				WoofSecurityOutputToWoofResourceModel resourceLink = outputModel.getWoofResource();
 				if (resourceLink != null) {
 					WoofResourceModel resourceModel = resourceLink.getWoofResource();
 					if (resourceModel != null) {
-						web.linkToResource(security.getOfficeSection().getOfficeSectionOutput(outputName),
-								resourceModel.getResourcePath());
+						resourceArchitect.link(securityBuilder.getOutput(outputName), resourceModel.getResourcePath());
 					}
 				}
 			}
@@ -520,8 +535,8 @@ public class WoofLoaderImpl implements WoofLoader {
 					OfficeSection targetSection = sections.get(targetSectionModel.getWoofSectionName());
 
 					// Link escalation handling to section input
-					OfficeEscalation escalation = office.addOfficeEscalation(exceptionType.getName());
-					office.link(escalation, targetSection.getOfficeSectionInput(targetInputName));
+					OfficeEscalation escalation = officeArchitect.addOfficeEscalation(exceptionType.getName());
+					officeArchitect.link(escalation, targetSection.getOfficeSectionInput(targetInputName));
 				}
 			}
 
@@ -530,8 +545,11 @@ public class WoofLoaderImpl implements WoofLoader {
 			if (templateLink != null) {
 				WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 				if (targetTemplateModel != null) {
-					HttpTemplateSection targetTemplate = templates.get(targetTemplateModel.getWoofTemplateName());
-					web.linkEscalation(exceptionType, targetTemplate);
+					WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
+
+					// Link escalation handling to template
+					OfficeEscalation escalation = officeArchitect.addOfficeEscalation(exceptionType.getName());
+					targetTemplate.link(escalation, exceptionType);
 				}
 			}
 
@@ -540,7 +558,9 @@ public class WoofLoaderImpl implements WoofLoader {
 			if (resourceLink != null) {
 				WoofResourceModel resourceModel = resourceLink.getWoofResource();
 				if (resourceModel != null) {
-					web.linkEscalation(exceptionType, resourceModel.getResourcePath());
+					// Link escalation handling to template
+					OfficeEscalation escalation = officeArchitect.addOfficeEscalation(exceptionType.getName());
+					resourceArchitect.link(escalation, resourceModel.getResourcePath());
 				}
 			}
 		}
@@ -563,8 +583,8 @@ public class WoofLoaderImpl implements WoofLoader {
 					OfficeSection targetSection = sections.get(targetSectionModel.getWoofSectionName());
 
 					// Add start-up flow
-					OfficeStart start = office.addOfficeStart(String.valueOf(startIndex++));
-					office.link(start, targetSection.getOfficeSectionInput(targetInputName));
+					OfficeStart start = officeArchitect.addOfficeStart(String.valueOf(startIndex++));
+					officeArchitect.link(start, targetSection.getOfficeSectionInput(targetInputName));
 				}
 			}
 		}
@@ -577,7 +597,8 @@ public class WoofLoaderImpl implements WoofLoader {
 			String governanceSourceClassName = govModel.getGovernanceSourceClassName();
 
 			// Configure the governance
-			OfficeGovernance governance = office.addOfficeGovernance(governanceName, governanceSourceClassName);
+			OfficeGovernance governance = officeArchitect.addOfficeGovernance(governanceName,
+					governanceSourceClassName);
 			for (PropertyModel property : govModel.getProperties()) {
 				governance.addProperty(property.getName(), property.getValue());
 			}
@@ -589,8 +610,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 					if (this.isWithinGovernanceArea(templateModel.getX(), templateModel.getY(), area)) {
 						// Template within governance area so govern
-						HttpTemplateSection template = templates.get(templateModel.getWoofTemplateName());
-						template.getOfficeSection().addGovernance(governance);
+						WebTemplate template = templates.get(templateModel.getApplicationPath());
+						template.addGovernance(governance);
 					}
 				}
 

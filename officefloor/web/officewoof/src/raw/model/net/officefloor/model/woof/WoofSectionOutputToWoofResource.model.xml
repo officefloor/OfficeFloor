@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="resource name" />
+	<field type="String" name="resource path" />
 	<field type="WoofSectionOutputModel" name="woof section output"
 		end-field="woof resource" />
 	<field type="WoofResourceModel" name="woof resource" end-list="woof section output" />

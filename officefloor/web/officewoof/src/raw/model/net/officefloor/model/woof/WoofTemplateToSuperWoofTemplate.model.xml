@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="super woof template application path" />
+    <field type="WoofTemplateModel" name="child woof template" end-field="super woof template" />
+    <field type="WoofTemplateModel" name="super woof template" end-list="child woof template" />
+</model>

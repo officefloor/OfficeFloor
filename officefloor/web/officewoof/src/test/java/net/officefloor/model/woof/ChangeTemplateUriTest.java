@@ -46,7 +46,7 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
 				this.template, "path", this.getWoofTemplateChangeContext());
 
 		// Validate the change
@@ -65,7 +65,7 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
 				this.template, "unique/uri",
 				this.getWoofTemplateChangeContext());
 
@@ -85,7 +85,7 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
 				this.template, "same/uri", this.getWoofTemplateChangeContext());
 
 		// Validate the change

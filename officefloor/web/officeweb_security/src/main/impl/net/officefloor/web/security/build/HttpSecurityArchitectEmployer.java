@@ -237,7 +237,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		String[] httpSecurityNames = new String[this.securities.size()];
 		Map<String, HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> nameToHttpSecurity = new HashMap<>();
 		Map<String, Integer> httpSecurityNameToFlowIndex = new HashMap<>();
-		int maxTimeout = -1;
+		long maxTimeout = -1;
 		for (int i = 0; i < this.securities.size(); i++) {
 			HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security = this.securities.get(i);
 			httpSecurityNames[i] = security.name;
@@ -666,7 +666,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Timeout.
 		 */
-		private int timeout = 10 * 1000;
+		private long timeout = 10 * 1000;
 
 		/**
 		 * <code>Content-Type</code> values.
@@ -823,6 +823,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		@Override
 		public void addProperty(String name, String value) {
 			this.properties.addProperty(name).setValue(value);
+		}
+
+		@Override
+		public void setTimeout(long timeout) {
+			this.timeout = timeout;
 		}
 
 		@Override

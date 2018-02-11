@@ -27,7 +27,7 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
  * Loads the extension from the {@link WoofTemplateExtensionSource}.
@@ -88,7 +88,7 @@ public interface WoofTemplateExtensionLoader {
 			ConfigurationContext configurationContext, SourceContext sourceContext, WoofChangeIssues issues);
 
 	/**
-	 * Extends the {@link HttpTemplateSection} with the
+	 * Extends the {@link WebTemplate} with the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param extensionSourceClassName
@@ -96,10 +96,10 @@ public interface WoofTemplateExtensionLoader {
 	 * @param properties
 	 *            {@link PropertyList} to configure the
 	 *            {@link WoofTemplateExtensionSource}.
-	 * @param templatePath
-	 *            URL path to the {@link HttpTemplateSection}.
+	 * @param applicationPath
+	 *            Application path to the {@link WebTemplate}.
 	 * @param template
-	 *            {@link HttpTemplateSection} to be extended.
+	 *            {@link WebTemplate} to be extended.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param webArchitect
@@ -107,10 +107,10 @@ public interface WoofTemplateExtensionLoader {
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @throws WoofTemplateExtensionException
-	 *             If fails to extend the {@link HttpTemplateSection}.
+	 *             If fails to extend the {@link WebTemplate}.
 	 */
-	void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath,
-			HttpTemplateSection template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+	void extendTemplate(String extensionSourceClassName, PropertyList properties, String applicationPath,
+			WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
 			SourceContext sourceContext) throws WoofTemplateExtensionException;
 
 }

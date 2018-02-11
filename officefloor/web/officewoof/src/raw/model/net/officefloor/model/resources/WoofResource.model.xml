@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="protocol" />
+	<field type="String" name="location" />
+	<field type="String" name="context path" />
+	<field type="String" name="http security name" />
+	<list type="TypeQualificationModel" name="type qualification" />
+	<list type="WoofResourceTransformerModel" name="woof resource transformer" />
+	<list type="String" name="role" />
+	<list type="String" name="required role" />
+</model>

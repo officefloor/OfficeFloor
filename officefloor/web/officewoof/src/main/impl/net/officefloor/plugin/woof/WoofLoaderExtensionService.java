@@ -47,7 +47,6 @@ import net.officefloor.plugin.objects.WoofObjectsLoaderImpl;
 import net.officefloor.plugin.teams.WoofTeamsLoader;
 import net.officefloor.plugin.teams.WoofTeamsLoaderContext;
 import net.officefloor.plugin.teams.WoofTeamsLoaderImpl;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
 
@@ -95,11 +94,6 @@ public class WoofLoaderExtensionService
 	 * Default path within a Maven project to the <code>webapp</code> directory.
 	 */
 	public static final String WEBAPP_PATH = "src/main/webapp";
-
-	/**
-	 * WoOF {@link HttpTemplate} URI suffix.
-	 */
-	public static final String WOOF_TEMPLATE_URI_SUFFIX = ".woof";
 
 	/**
 	 * Creates the {@link ResourceSource} instances for the
@@ -256,9 +250,6 @@ public class WoofLoaderExtensionService
 
 		// Employ the Web Architect
 		WebArchitect web = WebArchitectEmployer.employWebArchitect(officeArchitect, context);
-
-		// Provide default WoOF template suffix
-		web.setDefaultHttpTemplateUriSuffix(WOOF_TEMPLATE_URI_SUFFIX);
 
 		// Obtain the woof configuration (ensuring exists)
 		String woofLocation = context.getProperty(PROPERTY_WOOF_CONFIGURATION_LOCATION,

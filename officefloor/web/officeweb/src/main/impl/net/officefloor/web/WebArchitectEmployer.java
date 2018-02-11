@@ -32,6 +32,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -392,9 +393,9 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public void link(OfficeSectionOutput output, HttpUrlContinuation continuation, Class<?> parameterType) {
+	public void link(OfficeFlowSourceNode flowSourceNode, HttpUrlContinuation continuation, Class<?> parameterType) {
 		HttpInputImpl input = (HttpInputImpl) continuation;
-		input.redirects.add(new RedirectContinuation(output, parameterType));
+		input.redirects.add(new RedirectContinuation(flowSourceNode, parameterType));
 	}
 
 	@Override
@@ -496,7 +497,7 @@ public class WebArchitectEmployer implements WebArchitect {
 								.getOfficeSectionInput(redirect.getInputName());
 
 						// Link the continuation to redirect
-						this.officeArchitect.link(continuation.output, redirectInput);
+						this.officeArchitect.link(continuation.flowSourceNode, redirectInput);
 
 					} catch (Exception ex) {
 						this.officeArchitect.addIssue("Failed to create redirect to " + input.applicationPath
@@ -762,9 +763,9 @@ public class WebArchitectEmployer implements WebArchitect {
 	private static class RedirectContinuation {
 
 		/**
-		 * {@link OfficeSectionOutput} triggering the redirect.
+		 * {@link OfficeFlowSourceNode} triggering the redirect.
 		 */
-		private final OfficeSectionOutput output;
+		private final OfficeFlowSourceNode flowSourceNode;
 
 		/**
 		 * Type of parameter from {@link OfficeSectionOutput}. May be
@@ -775,14 +776,14 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param output
-		 *            {@link OfficeSectionOutput} triggering the redirect.
+		 * @param flowSourceNode
+		 *            {@link OfficeFlowSourceNode} triggering the redirect.
 		 * @param parameterType
 		 *            Type of parameter from {@link OfficeSectionOutput}. May be
 		 *            <code>null</code> for no parameter.
 		 */
-		private RedirectContinuation(OfficeSectionOutput output, Class<?> parameterType) {
-			this.output = output;
+		private RedirectContinuation(OfficeFlowSourceNode flowSourceNode, Class<?> parameterType) {
+			this.flowSourceNode = flowSourceNode;
 			this.parameterType = parameterType;
 		}
 	}
