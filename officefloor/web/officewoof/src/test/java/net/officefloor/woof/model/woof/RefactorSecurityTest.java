@@ -1,0 +1,174 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.woof.model.woof;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.model.change.Change;
+import net.officefloor.web.security.HttpCredentials;
+import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.woof.model.woof.PropertyModel;
+import net.officefloor.woof.model.woof.WoofSecurityModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
+
+/**
+ * Tests refactoring the {@link WoofSecurityModel}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
+
+	/**
+	 * {@link WoofSecurityModel}.
+	 */
+	private WoofSecurityModel security;
+
+	/**
+	 * {@link WoofSecurityOutputModel} name mapping.
+	 */
+	private Map<String, String> securityOutputNameMapping = new HashMap<String, String>();;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		this.security = this.model.getWoofSecurities().get(0);
+	}
+
+	/**
+	 * Initiate.
+	 */
+	public RefactorSecurityTest() {
+		super(true);
+	}
+
+	/**
+	 * Ensure handle no change.
+	 */
+	public void testNoChange() {
+
+		// Create the security type
+		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class,
+				(context) -> {
+					context.addFlow("OUTPUT_A", Integer.class, null);
+					context.addFlow("OUTPUT_B", String.class, null);
+					context.addFlow("OUTPUT_C", null, null);
+					context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+				});
+
+		// Create the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		properties.addProperty("name.one").setValue("value.one");
+		properties.addProperty("name.two").setValue("value.two");
+
+		// Keep access output names
+		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_A");
+		this.securityOutputNameMapping.put("OUTPUT_B", "OUTPUT_B");
+		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
+
+		// Refactor the access with same details
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+				"net.example.HttpSecuritySource", 4000, properties, securityType, this.securityOutputNameMapping);
+
+		// Validate change
+		this.assertChange(change, null, "Refactor Security", true);
+	}
+
+	/**
+	 * Ensure handle change to all details.
+	 */
+	public void testChange() {
+
+		// Create the security type
+		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(String.class, (context) -> {
+			context.addFlow("OUTPUT_A", Integer.class, null);
+			context.addFlow("OUTPUT_B", String.class, null);
+			context.addFlow("OUTPUT_C", null, null);
+			context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+		});
+
+		// Create the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		properties.addProperty("name.1").setValue("value.one");
+		properties.addProperty("name.two").setValue("value.2");
+
+		// Keep section output names
+		this.securityOutputNameMapping.put("OUTPUT_B", "OUTPUT_A");
+		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_B");
+		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_C");
+
+		// Refactor the section with same details
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+				"net.change.ChangeSecuritySource", 5000, properties, securityType, this.securityOutputNameMapping);
+
+		// Validate change
+		this.assertChange(change, null, "Refactor Access", true);
+	}
+
+	/**
+	 * Ensure handle remove {@link PropertyModel}, {@link WoofSecurityModel} and
+	 * {@link WoofAccessOutputModel} instances.
+	 */
+	public void testRemoveDetails() {
+
+		// Create the security type
+		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class,
+				(context) -> {
+					// No flows
+				});
+
+		// Refactor the access removing details
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+				"net.example.RemoveSecuritySource", 4000, null, securityType, null);
+
+		// Validate change
+		this.assertChange(change, null, "Refactor Access", true);
+	}
+
+	/**
+	 * Ensure handle adding {@link PropertyModel}, {@link WoofSecurityModel} and
+	 * {@link WoofAccessOutputModel} instances.
+	 */
+	public void testAddDetails() {
+
+		// Create the security type
+		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(String.class, (context) -> {
+			context.addFlow("OUTPUT_A", Integer.class, null);
+			context.addFlow("OUTPUT_B", String.class, null);
+			context.addFlow("OUTPUT_C", null, null);
+			context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+		});
+
+		// Create the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		properties.addProperty("name.one").setValue("value.one");
+		properties.addProperty("name.two").setValue("value.two");
+
+		// Refactor the access with added details
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+				"net.example.AddSecuritySource", 5000, properties, securityType, this.securityOutputNameMapping);
+
+		// Validate change
+		this.assertChange(change, null, "Refactor Access", true);
+	}
+
+}
