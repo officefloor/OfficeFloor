@@ -94,7 +94,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 */
 	public void testUnknownTemplateExtensionSource() {
 
-		final UnknownClassError error = new UnknownClassError("TEST", "UNKNOWN CLASS");
+		final UnknownClassError error = new UnknownClassError("UNKNOWN CLASS");
 
 		// Configure extension
 		MockWoofTemplateExtensionSource.reset(this, null, null, null);

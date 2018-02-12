@@ -25,11 +25,11 @@ import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
  * Tests the {@link WoofTemplateExtensionLoader} extending the
- * {@link HttpTemplateSection}.
+ * {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,9 +46,9 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	private final PropertyList properties = OfficeFloorCompiler.newPropertyList();
 
 	/**
-	 * {@link HttpTemplateSection}.
+	 * {@link WebTemplate}.
 	 */
-	private final HttpTemplateSection template = this.createMock(HttpTemplateSection.class);
+	private final WebTemplate template = this.createMock(WebTemplate.class);
 
 	/**
 	 * {@link OfficeArchitect}.
@@ -77,7 +77,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testFailToInstantiateExtension() throws Exception {
 
-		UnknownClassError error = new UnknownClassError("Unknown", "UNKNOWN");
+		UnknownClassError error = new UnknownClassError("UNKNOWN");
 
 		// Record fail to instantiate
 		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
@@ -96,7 +96,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure escalate appropriately if failure in extending the
-	 * {@link HttpTemplateSection}.
+	 * {@link WebTemplate}.
 	 */
 	public void testExtensionFailure() throws Exception {
 
@@ -123,7 +123,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can extend the {@link HttpTemplateSection}.
+	 * Ensure can extend the {@link WebTemplate}.
 	 */
 	public void testExtendTemplate() throws Exception {
 
@@ -136,15 +136,12 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		// Add the property
 		this.properties.addProperty("NAME").setValue("VALUE");
 
-		// Record actions on mock objects to ensure correctly available
-		this.recordReturn(this.webArchitect, this.webArchitect.getURIs(), new String[] { "URI" });
-
 		// Test
 		this.extendTemplate(MockWoofTemplateExtensionSource.class.getName());
 	}
 
 	/**
-	 * Extends the {@link HttpTemplateSection}.
+	 * Extends the {@link WebTemplate}.
 	 * 
 	 * @param extensionSourceClassName
 	 *            {@link WoofTemplateExtensionSource} class name.
@@ -199,9 +196,6 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 
 			// Ensure correct details
 			assertEquals("Incorrect template URI", "URI", context.getApplicationPath());
-			String[] uris = context.getWebApplication().getURIs();
-			assertEquals("Incorrect number of application URIs", 1, uris.length);
-			assertEquals("Incorrect application URI", "URI", uris[0]);
 		}
 	}
 

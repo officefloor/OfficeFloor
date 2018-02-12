@@ -27,7 +27,7 @@ import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
-import net.officefloor.web.state.HttpTemplateSection;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
  * Mock implicit {@link WoofTemplateExtensionSourceService}.
@@ -41,7 +41,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoof
 	 * Resets for testing loading implicit {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param templateUris
-	 *            URIs of the {@link HttpTemplateSection} instances being
+	 *            URIs of the {@link WebTemplate} instances being
 	 *            extended.
 	 */
 	public static void reset(String... templateUris) {
@@ -50,7 +50,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoof
 	}
 
 	/**
-	 * Expected {@link HttpTemplateSection} URIs.
+	 * Expected {@link WebTemplate} URIs.
 	 */
 	private static Deque<String> templateUris = null;
 

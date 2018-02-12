@@ -54,23 +54,21 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw WoOF to be connected
 		WoofModel woof = new WoofModel();
-		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, false, false);
+		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false, null);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel("TEMPLATE_OUTPUT", null);
 		template.addOutput(templateOutput);
 		WoofSectionModel section = new WoofSectionModel("SECTION", null, null);
 		woof.addWoofSection(section);
-		WoofSectionInputModel sectionInput = new WoofSectionInputModel("SECTION_INPUT", null, null);
+		WoofSectionInputModel sectionInput = new WoofSectionInputModel("SECTION_INPUT", null);
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
-		WoofSecurityModel access = new WoofSecurityModel("ACCESS", null, 1000);
-		woof.addWoofAccess(access);
-		WoofSecurityModel accessInput = new WoofSecurityModel("ACCESS_INPUT", null);
-		access.addInput(accessInput);
-		WoofAccessOutputModel accessOutput = new WoofAccessOutputModel("ACCESS_OUTPUT", null);
-		access.addOutput(accessOutput);
-		WoofResourceModel resource = new WoofResourceModel("RESOURCE", null);
+		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000, null);
+		woof.addWoofSecurity(security);
+		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("ACCESS_OUTPUT", null);
+		security.addOutput(securityOutput);
+		WoofResourceModel resource = new WoofResourceModel("RESOURCE");
 		woof.addWoofResource(resource);
 		WoofExceptionModel exception = new WoofExceptionModel("EXCEPTION");
 		woof.addWoofException(exception);
@@ -87,10 +85,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"TEMPLATE");
 		templateOutput.setWoofTemplate(templateToTemplate);
 
-		// Template Output -> Access Input
-		WoofTemplateOutputToWoofAccessInputModel templateToAccess = new WoofTemplateOutputToWoofAccessInputModel(
-				"ACCESS_INPUT");
-		templateOutput.setWoofAccessInput(templateToAccess);
+		// Template Output -> Security
+		WoofTemplateOutputToWoofSecurityModel templateToSecurity = new WoofTemplateOutputToWoofSecurityModel(
+				"SECURITY");
+		templateOutput.setWoofSecurity(templateToSecurity);
 
 		// Template Output -> Resource
 		WoofTemplateOutputToWoofResourceModel templateToResource = new WoofTemplateOutputToWoofResourceModel(
@@ -106,27 +104,28 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionOutputToWoofTemplateModel sectionToTemplate = new WoofSectionOutputToWoofTemplateModel("TEMPLATE");
 		sectionOutput.setWoofTemplate(sectionToTemplate);
 
-		// Section Output -> Access Input
-		WoofSectionOutputToWoofAccessInputModel sectionToAccess = new WoofSectionOutputToWoofAccessInputModel(
-				"ACCESS_INPUT");
-		sectionOutput.setWoofAccessInput(sectionToAccess);
+		// Section Output -> Security
+		WoofSectionOutputToWoofSecurityModel sectionToSecurity = new WoofSectionOutputToWoofSecurityModel("SECURITY");
+		sectionOutput.setWoofSecurity(sectionToSecurity);
 
 		// Section Output -> Resource
 		WoofSectionOutputToWoofResourceModel sectionToResource = new WoofSectionOutputToWoofResourceModel("RESOURCE");
 		sectionOutput.setWoofResource(sectionToResource);
 
-		// Access Output -> Section Input
-		WoofAccessOutputToWoofSectionInputModel accessToSection = new WoofAccessOutputToWoofSectionInputModel("SECTION",
-				"SECTION_INPUT");
-		accessOutput.setWoofSectionInput(accessToSection);
+		// Security Output -> Section Input
+		WoofSecurityOutputToWoofSectionInputModel securityToSection = new WoofSecurityOutputToWoofSectionInputModel(
+				"SECTION", "SECTION_INPUT");
+		securityOutput.setWoofSectionInput(securityToSection);
 
-		// Access Output -> Template
-		WoofAccessOutputToWoofTemplateModel accessToTemplate = new WoofAccessOutputToWoofTemplateModel("TEMPLATE");
-		accessOutput.setWoofTemplate(accessToTemplate);
+		// Security Output -> Template
+		WoofSecurityOutputToWoofTemplateModel securityToTemplate = new WoofSecurityOutputToWoofTemplateModel(
+				"TEMPLATE");
+		securityOutput.setWoofTemplate(securityToTemplate);
 
-		// Access Output -> Resource
-		WoofAccessOutputToWoofResourceModel accessToResource = new WoofAccessOutputToWoofResourceModel("RESOURCE");
-		accessOutput.setWoofResource(accessToResource);
+		// Security Output -> Resource
+		WoofSecurityOutputToWoofResourceModel securityToResource = new WoofSecurityOutputToWoofResourceModel(
+				"RESOURCE");
+		securityOutput.setWoofResource(securityToResource);
 
 		// Exception -> Section Input
 		WoofExceptionToWoofSectionInputModel exceptionToSection = new WoofExceptionToWoofSectionInputModel("SECTION",
@@ -170,9 +169,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("template output <- template", templateOutput, templateToTemplate.getWoofTemplateOutput());
 		assertEquals("template output -> template", template, templateToTemplate.getWoofTemplate());
 
-		// Ensure template output connected to access input
-		assertEquals("template output <- access input", templateOutput, templateToAccess.getWoofTemplateOutput());
-		assertEquals("template output -> access input", accessInput, templateToAccess.getWoofAccessInput());
+		// Ensure template output connected to security
+		assertEquals("template output <- security", templateOutput, templateToSecurity.getWoofTemplateOutput());
+		assertEquals("template output -> security", security, templateToSecurity.getWoofSecurity());
 
 		// Ensure template output connected to resource
 		assertEquals("template output <- resource", templateOutput, templateToResource.getWoofTemplateOutput());
@@ -187,24 +186,24 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("section output -> template", template, sectionToTemplate.getWoofTemplate());
 
 		// Ensure section output connected to access input
-		assertEquals("section output <- access input", sectionOutput, sectionToAccess.getWoofSectionOutput());
-		assertEquals("section output -> access input", accessInput, sectionToAccess.getWoofAccessInput());
+		assertEquals("section output <- security", sectionOutput, sectionToSecurity.getWoofSectionOutput());
+		assertEquals("section output -> security", security, sectionToSecurity.getWoofSecurity());
 
 		// Ensure section output connected to resource
 		assertEquals("section output <- resource", sectionOutput, sectionToResource.getWoofSectionOutput());
 		assertEquals("section output -> resource", resource, sectionToResource.getWoofResource());
 
-		// Ensure access output connected to section input
-		assertEquals("access output <- section input", accessOutput, accessToSection.getWoofAccessOutput());
-		assertEquals("access output -> section input", sectionInput, accessToSection.getWoofSectionInput());
+		// Ensure security output connected to section input
+		assertEquals("security output <- section input", securityOutput, securityToSection.getWoofSecurityOutput());
+		assertEquals("security output -> section input", sectionInput, securityToSection.getWoofSectionInput());
 
-		// Ensure access output connected to template
-		assertEquals("access output <- template", accessOutput, accessToTemplate.getWoofAccessOutput());
-		assertEquals("access output -> template", template, accessToTemplate.getWoofTemplate());
+		// Ensure security output connected to template
+		assertEquals("security output <- template", securityOutput, securityToTemplate.getWoofSecurityOutput());
+		assertEquals("security output -> template", template, securityToTemplate.getWoofTemplate());
 
-		// Ensure access output connected to resource
-		assertEquals("access output <- resource", accessOutput, accessToResource.getWoofAccessOutput());
-		assertEquals("access output -> resource", resource, accessToResource.getWoofResource());
+		// Ensure security output connected to resource
+		assertEquals("security output <- resource", securityOutput, securityToResource.getWoofSecurityOutput());
+		assertEquals("security output -> resource", resource, securityToResource.getWoofResource());
 
 		// Ensure exception connected to section input
 		assertEquals("exception <- section input", exception, exceptionToSection.getWoofException());
@@ -231,23 +230,21 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the WoOF (without connections)
 		WoofModel woof = new WoofModel();
-		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, false, false);
+		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false, null);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel("TEMPLATE_OUTPUT", null);
 		template.addOutput(templateOutput);
 		WoofSectionModel section = new WoofSectionModel("SECTION", null, null);
 		woof.addWoofSection(section);
-		WoofSectionInputModel sectionInput = new WoofSectionInputModel("SECTION_INPUT", null, null);
+		WoofSectionInputModel sectionInput = new WoofSectionInputModel("SECTION_INPUT", null);
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
-		WoofSecurityModel access = new WoofSecurityModel("ACCESS", null, 1000);
-		woof.addWoofAccess(access);
-		WoofSecurityModel accessInput = new WoofSecurityModel("ACCESS_INPUT", null);
-		access.addInput(accessInput);
-		WoofAccessOutputModel accessOutput = new WoofAccessOutputModel("ACCESS_OUTPUT", null);
-		access.addOutput(accessOutput);
-		WoofResourceModel resource = new WoofResourceModel("RESOURCE", null);
+		WoofSecurityModel security = new WoofSecurityModel("ACCESS", null, 1000, null);
+		woof.addWoofSecurity(security);
+		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("ACCESS_OUTPUT", null);
+		security.addOutput(securityOutput);
+		WoofResourceModel resource = new WoofResourceModel("RESOURCE");
 		woof.addWoofResource(resource);
 		WoofExceptionModel exception = new WoofExceptionModel("EXCEPTION");
 		woof.addWoofException(exception);
@@ -266,11 +263,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		templateToTemplate.setWoofTemplate(template);
 		templateToTemplate.connect();
 
-		// Template Output -> Access Input
-		WoofTemplateOutputToWoofAccessInputModel templateToAccess = new WoofTemplateOutputToWoofAccessInputModel();
-		templateToAccess.setWoofTemplateOutput(templateOutput);
-		templateToAccess.setWoofAccessInput(accessInput);
-		templateToAccess.connect();
+		// Template Output -> Security
+		WoofTemplateOutputToWoofSecurityModel templateToSecurity = new WoofTemplateOutputToWoofSecurityModel();
+		templateToSecurity.setWoofTemplateOutput(templateOutput);
+		templateToSecurity.setWoofSecurity(security);
+		templateToSecurity.connect();
 
 		// Template Output -> Resource
 		WoofTemplateOutputToWoofResourceModel templateToResource = new WoofTemplateOutputToWoofResourceModel();
@@ -290,11 +287,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		sectionToTemplate.setWoofTemplate(template);
 		sectionToTemplate.connect();
 
-		// Section Output -> Access Input
-		WoofSectionOutputToWoofAccessInputModel sectionToAccess = new WoofSectionOutputToWoofAccessInputModel();
-		sectionToAccess.setWoofSectionOutput(sectionOutput);
-		sectionToAccess.setWoofAccessInput(accessInput);
-		sectionToAccess.connect();
+		// Section Output -> Security
+		WoofSectionOutputToWoofSecurityModel sectionToSecurity = new WoofSectionOutputToWoofSecurityModel();
+		sectionToSecurity.setWoofSectionOutput(sectionOutput);
+		sectionToSecurity.setWoofSecurity(security);
+		sectionToSecurity.connect();
 
 		// Section Output -> Resource
 		WoofSectionOutputToWoofResourceModel sectionToResource = new WoofSectionOutputToWoofResourceModel();
@@ -302,23 +299,23 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		sectionToResource.setWoofResource(resource);
 		sectionToResource.connect();
 
-		// Access Output -> Section Input
-		WoofAccessOutputToWoofSectionInputModel accessToSection = new WoofAccessOutputToWoofSectionInputModel();
-		accessToSection.setWoofAccessOutput(accessOutput);
-		accessToSection.setWoofSectionInput(sectionInput);
-		accessToSection.connect();
+		// security Output -> Section Input
+		WoofSecurityOutputToWoofSectionInputModel securityToSection = new WoofSecurityOutputToWoofSectionInputModel();
+		securityToSection.setWoofSecurityOutput(securityOutput);
+		securityToSection.setWoofSectionInput(sectionInput);
+		securityToSection.connect();
 
-		// Access Output -> Template
-		WoofAccessOutputToWoofTemplateModel accessToTemplate = new WoofAccessOutputToWoofTemplateModel();
-		accessToTemplate.setWoofAccessOutput(accessOutput);
-		accessToTemplate.setWoofTemplate(template);
-		accessToTemplate.connect();
+		// Security Output -> Template
+		WoofSecurityOutputToWoofTemplateModel securityToTemplate = new WoofSecurityOutputToWoofTemplateModel();
+		securityToTemplate.setWoofSecurityOutput(securityOutput);
+		securityToTemplate.setWoofTemplate(template);
+		securityToTemplate.connect();
 
-		// Access Output -> Resource
-		WoofAccessOutputToWoofResourceModel accessToResource = new WoofAccessOutputToWoofResourceModel();
-		accessToResource.setWoofAccessOutput(accessOutput);
-		accessToResource.setWoofResource(resource);
-		accessToResource.connect();
+		// Security Output -> Resource
+		WoofSecurityOutputToWoofResourceModel securityToResource = new WoofSecurityOutputToWoofResourceModel();
+		securityToResource.setWoofSecurityOutput(securityOutput);
+		securityToResource.setWoofResource(resource);
+		securityToResource.connect();
 
 		// Exception -> Section Input
 		WoofExceptionToWoofSectionInputModel exceptionToSection = new WoofExceptionToWoofSectionInputModel();
@@ -355,22 +352,22 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the connections have links to enable retrieving
 		assertEquals("template output - section input (section name)", "SECTION", templateToSection.getSectionName());
 		assertEquals("template output - section input (input name)", "SECTION_INPUT", templateToSection.getInputName());
-		assertEquals("template output - template", "TEMPLATE", templateToTemplate.getTemplateName());
-		assertEquals("template output - access input", "ACCESS_INPUT", templateToAccess.getInputName());
-		assertEquals("template output - resource", "RESOURCE", templateToResource.getResourceName());
+		assertEquals("template output - template", "TEMPLATE", templateToTemplate.getApplicationPath());
+		assertEquals("template output - access input", "ACCESS_INPUT", templateToSecurity.getHttpSecurityName());
+		assertEquals("template output - resource", "RESOURCE", templateToResource.getResourcePath());
 		assertEquals("section output - section input (section name)", "SECTION", sectionToSection.getSectionName());
 		assertEquals("section output - section input (input name)", "SECTION_INPUT", sectionToSection.getInputName());
-		assertEquals("section output - template", "TEMPLATE", sectionToTemplate.getTemplateName());
-		assertEquals("section output - access input", "ACCESS_INPUT", sectionToAccess.getInputName());
-		assertEquals("section output - resource", "RESOURCE", sectionToResource.getResourceName());
-		assertEquals("access output - section input (section name)", "SECTION", accessToSection.getSectionName());
-		assertEquals("access output - section input (input name", "SECTION_INPUT", accessToSection.getInputName());
-		assertEquals("access output - template", "TEMPLATE", accessToTemplate.getTemplateName());
-		assertEquals("access output - resource", "RESOURCE", accessToResource.getResourceName());
+		assertEquals("section output - template", "TEMPLATE", sectionToTemplate.getApplicationPath());
+		assertEquals("section output - access input", "ACCESS_INPUT", sectionToSecurity.getHttpSecurityName());
+		assertEquals("section output - resource", "RESOURCE", sectionToResource.getResourcePath());
+		assertEquals("access output - section input (section name)", "SECTION", securityToSection.getSectionName());
+		assertEquals("access output - section input (input name", "SECTION_INPUT", securityToSection.getInputName());
+		assertEquals("access output - template", "TEMPLATE", securityToTemplate.getApplicationPath());
+		assertEquals("access output - resource", "RESOURCE", securityToResource.getResourcePath());
 		assertEquals("exception - section input (section name)", "SECTION", exceptionToSection.getSectionName());
 		assertEquals("exception - section input (input name)", "SECTION_INPUT", exceptionToSection.getInputName());
-		assertEquals("exception - template", "TEMPLATE", exceptionToTemplate.getTemplateName());
-		assertEquals("exception - resource", "RESOURCE", exceptionToResource.getResourceName());
+		assertEquals("exception - template", "TEMPLATE", exceptionToTemplate.getApplicationPath());
+		assertEquals("exception - resource", "RESOURCE", exceptionToResource.getResourcePath());
 		assertEquals("start - section input (section name)", "SECTION", startToSection.getSectionName());
 		assertEquals("start - section input (input name)", "SECTION_INPUT", startToSection.getInputName());
 	}

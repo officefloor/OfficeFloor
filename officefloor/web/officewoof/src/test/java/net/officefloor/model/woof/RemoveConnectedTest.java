@@ -59,14 +59,14 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure able to remove the {@link WoofSecurityModel}.
 	 */
-	public void testRemoveAccess() {
+	public void testRemoveSecurity() {
 
-		// Obtain the access to remove
-		WoofSecurityModel access = this.model.getWoofAccesses().get(0);
+		// Obtain the security to remove
+		WoofSecurityModel security = this.model.getWoofSecurities().get(0);
 
-		// Remove the access
-		Change<WoofSecurityModel> change = this.operations.removeSecurity(access);
-		this.assertChange(change, access, "Remove access net.example.HttpSecuritySource", true);
+		// Remove the security
+		Change<WoofSecurityModel> change = this.operations.removeSecurity(security);
+		this.assertChange(change, security, "Remove security net.example.HttpSecuritySource", true);
 	}
 
 	/**

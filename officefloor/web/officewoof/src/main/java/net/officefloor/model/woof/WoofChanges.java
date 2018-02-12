@@ -437,6 +437,29 @@ public interface WoofChanges {
 	Change<WoofStartModel> removeStart(WoofStartModel start);
 
 	/**
+	 * Link the {@link WoofTemplateModel} to its super
+	 * {@link WoofTemplateModel}.
+	 * 
+	 * @param childTemplate
+	 *            Child {@link WoofTemplateModel}.
+	 * @param superTemplate
+	 *            Super {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofTemplateToSuperWoofTemplateModel> linkTemplateToSuperTemplate(WoofTemplateModel childTemplate,
+			WoofTemplateModel superTemplate);
+
+	/**
+	 * Removes the {@link WoofTemplateToSuperWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofTemplateToSuperWoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofTemplateToSuperWoofTemplateModel> removeTemplateToSuperTemplate(
+			WoofTemplateToSuperWoofTemplateModel link);
+
+	/**
 	 * Links the {@link WoofTemplateOutputModel} to the
 	 * {@link WoofTemplateModel}.
 	 * 

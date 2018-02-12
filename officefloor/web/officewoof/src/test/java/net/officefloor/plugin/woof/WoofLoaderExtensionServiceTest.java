@@ -40,10 +40,10 @@ import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
  * Tests the {@link WoofLoaderExtensionService}.
@@ -352,7 +352,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 			DefaultCompilerIssue sectionLoadIssue = (DefaultCompilerIssue) officeSectionLoadIssue.getCauses()[0];
 			DefaultCompilerIssue missingResourceIssue = (DefaultCompilerIssue) sectionLoadIssue.getCauses()[0];
 			assertEquals("Incorrect cause", "Can not obtain resource at location 'NonWoof.html' for SectionSource "
-					+ HttpTemplateSectionSource.class.getName(), missingResourceIssue.getIssueDescription());
+					+ WebTemplateSectionSource.class.getName(), missingResourceIssue.getIssueDescription());
 		}
 	}
 

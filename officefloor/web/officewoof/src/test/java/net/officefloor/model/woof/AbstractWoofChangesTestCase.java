@@ -32,11 +32,14 @@ import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationCo
 import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderUtil;
+import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.type.HttpSecurityDependencyType;
+import net.officefloor.web.security.type.HttpSecurityFlowType;
+import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.spi.security.HttpAccessControlFactory;
+import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 
 /**
  * Abstract {@link WoofChanges} {@link TestCase}.
@@ -357,6 +360,11 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 			return this.type;
 		}
 
+		@Override
+		public Object[] getAnnotations() {
+			return new Object[0];
+		}
+
 		/*
 		 * ================ SectionOutputType ======================
 		 */
@@ -406,8 +414,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	 * @return {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected <C> HttpSecurityType<HttpSecurity, C, ?, ?> constructHttpSecurityType(Class<C> credentialsType,
-			HttpSecurityTypeConstructor constructor) {
+	protected <C> HttpSecurityType<HttpAuthentication<C>, HttpAccessControl, C, ?, ?> constructHttpSecurityType(
+			Class<C> credentialsType, HttpSecurityTypeConstructor constructor) {
 
 		// Construct and return the office section
 		HttpSecurityTypeContextImpl<C, ?, ?> context = new HttpSecurityTypeContextImpl(credentialsType);
@@ -464,8 +472,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	/**
 	 * {@link HttpSecurityTypeContext} implementation.
 	 */
-	private class HttpSecurityTypeContextImpl<C, D extends Enum<D>, F extends Enum<F>>
-			implements HttpSecurityTypeContext, HttpSecurityType<HttpSecurity, C, D, F> {
+	private class HttpSecurityTypeContextImpl<C, O extends Enum<O>, F extends Enum<F>>
+			implements HttpSecurityTypeContext, HttpSecurityType<HttpAuthentication<C>, HttpAccessControl, C, O, F> {
 
 		/**
 		 * Type of credentials.
@@ -516,23 +524,40 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		 */
 
 		@Override
-		public Class<HttpSecurity> getSecurityClass() {
-			return HttpSecurity.class;
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public Class<HttpAuthentication<C>> getAuthenticationType() {
+			return (Class) HttpAuthentication.class;
 		}
 
 		@Override
-		public Class<C> getCredentialsClass() {
+		public HttpAuthenticationFactory<HttpAuthentication<C>, C> getHttpAuthenticationFactory() {
+			return null;
+		}
+
+		@Override
+		public Class<HttpAccessControl> getAccessControlType() {
+			return HttpAccessControl.class;
+		}
+
+		@Override
+		public HttpAccessControlFactory<HttpAccessControl> getHttpAccessControlFactory() {
+			return null;
+		}
+
+		@Override
+		public Class<C> getCredentialsType() {
 			return this.credentialsType;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public HttpSecurityDependencyType<D>[] getDependencyTypes() {
+		public HttpSecurityDependencyType<O>[] getDependencyTypes() {
 			return this.dependencies.toArray(new HttpSecurityDependencyType[this.dependencies.size()]);
 		}
 
 		@Override
-		public HttpSecurityFlowType<?>[] getFlowTypes() {
+		@SuppressWarnings("unchecked")
+		public HttpSecurityFlowType<F>[] getFlowTypes() {
 			return this.flows.toArray(new HttpSecurityFlowType[this.flows.size()]);
 		}
 	}

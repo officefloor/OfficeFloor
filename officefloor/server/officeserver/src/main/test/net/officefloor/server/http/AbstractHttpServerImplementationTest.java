@@ -78,6 +78,16 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFrameTestCase {
 
 	/**
+	 * Time out on waiting for data.
+	 */
+	private static final long WAIT_FOR_DATA_TIMEOUT = 20 * 1000;
+
+	/**
+	 * Time out on waiting for shutdown.
+	 */
+	private static final long WAIT_FOR_SHUTDOWN_TIMEOUT = 60 * 1000;
+
+	/**
 	 * {@link HttpServerLocation}.
 	 */
 	private final HttpServerLocation serverLocation = new HttpServerLocationImpl();
@@ -1078,7 +1088,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 							if (noDataStart == -1) {
 								// Capture start time of no data
 								noDataStart = System.currentTimeMillis();
-							} else if ((System.currentTimeMillis() - noDataStart) > (20 * 1000)) {
+							} else if ((System.currentTimeMillis() - noDataStart) > (WAIT_FOR_DATA_TIMEOUT)) {
 								fail("Timed out waiting on data");
 							}
 						}
@@ -1171,7 +1181,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			}
 
 			// Wait for completion
-			this.wait(30 * 1000);
+			this.wait(WAIT_FOR_SHUTDOWN_TIMEOUT);
 			if (this.runResult == null) {
 				fail("Timed out waiting on pipeline completion");
 			}

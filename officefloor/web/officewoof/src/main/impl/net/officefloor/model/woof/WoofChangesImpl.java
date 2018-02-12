@@ -2328,6 +2328,20 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofTemplateToSuperWoofTemplateModel> linkTemplateToSuperTemplate(WoofTemplateModel childTemplate,
+			WoofTemplateModel superTemplate) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofTemplateToSuperWoofTemplateModel> removeTemplateToSuperTemplate(
+			WoofTemplateToSuperWoofTemplateModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> linkTemplateOutputToTemplate(
 			final WoofTemplateOutputModel templateOutput, WoofTemplateModel template) {
 

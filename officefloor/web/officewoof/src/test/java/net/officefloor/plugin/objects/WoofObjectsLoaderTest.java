@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -270,8 +271,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private void recordManagedObjectFlow(OfficeManagedObjectSource mos, String flowName, String sectionName,
 			String inputName) {
-		ManagedObjectFlow mosFlow = this.createMock(ManagedObjectFlow.class);
-		this.recordReturn(mos, mos.getManagedObjectFlow(flowName), mosFlow);
+		OfficeManagedObjectFlow mosFlow = this.createMock(OfficeManagedObjectFlow.class);
+		this.recordReturn(mos, mos.getOfficeManagedObjectFlow(flowName), mosFlow);
 		OfficeSection section = this.createMock(OfficeSection.class);
 		this.recordReturn(this.office, this.office.getOfficeSection(sectionName), section);
 		OfficeSectionInput sectionInput = this.createMock(OfficeSectionInput.class);
@@ -336,7 +337,7 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	private void recordManagedObjectDependency(OfficeManagedObject mo, String dependencyName, String qualifier,
 			String type) {
 		ManagedObjectDependency dependency = this.createMock(ManagedObjectDependency.class);
-		this.recordReturn(mo, mo.getManagedObjectDependency(dependencyName), dependency);
+		this.recordReturn(mo, mo.getOfficeManagedObjectDependency(dependencyName), dependency);
 		dependency.setOverrideQualifier(qualifier);
 		dependency.setSpecificType(type);
 	}
