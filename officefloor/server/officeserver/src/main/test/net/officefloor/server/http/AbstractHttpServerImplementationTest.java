@@ -85,7 +85,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Time out on waiting for shutdown.
 	 */
-	private static final long WAIT_FOR_SHUTDOWN_TIMEOUT = 60 * 1000;
+	private static final long WAIT_FOR_SHUTDOWN_TIMEOUT = 120 * 1000;
 
 	/**
 	 * {@link HttpServerLocation}.
