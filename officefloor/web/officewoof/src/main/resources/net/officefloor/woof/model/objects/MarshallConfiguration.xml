@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall type="net.officefloor.model.objects.AutoWireObjectsModel"
+<marshall type="net.officefloor.woof.model.objects.WoofObjectsModel"
 	element="objects">
 
 	<!-- OBJECT SOURCES -->
-	<collection method="getAutoWireObjectSources">
+	<collection method="getWoofObjectSources">
 
 		<!-- MANAGED OBJECT -->
-		<item type="net.officefloor.model.objects.AutoWireManagedObjectModel"
+		<item type="net.officefloor.woof.model.objects.WoofManagedObjectModel"
 			element="managed-object">
 			<attributes>
 				<attribute method="getManagedObjectSourceClassName"
@@ -19,22 +19,22 @@
 				<attribute method="getScope" attribute="scope" />
 			</attributes>
 			<collection method="getPropertySources">
-				<item type="net.officefloor.model.objects.PropertyModel"
+				<item type="net.officefloor.woof.model.objects.PropertyModel"
 					element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
-				<item type="net.officefloor.model.objects.PropertyFileModel"
+				<item type="net.officefloor.woof.model.objects.PropertyFileModel"
 					element="property-file">
 					<attributes>
 						<attribute method="getPath" attribute="path" />
 					</attributes>
 				</item>
 			</collection>
-			<collection method="getAutoWiring">
-				<item type="net.officefloor.model.objects.AutoWireModel"
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.woof.model.objects.TypeQualificationModel"
 					element="auto-wire">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
@@ -43,7 +43,7 @@
 				</item>
 			</collection>
 			<collection method="getFlows">
-				<item type="net.officefloor.model.objects.AutoWireFlowModel"
+				<item type="net.officefloor.woof.model.objects.WoofFlowModel"
 					element="flow">
 					<attributes>
 						<attribute method="getName" attribute="name" />
@@ -52,18 +52,8 @@
 					</attributes>
 				</item>
 			</collection>
-			<collection method="getTeams">
-				<item type="net.officefloor.model.objects.AutoWireTeamModel"
-					element="team">
-					<attributes>
-						<attribute method="getName" attribute="name" />
-						<attribute method="getQualifier" attribute="qualifier" />
-						<attribute method="getType" attribute="type" />
-					</attributes>
-				</item>
-			</collection>
 			<collection method="getDependencies">
-				<item type="net.officefloor.model.objects.AutoWireDependencyModel"
+				<item type="net.officefloor.woof.model.objects.WoofDependencyModel"
 					element="dependency">
 					<attributes>
 						<attribute method="getName" attribute="name" />
@@ -75,20 +65,20 @@
 		</item>
 
 		<!-- SUPPLIER -->
-		<item type="net.officefloor.model.objects.AutoWireSupplierModel"
+		<item type="net.officefloor.woof.model.objects.WoofSupplierModel"
 			element="supplier">
 			<attributes>
 				<attribute method="getSupplierSourceClassName" attribute="source" />
 			</attributes>
 			<collection method="getPropertySources">
-				<item type="net.officefloor.model.objects.PropertyModel"
+				<item type="net.officefloor.woof.model.objects.PropertyModel"
 					element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
-				<item type="net.officefloor.model.objects.PropertyFileModel"
+				<item type="net.officefloor.woof.model.objects.PropertyFileModel"
 					element="property-file">
 					<attributes>
 						<attribute method="getPath" attribute="path" />

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall type="net.officefloor.model.teams.AutoWireTeamsModel"
+<marshall type="net.officefloor.woof.model.teams.WoofTeamsModel"
 	element="teams">
 
 	<!-- TEAMS -->
-	<collection method="getAutoWireTeams" element="teams">
-		<item type="net.officefloor.model.teams.AutoWireTeamModel"
+	<collection method="getWoofTeams" element="teams">
+		<item type="net.officefloor.woof.model.teams.WoofTeamModel"
 			element="team">
 			<attributes>
 				<attribute method="getTeamSourceClassName" attribute="source" />
@@ -12,21 +12,23 @@
 				<attribute method="getType" attribute="type" />
 			</attributes>
 			<collection method="getPropertySources">
-				<item type="net.officefloor.model.teams.PropertyModel" element="property">
+				<item type="net.officefloor.woof.model.teams.PropertyModel"
+					element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
-				<item type="net.officefloor.model.teams.PropertyFileModel"
+				<item type="net.officefloor.woof.model.teams.PropertyFileModel"
 					element="property-file">
 					<attributes>
 						<attribute method="getPath" attribute="path" />
 					</attributes>
 				</item>
 			</collection>
-			<collection method="getAutoWiring">
-				<item type="net.officefloor.model.teams.AutoWireModel" element="auto-wire">
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.woof.model.teams.TypeQualificationModel"
+					element="auto-wire">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
 						<attribute method="getType" attribute="type" />

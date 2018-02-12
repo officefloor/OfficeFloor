@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="objects"
-	class="net.officefloor.model.objects.AutoWireObjectsModel">
+	class="net.officefloor.woof.model.objects.WoofObjectsModel">
 
 	<!-- MANAGED OBJECTS -->
-	<object method="addAutoWireObjectSource" node="managed-object"
-		class="net.officefloor.model.objects.AutoWireManagedObjectModel">
+	<object method="addWoofObjectSource" node="managed-object"
+		class="net.officefloor.woof.model.objects.WoofManagedObjectModel">
 		<value method="setManagedObjectSourceClassName" node="managed-object@source" />
 		<value method="setClassManagedObjectSourceClass" node="managed-object@class" />
 		<value method="setTimeout" node="managed-object@timeout" />
@@ -12,33 +12,27 @@
 		<value method="setType" node="managed-object@type" />
 		<value method="setScope" node="managed-object@scope" />
 		<object method="addPropertySource" node="property"
-			class="net.officefloor.model.objects.PropertyModel">
+			class="net.officefloor.woof.model.objects.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
 		<object method="addPropertySource" node="property-file"
-			class="net.officefloor.model.objects.PropertyFileModel">
+			class="net.officefloor.woof.model.objects.PropertyFileModel">
 			<value method="setPath" node="property-file@path" />
 		</object>
-		<object method="addAutoWire" node="auto-wire"
-			class="net.officefloor.model.objects.AutoWireModel">
+		<object method="addTypeQualification" node="auto-wire"
+			class="net.officefloor.woof.model.objects.TypeQualificationModel">
 			<value method="setQualifier" node="auto-wire@qualifier" />
 			<value method="setType" node="auto-wire@type" />
 		</object>
 		<object method="addFlow" node="flow"
-			class="net.officefloor.model.objects.AutoWireFlowModel">
+			class="net.officefloor.woof.model.objects.WoofFlowModel">
 			<value method="setName" node="flow@name" />
 			<value method="setSection" node="flow@section" />
 			<value method="setInput" node="flow@input" />
 		</object>
-		<object method="addTeam" node="team"
-			class="net.officefloor.model.objects.AutoWireTeamModel">
-			<value method="setName" node="team@name" />
-			<value method="setQualifier" node="team@qualifier" />
-			<value method="setType" node="team@type" />
-		</object>
 		<object method="addDependency" node="dependency"
-			class="net.officefloor.model.objects.AutoWireDependencyModel">
+			class="net.officefloor.woof.model.objects.WoofDependencyModel">
 			<value method="setName" node="dependency@name" />
 			<value method="setQualifier" node="dependency@qualifier" />
 			<value method="setType" node="dependency@type" />
@@ -46,16 +40,16 @@
 	</object>
 
 	<!-- SUPPLIERS -->
-	<object method="addAutoWireObjectSource" node="supplier"
-		class="net.officefloor.model.objects.AutoWireSupplierModel">
+	<object method="addWoofObjectSource" node="supplier"
+		class="net.officefloor.woof.model.objects.WoofSupplierModel">
 		<value method="setSupplierSourceClassName" node="supplier@source" />
 		<object method="addPropertySource" node="property"
-			class="net.officefloor.model.objects.PropertyModel">
+			class="net.officefloor.woof.model.objects.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
 		<object method="addPropertySource" node="property-file"
-			class="net.officefloor.model.objects.PropertyFileModel">
+			class="net.officefloor.woof.model.objects.PropertyFileModel">
 			<value method="setPath" node="property-file@path" />
 		</object>
 	</object>
