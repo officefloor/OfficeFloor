@@ -17,9 +17,9 @@
 		<module>officeweb_security</module>
 		<module>officeweb_template</module>
 		<module>officeweb_resource</module>
-		<module>officewoof</module>
 <!--
 		<module>officeweb_rest</module>
+		<module>officewoof</module>
 -->
 	</modules>
 	<dependencies>
