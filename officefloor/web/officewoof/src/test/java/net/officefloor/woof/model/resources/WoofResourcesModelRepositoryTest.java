@@ -76,6 +76,13 @@ public class WoofResourcesModelRepositoryTest extends OfficeFrameTestCase {
 				new TypeQualificationModel("QUALIFIER"), new TypeQualificationModel("ANOTHER"));
 		assertList(new String[] { "getName" }, resourceOne.getWoofResourceTransformers(),
 				new WoofResourceTransformerModel("zip"), new WoofResourceTransformerModel("another"));
+
+		// Ensure second has no configuration
+		WoofResourceModel resourceTwo = resources.get(1);
+		assertNull("Should not have security", resourceTwo.getSecurity());
+		assertEquals("Should be no auto-wiring for second resource", 0, resourceTwo.getTypeQualifications().size());
+		assertEquals("Should be no transforming for second resource", 0,
+				resourceTwo.getWoofResourceTransformers().size());
 	}
 
 	/**
