@@ -3,9 +3,7 @@
 	<field type="String" name="protocol" />
 	<field type="String" name="location" />
 	<field type="String" name="context path" />
-	<field type="String" name="http security name" />
+	<field type="WoofResourceSecurityModel" name="security" />
 	<list type="TypeQualificationModel" name="type qualification" />
 	<list type="WoofResourceTransformerModel" name="woof resource transformer" />
-	<list type="String" name="role" />
-	<list type="String" name="required role" />
 </model>

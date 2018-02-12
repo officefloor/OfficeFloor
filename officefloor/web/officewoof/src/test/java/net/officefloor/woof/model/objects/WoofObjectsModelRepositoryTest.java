@@ -44,7 +44,7 @@ import net.officefloor.woof.model.objects.WoofSupplierModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class WireObjectsModelRepositoryTest extends OfficeFrameTestCase {
+public class WoofObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link ConfigurationItem} containing the {@link WoofObjectsModel}.
