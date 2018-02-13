@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall node="resources"
+	class="net.officefloor.woof.model.resources.WoofResourcesModel">
+
+	<!-- RESOURCES -->
+	<object method="addWoofResource" node="resource"
+		class="net.officefloor.woof.model.resources.WoofResourceModel">
+		<value method="setProtocol" node="resource@protocol" />
+		<value method="setLocation" node="resource@location" />
+		<value method="setContextPath" node="resource@context-path" />
+		<object method="addTypeQualification" node="auto-wire"
+			class="net.officefloor.woof.model.resources.TypeQualificationModel">
+			<value method="setQualifier" node="auto-wire@qualifier" />
+		</object>
+		<object method="addWoofResourceTransformer" node="transform"
+			class="net.officefloor.woof.model.resources.WoofResourceTransformerModel">
+			<value method="setName" node="transform@name" />
+		</object>
+		<object method="setSecurity" node="security"
+			class="net.officefloor.woof.model.resources.WoofResourceSecurityModel">
+			<value method="setHttpSecurityName" node="security@qualifier" />
+			<value method="addRole" node="role@name" />
+			<value method="addRequiredRole" node="required-role@name" />
+		</object>
+	</object>
+
+</unmarshall>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall type="net.officefloor.woof.model.resources.WoofResourcesModel"
+	element="resources">
+
+	<!-- RESOURCE -->
+	<collection method="getWoofResources">
+		<item type="net.officefloor.woof.model.resources.WoofResourceModel"
+			element="resource">
+			<attributes>
+				<attribute method="getProtocol" attribute="protocol" />
+				<attribute method="getLocation" attribute="location" />
+				<attribute method="getContextPath" attribute="context-path" />
+			</attributes>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.woof.model.resources.TypeQualificationModel"
+					element="auto-wire">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getWoofResourceTransformers">
+				<item
+					type="net.officefloor.woof.model.resources.WoofResourceTransformerModel"
+					element="transform">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+					</attributes>
+				</item>
+			</collection>
+			<object method="getSecurity" element="security">
+				<attributes>
+					<attribute method="getHttpSecurityName" attribute="qualifier" />
+				</attributes>
+				<collection method="getRoles">
+					<item type="java.lang.String" element="role">
+						<attributes>
+							<attribute method="toString" attribute="name" />
+						</attributes>
+					</item>
+				</collection>
+				<collection method="getRequiredRoles">
+					<item type="java.lang.String" element="required-role">
+						<attributes>
+							<attribute method="toString" attribute="name" />
+						</attributes>
+					</item>
+				</collection>
+			</object>
+		</item>
+	</collection>
+
+</marshall>

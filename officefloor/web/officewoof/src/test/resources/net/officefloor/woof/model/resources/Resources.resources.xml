@@ -6,13 +6,13 @@
 		<transform name="zip" />
 		<transform name="another" />
 		<security qualifier="security">
-			<role>RoleOne</role>
-			<role>RoleTwo</role>
-			<required-role>RequiredOne</required-role>
-			<required-role>RequiredTwo</required-role>
+			<role name="RoleOne" />
+			<role name="RoleTwo" />
+			<required-role name="RequiredOne" />
+			<required-role name="RequiredTwo" />
 		</security>
 	</resource>
-	
+
 	<resource protocol="classpath" location="PUBLIC" />
 
 </resources>

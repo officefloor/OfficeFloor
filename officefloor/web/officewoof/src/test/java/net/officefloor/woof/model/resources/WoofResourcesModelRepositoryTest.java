@@ -73,7 +73,7 @@ public class WoofResourcesModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(security.getRoles(), "RoleOne", "RoleTwo");
 		assertList(security.getRequiredRoles(), "RequiredOne", "RequiredTwo");
 		assertList(new String[] { "getQualifier" }, resourceOne.getTypeQualifications(),
-				new TypeQualificationModel("QUALIFIER"), new TypeQualificationModel("ANOTHER"));
+				new TypeQualificationModel("QUALIFIED"), new TypeQualificationModel("ANOTHER"));
 		assertList(new String[] { "getName" }, resourceOne.getWoofResourceTransformers(),
 				new WoofResourceTransformerModel("zip"), new WoofResourceTransformerModel("another"));
 
