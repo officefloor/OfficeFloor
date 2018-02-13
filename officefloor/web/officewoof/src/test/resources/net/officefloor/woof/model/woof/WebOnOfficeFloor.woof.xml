@@ -1,33 +1,50 @@
 <woof>
 
+	<application-paths>
+		<application-path path="/pathA" secure="true">
+			<service method="GET" />
+			<service method="POST" />
+			<input section="SECTION_A" input="INPUT_A" />
+			<template path="/templateB" />
+			<resource path="/resourceA.html" />
+			<redirect path="/pathB" />
+		</application-path>
+		<application-path path="/pathB" />
+	</application-paths>
+
 	<templates>
-		<template name="TEMPLATE_A" uri="example" path="example/TemplateA.ofp"
-			extends="TEMPLATE_B" class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
-			secure="true" continue-rendering="true" x="300" y="301">
-			<output name="OUTPUT_1" argument-type="java.lang.Integer">
+		<template application-path="/templateA" location="example/TemplateA.ofp"
+			class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
+			charset="UTF-16" secure="true" redirect-values-function="redirect"
+			link-separator-character="_" x="300" y="301">
+			<extends template="another" />
+			<output name="OUTPUT_0" argument-type="java.lang.Integer">
 				<input section="SECTION_A" input="INPUT_A" />
 			</output>
+			<output name="OUTPUT_1">
+				<template path="/templateB" />
+			</output>
 			<output name="OUTPUT_2">
-				<template name="TEMPLATE_B" />
+				<resource path="/resourceA.html" />
 			</output>
 			<output name="OUTPUT_3">
-				<resource name="RESOURCE" />
+				<security name="SECURITY_B" />
 			</output>
 			<output name="OUTPUT_4">
-				<access input="Authenticate" />
+				<application path="/pathA" />
 			</output>
 			<output name="OUTPUT_5" />
-			<link name="LINK_1" secure="true" />
-			<link name="LINK_2" secure="false" />
-			<redirect method="REDIRECT_POST" />
-			<redirect method="REDIRECT_PUT" />
-			<extension class="GWT">
+			<link name="LINK_0" secure="true" />
+			<link name="LINK_1" secure="false" />
+			<render method="POST" />
+			<render method="PUT" />
+			<extension class="EXTENSION">
+				<property name="NAME.0" value="VALUE.0" />
 				<property name="NAME.1" value="VALUE.1" />
-				<property name="NAME.2" value="VALUE.2" />
 			</extension>
 			<extension class="net.example.Extension" />
 		</template>
-		<template name="TEMPLATE_B" uri="another" path="example/TemplateB.ofp"
+		<template application-path="/templateB" location="example/TemplateB.ofp"
 			x="302" y="303" />
 	</templates>
 
@@ -39,58 +56,71 @@
 			<input name="INPUT_A" parameter-type="java.lang.Integer" />
 			<input name="INPUT_B" uri="example" />
 			<output name="OUTPUT_A" argument-type="java.lang.String">
-				<input section="SECTION_B" input="INPUT_1" />
+				<input section="SECTION_B" input="INPUT_0" />
 			</output>
 			<output name="OUTPUT_B">
-				<template name="TEMPLATE_A" />
+				<template path="/templateA" />
 			</output>
 			<output name="OUTPUT_C">
-				<resource name="RESOURCE" />
+				<resource path="/resourceB.png" />
 			</output>
 			<output name="OUTPUT_D">
-				<access input="Authenticate" />
+				<security name="SECURITY_A" />
 			</output>
-			<output name="OUTPUT_E" />
+			<output name="OUTPUT_E">
+				<application path="/pathB" />
+			</output>
+			<output name="OUTPUT_F" />
 		</section>
 		<section name="SECTION_B" source="net.example.ExampleSectionSource"
 			location="EXAMPLE_LOCATION" x="402" y="403">
-			<input name="INPUT_1" />
+			<input name="INPUT_0" />
 		</section>
 	</sections>
 
-	<accesses>
-		<access name="SECURITY_A" source="net.example.HttpSecuritySource"
+	<securities>
+		<security name="SECURITY_A" source="net.example.HttpSecuritySource"
 			timeout="2000" x="500" y="501">
 			<property name="name.first" value="value.first" />
 			<property name="name.second" value="value.second" />
-			<input name="Authenticate" parameter-type="net.example.HttpCredentials" />
-			<output name="OUTPUT_ONE" argument-type="java.lang.String">
+			<content type="application/json" />
+			<content type="application/xml" />
+			<output name="OUTPUT_ZERO" argument-type="java.lang.String">
 				<input section="SECTION_B" input="INPUT_1" />
 			</output>
+			<output name="OUTPUT_ONE">
+				<template path="/templateA" />
+			</output>
 			<output name="OUTPUT_TWO">
-				<template name="TEMPLATE_A" />
+				<resource path="/resourceB.png" />
 			</output>
 			<output name="OUTPUT_THREE">
-				<resource name="RESOURCE" />
+				<security name="SECURITY_B" />
 			</output>
-			<output name="OUTPUT_FOUR" />
-		</access>
-		<access name="SECURITY_B" source="net.example.HttpSecuritySource"
-			timeout="2000" x="510" y="511" />
-	</accesses>
+			<output name="OUTPUT_FOUR">
+				<application path="/pathA" />
+			</output>
+			<output name="OUTPUT_FIVE" />
+		</security>
+		<security name="SECURITY_B" source="net.example.AnotherHttpSecuritySource"
+			x="510" y="511" />
+	</securities>
 
 	<governances>
-		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource"
+		<governance name="GOVERNANCE_A" source="net.example.ExampleGovernanceSource"
 			x="600" y="601">
 			<property name="name.a" value="value.a" />
 			<property name="name.b" value="value.b" />
-			<governance-area x="610" y="611" width="620" height="621" />
-			<governance-area x="630" y="631" width="640" height="641" />
+			<governance-area x="620" y="621" width="640" height="641" />
+			<governance-area x="630" y="631" width="650" height="651" />
 		</governance>
+		<governance name="GOVERNANCE_B" source="net.example.AnotherGovernanceSource"
+			x="610" y="611" />
 	</governances>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" x="700" y="701" />
+		<resource path="/resourceA.html" x="700" y="701" />
+		<resource path="/resourceB.png" x="710" y="711" />
 	</resources>
 
 	<exceptions>
@@ -98,18 +128,25 @@
 			<input section="SECTION_A" input="INPUT_A" />
 		</exception>
 		<exception class="java.lang.RuntimeException" x="802" y="803">
-			<template name="TEMPLATE_A" />
+			<template path="/templateA" />
 		</exception>
 		<exception class="java.sql.SQLException" x="804" y="805">
-			<resource name="RESOURCE" />
+			<resource path="/resourceB.png" />
 		</exception>
-		<exception class="java.io.IOException" x="806" y="807" />
+		<exception class="net.example.AuthException" x="806" y="807">
+			<security name="SECURITY_B" />
+		</exception>
+		<exception class="java.lang.NullPointerException" x="808" y="809">
+			<application path="/pathB" />
+		</exception>
+		<exception class="java.io.IOException" x="810" y="811" />
 	</exceptions>
 
 	<starting>
 		<start x="900" y="901">
 			<flow section="SECTION_A" input="INPUT_A" />
 		</start>
+		<start x="910" y="911" />
 	</starting>
 
 </woof>
