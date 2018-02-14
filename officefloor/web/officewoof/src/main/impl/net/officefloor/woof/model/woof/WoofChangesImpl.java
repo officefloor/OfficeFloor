@@ -175,17 +175,14 @@ public class WoofChangesImpl implements WoofChanges {
 	private static void sortTemplateConfiguration(WoofTemplateModel template) {
 
 		// Sort outputs keeping template render complete output last
-		Collections.sort(template.getOutputs(), new Comparator<WoofTemplateOutputModel>() {
-			@Override
-			public int compare(WoofTemplateOutputModel a, WoofTemplateOutputModel b) {
-				String nameA = a.getWoofTemplateOutputName();
-				String nameB = b.getWoofTemplateOutputName();
-				if (nameA.equals(nameB)) {
-					return 0; // same
-				} else {
-					// Sort by name
-					return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
-				}
+		Collections.sort(template.getOutputs(), (a, b) -> {
+			String nameA = a.getWoofTemplateOutputName();
+			String nameB = b.getWoofTemplateOutputName();
+			if (nameA.equals(nameB)) {
+				return 0; // same
+			} else {
+				// Sort by name
+				return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
 			}
 		});
 
@@ -193,7 +190,8 @@ public class WoofChangesImpl implements WoofChanges {
 		sortByName(template.getLinks(), TEMPLATE_LINK_NAME_EXTRACTOR);
 
 		// Sort the render HTTP methods
-		Collections.sort(template.getRenderHttpMethods());
+		Collections.sort(template.getRenderHttpMethods(), (a, b) -> String.CASE_INSENSITIVE_ORDER
+				.compare(a.getWoofTemplateRenderHttpMethodName(), b.getWoofTemplateRenderHttpMethodName()));
 	}
 
 	/**
@@ -745,8 +743,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(applicationPath, templateLocation, templateLogicClass,
-				redirectValuesFunction, contentType, charsetName, linkSeparatorCharacter, isTemplateSecure,
-				renderHttpMethods);
+				redirectValuesFunction, contentType, charsetName, linkSeparatorCharacter, isTemplateSecure);
 
 		// Determine if have links
 		if (linksSecure != null) {
@@ -754,6 +751,14 @@ public class WoofChangesImpl implements WoofChanges {
 			for (String linkName : linksSecure.keySet()) {
 				Boolean isLinkSecure = linksSecure.get(linkName);
 				template.addLink(new WoofTemplateLinkModel(linkName, isLinkSecure.booleanValue()));
+			}
+		}
+
+		// Determine if have render HTTP methods
+		if (renderHttpMethods != null) {
+			// Add the render HTTP methods
+			for (String renderHttpMethodName : renderHttpMethods) {
+				template.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel(renderHttpMethodName));
 			}
 		}
 
@@ -841,7 +846,8 @@ public class WoofChangesImpl implements WoofChanges {
 		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
 		final List<WoofTemplateLinkModel> existingTemplateLinks = new ArrayList<WoofTemplateLinkModel>(
 				template.getLinks());
-		final List<String> existingTemplateRenderHttpMethods = new ArrayList<String>(template.getRenderHttpMethods());
+		final List<WoofTemplateRenderHttpMethodModel> existingTemplateRenderHttpMethods = new ArrayList<>(
+				template.getRenderHttpMethods());
 
 		// Create change to attributes
 		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(template,
@@ -869,13 +875,14 @@ public class WoofChangesImpl implements WoofChanges {
 				}
 
 				// Refactor the render HTTP methods
-				for (String renderHttpMethod : new ArrayList<String>(template.getRenderHttpMethods())) {
+				for (WoofTemplateRenderHttpMethodModel renderHttpMethod : new ArrayList<>(
+						template.getRenderHttpMethods())) {
 					template.removeRenderHttpMethod(renderHttpMethod);
 				}
 				if (renderHttpMethods != null) {
 					// Add the render HTTP methods
 					for (String renderHttpMethod : renderHttpMethods) {
-						template.addRenderHttpMethod(renderHttpMethod);
+						template.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel(renderHttpMethod));
 					}
 				}
 			}
@@ -891,7 +898,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setIsTemplateSecure(existingIsTemplateSecure);
 
 				// Revert the links
-				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(template.getLinks())) {
+				for (WoofTemplateLinkModel link : new ArrayList<>(template.getLinks())) {
 					template.removeLink(link);
 				}
 				for (WoofTemplateLinkModel link : existingTemplateLinks) {
@@ -899,10 +906,11 @@ public class WoofChangesImpl implements WoofChanges {
 				}
 
 				// Revert the render HTTP methods
-				for (String renderHttpMethod : new ArrayList<String>(template.getRenderHttpMethods())) {
+				for (WoofTemplateRenderHttpMethodModel renderHttpMethod : new ArrayList<>(
+						template.getRenderHttpMethods())) {
 					template.removeRenderHttpMethod(renderHttpMethod);
 				}
-				for (String renderHttpMethod : existingTemplateRenderHttpMethods) {
+				for (WoofTemplateRenderHttpMethodModel renderHttpMethod : existingTemplateRenderHttpMethods) {
 					template.addRenderHttpMethod(renderHttpMethod);
 				}
 			}

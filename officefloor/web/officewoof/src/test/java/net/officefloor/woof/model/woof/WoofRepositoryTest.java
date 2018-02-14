@@ -60,7 +60,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofModel woof = new WoofModel();
 		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false, null);
 		woof.addWoofApplicationPath(applicationPath);
-		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false, null);
+		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel("TEMPLATE_OUTPUT", null);
 		template.addOutput(templateOutput);
@@ -346,7 +346,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofModel woof = new WoofModel();
 		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false, null);
 		woof.addWoofApplicationPath(applicationPath);
-		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false, null);
+		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel("TEMPLATE_OUTPUT", null);
 		template.addOutput(templateOutput);

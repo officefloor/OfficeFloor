@@ -16,13 +16,17 @@
 			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofTemplateModel">
 			<value method="setApplicationPath" node="template@path" />
 		</object>
-		<object method="addWoofResource" node="resource"
+		<object method="setWoofResource" node="resource"
 			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofResourceModel">
 			<value method="setResourcePath" node="resource@path" />
 		</object>
-		<object method="addWoofSecurity" node="security"
+		<object method="setWoofSecurity" node="security"
 			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofSecurityModel">
 			<value method="setHttpSecurityName" node="security@name" />
+		</object>
+		<object method="setWoofApplicationPath" node="redirect"
+			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofApplicationPathModel">
+			<value method="setApplicationPath" node="redirect@path" />
 		</object>
 	</object>
 
@@ -33,7 +37,7 @@
 		<value method="setTemplateLocation" node="template@location" />
 		<value method="setTemplateClassName" node="template@class" />
 		<value method="setTemplateContentType" node="template@content-type" />
-		<value method="setTemplateCharset" node="template@chaarset" />
+		<value method="setTemplateCharset" node="template@charset" />
 		<value method="setIsTemplateSecure" node="template@secure" />
 		<value method="setRedirectValuesFunction" node="template@redirect-values-function" />
 		<value method="setLinkSeparatorCharacter" node="template@link-separator-character" />
@@ -60,11 +64,19 @@
 				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel">
 				<value method="setResourcePath" node="resource@path" />
 			</object>
+			<object method="setWoofApplicationPath" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofApplicationPathModel">
+				<value method="setApplicationPath" node="redirect@path" />
+			</object>
 		</object>
 		<object method="addLink" node="link"
 			class="net.officefloor.woof.model.woof.WoofTemplateLinkModel">
 			<value method="setWoofTemplateLinkName" node="link@name" />
 			<value method="setIsLinkSecure" node="link@secure" />
+		</object>
+		<object method="addRenderHttpMethod" node="render"
+			class="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel">
+			<value method="setWoofTemplateRenderHttpMethodName" node="render@method" />
 		</object>
 		<object method="addExtension" node="extension"
 			class="net.officefloor.woof.model.woof.WoofTemplateExtensionModel">
@@ -116,16 +128,21 @@
 				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel">
 				<value method="setResourcePath" node="resource@path" />
 			</object>
+			<object method="setWoofApplicationPath" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofApplicationPathModel">
+				<value method="setApplicationPath" node="redirect@path" />
+			</object>
 		</object>
 	</object>
 
 	<!-- SECURITY -->
 	<object method="addWoofSecurity" node="security"
 		class="net.officefloor.woof.model.woof.WoofSecurityModel">
-		<value method="setHttpSecuritySourceClassName" node="access@source" />
-		<value method="setTimeout" node="access@timeout" />
-		<value method="setX" node="access@x" />
-		<value method="setY" node="access@y" />
+		<value method="setHttpSecurityName" node="security@name" />
+		<value method="setHttpSecuritySourceClassName" node="security@source" />
+		<value method="setTimeout" node="security@timeout" />
+		<value method="setX" node="security@x" />
+		<value method="setY" node="security@y" />
 		<object method="addProperty" node="property"
 			class="net.officefloor.woof.model.woof.PropertyModel">
 			<value method="setName" node="property@name" />
@@ -147,6 +164,14 @@
 			<object method="setWoofResource" node="resource"
 				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel">
 				<value method="setResourcePath" node="resource@path" />
+			</object>
+			<object method="setWoofSecurity" node="security"
+				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel">
+				<value method="setHttpSecurityName" node="security@name" />
+			</object>
+			<object method="setWoofApplicationPath" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofApplicationPathModel">
+				<value method="setApplicationPath" node="redirect@path" />
 			</object>
 		</object>
 	</object>
@@ -198,6 +223,14 @@
 		<object method="setWoofResource" node="resource"
 			class="net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel">
 			<value method="setResourcePath" node="resource@path" />
+		</object>
+		<object method="setWoofSecurity" node="security"
+			class="net.officefloor.woof.model.woof.WoofExceptionToWoofSecurityModel">
+			<value method="setHttpSecurityName" node="security@name" />
+		</object>
+		<object method="setWoofApplicationPath" node="redirect"
+			class="net.officefloor.woof.model.woof.WoofExceptionToWoofApplicationPathModel">
+			<value method="setApplicationPath" node="redirect@path" />
 		</object>
 	</object>
 

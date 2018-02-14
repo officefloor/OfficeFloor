@@ -112,10 +112,10 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 						"getTemplateContentType", "getTemplateCharset", "getIsTemplateSecure",
 						"getRedirectValuesFunction", "getLinkSeparatorCharacter", "getX", "getY" },
 				woof.getWoofTemplates(),
-				new WoofTemplateModel("example", "example/TemplateA.ofp", "net.example.ExampleClassA", "redirect",
+				new WoofTemplateModel("/templateA", "example/TemplateA.ofp", "net.example.ExampleClassA", "redirect",
 						"text/plain; charset=UTF-16", "UTF-16", "_", true, null, null, null, null, null, null, null,
 						null, null, null, null, 300, 301),
-				new WoofTemplateModel("another", "example/TemplateB.ofp", null, null, null, null, null, false, null,
+				new WoofTemplateModel("/templateB", "example/TemplateB.ofp", null, null, null, null, null, false, null,
 						null, null, null, null, null, null, null, null, null, null, 302, 303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertList(new String[] { "getWoofTemplateOutputName", "getArgumentType" }, template.getOutputs(),
@@ -127,24 +127,25 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new WoofTemplateOutputToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				templateOutputSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
 		WoofTemplateOutputModel templateOutputTemplate = template.getOutputs().get(1);
-		assertProperties(new WoofTemplateOutputToWoofTemplateModel("TEMPLATE_B"),
+		assertProperties(new WoofTemplateOutputToWoofTemplateModel("/templateB"),
 				templateOutputTemplate.getWoofTemplate(), "getApplicationPath");
 		WoofTemplateOutputModel templateOutputResource = template.getOutputs().get(2);
-		assertProperties(new WoofTemplateOutputToWoofResourceModel("RESOURCE"),
+		assertProperties(new WoofTemplateOutputToWoofResourceModel("/resourceA.html"),
 				templateOutputResource.getWoofResource(), "getResourcePath");
 		WoofTemplateOutputModel templateOutputSecurity = template.getOutputs().get(3);
-		assertProperties(new WoofTemplateOutputToWoofSecurityModel("Security"),
+		assertProperties(new WoofTemplateOutputToWoofSecurityModel("SECURITY_B"),
 				templateOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofTemplateOutputModel templateOutputApplicationPath = template.getOutputs().get(4);
 		assertProperties(new WoofTemplateOutputToWoofApplicationPathModel("/pathA"),
-				templateOutputApplicationPath.getWoofApplicationPath(), "getHttpSecurityName");
+				templateOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
 
 		// Validate links
 		assertList(new String[] { "getWoofTemplateLinkName", "getIsLinkSecure" }, template.getLinks(),
 				new WoofTemplateLinkModel("LINK_0", true), new WoofTemplateLinkModel("LINK_1", false));
 
 		// Validate redirect methods
-		assertList(new String[] { "toString" }, template.getRenderHttpMethods(), "RENDER_POST", "RENDER_PUT");
+		assertList(new String[] { "getWoofTemplateRenderHttpMethodName" }, template.getRenderHttpMethods(),
+				new WoofTemplateRenderHttpMethodModel("POST"), new WoofTemplateRenderHttpMethodModel("PUT"));
 
 		// Validate Template extensions
 		assertList(new String[] { "getExtensionClassName" }, template.getExtensions(),
@@ -160,7 +161,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new String[] { "getWoofSectionName", "getSectionSourceClassName", "getSectionLocation", "getX",
 						"getY" },
 				woof.getWoofSections(),
-				new WoofSectionModel("SECTION_A", "DESK", "DESK_LOCATION", null, null, null, 400, 401),
+				new WoofSectionModel("SECTION_A", "SECTION", "SECTION_LOCATION", null, null, null, 400, 401),
 				new WoofSectionModel("SECTION_B", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", null, null,
 						null, 402, 403));
 		WoofSectionModel section = woof.getWoofSections().get(0);
@@ -185,7 +186,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionOutputModel sectionOutputSecurity = section.getOutputs().get(3);
 		assertProperties(new WoofSectionOutputToWoofSecurityModel("SECURITY_A"),
 				sectionOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
-		WoofSectionOutputModel sectionOutputApplicationPath = section.getOutputs().get(3);
+		WoofSectionOutputModel sectionOutputApplicationPath = section.getOutputs().get(4);
 		assertProperties(new WoofSectionOutputToWoofApplicationPathModel("/pathB"),
 				sectionOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
 
@@ -202,7 +203,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofSecurityModel security = woof.getWoofSecurities().get(0);
 		assertList(new String[] { "getName", "getValue" }, security.getProperties(),
 				new PropertyModel("name.first", "value.first"), new PropertyModel("name.second", "value.second"));
-		assertList(new String[] { "getWoofAccessOutputName", "getArgumentType" }, security.getOutputs(),
+		assertList(new String[] { "getWoofSecurityOutputName", "getArgumentType" }, security.getOutputs(),
 				new WoofSecurityOutputModel("OUTPUT_ZERO", "java.lang.String"),
 				new WoofSecurityOutputModel("OUTPUT_ONE", null), new WoofSecurityOutputModel("OUTPUT_TWO", null),
 				new WoofSecurityOutputModel("OUTPUT_THREE", null), new WoofSecurityOutputModel("OUTPUT_FOUR", null),

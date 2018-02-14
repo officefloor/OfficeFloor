@@ -11,7 +11,7 @@
 	<field type="WoofTemplateToSuperWoofTemplateModel" name="super woof template" />
 	<list type="WoofTemplateToSuperWoofTemplateModel" name="child woof template" />
 	<list type="WoofTemplateLinkModel" name="link" />
-	<list type="String" name="render http method" />
+	<list type="WoofTemplateRenderHttpMethodModel" name="render http method" />
 	<list type="WoofTemplateExtensionModel" name="extension" />
 	<list type="WoofSectionOutputToWoofTemplateModel" name="woof section output" />
 	<list type="WoofTemplateOutputToWoofTemplateModel" name="woof template output" />

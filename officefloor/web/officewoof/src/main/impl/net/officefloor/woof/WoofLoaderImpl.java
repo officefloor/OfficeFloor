@@ -81,6 +81,7 @@ import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel;
 import net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel;
 import net.officefloor.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
@@ -214,8 +215,8 @@ public class WoofLoaderImpl implements WoofLoader {
 			}
 
 			// Configure HTTP methods for rendering
-			for (String renderMethodName : templateModel.getRenderHttpMethods()) {
-				template.addRenderMethod(HttpMethod.getHttpMethod(renderMethodName));
+			for (WoofTemplateRenderHttpMethodModel renderMethod : templateModel.getRenderHttpMethods()) {
+				template.addRenderMethod(HttpMethod.getHttpMethod(renderMethod.getWoofTemplateRenderHttpMethodName()));
 			}
 
 			// Maintain reference to template by application path
