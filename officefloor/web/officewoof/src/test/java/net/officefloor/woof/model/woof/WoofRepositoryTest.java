@@ -59,7 +59,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// Create the raw WoOF to be connected
 		WoofModel woof = new WoofModel();
 		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false, null);
-		woof.addWoofAppliationPath(applicationPath);
+		woof.addWoofApplicationPath(applicationPath);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false, null);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel("TEMPLATE_OUTPUT", null);
@@ -345,7 +345,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// Create the WoOF (without connections)
 		WoofModel woof = new WoofModel();
 		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false, null);
-		woof.addWoofAppliationPath(applicationPath);
+		woof.addWoofApplicationPath(applicationPath);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false, null);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel("TEMPLATE_OUTPUT", null);

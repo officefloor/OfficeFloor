@@ -6,6 +6,7 @@
 			<service method="POST" />
 			<input section="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
+			<security name="SECURITY_A" />
 			<resource path="/resourceA.html" />
 			<redirect path="/pathB" />
 		</application-path>

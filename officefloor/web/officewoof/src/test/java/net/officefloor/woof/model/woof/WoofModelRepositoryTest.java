@@ -90,10 +90,10 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the application paths
 		// ----------------------------------------
-		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofAppliationPaths(),
+		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofApplicationPaths(),
 				new WoofApplicationPathModel("/pathA", true, null),
 				new WoofApplicationPathModel("/pathB", false, null));
-		WoofApplicationPathModel applicationPath = woof.getWoofAppliationPaths().get(0);
+		WoofApplicationPathModel applicationPath = woof.getWoofApplicationPaths().get(0);
 		assertList(applicationPath.getHttpMethods(), "GET", "POST");
 		assertProperties(new WoofApplicationPathToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				applicationPath.getWoofSectionInput(), "getSectionName", "getInputName");

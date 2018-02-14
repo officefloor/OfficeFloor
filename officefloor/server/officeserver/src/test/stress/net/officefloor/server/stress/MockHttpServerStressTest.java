@@ -189,7 +189,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 		// Wait for completion
 		long startTime = System.currentTimeMillis();
 		for (TestThread client : clients) {
-			client.waitForCompletion(startTime, 10);
+			client.waitForCompletion(startTime, 30);
 		}
 	}
 
