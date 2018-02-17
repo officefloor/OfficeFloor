@@ -66,6 +66,7 @@ import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofSecurityContentTypeModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
@@ -307,8 +308,8 @@ public class WoofLoaderImpl implements WoofLoader {
 			for (PropertyModel property : securityModel.getProperties()) {
 				securityBuilder.addProperty(property.getName(), property.getValue());
 			}
-			for (String contentType : securityModel.getContentTypes()) {
-				securityBuilder.addContentType(contentType);
+			for (WoofSecurityContentTypeModel contentType : securityModel.getContentTypes()) {
+				securityBuilder.addContentType(contentType.getContentType());
 			}
 
 			// Register the HTTP security

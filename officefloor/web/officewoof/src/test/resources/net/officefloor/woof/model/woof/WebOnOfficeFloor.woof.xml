@@ -4,7 +4,7 @@
 		<application-path path="/pathA" secure="true">
 			<service method="GET" />
 			<service method="POST" />
-			<input section="SECTION_A" input="INPUT_A" />
+			<section name="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
 			<security name="SECURITY_A" />
 			<resource path="/resourceA.html" />
@@ -20,7 +20,7 @@
 			link-separator-character="_" x="300" y="301">
 			<extends template="another" />
 			<output name="OUTPUT_0" argument-type="java.lang.Integer">
-				<input section="SECTION_A" input="INPUT_A" />
+				<section name="SECTION_A" input="INPUT_A" />
 			</output>
 			<output name="OUTPUT_1">
 				<template path="/templateB" />
@@ -57,7 +57,7 @@
 			<input name="INPUT_A" parameter-type="java.lang.Integer" />
 			<input name="INPUT_B" uri="example" />
 			<output name="OUTPUT_A" argument-type="java.lang.String">
-				<input section="SECTION_B" input="INPUT_0" />
+				<section name="SECTION_B" input="INPUT_0" />
 			</output>
 			<output name="OUTPUT_B">
 				<template path="/templateA" />
@@ -87,7 +87,7 @@
 			<content type="application/json" />
 			<content type="application/xml" />
 			<output name="OUTPUT_ZERO" argument-type="java.lang.String">
-				<input section="SECTION_B" input="INPUT_1" />
+				<section name="SECTION_B" input="INPUT_1" />
 			</output>
 			<output name="OUTPUT_ONE">
 				<template path="/templateA" />
@@ -126,7 +126,7 @@
 
 	<exceptions>
 		<exception class="java.lang.Exception" x="800" y="801">
-			<input section="SECTION_A" input="INPUT_A" />
+			<section name="SECTION_A" input="INPUT_A" />
 		</exception>
 		<exception class="java.lang.RuntimeException" x="802" y="803">
 			<template path="/templateA" />
@@ -143,11 +143,11 @@
 		<exception class="java.io.IOException" x="810" y="811" />
 	</exceptions>
 
-	<starting>
+	<starts>
 		<start x="900" y="901">
-			<flow section="SECTION_A" input="INPUT_A" />
+			<section name="SECTION_A" input="INPUT_A" />
 		</start>
 		<start x="910" y="911" />
-	</starting>
+	</starts>
 
 </woof>

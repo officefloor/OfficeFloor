@@ -91,10 +91,10 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the application paths
 		// ----------------------------------------
 		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofApplicationPaths(),
-				new WoofApplicationPathModel("/pathA", true, null),
-				new WoofApplicationPathModel("/pathB", false, null));
+				new WoofApplicationPathModel("/pathA", true), new WoofApplicationPathModel("/pathB", false));
 		WoofApplicationPathModel applicationPath = woof.getWoofApplicationPaths().get(0);
-		assertList(applicationPath.getHttpMethods(), "GET", "POST");
+		assertList(new String[] { "getHttpMethodName" }, applicationPath.getHttpMethods(),
+				new WoofApplicationPathHttpMethodModel("GET"), new WoofApplicationPathHttpMethodModel("POST"));
 		assertProperties(new WoofApplicationPathToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				applicationPath.getWoofSectionInput(), "getSectionName", "getInputName");
 		assertProperties(new WoofApplicationPathToWoofTemplateModel("/templateB"), applicationPath.getWoofTemplate(),
@@ -203,6 +203,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofSecurityModel security = woof.getWoofSecurities().get(0);
 		assertList(new String[] { "getName", "getValue" }, security.getProperties(),
 				new PropertyModel("name.first", "value.first"), new PropertyModel("name.second", "value.second"));
+		assertList(new String[] { "getContentType" }, security.getContentTypes(),
+				new WoofSecurityContentTypeModel("application/json"),
+				new WoofSecurityContentTypeModel("application/xml"));
 		assertList(new String[] { "getWoofSecurityOutputName", "getArgumentType" }, security.getOutputs(),
 				new WoofSecurityOutputModel("OUTPUT_ZERO", "java.lang.String"),
 				new WoofSecurityOutputModel("OUTPUT_ONE", null), new WoofSecurityOutputModel("OUTPUT_TWO", null),

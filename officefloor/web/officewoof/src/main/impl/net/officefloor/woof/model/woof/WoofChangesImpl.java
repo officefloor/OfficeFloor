@@ -1598,12 +1598,19 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Create the security
 		final WoofSecurityModel woofSecurity = new WoofSecurityModel(httpSecurityName, httpSecuritySourceClassName,
-				timeout, contentTypes);
+				timeout);
 
 		// Add the properties (if available)
 		if (properties != null) {
 			for (Property property : properties) {
 				woofSecurity.addProperty(new PropertyModel(property.getName(), property.getValue()));
+			}
+		}
+
+		// Add the content types (if available)
+		if (contentTypes != null) {
+			for (String contentType : contentTypes) {
+				woofSecurity.addContentType(new WoofSecurityContentTypeModel(contentType));
 			}
 		}
 
@@ -1620,7 +1627,7 @@ public class WoofChangesImpl implements WoofChanges {
 		sortSecurityOutputs(woofSecurity);
 
 		// Create and return change to set access
-		return new AbstractChange<WoofSecurityModel>(woofSecurity, "Set Security") {
+		return new AbstractChange<WoofSecurityModel>(woofSecurity, "Add Security") {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofSecurity(woofSecurity);
@@ -1628,7 +1635,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 			@Override
 			public void revert() {
-				WoofChangesImpl.this.model.removeWoofSecurity(null);
+				WoofChangesImpl.this.model.removeWoofSecurity(woofSecurity);
 			}
 		};
 	}

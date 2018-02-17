@@ -7,7 +7,7 @@
 	<field type="WoofApplicationPathToWoofResourceModel" name="woof resource" />
 	<field type="WoofApplicationPathToWoofSecurityModel" name="woof security" />
 	<field type="WoofApplicationPathToWoofApplicationPathModel" name="woof application path" />
-	<list type="String" name="http method" />
+	<list type="WoofApplicationPathHttpMethodModel" name="http method" />
 	<list type="WoofTemplateOutputToWoofApplicationPathModel" name="woof template output" />
 	<list type="WoofSectionOutputToWoofApplicationPathModel" name="woof section output" />
 	<list type="WoofExceptionToWoofApplicationPathModel" name="woof exception" />

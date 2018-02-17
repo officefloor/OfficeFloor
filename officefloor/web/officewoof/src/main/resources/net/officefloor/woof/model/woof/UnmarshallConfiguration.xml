@@ -6,11 +6,14 @@
 		class="net.officefloor.woof.model.woof.WoofApplicationPathModel">
 		<value method="setApplicationPath" node="application-path@path" />
 		<value method="setIsSecure" node="application-path@secure" />
-		<value method="addHttpMethod" node="service@method" />
-		<object method="setWoofSectionInput" node="input"
+		<object method="addHttpMethod" node="service"
+			class="net.officefloor.woof.model.woof.WoofApplicationPathHttpMethodModel">
+			<value method="setHttpMethodName" node="service@method" />
+		</object>
+		<object method="setWoofSectionInput" node="section"
 			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofSectionInputModel">
-			<value method="setSectionName" node="input@section" />
-			<value method="setInputName" node="input@input" />
+			<value method="setSectionName" node="section@name" />
+			<value method="setInputName" node="section@input" />
 		</object>
 		<object method="setWoofTemplate" node="template"
 			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofTemplateModel">
@@ -47,10 +50,10 @@
 			class="net.officefloor.woof.model.woof.WoofTemplateOutputModel">
 			<value method="setWoofTemplateOutputName" node="output@name" />
 			<value method="setArgumentType" node="output@argument-type" />
-			<object method="setWoofSectionInput" node="input"
+			<object method="setWoofSectionInput" node="section"
 				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel">
-				<value method="setSectionName" node="input@section" />
-				<value method="setInputName" node="input@input" />
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
 			</object>
 			<object method="setWoofTemplate" node="template"
 				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel">
@@ -111,10 +114,10 @@
 			class="net.officefloor.woof.model.woof.WoofSectionOutputModel">
 			<value method="setWoofSectionOutputName" node="output@name" />
 			<value method="setArgumentType" node="output@argument-type" />
-			<object method="setWoofSectionInput" node="input"
+			<object method="setWoofSectionInput" node="section"
 				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofSectionInputModel">
-				<value method="setSectionName" node="input@section" />
-				<value method="setInputName" node="input@input" />
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
 			</object>
 			<object method="setWoofTemplate" node="template"
 				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel">
@@ -148,14 +151,18 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addContentType" node="content"
+			class="net.officefloor.woof.model.woof.WoofSecurityContentTypeModel">
+			<value method="setContentType" node="content@type" />
+		</object>
 		<object method="addOutput" node="output"
 			class="net.officefloor.woof.model.woof.WoofSecurityOutputModel">
 			<value method="setWoofSecurityOutputName" node="output@name" />
 			<value method="setArgumentType" node="output@argument-type" />
-			<object method="setWoofSectionInput" node="input"
+			<object method="setWoofSectionInput" node="section"
 				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel">
-				<value method="setSectionName" node="input@section" />
-				<value method="setInputName" node="input@input" />
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
 			</object>
 			<object method="setWoofTemplate" node="template"
 				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel">
@@ -211,10 +218,10 @@
 		<value method="setClassName" node="exception@class" />
 		<value method="setX" node="exception@x" />
 		<value method="setY" node="exception@y" />
-		<object method="setWoofSectionInput" node="input"
+		<object method="setWoofSectionInput" node="section"
 			class="net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel">
-			<value method="setSectionName" node="input@section" />
-			<value method="setInputName" node="input@input" />
+			<value method="setSectionName" node="section@name" />
+			<value method="setInputName" node="section@input" />
 		</object>
 		<object method="setWoofTemplate" node="template"
 			class="net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel">
@@ -239,10 +246,10 @@
 		class="net.officefloor.woof.model.woof.WoofStartModel">
 		<value method="setX" node="start@x" />
 		<value method="setY" node="start@y" />
-		<object method="setWoofSectionInput" node="flow"
+		<object method="setWoofSectionInput" node="section"
 			class="net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel">
-			<value method="setSectionName" node="flow@section" />
-			<value method="setInputName" node="flow@input" />
+			<value method="setSectionName" node="section@name" />
+			<value method="setInputName" node="section@input" />
 		</object>
 	</object>
 

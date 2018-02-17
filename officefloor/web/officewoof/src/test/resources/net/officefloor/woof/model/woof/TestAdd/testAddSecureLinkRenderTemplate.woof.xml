@@ -1,0 +1,14 @@
+<woof>
+
+	<templates>
+		<template application-path="/path" location="example/Template.ofp"
+			class="net.example.LogicClass" secure="true">
+			<link name="LINK_1" secure="true" />
+			<link name="LINK_2" secure="false" />
+			<render method="OTHER" />
+			<render method="POST" />
+			<render method="PUT" />
+		</template>
+	</templates>
+
+</woof>

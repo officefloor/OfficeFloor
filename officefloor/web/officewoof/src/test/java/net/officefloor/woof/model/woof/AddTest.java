@@ -68,7 +68,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate("uri", "example/Template.ofp",
+		Change<WoofTemplateModel> change = this.operations.addTemplate("/path", "example/Template.ofp",
 				"net.example.LogicClass", section, null, null, null, false, null, null, null, null,
 				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
@@ -98,7 +98,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate("uri", "example/Template.ofp",
+		Change<WoofTemplateModel> change = this.operations.addTemplate("/path", "example/Template.ofp",
 				"net.example.LogicClass", section, null, "text/html; charset=UTF-16", "UTF-16", false, null, null, null,
 				null, this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
@@ -136,7 +136,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure able to add with links and render configuration.
 	 */
-	public void testAddSecureLinkRenderConfiguredTemplate() {
+	public void testAddSecureLinkRenderTemplate() {
 
 		// Create the section type
 		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
@@ -149,7 +149,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
 		secureLinks.put("LINK_1", Boolean.TRUE);
 		secureLinks.put("LINK_2", Boolean.FALSE);
-		Change<WoofTemplateModel> change = this.operations.addTemplate("Template", "example/Template.ofp",
+		Change<WoofTemplateModel> change = this.operations.addTemplate("/path", "example/Template.ofp",
 				"net.example.LogicClass", section, null, null, null, true, null, secureLinks,
 				new String[] { "POST", "PUT", "OTHER" }, null, this.getWoofTemplateChangeContext());
 
@@ -190,7 +190,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testAddTemplateWithExtension() {
 
-		final String TEMPLATE_URI = "uri";
+		final String TEMPLATE_URI = "/path";
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
@@ -306,7 +306,6 @@ public class AddTest extends AbstractWoofChangesTestCase {
 					// Include flows
 					context.addFlow("OUTPUT_1", String.class, null);
 					context.addFlow("OUTPUT_2", null, null);
-
 				});
 
 		// Create the properties
@@ -315,8 +314,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Specify the access
-		Change<WoofSecurityModel> change = this.operations.addSecurity("test", "net.example.HttpSecuritySource", 2000,
-				properties, new String[] { "application/json" }, httpSecurityType);
+		Change<WoofSecurityModel> change = this.operations.addSecurity("SECURITY", "net.example.HttpSecuritySource",
+				2000, properties, new String[] { "application/json" }, httpSecurityType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -348,18 +347,18 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.b").setValue("value.b");
 
 		// Specify the access
-		Change<WoofSecurityModel> change = this.operations.addSecurity("test", "net.other.HttpSecuritySource", 3000,
-				properties, new String[] { "application/xml", "application/json" }, httpSecurityType);
+		Change<WoofSecurityModel> change = this.operations.addSecurity("SECURITY", "net.other.HttpSecuritySource", 3000,
+				properties, new String[] { "application/json", "application/xml" }, httpSecurityType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
 		// Validate change
-		this.assertChange(change, null, "Set Access", true);
+		this.assertChange(change, null, "Add Security", true);
 
 		// Ensure appropriately specified access
 		change.apply();
 		WoofSecurityModel woofSecurity = this.model.getWoofSecurities().get(0);
-		assertSame("Incorrect access", woofSecurity, change.getTarget());
+		assertSame("Incorrect security", woofSecurity, change.getTarget());
 	}
 
 	/**

@@ -58,7 +58,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw WoOF to be connected
 		WoofModel woof = new WoofModel();
-		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false, null);
+		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false);
 		woof.addWoofApplicationPath(applicationPath);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
 		woof.addWoofTemplate(template);
@@ -70,7 +70,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
-		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000, null);
+		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000);
 		woof.addWoofSecurity(security);
 		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("ACCESS_OUTPUT", null);
 		security.addOutput(securityOutput);
@@ -344,7 +344,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the WoOF (without connections)
 		WoofModel woof = new WoofModel();
-		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false, null);
+		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false);
 		woof.addWoofApplicationPath(applicationPath);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
 		woof.addWoofTemplate(template);
@@ -356,7 +356,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
-		WoofSecurityModel security = new WoofSecurityModel("ACCESS", null, 1000, null);
+		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000);
 		woof.addWoofSecurity(security);
 		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("ACCESS_OUTPUT", null);
 		security.addOutput(securityOutput);

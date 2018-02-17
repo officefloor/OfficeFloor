@@ -1,7 +1,7 @@
 <woof>
 
 	<resources>
-		<resource name="index.html" path="index.html" x="100" y="101" />
+		<resource path="index.html" x="100" y="101" />
 	</resources>
 
 </woof>
