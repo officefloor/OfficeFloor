@@ -164,7 +164,12 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 		}
 		assertEquals("Incorrect change description", expectedChangeDescription, change.getChangeDescription());
 		Conflict[] conflicts = change.getConflicts();
-		assertEquals("Incorrect number of conflicts", expectedConflictDescriptions.length, conflicts.length);
+		StringBuilder conflictMessage = new StringBuilder();
+		for (Conflict conflict : conflicts) {
+			conflictMessage.append(" - " + conflict.getConflictDescription() + "\n");
+		}
+		assertEquals("Incorrect number of conflicts\n\n" + conflictMessage.toString(),
+				expectedConflictDescriptions.length, conflicts.length);
 		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
 			assertEquals("Incorrect description for conflict " + i, expectedConflictDescriptions[i],
 					conflicts[i].getConflictDescription());

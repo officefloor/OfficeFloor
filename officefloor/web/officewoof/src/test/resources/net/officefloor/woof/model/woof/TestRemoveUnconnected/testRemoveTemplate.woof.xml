@@ -1,5 +1,9 @@
 <woof>
 
+	<application-paths>
+		<application-path path="/path" />
+	</application-paths>
+
 	<templates />
 
 	<sections>
@@ -7,22 +11,24 @@
 			location="SECTION_LOCATION" />
 	</sections>
 
-	<access source="net.example.HttpSecuritySource" />
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource" />
+	</securities>
 
 	<governances>
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
 	</governances>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="Example.html" />
 	</resources>
 
 	<exceptions>
 		<exception class="java.lang.Exception" />
 	</exceptions>
 	
-	<starting>
+	<starts>
 		<start />
-	</starting>
+	</starts>
 
 </woof>

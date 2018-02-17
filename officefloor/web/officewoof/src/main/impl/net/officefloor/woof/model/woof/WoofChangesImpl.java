@@ -46,44 +46,6 @@ import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
-import net.officefloor.woof.model.woof.PropertyModel;
-import net.officefloor.woof.model.woof.WoofChangeIssues;
-import net.officefloor.woof.model.woof.WoofChanges;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
-import net.officefloor.woof.model.woof.WoofTemplateExtension;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionProperty;
-import net.officefloor.woof.model.woof.WoofTemplateInheritance;
-import net.officefloor.woof.model.woof.WoofTemplateLinkModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel;
 import net.officefloor.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
 
@@ -732,6 +694,89 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return the template inheritances
 		return templateInheritances;
+	}
+
+	@Override
+	public Change<WoofApplicationPathModel> addApplicationPath(String applicationPath, boolean isSecure,
+			String[] serviceHttpMethods) {
+
+		// Create the application path
+		final WoofApplicationPathModel path = new WoofApplicationPathModel(applicationPath, isSecure);
+
+		// Determine if have service HTTP methods
+		if (serviceHttpMethods != null) {
+			// Add the service HTTP methods
+			for (String serverHttpMethod : serviceHttpMethods) {
+				path.addHttpMethod(new WoofApplicationPathHttpMethodModel(serverHttpMethod));
+			}
+		}
+
+		// Return change to add application path
+		return new AbstractChange<WoofApplicationPathModel>(path, "Add Application Path") {
+			@Override
+			public void apply() {
+				WoofChangesImpl.this.model.addWoofApplicationPath(path);
+			}
+
+			@Override
+			public void revert() {
+				WoofChangesImpl.this.model.removeWoofApplicationPath(path);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofApplicationPathModel> removeApplicationPath(WoofApplicationPathModel applicationPath) {
+
+		// Ensure application path available to remove
+		boolean isInModel = false;
+		for (WoofApplicationPathModel model : this.model.getWoofApplicationPaths()) {
+			if (model == applicationPath) {
+				isInModel = true;
+			}
+		}
+		if (!isInModel) {
+			// Application path model not in model
+			return new NoChange<WoofApplicationPathModel>(applicationPath,
+					"Remove application path " + applicationPath.getApplicationPath(), " is not in WoOF model");
+		}
+
+		// Return change to remove application path
+		return new AbstractChange<WoofApplicationPathModel>(applicationPath,
+				"Remove application path " + applicationPath.getApplicationPath()) {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+
+				// Remove the connections
+				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+				removeConnections(applicationPath.getWoofTemplateOutputs(), list);
+				removeConnections(applicationPath.getWoofSectionOutputs(), list);
+				removeConnections(applicationPath.getWoofSecurityOutputs(), list);
+				removeConnections(applicationPath.getWoofExceptions(), list);
+				removeConnection(applicationPath.getWoofTemplate(), list);
+				removeConnection(applicationPath.getWoofSectionInput(), list);
+				removeConnection(applicationPath.getWoofSecurity(), list);
+				removeConnection(applicationPath.getWoofResource(), list);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
+
+				// Remove the application path
+				WoofChangesImpl.this.model.removeWoofApplicationPath(applicationPath);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the application path
+				WoofChangesImpl.this.model.addWoofApplicationPath(applicationPath);
+				reconnectConnections(this.connections);
+				WoofChangesImpl.this.sortSections();
+			}
+		};
 	}
 
 	@Override

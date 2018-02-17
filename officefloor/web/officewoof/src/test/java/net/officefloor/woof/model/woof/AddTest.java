@@ -29,6 +29,7 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.woof.model.woof.WoofExceptionModel;
@@ -49,6 +50,42 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
  * @author Daniel Sagenschneider
  */
 public class AddTest extends AbstractWoofChangesTestCase {
+
+	/**
+	 * Ensure able to add {@link WoofApplicationPathModel}.
+	 */
+	public void testAddApplicationPath() {
+
+		// Add the application path
+		Change<WoofApplicationPathModel> change = this.operations.addApplicationPath("/path", false, null);
+
+		// Validate the chnage
+		this.assertChange(change, null, "Add Application Path", true);
+
+		// Enusre appropriately added template
+		change.apply();
+		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(0);
+		assertSame("Incorrect application path", applicationPath, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add {@link WoofApplicationPathModel} with service
+	 * {@link HttpMethod} instances.
+	 */
+	public void testAddApplicationPathWithServiceHttpMethods() {
+
+		// Add the application path
+		Change<WoofApplicationPathModel> change = this.operations.addApplicationPath("/path", true,
+				new String[] { "POST", "GET", "PUT" });
+
+		// Validate the chnage
+		this.assertChange(change, null, "Add Application Path", true);
+
+		// Enusre appropriately added template
+		change.apply();
+		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(0);
+		assertSame("Incorrect application path", applicationPath, change.getTarget());
+	}
 
 	/**
 	 * Ensure able to add {@link WoofTemplateModel}.
@@ -170,15 +207,15 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		});
 
 		// Add the first template
-		this.operations.addTemplate("Template", "example/Template.ofp", "Class1", section, null, null, null, false,
+		this.operations.addTemplate("/pathA", "example/TemplateOne.ofp", "Class1", section, null, null, null, false,
 				null, null, null, null, this.getWoofTemplateChangeContext()).apply();
 
 		// Add twice
-		this.operations.addTemplate("Template", "example/Template.ofp", "Class2", section, null, null, null, false,
+		this.operations.addTemplate("/pathB", "example/TemplateTwo.ofp", "Class2", section, null, null, null, false,
 				null, null, null, null, this.getWoofTemplateChangeContext()).apply();
 
 		// Add again with absolute URI
-		this.operations.addTemplate("/Template", "example/Template.ofp", "Class3", section, null, null, null, false,
+		this.operations.addTemplate("/pathC", "example/TemplateThree.ofp", "Class3", section, null, null, null, false,
 				null, null, null, null, this.getWoofTemplateChangeContext()).apply();
 
 		// Ensure appropriately added templates

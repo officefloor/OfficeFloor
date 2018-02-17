@@ -47,9 +47,9 @@ public class MockChangeWoofTemplateExtensionSource extends
 	private static Change<?> change = null;
 
 	/**
-	 * Expected old URI.
+	 * Expected old application path.
 	 */
-	private static String oldUri = null;
+	private static String oldApplicationPath = null;
 
 	/**
 	 * Expected old property name value pairs.
@@ -57,9 +57,9 @@ public class MockChangeWoofTemplateExtensionSource extends
 	private static String[] oldPropertyNameValuePairs = null;
 
 	/**
-	 * Expected new URI.
+	 * Expected new application path.
 	 */
-	private static String newUri = null;
+	private static String newApplicationPath = null;
 
 	/**
 	 * Expected old property name value pairs.
@@ -76,25 +76,25 @@ public class MockChangeWoofTemplateExtensionSource extends
 	 * 
 	 * @param change
 	 *            {@link Change}.
-	 * @param oldUrl
+	 * @param oldApplicationPath
 	 *            Expected old URL.
 	 * @param oldPropertyNameValuePairs
 	 *            Expected old {@link Property} values.
-	 * @param newUrl
+	 * @param newApplicationPath
 	 *            Expected new URL.
 	 * @param newPropertyNameValuePairs
 	 *            Expected new {@link Property} values.
 	 * @param changeContext
 	 *            {@link WoofTemplateChangeContext}.
 	 */
-	public static void reset(Change<?> change, String oldUrl,
-			String[] oldPropertyNameValuePairs, String newUrl,
+	public static void reset(Change<?> change, String oldApplicationPath,
+			String[] oldPropertyNameValuePairs, String newApplicationPath,
 			String[] newPropertyNameValuePairs,
 			WoofTemplateChangeContext changeContext) {
 		MockChangeWoofTemplateExtensionSource.change = change;
-		MockChangeWoofTemplateExtensionSource.oldUri = oldUrl;
+		MockChangeWoofTemplateExtensionSource.oldApplicationPath = oldApplicationPath;
 		MockChangeWoofTemplateExtensionSource.oldPropertyNameValuePairs = oldPropertyNameValuePairs;
-		MockChangeWoofTemplateExtensionSource.newUri = newUrl;
+		MockChangeWoofTemplateExtensionSource.newApplicationPath = newApplicationPath;
 		MockChangeWoofTemplateExtensionSource.newPropertyNameValuePairs = newPropertyNameValuePairs;
 		MockChangeWoofTemplateExtensionSource.changeContext = changeContext;
 	}
@@ -182,11 +182,11 @@ public class MockChangeWoofTemplateExtensionSource extends
 		}
 
 		// Validate the old configuration
-		assertConfiguration("old", context.getOldConfiguration(), oldUri,
+		assertConfiguration("old", context.getOldConfiguration(), oldApplicationPath,
 				oldPropertyNameValuePairs);
 
 		// Validate the new configuration
-		assertConfiguration("new", context.getNewConfiguration(), newUri,
+		assertConfiguration("new", context.getNewConfiguration(), newApplicationPath,
 				newPropertyNameValuePairs);
 
 		// Validate the configuration context

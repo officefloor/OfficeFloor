@@ -1,7 +1,11 @@
 <woof>
 
+	<application-paths>
+		<application-path path="/path" />
+	</application-paths>
+
 	<templates>
-		<template name="TEMPLATE" uri="template" path="example/Template.ofp"
+		<template application-path="/template" location="example/Template.ofp"
 			class="net.example.LogicClass">
 			<extension
 				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
@@ -18,20 +22,22 @@
 			location="SECTION_LOCATION" />
 	</sections>
 
+	<securities />
+
 	<governances>
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
 	</governances>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="Example.html" />
 	</resources>
 
 	<exceptions>
 		<exception class="java.lang.Exception" />
 	</exceptions>
 
-	<starting>
+	<starts>
 		<start />
-	</starting>
+	</starts>
 
 </woof>

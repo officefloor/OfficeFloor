@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.model.change.Change;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
@@ -74,12 +75,37 @@ public interface WoofChanges {
 
 	/**
 	 * Obtains the {@link WoofTemplateInheritance} instances by their super
-	 * {@link WoofTemplateModel} names.
+	 * {@link WoofTemplateModel} application path.
 	 * 
 	 * @return {@link WoofTemplateInheritance} instances by their super
-	 *         {@link WoofTemplateModel} names.
+	 *         {@link WoofTemplateModel} application path.
 	 */
 	Map<String, WoofTemplateInheritance> getWoofTemplateInheritances();
+
+	/**
+	 * Adds a {@link WoofApplicationPathModel}.
+	 * 
+	 * @param applicationPath
+	 *            URI to the {@link WoofApplicationPathModel}.
+	 * @param isSecure
+	 *            <code>true</code> to require a secure
+	 *            {@link ServerHttpConnection}.
+	 * @param serviceHttpMethods
+	 *            Names of the {@link HttpMethod} instances for this
+	 *            {@link WoofApplicationPathModel}.
+	 * @return {@link Change} to add a {@link WoofApplicationPathModel}.
+	 */
+	Change<WoofApplicationPathModel> addApplicationPath(String applicationPath, boolean isSecure,
+			String[] serviceHttpMethods);
+
+	/**
+	 * Removes a {@link WoofApplicationPathModel}.
+	 * 
+	 * @param applicationPath
+	 *            {@link WoofApplicationPathModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofApplicationPathModel}.
+	 */
+	Change<WoofApplicationPathModel> removeApplicationPath(WoofApplicationPathModel applicationPath);
 
 	/**
 	 * Adds a {@link WoofTemplateModel}.

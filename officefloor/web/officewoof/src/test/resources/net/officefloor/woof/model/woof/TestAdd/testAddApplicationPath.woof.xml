@@ -1,0 +1,7 @@
+<woof>
+
+	<application-paths>
+		<application-path path="/path" />
+	</application-paths>
+
+</woof>
