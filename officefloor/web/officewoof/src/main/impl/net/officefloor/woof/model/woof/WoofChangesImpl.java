@@ -19,7 +19,6 @@ package net.officefloor.woof.model.woof;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -57,57 +57,6 @@ import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
 public class WoofChangesImpl implements WoofChanges {
 
 	/**
-	 * {@link WoofTemplateModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofTemplateModel> TEMPLATE_NAME_EXTRACTOR = (model) -> model
-			.getApplicationPath();
-
-	/**
-	 * {@link WoofTemplateLinkModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofTemplateLinkModel> TEMPLATE_LINK_NAME_EXTRACTOR = (model) -> model
-			.getWoofTemplateLinkName();
-
-	/**
-	 * {@link WoofSectionModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofSectionModel> SECTION_NAME_EXTRACTOR = (model) -> model.getWoofSectionName();
-
-	/**
-	 * {@link WoofSectionInputModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofSectionInputModel> SECTION_INPUT_NAME_EXTRACTOR = (model) -> model
-			.getWoofSectionInputName();
-
-	/**
-	 * {@link WoofSectionOutputModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofSectionOutputModel> SECTION_OUTPUT_NAME_EXTRACTOR = (model) -> model
-			.getWoofSectionOutputName();
-
-	/**
-	 * {@link WoofGovernanceModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofGovernanceModel> GOVERNANCE_NAME_EXTRACTOR = (model) -> model
-			.getWoofGovernanceName();
-
-	/**
-	 * {@link WoofGovernanceAreaModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofGovernanceAreaModel> GOVERNANCE_AREA_IDENTIFIER_EXTRACTOR = (
-			model) -> model.getWidth() + "-" + model.getHeight();
-
-	/**
-	 * {@link WoofResourceModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofResourceModel> RESOURCE_NAME_EXTRACTOR = (model) -> model.getResourcePath();
-
-	/**
-	 * {@link WoofExceptionModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofExceptionModel> EXCEPTION_NAME_EXTRACTOR = (model) -> model.getClassName();
-
-	/**
 	 * Sorts the models by name.
 	 * 
 	 * @param models
@@ -115,14 +64,11 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param nameExtractor
 	 *            {@link NameExtractor}.
 	 */
-	private static <M> void sortByName(List<M> models, final NameExtractor<M> nameExtractor) {
-		Collections.sort(models, new Comparator<M>() {
-			@Override
-			public int compare(M a, M b) {
-				String nameA = nameExtractor.extractName(a);
-				String nameB = nameExtractor.extractName(b);
-				return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
-			}
+	private static <M> void sortModelList(List<M> models, final Function<M, String> nameExtractor) {
+		Collections.sort(models, (a, b) -> {
+			String nameA = nameExtractor.apply(a);
+			String nameB = nameExtractor.apply(b);
+			return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
 		});
 	}
 
@@ -137,23 +83,13 @@ public class WoofChangesImpl implements WoofChanges {
 	private static void sortTemplateConfiguration(WoofTemplateModel template) {
 
 		// Sort outputs keeping template render complete output last
-		Collections.sort(template.getOutputs(), (a, b) -> {
-			String nameA = a.getWoofTemplateOutputName();
-			String nameB = b.getWoofTemplateOutputName();
-			if (nameA.equals(nameB)) {
-				return 0; // same
-			} else {
-				// Sort by name
-				return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
-			}
-		});
+		sortModelList(template.getOutputs(), (model) -> model.getWoofTemplateOutputName());
 
 		// Sort the links
-		sortByName(template.getLinks(), TEMPLATE_LINK_NAME_EXTRACTOR);
+		sortModelList(template.getLinks(), (model) -> model.getWoofTemplateLinkName());
 
 		// Sort the render HTTP methods
-		Collections.sort(template.getRenderHttpMethods(), (a, b) -> String.CASE_INSENSITIVE_ORDER
-				.compare(a.getWoofTemplateRenderHttpMethodName(), b.getWoofTemplateRenderHttpMethodName()));
+		sortModelList(template.getRenderHttpMethods(), (model) -> model.getWoofTemplateRenderHttpMethodName());
 	}
 
 	/**
@@ -164,8 +100,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofSectionModel}.
 	 */
 	private static void sortSectionInputOutputs(WoofSectionModel section) {
-		sortByName(section.getInputs(), SECTION_INPUT_NAME_EXTRACTOR);
-		sortByName(section.getOutputs(), SECTION_OUTPUT_NAME_EXTRACTOR);
+		sortModelList(section.getInputs(), (model) -> model.getWoofSectionInputName());
+		sortModelList(section.getOutputs(), (model) -> model.getWoofSectionOutputName());
 	}
 
 	/**
@@ -176,21 +112,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofSecurityModel}.
 	 */
 	private static void sortSecurityOutputs(WoofSecurityModel security) {
-
-		// Sort outputs keeping Failure output last
-		Collections.sort(security.getOutputs(), new Comparator<WoofSecurityOutputModel>() {
-			@Override
-			public int compare(WoofSecurityOutputModel a, WoofSecurityOutputModel b) {
-				String nameA = a.getWoofSecurityOutputName();
-				String nameB = b.getWoofSecurityOutputName();
-				if (nameA.equals(nameB)) {
-					return 0; // same
-				} else {
-					// Sort by name
-					return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
-				}
-			}
-		});
+		sortModelList(security.getOutputs(), (output) -> output.getWoofSecurityOutputName());
 	}
 
 	/**
@@ -203,11 +125,11 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param models
 	 *            Listing of the existing models.
 	 * @param nameExtractor
-	 *            {@link NameExtractor}.
+	 *            {@link Function} to extract the name.
 	 * @return Unique name.
 	 */
 	private static <M> String getUniqueName(final String name, M model, List<M> models,
-			NameExtractor<M> nameExtractor) {
+			Function<M, String> nameExtractor) {
 
 		// Determine suffix
 		String uniqueName = name;
@@ -226,7 +148,7 @@ public class WoofChangesImpl implements WoofChanges {
 				if (check == model) {
 					continue; // ignore same model
 				}
-				String extractedName = nameExtractor.extractName(check);
+				String extractedName = nameExtractor.apply(check);
 				if (uniqueName.equals(extractedName)) {
 					isNameExist = true;
 				}
@@ -235,21 +157,6 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return the unique name
 		return uniqueName;
-	}
-
-	/**
-	 * Extracts the name from the model.
-	 */
-	private static interface NameExtractor<M> {
-
-		/**
-		 * Obtains the name from the model.
-		 * 
-		 * @param model
-		 *            Model.
-		 * @return Name of the model.
-		 */
-		String extractName(M model);
 	}
 
 	/**
@@ -531,21 +438,21 @@ public class WoofChangesImpl implements WoofChanges {
 	 * Sorts the {@link WoofTemplateModel} instances.
 	 */
 	private void sortTemplates() {
-		sortByName(this.model.getWoofTemplates(), TEMPLATE_NAME_EXTRACTOR);
+		sortModelList(this.model.getWoofTemplates(), (model) -> model.getApplicationPath());
 	}
 
 	/**
 	 * Sorts the {@link WoofSectionModel} instances.
 	 */
 	private void sortSections() {
-		sortByName(this.model.getWoofSections(), SECTION_NAME_EXTRACTOR);
+		sortModelList(this.model.getWoofSections(), (model) -> model.getWoofSectionName());
 	}
 
 	/**
 	 * Sorts the {@link WoofGovernanceModel} instances.
 	 */
 	private void sortGovernances() {
-		sortByName(this.model.getWoofGovernances(), GOVERNANCE_NAME_EXTRACTOR);
+		sortModelList(this.model.getWoofGovernances(), (model) -> model.getWoofGovernanceName());
 	}
 
 	/**
@@ -557,21 +464,28 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofGovernanceAreaModel} instances sorted.
 	 */
 	private void sortGovernanceAreas(WoofGovernanceModel governance) {
-		sortByName(governance.getGovernanceAreas(), GOVERNANCE_AREA_IDENTIFIER_EXTRACTOR);
+		sortModelList(governance.getGovernanceAreas(), (model) -> model.getWidth() + "-" + model.getHeight());
 	}
 
 	/**
 	 * Sorts the {@link WoofResourceModel} instances.
 	 */
 	private void sortResources() {
-		sortByName(this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
+		sortModelList(this.model.getWoofResources(), (model) -> model.getResourcePath());
 	}
 
 	/**
 	 * Sorts the {@link WoofExceptionModel} instances.
 	 */
 	private void sortExceptions() {
-		sortByName(this.model.getWoofExceptions(), EXCEPTION_NAME_EXTRACTOR);
+		sortModelList(this.model.getWoofExceptions(), (model) -> model.getClassName());
+	}
+
+	/**
+	 * Sorts the {@link WoofApplicationPathModel} instances.
+	 */
+	private void sortApplicationPaths() {
+		sortModelList(this.model.getWoofApplicationPaths(), (model) -> model.getApplicationPath());
 	}
 
 	/**
@@ -716,6 +630,7 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofApplicationPath(path);
+				WoofChangesImpl.this.sortApplicationPaths();
 			}
 
 			@Override
@@ -755,14 +670,16 @@ public class WoofChangesImpl implements WoofChanges {
 
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-				removeConnections(applicationPath.getWoofTemplateOutputs(), list);
 				removeConnections(applicationPath.getWoofSectionOutputs(), list);
+				removeConnections(applicationPath.getWoofTemplateOutputs(), list);
 				removeConnections(applicationPath.getWoofSecurityOutputs(), list);
 				removeConnections(applicationPath.getWoofExceptions(), list);
-				removeConnection(applicationPath.getWoofTemplate(), list);
+				removeConnections(applicationPath.getWoofRedirects(), list);
 				removeConnection(applicationPath.getWoofSectionInput(), list);
+				removeConnection(applicationPath.getWoofTemplate(), list);
 				removeConnection(applicationPath.getWoofSecurity(), list);
 				removeConnection(applicationPath.getWoofResource(), list);
+				removeConnection(applicationPath.getWoofApplicationPath(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the application path
@@ -774,7 +691,7 @@ public class WoofChangesImpl implements WoofChanges {
 				// Add back the application path
 				WoofChangesImpl.this.model.addWoofApplicationPath(applicationPath);
 				reconnectConnections(this.connections);
-				WoofChangesImpl.this.sortSections();
+				WoofChangesImpl.this.sortApplicationPaths();
 			}
 		};
 	}
@@ -1165,11 +1082,13 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(template.getWoofSectionOutputs(), list);
 				removeConnections(template.getWoofSecurityOutputs(), list);
 				removeConnections(template.getWoofExceptions(), list);
+				removeConnections(template.getWoofApplicationPaths(), list);
 				for (WoofTemplateOutputModel output : template.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
+					removeConnection(output.getWoofApplicationPath(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -1206,7 +1125,8 @@ public class WoofChangesImpl implements WoofChanges {
 			String sectionLocation, PropertyList properties, SectionType section) {
 
 		// Obtain the unique section name
-		sectionName = getUniqueName(sectionName, null, this.model.getWoofSections(), SECTION_NAME_EXTRACTOR);
+		sectionName = getUniqueName(sectionName, null, this.model.getWoofSections(),
+				(model) -> model.getWoofSectionName());
 
 		// Create the section
 		final WoofSectionModel woofSection = new WoofSectionModel(sectionName, sectionSourceClassName, sectionLocation);
@@ -1612,6 +1532,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnections(input.getWoofSectionOutputs(), list);
 					removeConnections(input.getWoofSecurityOutputs(), list);
 					removeConnections(input.getWoofExceptions(), list);
+					removeConnections(input.getWoofApplicationPaths(), list);
 					removeConnections(input.getWoofStarts(), list);
 				}
 				for (WoofSectionOutputModel output : section.getOutputs()) {
@@ -1619,6 +1540,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
+					removeConnection(output.getWoofApplicationPath(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -1895,8 +1817,7 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofSecurityModel> removeSecurity(final WoofSecurityModel security) {
 
 		// Return change to remove access
-		return new AbstractChange<WoofSecurityModel>(security,
-				"Remove security " + security.getHttpSecuritySourceClassName()) {
+		return new AbstractChange<WoofSecurityModel>(security, "Remove security " + security.getHttpSecurityName()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -1908,12 +1829,17 @@ public class WoofChangesImpl implements WoofChanges {
 
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-				removeConnections(security.getWoofTemplateOutputs(), list);
 				removeConnections(security.getWoofSectionOutputs(), list);
+				removeConnections(security.getWoofTemplateOutputs(), list);
+				removeConnections(security.getWoofSecurityOutputs(), list);
+				removeConnections(security.getWoofExceptions(), list);
+				removeConnections(security.getWoofApplicationPaths(), list);
 				for (WoofSecurityOutputModel output : security.getOutputs()) {
-					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
+					removeConnection(output.getWoofTemplate(), list);
+					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
+					removeConnection(output.getWoofApplicationPath(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -1937,7 +1863,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the unique governance name
 		governanceName = getUniqueName(governanceName, null, this.model.getWoofGovernances(),
-				GOVERNANCE_NAME_EXTRACTOR);
+				(model) -> model.getWoofGovernanceName());
 
 		// Create the governance
 		final WoofGovernanceModel woofGovernance = new WoofGovernanceModel(governanceName, governanceSourceClassName);
@@ -1990,7 +1916,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the unique governance name
 		final String uniqueGovernanceName = getUniqueName(governanceName, governance, this.model.getWoofGovernances(),
-				GOVERNANCE_NAME_EXTRACTOR);
+				(model) -> model.getWoofGovernanceName());
 
 		// Return change to refactor governance
 		return new AbstractChange<WoofGovernanceModel>(governance, "Refactor Governance") {
@@ -2220,6 +2146,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(resource.getWoofSectionOutputs(), list);
 				removeConnections(resource.getWoofSecurityOutputs(), list);
 				removeConnections(resource.getWoofExceptions(), list);
+				removeConnections(resource.getWoofApplicationPaths(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the resource
@@ -2271,6 +2198,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to add exception
 		return new AbstractChange<WoofExceptionModel>(exception, "Add Exception") {
+
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofException(exception);
@@ -2281,6 +2209,7 @@ public class WoofChangesImpl implements WoofChanges {
 			public void revert() {
 				WoofChangesImpl.this.model.removeWoofException(exception);
 			}
+
 		};
 	}
 
@@ -2354,9 +2283,11 @@ public class WoofChangesImpl implements WoofChanges {
 
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-				removeConnection(exception.getWoofTemplate(), list);
 				removeConnection(exception.getWoofSectionInput(), list);
+				removeConnection(exception.getWoofTemplate(), list);
+				removeConnection(exception.getWoofSecurity(), list);
 				removeConnection(exception.getWoofResource(), list);
+				removeConnection(exception.getWoofApplicationPath(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the exception

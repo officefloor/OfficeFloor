@@ -100,16 +100,12 @@
 		<resource path="/resource.html" />
 	</resources>
 
-	<exceptions>
-		<exception class="java.lang.Exception">
-			<section name="SECTION" input="INPUT" />
-			<template path="/template" />
-			<security name="SECURITY" />
-			<resource path="/resource.html" />
-			<redirect path="/applicationPath" />
-		</exception>
-	</exceptions>
+	<exceptions />
 
-	<starts />
+	<starts>
+		<start>
+			<section name="SECTION" input="INPUT" />
+		</start>
+	</starts>
 
 </woof>

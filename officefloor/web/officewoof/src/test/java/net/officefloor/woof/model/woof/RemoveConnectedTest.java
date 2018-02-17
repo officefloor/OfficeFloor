@@ -17,17 +17,7 @@
  */
 package net.officefloor.woof.model.woof;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests removing from a {@link WoofModel}.
@@ -35,6 +25,19 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
  * @author Daniel Sagenschneider
  */
 public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
+
+	/**
+	 * Enable able to remove the {@link WoofApplicationPathModel}.
+	 */
+	public void testRemoveApplicationPath() {
+
+		// Obtain the application path
+		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(0);
+
+		// Remove the application path
+		Change<WoofApplicationPathModel> change = this.operations.removeApplicationPath(applicationPath);
+		this.assertChange(change, applicationPath, "Remove application path /applicationPath", true);
+	}
 
 	/**
 	 * Ensure able to remove the {@link WoofTemplateModel}.
@@ -47,7 +50,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 		// Remove the template
 		Change<WoofTemplateModel> change = this.operations.removeTemplate(template,
 				this.getWoofTemplateChangeContext());
-		this.assertChange(change, template, "Remove template TEMPLATE", true);
+		this.assertChange(change, template, "Remove template /template", true);
 	}
 
 	/**
@@ -73,7 +76,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 
 		// Remove the security
 		Change<WoofSecurityModel> change = this.operations.removeSecurity(security);
-		this.assertChange(change, security, "Remove security net.example.HttpSecuritySource", true);
+		this.assertChange(change, security, "Remove security SECURITY", true);
 	}
 
 	/**
@@ -86,48 +89,21 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 
 		// Remove the resource
 		Change<WoofResourceModel> change = this.operations.removeResource(resource);
-		this.assertChange(change, resource, "Remove resource RESOURCE", true);
+		this.assertChange(change, resource, "Remove resource /resource.html", true);
 	}
 
 	/**
 	 * Ensure able to remove the {@link WoofExceptionModel} linked to a
 	 * template.
 	 */
-	public void testRemoveExceptionLinkedToTemplate() {
-		this.doRemoveExceptionTest(0, IOException.class);
-	}
-
-	/**
-	 * Ensure able to remove the {@link WoofExceptionModel} linked to a section.
-	 */
-	public void testRemoveExceptionLinkedToSection() {
-		this.doRemoveExceptionTest(1, RuntimeException.class);
-	}
-
-	/**
-	 * Ensure able to remove the {@link WoofExceptionModel} linked to a
-	 * resource.
-	 */
-	public void testRemoveExceptionLinkedToResource() {
-		this.doRemoveExceptionTest(2, SQLException.class);
-	}
-
-	/**
-	 * Does the remove {@link WoofExceptionModel} test.
-	 * 
-	 * @param index
-	 *            Index of the {@link WoofExceptionModel} to remove.
-	 * @param exceptionClass
-	 *            Class of the {@link Exception}.
-	 */
-	private void doRemoveExceptionTest(int index, Class<? extends Throwable> exceptionClass) {
+	public void testRemoveException() {
 
 		// Obtain the exception to remove
-		WoofExceptionModel exception = this.model.getWoofExceptions().get(index);
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(0);
 
 		// Remove the exception
 		Change<WoofExceptionModel> change = this.operations.removeException(exception);
-		this.assertChange(change, exception, "Remove exception " + exceptionClass.getName(), true);
+		this.assertChange(change, exception, "Remove exception " + Exception.class.getName(), true);
 	}
 
 	/**

@@ -1,8 +1,20 @@
 <woof>
 
+	<application-paths>
+		<application-path path="/applicationPath">
+			<section name="SECTION" input="INPUT" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPathLink" />
+		</application-path>
+		<application-path path="/applicationPathLink">
+			<redirect path="/applicationPath" />
+		</application-path>
+	</application-paths>
+
 	<templates>
-		<template name="TEMPLATE_CHILD" path="example/Child.ofp" />
-		<template name="TEMPLATE_LINK" path="example/Link.ofp">
+		<template application-path="/templateChild" location="example/Child.ofp" />
+		<template application-path="/templateLink" location="example/Link.ofp">
 			<output name="OUTPUT" />
 		</template>
 	</templates>
@@ -12,54 +24,68 @@
 			location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT_A">
-				<input section="SECTION_LINK" input="INPUT" />
+				<section name="SECTION_LINK" input="INPUT" />
 			</output>
 			<output name="OUTPUT_B" />
 			<output name="OUTPUT_C">
-				<access input="Authenticate" />
+				<security name="SECURITY" />
 			</output>
 			<output name="OUTPUT_D">
-				<resource name="RESOURCE" />
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_E">
+				<redirect path="/applicationPath" />
 			</output>
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
 			location="LINK_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<input section="SECTION" input="INPUT" />
+				<section name="SECTION" input="INPUT" />
 			</output>
 		</section>
 	</sections>
 
-	<access source="net.example.HttpSecuritySource">
-		<input name="Authenticate" />
-		<output name="OUTPUT_A1">
-			<input section="SECTION" input="INPUT" />
-		</output>
-		<output name="OUTPUT_A2" />
-		<output name="OUTPUT_A3">
-			<resource name="RESOURCE" />
-		</output>
-	</access>
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT_a">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_b" />
+			<output name="OUTPUT_c">
+				<security name="SECURITY_LINK" />
+			</output>
+			<output name="OUTPUT_d">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_e">
+				<redirect path="/applicationPath" />
+			</output>
+		</security>
+		<security name="SECURITY_LINK" source="net.another.HttpSecuritySource">
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
+		</security>
+	</securities>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
 
 	<exceptions>
-		<exception class="java.io.IOException" />
-		<exception class="java.lang.RuntimeException">
-			<input section="SECTION" input="INPUT" />
-		</exception>
-		<exception class="java.sql.SQLException">
-			<resource name="RESOURCE" />
+		<exception class="java.lang.Exception">
+			<section name="SECTION" input="INPUT" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPath" />
 		</exception>
 	</exceptions>
 
-	<starting>
+	<starts>
 		<start>
-			<flow section="SECTION" input="INPUT" />
+			<section name="SECTION" input="INPUT" />
 		</start>
-	</starting>
+	</starts>
 
 </woof>
