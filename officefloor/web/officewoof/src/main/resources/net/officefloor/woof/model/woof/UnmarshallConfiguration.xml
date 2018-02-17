@@ -46,6 +46,19 @@
 		<value method="setLinkSeparatorCharacter" node="template@link-separator-character" />
 		<value method="setX" node="template@x" />
 		<value method="setY" node="template@y" />
+		<object method="addRenderHttpMethod" node="render"
+			class="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel">
+			<value method="setWoofTemplateRenderHttpMethodName" node="render@method" />
+		</object>
+		<object method="addLink" node="link"
+			class="net.officefloor.woof.model.woof.WoofTemplateLinkModel">
+			<value method="setWoofTemplateLinkName" node="link@name" />
+			<value method="setIsLinkSecure" node="link@secure" />
+		</object>
+		<object method="setSuperWoofTemplate" node="extends"
+			class="net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel">
+			<value method="setSuperWoofTemplateApplicationPath" node="extends@template" />
+		</object>
 		<object method="addOutput" node="output"
 			class="net.officefloor.woof.model.woof.WoofTemplateOutputModel">
 			<value method="setWoofTemplateOutputName" node="output@name" />
@@ -71,15 +84,6 @@
 				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofApplicationPathModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
-		</object>
-		<object method="addLink" node="link"
-			class="net.officefloor.woof.model.woof.WoofTemplateLinkModel">
-			<value method="setWoofTemplateLinkName" node="link@name" />
-			<value method="setIsLinkSecure" node="link@secure" />
-		</object>
-		<object method="addRenderHttpMethod" node="render"
-			class="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel">
-			<value method="setWoofTemplateRenderHttpMethodName" node="render@method" />
 		</object>
 		<object method="addExtension" node="extension"
 			class="net.officefloor.woof.model.woof.WoofTemplateExtensionModel">

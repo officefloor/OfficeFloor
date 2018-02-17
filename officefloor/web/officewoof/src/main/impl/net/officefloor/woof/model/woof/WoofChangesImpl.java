@@ -1078,6 +1078,8 @@ public class WoofChangesImpl implements WoofChanges {
 
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+				removeConnection(template.getSuperWoofTemplate(), list);
+				removeConnections(template.getChildWoofTemplates(), list);
 				removeConnections(template.getWoofTemplateOutputs(), list);
 				removeConnections(template.getWoofSectionOutputs(), list);
 				removeConnections(template.getWoofSecurityOutputs(), list);

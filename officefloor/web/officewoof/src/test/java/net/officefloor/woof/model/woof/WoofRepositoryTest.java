@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -113,6 +114,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		/**
 		 * Template Output links
 		 */
+
+		// Template -> Super Template
+		WoofTemplateToSuperWoofTemplateModel templateToSuperTemplate = new WoofTemplateToSuperWoofTemplateModel(
+				"TEMPLATE");
+		template.setSuperWoofTemplate(templateToSuperTemplate);
 
 		// Template Output -> Section Input
 		WoofTemplateOutputToWoofSectionInputModel templateOutputToSectionInput = new WoofTemplateOutputToWoofSectionInputModel(
@@ -257,6 +263,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertApplicationPath.assertLink(applicationPathToSecurity, "security", security);
 		assertApplicationPath.assertLink(applicationPathToApplicationPath, "application path", applicationPath);
 
+		// Template links
+		AssertLinks<WoofTemplateModel> assertTemplate = new AssertLinks<>("template", template);
+		assertTemplate.assertLink(template.getSuperWoofTemplate(), "super template", template);
+
 		// Template Output links
 		AssertLinks<WoofTemplateOutputModel> assertTemplateOutput = new AssertLinks<>("template output",
 				templateOutput);
@@ -303,6 +313,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		private String sourceName;
 		private S source;
+		private String previousMethodName = null;
 
 		private AssertLinks(String sourceName, S source) {
 			this.sourceName = sourceName;
@@ -313,6 +324,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		private <L extends ConnectionModel, T extends Model> void assertLink(L link, String targetName, T target) {
 
 			// Obtain the source
+			this.previousMethodName = null;
 			S linkSource = (S) this.getModel(link, this.source.getClass());
 			T linkTarget = (T) this.getModel(link, target.getClass());
 
@@ -324,10 +336,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		private <L extends ConnectionModel> Object getModel(L link, Class<?> modelType) {
 			for (Method method : link.getClass().getMethods()) {
 				if (method.getReturnType() == modelType) {
-					try {
-						return method.invoke(link);
-					} catch (Exception ex) {
-						throw fail(ex);
+					if (!method.getName().equals(this.previousMethodName)) {
+						try {
+							return method.invoke(link);
+						} catch (Exception ex) {
+							throw fail(ex);
+						}
 					}
 				}
 			}
@@ -376,10 +390,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				new WoofApplicationPathToWoofResourceModel(), applicationPath, resource);
 		WoofApplicationPathToWoofSecurityModel applicationPathToSecurity = link(
 				new WoofApplicationPathToWoofSecurityModel(), applicationPath, security);
-		WoofApplicationPathToWoofApplicationPathModel applicationPathToApplicationPath = new WoofApplicationPathToWoofApplicationPathModel();
-		applicationPathToApplicationPath.setWoofApplicationPath(applicationPath);
-		applicationPathToApplicationPath.setWoofRedirect(applicationPath);
-		applicationPathToApplicationPath.connect();
+		WoofApplicationPathToWoofApplicationPathModel applicationPathToApplicationPath = link(
+				new WoofApplicationPathToWoofApplicationPathModel(), applicationPath, applicationPath);
+
+		// Template links
+		WoofTemplateToSuperWoofTemplateModel templateToSuperTemplate = link(new WoofTemplateToSuperWoofTemplateModel(),
+				template, template);
 
 		// Template Output links
 		WoofTemplateOutputToWoofSectionInputModel templateOutputToSectionInput = link(
@@ -452,6 +468,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("application path - application path", "APPLICATION_PATH",
 				applicationPathToApplicationPath.getApplicationPath());
 
+		// Assert Template links
+		assertEquals("template - super template", "TEMPLATE",
+				templateToSuperTemplate.getSuperWoofTemplateApplicationPath());
+
 		// Assert Template Output links
 		assertEquals("template output - section input (section name)", "SECTION",
 				templateOutputToSectionInput.getSectionName());
@@ -503,16 +523,20 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 	 * Convenience method to create a link.
 	 */
 	private static <L extends ConnectionModel> L link(L link, Model source, Model target) {
+		final Closure<String> previousMethodName = new Closure<>();
 		final Consumer<Model> loadEndModel = (model) -> {
 			for (Method method : link.getClass().getMethods()) {
 				if (method.getParameterTypes().length == 1) {
 					if (method.getParameterTypes()[0] == model.getClass()) {
-						try {
-							method.invoke(link, model);
-						} catch (Exception ex) {
-							throw fail(ex);
+						if (!method.getName().equals(previousMethodName.value)) {
+							try {
+								method.invoke(link, model);
+							} catch (Exception ex) {
+								throw fail(ex);
+							}
+							previousMethodName.value = method.getName();
+							return; // loaded
 						}
-						return; // loaded
 					}
 				}
 			}

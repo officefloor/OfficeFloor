@@ -18,7 +18,7 @@
 			class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
 			charset="UTF-16" secure="true" redirect-values-function="redirect"
 			link-separator-character="_" x="300" y="301">
-			<extends template="another" />
+			<extends template="/templateB" />
 			<output name="OUTPUT_0" argument-type="java.lang.Integer">
 				<section name="SECTION_A" input="INPUT_A" />
 			</output>

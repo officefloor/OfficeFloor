@@ -118,6 +118,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofTemplateModel("/templateB", "example/TemplateB.ofp", null, null, null, null, null, false, null,
 						null, null, null, null, null, null, null, null, null, null, 302, 303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
+		assertProperties(new WoofTemplateToSuperWoofTemplateModel("/templateB"), template.getSuperWoofTemplate(),
+				"getSuperWoofTemplateApplicationPath");
 		assertList(new String[] { "getWoofTemplateOutputName", "getArgumentType" }, template.getOutputs(),
 				new WoofTemplateOutputModel("OUTPUT_0", "java.lang.Integer"),
 				new WoofTemplateOutputModel("OUTPUT_1", null), new WoofTemplateOutputModel("OUTPUT_2", null),

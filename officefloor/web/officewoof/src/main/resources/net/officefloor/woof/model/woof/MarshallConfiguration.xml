@@ -64,6 +64,31 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<collection method="getLinks">
+				<item type="net.officefloor.woof.model.woof.WoofTemplateLinkModel"
+					element="link">
+					<attributes>
+						<attribute method="getWoofTemplateLinkName" attribute="name" />
+						<attribute method="getIsLinkSecure" attribute="secure" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getRenderHttpMethods">
+				<item
+					type="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel"
+					element="render">
+					<attributes>
+						<attribute method="getWoofTemplateRenderHttpMethodName"
+							attribute="method" />
+					</attributes>
+				</item>
+			</collection>
+			<object method="getSuperWoofTemplate" element="extends">
+				<attributes>
+					<attribute method="getSuperWoofTemplateApplicationPath"
+						attribute="template" />
+				</attributes>
+			</object>
 			<collection method="getOutputs">
 				<item type="net.officefloor.woof.model.woof.WoofTemplateOutputModel"
 					element="output">
@@ -97,25 +122,6 @@
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
 					</object>
-				</item>
-			</collection>
-			<collection method="getLinks">
-				<item type="net.officefloor.woof.model.woof.WoofTemplateLinkModel"
-					element="link">
-					<attributes>
-						<attribute method="getWoofTemplateLinkName" attribute="name" />
-						<attribute method="getIsLinkSecure" attribute="secure" />
-					</attributes>
-				</item>
-			</collection>
-			<collection method="getRenderHttpMethods">
-				<item
-					type="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel"
-					element="render">
-					<attributes>
-						<attribute method="getWoofTemplateRenderHttpMethodName"
-							attribute="method" />
-					</attributes>
 				</item>
 			</collection>
 			<collection method="getExtensions">

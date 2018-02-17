@@ -100,7 +100,7 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 
 		// Remove the security
 		Change<WoofSecurityModel> change = this.operations.removeSecurity(security);
-		this.assertChange(change, security, "Remove security net.example.HttpSecuritySource", true);
+		this.assertChange(change, security, "Remove security SECURITY", true);
 	}
 
 	/**

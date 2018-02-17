@@ -132,13 +132,23 @@ public class WoofRepositoryImpl implements WoofRepository {
 					});
 		}
 
-		// Connect Template Outputs
+		// Connect Template
 		for (WoofTemplateModel template : woof.getWoofTemplates()) {
+			Connector<WoofTemplateModel> connector = new Connector<>(template);
+
+			// Super Template
+			connector.connect(template.getSuperWoofTemplate(),
+					(conn) -> templates.get(conn.getSuperWoofTemplateApplicationPath()), (conn, source, target) -> {
+						conn.setChildWoofTemplate(source);
+						conn.setSuperWoofTemplate(target);
+					});
+
+			// Connect Template Outputs
 			for (WoofTemplateOutputModel templateOutput : template.getOutputs()) {
-				Connector<WoofTemplateOutputModel> connector = new Connector<>(templateOutput);
+				Connector<WoofTemplateOutputModel> outputConnector = new Connector<>(templateOutput);
 
 				// Section Inputs
-				connector.connect(templateOutput.getWoofSectionInput(),
+				outputConnector.connect(templateOutput.getWoofSectionInput(),
 						(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()),
 						(conn, source, target) -> {
 							conn.setWoofTemplateOutput(source);
@@ -146,28 +156,28 @@ public class WoofRepositoryImpl implements WoofRepository {
 						});
 
 				// Templates
-				connector.connect(templateOutput.getWoofTemplate(), (conn) -> templates.get(conn.getApplicationPath()),
-						(conn, source, target) -> {
+				outputConnector.connect(templateOutput.getWoofTemplate(),
+						(conn) -> templates.get(conn.getApplicationPath()), (conn, source, target) -> {
 							conn.setWoofTemplateOutput(source);
 							conn.setWoofTemplate(target);
 						});
 
 				// Resources
-				connector.connect(templateOutput.getWoofResource(), (conn) -> resources.get(conn.getResourcePath()),
-						(conn, source, target) -> {
+				outputConnector.connect(templateOutput.getWoofResource(),
+						(conn) -> resources.get(conn.getResourcePath()), (conn, source, target) -> {
 							conn.setWoofTemplateOutput(source);
 							conn.setWoofResource(target);
 						});
 
 				// Securities
-				connector.connect(templateOutput.getWoofSecurity(),
+				outputConnector.connect(templateOutput.getWoofSecurity(),
 						(conn) -> securities.get(conn.getHttpSecurityName()), (conn, source, target) -> {
 							conn.setWoofTemplateOutput(source);
 							conn.setWoofSecurity(target);
 						});
 
 				// Redirects
-				connector.connect(templateOutput.getWoofApplicationPath(),
+				outputConnector.connect(templateOutput.getWoofApplicationPath(),
 						(conn) -> applicationPaths.get(conn.getApplicationPath()), (conn, source, target) -> {
 							conn.setWoofTemplateOutput(source);
 							conn.setWoofApplicationPath(target);
@@ -451,6 +461,11 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 		// Specify templates
 		for (WoofTemplateModel template : woof.getWoofTemplates()) {
+
+			// Specify super templates
+			for (WoofTemplateToSuperWoofTemplateModel conn : template.getChildWoofTemplates()) {
+				conn.setSuperWoofTemplateApplicationPath(template.getApplicationPath());
+			}
 
 			// Specify section outputs
 			for (WoofSectionOutputToWoofTemplateModel conn : template.getWoofSectionOutputs()) {
