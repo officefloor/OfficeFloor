@@ -38,8 +38,7 @@ import org.junit.Assert;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockChangeWoofTemplateExtensionSource extends
-		MockNoChangeWoofTemplateExtensionSource {
+public class MockChangeWoofTemplateExtensionSource extends MockNoChangeWoofTemplateExtensionSource {
 
 	/**
 	 * {@link Change}.
@@ -87,10 +86,8 @@ public class MockChangeWoofTemplateExtensionSource extends
 	 * @param changeContext
 	 *            {@link WoofTemplateChangeContext}.
 	 */
-	public static void reset(Change<?> change, String oldApplicationPath,
-			String[] oldPropertyNameValuePairs, String newApplicationPath,
-			String[] newPropertyNameValuePairs,
-			WoofTemplateChangeContext changeContext) {
+	public static void reset(Change<?> change, String oldApplicationPath, String[] oldPropertyNameValuePairs,
+			String newApplicationPath, String[] newPropertyNameValuePairs, WoofTemplateChangeContext changeContext) {
 		MockChangeWoofTemplateExtensionSource.change = change;
 		MockChangeWoofTemplateExtensionSource.oldApplicationPath = oldApplicationPath;
 		MockChangeWoofTemplateExtensionSource.oldPropertyNameValuePairs = oldPropertyNameValuePairs;
@@ -105,8 +102,7 @@ public class MockChangeWoofTemplateExtensionSource extends
 	 * @param change
 	 *            Mock {@link Change}.
 	 */
-	public static void recordAssertChange(Change<?> change,
-			OfficeFrameTestCase testCase) {
+	public static void recordAssertChange(Change<?> change, OfficeFrameTestCase testCase) {
 		testCase.recordReturn(change, change.getConflicts(), null);
 		change.apply();
 		change.revert();
@@ -124,34 +120,29 @@ public class MockChangeWoofTemplateExtensionSource extends
 	 * @param expectedPropertyNameValuePairs
 	 *            Expected property name value pairs.
 	 */
-	private static void assertConfiguration(String configurationType,
-			WoofTemplateExtensionConfiguration configuration,
+	private static void assertConfiguration(String configurationType, WoofTemplateExtensionConfiguration configuration,
 			String expectedUrl, String... expectedPropertyNameValuePairs) {
 
 		// Determine if expecting configuration
 		if (expectedUrl == null) {
-			Assert.assertNull("Should be no " + configurationType
-					+ " configuration", configuration);
+			Assert.assertNull("Should be no " + configurationType + " configuration", configuration);
 			return; // correctly no configuration
 		}
 
 		// Ensure have configuration to validate
-		Assert.assertNotNull("Should have " + configurationType
-				+ " configuration", configuration);
+		Assert.assertNotNull("Should have " + configurationType + " configuration", configuration);
 
 		// Validate the URL and properties
-		Assert.assertEquals("Incorrect " + configurationType + " URI",
-				expectedUrl, configuration.getUri());
-		Assert.assertEquals("Incorrect number of " + configurationType
-				+ " properties", (expectedPropertyNameValuePairs.length / 2),
-				configuration.getPropertyNames().length);
+		Assert.assertEquals("Incorrect " + configurationType + " application path", expectedUrl,
+				configuration.getApplicationPath());
+		Assert.assertEquals("Incorrect number of " + configurationType + " properties",
+				(expectedPropertyNameValuePairs.length / 2), configuration.getPropertyNames().length);
 		for (int i = 0; i < expectedPropertyNameValuePairs.length; i += 2) {
 			String expectedName = expectedPropertyNameValuePairs[i];
 			String expectedValue = expectedPropertyNameValuePairs[i + 1];
-			Assert.assertEquals("Incorrect value for " + configurationType
-					+ " property " + expectedName + " [" + i + "]",
-					expectedValue,
-					configuration.getProperty(expectedName, null));
+			Assert.assertEquals(
+					"Incorrect value for " + configurationType + " property " + expectedName + " [" + i + "]",
+					expectedValue, configuration.getProperty(expectedName, null));
 		}
 	}
 
@@ -160,38 +151,31 @@ public class MockChangeWoofTemplateExtensionSource extends
 	 */
 
 	@Override
-	public Change<?> createConfigurationChange(
-			WoofTemplateExtensionChangeContext context) {
+	public Change<?> createConfigurationChange(WoofTemplateExtensionChangeContext context) {
 
 		// Ensure able to obtain resource
 		try {
-			InputStream resource = context.getResource(this.getClass()
-					.getPackage().getName().replace('.', '/')
+			InputStream resource = context.getResource(this.getClass().getPackage().getName().replace('.', '/')
 					+ "/MockChangeWoofTemplateExtensionSource.resource");
 			Assert.assertNotNull("Should have resource", resource);
 			StringWriter resourceContents = new StringWriter();
 			Reader resourceReader = new InputStreamReader(resource);
-			for (int character = resourceReader.read(); character != -1; character = resourceReader
-					.read()) {
+			for (int character = resourceReader.read(); character != -1; character = resourceReader.read()) {
 				resourceContents.write(character);
 			}
-			Assert.assertEquals("Incorrect resource content", "RESOURCE",
-					resourceContents.toString());
+			Assert.assertEquals("Incorrect resource content", "RESOURCE", resourceContents.toString());
 		} catch (IOException ex) {
 			Assert.fail("Should be able to read resource: " + ex.getMessage());
 		}
 
 		// Validate the old configuration
-		assertConfiguration("old", context.getOldConfiguration(), oldApplicationPath,
-				oldPropertyNameValuePairs);
+		assertConfiguration("old", context.getOldConfiguration(), oldApplicationPath, oldPropertyNameValuePairs);
 
 		// Validate the new configuration
-		assertConfiguration("new", context.getNewConfiguration(), newApplicationPath,
-				newPropertyNameValuePairs);
+		assertConfiguration("new", context.getNewConfiguration(), newApplicationPath, newPropertyNameValuePairs);
 
 		// Validate the configuration context
-		Assert.assertSame("Incorrect configuration context",
-				changeContext.getConfigurationContext(),
+		Assert.assertSame("Incorrect configuration context", changeContext.getConfigurationContext(),
 				context.getConfigurationContext());
 
 		// Return the change

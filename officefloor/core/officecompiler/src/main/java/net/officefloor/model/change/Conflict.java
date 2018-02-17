@@ -31,4 +31,11 @@ public interface Conflict {
 	 */
 	String getConflictDescription();
 
+	/**
+	 * Obtains the cause of the {@link Conflict}.
+	 * 
+	 * @return Cause of the {@link Conflict}. May be <code>null</code>.
+	 */
+	Throwable getConflictCause();
+
 }

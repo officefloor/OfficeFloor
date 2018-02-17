@@ -587,7 +587,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 			// Validate the configuration
 			assertNotNull("Should have " + configurationType + " configuration", configuration);
-			assertEquals("Incorrect " + configurationType + " URI", uri, configuration.getUri());
+			assertEquals("Incorrect " + configurationType + " URI", uri, configuration.getApplicationPath());
 			assertEquals("Incorrect number of " + configurationType + " properties", (properties.length / 2),
 					configuration.getPropertyNames().length);
 			for (int i = 0; i < properties.length; i += 2) {

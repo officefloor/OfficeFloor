@@ -2474,7 +2474,7 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofTemplateOutputToWoofSectionInputModel>(
-					new WoofTemplateOutputToWoofSectionInputModel(),
+					new WoofTemplateOutputToWoofSectionInputModel(), "Remove Template Output to Section Input",
 					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
@@ -2591,7 +2591,7 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofSectionOutputToWoofSectionInputModel>(
-					new WoofSectionOutputToWoofSectionInputModel(),
+					new WoofSectionOutputToWoofSectionInputModel(), "Remove Section Output to Section Input",
 					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
@@ -2707,7 +2707,7 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofSecurityOutputToWoofSectionInputModel>(
-					new WoofSecurityOutputToWoofSectionInputModel(),
+					new WoofSecurityOutputToWoofSectionInputModel(), "Remove Security Output to Security Input",
 					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
@@ -2793,6 +2793,7 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofExceptionToWoofSectionInputModel>(new WoofExceptionToWoofSectionInputModel(),
+					"Remove Exception to Section Input",
 					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
@@ -2851,6 +2852,7 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofStartToWoofSectionInputModel>(new WoofStartToWoofSectionInputModel(),
+					"Remove Exception to Resource",
 					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 

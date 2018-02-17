@@ -151,7 +151,7 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 		 */
 
 		@Override
-		public String getUri() {
+		public String getApplicationPath() {
 			return this.uri;
 		}
 	}

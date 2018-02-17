@@ -54,7 +54,7 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
-		MockChangeWoofTemplateExtensionSource.reset(extensionChange, "template",
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, "/template",
 				new String[] { "ONE", "A", "TWO", "B" }, null, null, this.getWoofTemplateChangeContext());
 
 		// Record extension change
@@ -126,7 +126,7 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 
 		// Remove the resource
 		Change<WoofResourceModel> change = this.operations.removeResource(resource);
-		this.assertChange(change, resource, "Remove resource RESOURCE", true);
+		this.assertChange(change, resource, "Remove resource Example.html", true);
 	}
 
 	/**

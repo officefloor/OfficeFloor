@@ -1,8 +1,6 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/path" />
-	</application-paths>
+	<application-paths />
 
 	<templates>
 		<template application-path="/template" location="example/Template.ofp"
@@ -26,7 +24,9 @@
 		<security name="SECURITY" source="net.example.HttpSecuritySource" />
 	</securities>
 
-	<governances />
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
+	</governances>
 
 	<resources>
 		<resource path="Example.html" />

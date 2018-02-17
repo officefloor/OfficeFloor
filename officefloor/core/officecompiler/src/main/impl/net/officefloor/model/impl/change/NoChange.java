@@ -34,18 +34,34 @@ public class NoChange<T> extends AbstractChange<T> {
 	 *            Target of the {@link Change}.
 	 * @param changeDescription
 	 *            Description of the {@link Change}.
+	 * @param conflicts
+	 *            {@link Conflict} instances.
+	 */
+	public NoChange(T target, String changeDescription, Conflict... conflicts) {
+		super(target, changeDescription);
+
+		// Add the conflicts
+		this.setConflicts(conflicts);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param target
+	 *            Target of the {@link Change}.
+	 * @param changeDescription
+	 *            Description of the {@link Change}.
 	 * @param conflictDescriptions
 	 *            Descriptions for any {@link Conflict} instances added to this
 	 *            {@link Change}.
 	 */
-	public NoChange(T target, String changeDescription,
-			String... conflictDescriptions) {
+	public NoChange(T target, String changeDescription, String... conflictDescriptions) {
 		super(target, changeDescription);
 
 		// Add the conflicts
 		Conflict[] conflicts = new Conflict[conflictDescriptions.length];
 		for (int i = 0; i < conflicts.length; i++) {
-			conflicts[i] = new ConflictImpl(conflictDescriptions[i]);
+			conflicts[i] = new ConflictImpl(conflictDescriptions[i], null);
 		}
 		this.setConflicts(conflicts);
 	}

@@ -31,19 +31,13 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.impl.change.ConflictImpl;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.model.woof.WoofTemplateExtensionChangeContextImpl;
 import net.officefloor.woof.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.woof.template.WoofTemplateExtensionChangeContext;
-import net.officefloor.woof.template.WoofTemplateExtensionException;
-import net.officefloor.woof.template.WoofTemplateExtensionLoader;
-import net.officefloor.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceProperty;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceSpecification;
 
 /**
  * {@link WoofTemplateExtensionLoader} implementation.
@@ -314,22 +308,24 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	 * 
 	 * @param woofTemplateExtensionSourceClassName
 	 *            {@link WoofTemplateExtensionSource} class name.
-	 * @param oldUri
+	 * @param oldApplicationPath
 	 *            Old URI.
-	 * @param newUri
+	 * @param newApplicationPath
 	 *            New URI.
 	 * @param ex
 	 *            Cause.
 	 * @return {@link NoChange}.
 	 */
-	private static NoChange<?> createFailureChange(String woofTemplateExtensionSourceClassName, String oldUri,
-			String newUri, Throwable ex) {
+	private static NoChange<?> createFailureChange(String woofTemplateExtensionSourceClassName,
+			String oldApplicationPath, String newApplicationPath, Throwable ex) {
 		return new NoChange<WoofTemplateExtensionModel>(
 				new WoofTemplateExtensionModel(woofTemplateExtensionSourceClassName),
 				"Refactor extension " + woofTemplateExtensionSourceClassName,
-				"Extension " + woofTemplateExtensionSourceClassName + " on template "
-						+ (oldUri != null ? oldUri : newUri) + " prevented change as " + ex.getMessage() + " ["
-						+ ex.getClass().getName() + "]");
+				new ConflictImpl(
+						"Extension " + woofTemplateExtensionSourceClassName + " on template "
+								+ (oldApplicationPath != null ? oldApplicationPath : newApplicationPath)
+								+ " prevented change as " + ex.getMessage() + " [" + ex.getClass().getName() + "]",
+						ex));
 	}
 
 	@Override

@@ -29,10 +29,10 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
 public interface WoofTemplateExtensionConfiguration extends SourceProperties {
 
 	/**
-	 * Obtains the URI for the {@link WoofTemplateModel}.
+	 * Obtains the application path for the {@link WoofTemplateModel}.
 	 * 
-	 * @return URI for the {@link WoofTemplateModel}.
+	 * @return Application path for the {@link WoofTemplateModel}.
 	 */
-	String getUri();
+	String getApplicationPath();
 
 }

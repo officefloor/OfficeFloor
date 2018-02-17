@@ -172,7 +172,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 	 */
 	private static void assertConfiguration(WoofTemplateExtensionConfiguration configuration, String expectedUri,
 			String... expectedPropertyNameValues) {
-		assertEquals("Incorrect URI", expectedUri, configuration.getUri());
+		assertEquals("Incorrect URI", expectedUri, configuration.getApplicationPath());
 		assertEquals("Incorrect number of properties", (expectedPropertyNameValues.length / 2),
 				configuration.getPropertyNames().length);
 		for (int i = 0; i < expectedPropertyNameValues.length; i += 2) {
