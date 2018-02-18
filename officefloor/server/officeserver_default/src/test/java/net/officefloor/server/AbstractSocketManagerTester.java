@@ -275,7 +275,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 */
 		protected Socket getClient() throws IOException {
 			Socket socket = AbstractSocketManagerTester.this.createClient(DEFAULT_PORT);
-			socket.setSoTimeout(1000); // ensure timeout tests
+			socket.setSoTimeout(10 * 1000); // ensure timeout tests
 			return socket;
 		}
 
