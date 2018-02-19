@@ -811,15 +811,15 @@ public class ProcessManager implements ProcessManagerMBean {
 			server = this.mbeanServer;
 			objectNames = new ArrayList<ObjectName>(this.registeredMBeanNames);
 			listener = this.completionListener;
-		}
-
-		// Unregister the MBeans
-		for (ObjectName mbeanName : objectNames) {
-			try {
-				server.unregisterMBean(mbeanName);
-			} catch (Throwable ex) {
-				this.logger.println("WARNING: Failed to unregister MBean " + mbeanName);
-				ex.printStackTrace(this.logger);
+			
+			// Unregister the MBeans
+			for (ObjectName mbeanName : objectNames) {
+				try {
+					server.unregisterMBean(mbeanName);
+				} catch (Throwable ex) {
+					this.logger.println("WARNING: Failed to unregister MBean " + mbeanName);
+					ex.printStackTrace(this.logger);
+				}
 			}
 		}
 
