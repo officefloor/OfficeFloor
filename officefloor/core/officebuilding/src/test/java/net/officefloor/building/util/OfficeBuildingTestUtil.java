@@ -260,7 +260,7 @@ public class OfficeBuildingTestUtil {
 	public static void waitUntilProcessComplete(ProcessManagerMBean manager, FurtherDetails details) throws Exception {
 
 		// Maximum run time (allow reasonable time to close)
-		final int MAX_RUN_TIME = 20000;
+		final int MAX_RUN_TIME = 30 * 1000;
 
 		// Wait until process completes (or times out)
 		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;
