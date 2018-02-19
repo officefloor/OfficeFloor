@@ -18,9 +18,9 @@
 		timeout="10">
 		<property name="MO_ONE" value="VALUE_ONE" />
 		<property-file path="example/object.properties" />
-		<property name="MO_TWO" value="VALUE_TWO" />
+		<property name="MO_THREE" value="VALUE_THREE" />
 		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
-		<auto-wire type="net.orm.SessionLocal" />  
+		<auto-wire type="net.orm.SessionLocal" />
 		<flow name="FLOW" section="SECTION" input="INPUT" />
 		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
 		<dependency name="DEPENDENCY" qualifier="QUALIFIER"

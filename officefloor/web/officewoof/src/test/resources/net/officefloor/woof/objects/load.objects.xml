@@ -1,14 +1,13 @@
 <objects>
 
 	<managed-object source="net.example.ExampleManagedObjectSourceA"
-		timeout="10" scope="thread">
+		timeout="10" scope="process">
 		<property name="MO_ONE" value="VALUE_ONE" />
 		<property-file path="example/object.properties" />
-		<property name="MO_TWO" value="VALUE_TWO" />
+		<property name="MO_THREE" value="VALUE_THREE" />
 		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
 		<auto-wire type="net.orm.SessionLocal" />
 		<flow name="FLOW" section="SECTION" input="INPUT" />
-		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
 		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
 			type="net.example.Dependency" />
 	</managed-object>
@@ -16,7 +15,7 @@
 	<supplier source="net.example.ExampleSupplierSourceA">
 		<property name="SUPPLIER_A" value="VALUE_A" />
 		<property-file path="example/supplier.properties" />
-		<property name="SUPPLIER_B" value="VALUE_B" />
+		<property name="SUPPLIER_C" value="VALUE_C" />
 	</supplier>
 
 	<managed-object source="net.example.ExampleManagedObjectSourceB"

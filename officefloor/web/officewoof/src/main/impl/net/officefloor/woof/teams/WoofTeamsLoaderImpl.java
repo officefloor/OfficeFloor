@@ -24,7 +24,9 @@ import java.util.Properties;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.woof.model.teams.PropertyFileModel;
 import net.officefloor.woof.model.teams.PropertyModel;
 import net.officefloor.woof.model.teams.PropertySourceModel;
@@ -68,6 +70,10 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 		WoofTeamsModel teams = new WoofTeamsModel();
 		this.repository.retrieveWoofTeams(teams, context.getConfiguration());
 
+		// Obtain the deployer and extension context
+		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+		OfficeFloorExtensionContext extensionContext = context.getOfficeFloorExtensionContext();
+
 		// Configure the teams
 		for (WoofTeamModel teamModel : teams.getWoofTeams()) {
 
@@ -91,7 +97,7 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 					: teamSourceClassName);
 
 			// Add the team
-			OfficeFloorTeam team = context.getOfficeFloorDeployer().addTeam(teamName, teamSourceClassName);
+			OfficeFloorTeam team = deployer.addTeam(teamName, teamSourceClassName);
 
 			// Load the type qualification
 			for (AutoWire autoWire : typeQualifications) {
@@ -110,8 +116,7 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 				} else if (propertySource instanceof PropertyFileModel) {
 					// Load properties from file
 					PropertyFileModel propertyFile = (PropertyFileModel) propertySource;
-					InputStream propertyConfiguration = context.getOfficeFloorExtensionContext()
-							.getResource(propertyFile.getPath());
+					InputStream propertyConfiguration = extensionContext.getResource(propertyFile.getPath());
 					Properties properties = new Properties();
 					properties.load(propertyConfiguration);
 					for (String propertyName : properties.stringPropertyNames()) {

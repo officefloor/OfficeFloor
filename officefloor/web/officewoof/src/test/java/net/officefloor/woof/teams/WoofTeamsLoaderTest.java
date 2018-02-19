@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof.teams;
 
+import java.io.ByteArrayInputStream;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -27,9 +29,6 @@ import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationCo
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
-import net.officefloor.woof.teams.WoofTeamsLoader;
-import net.officefloor.woof.teams.WoofTeamsLoaderContext;
-import net.officefloor.woof.teams.WoofTeamsLoaderImpl;
 
 /**
  * Tests the {@link WoofTeamsLoader}.
@@ -70,13 +69,12 @@ public class WoofTeamsLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoading() throws Exception {
 
-		// Obtain the deployer
+		// Obtain the configuration
+		this.recordReturn(this.loaderContext, this.loaderContext.getConfiguration(),
+				this.getConfiguration("Teams.teams.xml"));
 		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeFloorDeployer(), this.deployer);
 		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeFloorExtensionContext(),
 				this.extensionContext);
-		this.recordReturn(this.extensionContext,
-				this.extensionContext.getOptionalConfigurationItem("Teams.teams.xml", null),
-				this.getConfiguration("Teams.teams.xml"));
 
 		// Record first team
 		OfficeFloorTeam teamOne = this.createMock(OfficeFloorTeam.class);
@@ -85,6 +83,9 @@ public class WoofTeamsLoaderTest extends OfficeFrameTestCase {
 		teamOne.addTypeQualification("QUALIFIED_ONE", "TYPE_ONE");
 		teamOne.addTypeQualification("QUALIFIED_TWO", "TYPE_TWO");
 		teamOne.addProperty("NAME_ONE", "VALUE_ONE");
+		this.recordReturn(this.extensionContext, this.extensionContext.getResource("example/team.properties"),
+				new ByteArrayInputStream("file=value".getBytes()));
+		teamOne.addProperty("file", "value");
 		teamOne.addProperty("NAME_TWO", "VALUE_TWO");
 
 		// Record second team

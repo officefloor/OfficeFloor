@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSupplier;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -82,6 +83,10 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 		// Obtain the details
 		ConfigurationItem objectsConfiguration = context.getConfiguration();
 
+		// Obtain the Office Architect and context
+		OfficeArchitect architect = context.getOfficeArchitect();
+		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
+
 		// Load the objects model
 		WoofObjectsModel objects = new WoofObjectsModel();
 		this.repository.retrieveWoofObjects(objects, objectsConfiguration);
@@ -92,11 +97,11 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 			// Load based on object source type
 			if (objectSource instanceof WoofManagedObjectModel) {
 				// Load the managed object
-				this.loadWoofManagedObject((WoofManagedObjectModel) objectSource, context);
+				this.loadWoofManagedObject((WoofManagedObjectModel) objectSource, architect, extensionContext);
 
 			} else if (objectSource instanceof WoofSupplierModel) {
 				// Load the supplier
-				this.loadWoofSupplier((WoofSupplierModel) objectSource, context);
+				this.loadWoofSupplier((WoofSupplierModel) objectSource, architect, extensionContext);
 
 			} else {
 				// Unknown object source
@@ -111,16 +116,15 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	 * 
 	 * @param managedObject
 	 *            {@link WoofManagedObjectModel}.
+	 * @param architect
+	 *            {@link OfficeArchitect}.
 	 * @param context
-	 *            {@link WoofObjectsLoaderContext}.
+	 *            {@link OfficeExtensionContext}.
 	 * @throws Exception
 	 *             If fails to load {@link ManagedObject}.
 	 */
-	private void loadWoofManagedObject(final WoofManagedObjectModel managedObject, WoofObjectsLoaderContext context)
-			throws Exception {
-
-		// Obtain the Office Architect
-		OfficeArchitect architect = context.getOfficeArchitect();
+	private void loadWoofManagedObject(final WoofManagedObjectModel managedObject, OfficeArchitect architect,
+			OfficeExtensionContext context) throws Exception {
 
 		// Obtain the managed object source
 		String managedObjectSourceClassName = managedObject.getManagedObjectSourceClassName();
@@ -138,21 +142,34 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 		List<AutoWire> typeQualifications = new LinkedList<AutoWire>();
 		String qualifier = managedObject.getQualifier();
 		String type = managedObject.getType();
-		if (!(CompileUtil.isBlank(type))) {
+		if (!CompileUtil.isBlank(type)) {
 			// Shortcut type qualification provided
 			typeQualifications.add(new AutoWire(qualifier, type));
+		} else if ((!CompileUtil.isBlank(qualifier)) && (!CompileUtil.isBlank(classManagedObjectSourceClass))) {
+			// No type, so default type from class for qualification
+			typeQualifications.add(new AutoWire(qualifier, classManagedObjectSourceClass));
 		}
 		for (TypeQualificationModel autoWire : managedObject.getTypeQualifications()) {
 			typeQualifications.add(new AutoWire(autoWire.getQualifier(), autoWire.getType()));
 		}
-		if ((classManagedObjectSourceClass != null) && (typeQualifications.size() == 0)) {
-			// No type qualification, so default from class
-			typeQualifications.add(new AutoWire(qualifier, classManagedObjectSourceClass));
-		}
 
 		// Obtain the managed object name
 		String managedObjectName = (typeQualifications.size() > 0 ? typeQualifications.get(0).toString()
-				: managedObjectSourceClassName);
+				: !CompileUtil.isBlank(classManagedObjectSourceClass) ? classManagedObjectSourceClass
+						: managedObjectSourceClassName);
+
+		// Obtain the managed object scope
+		String managedObjectScopeName = managedObject.getScope();
+		final ManagedObjectScope managedObjectScope;
+		try {
+			managedObjectScope = CompileUtil.isBlank(managedObjectScopeName) ? ManagedObjectScope.THREAD
+					: ManagedObjectScope.valueOf(managedObjectScopeName.toUpperCase());
+		} catch (IllegalArgumentException ex) {
+			// Invalid scope
+			architect.addIssue("Invalid managed object scope '" + managedObjectScopeName + "' for managed object "
+					+ managedObjectName);
+			return; // invalid managed object so do not load
+		}
 
 		// Add the managed object source
 		OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource(managedObjectName,
@@ -177,22 +194,13 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 					architect.getOfficeSection(flow.getSection()).getOfficeSectionInput(flow.getInput()));
 		}
 
-		// Obtain the managed object scope
-		String managedObjectScopeName = managedObject.getScope();
-		final ManagedObjectScope managedObjectScope;
-		try {
-			managedObjectScope = CompileUtil.isBlank(managedObjectScopeName) ? null
-					: ManagedObjectScope.valueOf(managedObjectScopeName.toUpperCase());
-		} catch (IllegalArgumentException ex) {
-			// Invalid scope
-			architect.addIssue("Invalid managed object scope '" + managedObjectScopeName + "' for managed object "
-					+ (typeQualifications.size() > 0 ? typeQualifications.get(0).toString()
-							: managedObjectSourceClassName));
-			return; // invalid managed object so do not load
-		}
-
 		// Add the managed object
 		OfficeManagedObject mo = mos.addOfficeManagedObject(managedObjectName, managedObjectScope);
+
+		// Configure the type qualifiers
+		for (AutoWire autoWire : typeQualifications) {
+			mo.addTypeQualification(autoWire.getQualifier(), autoWire.getType());
+		}
 
 		// Configure the dependencies
 		for (WoofDependencyModel dependencyModel : managedObject.getDependencies()) {
@@ -210,20 +218,21 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	 * 
 	 * @param supplierModel
 	 *            {@link WoofSupplierModel}.
+	 * @param architect
+	 *            {@link OfficeArchitect}.
 	 * @param context
-	 *            {@link WoofObjectsLoaderContext}.
+	 *            {@link OfficeExtensionContext}.
 	 * @throws IOException
 	 *             If failure loading {@link Property}.
 	 */
-	private void loadWoofSupplier(WoofSupplierModel supplierModel, WoofObjectsLoaderContext context)
-			throws IOException {
+	private void loadWoofSupplier(WoofSupplierModel supplierModel, OfficeArchitect architect,
+			OfficeExtensionContext context) throws IOException {
 
 		// Obtain the supplier details
 		String supplierSourceClassName = supplierModel.getSupplierSourceClassName();
 
 		// Add the supplier
-		OfficeSupplier supplier = context.getOfficeArchitect().addSupplier(supplierSourceClassName,
-				supplierSourceClassName);
+		OfficeSupplier supplier = architect.addSupplier(supplierSourceClassName, supplierSourceClassName);
 
 		// Load the properties
 		this.loadProperties(supplier, supplierModel.getPropertySources(), context);
@@ -237,12 +246,12 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	 * @param propertySources
 	 *            {@link PropertySourceModel} instances.
 	 * @param context
-	 *            {@link WoofObjectsLoaderContext}.
+	 *            {@link OfficeExtensionContext}.
 	 * @throws IOException
 	 *             If fails to load the properties.
 	 */
 	private void loadProperties(PropertyConfigurable configurable, List<PropertySourceModel> propertySources,
-			WoofObjectsLoaderContext context) throws IOException {
+			OfficeExtensionContext context) throws IOException {
 		for (PropertySourceModel propertySource : propertySources) {
 
 			// Load based on property source type
@@ -254,8 +263,7 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 			} else if (propertySource instanceof PropertyFileModel) {
 				// Load properties from file
 				PropertyFileModel propertyFile = (PropertyFileModel) propertySource;
-				InputStream propertyConfiguration = context.getOfficeExtensionContext()
-						.getResource(propertyFile.getPath());
+				InputStream propertyConfiguration = context.getResource(propertyFile.getPath());
 				Properties properties = new Properties();
 				properties.load(propertyConfiguration);
 				for (String propertyName : properties.stringPropertyNames()) {

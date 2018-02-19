@@ -1,18 +1,17 @@
 <objects>
 
 	<managed-object source="net.example.ExampleManagedObjectSourceA"
-		type="java.lang.String" scope="process" />
+		scope="process" />
 
 	<managed-object source="net.example.ExampleManagedObjectSourceB"
-		type="java.lang.String" scope="THREAD" />
+		scope="THREAD" />
 
 	<managed-object source="net.example.ExampleManagedObjectSourceC"
-		type="java.lang.String" scope="work" />
+		scope="function" />
 
-	<managed-object source="net.example.ExampleManagedObjectSourceD"
-		type="java.lang.String" /> <!-- default -->
+	<managed-object source="net.example.ExampleManagedObjectSourceD" /> <!-- default -->
 
 	<managed-object source="net.example.ExampleManagedObjectSourceE"
-		type="java.lang.String" scope="invalid" />
+		scope="invalid" />
 
 </objects>
