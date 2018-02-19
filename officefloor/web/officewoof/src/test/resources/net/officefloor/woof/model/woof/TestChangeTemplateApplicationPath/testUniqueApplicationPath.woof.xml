@@ -1,0 +1,11 @@
+<woof>
+
+	<templates>
+		<!-- Note: sorts by application path -->
+		<template application-path="/same/path" location="Path2.ofp"
+			class="Class2" />
+		<template application-path="/unique/path" location="Path1.ofp"
+			class="Class1" />
+	</templates>
+
+</woof>

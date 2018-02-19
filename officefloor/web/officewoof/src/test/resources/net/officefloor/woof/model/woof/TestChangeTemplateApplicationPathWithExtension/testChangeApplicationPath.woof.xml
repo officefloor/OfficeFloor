@@ -1,11 +1,7 @@
 <woof>
 
 	<templates>
-		<template path="/path" location="example/Template.ofp" class="net.example.LogicClass">
-			<extension
-				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
-				<property name="name" value="value" />
-			</extension>
+		<template application-path="/change/path" class="Class1">
 			<extension
 				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
 			<extension
@@ -14,6 +10,7 @@
 				<property name="TWO" value="B" />
 			</extension>
 		</template>
+		<template application-path="/same/path" class="Class2" />
 	</templates>
 
 </woof>

@@ -1,9 +1,8 @@
 <woof>
 
 	<templates>
-		<template application-path="/path" location="example/Template.ofp"
-			class="net.example.LogicClass" content-type="text/html; charset=UTF-16"
-			charset="UTF-16" x="100" y="101">
+		<template path="/path" location="example/Template.ofp" class="net.example.LogicClass"
+			content-type="text/html; charset=UTF-16" charset="UTF-16" x="100" y="101">
 		</template>
 	</templates>
 

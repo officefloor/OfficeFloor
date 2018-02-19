@@ -30,9 +30,15 @@
 	</resources>
 
 	<exceptions>
-		<exception class="A" />
+		<exception class="A">
+			<security name="SECURITY_LINK" />
+		</exception>
 		<exception class="B">
-			<section name="SECTION_LINK" input="INPUT" />
+			<template path="/template" />
+			<section name="SECTION" input="INPUT" />
+			<security name="SECURITY" />
+			<resource path="/resource" />
+			<redirect path="/path" />
 		</exception>
 	</exceptions>
 

@@ -18,13 +18,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests linking from the {@link WoofExceptionModel}.
@@ -42,6 +35,56 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	 * Index of exception B.
 	 */
 	private static final int B = 1;
+
+	/**
+	 * Ensures can link to {@link WoofApplicationPathModel}.
+	 */
+	public void testLinkToApplicationPath() {
+		this.doLinkToApplicationPath(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofExceptionToWoofApplicationPathModel}.
+	 */
+	public void testLinkOverrideToApplicationPath() {
+		this.doLinkToApplicationPath(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofApplicationPathModel}.
+	 * 
+	 * @param exceptionIndex
+	 *            {@link WoofExceptionModel} index.
+	 */
+	private void doLinkToApplicationPath(int exceptionIndex) {
+
+		// Obtain the items to link
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
+		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(1);
+
+		// Link the exception to application path
+		Change<WoofExceptionToWoofApplicationPathModel> change = this.operations
+				.linkExceptionToApplicationPath(exception, applicationPath);
+
+		// Validate change
+		this.assertChange(change, null, "Link Exception to Application Path", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofExceptionToWoofApplicationModel}.
+	 */
+	public void testRemoveToApplicationPathLink() {
+
+		// Obtain the link to remove
+		WoofExceptionToWoofApplicationPathModel link = this.model.getWoofExceptions().get(B).getWoofApplicationPath();
+
+		// Remove the link
+		Change<WoofExceptionToWoofApplicationPathModel> change = this.operations.removeExceptionToApplicationPath(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Exception to Application Path", true);
+	}
 
 	/**
 	 * Ensure can link to {@link WoofTemplateModel}.
@@ -67,13 +110,11 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	private void doLinkToTemplate(int exceptionIndex) {
 
 		// Obtain the items to link
-		WoofExceptionModel exception = this.model.getWoofExceptions().get(
-				exceptionIndex);
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 
 		// Link the exception to template
-		Change<WoofExceptionToWoofTemplateModel> change = this.operations
-				.linkExceptionToTemplate(exception, template);
+		Change<WoofExceptionToWoofTemplateModel> change = this.operations.linkExceptionToTemplate(exception, template);
 
 		// Validate change
 		this.assertChange(change, null, "Link Exception to Template", true);
@@ -85,12 +126,10 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToTemplateLink() {
 
 		// Obtain the link to remove
-		WoofExceptionToWoofTemplateModel link = this.model.getWoofExceptions()
-				.get(B).getWoofTemplate();
+		WoofExceptionToWoofTemplateModel link = this.model.getWoofExceptions().get(B).getWoofTemplate();
 
 		// Remove the link
-		Change<WoofExceptionToWoofTemplateModel> change = this.operations
-				.removeExceptionToTemplate(link);
+		Change<WoofExceptionToWoofTemplateModel> change = this.operations.removeExceptionToTemplate(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Exception to Template", true);
@@ -120,14 +159,12 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	private void doLinkToSectionInput(int exceptionIndex) {
 
 		// Obtain the items to link
-		WoofExceptionModel exception = this.model.getWoofExceptions().get(
-				exceptionIndex);
-		WoofSectionInputModel sectionInput = this.model.getWoofSections()
-				.get(B).getInputs().get(0);
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
+		WoofSectionInputModel sectionInput = this.model.getWoofSections().get(1).getInputs().get(0);
 
 		// Link the exception to section input
-		Change<WoofExceptionToWoofSectionInputModel> change = this.operations
-				.linkExceptionToSectionInput(exception, sectionInput);
+		Change<WoofExceptionToWoofSectionInputModel> change = this.operations.linkExceptionToSectionInput(exception,
+				sectionInput);
 
 		// Validate change
 		this.assertChange(change, null, "Link Exception to Section Input", true);
@@ -139,16 +176,62 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToSectionInputLink() {
 
 		// Obtain the link to remove
-		WoofExceptionToWoofSectionInputModel link = this.model
-				.getWoofExceptions().get(B).getWoofSectionInput();
+		WoofExceptionToWoofSectionInputModel link = this.model.getWoofExceptions().get(B).getWoofSectionInput();
 
 		// Remove the link
-		Change<WoofExceptionToWoofSectionInputModel> change = this.operations
-				.removeExceptionToSectionInput(link);
+		Change<WoofExceptionToWoofSectionInputModel> change = this.operations.removeExceptionToSectionInput(link);
 
 		// Validate change
-		this.assertChange(change, null, "Remove Exception to Section Input",
-				true);
+		this.assertChange(change, null, "Remove Exception to Section Input", true);
+	}
+
+	/**
+	 * Ensure can link to {@link WoofSecurityModel}.
+	 */
+	public void testLinkToSecurity() {
+		this.doLinkToSecurity(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofExceptionToWoofSecurityModel}.
+	 */
+	public void testLinkOverrideToSecurity() {
+		this.doLinkToSecurity(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofSecurityModel}.
+	 * 
+	 * @param exceptionIndex
+	 *            {@link WoofExceptionModel} index.
+	 */
+	private void doLinkToSecurity(int exceptionIndex) {
+
+		// Obtain the items to link
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
+		WoofSecurityModel security = this.model.getWoofSecurities().get(1);
+
+		// Link the exception to security
+		Change<WoofExceptionToWoofSecurityModel> change = this.operations.linkExceptionToSecurity(exception, security);
+
+		// Validate change
+		this.assertChange(change, null, "Link Exception to Security", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofExceptionToWoofSecurityModel}.
+	 */
+	public void testRemoveToSecurityLink() {
+
+		// Obtain the link to remove
+		WoofExceptionToWoofSecurityModel link = this.model.getWoofExceptions().get(B).getWoofSecurity();
+
+		// Remove the link
+		Change<WoofExceptionToWoofSecurityModel> change = this.operations.removeExceptionToSecurity(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Exception to Security", true);
 	}
 
 	/**
@@ -175,13 +258,11 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	private void doLinkToResource(int exceptionIndex) {
 
 		// Obtain the items to link
-		WoofExceptionModel exception = this.model.getWoofExceptions().get(
-				exceptionIndex);
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
 		WoofResourceModel resource = this.model.getWoofResources().get(1);
 
 		// Link the exception to resource
-		Change<WoofExceptionToWoofResourceModel> change = this.operations
-				.linkExceptionToResource(exception, resource);
+		Change<WoofExceptionToWoofResourceModel> change = this.operations.linkExceptionToResource(exception, resource);
 
 		// Validate change
 		this.assertChange(change, null, "Link Exception to Resource", true);
@@ -193,12 +274,10 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToResourceLink() {
 
 		// Obtain the link to remove
-		WoofExceptionToWoofResourceModel link = this.model.getWoofExceptions()
-				.get(B).getWoofResource();
+		WoofExceptionToWoofResourceModel link = this.model.getWoofExceptions().get(B).getWoofResource();
 
 		// Remove the link
-		Change<WoofExceptionToWoofResourceModel> change = this.operations
-				.removeExceptionToResource(link);
+		Change<WoofExceptionToWoofResourceModel> change = this.operations.removeExceptionToResource(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Exception to Resource", true);

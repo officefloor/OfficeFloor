@@ -32,7 +32,7 @@
 	<exceptions>
 		<exception class="A" />
 		<exception class="B">
-			<section name="SECTION_LINK" input="INPUT" />
+			<security name="SECURITY_LINK" />
 		</exception>
 	</exceptions>
 

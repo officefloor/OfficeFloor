@@ -36,7 +36,7 @@
 	<!-- TEMPLATE -->
 	<object method="addWoofTemplate" node="template"
 		class="net.officefloor.woof.model.woof.WoofTemplateModel">
-		<value method="setApplicationPath" node="template@application-path" />
+		<value method="setApplicationPath" node="template@path" />
 		<value method="setTemplateLocation" node="template@location" />
 		<value method="setTemplateClassName" node="template@class" />
 		<value method="setTemplateContentType" node="template@content-type" />

@@ -1,8 +1,8 @@
 <woof>
 
 	<templates>
-		<template application-path="/path" location="example/Template.ofp"
-			class="net.example.LogicClass" x="100" y="101">
+		<template path="/path" location="example/Template.ofp" class="net.example.LogicClass"
+			x="100" y="101">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer" />
 			<output name="OUTPUT_2" />
 		</template>

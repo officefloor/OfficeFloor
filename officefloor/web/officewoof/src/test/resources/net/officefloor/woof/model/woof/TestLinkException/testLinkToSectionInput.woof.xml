@@ -1,8 +1,13 @@
 <woof>
 
+	<application-paths>
+		<application-path path="/path" />
+		<application-path path="/pathLink" />
+	</application-paths>
+
 	<templates>
-		<template name="TEMPLATE" />
-		<template name="TEMPLATE_LINK" />
+		<template path="/template" />
+		<template path="/templateLink" />
 	</templates>
 
 	<sections>
@@ -14,19 +19,26 @@
 		</section>
 	</sections>
 
+	<securities>
+		<security name="SECURITY" />
+		<security name="SECURITY_LINK" />
+	</securities>
+
 	<resources>
-		<resource name="RESOURCE" />
-		<resource name="RESOURCE_LINK" />
+		<resource path="/resource" />
+		<resource path="/resourceLink" />
 	</resources>
 
 	<exceptions>
 		<exception class="A">
-			<input section="SECTION_LINK" input="INPUT" />
+			<section name="SECTION_LINK" input="INPUT" />
 		</exception>
 		<exception class="B">
-			<template name="TEMPLATE" />
-			<input section="SECTION" input="INPUT" />
-			<resource name="RESOURCE" />
+			<template path="/template" />
+			<section name="SECTION" input="INPUT" />
+			<security name="SECURITY" />
+			<resource path="/resource" />
+			<redirect path="/path" />
 		</exception>
 	</exceptions>
 

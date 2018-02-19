@@ -62,7 +62,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param models
 	 *            Models.
 	 * @param nameExtractor
-	 *            {@link NameExtractor}.
+	 *            {@link Function} to extract name.
 	 */
 	private static <M> void sortModelList(List<M> models, final Function<M, String> nameExtractor) {
 		Collections.sort(models, (a, b) -> {
@@ -70,6 +70,26 @@ public class WoofChangesImpl implements WoofChanges {
 			String nameB = nameExtractor.apply(b);
 			return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
 		});
+	}
+
+	/**
+	 * Determines if the identifier is unique.
+	 * 
+	 * @param identifier
+	 *            Identifier to determine is unique.
+	 * @param changingModel
+	 *            Changing {@link Model}. May be <code>null</code> for new
+	 *            {@link Model} being added.
+	 * @param models
+	 *            Models.
+	 * @param nameExtractor
+	 *            {@link Function} to extract name.
+	 * @return <code>true</code> if identifier is unique.
+	 */
+	private static <M> boolean isUniqueModelIdentifier(String identifier, M changingModel, List<M> models,
+			final Function<M, String> nameExtractor) {
+		return models.stream()
+				.allMatch((item) -> (item == changingModel) || (!identifier.equals(nameExtractor.apply(item))));
 	}
 
 	/**
@@ -1008,11 +1028,19 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofTemplateModel> changeTemplateApplicationPath(final WoofTemplateModel template,
 			final String applicationPath, WoofTemplateChangeContext context) {
 
+		// Ensure the application path is unique
+		if (!isUniqueModelIdentifier(applicationPath, template, this.model.getWoofTemplates(),
+				(model) -> model.getApplicationPath())) {
+			return new NoChange<WoofTemplateModel>(template, "Change Template Application Path",
+					"Template already exists with application path " + applicationPath);
+		}
+
 		// Keep track of original values
 		final String originalApplicationPath = template.getApplicationPath();
 
 		// Create change to template URI
-		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(template, "Change Template URI") {
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(template,
+				"Change Template Application Path") {
 			@Override
 			public void apply() {
 				// Update template application path
@@ -2694,6 +2722,35 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofExceptionToWoofApplicationPathModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
+			WoofApplicationPathModel applicationPath) {
+
+		// Create the connection
+		final WoofExceptionToWoofApplicationPathModel connection = new WoofExceptionToWoofApplicationPathModel(
+				applicationPath.getApplicationPath(), exception, applicationPath);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofExceptionToWoofApplicationPathModel, WoofExceptionModel>(connection, exception,
+				"Link Exception to Application Path") {
+			@Override
+			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofApplicationPath());
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofApplicationPathModel> removeExceptionToApplicationPath(
+			WoofExceptionToWoofApplicationPathModel link) {
+		return new RemoveLinkChange<WoofExceptionToWoofApplicationPathModel>(link,
+				"Remove Exception to Application Path");
+	}
+
+	@Override
 	public Change<WoofExceptionToWoofTemplateModel> linkExceptionToTemplate(WoofExceptionModel exception,
 			WoofTemplateModel template) {
 
@@ -2709,6 +2766,8 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofApplicationPath());
 			}
 		};
 	}
@@ -2742,6 +2801,8 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofApplicationPath());
 			}
 		};
 	}
@@ -2750,6 +2811,33 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
 			WoofExceptionToWoofSectionInputModel link) {
 		return new RemoveLinkChange<WoofExceptionToWoofSectionInputModel>(link, "Remove Exception to Section Input");
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofSecurityModel> linkExceptionToSecurity(WoofExceptionModel exception,
+			WoofSecurityModel security) {
+
+		// Create the connection
+		final WoofExceptionToWoofSecurityModel connection = new WoofExceptionToWoofSecurityModel(
+				security.getHttpSecurityName(), exception, security);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofExceptionToWoofSecurityModel, WoofExceptionModel>(connection, exception,
+				"Link Exception to Security") {
+			@Override
+			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofApplicationPath());
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofSecurityModel> removeExceptionToSecurity(WoofExceptionToWoofSecurityModel link) {
+		return new RemoveLinkChange<WoofExceptionToWoofSecurityModel>(link, "Remove Exception to Security");
 	}
 
 	@Override
@@ -2768,6 +2856,8 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofApplicationPath());
 			}
 		};
 	}

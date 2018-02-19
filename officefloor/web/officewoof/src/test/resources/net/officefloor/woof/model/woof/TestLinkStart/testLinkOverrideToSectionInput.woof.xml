@@ -8,12 +8,12 @@
 			<input name="INPUT" />
 		</section>
 	</sections>
-	
-	<starting>
+
+	<starts>
 		<start />
 		<start>
-			<flow section="SECTION_LINK" input="INPUT" />
+			<section name="SECTION_LINK" input="INPUT" />
 		</start>
-	</starting>
+	</starts>
 
 </woof>

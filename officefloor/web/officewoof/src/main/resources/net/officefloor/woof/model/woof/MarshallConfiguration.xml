@@ -53,7 +53,7 @@
 		<item type="net.officefloor.woof.model.woof.WoofTemplateModel"
 			element="template">
 			<attributes>
-				<attribute method="getApplicationPath" attribute="application-path" />
+				<attribute method="getApplicationPath" attribute="path" />
 				<attribute method="getTemplateLocation" attribute="location" />
 				<attribute method="getTemplateClassName" attribute="class" />
 				<attribute method="getTemplateContentType" attribute="content-type" />

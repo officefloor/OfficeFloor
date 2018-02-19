@@ -768,6 +768,29 @@ public interface WoofChanges {
 			WoofSecurityOutputToWoofResourceModel link);
 
 	/**
+	 * Links the {@link WoofExceptionModel} to the
+	 * {@link WoofApplicationPathModel}.
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel}.
+	 * @param applicationPath
+	 *            {@link WoofApplicationPathModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofExceptionToWoofApplicationPathModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
+			WoofApplicationPathModel applicationPath);
+
+	/**
+	 * Removes the {@link WoofExceptionToWoofApplicationPathModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofExceptionToWoofApplicationPathModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofExceptionToWoofApplicationPathModel> removeExceptionToApplicationPath(
+			WoofExceptionToWoofApplicationPathModel link);
+
+	/**
 	 * Links the {@link WoofExceptionModel} to the {@link WoofTemplateModel} .
 	 * 
 	 * @param exception
@@ -810,6 +833,27 @@ public interface WoofChanges {
 	 */
 	Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
 			WoofExceptionToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofExceptionModel} to the {@link WoofSecurityModel} .
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel}.
+	 * @param security
+	 *            {@link WoofSecurityModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofExceptionToWoofSecurityModel> linkExceptionToSecurity(WoofExceptionModel exception,
+			WoofSecurityModel security);
+
+	/**
+	 * Removes the {@link WoofExceptionToWoofSecurityModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofExceptionToWoofSecurityModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofExceptionToWoofSecurityModel> removeExceptionToSecurity(WoofExceptionToWoofSecurityModel link);
 
 	/**
 	 * Links the {@link WoofExceptionModel} to the {@link WoofResourceModel} .

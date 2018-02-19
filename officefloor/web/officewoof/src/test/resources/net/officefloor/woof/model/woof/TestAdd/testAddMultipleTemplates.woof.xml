@@ -1,13 +1,13 @@
 <woof>
 
 	<templates>
-		<template application-path="/pathA" location="example/TemplateOne.ofp"
+		<template path="/pathA" location="example/TemplateOne.ofp"
 			class="Class1">
 		</template>
-		<template application-path="/pathB" location="example/TemplateTwo.ofp"
+		<template path="/pathB" location="example/TemplateTwo.ofp"
 			class="Class2">
 		</template>
-		<template application-path="/pathC" location="example/TemplateThree.ofp"
+		<template path="/pathC" location="example/TemplateThree.ofp"
 			class="Class3">
 		</template>
 	</templates>

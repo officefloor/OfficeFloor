@@ -13,8 +13,8 @@
 	</application-paths>
 
 	<templates>
-		<template application-path="/templateChild" location="example/Child.ofp" />
-		<template application-path="/templateLink" location="example/Link.ofp">
+		<template path="/templateChild" location="example/Child.ofp" />
+		<template path="/templateLink" location="example/Link.ofp">
 			<output name="OUTPUT" />
 		</template>
 	</templates>

@@ -25,7 +25,7 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
+public class ChangeTemplateApplicationPathTest extends AbstractWoofChangesTestCase {
 
 	/**
 	 * {@link WoofTemplateModel}.
@@ -39,58 +39,58 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure able make no change to URI.
+	 * Ensure able make no change to application path.
 	 */
-	public void testNotChangeUri() {
+	public void testNotChangeApplicationPath() {
 
 		// Test
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
-				this.template, "path", this.getWoofTemplateChangeContext());
-
-		// Validate the change
-		this.assertChange(change, this.template, "Change Template URI", true);
-
-		// Verify
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can change to unique URI.
-	 */
-	public void testUniqueUri() {
-
-		// Test
-		this.replayMockObjects();
-
-		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
-				this.template, "unique/uri",
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template, "/path",
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change
-		this.assertChange(change, this.template, "Change Template URI", true);
+		this.assertChange(change, this.template, "Change Template Application Path", true);
 
 		// Verify
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure can change to non-unique URI.
+	 * Ensure can change to unique application path.
 	 */
-	public void testNonUniqueUri() {
+	public void testUniqueApplicationPath() {
 
 		// Test
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(
-				this.template, "same/uri", this.getWoofTemplateChangeContext());
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template, "/unique/path",
+				this.getWoofTemplateChangeContext());
 
 		// Validate the change
-		this.assertChange(change, this.template, "Change Template URI", true);
+		this.assertChange(change, this.template, "Change Template Application Path", true);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can not change to non-unique application path.
+	 */
+	public void testNonUniqueApplicationPath() {
+
+		// Test
+		this.replayMockObjects();
+
+		// Change template to unique URI
+		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template, "/same/path",
+				this.getWoofTemplateChangeContext());
+
+		// Validate the change
+		this.assertChange(change, this.template, "Change Template Application Path", false,
+				"Template already exists with application path /same/path");
 
 		// Verify
 		this.verifyMockObjects();

@@ -5,7 +5,7 @@
 	</application-paths>
 
 	<templates>
-		<template application-path="/template" location="example/Template.ofp"
+		<template path="/template" location="example/Template.ofp"
 			class="net.example.LogicClass">
 			<extension
 				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />

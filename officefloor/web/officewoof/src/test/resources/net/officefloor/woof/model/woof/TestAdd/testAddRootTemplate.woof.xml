@@ -1,7 +1,7 @@
 <woof>
 
 	<templates>
-		<template application-path="/" location="root.ofp" />
+		<template path="/" location="root.ofp" />
 	</templates>
 
 </woof>

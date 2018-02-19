@@ -32,7 +32,10 @@
 	<exceptions>
 		<exception class="A" />
 		<exception class="B">
-			<section name="SECTION_LINK" input="INPUT" />
+			<template path="/template" />
+			<section name="SECTION" input="INPUT" />
+			<resource path="/resource" />
+			<redirect path="/path" />
 		</exception>
 	</exceptions>
 

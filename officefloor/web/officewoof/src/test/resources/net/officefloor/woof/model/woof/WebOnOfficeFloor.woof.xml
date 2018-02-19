@@ -14,7 +14,7 @@
 	</application-paths>
 
 	<templates>
-		<template application-path="/templateA" location="example/TemplateA.ofp"
+		<template path="/templateA" location="example/TemplateA.ofp"
 			class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
 			charset="UTF-16" secure="true" redirect-values-function="redirect"
 			link-separator-character="_" x="300" y="301">
@@ -45,7 +45,7 @@
 			</extension>
 			<extension class="net.example.Extension" />
 		</template>
-		<template application-path="/templateB" location="example/TemplateB.ofp"
+		<template path="/templateB" location="example/TemplateB.ofp"
 			x="302" y="303" />
 	</templates>
 

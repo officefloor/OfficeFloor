@@ -8,10 +8,10 @@
 			<input name="INPUT" />
 		</section>
 	</sections>
-	
-	<starting>
+
+	<starts>
 		<start />
 		<start />
-	</starting>
+	</starts>
 
 </woof>
