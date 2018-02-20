@@ -178,7 +178,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(
-			String securityName, Class<? extends HttpSecuritySource<A, AC, C, O, F>> httpSecuritySourceClass) {
+			String securityName, String httpSecuritySourceClassName) {
+
+		// Obtain the class
+		Class<?> httpSecuritySourceClass = this.officeSourceContext.loadClass(httpSecuritySourceClassName);
 
 		// Instantiate the HTTP security source
 		HttpSecuritySource<A, AC, C, O, F> httpSecuritySource;
@@ -224,7 +227,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Provide anonymous security (if no security configured)
 		if (this.securities.size() == 0) {
-			this.addHttpSecurity("anonymous", AnonymousHttpSecuritySource.class);
+			this.addHttpSecurity("anonymous", new AnonymousHttpSecuritySource());
 		}
 
 		// Configure the HTTP challenge context

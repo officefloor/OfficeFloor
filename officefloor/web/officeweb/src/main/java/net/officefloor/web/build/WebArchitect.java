@@ -21,11 +21,11 @@ import java.lang.annotation.Annotation;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -221,11 +221,11 @@ public abstract interface WebArchitect {
 	 *            Indicates if secure connection required.
 	 * @param applicationPath
 	 *            URL path of the application to be linked.
-	 * @param sectionInput
-	 *            {@link OfficeSectionInput} servicing the URI.
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode} servicing the application path.
 	 * @return {@link HttpUrlContinuation}.
 	 */
-	HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput);
+	HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeFlowSinkNode flowSinkNode);
 
 	/**
 	 * Links a URL to an {@link OfficeSectionInput}.
@@ -236,25 +236,11 @@ public abstract interface WebArchitect {
 	 *            {@link HttpMethod}.
 	 * @param applicationPath
 	 *            URL path of the application to be linked.
-	 * @param sectionInput
-	 *            {@link OfficeSectionInput} servicing the URI.
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode} servicing the application path.
 	 * @return {@link HttpInput}.
 	 */
-	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeSectionInput sectionInput);
-
-	/**
-	 * Links the {@link OfficeSectionOutput} to the {@link HttpUrlContinuation}.
-	 * 
-	 * @param flowSourceNode
-	 *            {@link OfficeFlowSourceNode}.
-	 * @param continuation
-	 *            {@link HttpUrlContinuation}.
-	 * @param parameterType
-	 *            {@link Class} providing the possible parameters for the
-	 *            {@link HttpUrlContinuation} path. May be <code>null</code> if
-	 *            {@link HttpUrlContinuation} path contains no parameters.
-	 */
-	void link(OfficeFlowSourceNode flowSourceNode, HttpUrlContinuation continuation, Class<?> parameterType);
+	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeFlowSinkNode flowSinkNode);
 
 	/**
 	 * <p>
@@ -263,11 +249,11 @@ public abstract interface WebArchitect {
 	 * Typically, this is used on importing previous state into the
 	 * {@link ServerHttpConnection} and then have it serviced.
 	 * 
-	 * @param output
-	 *            {@link OfficeSectionOutput} to trigger re-routing the
+	 * @param flowSourceNode
+	 *            {@link OfficeFlowSourceNode} to trigger re-routing the
 	 *            {@link ServerHttpConnection}.
 	 */
-	void reroute(OfficeSectionOutput output);
+	void reroute(OfficeFlowSourceNode flowSourceNode);
 
 	/**
 	 * <p>
@@ -277,14 +263,14 @@ public abstract interface WebArchitect {
 	 * <p>
 	 * This allows, for example, logging all requests to the web application.
 	 * 
-	 * @param sectionInput
-	 *            {@link OfficeSectionInput} to handle intercepting the
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode} to handle intercepting the
 	 *            {@link HttpRequest}.
-	 * @param sectionOutput
-	 *            {@link OfficeSectionOutput} to continue servicing the
+	 * @param flowSourceNode
+	 *            {@link OfficeFlowSourceNode} to continue servicing the
 	 *            {@link HttpRequest}.
 	 */
-	void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput);
+	void intercept(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode flowSourceNode);
 
 	/**
 	 * <p>
@@ -296,15 +282,15 @@ public abstract interface WebArchitect {
 	 * to attempt to service the {@link HttpRequest}. This allows, for example,
 	 * adding a chained servicer for serving resources from a file system.
 	 * 
-	 * @param sectionInput
-	 *            {@link OfficeSectionInput} to handle the {@link HttpRequest}.
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode} to handle the {@link HttpRequest}.
 	 * @param notHandledOutput
-	 *            {@link OfficeSectionOutput} should this servicer not handle
+	 *            {@link OfficeFlowSourceNode} should this servicer not handle
 	 *            the {@link HttpRequest}. May be <code>null</code> if handles
 	 *            all {@link HttpRequest} instances (any services chained after
 	 *            this will therefore not be used).
 	 */
-	void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput);
+	void chainServicer(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode notHandledOutput);
 
 	/**
 	 * Creates the {@link AcceptNegotiatorBuilder} to build an

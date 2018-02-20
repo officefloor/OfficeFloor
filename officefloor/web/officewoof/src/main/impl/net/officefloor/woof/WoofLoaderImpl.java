@@ -43,12 +43,9 @@ import net.officefloor.web.resource.build.HttpResourceArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
-import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplater;
 import net.officefloor.web.template.build.WebTemplaterEmployer;
-import net.officefloor.woof.WoofLoader;
-import net.officefloor.woof.WoofLoaderContext;
 import net.officefloor.woof.model.woof.PropertyModel;
 import net.officefloor.woof.model.woof.WoofExceptionModel;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
@@ -297,13 +294,9 @@ public class WoofLoaderImpl implements WoofLoader {
 			String httpSecuritySourceClassName = securityModel.getHttpSecuritySourceClassName();
 			long timeout = securityModel.getTimeout();
 
-			// Obtain the HTTP Security Source class
-			Class<? extends HttpSecuritySource<?, ?, ?, ?, ?>> httpSecuritySourceClass = (Class<? extends HttpSecuritySource<?, ?, ?, ?, ?>>) extensionContext
-					.loadClass(httpSecuritySourceClassName);
-
 			// Add the HTTP security
 			HttpSecurityBuilder securityBuilder = securityArchitect.addHttpSecurity(httpSecurityName,
-					httpSecuritySourceClass);
+					httpSecuritySourceClassName);
 			securityBuilder.setTimeout(timeout);
 			for (PropertyModel property : securityModel.getProperties()) {
 				securityBuilder.addProperty(property.getName(), property.getValue());

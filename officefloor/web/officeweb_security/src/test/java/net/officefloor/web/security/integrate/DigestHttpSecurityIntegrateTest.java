@@ -51,7 +51,8 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 			HttpSecurityArchitect securityArchitect) {
 
 		// Configure the HTTP Security
-		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY", DigestHttpSecuritySource.class);
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY",
+				DigestHttpSecuritySource.class.getName());
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_REALM, REALM);
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY, "PrivateKey");
 

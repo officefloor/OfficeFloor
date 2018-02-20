@@ -191,7 +191,8 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * 
 	 * @param governance
 	 *            {@link OfficeGovernance}.
+	 * @return <code>this</code>.
 	 */
-	void addGovernance(OfficeGovernance governance);
+	WebTemplate addGovernance(OfficeGovernance governance);
 
 }

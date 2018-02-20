@@ -435,14 +435,16 @@ public class WebTemplaterEmployer implements WebTemplater {
 						// Configure the redirect
 						OfficeSectionOutput redirectOutput = this.section
 								.getOfficeSectionOutput(outputType.getOfficeSectionOutputName());
-						WebTemplaterEmployer.this.webArchitect.link(redirectOutput, templateInput, valuesType);
+						WebTemplaterEmployer.this.officeArchitect.link(redirectOutput,
+								templateInput.getRedirect(valuesType));
 					}
 				}
 			}
 
 			// Link to template (redirect - should be different URL always)
 			for (LinkToTemplate link : this.linkToTemplates) {
-				WebTemplaterEmployer.this.webArchitect.link(link.flowSourceNode, templateInput, link.valuesType);
+				WebTemplaterEmployer.this.officeArchitect.link(link.flowSourceNode,
+						templateInput.getRedirect(link.valuesType));
 			}
 		}
 
@@ -527,8 +529,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public void addGovernance(OfficeGovernance governance) {
+		public WebTemplate addGovernance(OfficeGovernance governance) {
 			this.section.addGovernance(governance);
+			return this;
 		}
 	}
 

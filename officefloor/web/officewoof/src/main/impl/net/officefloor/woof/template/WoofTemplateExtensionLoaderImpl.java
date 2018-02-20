@@ -426,7 +426,7 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		}
 
 		@Override
-		public WebArchitect getWebApplication() {
+		public WebArchitect getWebArchitect() {
 			return this.webArchitect;
 		}
 	}

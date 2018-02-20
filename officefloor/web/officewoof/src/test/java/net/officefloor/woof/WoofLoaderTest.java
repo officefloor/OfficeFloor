@@ -17,7 +17,9 @@
  */
 package net.officefloor.woof;
 
+import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.util.function.Function;
 import java.util.logging.LogRecord;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -32,6 +34,7 @@ import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.test.LoggerAssertion;
@@ -40,6 +43,7 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
@@ -48,9 +52,6 @@ import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.type.HttpSecuritySourceSpecificationRunnableTest.MockHttpSecuritySource;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplater;
-import net.officefloor.woof.WoofLoader;
-import net.officefloor.woof.WoofLoaderContext;
-import net.officefloor.woof.WoofLoaderImpl;
 import net.officefloor.woof.model.woof.WoofRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofTemplateModel;
 import net.officefloor.woof.template.WoofTemplateExtensionException;
@@ -136,13 +137,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoading() throws Exception {
 
-		final WebTemplate templateA = this.createMock(WebTemplate.class);
-		final WebTemplate templateB = this.createMock(WebTemplate.class);
-		final OfficeSection sectionA = this.createMock(OfficeSection.class);
-		final OfficeSectionInput sectionAInput = this.createMock(OfficeSectionInput.class);
 		final HttpUrlContinuation link = this.createMock(HttpUrlContinuation.class);
-		final OfficeSection sectionB = this.createMock(OfficeSection.class);
-		final HttpSecurityBuilder security = this.createMock(HttpSecurityBuilder.class);
 		final OfficeGovernance governanceA = this.createMock(OfficeGovernance.class);
 		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
 
@@ -151,89 +146,112 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("example", "another");
 
 		// Record loading templates
-		this.recordReturn(this.templater, this.templater.addTemplate("example", "WOOF/TemplateA.ofp"), templateA);
-		templateA.setLogicClass(Template.class);
-		templateA.setContentType("text/html; charset=UTF-8");
-		templateA.setSecure(true);
-		templateA.setLinkSecure("LINK_1", true);
-		templateA.setLinkSecure("LINK_2", false);
-		templateA.addRenderMethod(HttpMethod.getHttpMethod("REDIRECT_POST"));
-		templateA.addRenderMethod(HttpMethod.getHttpMethod("REDIRECT_PUT"));
-		this.recordImplicitTemplateExtensions(templateA, "example");
-		this.recordReturn(this.templater, this.templater.addTemplate("another", "WOOF/TemplateB.ofp"), templateB);
-		templateB.setSecure(false);
-		this.recordImplicitTemplateExtensions(templateB, "another");
+		WebTemplateRecorder templateA = new WebTemplateRecorder("/template/{param}", "WOOF/TemplateA.ofp");
+		templateA.record((template) -> template.setLogicClass(Template.class));
+		templateA.record((template) -> template.setRedirectValuesFunction("redirect"));
+		templateA.record((template) -> template.setContentType("text/html; charset=UTF-8"));
+		templateA.record((template) -> template.setCharset(Charset.forName("UTF-8")));
+		templateA.record((template) -> template.setLinkSeparatorCharacter('_'));
+		templateA.record((template) -> template.setSecure(true));
+		templateA.record((template) -> template.setLinkSecure("LINK_1", true));
+		templateA.record((template) -> template.setLinkSecure("LINK_2", false));
+		templateA.record((template) -> template.addRenderMethod(HttpMethod.getHttpMethod("POST")));
+		templateA.record((template) -> template.addRenderMethod(HttpMethod.getHttpMethod("PUT")));
+		this.recordImplicitTemplateExtensions();
+		WebTemplateRecorder templateB = new WebTemplateRecorder("/template/another", "WOOF/TemplateB.ofp");
+		templateB.record((template) -> template.setSecure(false));
+		this.recordImplicitTemplateExtensions();
 
 		// Record loading sections
+		final OfficeSection sectionA = this.createMock(OfficeSection.class);
 		this.recordReturn(this.office,
 				this.office.addOfficeSection("SECTION_A", ClassSectionSource.class.getName(), Section.class.getName()),
 				sectionA);
 		sectionA.addProperty("name.one", "value.one");
 		sectionA.addProperty("name.two", "value.two");
+		final OfficeSectionInput sectionAInput = this.createMock(OfficeSectionInput.class);
 		this.recordReturn(sectionA, sectionA.getOfficeSectionInput("INPUT_B"), sectionAInput);
 		this.recordReturn(this.web, this.web.link(false, "example", sectionAInput), link);
+		final OfficeSection sectionB = this.createMock(OfficeSection.class);
 		this.recordReturn(this.office, this.office.addOfficeSection("SECTION_B", "CLASS", Section.class.getName()),
 				sectionB);
 
-		// Record loading access
-		this.recordReturn(this.security, this.security.addHttpSecurity("SECURITY", MockHttpSecuritySource.class),
-				security);
-		security.setTimeout(2000);
-		security.addProperty("name.first", "value.first");
-		security.addProperty("name.second", "value.second");
+		// Record loading securities
+		final HttpSecurityBuilder securityOne = this.createMock(HttpSecurityBuilder.class);
+		this.recordReturn(this.security,
+				this.security.addHttpSecurity("SECURITY_ONE", MockHttpSecuritySource.class.getName()), securityOne);
+		securityOne.setTimeout(2000);
+		securityOne.addProperty("name.first", "value.first");
+		securityOne.addProperty("name.second", "value.second");
+		final HttpSecurityBuilder securityTwo = this.createMock(HttpSecurityBuilder.class);
+		this.recordReturn(this.security,
+				this.security.addHttpSecurity("SECURITY_TWO", MockHttpSecuritySource.class.getName()), securityTwo);
+
+		// Record application paths
+		HttpUrlContinuation pathAContinuation = this.createMock(HttpUrlContinuation.class);
+		this.recordReturn(this.web, this.web.link(true, "/pathA", this.recordGetInput(sectionA, "INPUT_A")),
+				pathAContinuation);
+		HttpInputPath pathAInput = this.createMock(HttpInputPath.class);
+		this.recordReturn(this.web,
+				this.web.link(true, HttpMethod.POST, "/pathA", this.recordGetInput(sectionA, "INPUT_A")), pathAInput);
+		// TODO link application path to template
+		HttpUrlContinuation pathC = this.createMock(HttpUrlContinuation.class);
+		this.recordReturn(this.web, this.web.link(false, "/pathC", securityOne.getAuthenticateInput()), pathC);
+		// TODO link application path to resource
+		HttpUrlContinuation pathE = this.createMock(HttpUrlContinuation.class);
+		this.recordReturn(this.web, this.web.link(false, "/pathE", pathAContinuation.getRedirect(null)), pathE);
 
 		// Record linking template outputs
-		this.office.link(this.recordGetSectionOutput(templateA, "OUTPUT_1"),
-				this.recordGetSectionInput(sectionA, "INPUT_A"));
-		templateB.link(this.recordGetSectionOutput(templateA, "OUTPUT_2"), null);
-		this.office.link(this.recordGetSectionOutput(templateA, "OUTPUT_3"), this.recordGetSectionInput(security));
-		this.resources.link(this.recordGetSectionOutput(templateA, "OUTPUT_4"), "Example.html");
+		this.office.link(templateA.recordGetOutput("OUTPUT_1"), this.recordGetInput(sectionA, "INPUT_A"));
+		templateB.template.link(templateA.recordGetOutput("OUTPUT_2"), null);
+		this.office.link(templateA.recordGetOutput("OUTPUT_3"), this.recordGetInput(securityOne));
+		this.resources.link(templateA.recordGetOutput("OUTPUT_4"), "/resource.html");
+		this.office.link(templateA.recordGetOutput("OUTPUT_5"), pathAContinuation.getRedirect(String.class));
 
 		// Record linking section outputs
-		this.office.link(this.recordGetSectionOutput(sectionA, "OUTPUT_A"),
-				this.recordGetSectionInput(sectionB, "INPUT_1"));
-		templateA.link(this.recordGetSectionOutput(sectionA, "OUTPUT_B"), null);
-		this.office.link(this.recordGetSectionOutput(sectionA, "OUTPUT_C"), this.recordGetSectionInput(security));
-		this.resources.link(this.recordGetSectionOutput(sectionA, "OUTPUT_D"), "Example.html");
+		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_A"), this.recordGetInput(sectionB, "INPUT_1"));
+		templateA.template.link(this.recordGetOutput(sectionA, "OUTPUT_B"), null);
+		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_C"), this.recordGetInput(securityOne));
+		this.resources.link(this.recordGetOutput(sectionA, "OUTPUT_D"), "/resource.png");
+		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_E"), pathC.getRedirect(Long.class));
 
-		// Record link access outputs
-		this.office.link(this.recordGetSectionOutput(security, "OUTPUT_ONE"),
-				this.recordGetSectionInput(sectionB, "INPUT_1"));
-		templateA.link(this.recordGetSectionOutput(security, "OUTPUT_TWO"), null);
-		this.resources.link(this.recordGetSectionOutput(security, "OUTPUT_THREE"), "Example.html");
+		// Record link security outputs
+		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_ONE"), this.recordGetInput(sectionB, "INPUT_1"));
+		templateB.template.link(this.recordGetOutput(securityOne, "OUTPUT_TWO"), null);
+		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_THREE"), this.recordGetInput(securityTwo));
+		this.resources.link(this.recordGetOutput(securityOne, "OUTPUT_FOUR"), "/resource.html");
+		HttpUrlContinuation pathD = this.createMock(HttpUrlContinuation.class);
+		// TODO configure HTTP URL continuation to resource
+		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_5"), pathD.getRedirect(null));
 
 		// Record linking escalations
-		OfficeEscalation escalationException = this.createMock(OfficeEscalation.class);
-		this.recordReturn(this.office, this.office.addOfficeEscalation(Exception.class.getName()), escalationException);
-		this.office.link(escalationException, this.recordGetSectionInput(sectionA, "INPUT_A"));
-		OfficeEscalation escalationRuntime = this.createMock(OfficeEscalation.class);
-		this.recordReturn(this.office, this.office.addOfficeEscalation(RuntimeException.class.getName()),
-				escalationRuntime);
-		templateA.link(escalationRuntime, null);
-		OfficeEscalation escalationSql = this.createMock(OfficeEscalation.class);
-		this.recordReturn(this.office, this.office.addOfficeEscalation(SQLException.class.getName()), escalationSql);
-		this.resources.link(escalationSql, "Example.html");
+		this.office.link(this.recordEscalation(Exception.class), this.recordGetInput(sectionA, "INPUT_A"));
+		templateA.template.link(this.recordEscalation(RuntimeException.class), null);
+		this.office.link(this.recordEscalation(UnsupportedOperationException.class), this.recordGetInput(securityTwo));
+		this.resources.link(this.recordEscalation(SQLException.class), "/resource.png");
+		// TODO configure HTTP URL continuation for exception
+		this.office.link(this.recordEscalation(NullPointerException.class), pathE.getRedirect(null));
 
 		// Record linking starts
 		OfficeStart startOne = this.createMock(OfficeStart.class);
 		this.recordReturn(this.office, this.office.addOfficeStart("START_1"), startOne);
-		this.office.link(startOne, this.recordGetSectionInput(sectionA, "INPUT_A"));
+		this.office.link(startOne, this.recordGetInput(sectionA, "INPUT_A"));
 		OfficeStart startTwo = this.createMock(OfficeStart.class);
 		this.recordReturn(this.office, this.office.addOfficeStart("START_2"), startTwo);
-		this.office.link(startTwo, this.recordGetSectionInput(sectionB, "INPUT_1"));
+		this.office.link(startTwo, this.recordGetInput(sectionB, "INPUT_1"));
 
 		// Record loading governances
 		this.recordReturn(this.office,
 				this.office.addOfficeGovernance("GOVERNANCE_A", ClassGovernanceSource.class.getName()), governanceA);
 		governanceA.addProperty("name.a", "value.a");
 		governanceA.addProperty("name.b", "value.b");
-		templateA.addGovernance(governanceA);
+		templateA.record((template) -> template.addGovernance(governanceA));
 		sectionA.addGovernance(governanceA);
 		this.recordReturn(this.office, this.office.addOfficeGovernance("GOVERNANCE_B", "CLASS"), governanceB);
 
 		// Test
 		this.replayMockObjects();
-		this.loadConfiguration("application.woof");
+		this.loadConfiguration("application.woof.xml");
 		this.verifyMockObjects();
 	}
 
@@ -242,84 +260,72 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritance() throws Exception {
 
-		final WebTemplate parentTemplate = this.createMock(WebTemplate.class);
-		final WebTemplate childTemplate = this.createMock(WebTemplate.class);
-		final WebTemplate grandChildTemplate = this.createMock(WebTemplate.class);
-		final WebTemplate templateOne = this.createMock(WebTemplate.class);
-		final WebTemplate templateTwo = this.createMock(WebTemplate.class);
-		final WebTemplate templateThree = this.createMock(WebTemplate.class);
-		final OfficeSection section = this.createMock(OfficeSection.class);
-		final HttpSecurityBuilder security = this.createMock(HttpSecurityBuilder.class);
-
 		// Record initiating from source context
 		this.recordInitateFromExtensionContext();
 		MockImplicitWoofTemplateExtensionSourceService.reset("parent", "child", "grandchild", "one", "two", "three");
 
 		// Record loading parent template
-		this.recordReturn(this.templater, this.templater.addTemplate("parent", "WOOF/Parent.ofp"), parentTemplate);
-		parentTemplate.setSecure(false);
-		parentTemplate.setLinkSecure("LINK_SECURE", true);
-		parentTemplate.setLinkSecure("LINK_NON_SECURE", false);
-		this.recordImplicitTemplateExtensions(parentTemplate, "parent");
+		WebTemplateRecorder parentTemplate = new WebTemplateRecorder("parent", "WOOF/Parent.ofp");
+		parentTemplate.record((template) -> template.setSecure(false));
+		parentTemplate.record((template) -> template.setLinkSecure("LINK_SECURE", true));
+		parentTemplate.record((template) -> template.setLinkSecure("LINK_NON_SECURE", false));
+		this.recordImplicitTemplateExtensions();
 
 		// Record loading child template (inheriting configuration)
-		this.recordReturn(this.templater, this.templater.addTemplate("child", "WOOF/Child.ofp"), childTemplate);
-		childTemplate.setSecure(false);
-		childTemplate.setLinkSecure("LINK_OTHER", true);
-		this.recordImplicitTemplateExtensions(childTemplate, "child");
+		WebTemplateRecorder childTemplate = new WebTemplateRecorder("child", "WOOF/Child.ofp");
+		childTemplate.record((template) -> template.setSecure(false));
+		childTemplate.record((template) -> template.setLinkSecure("LINK_OTHER", true));
+		this.recordImplicitTemplateExtensions();
 
 		// Record loading grand child template (overriding configuration)
-		this.recordReturn(this.templater, this.templater.addTemplate("grandchild", "WOOF/GrandChild.ofp"),
-				grandChildTemplate);
-		grandChildTemplate.setSecure(false);
-		grandChildTemplate.setLinkSecure("LINK_SECURE", false);
-		grandChildTemplate.setLinkSecure("LINK_NON_SECURE", true);
-		this.recordImplicitTemplateExtensions(grandChildTemplate, "grandchild");
+		WebTemplateRecorder grandChildTemplate = new WebTemplateRecorder("grandchild", "WOOF/GrandChild.ofp");
+		grandChildTemplate.record((template) -> template.setSecure(false));
+		grandChildTemplate.record((template) -> template.setLinkSecure("LINK_SECURE", false));
+		grandChildTemplate.record((template) -> template.setLinkSecure("LINK_NON_SECURE", true));
+		this.recordImplicitTemplateExtensions();
 
 		// Record loading remaining templates
-		this.recordReturn(this.templater, this.templater.addTemplate("one", "WOOF/TemplateOne.ofp"), templateOne);
-		templateOne.setSecure(false);
-		this.recordImplicitTemplateExtensions(templateOne, "one");
-		this.recordReturn(this.templater, this.templater.addTemplate("two", "WOOF/TemplateTwo.ofp"), templateTwo);
-		templateTwo.setSecure(false);
-		this.recordImplicitTemplateExtensions(templateTwo, "two");
-		this.recordReturn(this.templater, this.templater.addTemplate("three", "WOOF/TemplateThree.ofp"), templateThree);
-		templateThree.setSecure(false);
-		this.recordImplicitTemplateExtensions(templateThree, "three");
+		WebTemplateRecorder templateOne = new WebTemplateRecorder("one", "WOOF/TemplateOne.ofp");
+		templateOne.record((template) -> template.setSecure(false));
+		this.recordImplicitTemplateExtensions();
+		WebTemplateRecorder templateTwo = new WebTemplateRecorder("two", "WOOF/TemplateTwo.ofp");
+		templateTwo.record((template) -> template.setSecure(false));
+		this.recordImplicitTemplateExtensions();
+		WebTemplateRecorder templateThree = new WebTemplateRecorder("three", "WOOF/TemplateThree.ofp");
+		templateThree.record((template) -> template.setSecure(false));
+		this.recordImplicitTemplateExtensions();
 
 		// Record loading sections
+		final OfficeSection section = this.createMock(OfficeSection.class);
 		this.recordReturn(this.office,
 				this.office.addOfficeSection("SECTION", "CLASS", "net.officefloor.ExampleSection"), section);
 
 		// Record loading access
-		this.recordReturn(this.security, this.security.addHttpSecurity("SECURITY", MockHttpSecuritySource.class),
-				security);
+		final HttpSecurityBuilder security = this.createMock(HttpSecurityBuilder.class);
+		this.recordReturn(this.security,
+				this.security.addHttpSecurity("SECURITY", MockHttpSecuritySource.class.getName()), security);
 		security.setTimeout(2000);
 
 		// Record linking parent template outputs
-		this.office.link(this.recordGetSectionOutput(parentTemplate, "OUTPUT_SECTION"),
-				this.recordGetSectionInput(section, "INPUT_1"));
-		templateOne.link(this.recordGetSectionOutput(parentTemplate, "OUTPUT_TEMPLATE"), null);
-		this.office.link(this.recordGetSectionOutput(parentTemplate, "OUTPUT_ACCESS"),
-				this.recordGetSectionInput(security));
-		this.resources.link(this.recordGetSectionOutput(parentTemplate, "OUTPUT_RESOURCE"), "ResourceOne.html");
+		this.office.link(parentTemplate.recordGetOutput("OUTPUT_SECTION"), this.recordGetInput(section, "INPUT_1"));
+		templateOne.template.link(parentTemplate.recordGetOutput("OUTPUT_TEMPLATE"), null);
+		this.office.link(parentTemplate.recordGetOutput("OUTPUT_ACCESS"), this.recordGetInput(security));
+		this.resources.link(parentTemplate.recordGetOutput("OUTPUT_RESOURCE"), "ResourceOne.html");
 
 		// Child template inherits link configuration
-		childTemplate.setSuperTemplate(parentTemplate);
+		childTemplate.template.setSuperTemplate(parentTemplate.template);
 
 		// Record linking grand child template outputs (overriding)
-		grandChildTemplate.setSuperTemplate(childTemplate);
-		this.office.link(this.recordGetSectionOutput(grandChildTemplate, "OUTPUT_SECTION"),
-				this.recordGetSectionInput(section, "INPUT_2"));
-		templateTwo.link(this.recordGetSectionOutput(grandChildTemplate, "OUTPUT_TEMPLATE"), null);
-		this.office.link(this.recordGetSectionOutput(grandChildTemplate, "OUTPUT_ACCESS"),
-				this.recordGetSectionInput(security));
-		this.resources.link(this.recordGetSectionOutput(grandChildTemplate, "OUTPUT_RESOURCE"), "ResourceTwo.html");
-		templateThree.link(this.recordGetSectionOutput(grandChildTemplate, "OUTPUT_ANOTHER"), null);
+		grandChildTemplate.template.setSuperTemplate(childTemplate.template);
+		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_SECTION"), this.recordGetInput(section, "INPUT_2"));
+		templateTwo.template.link(grandChildTemplate.recordGetOutput("OUTPUT_TEMPLATE"), null);
+		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_ACCESS"), this.recordGetInput(security));
+		this.resources.link(grandChildTemplate.recordGetOutput("OUTPUT_RESOURCE"), "ResourceTwo.html");
+		templateThree.template.link(grandChildTemplate.recordGetOutput("OUTPUT_ANOTHER"), null);
 
 		// Test
 		this.replayMockObjects();
-		this.loadConfiguration("inheritance.woof");
+		this.loadConfiguration("inheritance.woof.xml");
 		this.verifyMockObjects();
 	}
 
@@ -328,26 +334,24 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testExplicitTemplateExtension() throws Exception {
 
-		final WebTemplate template = this.createMock(WebTemplate.class);
-
 		// Record initiating from source context
 		this.recordInitateFromExtensionContext();
 		MockImplicitWoofTemplateExtensionSourceService.reset("example");
 
 		// Record loading template
-		this.recordReturn(this.templater, this.templater.addTemplate("example", "WOOF/Template.html"), template);
-		template.setLogicClass(Template.class);
-		template.setSecure(false);
+		WebTemplateRecorder example = new WebTemplateRecorder("example", "WOOF/Template.html");
+		example.record((template) -> template.setLogicClass(Template.class));
+		example.record((template) -> template.setSecure(false));
 
 		// Record extending with explicit template extension
 		this.recordTemplateExtension(MockExplicitWoofTemplateExtensionSource.class);
 
 		// Record implicit template extensions
-		this.recordImplicitTemplateExtensions(template, "example");
+		this.recordImplicitTemplateExtensions();
 
 		// Test
 		this.replayMockObjects();
-		this.loadConfiguration("explicit-template-extension.woof");
+		this.loadConfiguration("explicit-template-extension.woof.xml");
 		this.verifyMockObjects();
 	}
 
@@ -393,7 +397,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		try {
-			this.loadConfiguration("unknown-template-extension.woof");
+			this.loadConfiguration("unknown-template-extension.woof.xml");
 			fail("Should not load successfully");
 		} catch (WoofTemplateExtensionException ex) {
 			assertEquals("Incorrect exception",
@@ -450,6 +454,47 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Convenience class to make {@link WebTemplate} recording easier.
+	 */
+	private class WebTemplateRecorder {
+
+		private final WebTemplate template;
+
+		private WebTemplateRecorder(String applicationPath, String location) {
+			this.template = WoofLoaderTest.this.createMock(WebTemplate.class);
+			WoofLoaderTest.this.recordReturn(WoofLoaderTest.this.templater,
+					WoofLoaderTest.this.templater.addTemplate(applicationPath, location), this.template);
+		}
+
+		private void record(Function<WebTemplate, WebTemplate> action) {
+			WoofLoaderTest.this.recordReturn(this.template, action.apply(this.template), this.template);
+		}
+
+		private <R> void record(Function<WebTemplate, R> action, R returnValue) {
+			WoofLoaderTest.this.recordReturn(this.template, action.apply(this.template), returnValue);
+		}
+
+		private OfficeSectionOutput recordGetOutput(String outputName) {
+			OfficeSectionOutput output = WoofLoaderTest.this.createMock(OfficeSectionOutput.class);
+			WoofLoaderTest.this.recordReturn(this.template, this.template.getOutput(outputName), output);
+			return output;
+		}
+	}
+
+	/**
+	 * Records creating {@link OfficeEscalation}.
+	 * 
+	 * @param escalationType
+	 *            {@link Escalation} type.
+	 * @return {@link OfficeEscalation}.
+	 */
+	private OfficeEscalation recordEscalation(Class<? extends Throwable> escalationType) {
+		OfficeEscalation escalation = this.createMock(OfficeEscalation.class);
+		this.recordReturn(this.office, this.office.addOfficeEscalation(escalationType.getName()), escalation);
+		return escalation;
+	}
+
+	/**
 	 * Mock template class.
 	 */
 	public static class Template {
@@ -474,7 +519,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 *            Name of {@link OfficeSectionOutput}.
 	 * @return {@link OfficeSectionOutput}.
 	 */
-	private OfficeSectionOutput recordGetSectionOutput(OfficeSection section, String outputName) {
+	private OfficeSectionOutput recordGetOutput(OfficeSection section, String outputName) {
 		OfficeSectionOutput sectionOutput = this.createMock(OfficeSectionOutput.class);
 		this.recordReturn(section, section.getOfficeSectionOutput(outputName), sectionOutput);
 		return sectionOutput;
@@ -489,25 +534,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 *            Name of {@link OfficeSectionInput}.
 	 * @return {@link OfficeSectionInput}.
 	 */
-	private OfficeSectionInput recordGetSectionInput(OfficeSection section, String inputName) {
+	private OfficeSectionInput recordGetInput(OfficeSection section, String inputName) {
 		OfficeSectionInput sectionInput = this.createMock(OfficeSectionInput.class);
 		this.recordReturn(section, section.getOfficeSectionInput(inputName), sectionInput);
 		return sectionInput;
-	}
-
-	/**
-	 * Records obtain {@link OfficeSectionOutput}.
-	 * 
-	 * @param template
-	 *            {@link WebTemplate}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
-	 * @return {@link OfficeSectionOutput}.
-	 */
-	private OfficeSectionOutput recordGetSectionOutput(WebTemplate template, String outputName) {
-		OfficeSectionOutput output = this.createMock(OfficeSectionOutput.class);
-		this.recordReturn(template, template.getOutput(outputName), output);
-		return output;
 	}
 
 	/**
@@ -519,7 +549,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 *            Name of the {@link OfficeSectionOutput}.
 	 * @return {@link OfficeSectionOutput}.
 	 */
-	private OfficeSectionOutput recordGetSectionOutput(HttpSecurityBuilder security, String outputName) {
+	private OfficeSectionOutput recordGetOutput(HttpSecurityBuilder security, String outputName) {
 		OfficeSectionOutput output = this.createMock(OfficeSectionOutput.class);
 		this.recordReturn(security, security.getOutput(outputName), output);
 		return output;
@@ -532,7 +562,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 *            {@link HttpSecurityBuilder}.
 	 * @return {@link OfficeSectionInput}.
 	 */
-	private OfficeSectionInput recordGetSectionInput(HttpSecurityBuilder security) {
+	private OfficeSectionInput recordGetInput(HttpSecurityBuilder security) {
 		OfficeSectionInput input = this.createMock(OfficeSectionInput.class);
 		this.recordReturn(security, security.getAuthenticateInput(), input);
 		return input;
@@ -565,13 +595,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records implicit {@link WoofTemplateExtensionSource} on the
 	 * {@link WebTemplate}.
-	 * 
-	 * @param template
-	 *            {@link WebTemplate}.
-	 * @param templateUri
-	 *            URI.
 	 */
-	private void recordImplicitTemplateExtensions(WebTemplate template, String templateUri) {
+	private void recordImplicitTemplateExtensions() {
 
 		// Record the template extension
 		this.recordTemplateExtension(MockImplicitWoofTemplateExtensionSourceService.class);

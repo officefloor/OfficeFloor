@@ -854,10 +854,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			HttpUrlContinuation continuation = context.link(false, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
-			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			web.link(false, HttpMethod.POST, "/redirect", section.getOfficeSectionInput("service"));
-			web.link(section.getOfficeSectionOutput("redirect"), continuation, null);
+			context.getWebArchitect().link(false, HttpMethod.POST, "/redirect",
+					section.getOfficeSectionInput("service"));
+			context.getOfficeArchitect().link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -890,10 +890,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			HttpUrlContinuation continuation = context.link(true, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
-			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			web.link(false, HttpMethod.POST, "/redirect", section.getOfficeSectionInput("service"));
-			web.link(section.getOfficeSectionOutput("redirect"), continuation, null);
+			context.getWebArchitect().link(false, HttpMethod.POST, "/redirect",
+					section.getOfficeSectionInput("service"));
+			context.getOfficeArchitect().link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -942,10 +942,11 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			HttpUrlContinuation continuation = context.link(false, "/path/{param}", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
-			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			web.link(false, HttpMethod.POST, "/redirect", section.getOfficeSectionInput("service"));
-			web.link(section.getOfficeSectionOutput("redirect"), continuation, MockPathParameters.class);
+			context.getWebArchitect().link(false, HttpMethod.POST, "/redirect",
+					section.getOfficeSectionInput("service"));
+			context.getOfficeArchitect().link(section.getOfficeSectionOutput("redirect"),
+					continuation.getRedirect(MockPathParameters.class));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 

@@ -32,6 +32,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -39,7 +40,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
-import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -378,39 +378,33 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
-		HttpInputImpl continuation = new HttpInputImpl(isSecure, applicationPath, sectionInput);
+	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeFlowSinkNode flowSinkNode) {
+		HttpUrlContinuationImpl continuation = new HttpUrlContinuationImpl(isSecure, applicationPath, flowSinkNode);
 		this.inputs.add(continuation);
 		return continuation;
 	}
 
 	@Override
 	public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
-			OfficeSectionInput sectionInput) {
-		HttpInputImpl input = new HttpInputImpl(isSecure, httpMethod, applicationPath, sectionInput);
+			OfficeFlowSinkNode flowSinkNode) {
+		HttpInputImpl input = new HttpInputImpl(isSecure, httpMethod, applicationPath, flowSinkNode);
 		this.inputs.add(input);
 		return input;
 	}
 
 	@Override
-	public void link(OfficeFlowSourceNode flowSourceNode, HttpUrlContinuation continuation, Class<?> parameterType) {
-		HttpInputImpl input = (HttpInputImpl) continuation;
-		input.redirects.add(new RedirectContinuation(flowSourceNode, parameterType));
+	public void reroute(OfficeFlowSourceNode flowSourceNode) {
+		this.officeArchitect.link(flowSourceNode, this.routingSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
 	}
 
 	@Override
-	public void reroute(OfficeSectionOutput output) {
-		this.officeArchitect.link(output, this.routingSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
+	public void intercept(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode flowSourceNode) {
+		this.interceptors.add(new Interceptor(flowSinkNode, flowSourceNode));
 	}
 
 	@Override
-	public void intercept(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
-		this.interceptors.add(new Interceptor(sectionInput, sectionOutput));
-	}
-
-	@Override
-	public void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
-		this.chainedServicers.add(new ChainedServicer(sectionInput, notHandledOutput));
+	public void chainServicer(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode notHandledOutput) {
+		this.chainedServicers.add(new ChainedServicer(flowSinkNode, notHandledOutput));
 	}
 
 	@Override
@@ -459,15 +453,15 @@ public class WebArchitectEmployer implements WebArchitect {
 			Interception interception = routing.getInterception();
 
 			// Obtain the section output
-			OfficeSectionOutput interceptionOutput = this.routingSection
+			OfficeFlowSourceNode interceptionOutput = this.routingSection
 					.getOfficeSectionOutput(interception.getOutputName());
 			for (Interceptor interceptor : this.interceptors) {
 
 				// Link in interception
-				this.officeArchitect.link(interceptionOutput, interceptor.sectionInput);
+				this.officeArchitect.link(interceptionOutput, interceptor.flowSinkNode);
 
 				// Set up for next iteration
-				interceptionOutput = interceptor.sectionOutput;
+				interceptionOutput = interceptor.flowSourceNode;
 			}
 
 			// Link interception back to routing
@@ -481,33 +475,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			// Link route output to handling section input
 			OfficeSectionOutput routeOutput = this.routingSection
 					.getOfficeSectionOutput(input.routeInput.getOutputName());
-			this.officeArchitect.link(routeOutput, input.sectionInput);
-
-			// Determine if URL continuation
-			if ((input.isUrlContinuation) && (input.redirects.size() > 0)) {
-
-				// Configure the redirect continuation
-				for (RedirectContinuation continuation : input.redirects) {
-					try {
-
-						// Create the redirect
-						Redirect redirect = this.routing.addRedirect(input.isSecure, input.routeInput,
-								continuation.parameterType);
-						OfficeSectionInput redirectInput = this.routingSection
-								.getOfficeSectionInput(redirect.getInputName());
-
-						// Link the continuation to redirect
-						this.officeArchitect.link(continuation.flowSourceNode, redirectInput);
-
-					} catch (Exception ex) {
-						this.officeArchitect.addIssue("Failed to create redirect to " + input.applicationPath
-								+ (continuation.parameterType == null ? " with null value type"
-										: " with values type " + continuation.parameterType.getName())
-								+ " from section " + routeOutput.getOfficeSection().getOfficeSectionName() + " output "
-								+ routeOutput.getOfficeSectionOutputName(), ex);
-					}
-				}
-			}
+			this.officeArchitect.link(routeOutput, input.flowSinkNode);
 		}
 
 		// Load in-line configured dependencies
@@ -582,7 +550,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		});
 
 		// Chain in the servicer instances
-		OfficeSectionOutput chainOutput = this.routingSection
+		OfficeFlowSourceNode chainOutput = this.routingSection
 				.getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME);
 		NEXT_CHAINED_SERVICER: for (ChainedServicer servicer : this.chainedServicers) {
 
@@ -592,7 +560,7 @@ public class WebArchitectEmployer implements WebArchitect {
 			}
 
 			// Link output to to input
-			this.officeArchitect.link(chainOutput, servicer.sectionInput);
+			this.officeArchitect.link(chainOutput, servicer.flowSinkNode);
 
 			// Set up for next chain
 			chainOutput = servicer.notHandledOutput;
@@ -654,17 +622,12 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * {@link HttpInput} implementation.
 	 */
-	private class HttpInputImpl implements HttpInput, HttpUrlContinuation {
-
-		/**
-		 * Indicates if {@link HttpUrlContinuation}.
-		 */
-		private final boolean isUrlContinuation;
+	private class HttpInputImpl implements HttpInput {
 
 		/**
 		 * Indicates if secure.
 		 */
-		private final boolean isSecure;
+		protected final boolean isSecure;
 
 		/**
 		 * {@link HttpMethod}.
@@ -674,76 +637,36 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * Application path.
 		 */
-		private final String applicationPath;
+		protected final String applicationPath;
 
 		/**
-		 * Handling {@link OfficeSectionInput}.
+		 * Handling {@link OfficeFlowSinkNode}.
 		 */
-		private final OfficeSectionInput sectionInput;
+		private final OfficeFlowSinkNode flowSinkNode;
 
 		/**
 		 * {@link RouteInput}
 		 */
-		private final RouteInput routeInput;
-
-		/**
-		 * {@link RedirectContinuation} instances for this
-		 * {@link HttpUrlContinuation}.
-		 */
-		private final List<RedirectContinuation> redirects = new LinkedList<>();
-
-		/**
-		 * Instantiate as {@link HttpUrlContinuation}.
-		 * 
-		 * @param isSecure
-		 *            Indicates if secure.
-		 * @param applicationPath
-		 *            Application path.
-		 * @param sectionInput
-		 *            Handling {@link OfficeSectionInput}.
-		 */
-		public HttpInputImpl(boolean isSecure, String applicationPath, OfficeSectionInput sectionInput) {
-			this(true, isSecure, HttpMethod.GET, applicationPath, sectionInput);
-		}
-
-		/**
-		 * Instantiate as {@link HttpInput}.
-		 * 
-		 * @param isSecure
-		 *            Indicates if secure.
-		 * @param method
-		 *            {@link HttpMethod}.
-		 * @param applicationPath
-		 *            Application path.
-		 * @param sectionInput
-		 *            Handling {@link OfficeSectionInput}.
-		 */
-		public HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath,
-				OfficeSectionInput sectionInput) {
-			this(false, isSecure, method, applicationPath, sectionInput);
-		}
+		protected final RouteInput routeInput;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isUrlContinuation
-		 *            Indicates if {@link HttpUrlContinuation}.
 		 * @param isSecure
 		 *            Indicates if secure.
 		 * @param method
 		 *            {@link HttpMethod}.
 		 * @param applicationPath
 		 *            Application path.
-		 * @param sectionInput
-		 *            Handling {@link OfficeSectionInput}.
+		 * @param flowSinkNode
+		 *            Handling {@link OfficeFlowSinkNode}.
 		 */
-		private HttpInputImpl(boolean isUrlContinuation, boolean isSecure, HttpMethod method, String applicationPath,
-				OfficeSectionInput sectionInput) {
-			this.isUrlContinuation = isUrlContinuation;
+		private HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath,
+				OfficeFlowSinkNode flowSinkNode) {
 			this.isSecure = isSecure;
 			this.method = method;
 			this.applicationPath = applicationPath;
-			this.sectionInput = sectionInput;
+			this.flowSinkNode = flowSinkNode;
 			this.routeInput = WebArchitectEmployer.this.routing.addRoute(isSecure, this.method, this.applicationPath);
 		}
 
@@ -755,36 +678,50 @@ public class WebArchitectEmployer implements WebArchitect {
 		public HttpInputPath getPath() {
 			return this.routeInput.getHttpInputPath();
 		}
+
 	}
 
 	/**
-	 * Redirect continuation.
+	 * {@link HttpUrlContinuation} implementation.
 	 */
-	private static class RedirectContinuation {
-
-		/**
-		 * {@link OfficeFlowSourceNode} triggering the redirect.
-		 */
-		private final OfficeFlowSourceNode flowSourceNode;
-
-		/**
-		 * Type of parameter from {@link OfficeSectionOutput}. May be
-		 * <code>null</code> for no parameter.
-		 */
-		private final Class<?> parameterType;
+	private class HttpUrlContinuationImpl extends HttpInputImpl implements HttpUrlContinuation {
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param flowSourceNode
-		 *            {@link OfficeFlowSourceNode} triggering the redirect.
-		 * @param parameterType
-		 *            Type of parameter from {@link OfficeSectionOutput}. May be
-		 *            <code>null</code> for no parameter.
+		 * @param isSecure
+		 *            Indicates if secure.
+		 * @param applicationPath
+		 *            Application path.
+		 * @param flowSinkNode
+		 *            Handling {@link OfficeFlowSinkNode}.
 		 */
-		private RedirectContinuation(OfficeFlowSourceNode flowSourceNode, Class<?> parameterType) {
-			this.flowSourceNode = flowSourceNode;
-			this.parameterType = parameterType;
+		private HttpUrlContinuationImpl(boolean isSecure, String applicationPath, OfficeFlowSinkNode flowSinkNode) {
+			super(isSecure, HttpMethod.GET, applicationPath, flowSinkNode);
+		}
+
+		/*
+		 * =============== HttpUrlContinuation =============
+		 */
+
+		@Override
+		public OfficeFlowSinkNode getRedirect(Class<?> parameterType) {
+			try {
+
+				// Create the redirect
+				Redirect redirect = WebArchitectEmployer.this.routing.addRedirect(this.isSecure, this.routeInput,
+						parameterType);
+
+				// Return the section input for redirect
+				return WebArchitectEmployer.this.routingSection.getOfficeSectionInput(redirect.getInputName());
+
+			} catch (Exception ex) {
+				throw WebArchitectEmployer.this.officeArchitect
+						.addIssue(
+								"Failed to create redirect to " + this.applicationPath + (parameterType == null
+										? " with null value type" : " with values type " + parameterType.getName()),
+								ex);
+			}
 		}
 	}
 
@@ -794,26 +731,26 @@ public class WebArchitectEmployer implements WebArchitect {
 	private static class Interceptor {
 
 		/**
-		 * {@link OfficeSectionInput}.
+		 * {@link OfficeFlowSinkNode}.
 		 */
-		public final OfficeSectionInput sectionInput;
+		public final OfficeFlowSinkNode flowSinkNode;
 
 		/**
-		 * {@link SectionOutput}.
+		 * {@link OfficeFlowSourceNode}.
 		 */
-		public final OfficeSectionOutput sectionOutput;
+		public final OfficeFlowSourceNode flowSourceNode;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param sectionInput
-		 *            {@link OfficeSectionInput}.
-		 * @param sectionOutput
-		 *            {@link SectionOutput}.
+		 * @param flowSinkNode
+		 *            {@link OfficeFlowSinkNode}.
+		 * @param flowSourceNode
+		 *            {@link OfficeFlowSourceNode}.
 		 */
-		private Interceptor(OfficeSectionInput sectionInput, OfficeSectionOutput sectionOutput) {
-			this.sectionInput = sectionInput;
-			this.sectionOutput = sectionOutput;
+		private Interceptor(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode flowSourceNode) {
+			this.flowSinkNode = flowSinkNode;
+			this.flowSourceNode = flowSourceNode;
 		}
 	}
 
@@ -823,25 +760,25 @@ public class WebArchitectEmployer implements WebArchitect {
 	private static class ChainedServicer {
 
 		/**
-		 * {@link OfficeSectionInput}.
+		 * {@link OfficeFlowSinkNode}.
 		 */
-		public final OfficeSectionInput sectionInput;
+		public final OfficeFlowSinkNode flowSinkNode;
 
 		/**
-		 * {@link SectionOutput}. May be <code>null</code>.
+		 * {@link OfficeFlowSourceNode}. May be <code>null</code>.
 		 */
-		public final OfficeSectionOutput notHandledOutput;
+		public final OfficeFlowSourceNode notHandledOutput;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param sectionInput
-		 *            {@link OfficeSectionInput}.
+		 * @param flowSinkNode
+		 *            {@link OfficeFlowSinkNode}.
 		 * @param notHandledOutput
-		 *            {@link SectionOutput}. May be <code>null</code>.
+		 *            {@link OfficeFlowSourceNode}. May be <code>null</code>.
 		 */
-		private ChainedServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
-			this.sectionInput = sectionInput;
+		private ChainedServicer(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode notHandledOutput) {
+			this.flowSinkNode = flowSinkNode;
 			this.notHandledOutput = notHandledOutput;
 		}
 	}

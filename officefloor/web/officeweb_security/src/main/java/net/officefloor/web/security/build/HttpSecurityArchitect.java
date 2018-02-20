@@ -38,12 +38,12 @@ public interface HttpSecurityArchitect {
 	 *            Name of the {@link HttpSecurityBuilder}. This name is use to
 	 *            qualify dependency injection, should this particular
 	 *            {@link HttpSecurityBuilder} be required.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} {@link Class}.
+	 * @param httpSecuritySourceClassName
+	 *            Name of the {@link HttpSecuritySource} {@link Class}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
 	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(
-			String securityName, Class<? extends HttpSecuritySource<A, AC, C, O, F>> httpSecuritySourceClass);
+			String securityName, String httpSecuritySourceClassName);
 
 	/**
 	 * Adds a {@link HttpSecurity}.

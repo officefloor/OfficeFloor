@@ -49,7 +49,8 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 		OfficeArchitect office = context.getOfficeArchitect();
 
 		// Configure the HTTP Security
-		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY", FormHttpSecuritySource.class);
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY",
+				FormHttpSecuritySource.class.getName());
 		security.addProperty(FormHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 
 		// Provide the form login page

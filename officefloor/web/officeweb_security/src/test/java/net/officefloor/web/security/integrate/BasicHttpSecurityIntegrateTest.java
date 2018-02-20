@@ -44,7 +44,8 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 			HttpSecurityArchitect securityArchitect) {
 
 		// Configure the HTTP Security
-		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("BASIC", BasicHttpSecuritySource.class);
+		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("BASIC",
+				BasicHttpSecuritySource.class.getName());
 		security.addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 
 		// Obtain the password file

@@ -415,10 +415,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	public void testQualifiedSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
-			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class).addProperty("realm", "api");
+			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class.getName()).addProperty("realm",
+					"api");
 
 			// Provide security for web content
-			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class).addProperty("realm", "app");
+			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class.getName()).addProperty("realm",
+					"app");
 
 			// Provide servicer that will use any security
 			context.link(false, "/path", QualifiedHttpAccessServicer.class);
@@ -450,10 +452,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	public void testMultipleChallengeSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
-			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class).addProperty("realm", "one");
+			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class.getName()).addProperty("realm",
+					"one");
 
 			// Provide security for web content
-			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class).addProperty("realm", "two");
+			security.addHttpSecurity("app", MockChallengeHttpSecuritySource.class.getName()).addProperty("realm",
+					"two");
 
 			// Provide servicer that will use any security
 			context.link(false, "/path", HttpAccessServicer.class);

@@ -32,7 +32,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.CompileException;
 import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.internal.structure.AutoWire;
-import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -44,9 +43,6 @@ import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
-import net.officefloor.woof.WoofLoader;
-import net.officefloor.woof.WoofLoaderExtensionService;
-import net.officefloor.woof.WoofLoaderImpl;
 
 /**
  * Tests the {@link WoofLoaderExtensionService}.
@@ -64,11 +60,6 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
-
-	/**
-	 * Flags to close the {@link OfficeFloor} via {@link OfficeFloorMBean}.
-	 */
-	private boolean isCloseOfficeFloorViaMbeans = false;
 
 	/**
 	 * {@link LoggerAssertion} for the {@link WoofLoader}.
@@ -107,8 +98,6 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 			} finally {
 				if (this.officeFloor != null) {
 					this.officeFloor.closeOfficeFloor();
-				} else if (this.isCloseOfficeFloorViaMbeans) {
-					fail("TODO implement closing OfficeFloor via MBeans");
 				}
 			}
 		} finally {
@@ -201,14 +190,14 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 
 		// Obtain no logic template WoOF configuration
 		String noLogicTemplateConfigurationLocation = this.getPackageRelativePath(this.getClass())
-				+ "/NoLogicTemplate.woof";
+				+ "/NoLogicTemplate.woof.xml";
 
 		// Run the application with no logic template
 		this.openOfficeFloor(WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				noLogicTemplateConfigurationLocation);
 
 		// Test
-		String response = this.doRequest("/template.woof");
+		String response = this.doRequest("/template");
 		assertEquals("Incorrect response", "NO LOGIC TEMPLATE", response);
 	}
 
@@ -218,7 +207,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 	public void testCommandLineConfiguration() throws Exception {
 
 		// Obtain alternate configuration location
-		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof.xml";
 
 		// Run the application with properties for alternate configuration
 		OfficeFloorMain.open(WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
@@ -241,7 +230,6 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
 
 		// Run the application with properties for alternate configuration
-		this.isCloseOfficeFloorViaMbeans = true;
 		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation, "only.property.name.to.have.blank.value");
 
@@ -260,10 +248,9 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof.xml";
 
 		// Run the application for woof resource
-		this.isCloseOfficeFloorViaMbeans = true;
 		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
@@ -284,10 +271,9 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof.xml";
 
 		// Run the application for woof resource
-		this.isCloseOfficeFloorViaMbeans = true;
 		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
@@ -307,10 +293,9 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof.xml";
 
 		// Run the application for woof resource
-		this.isCloseOfficeFloorViaMbeans = true;
 		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
@@ -335,11 +320,10 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 				(nonWoofResource.exists() && nonWoofResource.isFile()));
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webappOther.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webappOther.woof.xml";
 
 		try {
 			// Run the application for woof resource
-			this.isCloseOfficeFloorViaMbeans = true;
 			OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 					alternateConfigurationLocation);
 			fail("Should not successfully find resource and therefore should not start");

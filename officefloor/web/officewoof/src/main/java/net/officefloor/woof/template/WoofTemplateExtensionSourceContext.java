@@ -50,7 +50,7 @@ public interface WoofTemplateExtensionSourceContext extends SourceContext, Confi
 	 * 
 	 * @return {@link WebArchitect}.
 	 */
-	WebArchitect getWebApplication();
+	WebArchitect getWebArchitect();
 
 	/**
 	 * Obtains the {@link OfficeArchitect} that the {@link WebTemplate} has been
