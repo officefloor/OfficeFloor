@@ -20,10 +20,10 @@ package net.officefloor.woof.teams;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.woof.plugin.objects.WoofObjectsLoader;
+import net.officefloor.woof.resources.WoofResourcesLoader;
 
 /**
- * Context for the {@link WoofObjectsLoader}.
+ * Context for the {@link WoofResourcesLoader}.
  *
  * @author Daniel Sagenschneider
  */
@@ -31,7 +31,7 @@ public interface WoofTeamsLoaderContext {
 
 	/**
 	 * Obtains the {@link ConfigurationItem} containing the configuration of the
-	 * objects.
+	 * teams.
 	 * 
 	 * @return {@link ConfigurationItem} containing the configuration of the
 	 *         objects.
@@ -39,8 +39,7 @@ public interface WoofTeamsLoaderContext {
 	ConfigurationItem getConfiguration();
 
 	/**
-	 * Obtains the {@link OfficeFloorDeployer} to be configured with the
-	 * objects.
+	 * Obtains the {@link OfficeFloorDeployer} to be configured with the teams.
 	 * 
 	 * @return {@link OfficeFloorDeployer} to be configured with the objects.
 	 */

@@ -49,8 +49,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.woof.model.objects.WoofObjectsRepositoryImpl;
-import net.officefloor.woof.plugin.objects.WoofObjectsLoader;
-import net.officefloor.woof.plugin.objects.WoofObjectsLoaderContext;
+import net.officefloor.woof.objects.WoofObjectsLoader;
+import net.officefloor.woof.objects.WoofObjectsLoaderContext;
 
 /**
  * Tests the {@link WoofObjectsLoader}.

@@ -48,8 +48,8 @@ import net.officefloor.woof.model.objects.WoofObjectSourceModel;
 import net.officefloor.woof.model.objects.WoofObjectsModel;
 import net.officefloor.woof.model.objects.WoofObjectsRepository;
 import net.officefloor.woof.model.objects.WoofSupplierModel;
-import net.officefloor.woof.plugin.objects.WoofObjectsLoader;
-import net.officefloor.woof.plugin.objects.WoofObjectsLoaderContext;
+import net.officefloor.woof.objects.WoofObjectsLoader;
+import net.officefloor.woof.objects.WoofObjectsLoaderContext;
 
 /**
  * {@link WoofObjectsLoader} implementation.

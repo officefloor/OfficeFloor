@@ -1,0 +1,18 @@
+<resources>
+
+	<resource protocol="file" location="/location" context-path="context">
+		<auto-wire qualifier="QUALIFIED" />
+		<auto-wire qualifier="ANOTHER" />
+		<transform name="zip" />
+		<transform name="another" />
+		<security qualifier="security">
+			<role name="RoleOne" />
+			<role name="RoleTwo" />
+			<required-role name="RequiredOne" />
+			<required-role name="RequiredTwo" />
+		</security>
+	</resource>
+
+	<resource protocol="classpath" location="PUBLIC" />
+
+</resources>

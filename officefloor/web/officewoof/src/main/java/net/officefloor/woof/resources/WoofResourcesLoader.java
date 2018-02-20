@@ -15,24 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.woof;
+package net.officefloor.woof.resources;
 
-import net.officefloor.woof.objects.WoofObjectsLoader;
+import net.officefloor.woof.model.resources.WoofResourcesModel;
 
 /**
- * Mock dependency for integration testing of {@link WoofObjectsLoader}.
+ * Loads the {@link WoofResourcesModel} configuration.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockDependency {
+public interface WoofResourcesLoader {
 
 	/**
-	 * Obtains the message.
+	 * Loads the {@link WoofResourcesModel} configuration.
 	 * 
-	 * @return Message.
+	 * @param context
+	 *            {@link WoofResourcesLoaderContext}.
+	 * @throws Exception
+	 *             If fails to load the configuration.
 	 */
-	public String getMessage() {
-		return "TEST";
-	}
+	void loadWoofResourcesConfiguration(WoofResourcesLoaderContext context) throws Exception;
 
 }

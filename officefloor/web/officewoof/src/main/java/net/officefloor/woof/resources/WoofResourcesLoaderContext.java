@@ -15,32 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.woof.plugin.objects;
+package net.officefloor.woof.resources;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.web.resource.build.HttpResourceArchitect;
 
 /**
- * Context for the {@link WoofObjectsLoader}.
+ * Context for the {@link WoofResourcesLoader}.
  *
  * @author Daniel Sagenschneider
  */
-public interface WoofObjectsLoaderContext {
+public interface WoofResourcesLoaderContext {
 
 	/**
 	 * Obtains the {@link ConfigurationItem} containing the configuration of the
-	 * objects.
+	 * resources.
 	 * 
 	 * @return {@link ConfigurationItem} containing the configuration of the
-	 *         objects.
+	 *         resources.
 	 */
 	ConfigurationItem getConfiguration();
 
 	/**
-	 * Obtains the {@link OfficeArchitect} to be configured with the objects.
+	 * Obtains the {@link HttpResourceArchitect}.
 	 * 
-	 * @return {@link OfficeArchitect} to be configured with the objects.
+	 * @return {@link HttpResourceArchitect}.
+	 */
+	HttpResourceArchitect getHttpResourceArchitect();
+
+	/**
+	 * Obtains the {@link OfficeArchitect}.
+	 * 
+	 * @return {@link OfficeArchitect}.
 	 */
 	OfficeArchitect getOfficeArchitect();
 
