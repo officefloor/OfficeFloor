@@ -186,6 +186,7 @@ public class WoofLoaderImpl implements WoofLoader {
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 
 			// Obtain template details
+			boolean isSecure = templateModel.getIsTemplateSecure();
 			String applicationPath = templateModel.getApplicationPath();
 			String templateLocation = templateModel.getTemplateLocation();
 			String templateClassName = templateModel.getTemplateClassName();
@@ -195,7 +196,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					: classLoader.loadClass(templateClassName);
 
 			// Configure the template
-			WebTemplate template = templaterArchitect.addTemplate(applicationPath, templateLocation);
+			WebTemplate template = templaterArchitect.addTemplate(isSecure, applicationPath, templateLocation);
 			if (!CompileUtil.isBlank(templateClassName)) {
 				template.setLogicClass(templateLogicClass);
 			}
@@ -207,7 +208,6 @@ public class WoofLoaderImpl implements WoofLoader {
 			}
 
 			// Configure secure for template
-			template.setSecure(templateModel.getIsTemplateSecure());
 			for (WoofTemplateLinkModel linkModel : templateModel.getLinks()) {
 				template.setLinkSecure(linkModel.getWoofTemplateLinkName(), linkModel.getIsLinkSecure());
 			}
@@ -329,6 +329,13 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Obtain output name
 				String outputName = outputModel.getWoofTemplateOutputName();
 
+				// Obtain the output argument type
+				Class<?> outputArgumentType = null;
+				String outputArgumentTypeName = outputModel.getArgumentType();
+				if (!CompileUtil.isBlank(outputArgumentTypeName)) {
+					outputArgumentType = extensionContext.loadClass(outputArgumentTypeName);
+				}
+
 				// Link potential section input
 				WoofTemplateOutputToWoofSectionInputModel sectionLink = outputModel.getWoofSectionInput();
 				if (sectionLink != null) {
@@ -354,11 +361,8 @@ public class WoofLoaderImpl implements WoofLoader {
 					WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 					if (targetTemplateModel != null) {
 						WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
-
-						// TODO obtain template output argument type
-						Class<?> templateOutputArgumentType = null;
-
-						targetTemplate.link(template.getOutput(outputName), templateOutputArgumentType);
+						officeArchitect.link(template.getOutput(outputName),
+								targetTemplate.getRender(outputArgumentType));
 					}
 				}
 
@@ -397,6 +401,13 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Obtain output name
 				String outputName = outputModel.getWoofSectionOutputName();
 
+				// Obtain the output argument type
+				Class<?> outputArgumentType = null;
+				String outputArgumentTypeName = outputModel.getArgumentType();
+				if (!CompileUtil.isBlank(outputArgumentTypeName)) {
+					outputArgumentType = extensionContext.loadClass(outputArgumentTypeName);
+				}
+
 				// Link potential section input
 				WoofSectionOutputToWoofSectionInputModel sectionLink = outputModel.getWoofSectionInput();
 				if (sectionLink != null) {
@@ -422,11 +433,8 @@ public class WoofLoaderImpl implements WoofLoader {
 					WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 					if (targetTemplateModel != null) {
 						WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
-
-						// TODO obtain template output argument type
-						Class<?> templateOutputArgumentType = null;
-
-						targetTemplate.link(section.getOfficeSectionOutput(outputName), templateOutputArgumentType);
+						officeArchitect.link(section.getOfficeSectionOutput(outputName),
+								targetTemplate.getRender(outputArgumentType));
 					}
 				}
 
@@ -466,6 +474,13 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Obtain output name
 				String outputName = outputModel.getWoofSecurityOutputName();
 
+				// Obtain the output argument type
+				Class<?> outputArgumentType = null;
+				String outputArgumentTypeName = outputModel.getArgumentType();
+				if (!CompileUtil.isBlank(outputArgumentTypeName)) {
+					outputArgumentType = extensionContext.loadClass(outputArgumentTypeName);
+				}
+
 				// Link potential section input
 				WoofSecurityOutputToWoofSectionInputModel sectionLink = outputModel.getWoofSectionInput();
 				if (sectionLink != null) {
@@ -491,11 +506,8 @@ public class WoofLoaderImpl implements WoofLoader {
 					WoofTemplateModel targetTemplateModel = templateLink.getWoofTemplate();
 					if (targetTemplateModel != null) {
 						WebTemplate targetTemplate = templates.get(targetTemplateModel.getApplicationPath());
-
-						// TODO obtain template output argument type
-						Class<?> templateOutputArgumentType = null;
-
-						targetTemplate.link(securityBuilder.getOutput(outputName), templateOutputArgumentType);
+						officeArchitect.link(securityBuilder.getOutput(outputName),
+								targetTemplate.getRender(outputArgumentType));
 					}
 				}
 
@@ -546,7 +558,7 @@ public class WoofLoaderImpl implements WoofLoader {
 
 					// Link escalation handling to template
 					OfficeEscalation escalation = officeArchitect.addOfficeEscalation(exceptionType.getName());
-					targetTemplate.link(escalation, exceptionType);
+					officeArchitect.link(escalation, targetTemplate.getRender(exceptionType));
 				}
 			}
 

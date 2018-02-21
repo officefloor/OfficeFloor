@@ -21,16 +21,16 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 
 /**
@@ -96,17 +96,6 @@ public interface WebTemplate extends PropertyConfigurable {
 	WebTemplate setLinkSeparatorCharacter(char separator);
 
 	/**
-	 * Flags whether the {@link WebTemplate} may only be rendered over a secure
-	 * connection.
-	 * 
-	 * @param isSecure
-	 *            <code>true</code> to only render the {@link WebTemplate} over
-	 *            a secure connection.
-	 * @return <code>this</code>.
-	 */
-	WebTemplate setSecure(boolean isSecure);
-
-	/**
 	 * <p>
 	 * Indicate whether a secure connection is required for the link. This
 	 * overrides the default template secure setting for the link.
@@ -122,6 +111,18 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * @return <code>this</code>.
 	 */
 	WebTemplate setLinkSecure(String linkName, boolean isSecure);
+
+	/**
+	 * <p>
+	 * Obtains the {@link HttpSecurableBuilder} to configure access controls to
+	 * this {@link WebTemplate}.
+	 * <p>
+	 * Calling this method without providing configuration requires only
+	 * authentication to access the {@link WebTemplate}.
+	 * 
+	 * @return {@link HttpSecurableBuilder}.
+	 */
+	HttpSecurableBuilder getHttpSecurer();
 
 	/**
 	 * <p>
@@ -157,29 +158,26 @@ public interface WebTemplate extends PropertyConfigurable {
 	WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension);
 
 	/**
-	 * Links the {@link OfficeSectionOutput} to this {@link WebTemplate}.
+	 * Obtains the {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
 	 * 
-	 * @param flowSourceNode
-	 *            {@link OfficeFlowSourceNode} to link to the
-	 *            {@link WebTemplate}.
 	 * @param valuesType
-	 *            Type provided as a parameter to the {@link OfficeSectionInput}
+	 *            Type provided as a parameter to the {@link OfficeFlowSinkNode}
 	 *            should the path parameters require being obtained. The type
 	 *            should provide a bean property for each path parameter for the
 	 *            {@link WebTemplate}. May be <code>null</code> if no path
 	 *            parameters are required.
-	 * @return <code>this</code>.
+	 * @return {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
 	 */
-	WebTemplate link(OfficeFlowSourceNode flowSourceNode, Class<?> valuesType);
+	OfficeFlowSinkNode getRender(Class<?> valuesType);
 
 	/**
-	 * Obtains the {@link OfficeSectionOutput} from the {@link WebTemplate}.
+	 * Obtains the {@link OfficeFlowSourceNode} from the {@link WebTemplate}.
 	 * 
 	 * @param outputName
-	 *            {@link OfficeSectionOutput} name.
-	 * @return {@link OfficeSectionOutput} for the name.
+	 *            {@link OfficeFlowSourceNode} name.
+	 * @return {@link OfficeFlowSourceNode} for the name.
 	 */
-	OfficeSectionOutput getOutput(String outputName);
+	OfficeFlowSourceNode getOutput(String outputName);
 
 	/**
 	 * <p>

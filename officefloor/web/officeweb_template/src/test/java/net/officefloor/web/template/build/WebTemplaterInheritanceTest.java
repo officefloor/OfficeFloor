@@ -181,8 +181,8 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 			compile.web((context) -> {
 				WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
 						context.getOfficeArchitect(), context.getOfficeSourceContext());
-				WebTemplate parent = templater.addTemplate("/parent", new StringReader(parentContent));
-				WebTemplate child = templater.addTemplate("/child", new StringReader(childContent));
+				WebTemplate parent = templater.addTemplate(false, "/parent", new StringReader(parentContent));
+				WebTemplate child = templater.addTemplate(false, "/child", new StringReader(childContent));
 				child.setSuperTemplate(parent);
 				templater.informWebArchitect();
 			});
@@ -240,8 +240,8 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 		compile.web((context) -> {
 			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
 					context.getOfficeArchitect(), context.getOfficeSourceContext());
-			WebTemplate parent = templater.addTemplate("/parent", new StringReader(parentContent));
-			WebTemplate child = templater.addTemplate("/child", new StringReader(childContent));
+			WebTemplate parent = templater.addTemplate(false, "/parent", new StringReader(parentContent));
+			WebTemplate child = templater.addTemplate(false, "/child", new StringReader(childContent));
 			child.setSuperTemplate(parent);
 			templater.informWebArchitect();
 		});

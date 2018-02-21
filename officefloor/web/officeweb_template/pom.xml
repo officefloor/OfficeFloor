@@ -54,6 +54,10 @@
 			<artifactId>officeweb</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officeweb_security</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver</artifactId>
 		</dependency>

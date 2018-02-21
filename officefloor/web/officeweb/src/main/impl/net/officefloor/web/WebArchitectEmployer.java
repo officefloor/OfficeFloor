@@ -687,6 +687,12 @@ public class WebArchitectEmployer implements WebArchitect {
 	private class HttpUrlContinuationImpl extends HttpInputImpl implements HttpUrlContinuation {
 
 		/**
+		 * Mapping of parameter type to {@link OfficeFlowSinkNode} for
+		 * redirects.
+		 */
+		private final Map<Class<?>, OfficeFlowSinkNode> redirects = new HashMap<>();
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param isSecure
@@ -706,14 +712,25 @@ public class WebArchitectEmployer implements WebArchitect {
 
 		@Override
 		public OfficeFlowSinkNode getRedirect(Class<?> parameterType) {
-			try {
 
+			// Determine if already cached
+			OfficeFlowSinkNode flowSinkNode = this.redirects.get(parameterType);
+			if (flowSinkNode != null) {
+				return flowSinkNode;
+			}
+
+			// Not cached, so create
+			try {
 				// Create the redirect
 				Redirect redirect = WebArchitectEmployer.this.routing.addRedirect(this.isSecure, this.routeInput,
 						parameterType);
 
+				// Obtain and cache the flow sink node for the redirect
+				flowSinkNode = WebArchitectEmployer.this.routingSection.getOfficeSectionInput(redirect.getInputName());
+				this.redirects.put(parameterType, flowSinkNode);
+
 				// Return the section input for redirect
-				return WebArchitectEmployer.this.routingSection.getOfficeSectionInput(redirect.getInputName());
+				return flowSinkNode;
 
 			} catch (Exception ex) {
 				throw WebArchitectEmployer.this.officeArchitect

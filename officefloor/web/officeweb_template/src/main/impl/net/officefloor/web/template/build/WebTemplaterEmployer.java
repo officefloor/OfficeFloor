@@ -36,6 +36,7 @@ import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -43,9 +44,11 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
 import net.officefloor.web.template.section.WebTemplateRedirectAnnotation;
@@ -116,7 +119,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 	 */
 
 	@Override
-	public WebTemplate addTemplate(String applicationPath, Reader templateContent) {
+	public WebTemplate addTemplate(boolean isSecure, String applicationPath, Reader templateContent) {
 
 		// Read in the template
 		StringWriter content = new StringWriter();
@@ -129,28 +132,31 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		// Add the template
-		return this.addTemplate(applicationPath, (properties) -> properties
+		return this.addTemplate(isSecure, applicationPath, (properties) -> properties
 				.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString()));
 	}
 
 	@Override
-	public WebTemplate addTemplate(String applicationPath, String locationOfTemplate) {
+	public WebTemplate addTemplate(boolean isSecure, String applicationPath, String locationOfTemplate) {
 
 		// Add the template
-		return this.addTemplate(applicationPath, (properties) -> properties
+		return this.addTemplate(isSecure, applicationPath, (properties) -> properties
 				.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION).setValue(locationOfTemplate));
 	}
 
 	/**
 	 * Adds the {@link WebTemplate}.
 	 * 
+	 * @param isSecure
+	 *            Indicates if requires secure {@link ServerHttpConnection} to
+	 *            render the {@link WebTemplate}.
 	 * @param applicationPath
 	 *            Application path.
 	 * @param configurer
 	 *            {@link Consumer} to configure the {@link PropertyList}.
 	 * @return {@link WebTemplate}.
 	 */
-	private WebTemplate addTemplate(String applicationPath, Consumer<PropertyList> configurer) {
+	private WebTemplate addTemplate(boolean isSecure, String applicationPath, Consumer<PropertyList> configurer) {
 
 		// Add the section for the template
 		WebTemplateSectionSource webTemplateSectionSource = new WebTemplateSectionSource();
@@ -167,8 +173,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 		configurer.accept(properties);
 
 		// Add the template
-		WebTemplateImpl template = new WebTemplateImpl(applicationPath, webTemplateSectionSource, templateSection,
-				properties);
+		WebTemplateImpl template = new WebTemplateImpl(isSecure, applicationPath, webTemplateSectionSource,
+				templateSection, properties);
 		this.templates.add(template);
 
 		// Return the template
@@ -186,6 +192,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 	 * {@link WebTemplate} implementation.
 	 */
 	private class WebTemplateImpl implements WebTemplate {
+
+		/**
+		 * Indicates if the {@link WebTemplate} is secure.
+		 */
+		private final boolean isSecure;
 
 		/**
 		 * Application path for the {@link WebTemplate}.
@@ -208,6 +219,17 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private final PropertyList properties;
 
 		/**
+		 * {@link OfficeSectionInput} to render the {@link WebTemplate}.
+		 */
+		private final OfficeSectionInput sectionInput;
+
+		/**
+		 * {@link HttpUrlContinuation} to redirect to render the
+		 * {@link WebTemplate}.
+		 */
+		private final HttpUrlContinuation templateInput;
+
+		/**
 		 * Logic {@link Class} for the {@link WebTemplate}.
 		 */
 		private Class<?> logicClass = null;
@@ -218,11 +240,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 * {@link WebTemplate}.
 		 */
 		private String redirectValuesFunctionName = null;
-
-		/**
-		 * Indicates if the {@link WebTemplate} is secure.
-		 */
-		private boolean isSecure = false;
 
 		/**
 		 * Secure links.
@@ -250,18 +267,22 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private final List<HttpMethod> renderMethods = new LinkedList<>();
 
 		/**
-		 * Listing of {@link LinkToTemplate} instances.
-		 */
-		private final List<LinkToTemplate> linkToTemplates = new LinkedList<>();
-
-		/**
 		 * Super {@link WebTemplate}.
 		 */
 		private WebTemplateImpl superTemplate = null;
 
 		/**
+		 * {@link OfficeFlowSinkNode} to render {@link WebTemplate} by values
+		 * type.
+		 */
+		private final Map<Class<?>, OfficeFlowSinkNode> renderInputs = new HashMap<>();
+
+		/**
 		 * Instantiate.
 		 * 
+		 * @param isSecure
+		 *            Indicates if requires secure {@link ServerHttpConnection}
+		 *            to render the {@link WebTemplate}.
 		 * @param applicationPath
 		 *            Application path for the {@link WebTemplate}.
 		 * @param webTemplateSectionSource
@@ -271,12 +292,19 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 * @param properties
 		 *            {@link PropertyList}.
 		 */
-		private WebTemplateImpl(String applicationPath, WebTemplateSectionSource webTemplateSectionSource,
-				OfficeSection templateSection, PropertyList properties) {
+		private WebTemplateImpl(boolean isSecure, String applicationPath,
+				WebTemplateSectionSource webTemplateSectionSource, OfficeSection templateSection,
+				PropertyList properties) {
+			this.isSecure = isSecure;
 			this.applicationPath = applicationPath;
 			this.webTemplateSectionSource = webTemplateSectionSource;
 			this.section = templateSection;
 			this.properties = properties;
+
+			// Configure the input
+			this.sectionInput = this.section.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+			this.templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure, this.applicationPath,
+					sectionInput);
 		}
 
 		/**
@@ -284,14 +312,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 */
 		private void loadProperties() {
 
-			// Configure the input
-			OfficeSectionInput sectionInput = this.section
-					.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
-			HttpUrlContinuation templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure,
-					this.applicationPath, sectionInput);
-
 			// Provide the input path to template section
-			HttpInputPath templateInputPath = templateInput.getPath();
+			HttpInputPath templateInputPath = this.templateInput.getPath();
 			this.webTemplateSectionSource.setHttpInputPath(templateInputPath);
 
 			// Configure properties for the template
@@ -398,7 +420,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 				}
 
 				// Route to template for method
-				WebTemplaterEmployer.this.webArchitect.link(this.isSecure, method, this.applicationPath, sectionInput);
+				WebTemplaterEmployer.this.webArchitect.link(this.isSecure, method, this.applicationPath,
+						this.sectionInput);
 			}
 
 			// Load the link inputs
@@ -436,15 +459,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 						OfficeSectionOutput redirectOutput = this.section
 								.getOfficeSectionOutput(outputType.getOfficeSectionOutputName());
 						WebTemplaterEmployer.this.officeArchitect.link(redirectOutput,
-								templateInput.getRedirect(valuesType));
+								this.templateInput.getRedirect(valuesType));
 					}
 				}
-			}
-
-			// Link to template (redirect - should be different URL always)
-			for (LinkToTemplate link : this.linkToTemplates) {
-				WebTemplaterEmployer.this.officeArchitect.link(link.flowSourceNode,
-						templateInput.getRedirect(link.valuesType));
 			}
 		}
 
@@ -488,15 +505,15 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate setSecure(boolean isSecure) {
-			this.isSecure = isSecure;
+		public WebTemplate setLinkSecure(String linkName, boolean isSecure) {
+			this.secureLinks.put(linkName, isSecure);
 			return this;
 		}
 
 		@Override
-		public WebTemplate setLinkSecure(String linkName, boolean isSecure) {
-			this.secureLinks.put(linkName, isSecure);
-			return this;
+		public HttpSecurableBuilder getHttpSecurer() {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException("TODO implement Security for WebTemplate");
 		}
 
 		@Override
@@ -518,13 +535,17 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate link(OfficeFlowSourceNode flowSourceNode, Class<?> valuesType) {
-			this.linkToTemplates.add(new LinkToTemplate(flowSourceNode, valuesType));
-			return this;
+		public OfficeFlowSinkNode getRender(Class<?> valuesType) {
+			OfficeFlowSinkNode renderInput = this.renderInputs.get(valuesType);
+			if (renderInput == null) {
+				renderInput = this.templateInput.getRedirect(valuesType);
+				this.renderInputs.put(valuesType, renderInput);
+			}
+			return renderInput;
 		}
 
 		@Override
-		public OfficeSectionOutput getOutput(String outputName) {
+		public OfficeFlowSourceNode getOutput(String outputName) {
 			return this.section.getOfficeSectionOutput(outputName);
 		}
 
@@ -532,35 +553,6 @@ public class WebTemplaterEmployer implements WebTemplater {
 		public WebTemplate addGovernance(OfficeGovernance governance) {
 			this.section.addGovernance(governance);
 			return this;
-		}
-	}
-
-	/**
-	 * Link to the {@link WebTemplate}.
-	 */
-	private static class LinkToTemplate {
-
-		/**
-		 * {@link OfficeFlowSourceNode}.
-		 */
-		private final OfficeFlowSourceNode flowSourceNode;
-
-		/**
-		 * Values type.
-		 */
-		private final Class<?> valuesType;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param flowSourceNode
-		 *            {@link OfficeFlowSourceNode}.
-		 * @param valuesType
-		 *            Values type.
-		 */
-		public LinkToTemplate(OfficeFlowSourceNode flowSourceNode, Class<?> valuesType) {
-			this.flowSourceNode = flowSourceNode;
-			this.valuesType = valuesType;
 		}
 	}
 
