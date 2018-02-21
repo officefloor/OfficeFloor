@@ -19,7 +19,7 @@ package net.officefloor.web.resource.build;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.spi.ResourceSystem;
@@ -33,14 +33,13 @@ import net.officefloor.web.resource.spi.ResourceSystemFactory;
 public interface HttpResourceArchitect {
 
 	/**
-	 * Links the {@link OfficeFlowSourceNode} to the {@link HttpResource}.
+	 * Obtains the {@link OfficeFlowSinkNode} to send the {@link HttpResource}.
 	 * 
-	 * @param flowSourceNode
-	 *            {@link OfficeFlowSourceNode}.
 	 * @param resourcePath
 	 *            Path to the {@link HttpResource}.
+	 * @return {@link OfficeFlowSinkNode} to send the {@link HttpResource}.
 	 */
-	void link(OfficeFlowSourceNode flowSourceNode, String resourcePath);
+	OfficeFlowSinkNode getResource(String resourcePath);
 
 	/**
 	 * <p>

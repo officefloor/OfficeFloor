@@ -98,7 +98,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	public void testSectionOutputToResource() throws Exception {
 		this.compile((context, resource) -> {
 			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
-			resource.link(section.getOfficeSectionOutput("resource"), "resource.html");
+			context.getOfficeArchitect().link(section.getOfficeSectionOutput("resource"),
+					resource.getResource("resource.html"));
 			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
 		});
 
@@ -124,7 +125,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.issue((issues) -> issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 				"Can not find HTTP resource '/missing.html'"), (context, resource) -> {
 					OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
-					resource.link(section.getOfficeSectionOutput("resource"), "missing.html");
+					context.getOfficeArchitect().link(section.getOfficeSectionOutput("resource"),
+							resource.getResource("missing.html"));
 					context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
 				});
 	}
@@ -136,7 +138,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.compile((context, resource) -> {
 			context.link(false, "/path", EscalationToResourceServicer.class);
 			OfficeEscalation escalation = context.getOfficeArchitect().addOfficeEscalation(Exception.class.getName());
-			resource.link(escalation, "resource.html");
+			context.getOfficeArchitect().link(escalation, resource.getResource("resource.html"));
 		});
 
 		// Ensure handle escalation
@@ -159,7 +161,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 					context.link(false, "/path", EscalationToResourceServicer.class);
 					OfficeEscalation escalation = context.getOfficeArchitect()
 							.addOfficeEscalation(Exception.class.getName());
-					resource.link(escalation, "missing.html");
+					context.getOfficeArchitect().link(escalation, resource.getResource("missing.html"));
 				});
 	}
 

@@ -382,7 +382,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceLink != null) {
 					WoofResourceModel resourceModel = resourceLink.getWoofResource();
 					if (resourceModel != null) {
-						resourceArchitect.link(template.getOutput(outputName), resourceModel.getResourcePath());
+						officeArchitect.link(template.getOutput(outputName),
+								resourceArchitect.getResource(resourceModel.getResourcePath()));
 					}
 				}
 			}
@@ -455,8 +456,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceLink != null) {
 					WoofResourceModel resourceModel = resourceLink.getWoofResource();
 					if (resourceModel != null) {
-						resourceArchitect.link(section.getOfficeSectionOutput(outputName),
-								resourceModel.getResourcePath());
+						officeArchitect.link(section.getOfficeSectionOutput(outputName),
+								resourceArchitect.getResource(resourceModel.getResourcePath()));
 					}
 				}
 			}
@@ -516,7 +517,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceLink != null) {
 					WoofResourceModel resourceModel = resourceLink.getWoofResource();
 					if (resourceModel != null) {
-						resourceArchitect.link(securityBuilder.getOutput(outputName), resourceModel.getResourcePath());
+						officeArchitect.link(securityBuilder.getOutput(outputName),
+								resourceArchitect.getResource(resourceModel.getResourcePath()));
 					}
 				}
 			}
@@ -569,7 +571,7 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceModel != null) {
 					// Link escalation handling to template
 					OfficeEscalation escalation = officeArchitect.addOfficeEscalation(exceptionType.getName());
-					resourceArchitect.link(escalation, resourceModel.getResourcePath());
+					officeArchitect.link(escalation, resourceArchitect.getResource(resourceModel.getResourcePath()));
 				}
 			}
 		}

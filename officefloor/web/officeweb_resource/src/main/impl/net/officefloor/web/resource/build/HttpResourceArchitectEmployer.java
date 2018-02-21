@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -33,10 +34,9 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -131,14 +131,20 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	private final OfficeSourceContext officeSourceContext;
 
 	/**
+	 * {@link OfficeSection} for the {@link HttpResourceSectionSource}.
+	 */
+	private final OfficeSection section;
+
+	/**
 	 * {@link HttpResourceSource} instances.
 	 */
 	private final List<HttpResourceSource> httpResourceSources = new LinkedList<>();
 
 	/**
-	 * {@link ResourceLink} instances.
+	 * {@link Map} of {@link HttpResource} path to its
+	 * {@link OfficeFlowSinkNode}.
 	 */
-	private final List<ResourceLink> resourceLinks = new LinkedList<>();
+	private final Map<String, OfficeFlowSinkNode> linkedResources = new HashMap<>();
 
 	/**
 	 * Next {@link HttpResourceSource} index (to ensure unique names).
@@ -163,6 +169,10 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		this.securityArchitect = securityArchitect;
 		this.officeArchitect = officeArchitect;
 		this.officeSourceContext = officeSourceContext;
+
+		// Add the resource service section
+		HttpResourceSectionSource sectionSource = new HttpResourceSectionSource();
+		this.section = this.officeArchitect.addOfficeSection("_resources_", sectionSource, null);
 	}
 
 	/*
@@ -170,8 +180,22 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	 */
 
 	@Override
-	public void link(OfficeFlowSourceNode flowSourceNode, String resourcePath) {
-		this.resourceLinks.add(new ResourceLink(flowSourceNode, resourcePath));
+	public OfficeFlowSinkNode getResource(String resourcePath) {
+
+		// Ensure prefix with /
+		if (CompileUtil.isBlank(resourcePath)) {
+			resourcePath = "/";
+		} else if (!resourcePath.startsWith("/")) {
+			resourcePath = "/" + resourcePath;
+		}
+
+		// Obtain and cache resource
+		OfficeFlowSinkNode resource = this.linkedResources.get(resourcePath);
+		if (resource == null) {
+			resource = section.getOfficeSectionInput("send_" + resourcePath);
+			this.linkedResources.put(resourcePath, resource);
+		}
+		return resource;
 	}
 
 	@Override
@@ -222,10 +246,6 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		FileCacheFactory fileCacheFactory = this.officeSourceContext.loadService(FileCacheService.class,
 				new TemporaryDirectoryFileCacheService());
 
-		// Add the resource service section
-		HttpResourceSectionSource sectionSource = new HttpResourceSectionSource();
-		OfficeSection section = this.officeArchitect.addOfficeSection("_resources_", sectionSource, null);
-
 		// Load the resource sources
 		int nextStoreIndex = 1;
 		List<HttpResourceStore> stores = new ArrayList<>(this.httpResourceSources.size());
@@ -260,71 +280,35 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 			// Link managed objects to section
 			this.officeArchitect.link(
-					section.getOfficeSectionObject(
+					this.section.getOfficeSectionObject(
 							HttpResourceCache.class.getSimpleName() + httpResourceSource.nameSuffix),
 					cacheManagedObject);
 			this.officeArchitect.link(
-					section.getOfficeSectionObject(
+					this.section.getOfficeSectionObject(
 							HttpResourceStore.class.getSimpleName() + httpResourceSource.nameSuffix),
 					storeManagedObject);
 		}
 
-		// Link to resources
-		Map<String, OfficeSectionInput> resourceSendTriggers = new HashMap<>();
-		for (ResourceLink link : this.resourceLinks) {
-			OfficeSectionInput trigger = this.getResourceSender(link.resourcePath, section, stores,
-					resourceSendTriggers);
-			this.officeArchitect.link(link.flowSourceNode, trigger);
+		// Ensure linked resources are available
+		for (String resourcePath : this.linkedResources.keySet()) {
+
+			// Ensure the resource is available from one of the stores
+			boolean isAvailable = false;
+			FOUND_RESOURCE: for (HttpResourceStore store : stores) {
+				HttpResource resource = store.getHttpResource(resourcePath);
+				if (resource.isExist() && (resource instanceof HttpFile)) {
+					isAvailable = true;
+					break FOUND_RESOURCE;
+				}
+			}
+			if (!isAvailable) {
+				throw this.officeArchitect.addIssue("Can not find HTTP resource '" + resourcePath + "'");
+			}
 		}
 
 		// Configure to service resources after the application
-		this.webArchitect.chainServicer(section.getOfficeSectionInput(HttpResourceSectionSource.INPUT_NAME),
-				section.getOfficeSectionOutput(HttpResourceSectionSource.NOT_FOUND_OUTPUT_NAME));
-	}
-
-	/**
-	 * Obtains the {@link OfficeSectionInput} to handle sending the resource.
-	 * 
-	 * @param resourcePath
-	 *            Path to the resource.
-	 * @param section
-	 *            {@link OfficeSection} for handling sending resources.
-	 * @param stores
-	 *            Listing of {@link HttpResourceStore} instances to validate
-	 *            resource exists.
-	 * @param resourceSendTriggers
-	 *            {@link Map} of resource path to handling
-	 *            {@link OfficeSectionInput}.
-	 * @return {@link OfficeSectionInput} to handle sending the resource.
-	 * @throws IOException
-	 *             If fails to find the resource on checking exists.
-	 */
-	private OfficeSectionInput getResourceSender(String resourcePath, OfficeSection section,
-			List<HttpResourceStore> stores, Map<String, OfficeSectionInput> resourceSendTriggers) throws IOException {
-
-		// Obtain the send trigger
-		OfficeSectionInput trigger = resourceSendTriggers.get(resourcePath);
-		if (trigger == null) {
-			// Register the trigger
-			trigger = section.getOfficeSectionInput("send_" + resourcePath);
-			resourceSendTriggers.put(resourcePath, trigger);
-		}
-
-		// Ensure the resource is available from one of the stores
-		boolean isAvailable = false;
-		FOUND_RESOURCE: for (HttpResourceStore store : stores) {
-			HttpResource resource = store.getHttpResource(resourcePath);
-			if (resource.isExist() && (resource instanceof HttpFile)) {
-				isAvailable = true;
-				break FOUND_RESOURCE;
-			}
-		}
-		if (!isAvailable) {
-			throw this.officeArchitect.addIssue("Can not find HTTP resource '" + resourcePath + "'");
-		}
-
-		// Return the trigger
-		return trigger;
+		this.webArchitect.chainServicer(this.section.getOfficeSectionInput(HttpResourceSectionSource.INPUT_NAME),
+				this.section.getOfficeSectionOutput(HttpResourceSectionSource.NOT_FOUND_OUTPUT_NAME));
 	}
 
 	/**
@@ -442,35 +426,6 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				};
 			}
 			return this.securable;
-		}
-	}
-
-	/**
-	 * Resource link.
-	 */
-	private static class ResourceLink {
-
-		/**
-		 * {@link OfficeFlowSourceNode}.
-		 */
-		public final OfficeFlowSourceNode flowSourceNode;
-
-		/**
-		 * Resource path.
-		 */
-		public final String resourcePath;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param flowSourceNode
-		 *            {@link OfficeFlowSourceNode}.
-		 * @param resourcePath
-		 *            Resource path.
-		 */
-		public ResourceLink(OfficeFlowSourceNode flowSourceNode, String resourcePath) {
-			this.flowSourceNode = flowSourceNode;
-			this.resourcePath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
 		}
 	}
 
@@ -602,17 +557,17 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 			// Configure triggering the resource
 			Set<String> configuredResourcePaths = new HashSet<>();
-			for (ResourceLink link : HttpResourceArchitectEmployer.this.resourceLinks) {
+			for (String resourcePath : HttpResourceArchitectEmployer.this.linkedResources.keySet()) {
 
 				// Determine if already configured resource path
-				if (configuredResourcePaths.contains(link.resourcePath)) {
+				if (configuredResourcePaths.contains(resourcePath)) {
 					return; // already configured
 				}
 
 				// Add the trigger function
-				String functionName = "trigger_" + link.resourcePath;
+				String functionName = "trigger_" + resourcePath;
 				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
-						new TriggerSendHttpFileManagedFunctionSource(link.resourcePath));
+						new TriggerSendHttpFileManagedFunctionSource(resourcePath));
 				SectionFunction function = namespace.addSectionFunction(functionName,
 						TriggerSendHttpFileManagedFunctionSource.FUNCTION_NAME);
 
@@ -620,7 +575,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				designer.link(function, nextHandler);
 
 				// Configure handling trigger
-				SectionInput send = designer.addSectionInput("send_" + link.resourcePath, null);
+				SectionInput send = designer.addSectionInput("send_" + resourcePath, null);
 				designer.link(send, function);
 			}
 		}

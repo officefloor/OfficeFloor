@@ -205,21 +205,22 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(templateA.recordGetOutput("OUTPUT_1"), this.recordGetInput(sectionA, "INPUT_A"));
 		this.office.link(templateA.recordGetOutput("OUTPUT_2"), templateB.recordGetRender(null));
 		this.office.link(templateA.recordGetOutput("OUTPUT_3"), this.recordGetInput(securityOne));
-		this.resources.link(templateA.recordGetOutput("OUTPUT_4"), "/resource.html");
+		this.office.link(templateA.recordGetOutput("OUTPUT_4"), this.resources.getResource("/resource.html"));
 		this.office.link(templateA.recordGetOutput("OUTPUT_5"), pathAContinuation.getRedirect(String.class));
 
 		// Record linking section outputs
 		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_A"), this.recordGetInput(sectionB, "INPUT_1"));
 		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_B"), templateA.recordGetRender(null));
 		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_C"), this.recordGetInput(securityOne));
-		this.resources.link(this.recordGetOutput(sectionA, "OUTPUT_D"), "/resource.png");
+		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_D"), this.resources.getResource("/resource.png"));
 		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_E"), pathC.getRedirect(Long.class));
 
 		// Record link security outputs
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_ONE"), this.recordGetInput(sectionB, "INPUT_1"));
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_TWO"), templateB.recordGetRender(null));
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_THREE"), this.recordGetInput(securityTwo));
-		this.resources.link(this.recordGetOutput(securityOne, "OUTPUT_FOUR"), "/resource.html");
+		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_FOUR"),
+				this.resources.getResource("/resource.html"));
 		HttpUrlContinuation pathD = this.createMock(HttpUrlContinuation.class);
 		// TODO configure HTTP URL continuation to resource
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_5"), pathD.getRedirect(null));
@@ -228,7 +229,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(this.recordEscalation(Exception.class), this.recordGetInput(sectionA, "INPUT_A"));
 		this.office.link(this.recordEscalation(RuntimeException.class), templateA.recordGetRender(null));
 		this.office.link(this.recordEscalation(UnsupportedOperationException.class), this.recordGetInput(securityTwo));
-		this.resources.link(this.recordEscalation(SQLException.class), "/resource.png");
+		this.office.link(this.recordEscalation(SQLException.class), this.resources.getResource("/resource.png"));
 		// TODO configure HTTP URL continuation for exception
 		this.office.link(this.recordEscalation(NullPointerException.class), pathE.getRedirect(null));
 
@@ -304,7 +305,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(parentTemplate.recordGetOutput("OUTPUT_SECTION"), this.recordGetInput(section, "INPUT_1"));
 		this.office.link(parentTemplate.recordGetOutput("OUTPUT_TEMPLATE"), templateOne.recordGetRender(null));
 		this.office.link(parentTemplate.recordGetOutput("OUTPUT_ACCESS"), this.recordGetInput(security));
-		this.resources.link(parentTemplate.recordGetOutput("OUTPUT_RESOURCE"), "ResourceOne.html");
+		this.office.link(parentTemplate.recordGetOutput("OUTPUT_RESOURCE"),
+				this.resources.getResource("ResourceOne.html"));
 
 		// Child template inherits link configuration
 		childTemplate.template.setSuperTemplate(parentTemplate.template);
@@ -314,7 +316,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_SECTION"), this.recordGetInput(section, "INPUT_2"));
 		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_TEMPLATE"), templateTwo.recordGetRender(null));
 		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_ACCESS"), this.recordGetInput(security));
-		this.resources.link(grandChildTemplate.recordGetOutput("OUTPUT_RESOURCE"), "ResourceTwo.html");
+		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_RESOURCE"),
+				this.resources.getResource("ResourceTwo.html"));
 		this.office.link(grandChildTemplate.recordGetOutput("OUTPUT_ANOTHER"), templateThree.recordGetRender(null));
 
 		// Test
