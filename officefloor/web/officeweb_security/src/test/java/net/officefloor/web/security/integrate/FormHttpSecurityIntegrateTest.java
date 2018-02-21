@@ -45,8 +45,8 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	@Override
 	protected HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
 			HttpSecurityArchitect securityArchitect) {
-		WebArchitect web = context.getWebArchitect();
 		OfficeArchitect office = context.getOfficeArchitect();
+		WebArchitect web = context.getWebArchitect();
 
 		// Configure the HTTP Security
 		HttpSecurityBuilder security = securityArchitect.addHttpSecurity("SECURITY",
@@ -56,7 +56,7 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 		// Provide the form login page
 		OfficeSection form = context.addSection("FORM", LoginPage.class);
 		office.link(security.getOutput("FORM_LOGIN_PAGE"), form.getOfficeSectionInput("form"));
-		web.link(false, "/login", form.getOfficeSectionInput("login"));
+		office.link(web.getHttpInput(false, "/login").getInput(), form.getOfficeSectionInput("login"));
 		office.link(form.getOfficeSectionOutput("authenticate"), security.getAuthenticateInput());
 
 		// Provide parameters for login form

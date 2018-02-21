@@ -45,7 +45,7 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.web.HttpInputPath;
+import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
@@ -139,10 +139,6 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoading() throws Exception {
 
-		final HttpUrlContinuation link = this.createMock(HttpUrlContinuation.class);
-		final OfficeGovernance governanceA = this.createMock(OfficeGovernance.class);
-		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
-
 		// Record initiating from source context
 		this.recordInitateFromExtensionContext();
 		MockImplicitWoofTemplateExtensionSourceService.reset("example", "another");
@@ -169,9 +165,6 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				sectionA);
 		sectionA.addProperty("name.one", "value.one");
 		sectionA.addProperty("name.two", "value.two");
-		final OfficeSectionInput sectionAInput = this.createMock(OfficeSectionInput.class);
-		this.recordReturn(sectionA, sectionA.getOfficeSectionInput("INPUT_B"), sectionAInput);
-		this.recordReturn(this.web, this.web.link(false, "example", sectionAInput), link);
 		final OfficeSection sectionB = this.createMock(OfficeSection.class);
 		this.recordReturn(this.office, this.office.addOfficeSection("SECTION_B", "CLASS", Section.class.getName()),
 				sectionB);
@@ -188,25 +181,22 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.security.addHttpSecurity("SECURITY_TWO", MockHttpSecuritySource.class.getName()), securityTwo);
 
 		// Record application paths
-		HttpUrlContinuation pathAContinuation = this.createMock(HttpUrlContinuation.class);
-		this.recordReturn(this.web, this.web.link(true, "/pathA", this.recordGetInput(sectionA, "INPUT_A")),
-				pathAContinuation);
-		HttpInputPath pathAInput = this.createMock(HttpInputPath.class);
-		this.recordReturn(this.web,
-				this.web.link(true, HttpMethod.POST, "/pathA", this.recordGetInput(sectionA, "INPUT_A")), pathAInput);
-		// TODO link application path to template
-		HttpUrlContinuation pathC = this.createMock(HttpUrlContinuation.class);
-		this.recordReturn(this.web, this.web.link(false, "/pathC", securityOne.getAuthenticateInput()), pathC);
-		// TODO link application path to resource
+		OfficeSectionInput sectionAinputA = this.recordGetInput(sectionA, "INPUT_A");
+		HttpUrlContinuation pathA = this.recordApplicationPath(true, "/pathA", sectionAinputA);
+		this.recordApplicationPath(true, HttpMethod.POST, "/pathA", sectionAinputA);
+		this.recordApplicationPath(false, "/pathB", templateA.recordGetRender(null));
+		HttpUrlContinuation pathC = this.recordApplicationPath(false, "/pathC", securityOne.getAuthenticateInput());
+		HttpUrlContinuation pathD = this.recordApplicationPath(false, "/pathD",
+				this.resources.getResource("/resourceA.html"));
+		// TODO record redirect
 		HttpUrlContinuation pathE = this.createMock(HttpUrlContinuation.class);
-		this.recordReturn(this.web, this.web.link(false, "/pathE", pathAContinuation.getRedirect(null)), pathE);
 
 		// Record linking template outputs
 		this.office.link(templateA.recordGetOutput("OUTPUT_1"), this.recordGetInput(sectionA, "INPUT_A"));
 		this.office.link(templateA.recordGetOutput("OUTPUT_2"), templateB.recordGetRender(null));
 		this.office.link(templateA.recordGetOutput("OUTPUT_3"), this.recordGetInput(securityOne));
 		this.office.link(templateA.recordGetOutput("OUTPUT_4"), this.resources.getResource("/resource.html"));
-		this.office.link(templateA.recordGetOutput("OUTPUT_5"), pathAContinuation.getRedirect(String.class));
+		this.office.link(templateA.recordGetOutput("OUTPUT_5"), pathA.getRedirect(String.class));
 
 		// Record linking section outputs
 		this.office.link(this.recordGetOutput(sectionA, "OUTPUT_A"), this.recordGetInput(sectionB, "INPUT_1"));
@@ -221,16 +211,13 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_THREE"), this.recordGetInput(securityTwo));
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_FOUR"),
 				this.resources.getResource("/resource.html"));
-		HttpUrlContinuation pathD = this.createMock(HttpUrlContinuation.class);
-		// TODO configure HTTP URL continuation to resource
-		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_5"), pathD.getRedirect(null));
+		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_FIVE"), pathD.getRedirect(null));
 
 		// Record linking escalations
 		this.office.link(this.recordEscalation(Exception.class), this.recordGetInput(sectionA, "INPUT_A"));
 		this.office.link(this.recordEscalation(RuntimeException.class), templateA.recordGetRender(null));
 		this.office.link(this.recordEscalation(UnsupportedOperationException.class), this.recordGetInput(securityTwo));
 		this.office.link(this.recordEscalation(SQLException.class), this.resources.getResource("/resource.png"));
-		// TODO configure HTTP URL continuation for exception
 		this.office.link(this.recordEscalation(NullPointerException.class), pathE.getRedirect(null));
 
 		// Record linking starts
@@ -242,12 +229,14 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(startTwo, this.recordGetInput(sectionB, "INPUT_1"));
 
 		// Record loading governances
+		final OfficeGovernance governanceA = this.createMock(OfficeGovernance.class);
 		this.recordReturn(this.office,
 				this.office.addOfficeGovernance("GOVERNANCE_A", ClassGovernanceSource.class.getName()), governanceA);
 		governanceA.addProperty("name.a", "value.a");
 		governanceA.addProperty("name.b", "value.b");
 		templateA.record((template) -> template.addGovernance(governanceA));
 		sectionA.addGovernance(governanceA);
+		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
 		this.recordReturn(this.office, this.office.addOfficeGovernance("GOVERNANCE_B", "CLASS"), governanceB);
 
 		// Test
@@ -480,6 +469,50 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 			WoofLoaderTest.this.recordReturn(this.template, this.template.getOutput(outputName), output);
 			return output;
 		}
+	}
+
+	/**
+	 * Records application path.
+	 * 
+	 * @param isSecure
+	 *            Secure.
+	 * @param applicationPath
+	 *            Application path.
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode}.
+	 * @return Mock {@link HttpUrlContinuation}.
+	 */
+	private HttpUrlContinuation recordApplicationPath(boolean isSecure, String applicationPath,
+			OfficeFlowSinkNode flowSinkNode) {
+		HttpUrlContinuation continuation = this.createMock(HttpUrlContinuation.class);
+		this.recordReturn(this.web, this.web.getHttpInput(isSecure, applicationPath), continuation);
+		OfficeFlowSourceNode input = this.createMock(OfficeFlowSourceNode.class);
+		this.recordReturn(continuation, continuation.getInput(), input);
+		this.office.link(input, flowSinkNode);
+		return continuation;
+	}
+
+	/**
+	 * Records application path.
+	 * 
+	 * @param isSecure
+	 *            Secure.
+	 * @param httpMethod
+	 *            {@link HttpMethod}.
+	 * @param applicationPath
+	 *            Application path.
+	 * @param flowSinkNode
+	 *            {@link OfficeFlowSinkNode}.
+	 * @return Mock {@link HttpInput}.
+	 */
+	private HttpInput recordApplicationPath(boolean isSecure, HttpMethod httpMethod, String applicationPath,
+			OfficeFlowSinkNode flowSinkNode) {
+		HttpInput httpInput = this.createMock(HttpInput.class);
+		this.recordReturn(this.web, this.web.getHttpInput(isSecure, httpMethod, applicationPath), httpInput);
+		OfficeFlowSourceNode input = this.createMock(OfficeFlowSourceNode.class);
+		this.recordReturn(httpInput, httpInput.getInput(), input);
+		this.office.link(input, flowSinkNode);
+		return httpInput;
 	}
 
 	/**

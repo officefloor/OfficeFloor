@@ -388,7 +388,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					HttpAccess httpAccess = (HttpAccess) annotation;
 
 					// Secure access to function
-					this.secure(httpAccess.withQualifier(), httpAccess.ifRole(), httpAccess.ifAllRoles(),
+					this.secure(httpAccess.withHttpSecurity(), httpAccess.ifRole(), httpAccess.ifAllRoles(),
 							finalAccessControlManagedObject, httpAccessAdministrators, nameToHttpSecurity,
 							(securerContext) -> context.addPreAdministration(securerContext.getAdministration()));
 

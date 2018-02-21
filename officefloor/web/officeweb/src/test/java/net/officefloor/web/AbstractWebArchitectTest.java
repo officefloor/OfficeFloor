@@ -27,8 +27,8 @@ import java.lang.annotation.Target;
 import java.net.HttpCookie;
 
 import lombok.Data;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
@@ -110,8 +110,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testGetRoot() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/", MockSection.class, this.mockRequest("/"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class MockSection {
@@ -134,7 +133,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		this.compile.web(null);
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest());
-		assertEquals("Should not find a resource", 404, response.getStatus().getStatusCode());
+		response.assertResponse(404, "No resource found for /");
 	}
 
 	/**
@@ -143,8 +142,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testPostRoot() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.POST, "/", MockSection.class,
 				this.mockRequest("/").method(HttpMethod.POST));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	/**
@@ -160,8 +158,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testPostNotAllowed() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/", MockSection.class,
 				this.mockRequest("/").method(HttpMethod.POST));
-		assertEquals("Incorrect response status", 405, response.getStatus().getStatusCode());
-		assertEquals("Must indicate allowed methods", "GET, HEAD, OPTIONS", response.getHeader("Allow").getValue());
+		response.assertResponse(405, "", "Allow", "GET, HEAD, OPTIONS");
 	}
 
 	/**
@@ -170,8 +167,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testPath() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path/to/resource", MockSection.class,
 				this.mockRequest("/path/to/resource"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	/**
@@ -187,8 +183,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testPathParameter() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}", MockPathParameter.class,
 				this.mockRequest("/path/value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	@Data
@@ -210,8 +205,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testPathValue() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}/{two}", MockPathValue.class,
 				this.mockRequest("/path/value/2"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getEntity(null));
+		response.assertResponse(200, "Value=value");
 	}
 
 	public static class MockPathValue {
@@ -234,8 +228,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testPathMultipleParameters() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path/with/first-{param}/and/{second}/param",
 				MockMultipleParameters.class, this.mockRequest("/path/with/first-one/and/two/param"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "One=one and Two=two", response.getEntity(null));
+		response.assertResponse(200, "One=one and Two=two");
 	}
 
 	@HttpParameters
@@ -277,8 +270,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testQueryParameter() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockQueryParameter.class,
 				this.mockRequest("/path?param=value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	@HttpParameters
@@ -303,8 +295,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testQueryValue() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockQueryValue.class,
 				this.mockRequest("/path?param=value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getEntity(null));
+		response.assertResponse(200, "Value=value");
 	}
 
 	public static class MockQueryValue {
@@ -320,8 +311,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testHeaderValue() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockHeaderValue.class,
 				this.mockRequest("/path").header("x-test", "value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getEntity(null));
+		response.assertResponse(200, "Value=value");
 	}
 
 	public static class MockHeaderValue {
@@ -337,8 +327,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testCookieValue() throws Exception {
 		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockCookieValue.class,
 				this.mockRequest("/path").header("cookie", new HttpCookie("param", "value").toString()));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getEntity(null));
+		response.assertResponse(200, "Value=value");
 	}
 
 	public static class MockCookieValue {
@@ -355,8 +344,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockFormParameter.class,
 				this.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	@HttpParameters
@@ -381,8 +369,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockFormValue.class,
 				this.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	public static class MockFormValue {
@@ -400,10 +387,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		Closure<HttpInputPath> input = new Closure<>();
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", MockSection.class)
-					.getOfficeSectionInput("service");
-			WebArchitect web = context.getWebArchitect();
-			input.value = web.link(false, "/static/path", servicer).getPath();
+			input.value = context.link(false, "/static/path", MockSection.class).getPath();
 		});
 		this.compile.compileAndOpenOfficeFloor();
 
@@ -437,10 +421,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		Closure<HttpInputPath> input = new Closure<>();
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", MockSection.class)
-					.getOfficeSectionInput("service");
-			WebArchitect web = context.getWebArchitect();
-			input.value = web.link(false, "/dynamic/{param}", servicer).getPath();
+			input.value = context.link(false, "/dynamic/{param}", MockSection.class).getPath();
 		});
 		this.compile.compileAndOpenOfficeFloor();
 
@@ -479,18 +460,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", HttpArgumentSection.class)
-					.getOfficeSectionInput("service");
-			WebArchitect web = context.getWebArchitect();
-			web.addHttpArgument("param", HttpValueLocation.QUERY);
-			web.link(false, HttpMethod.GET, "/", servicer);
+			context.getWebArchitect().addHttpArgument("param", HttpValueLocation.QUERY);
+			context.link(false, HttpMethod.GET, "/", HttpArgumentSection.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send the request
 		MockHttpResponse response = this.server.send(this.mockRequest("/?param=value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Argument=value", response.getEntity(null));
+		response.assertResponse(200, "Argument=value");
 	}
 
 	public static class HttpArgumentSection {
@@ -506,19 +483,15 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", MockObjectValue.class)
-					.getOfficeSectionInput("service");
-			WebArchitect web = context.getWebArchitect();
-			web.addHttpObjectParser(new ObjectValueFactory());
-			web.link(false, HttpMethod.POST, "/path", servicer);
+			context.getWebArchitect().addHttpObjectParser(new ObjectValueFactory());
+			context.link(false, HttpMethod.POST, "/path", MockObjectValue.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send the request
 		MockHttpResponse response = this.server.send(this.mockRequest("/path").method(HttpMethod.POST)
 				.header("Content-Type", "application/mock").entity("value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getEntity(null));
+		response.assertResponse(200, "Value=value");
 	}
 
 	@HttpObject
@@ -579,20 +552,17 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", MockObjectAlias.class)
-					.getOfficeSectionInput("service");
 			WebArchitect web = context.getWebArchitect();
 			web.addHttpObjectParser(new ObjectAliasFactory());
 			web.addHttpObjectAnnotationAlias(MockAlias.class, "application/alias");
-			web.link(false, HttpMethod.POST, "/path", servicer);
+			context.link(false, HttpMethod.POST, "/path", MockObjectAlias.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send the request
 		MockHttpResponse response = this.server.send(this.mockRequest("/path").method(HttpMethod.POST)
 				.header("Content-Type", "application/alias").entity("value"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Value=value", response.getEntity(null));
+		response.assertResponse(200, "Value=value");
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -656,16 +626,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			context.link(false, HttpMethod.GET, "/path/{param}", MockObjectSection.class);
-			WebArchitect web = context.getWebArchitect();
-			web.addHttpObjectResponder(new MockObjectResponderFactory());
+			context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request
 		MockHttpResponse response = this.server.send(this.mockRequest("/path/value"));
-		assertEquals("Should be serviced", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect content type", "application/json", response.getHeader("content-type").getValue());
-		assertEquals("Incorrect object", "{value=\"OBJECT value\"}", response.getEntity(null));
+		response.assertResponse(200, "{value=\"OBJECT value\"}", "content-type", "application/json");
 	}
 
 	public static class MockObjectSection {
@@ -743,16 +710,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			context.link(false, HttpMethod.GET, "/path", MockEscalate.class);
-			WebArchitect web = context.getWebArchitect();
-			web.addHttpObjectResponder(new MockObjectResponderFactory());
+			context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request
 		MockHttpResponse response = this.server.send(this.mockRequest("/path"));
-		assertEquals("Should be error", 500, response.getStatus().getStatusCode());
-		assertEquals("Incorrect content type", "application/mock", response.getHeader("content-type").getValue());
-		assertEquals("Incorrect error object", "{error: \"TEST ESCALATION\"}", response.getEntity(null));
+		response.assertResponse(500, "{error: \"TEST ESCALATION\"}", "content-type", "application/mock");
 	}
 
 	public static class MockEscalate {
@@ -768,23 +732,22 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", MockApplication.class)
-					.getOfficeSectionInput("service");
+			OfficeSection servicer = context.addSection("SECTION", MockApplication.class);
+			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
-			web.link(false, HttpMethod.POST, "/path", servicer);
-			web.link(false, "/path", servicer);
+			office.link(web.getHttpInput(false, HttpMethod.POST, "/path").getInput(),
+					servicer.getOfficeSectionInput("post"));
+			office.link(web.getHttpInput(false, "/path").getInput(), servicer.getOfficeSectionInput("get"));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request to store state in application state
 		MockHttpResponse response = this.server.send(this.mockRequest("/path?param=value").method(HttpMethod.POST));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Application=value", response.getEntity(null));
+		response.assertResponse(200, "post=value");
 
 		// Obtain value from application state
 		response = this.server.send(this.mockRequest("/path"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Application=value", response.getEntity(null));
+		response.assertResponse(200, "get=value");
 	}
 
 	@HttpApplicationStateful
@@ -793,12 +756,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockApplication {
-		public void service(QueryParameter parameter, ServerHttpConnection connection, ApplicationObject object)
+		public void post(QueryParameter parameter, ServerHttpConnection connection, ApplicationObject object)
 				throws IOException {
-			if (connection.getRequest().getMethod() == HttpMethod.POST) {
-				object.value = parameter.param;
-			}
-			connection.getResponse().getEntityWriter().write("Application=" + object.value);
+			object.value = parameter.param;
+			connection.getResponse().getEntityWriter().write("post=" + object.value);
+		}
+
+		public void get(ServerHttpConnection connection, ApplicationObject object) throws IOException {
+			connection.getResponse().getEntityWriter().write("get=" + object.value);
 		}
 	}
 
@@ -809,23 +774,22 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			OfficeSectionInput servicer = context.addSection("SECTION", MockSession.class)
-					.getOfficeSectionInput("service");
+			OfficeSection servicer = context.addSection("SECTION", MockSession.class);
+			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
-			web.link(false, HttpMethod.POST, "/path", servicer);
-			web.link(false, "/path", servicer);
+			office.link(web.getHttpInput(false, HttpMethod.POST, "/path").getInput(),
+					servicer.getOfficeSectionInput("post"));
+			office.link(web.getHttpInput(false, "/path").getInput(), servicer.getOfficeSectionInput("get"));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request to store state in session
 		MockHttpResponse response = this.server.send(this.mockRequest("/path?param=value").method(HttpMethod.POST));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Session=value", response.getEntity(null));
+		response.assertResponse(200, "post=value");
 
 		// Obtain value from session
 		response = this.server.send(this.mockRequest("/path").cookies(response));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Session=value", response.getEntity(null));
+		response.assertResponse(200, "get=value");
 	}
 
 	@HttpSessionStateful
@@ -834,12 +798,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockSession {
-		public void service(ServerHttpConnection connection, SessionObject object, QueryParameter parameter)
+		public void post(ServerHttpConnection connection, SessionObject object, QueryParameter parameter)
 				throws IOException {
-			if (connection.getRequest().getMethod() == HttpMethod.POST) {
-				object.value = parameter.param;
-			}
-			connection.getResponse().getEntityWriter().write("Session=" + object.value);
+			object.value = parameter.param;
+			connection.getResponse().getEntityWriter().write("post=" + object.value);
+		}
+
+		public void get(ServerHttpConnection connection, SessionObject object) throws IOException {
+			connection.getResponse().getEntityWriter().write("get=" + object.value);
 		}
 	}
 
@@ -850,14 +816,17 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+
 			// Provide continuation
 			HttpUrlContinuation continuation = context.link(false, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			context.getWebArchitect().link(false, HttpMethod.POST, "/redirect",
+			office.link(web.getHttpInput(false, HttpMethod.POST, "/redirect").getInput(),
 					section.getOfficeSectionInput("service"));
-			context.getOfficeArchitect().link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
+			office.link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -866,17 +835,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Send request that provides redirect
 		MockHttpResponse response = this.server.send(this.mockRequest("/redirect?param=value").method(HttpMethod.POST));
-		assertEquals("Incorrect status", 303, response.getStatus().getStatusCode());
-		assertEquals("Incorrect redirect location", this.contextUrl("", "/path"),
-				response.getHeader("location").getValue());
+		response.assertResponse(303, "", "location", this.contextUrl("", "/path"));
 		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", String.valueOf(nextSerialisableIdentifier))
 				.setPath(this.contextUrl("", "/path")).setHttpOnly(true));
 
 		// Ensure can redirect
 		MockHttpRequestBuilder redirectRequest = this.mockRequest("/path").cookies(response);
 		response = this.server.send(redirectRequest);
-		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
-		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	/**
@@ -886,14 +852,17 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+
 			// Provide continuation
 			HttpUrlContinuation continuation = context.link(true, "/path", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			context.getWebArchitect().link(false, HttpMethod.POST, "/redirect",
+			office.link(web.getHttpInput(false, HttpMethod.POST, "/redirect").getInput(),
 					section.getOfficeSectionInput("service"));
-			context.getOfficeArchitect().link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
+			office.link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -902,17 +871,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Send request that provides redirect (to secure URL)
 		MockHttpResponse response = this.server.send(this.mockRequest("/redirect?param=value").method(HttpMethod.POST));
-		assertEquals("Incorrect status", 303, response.getStatus().getStatusCode());
-		assertEquals("Incorrect redirect location", this.contextUrl("https://mock.officefloor.net", "/path"),
-				response.getHeader("location").getValue());
+		response.assertResponse(303, "", "location", this.contextUrl("https://mock.officefloor.net", "/path"));
 		response.assertCookie(MockHttpServer.mockResponseCookie("ofr", String.valueOf(nextSerialisableIdentifier))
 				.setPath(this.contextUrl("", "/path")).setSecure(true).setHttpOnly(true));
 
 		// Ensure can redirect
 		MockHttpRequestBuilder redirectRequest = this.mockRequest("/path").secure(true).cookies(response);
 		response = this.server.send(redirectRequest);
-		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
-		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	public static class MockRedirect implements MockPathParameters {
@@ -938,28 +904,26 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+
 			// Provide continuation
 			HttpUrlContinuation continuation = context.link(false, "/path/{param}", MockQueryParameter.class);
 
 			// Configure to redirect to continuation
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			context.getWebArchitect().link(false, HttpMethod.POST, "/redirect",
+			office.link(context.getWebArchitect().getHttpInput(false, HttpMethod.POST, "/redirect").getInput(),
 					section.getOfficeSectionInput("service"));
-			context.getOfficeArchitect().link(section.getOfficeSectionOutput("redirect"),
-					continuation.getRedirect(MockPathParameters.class));
+			office.link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(MockPathParameters.class));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request that provides redirect
 		MockHttpResponse response = this.server.send(this.mockRequest("/redirect?param=value").method(HttpMethod.POST));
-		assertEquals("Incorrect status: " + response.getEntity(null), 303, response.getStatus().getStatusCode());
-		assertEquals("Incorrect redirect location", this.contextUrl("", "/path/value"),
-				response.getHeader("location").getValue());
+		response.assertResponse(303, "", "location", this.contextUrl("", "/path/value"));
 
 		// Ensure can redirect
 		response = this.server.send(this.mockRequest("/path/value").cookies(response));
-		assertEquals("Should service redirected", 200, response.getStatus().getStatusCode());
-		assertEquals("Should re-instate request", "Parameter=value", response.getEntity(null));
+		response.assertResponse(200, "Parameter=value");
 	}
 
 	/**
@@ -969,24 +933,24 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Configure section and its state
 			OfficeSection reroute = context.addSection("REROUTE", RerouteSection.class);
 			context.addManagedObject("REROUTE_STATE", RerouteState.class, ManagedObjectScope.PROCESS);
 
 			// Configure reroute
-			WebArchitect web = context.getWebArchitect();
 			web.reroute(reroute.getOfficeSectionOutput("routeAgain"));
 
 			// Provide HTTP input to service
-			web.link(false, "/reroute", reroute.getOfficeSectionInput("reroute"));
+			office.link(web.getHttpInput(false, "/reroute").getInput(), reroute.getOfficeSectionInput("reroute"));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request that should re-route multiple times
 		MockHttpResponse response = this.server.send(this.mockRequest("/reroute"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect number of re-routes", "10", response.getEntity(null));
+		response.assertResponse(200, "10");
 	}
 
 	public static class RerouteState {

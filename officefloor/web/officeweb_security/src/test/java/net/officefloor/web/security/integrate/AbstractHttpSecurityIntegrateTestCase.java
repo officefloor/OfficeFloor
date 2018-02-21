@@ -19,6 +19,7 @@ package net.officefloor.web.security.integrate;
 
 import java.io.IOException;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -68,6 +69,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
 		});
 		compiler.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
 
 			// Employ security architect
@@ -79,8 +81,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 			// Add servicing methods
 			OfficeSection section = context.addSection("SERVICE", Servicer.class);
-			web.link(false, "/service", section.getOfficeSectionInput("service"));
-			web.link(false, "/logout", section.getOfficeSectionInput("logout"));
+			office.link(web.getHttpInput(false, "/service").getInput(), section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/logout").getInput(), section.getOfficeSectionInput("logout"));
 
 			// Inform web architect of security
 			securityArchitect.informWebArchitect();

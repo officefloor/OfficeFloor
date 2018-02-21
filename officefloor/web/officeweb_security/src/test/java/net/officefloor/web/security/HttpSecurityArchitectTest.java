@@ -19,6 +19,7 @@ package net.officefloor.web.security;
 
 import java.io.IOException;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -103,14 +104,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	public void testNoSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// No security
-
-			// Configure servicer
-			context.getWebArchitect().link(false, "/path",
-					context.addSection("section", GuestLogic.class).getOfficeSectionInput("service"));
+			context.link(false, "/path", GuestLogic.class);
 		});
 
 		// Ensure service request
-		this.server.send(MockHttpServer.mockRequest("/path")).assertResponse(200, "TEST");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "TEST");
 	}
 
 	/**
@@ -121,8 +120,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure service request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class GuestLogic {
@@ -174,8 +172,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure indicate not logged in
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class Standard_CheckNotAuthenticatedServicer {
@@ -211,8 +208,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class Custom_CheckAuthenticatedServicer {
@@ -235,8 +231,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class Standard_CheckAuthenticatedServicer {
@@ -260,9 +255,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure not allowed access
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be allowed access", 401, response.getStatus().getStatusCode());
-		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"),
-				response.getHeader("www-authenticate").getValue());
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"));
 	}
 
 	public static class Custom_NoAccessAsNotAuthenticatedServicer {
@@ -280,9 +274,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure not allowed access
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be allowed access", 401, response.getStatus().getStatusCode());
-		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"),
-				response.getHeader("www-authenticate").getValue());
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"));
 	}
 
 	public static class Standard_NoAccessAsNotAuthenticatedServicer {
@@ -299,8 +292,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class Custom_AccessControlServicer {
@@ -327,8 +319,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Send request (with authentication)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class Standard_AccessControlServicer {
@@ -356,8 +347,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure able to access
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	public static class HttpAccessServicer {
@@ -375,9 +365,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure not allowed access (with a challenge to authenticate)
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be allowed access", 401, response.getStatus().getStatusCode());
-		assertEquals("Should issue challenge", MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"),
-				response.getHeader("www-authenticate").getValue());
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"));
 	}
 
 	/**
@@ -388,7 +377,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure not allowed access (with a challenge to authenticate)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "not", "not"));
-		assertEquals("Should not be allowed access", 403, response.getStatus().getStatusCode());
+		response.assertResponse(403, "");
 		assertEquals("Already authenticated, so should be no challenge", 0, response.getHeaders().size());
 	}
 
@@ -400,13 +389,11 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure able to access
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 
 		// Ensure able to access via cached security in session
 		response = this.server.send(MockHttpServer.mockRequest("/path").cookies(response));
-		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	/**
@@ -428,18 +415,16 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure only app challenge is on response
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include only the qualified security", response.getHeader("www-authenticate").getValue(),
+		response.assertResponse(401, "", "www-authenticate",
 				MockChallengeHttpSecuritySource.getHeaderChallengeValue("app"));
 
 		// Ensure can access once providing credentials
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "QUALIFIED", response.getEntity(null));
+		response.assertResponse(200, "QUALIFIED");
 	}
 
 	public static class QualifiedHttpAccessServicer {
-		@HttpAccess(withQualifier = "app", ifRole = { "test", "not" })
+		@HttpAccess(withHttpSecurity = "app", ifRole = { "test", "not" })
 		public void service(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("QUALIFIED");
 		}
@@ -465,17 +450,13 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure both security is on the challenge
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be authenticated: " + response.getEntity(null), 401,
-				response.getStatus().getStatusCode());
-		assertEquals("Should include both security challenges",
+		response.assertResponse(401, "", "www-authenticate",
 				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one") + ", "
-						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("two"),
-				response.getHeader("www-authenticate").getValue());
+						+ MockChallengeHttpSecuritySource.getHeaderChallengeValue("two"));
 
 		// Ensure can access once providing credentials
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 
 	/**
@@ -498,10 +479,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure can select security based on accept-type
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include the negotiated security challenge",
-				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
-				response.getHeader("www-authenticate").getValue());
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"));
 	}
 
 	/**
@@ -522,10 +501,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure can select security based on accept-type
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include the negotiated security challenge",
-				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
-				response.getHeader("www-authenticate").getValue());
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"));
 	}
 
 	/**
@@ -534,6 +511,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testMixChallengeWithApplicationSecurity() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+
 			// Provide security for REST API calls
 			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"))
 					.addContentType("application/json");
@@ -544,24 +524,20 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Provide servicer that will use any security
 			OfficeSection section = context.addSection("service", MixServicer.class);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 
 			// Configure challenge
-			context.getOfficeArchitect().link(app.getOutput("CHALLENGE"), section.getOfficeSectionInput("challenge"));
+			office.link(app.getOutput("CHALLENGE"), section.getOfficeSectionInput("challenge"));
 		});
 
 		// Ensure for html request that application challenge
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").header("accept", "text/html"));
-		assertEquals("Should provide successful form response", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect form response", "User name and password please", response.getEntity(null));
+		response.assertResponse(200, "User name and password please");
 
 		// Ensure for json request that challenge
 		response = this.server.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include the negotiated security challenge",
-				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"),
-				response.getHeader("www-authenticate").getValue());
-
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("one"));
 	}
 
 	public static class MixServicer {
@@ -580,6 +556,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpOfficeSecurerManagedObject() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Provide security
 			HttpSecurityBuilder builder = security.addHttpSecurity("api",
@@ -587,7 +565,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Provide servicer
 			OfficeSection section = context.addSection("service", HttpSecurerManagedObjectServicer.class);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 
 			// Provide object
 			OfficeManagedObject mo = context.addManagedObject("MO", HttpSecurerObject.class, ManagedObjectScope.THREAD);
@@ -599,15 +577,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure use of managed object is secured
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		assertEquals("Should not be authenticated", 401, response.getStatus().getStatusCode());
-		assertEquals("Should include the negotiated security challenge",
-				MockChallengeHttpSecuritySource.getHeaderChallengeValue("secure"),
-				response.getHeader("www-authenticate").getValue());
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("secure"));
 
 		// Ensure can access once providing credentials
 		response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "SECURE", response.getEntity(null));
+		response.assertResponse(200, "SECURE");
 	}
 
 	public static class HttpSecurerObject {
@@ -624,6 +599,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpOfficeSecurerFunction() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Provide security
 			HttpSecurityBuilder builder = security.addHttpSecurity("api",
@@ -631,7 +608,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Provide servicer
 			OfficeSection section = context.addSection("servicer", HttpSecurerFunctionServicer.class);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 
 			// Secure the function
 			OfficeSectionFunction function = section.getOfficeSectionFunction("service");
@@ -642,14 +619,13 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			securer.secure((secureContext) -> function.addPreAdministration(secureContext.getAdministration()));
 		});
 
-		// Ensure not access if do not have role
+		// Ensure no access if do not have role
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "test", "test"));
-		assertEquals("Should not be authenticated", 403, response.getStatus().getStatusCode());
+		response.assertResponse(403, "");
 
 		// May access if have role
 		response = this.server.send(this.mockRequest("/path", "role", "role"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "SECURE", response.getEntity(null));
+		response.assertResponse(200, "SECURE");
 	}
 
 	public static class HttpSecurerFunctionServicer {
@@ -663,6 +639,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpOfficeSecurerFlow() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Provide security
 			HttpSecurityBuilder builder = security.addHttpSecurity("app",
@@ -670,7 +648,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Provide servicer
 			OfficeSection section = context.addSection("servicer", HttpSectionSecurerFlowServicer.class);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 
 			// Configure the secure decision
 			AbstractHttpSecurable securable = new AbstractHttpSecurable() {
@@ -680,18 +658,21 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			securer.secure((securerContext) -> {
 				OfficeFlowSinkNode secureFlow = securerContext.secureFlow(null, section.getOfficeSectionInput("secure"),
 						section.getOfficeSectionInput("insecure"));
-				context.getOfficeArchitect().link(section.getOfficeSectionOutput("decision"), secureFlow);
+				office.link(section.getOfficeSectionOutput("decision"), secureFlow);
 			});
 		});
 
 		// Ensure insecure flow followed
-		this.server.send(MockHttpServer.mockRequest("/path")).assertResponse(200, "INSECURE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "INSECURE");
 
 		// Ensure insecure flow if not in role
-		this.server.send(this.mockRequest("/path", "no_access", "no_access")).assertResponse(200, "INSECURE");
+		response = this.server.send(this.mockRequest("/path", "no_access", "no_access"));
+		response.assertResponse(200, "INSECURE");
 
 		// May access if have role
-		this.server.send(this.mockRequest("/path", "role", "role")).assertResponse(200, "SECURE");
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		response.assertResponse(200, "SECURE");
 	}
 
 	public static class HttpSectionSecurerFlowServicer {
@@ -714,6 +695,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpOfficeSecurerFlowWithArgument() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Provide security
 			HttpSecurityBuilder builder = security.addHttpSecurity("app",
@@ -721,7 +704,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 			// Provide servicer
 			OfficeSection section = context.addSection("servicer", HttpSectionSecurerFlowServicerWithArgument.class);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 
 			// Configure the secure decision
 			AbstractHttpSecurable securable = new AbstractHttpSecurable() {
@@ -731,19 +714,21 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			securer.secure((securerContext) -> {
 				OfficeFlowSinkNode secureFlow = securerContext.secureFlow(String.class,
 						section.getOfficeSectionInput("secure"), section.getOfficeSectionInput("insecure"));
-				context.getOfficeArchitect().link(section.getOfficeSectionOutput("decision"), secureFlow);
+				office.link(section.getOfficeSectionOutput("decision"), secureFlow);
 			});
 		});
 
 		// Ensure insecure flow followed
-		this.server.send(MockHttpServer.mockRequest("/path")).assertResponse(200, "INSECURE - argument");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "INSECURE - argument");
 
 		// Ensure insecure flow if not in role
-		this.server.send(this.mockRequest("/path", "no_access", "no_access")).assertResponse(200,
-				"INSECURE - argument");
+		response = this.server.send(this.mockRequest("/path", "no_access", "no_access"));
+		response.assertResponse(200, "INSECURE - argument");
 
 		// May access if have role
-		this.server.send(this.mockRequest("/path", "role", "role")).assertResponse(200, "SECURE - argument");
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		response.assertResponse(200, "SECURE - argument");
 	}
 
 	public static class HttpSectionSecurerFlowServicerWithArgument {
@@ -766,6 +751,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpSectionSecurerFlow() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Provide security
 			HttpSecurityBuilder builder = security.addHttpSecurity("app",
@@ -782,17 +769,20 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 					new HttpSectionSecurerFlowSection(securer.createFlowSecurer(), HttpSectionSecurerFlowServicer.class,
 							null),
 					null);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 		});
 
 		// Ensure insecure flow followed
-		this.server.send(MockHttpServer.mockRequest("/path")).assertResponse(200, "INSECURE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "INSECURE");
 
 		// Ensure insecure flow if not in role
-		this.server.send(this.mockRequest("/path", "no_access", "no_access")).assertResponse(200, "INSECURE");
+		response = this.server.send(this.mockRequest("/path", "no_access", "no_access"));
+		response.assertResponse(200, "INSECURE");
 
 		// May access if have role
-		this.server.send(this.mockRequest("/path", "role", "role")).assertResponse(200, "SECURE");
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		response.assertResponse(200, "SECURE");
 	}
 
 	public class HttpSectionSecurerFlowSection extends AbstractSectionSource {
@@ -839,6 +829,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpSectionSecurerFlowWithArgument() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 
 			// Provide security
 			HttpSecurityBuilder builder = security.addHttpSecurity("app",
@@ -855,18 +847,20 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 					new HttpSectionSecurerFlowSection(securer.createFlowSecurer(),
 							HttpSectionSecurerFlowServicerWithArgument.class, String.class),
 					null);
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/path").getInput(), section.getOfficeSectionInput("service"));
 		});
 
 		// Ensure insecure flow followed
-		this.server.send(MockHttpServer.mockRequest("/path")).assertResponse(200, "INSECURE - argument");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "INSECURE - argument");
 
 		// Ensure insecure flow if not in role
-		this.server.send(this.mockRequest("/path", "no_access", "no_access")).assertResponse(200,
-				"INSECURE - argument");
+		response = this.server.send(this.mockRequest("/path", "no_access", "no_access"));
+		response.assertResponse(200, "INSECURE - argument");
 
 		// May access if have role
-		this.server.send(this.mockRequest("/path", "role", "role")).assertResponse(200, "SECURE - argument");
+		response = this.server.send(this.mockRequest("/path", "role", "role"));
+		response.assertResponse(200, "SECURE - argument");
 	}
 
 	/**
@@ -874,28 +868,28 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testCustom_Logout() throws Exception {
 		this.compile((context, security) -> {
-			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"));
-			OfficeSection section = context.addSection("section", CustomLogout.class);
+			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
-			web.link(false, "/login", section.getOfficeSectionInput("login"));
-			web.link(false, "/logout", section.getOfficeSectionInput("logout"));
-			web.link(false, "/check", section.getOfficeSectionInput("check"));
+
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"));
+
+			OfficeSection section = context.addSection("section", CustomLogout.class);
+			office.link(web.getHttpInput(false, "/login").getInput(), section.getOfficeSectionInput("login"));
+			office.link(web.getHttpInput(false, "/logout").getInput(), section.getOfficeSectionInput("logout"));
+			office.link(web.getHttpInput(false, "/check").getInput(), section.getOfficeSectionInput("check"));
 		});
 
 		// Ensure login
 		MockHttpResponse response = this.server.send(this.mockRequest("/login", "test", "test"));
-		assertEquals("Should login", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect login", "login", response.getEntity(null));
+		response.assertResponse(200, "login");
 
 		// Trigger logout
 		response = this.server.send(MockHttpServer.mockRequest("/logout").cookies(response));
-		assertEquals("Incorrect logout", "logout", response.getEntity(null));
-		assertEquals("Should logout", 200, response.getStatus().getStatusCode());
+		response.assertResponse(200, "logout");
 
 		// Ensure logged out
 		response = this.server.send(MockHttpServer.mockRequest("/check").cookies(response));
-		assertEquals("Incorrect check", 200, response.getStatus().getStatusCode());
-		assertEquals("Should be logged out", "guest", response.getEntity(null));
+		response.assertResponse(200, "guest");
 	}
 
 	public static class CustomLogout {
@@ -921,28 +915,28 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testStandard_Logout() throws Exception {
 		this.compile((context, security) -> {
-			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"));
-			OfficeSection section = context.addSection("section", CustomLogout.class);
+			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
-			web.link(false, "/login", section.getOfficeSectionInput("login"));
-			web.link(false, "/logout", section.getOfficeSectionInput("logout"));
-			web.link(false, "/check", section.getOfficeSectionInput("check"));
+
+			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"));
+
+			OfficeSection section = context.addSection("section", CustomLogout.class);
+			office.link(web.getHttpInput(false, "/login").getInput(), section.getOfficeSectionInput("login"));
+			office.link(web.getHttpInput(false, "/logout").getInput(), section.getOfficeSectionInput("logout"));
+			office.link(web.getHttpInput(false, "/check").getInput(), section.getOfficeSectionInput("check"));
 		});
 
 		// Ensure login
 		MockHttpResponse response = this.server.send(this.mockRequest("/login", "test", "test"));
-		assertEquals("Should login", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect login", "login", response.getEntity(null));
+		response.assertResponse(200, "login");
 
 		// Trigger logout
 		response = this.server.send(MockHttpServer.mockRequest("/logout").cookies(response));
-		assertEquals("Incorrect logout", "logout", response.getEntity(null));
-		assertEquals("Should logout", 200, response.getStatus().getStatusCode());
+		response.assertResponse(200, "logout");
 
 		// Ensure logged out
 		response = this.server.send(MockHttpServer.mockRequest("/check").cookies(response));
-		assertEquals("Incorrect check", 200, response.getStatus().getStatusCode());
-		assertEquals("Should be logged out", "guest", response.getEntity(null));
+		response.assertResponse(200, "guest");
 	}
 
 	public static class StandardLogout {

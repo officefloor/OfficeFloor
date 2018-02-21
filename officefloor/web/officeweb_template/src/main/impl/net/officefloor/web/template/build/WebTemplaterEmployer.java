@@ -303,8 +303,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 			// Configure the input
 			this.sectionInput = this.section.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
-			this.templateInput = WebTemplaterEmployer.this.webArchitect.link(this.isSecure, this.applicationPath,
-					sectionInput);
+			this.templateInput = WebTemplaterEmployer.this.webArchitect.getHttpInput(this.isSecure,
+					this.applicationPath);
+			WebTemplaterEmployer.this.officeArchitect.link(this.templateInput.getInput(), this.sectionInput);
 		}
 
 		/**
@@ -420,8 +421,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 				}
 
 				// Route to template for method
-				WebTemplaterEmployer.this.webArchitect.link(this.isSecure, method, this.applicationPath,
-						this.sectionInput);
+				WebTemplaterEmployer.this.officeArchitect.link(WebTemplaterEmployer.this.webArchitect
+						.getHttpInput(this.isSecure, method, this.applicationPath).getInput(), this.sectionInput);
 			}
 
 			// Load the link inputs
@@ -440,7 +441,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 						// Configure the link inputs for each method supported
 						for (HttpMethod method : link.getMethods()) {
-							WebTemplaterEmployer.this.webArchitect.link(isLinkSecure, method, linkPath, linkInput);
+							WebTemplaterEmployer.this.officeArchitect.link(WebTemplaterEmployer.this.webArchitect
+									.getHttpInput(isLinkSecure, method, linkPath).getInput(), linkInput);
 						}
 					}
 				}

@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -38,7 +39,6 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -116,7 +116,8 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 				(context, templater) -> templater.addTemplate(false, "/path", new StringReader("TEST")), "TEST");
 
 		// Ensure default values for template
-		assertEquals("Incorrect default content-type", "text/plain", response.getHeader("content-type").getValue());
+		response.assertResponse(200, "");
+		response.assertHeader("content-type", "text/plain");
 	}
 
 	/**
@@ -469,8 +470,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can GET link
 		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section GET /path+link", response.getEntity(null));
+		response.assertResponse(200, "section GET /path+link");
 	}
 
 	public static class MockSection {
@@ -492,13 +492,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can GET link triggers redirect to template
 		MockHttpResponse response = this.server.send(this.mockRequest("/path+link"));
-		assertEquals("Should be redirect to template", 303, response.getStatus().getStatusCode());
-		response.assertHeader("location", this.contextUrl("", "/path"));
+		response.assertResponse(303, "LINK ", "location", this.contextUrl("", "/path"));
 
 		// Ensure on GET redirect that able to load template
 		response = this.server.send(this.mockRequest("/path"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect template", "Template /path+link", response.getEntity(null));
+		response.assertResponse(200, "Template /path+link");
 	}
 
 	public static class LinkRerenderTemplateLogic {
@@ -537,8 +535,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can GET link
 		MockHttpResponse response = this.server.send(this.mockRequest("/path|link"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section GET /path|link", response.getEntity(null));
+		response.assertResponse(200, "section GET /path|link");
 	}
 
 	/**
@@ -554,8 +551,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can GET link (use different path parameter)
 		MockHttpResponse response = this.server.send(this.mockRequest("/another+link"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section GET /another+link", response.getEntity(null));
+		response.assertResponse(200, "section GET /another+link");
 	}
 
 	public static class DynamicLinkLogic {
@@ -585,8 +581,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can GET link (use different path parameter)
 		MockHttpResponse response = this.server.send(this.mockRequest("/another|link"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section GET /another|link", response.getEntity(null));
+		response.assertResponse(200, "section GET /another|link");
 	}
 
 	/**
@@ -602,13 +597,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can GET link
 		MockHttpResponse response = this.server.send(this.mockRequest("/default+link").method(HttpMethod.GET));
-		assertEquals("GET link should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect GET response", "section GET /default+link", response.getEntity(null));
+		response.assertResponse(200, "section GET /default+link");
 
 		// Ensure can POST link
 		response = this.server.send(this.mockRequest("/default+link").method(HttpMethod.POST));
-		assertEquals("POST link should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect POST resposne", "section POST /default+link", response.getEntity(null));
+		response.assertResponse(200, "section POST /default+link");
 	}
 
 	/**
@@ -623,12 +616,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can POST link
 		MockHttpResponse response = this.server.send(this.mockRequest("/post+link").method(HttpMethod.POST));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section POST /post+link", response.getEntity(null));
+		response.assertResponse(200, "section POST /post+link");
 
 		// Ensure can not GET link (as specifies only POST)
 		response = this.server.send(this.mockRequest("/post+link").method(HttpMethod.GET));
-		assertEquals("Should not support GET", 405, response.getStatus().getStatusCode());
+		response.assertResponse(405, "");
 	}
 
 	/**
@@ -643,8 +635,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		// Ensure can POST link
 		MockHttpResponse response = this.server.send(this.mockRequest("/put+link").method(HttpMethod.PUT));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect link response", "section PUT /put+link", response.getEntity(null));
+		response.assertResponse(200, "section PUT /put+link");
 	}
 
 	/**
@@ -656,8 +647,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.template((context, templater) -> templater
 				.addTemplate(false, "/path", new StringReader("TEMPLATE")).addRenderMethod(method),
 				this.mockRequest("/path").method(method));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect template", "TEMPLATE", response.getEntity(null));
+		response.assertResponse(200, "TEMPLATE");
 	}
 
 	/**
@@ -671,14 +661,12 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		}, "");
 
 		// Ensure redirect
-		assertEquals("Should be redirect", HttpStatus.SEE_OTHER, response.getStatus());
+		response.assertResponse(303, "", "location", this.contextUrl("", "/template"));
 		String location = response.getHeader("location").getValue();
-		assertEquals("Incorrect location", this.contextUrl("", "/template"), location);
 
 		// Fire redirect to then get the template
 		response = this.server.send(this.mockRequest(location).cookies(response));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Should have template", "TEMPLATE", response.getEntity(null));
+		response.assertResponse(200, "TEMPLATE");
 	}
 
 	/**
@@ -686,23 +674,22 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkToTemplateWithDynamicPath() throws Exception {
 		MockHttpResponse redirect = this.template("/redirect", (context, templater) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("SECTION", DynamicPathSection.class);
-			context.getWebArchitect().link(false, "/redirect", section.getOfficeSectionInput("service"));
+			office.link(web.getHttpInput(false, "/redirect").getInput(), section.getOfficeSectionInput("service"));
 			WebTemplate template = templater.addTemplate(false, "/{param}", new StringReader("TEMPLATE"))
 					.setLogicClass(LinkDynamicPathLogic.class).setRedirectValuesFunction("getPathValues");
-			context.getOfficeArchitect().link(section.getOfficeSectionOutput("template"),
-					template.getRender(DynamicPathSection.class));
+			office.link(section.getOfficeSectionOutput("template"), template.getRender(DynamicPathSection.class));
 		}, "");
 
 		// Ensure redirect
-		assertEquals("Should be redirect", HttpStatus.SEE_OTHER, redirect.getStatus());
+		redirect.assertResponse(303, "", "location", this.contextUrl("", "/value"));
 		String location = redirect.getHeader("location").getValue();
-		assertEquals("Incorrect location", this.contextUrl("", "/value"), location);
 
 		// Fire redirect to then get the template
 		MockHttpResponse response = this.server.send(this.mockRequest(location).cookies(redirect));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Should have template", "TEMPLATE", response.getEntity(null));
+		response.assertResponse(200, "TEMPLATE");
 	}
 
 	public static class LinkDynamicPathLogic {
@@ -758,14 +745,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 				(context, templater) -> templater.addTemplate(true, "/path", new StringReader("SECURE")), "");
 
 		// Non-secure request should have redirect to secure connection
-		assertEquals("Should redirect for secure connection", 307, response.getStatus().getStatusCode());
-		assertEquals("Should be secure redirect URL", this.contextUrl("https://mock.officefloor.net", "/path"),
-				response.getHeader("location").getValue());
+		response.assertResponse(307, "", "location", this.contextUrl("https://mock.officefloor.net", "/path"));
 
 		// Ensure able to obtain template over secure connection
 		response = this.server.send(this.mockRequest("/path").secure(true));
-		assertEquals("Should obtain template", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect template", "SECURE", response.getEntity(null));
+		response.assertResponse(200, "SECURE");
 	}
 
 	/**
@@ -777,8 +761,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 				this.mockRequest("/path").secure(true));
 
 		// Should obtain insecure template on secure connection
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Inorrect template", "INSECURE", response.getEntity(null));
+		response.assertResponse(200, "INSECURE");
 	}
 
 	/*
@@ -793,13 +776,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		}, "");
 
 		// Not-secure request should a have a redirect to secure connection
-		assertEquals("Should redirect for secure connection", 307, response.getStatus().getStatusCode());
-		response.assertHeader("location", this.contextUrl("https://mock.officefloor.net", "/path+link"));
+		response.assertResponse(307, "", "location", this.contextUrl("https://mock.officefloor.net", "/path+link"));
 
 		// Ensure able to obtain link over secure connection
 		response = this.server.send(this.mockRequest("/path+link").secure(true));
-		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect content", "section GET /path+link", response.getEntity(null));
+		response.assertResponse(200, "section GET /path+link");
 	}
 
 	/**
@@ -824,11 +805,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
 		}, this.mockRequest("/path").secure(true));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Keep link secure (to avoid browser warning issues)
 		// (Also, avoids another connection needing to be established)
-		assertEquals("Incorrect content", "Link=/path+link", response.getEntity(null));
+		response.assertResponse(200, "Link=/path+link");
 	}
 
 	/**

@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -30,7 +31,6 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
-import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -97,10 +97,9 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testSectionOutputToResource() throws Exception {
 		this.compile((context, resource) -> {
-			OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
-			context.getOfficeArchitect().link(section.getOfficeSectionOutput("resource"),
-					resource.getResource("resource.html"));
-			context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+			office.link(web.getHttpInput(false, "/path").getInput(), resource.getResource("resource.html"));
 		});
 
 		// Send the request
@@ -112,22 +111,15 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		response.assertResponse(200, "TEST RESOURCE");
 	}
 
-	public static class OutputToResourceServicer {
-		@NextFunction("resource")
-		public void service() {
-		}
-	}
-
 	/**
 	 * Ensure issue if missing resource.
 	 */
 	public void testSectionOutputToMissingResource() throws Exception {
 		this.issue((issues) -> issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 				"Can not find HTTP resource '/missing.html'"), (context, resource) -> {
-					OfficeSection section = context.addSection("section", OutputToResourceServicer.class);
-					context.getOfficeArchitect().link(section.getOfficeSectionOutput("resource"),
-							resource.getResource("missing.html"));
-					context.getWebArchitect().link(false, "/path", section.getOfficeSectionInput("service"));
+					OfficeArchitect office = context.getOfficeArchitect();
+					WebArchitect web = context.getWebArchitect();
+					office.link(web.getHttpInput(false, "/path").getInput(), resource.getResource("missing.html"));
 				});
 	}
 
@@ -136,9 +128,10 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testEscalationToResource() throws Exception {
 		this.compile((context, resource) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
 			context.link(false, "/path", EscalationToResourceServicer.class);
-			OfficeEscalation escalation = context.getOfficeArchitect().addOfficeEscalation(Exception.class.getName());
-			context.getOfficeArchitect().link(escalation, resource.getResource("resource.html"));
+			OfficeEscalation escalation = office.addOfficeEscalation(Exception.class.getName());
+			office.link(escalation, resource.getResource("resource.html"));
 		});
 
 		// Ensure handle escalation
@@ -174,11 +167,12 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure can obtain resource
-		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200, "TEST RESOURCE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE");
 
 		// Ensure passes through if not found resource
-		this.server.send(MockHttpServer.mockRequest("/missing.html")).assertResponse(404,
-				"No resource found for /missing.html");
+		response = this.server.send(MockHttpServer.mockRequest("/missing.html"));
+		response.assertResponse(404, "No resource found for /missing.html");
 	}
 
 	/**
@@ -191,11 +185,12 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure can obtain resource
-		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/external.html"));
+		response.assertResponse(200, "TEST EXTERNAL RESOURCE");
 
 		// Ensure passes through if not found resource
-		this.server.send(MockHttpServer.mockRequest("/missing.html")).assertResponse(404,
-				"No resource found for /missing.html");
+		response = this.server.send(MockHttpServer.mockRequest("/missing.html"));
+		response.assertResponse(404, "No resource found for /missing.html");
 	}
 
 	/**
@@ -222,7 +217,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure can obtain resource
-		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/external.html"));
+		response.assertResponse(200, "TEST EXTERNAL RESOURCE");
 	}
 
 	/**
@@ -234,7 +230,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure can obtain resource
-		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200, "TEST RESOURCE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE");
 	}
 
 	/**
@@ -257,11 +254,12 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure can obtain non-secured resource
-		this.server.send(MockHttpServer.mockRequest("/external.html")).assertResponse(200, "TEST EXTERNAL RESOURCE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/external.html"));
+		response.assertResponse(200, "TEST EXTERNAL RESOURCE");
 
 		// Ensure secured resources (not available to be found)
-		this.server.send(MockHttpServer.mockRequest("/secured.html")).assertResponse(404,
-				"No resource found for /secured.html");
+		response = this.server.send(MockHttpServer.mockRequest("/secured.html"));
+		response.assertResponse(404, "No resource found for /secured.html");
 
 		// Ensure no access if not in roles
 		this.server.send(new MockCredentials("not", "not").loadHttpRequest(MockHttpServer.mockRequest("/secured.html")))
@@ -283,14 +281,16 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure requires context path
-		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(404,
-				"No resource found for /resource.html");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
+		response.assertResponse(404, "No resource found for /resource.html");
 
 		// Ensure available with context path
-		this.server.send(MockHttpServer.mockRequest("/context/resource.html")).assertResponse(200, "TEST RESOURCE");
+		response = this.server.send(MockHttpServer.mockRequest("/context/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE");
 
 		// Ensure default resource with context path
-		this.server.send(MockHttpServer.mockRequest("/context")).assertResponse(200, "<html><body>test</body></html>");
+		response = this.server.send(MockHttpServer.mockRequest("/context"));
+		response.assertResponse(200, "<html><body>test</body></html>");
 	}
 
 	/**
@@ -298,6 +298,9 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testTypeQualifier() throws Exception {
 		this.compile((context, resource) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+
 			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
 			resources.addTypeQualifier("qualifier");
 
@@ -306,18 +309,21 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 
 			// Configure linking servicer
 			OfficeSection servicer = context.addSection("servicer", TypeQualifierServicer.class);
-			context.getWebArchitect().link(false, "/store", servicer.getOfficeSectionInput("store"));
-			context.getWebArchitect().link(false, "/cache", servicer.getOfficeSectionInput("cache"));
+			office.link(web.getHttpInput(false, "/store").getInput(), servicer.getOfficeSectionInput("store"));
+			office.link(web.getHttpInput(false, "/cache").getInput(), servicer.getOfficeSectionInput("cache"));
 		});
 
 		// Ensure not cached
-		this.server.send(MockHttpServer.mockRequest("/cache")).assertResponse(200, "Not cached");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/cache"));
+		response.assertResponse(200, "Not cached");
 
 		// Ensure can obtain from store
-		this.server.send(MockHttpServer.mockRequest("/store")).assertResponse(200, "TEST RESOURCE");
+		response = this.server.send(MockHttpServer.mockRequest("/store"));
+		response.assertResponse(200, "TEST RESOURCE");
 
 		// Ensure can obtain from cache
-		this.server.send(MockHttpServer.mockRequest("/cache")).assertResponse(200, "TEST RESOURCE");
+		response = this.server.send(MockHttpServer.mockRequest("/cache"));
+		response.assertResponse(200, "TEST RESOURCE");
 	}
 
 	public static class TypeQualifierServicer {
@@ -348,8 +354,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure transforms resource
-		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200,
-				"TEST RESOURCE - transformed");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE - transformed");
 	}
 
 	/**
@@ -378,8 +384,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure transforms resource
-		this.server.send(MockHttpServer.mockRequest("/resource.html")).assertResponse(200,
-				"TEST RESOURCE - transformed");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE - transformed");
 	}
 
 	/**
@@ -392,7 +398,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure transforms resource
-		this.server.send(MockHttpServer.mockRequest("/")).assertResponse(200, "TEST RESOURCE");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/"));
+		response.assertResponse(200, "TEST RESOURCE");
 	}
 
 	/**

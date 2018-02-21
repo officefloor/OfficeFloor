@@ -51,7 +51,7 @@ public @interface HttpAccess {
 	 *         control. Leaving blank allows any configured
 	 *         {@link HttpSecurity}.
 	 */
-	String withQualifier() default "";
+	String withHttpSecurity() default "";
 
 	/**
 	 * Provides means to allow access if have role in any one of the configured

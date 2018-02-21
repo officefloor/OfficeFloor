@@ -213,22 +213,20 @@ public abstract interface WebArchitect {
 	boolean isPathParameters(String path);
 
 	/**
-	 * Links an application path to an {@link OfficeSectionInput}. This will
+	 * Creates a {@link HttpUrlContinuation} into the web application. This will
 	 * always be a {@link HttpMethod#GET} due to redirection required for the
 	 * {@link HttpUrlContinuation}.
 	 * 
 	 * @param isSecure
 	 *            Indicates if secure connection required.
 	 * @param applicationPath
-	 *            URL path of the application to be linked.
-	 * @param flowSinkNode
-	 *            {@link OfficeFlowSinkNode} servicing the application path.
+	 *            Application path to be linked.
 	 * @return {@link HttpUrlContinuation}.
 	 */
-	HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeFlowSinkNode flowSinkNode);
+	HttpUrlContinuation getHttpInput(boolean isSecure, String applicationPath);
 
 	/**
-	 * Links an application path to an {@link OfficeSectionInput}.
+	 * Creates a {@link HttpInput} into the application.
 	 * 
 	 * @param isSecure
 	 *            Indicates if secure connection required.
@@ -236,11 +234,9 @@ public abstract interface WebArchitect {
 	 *            {@link HttpMethod}.
 	 * @param applicationPath
 	 *            URL path of the application to be linked.
-	 * @param flowSinkNode
-	 *            {@link OfficeFlowSinkNode} servicing the application path.
 	 * @return {@link HttpInput}.
 	 */
-	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, OfficeFlowSinkNode flowSinkNode);
+	HttpInput getHttpInput(boolean isSecure, HttpMethod httpMethod, String applicationPath);
 
 	/**
 	 * <p>

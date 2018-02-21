@@ -90,6 +90,11 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		private final CompileOfficeContext officeContext;
 
 		/**
+		 * {@link OfficeArchitect}.
+		 */
+		private final OfficeArchitect officeArchitect;
+
+		/**
 		 * {@link WebArchitect}.
 		 */
 		private final WebArchitect webArchitect;
@@ -102,9 +107,10 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		 */
 		public CompileWebContextImpl(CompileOfficeContext officeContext) {
 			this.officeContext = officeContext;
+			this.officeArchitect = this.officeContext.getOfficeArchitect();
 
 			// Always employ the web architect
-			this.webArchitect = WebArchitectEmployer.employWebArchitect(this.officeContext.getOfficeArchitect(),
+			this.webArchitect = WebArchitectEmployer.employWebArchitect(this.officeArchitect,
 					WebCompileOfficeFloor.this.contextPath);
 		}
 
@@ -160,8 +166,9 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 			OfficeSection section = this.addSection(httpMethod.getName() + "_" + applicationPath, sectionClass);
 
 			// Create the link to the section service method
-			return this.webArchitect.link(isSecure, httpMethod, applicationPath,
-					section.getOfficeSectionInput("service"));
+			HttpInput input = this.webArchitect.getHttpInput(isSecure, httpMethod, applicationPath);
+			this.officeArchitect.link(input.getInput(), section.getOfficeSectionInput("service"));
+			return input;
 		}
 
 		@Override
@@ -171,7 +178,9 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 			OfficeSection section = this.addSection("GET_" + applicationPath, sectionClass);
 
 			// Return the link to the section service method
-			return this.webArchitect.link(isSecure, applicationPath, section.getOfficeSectionInput("service"));
+			HttpUrlContinuation continuation = this.webArchitect.getHttpInput(isSecure, applicationPath);
+			this.officeArchitect.link(continuation.getInput(), section.getOfficeSectionInput("service"));
+			return continuation;
 		}
 	}
 

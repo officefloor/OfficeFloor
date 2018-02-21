@@ -38,7 +38,6 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
@@ -278,7 +277,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 		// Determine if already registered
 		bindName = getBindName(objectClass, bindName);
-		OfficeManagedObject object = this.httpSessionObjects.get(objectClass);
+		OfficeManagedObject object = this.httpSessionObjects.get(bindName);
 		if (object != null) {
 			return object; // return the already registered object
 		}
@@ -378,16 +377,15 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpUrlContinuation link(boolean isSecure, String applicationPath, OfficeFlowSinkNode flowSinkNode) {
-		HttpUrlContinuationImpl continuation = new HttpUrlContinuationImpl(isSecure, applicationPath, flowSinkNode);
+	public HttpUrlContinuation getHttpInput(boolean isSecure, String applicationPath) {
+		HttpUrlContinuationImpl continuation = new HttpUrlContinuationImpl(isSecure, applicationPath);
 		this.inputs.add(continuation);
 		return continuation;
 	}
 
 	@Override
-	public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath,
-			OfficeFlowSinkNode flowSinkNode) {
-		HttpInputImpl input = new HttpInputImpl(isSecure, httpMethod, applicationPath, flowSinkNode);
+	public HttpInput getHttpInput(boolean isSecure, HttpMethod httpMethod, String applicationPath) {
+		HttpInputImpl input = new HttpInputImpl(isSecure, httpMethod, applicationPath);
 		this.inputs.add(input);
 		return input;
 	}
@@ -467,15 +465,6 @@ public class WebArchitectEmployer implements WebArchitect {
 			// Link interception back to routing
 			OfficeSectionInput routingInput = this.routingSection.getOfficeSectionInput(interception.getInputName());
 			this.officeArchitect.link(interceptionOutput, routingInput);
-		}
-
-		// Configure the routing
-		for (HttpInputImpl input : this.inputs) {
-
-			// Link route output to handling section input
-			OfficeSectionOutput routeOutput = this.routingSection
-					.getOfficeSectionOutput(input.routeInput.getOutputName());
-			this.officeArchitect.link(routeOutput, input.flowSinkNode);
 		}
 
 		// Load in-line configured dependencies
@@ -640,14 +629,15 @@ public class WebArchitectEmployer implements WebArchitect {
 		protected final String applicationPath;
 
 		/**
-		 * Handling {@link OfficeFlowSinkNode}.
-		 */
-		private final OfficeFlowSinkNode flowSinkNode;
-
-		/**
 		 * {@link RouteInput}
 		 */
 		protected final RouteInput routeInput;
+
+		/**
+		 * {@link OfficeFlowSourceNode} to configure handling of this
+		 * {@link HttpInput}.
+		 */
+		private final OfficeFlowSourceNode input;
 
 		/**
 		 * Instantiate.
@@ -658,16 +648,14 @@ public class WebArchitectEmployer implements WebArchitect {
 		 *            {@link HttpMethod}.
 		 * @param applicationPath
 		 *            Application path.
-		 * @param flowSinkNode
-		 *            Handling {@link OfficeFlowSinkNode}.
 		 */
-		private HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath,
-				OfficeFlowSinkNode flowSinkNode) {
+		private HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath) {
 			this.isSecure = isSecure;
 			this.method = method;
 			this.applicationPath = applicationPath;
-			this.flowSinkNode = flowSinkNode;
 			this.routeInput = WebArchitectEmployer.this.routing.addRoute(isSecure, this.method, this.applicationPath);
+			this.input = WebArchitectEmployer.this.routingSection
+					.getOfficeSectionOutput(this.routeInput.getOutputName());
 		}
 
 		/*
@@ -679,6 +667,10 @@ public class WebArchitectEmployer implements WebArchitect {
 			return this.routeInput.getHttpInputPath();
 		}
 
+		@Override
+		public OfficeFlowSourceNode getInput() {
+			return this.input;
+		}
 	}
 
 	/**
@@ -699,11 +691,9 @@ public class WebArchitectEmployer implements WebArchitect {
 		 *            Indicates if secure.
 		 * @param applicationPath
 		 *            Application path.
-		 * @param flowSinkNode
-		 *            Handling {@link OfficeFlowSinkNode}.
 		 */
-		private HttpUrlContinuationImpl(boolean isSecure, String applicationPath, OfficeFlowSinkNode flowSinkNode) {
-			super(isSecure, HttpMethod.GET, applicationPath, flowSinkNode);
+		private HttpUrlContinuationImpl(boolean isSecure, String applicationPath) {
+			super(isSecure, HttpMethod.GET, applicationPath);
 		}
 
 		/*
