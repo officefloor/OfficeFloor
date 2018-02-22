@@ -29,14 +29,27 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Enable able to remove the {@link WoofHttpContinuationModel}.
 	 */
-	public void testRemoveApplicationPath() {
+	public void testRemoveHttpContinuation() {
 
-		// Obtain the application path
-		WoofHttpContinuationModel applicationPath = this.model.getWoofApplicationPaths().get(0);
+		// Obtain the HTTP Continuation
+		WoofHttpContinuationModel continuation = this.model.getWoofHttpContinuations().get(0);
 
-		// Remove the application path
-		Change<WoofHttpContinuationModel> change = this.operations.removeApplicationPath(applicationPath);
-		this.assertChange(change, applicationPath, "Remove application path /applicationPath", true);
+		// Remove the HTTP Continuation
+		Change<WoofHttpContinuationModel> change = this.operations.removeHttpContinuation(continuation);
+		this.assertChange(change, continuation, "Remove HTTP continuation /applicationPath", true);
+	}
+
+	/**
+	 * Enable able to remove the {@link WoofHttpInputModel}.
+	 */
+	public void testRemoveHttpInput() {
+
+		// Obtain the HTTP Input
+		WoofHttpInputModel httpInput = this.model.getWoofHttpInputs().get(0);
+
+		// Remove the HTTP Input
+		Change<WoofHttpInputModel> change = this.operations.removeHttpInput(httpInput);
+		this.assertChange(change, httpInput, "Remove HTTP input /applicationPath", true);
 	}
 
 	/**

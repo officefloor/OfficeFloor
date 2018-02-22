@@ -36,35 +36,6 @@ import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel;
 
 /**
  * Changes that can be made to a {@link WoofModel}.
@@ -90,22 +61,41 @@ public interface WoofChanges {
 	 * @param isSecure
 	 *            <code>true</code> to require a secure
 	 *            {@link ServerHttpConnection}.
-	 * @param serviceHttpMethods
-	 *            Names of the {@link HttpMethod} instances for this
-	 *            {@link WoofHttpContinuationModel}.
 	 * @return {@link Change} to add a {@link WoofHttpContinuationModel}.
 	 */
-	Change<WoofHttpContinuationModel> addApplicationPath(String applicationPath, boolean isSecure,
-			String[] serviceHttpMethods);
+	Change<WoofHttpContinuationModel> addHttpContinuation(String applicationPath, boolean isSecure);
 
 	/**
 	 * Removes a {@link WoofHttpContinuationModel}.
 	 * 
-	 * @param applicationPath
+	 * @param httpContinuation
 	 *            {@link WoofHttpContinuationModel} to remove.
 	 * @return {@link Change} to remove the {@link WoofHttpContinuationModel}.
 	 */
-	Change<WoofHttpContinuationModel> removeApplicationPath(WoofHttpContinuationModel applicationPath);
+	Change<WoofHttpContinuationModel> removeHttpContinuation(WoofHttpContinuationModel httpContinuation);
+
+	/**
+	 * Adds a {@link WoofHttpInputModel}.
+	 * 
+	 * @param applicationPath
+	 *            Application path to the {@link WoofHttpInputModel}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
+	 * @param isSecure
+	 *            <code>true</code> to require a secure
+	 *            {@link ServerHttpConnection}.
+	 * @return {@link Change} to add a {@link WoofHttpInputModel}.
+	 */
+	Change<WoofHttpInputModel> addHttpInput(String applicationPath, String httpMethodName, boolean isSecure);
+
+	/**
+	 * Removes a {@link WoofHttpInputModel}.
+	 * 
+	 * @param httpInput
+	 *            {@link WoofHttpInputModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofHttpContinuationModel}.
+	 */
+	Change<WoofHttpInputModel> removeHttpInput(WoofHttpInputModel httpInput);
 
 	/**
 	 * Adds a {@link WoofTemplateModel}.
@@ -777,7 +767,7 @@ public interface WoofChanges {
 	 *            {@link WoofHttpContinuationModel}.
 	 * @return {@link Change} to make the link.
 	 */
-	Change<WoofExceptionToWoofHttpContinuationModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
+	Change<WoofExceptionToWoofHttpContinuationModel> linkExceptionToHttpContinuation(WoofExceptionModel exception,
 			WoofHttpContinuationModel applicationPath);
 
 	/**
@@ -787,7 +777,7 @@ public interface WoofChanges {
 	 *            {@link WoofExceptionToWoofHttpContinuationModel}.
 	 * @return {@link Change} to remove the link.
 	 */
-	Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToApplicationPath(
+	Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToHttpContinuation(
 			WoofExceptionToWoofHttpContinuationModel link);
 
 	/**

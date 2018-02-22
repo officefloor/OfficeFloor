@@ -13,16 +13,15 @@
 	</http-continuations>
 
 	<http-inputs>
-		<http-input path="/pathC" method="POST" secure="true">
-			<alias path="/pathAliasA" secure="true" />
-			<alias path="/pathAliasB" secure="false" />
-			<section name="SECTION_A" input="INPUT_A" />
-			<template path="/templateB" />
-			<security name="SECURITY_A" />
-			<resource path="/resourceA.html" />
-			<redirect path="/pathB" />
+		<http-input path="/pathC" method="POST" secure="true" x="200"
+			y="201">
+			<section name="SECTION_B" input="INPUT_0" />
+			<template path="/templateA" />
+			<security name="SECURITY_B" />
+			<resource path="/resourceB.png" />
+			<redirect path="/pathA" />
 		</http-input>
-		<http-input path="/pathD" method="PUT" />
+		<http-input path="/pathD" method="PUT" x="210" y="211" />
 	</http-inputs>
 
 	<templates>

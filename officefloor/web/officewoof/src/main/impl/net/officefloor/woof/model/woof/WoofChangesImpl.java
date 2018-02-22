@@ -504,8 +504,8 @@ public class WoofChangesImpl implements WoofChanges {
 	/**
 	 * Sorts the {@link WoofHttpContinuationModel} instances.
 	 */
-	private void sortApplicationPaths() {
-		sortModelList(this.model.getWoofApplicationPaths(), (model) -> model.getApplicationPath());
+	private void sortHttpContinuations() {
+		sortModelList(this.model.getWoofHttpContinuations(), (model) -> model.getApplicationPath());
 	}
 
 	/**
@@ -631,54 +631,45 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofHttpContinuationModel> addApplicationPath(String applicationPath, boolean isSecure,
-			String[] serviceHttpMethods) {
+	public Change<WoofHttpContinuationModel> addHttpContinuation(String applicationPath, boolean isSecure) {
 
 		// Create the application path
-		final WoofHttpContinuationModel path = new WoofHttpContinuationModel(applicationPath, isSecure);
+		final WoofHttpContinuationModel path = new WoofHttpContinuationModel(isSecure, applicationPath);
 
-		// Determine if have service HTTP methods
-		if (serviceHttpMethods != null) {
-			// Add the service HTTP methods
-			for (String serverHttpMethod : serviceHttpMethods) {
-				path.addHttpMethod(new WoofApplicationPathHttpMethodModel(serverHttpMethod));
-			}
-		}
-
-		// Return change to add application path
-		return new AbstractChange<WoofHttpContinuationModel>(path, "Add Application Path") {
+		// Return change to add HTTP continuation
+		return new AbstractChange<WoofHttpContinuationModel>(path, "Add HTTP Continuation") {
 			@Override
 			public void apply() {
-				WoofChangesImpl.this.model.addWoofApplicationPath(path);
-				WoofChangesImpl.this.sortApplicationPaths();
+				WoofChangesImpl.this.model.addWoofHttpContinuation(path);
+				WoofChangesImpl.this.sortHttpContinuations();
 			}
 
 			@Override
 			public void revert() {
-				WoofChangesImpl.this.model.removeWoofApplicationPath(path);
+				WoofChangesImpl.this.model.removeWoofHttpContinuation(path);
 			}
 		};
 	}
 
 	@Override
-	public Change<WoofHttpContinuationModel> removeApplicationPath(WoofHttpContinuationModel applicationPath) {
+	public Change<WoofHttpContinuationModel> removeHttpContinuation(WoofHttpContinuationModel httpContinuation) {
 
-		// Ensure application path available to remove
+		// Ensure HTTP continuation available to remove
 		boolean isInModel = false;
-		for (WoofHttpContinuationModel model : this.model.getWoofApplicationPaths()) {
-			if (model == applicationPath) {
+		for (WoofHttpContinuationModel model : this.model.getWoofHttpContinuations()) {
+			if (model == httpContinuation) {
 				isInModel = true;
 			}
 		}
 		if (!isInModel) {
 			// Application path model not in model
-			return new NoChange<WoofHttpContinuationModel>(applicationPath,
-					"Remove application path " + applicationPath.getApplicationPath(), " is not in WoOF model");
+			return new NoChange<WoofHttpContinuationModel>(httpContinuation,
+					"Remove HTTP continuation " + httpContinuation.getApplicationPath(), " is not in WoOF model");
 		}
 
 		// Return change to remove application path
-		return new AbstractChange<WoofHttpContinuationModel>(applicationPath,
-				"Remove application path " + applicationPath.getApplicationPath()) {
+		return new AbstractChange<WoofHttpContinuationModel>(httpContinuation,
+				"Remove HTTP continuation" + httpContinuation.getApplicationPath()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -690,30 +681,42 @@ public class WoofChangesImpl implements WoofChanges {
 
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-				removeConnections(applicationPath.getWoofSectionOutputs(), list);
-				removeConnections(applicationPath.getWoofTemplateOutputs(), list);
-				removeConnections(applicationPath.getWoofSecurityOutputs(), list);
-				removeConnections(applicationPath.getWoofExceptions(), list);
-				removeConnections(applicationPath.getWoofRedirects(), list);
-				removeConnection(applicationPath.getWoofSectionInput(), list);
-				removeConnection(applicationPath.getWoofTemplate(), list);
-				removeConnection(applicationPath.getWoofSecurity(), list);
-				removeConnection(applicationPath.getWoofResource(), list);
-				removeConnection(applicationPath.getWoofApplicationPath(), list);
+				removeConnections(httpContinuation.getWoofSectionOutputs(), list);
+				removeConnections(httpContinuation.getWoofTemplateOutputs(), list);
+				removeConnections(httpContinuation.getWoofSecurityOutputs(), list);
+				removeConnections(httpContinuation.getWoofExceptions(), list);
+				removeConnections(httpContinuation.getWoofRedirects(), list);
+				removeConnection(httpContinuation.getWoofSectionInput(), list);
+				removeConnection(httpContinuation.getWoofTemplate(), list);
+				removeConnection(httpContinuation.getWoofSecurity(), list);
+				removeConnection(httpContinuation.getWoofResource(), list);
+				removeConnection(httpContinuation.getWoofHttpContinuation(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
-				// Remove the application path
-				WoofChangesImpl.this.model.removeWoofApplicationPath(applicationPath);
+				// Remove the HTTP continuation
+				WoofChangesImpl.this.model.removeWoofHttpContinuation(httpContinuation);
 			}
 
 			@Override
 			public void revert() {
-				// Add back the application path
-				WoofChangesImpl.this.model.addWoofApplicationPath(applicationPath);
+				// Add back the HTTP continuation
+				WoofChangesImpl.this.model.addWoofHttpContinuation(httpContinuation);
 				reconnectConnections(this.connections);
-				WoofChangesImpl.this.sortApplicationPaths();
+				WoofChangesImpl.this.sortHttpContinuations();
 			}
 		};
+	}
+
+	@Override
+	public Change<WoofHttpInputModel> addHttpInput(String applicationPath, String httpMethodName, boolean isSecure) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputModel> removeHttpInput(WoofHttpInputModel httpInput) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -1112,13 +1115,13 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(template.getWoofSectionOutputs(), list);
 				removeConnections(template.getWoofSecurityOutputs(), list);
 				removeConnections(template.getWoofExceptions(), list);
-				removeConnections(template.getWoofApplicationPaths(), list);
+				removeConnections(template.getWoofHttpContinuations(), list);
 				for (WoofTemplateOutputModel output : template.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
-					removeConnection(output.getWoofApplicationPath(), list);
+					removeConnection(output.getWoofHttpContinuation(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -1562,7 +1565,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnections(input.getWoofSectionOutputs(), list);
 					removeConnections(input.getWoofSecurityOutputs(), list);
 					removeConnections(input.getWoofExceptions(), list);
-					removeConnections(input.getWoofApplicationPaths(), list);
+					removeConnections(input.getWoofHttpContinuations(), list);
 					removeConnections(input.getWoofStarts(), list);
 				}
 				for (WoofSectionOutputModel output : section.getOutputs()) {
@@ -1570,7 +1573,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
-					removeConnection(output.getWoofApplicationPath(), list);
+					removeConnection(output.getWoofHttpContinuation(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -1863,13 +1866,13 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(security.getWoofTemplateOutputs(), list);
 				removeConnections(security.getWoofSecurityOutputs(), list);
 				removeConnections(security.getWoofExceptions(), list);
-				removeConnections(security.getWoofApplicationPaths(), list);
+				removeConnections(security.getWoofHttpContinuations(), list);
 				for (WoofSecurityOutputModel output : security.getOutputs()) {
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
-					removeConnection(output.getWoofApplicationPath(), list);
+					removeConnection(output.getWoofHttpContinuation(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -2176,7 +2179,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(resource.getWoofSectionOutputs(), list);
 				removeConnections(resource.getWoofSecurityOutputs(), list);
 				removeConnections(resource.getWoofExceptions(), list);
-				removeConnections(resource.getWoofApplicationPaths(), list);
+				removeConnections(resource.getWoofHttpContinuations(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the resource
@@ -2317,7 +2320,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnection(exception.getWoofTemplate(), list);
 				removeConnection(exception.getWoofSecurity(), list);
 				removeConnection(exception.getWoofResource(), list);
-				removeConnection(exception.getWoofApplicationPath(), list);
+				removeConnection(exception.getWoofHttpContinuation(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the exception
@@ -2722,8 +2725,8 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofHttpContinuationModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
-			WoofHttpContinuationModel applicationPath) {
+	public Change<WoofExceptionToWoofHttpContinuationModel> linkExceptionToHttpContinuation(
+			WoofExceptionModel exception, WoofHttpContinuationModel applicationPath) {
 
 		// Create the connection
 		final WoofExceptionToWoofHttpContinuationModel connection = new WoofExceptionToWoofHttpContinuationModel(
@@ -2738,13 +2741,13 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
-				list.add(source.getWoofApplicationPath());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToApplicationPath(
+	public Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToHttpContinuation(
 			WoofExceptionToWoofHttpContinuationModel link) {
 		return new RemoveLinkChange<WoofExceptionToWoofHttpContinuationModel>(link,
 				"Remove Exception to Application Path");
@@ -2767,7 +2770,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
-				list.add(source.getWoofApplicationPath());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2802,7 +2805,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
-				list.add(source.getWoofApplicationPath());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2830,7 +2833,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
-				list.add(source.getWoofApplicationPath());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2857,7 +2860,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
-				list.add(source.getWoofApplicationPath());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}

@@ -29,20 +29,8 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.type.HttpSecurityType;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofTemplateExtension;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionImpl;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionPropertyImpl;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests adding to a {@link WoofModel}.
@@ -54,37 +42,35 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure able to add {@link WoofHttpContinuationModel}.
 	 */
-	public void testAddApplicationPath() {
+	public void testAddHttpContinuation() {
 
-		// Add the application path
-		Change<WoofHttpContinuationModel> change = this.operations.addApplicationPath("/path", false, null);
+		// Add the HTTP continuation
+		Change<WoofHttpContinuationModel> change = this.operations.addHttpContinuation("/path", false);
 
-		// Validate the chnage
-		this.assertChange(change, null, "Add Application Path", true);
+		// Validate the change
+		this.assertChange(change, null, "Add HTTP Continuation", true);
 
-		// Enusre appropriately added template
+		// Ensure appropriately added
 		change.apply();
-		WoofHttpContinuationModel applicationPath = this.model.getWoofApplicationPaths().get(0);
-		assertSame("Incorrect application path", applicationPath, change.getTarget());
+		WoofHttpContinuationModel continuation = this.model.getWoofHttpContinuations().get(0);
+		assertSame("Incorrect HTTP continuation", continuation, change.getTarget());
 	}
 
 	/**
-	 * Ensure able to add {@link WoofHttpContinuationModel} with service
-	 * {@link HttpMethod} instances.
+	 * Ensure able to add {@link WoofHttpInputModel}.
 	 */
-	public void testAddApplicationPathWithServiceHttpMethods() {
+	public void testAddHttpInput() {
 
-		// Add the application path
-		Change<WoofHttpContinuationModel> change = this.operations.addApplicationPath("/path", true,
-				new String[] { "POST", "GET", "PUT" });
+		// Add the HTTP input
+		Change<WoofHttpInputModel> change = this.operations.addHttpInput("/path", "POST", false);
 
-		// Validate the chnage
-		this.assertChange(change, null, "Add Application Path", true);
+		// Validate the change
+		this.assertChange(change, null, "Add HTTP Input", true);
 
-		// Enusre appropriately added template
+		// Ensure appropriately added
 		change.apply();
-		WoofHttpContinuationModel applicationPath = this.model.getWoofApplicationPaths().get(0);
-		assertSame("Incorrect application path", applicationPath, change.getTarget());
+		WoofHttpInputModel httpInput = this.model.getWoofHttpInputs().get(0);
+		assertSame("Incorrect HTTP input", httpInput, change.getTarget());
 	}
 
 	/**

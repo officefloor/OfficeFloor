@@ -60,10 +60,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 		// Load the WoOF from the configuration
 		this.modelRepository.retrieve(woof, configuration);
 
-		// Create the set of application paths
-		Map<String, WoofHttpContinuationModel> applicationPaths = new HashMap<>();
-		for (WoofHttpContinuationModel applicationPath : woof.getWoofApplicationPaths()) {
-			applicationPaths.put(applicationPath.getApplicationPath(), applicationPath);
+		// Create the set of HTTP continuations
+		Map<String, WoofHttpContinuationModel> httpContinuations = new HashMap<>();
+		for (WoofHttpContinuationModel httpContinuation : woof.getWoofHttpContinuations()) {
+			httpContinuations.put(httpContinuation.getApplicationPath(), httpContinuation);
 		}
 
 		// Create the set of Section Inputs
@@ -92,42 +92,42 @@ public class WoofRepositoryImpl implements WoofRepository {
 			resources.put(resource.getResourcePath(), resource);
 		}
 
-		// Connect Application Paths
-		for (WoofHttpContinuationModel applicationPath : woof.getWoofApplicationPaths()) {
-			Connector<WoofHttpContinuationModel> connector = new Connector<>(applicationPath);
+		// Connect HTTP Continuations
+		for (WoofHttpContinuationModel httpContinuation : woof.getWoofHttpContinuations()) {
+			Connector<WoofHttpContinuationModel> connector = new Connector<>(httpContinuation);
 
 			// Section Inputs
-			connector.connect(applicationPath.getWoofSectionInput(),
+			connector.connect(httpContinuation.getWoofSectionInput(),
 					(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()), (conn, source, target) -> {
-						conn.setWoofApplicationPath(source);
+						conn.setWoofHttpContinuation(source);
 						conn.setWoofSectionInput(target);
 					});
 
 			// Templates
-			connector.connect(applicationPath.getWoofTemplate(), (conn) -> templates.get(conn.getApplicationPath()),
+			connector.connect(httpContinuation.getWoofTemplate(), (conn) -> templates.get(conn.getApplicationPath()),
 					(conn, source, target) -> {
-						conn.setWoofApplicationPath(source);
+						conn.setWoofHttpContinuation(source);
 						conn.setWoofTemplate(target);
 					});
 
 			// Resources
-			connector.connect(applicationPath.getWoofResource(), (conn) -> resources.get(conn.getResourcePath()),
+			connector.connect(httpContinuation.getWoofResource(), (conn) -> resources.get(conn.getResourcePath()),
 					(conn, source, target) -> {
-						conn.setWoofApplicationPath(source);
+						conn.setWoofHttpContinuation(source);
 						conn.setWoofResource(target);
 					});
 
 			// Securities
-			connector.connect(applicationPath.getWoofSecurity(), (conn) -> securities.get(conn.getHttpSecurityName()),
+			connector.connect(httpContinuation.getWoofSecurity(), (conn) -> securities.get(conn.getHttpSecurityName()),
 					(conn, source, target) -> {
-						conn.setWoofApplicationPath(source);
+						conn.setWoofHttpContinuation(source);
 						conn.setWoofSecurity(target);
 					});
 
 			// Redirects
-			connector.connect(applicationPath.getWoofApplicationPath(),
-					(conn) -> applicationPaths.get(conn.getApplicationPath()), (conn, source, target) -> {
-						conn.setWoofApplicationPath(source);
+			connector.connect(httpContinuation.getWoofHttpContinuation(),
+					(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
+						conn.setWoofHttpContinuation(source);
 						conn.setWoofRedirect(target);
 					});
 		}
@@ -177,10 +177,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 						});
 
 				// Redirects
-				outputConnector.connect(templateOutput.getWoofApplicationPath(),
-						(conn) -> applicationPaths.get(conn.getApplicationPath()), (conn, source, target) -> {
+				outputConnector.connect(templateOutput.getWoofHttpContinuation(),
+						(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 							conn.setWoofTemplateOutput(source);
-							conn.setWoofApplicationPath(target);
+							conn.setWoofHttpContinuation(target);
 						});
 			}
 		}
@@ -220,10 +220,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 						});
 
 				// Redirects
-				connector.connect(sectionOutput.getWoofApplicationPath(),
-						(conn) -> applicationPaths.get(conn.getApplicationPath()), (conn, source, target) -> {
+				connector.connect(sectionOutput.getWoofHttpContinuation(),
+						(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 							conn.setWoofSectionOutput(source);
-							conn.setWoofApplicationPath(target);
+							conn.setWoofHttpContinuation(target);
 						});
 			}
 		}
@@ -263,10 +263,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 						});
 
 				// Redirects
-				connector.connect(securityOutput.getWoofApplicationPath(),
-						(conn) -> applicationPaths.get(conn.getApplicationPath()), (conn, source, target) -> {
+				connector.connect(securityOutput.getWoofHttpContinuation(),
+						(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 							conn.setWoofSecurityOutput(source);
-							conn.setWoofApplicationPath(target);
+							conn.setWoofHttpContinuation(target);
 						});
 			}
 		}
@@ -304,10 +304,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 					});
 
 			// Redirects
-			connector.connect(exception.getWoofApplicationPath(),
-					(conn) -> applicationPaths.get(conn.getApplicationPath()), (conn, source, target) -> {
+			connector.connect(exception.getWoofHttpContinuation(),
+					(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 						conn.setWoofException(source);
-						conn.setWoofApplicationPath(target);
+						conn.setWoofHttpContinuation(target);
 					});
 		}
 
@@ -388,32 +388,32 @@ public class WoofRepositoryImpl implements WoofRepository {
 	@Override
 	public void storeWoof(WoofModel woof, WritableConfigurationItem configuration) throws Exception {
 
-		// Specify application paths
-		for (WoofHttpContinuationModel applicationPath : woof.getWoofApplicationPaths()) {
+		// Specify HTTP continuations
+		for (WoofHttpContinuationModel httpContinuation : woof.getWoofHttpContinuations()) {
 
 			// Specify section outputs
-			for (WoofSectionOutputToWoofHttpContinuationModel conn : applicationPath.getWoofSectionOutputs()) {
-				conn.setApplicationPath(applicationPath.getApplicationPath());
+			for (WoofSectionOutputToWoofHttpContinuationModel conn : httpContinuation.getWoofSectionOutputs()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 
 			// Specify template outputs
-			for (WoofTemplateOutputToWoofHttpContinuationModel conn : applicationPath.getWoofTemplateOutputs()) {
-				conn.setApplicationPath(applicationPath.getApplicationPath());
+			for (WoofTemplateOutputToWoofHttpContinuationModel conn : httpContinuation.getWoofTemplateOutputs()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 
 			// Specify security outputs
-			for (WoofSecurityOutputToWoofHttpContinuationModel conn : applicationPath.getWoofSecurityOutputs()) {
-				conn.setApplicationPath(applicationPath.getApplicationPath());
+			for (WoofSecurityOutputToWoofHttpContinuationModel conn : httpContinuation.getWoofSecurityOutputs()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 
 			// Specify exceptions
-			for (WoofExceptionToWoofHttpContinuationModel conn : applicationPath.getWoofExceptions()) {
-				conn.setApplicationPath(applicationPath.getApplicationPath());
+			for (WoofExceptionToWoofHttpContinuationModel conn : httpContinuation.getWoofExceptions()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 
 			// Specify redirects
-			for (WoofHttpContinuationToWoofHttpContinuationModel conn : applicationPath.getWoofRedirects()) {
-				conn.setApplicationPath(applicationPath.getApplicationPath());
+			for (WoofHttpContinuationToWoofHttpContinuationModel conn : httpContinuation.getWoofRedirects()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 		}
 
@@ -445,8 +445,8 @@ public class WoofRepositoryImpl implements WoofRepository {
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
-				// Specify application paths
-				for (WoofHttpContinuationToWoofSectionInputModel conn : input.getWoofApplicationPaths()) {
+				// Specify HTTP continuation
+				for (WoofHttpContinuationToWoofSectionInputModel conn : input.getWoofHttpContinuations()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
@@ -487,8 +487,8 @@ public class WoofRepositoryImpl implements WoofRepository {
 				conn.setApplicationPath(template.getApplicationPath());
 			}
 
-			// Specify application paths
-			for (WoofHttpContinuationToWoofTemplateModel conn : template.getWoofApplicationPaths()) {
+			// Specify HTTP continuations
+			for (WoofHttpContinuationToWoofTemplateModel conn : template.getWoofHttpContinuations()) {
 				conn.setApplicationPath(template.getApplicationPath());
 			}
 		}
@@ -516,8 +516,8 @@ public class WoofRepositoryImpl implements WoofRepository {
 				conn.setHttpSecurityName(security.getHttpSecurityName());
 			}
 
-			// Specify application paths
-			for (WoofHttpContinuationToWoofSecurityModel conn : security.getWoofApplicationPaths()) {
+			// Specify HTTP continuations
+			for (WoofHttpContinuationToWoofSecurityModel conn : security.getWoofHttpContinuations()) {
 				conn.setHttpSecurityName(security.getHttpSecurityName());
 			}
 		}
@@ -545,8 +545,8 @@ public class WoofRepositoryImpl implements WoofRepository {
 				conn.setResourcePath(resource.getResourcePath());
 			}
 
-			// Specify application paths
-			for (WoofHttpContinuationToWoofResourceModel conn : resource.getWoofApplicationPaths()) {
+			// Specify HTTP continuations
+			for (WoofHttpContinuationToWoofResourceModel conn : resource.getWoofHttpContinuations()) {
 				conn.setResourcePath(resource.getResourcePath());
 			}
 		}

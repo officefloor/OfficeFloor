@@ -90,13 +90,16 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the HTTP continuations
 		// ----------------------------------------
-		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofHttpContinuations(),
-				new WoofHttpContinuationModel(true, "/pathA"), new WoofHttpContinuationModel(false, "/pathB"));
+		assertList(new String[] { "getApplicationPath", "getIsSecure", "getX", "getY" },
+				woof.getWoofHttpContinuations(), new WoofHttpContinuationModel(true, "/pathA"),
+				new WoofHttpContinuationModel(false, "/pathB"));
 		WoofHttpContinuationModel continuation = woof.getWoofHttpContinuations().get(0);
 		assertProperties(new WoofHttpContinuationToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				continuation.getWoofSectionInput(), "getSectionName", "getInputName");
 		assertProperties(new WoofHttpContinuationToWoofTemplateModel("/templateB"), continuation.getWoofTemplate(),
 				"getApplicationPath");
+		assertProperties(new WoofHttpContinuationToWoofSecurityModel("SECURITY_A"), continuation.getWoofSecurity(),
+				"getHttpSecurityName");
 		assertProperties(new WoofHttpContinuationToWoofResourceModel("/resourceA.html"), continuation.getWoofResource(),
 				"getResourcePath");
 		assertProperties(new WoofHttpContinuationToWoofHttpContinuationModel("/pathB"),
@@ -105,9 +108,20 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the HTTP inputs
 		// ----------------------------------------
-		assertList(new String[] { "getApplicationPath", "getIsSecure", "getHttpMethodName" }, woof.getWoofHttpInputs(),
-				new WoofHttpInputModel(isSecure, httpMethod, applicationPath, woofSectionInput, woofTemplate,
-						woofResource, woofSecurity, woofHttpContinuation, x, y));
+		assertList(new String[] { "getApplicationPath", "getIsSecure", "getHttpMethodName", "getX", "getY" },
+				woof.getWoofHttpInputs(), new WoofHttpInputModel(true, "POST", "/pathC", 200, 201),
+				new WoofHttpInputModel(false, "PUT", "/pathD", 210, 211));
+		WoofHttpInputModel httpInput = woof.getWoofHttpInputs().get(0);
+		assertProperties(new WoofHttpInputToWoofSectionInputModel("SECTION_B", "INPUT_0"),
+				httpInput.getWoofSectionInput(), "getSectionName", "getInputName");
+		assertProperties(new WoofHttpInputToWoofTemplateModel("/templateA"), httpInput.getWoofTemplate(),
+				"getApplictaionPath");
+		assertProperties(new WoofHttpInputToWoofSecurityModel("SECURITY_B"), httpInput.getWoofSecurity(),
+				"getHttpSecurityName");
+		assertProperties(new WoofHttpInputToWoofResourceModel("/resourceB.png"), httpInput.getWoofResource(),
+				"getResourcePath");
+		assertProperties(new WoofHttpInputToWoofHttpContinuationModel("/pathD"), httpInput.getWoofHttpContinuation(),
+				"getApplicationPath");
 
 		// ----------------------------------------
 		// Validate the templates
