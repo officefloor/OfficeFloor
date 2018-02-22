@@ -83,29 +83,29 @@ public interface WoofChanges {
 	Map<String, WoofTemplateInheritance> getWoofTemplateInheritances();
 
 	/**
-	 * Adds a {@link WoofApplicationPathModel}.
+	 * Adds a {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param applicationPath
-	 *            URI to the {@link WoofApplicationPathModel}.
+	 *            URI to the {@link WoofHttpContinuationModel}.
 	 * @param isSecure
 	 *            <code>true</code> to require a secure
 	 *            {@link ServerHttpConnection}.
 	 * @param serviceHttpMethods
 	 *            Names of the {@link HttpMethod} instances for this
-	 *            {@link WoofApplicationPathModel}.
-	 * @return {@link Change} to add a {@link WoofApplicationPathModel}.
+	 *            {@link WoofHttpContinuationModel}.
+	 * @return {@link Change} to add a {@link WoofHttpContinuationModel}.
 	 */
-	Change<WoofApplicationPathModel> addApplicationPath(String applicationPath, boolean isSecure,
+	Change<WoofHttpContinuationModel> addApplicationPath(String applicationPath, boolean isSecure,
 			String[] serviceHttpMethods);
 
 	/**
-	 * Removes a {@link WoofApplicationPathModel}.
+	 * Removes a {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param applicationPath
-	 *            {@link WoofApplicationPathModel} to remove.
-	 * @return {@link Change} to remove the {@link WoofApplicationPathModel}.
+	 *            {@link WoofHttpContinuationModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofHttpContinuationModel}.
 	 */
-	Change<WoofApplicationPathModel> removeApplicationPath(WoofApplicationPathModel applicationPath);
+	Change<WoofHttpContinuationModel> removeApplicationPath(WoofHttpContinuationModel applicationPath);
 
 	/**
 	 * Adds a {@link WoofTemplateModel}.
@@ -769,26 +769,26 @@ public interface WoofChanges {
 
 	/**
 	 * Links the {@link WoofExceptionModel} to the
-	 * {@link WoofApplicationPathModel}.
+	 * {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param exception
 	 *            {@link WoofExceptionModel}.
 	 * @param applicationPath
-	 *            {@link WoofApplicationPathModel}.
+	 *            {@link WoofHttpContinuationModel}.
 	 * @return {@link Change} to make the link.
 	 */
-	Change<WoofExceptionToWoofApplicationPathModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
-			WoofApplicationPathModel applicationPath);
+	Change<WoofExceptionToWoofHttpContinuationModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
+			WoofHttpContinuationModel applicationPath);
 
 	/**
-	 * Removes the {@link WoofExceptionToWoofApplicationPathModel}.
+	 * Removes the {@link WoofExceptionToWoofHttpContinuationModel}.
 	 * 
 	 * @param link
-	 *            {@link WoofExceptionToWoofApplicationPathModel}.
+	 *            {@link WoofExceptionToWoofHttpContinuationModel}.
 	 * @return {@link Change} to remove the link.
 	 */
-	Change<WoofExceptionToWoofApplicationPathModel> removeExceptionToApplicationPath(
-			WoofExceptionToWoofApplicationPathModel link);
+	Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToApplicationPath(
+			WoofExceptionToWoofHttpContinuationModel link);
 
 	/**
 	 * Links the {@link WoofExceptionModel} to the {@link WoofTemplateModel} .

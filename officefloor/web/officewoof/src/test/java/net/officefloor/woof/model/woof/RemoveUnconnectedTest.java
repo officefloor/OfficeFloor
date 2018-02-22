@@ -35,15 +35,15 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
 public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 
 	/**
-	 * Ensure able to remove the {@link WoofApplicationPathModel}.
+	 * Ensure able to remove the {@link WoofHttpContinuationModel}.
 	 */
 	public void testRemoveApplicationPath() {
 
 		// Obtain the application path to remove
-		WoofApplicationPathModel path = this.model.getWoofApplicationPaths().get(0);
+		WoofHttpContinuationModel path = this.model.getWoofApplicationPaths().get(0);
 
 		// Remove the application path
-		Change<WoofApplicationPathModel> change = this.operations.removeApplicationPath(path);
+		Change<WoofHttpContinuationModel> change = this.operations.removeApplicationPath(path);
 		this.assertChange(change, path, "Remove application path /path", true);
 	}
 

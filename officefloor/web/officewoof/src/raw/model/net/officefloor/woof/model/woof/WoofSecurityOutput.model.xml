@@ -6,5 +6,5 @@
 	<field type="WoofSecurityOutputToWoofTemplateModel" name="woof template" />
 	<field type="WoofSecurityOutputToWoofSecurityModel" name="woof security" />
 	<field type="WoofSecurityOutputToWoofResourceModel" name="woof resource" />
-	<field type="WoofSecurityOutputToWoofApplicationPathModel" name="woof application path" />
+	<field type="WoofSecurityOutputToWoofHttpContinuationModel" name="woof http continuation" />
 </model>

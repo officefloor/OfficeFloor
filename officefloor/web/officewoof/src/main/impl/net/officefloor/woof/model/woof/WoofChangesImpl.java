@@ -502,7 +502,7 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
-	 * Sorts the {@link WoofApplicationPathModel} instances.
+	 * Sorts the {@link WoofHttpContinuationModel} instances.
 	 */
 	private void sortApplicationPaths() {
 		sortModelList(this.model.getWoofApplicationPaths(), (model) -> model.getApplicationPath());
@@ -631,11 +631,11 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofApplicationPathModel> addApplicationPath(String applicationPath, boolean isSecure,
+	public Change<WoofHttpContinuationModel> addApplicationPath(String applicationPath, boolean isSecure,
 			String[] serviceHttpMethods) {
 
 		// Create the application path
-		final WoofApplicationPathModel path = new WoofApplicationPathModel(applicationPath, isSecure);
+		final WoofHttpContinuationModel path = new WoofHttpContinuationModel(applicationPath, isSecure);
 
 		// Determine if have service HTTP methods
 		if (serviceHttpMethods != null) {
@@ -646,7 +646,7 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Return change to add application path
-		return new AbstractChange<WoofApplicationPathModel>(path, "Add Application Path") {
+		return new AbstractChange<WoofHttpContinuationModel>(path, "Add Application Path") {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofApplicationPath(path);
@@ -661,23 +661,23 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofApplicationPathModel> removeApplicationPath(WoofApplicationPathModel applicationPath) {
+	public Change<WoofHttpContinuationModel> removeApplicationPath(WoofHttpContinuationModel applicationPath) {
 
 		// Ensure application path available to remove
 		boolean isInModel = false;
-		for (WoofApplicationPathModel model : this.model.getWoofApplicationPaths()) {
+		for (WoofHttpContinuationModel model : this.model.getWoofApplicationPaths()) {
 			if (model == applicationPath) {
 				isInModel = true;
 			}
 		}
 		if (!isInModel) {
 			// Application path model not in model
-			return new NoChange<WoofApplicationPathModel>(applicationPath,
+			return new NoChange<WoofHttpContinuationModel>(applicationPath,
 					"Remove application path " + applicationPath.getApplicationPath(), " is not in WoOF model");
 		}
 
 		// Return change to remove application path
-		return new AbstractChange<WoofApplicationPathModel>(applicationPath,
+		return new AbstractChange<WoofHttpContinuationModel>(applicationPath,
 				"Remove application path " + applicationPath.getApplicationPath()) {
 
 			/**
@@ -2722,15 +2722,15 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofApplicationPathModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
-			WoofApplicationPathModel applicationPath) {
+	public Change<WoofExceptionToWoofHttpContinuationModel> linkExceptionToApplicationPath(WoofExceptionModel exception,
+			WoofHttpContinuationModel applicationPath) {
 
 		// Create the connection
-		final WoofExceptionToWoofApplicationPathModel connection = new WoofExceptionToWoofApplicationPathModel(
+		final WoofExceptionToWoofHttpContinuationModel connection = new WoofExceptionToWoofHttpContinuationModel(
 				applicationPath.getApplicationPath(), exception, applicationPath);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofExceptionToWoofApplicationPathModel, WoofExceptionModel>(connection, exception,
+		return new AddLinkChange<WoofExceptionToWoofHttpContinuationModel, WoofExceptionModel>(connection, exception,
 				"Link Exception to Application Path") {
 			@Override
 			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
@@ -2744,9 +2744,9 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofApplicationPathModel> removeExceptionToApplicationPath(
-			WoofExceptionToWoofApplicationPathModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofApplicationPathModel>(link,
+	public Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToApplicationPath(
+			WoofExceptionToWoofHttpContinuationModel link) {
+		return new RemoveLinkChange<WoofExceptionToWoofHttpContinuationModel>(link,
 				"Remove Exception to Application Path");
 	}
 

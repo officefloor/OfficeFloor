@@ -37,7 +37,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	private static final int B = 1;
 
 	/**
-	 * Ensures can link to {@link WoofApplicationPathModel}.
+	 * Ensures can link to {@link WoofHttpContinuationModel}.
 	 */
 	public void testLinkToApplicationPath() {
 		this.doLinkToApplicationPath(A);
@@ -45,14 +45,14 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 
 	/**
 	 * Ensure link overrides other links for
-	 * {@link WoofExceptionToWoofApplicationPathModel}.
+	 * {@link WoofExceptionToWoofHttpContinuationModel}.
 	 */
 	public void testLinkOverrideToApplicationPath() {
 		this.doLinkToApplicationPath(B);
 	}
 
 	/**
-	 * Undertakes linking to a {@link WoofApplicationPathModel}.
+	 * Undertakes linking to a {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param exceptionIndex
 	 *            {@link WoofExceptionModel} index.
@@ -61,10 +61,10 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 
 		// Obtain the items to link
 		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
-		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(1);
+		WoofHttpContinuationModel applicationPath = this.model.getWoofApplicationPaths().get(1);
 
 		// Link the exception to application path
-		Change<WoofExceptionToWoofApplicationPathModel> change = this.operations
+		Change<WoofExceptionToWoofHttpContinuationModel> change = this.operations
 				.linkExceptionToApplicationPath(exception, applicationPath);
 
 		// Validate change
@@ -77,10 +77,10 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToApplicationPathLink() {
 
 		// Obtain the link to remove
-		WoofExceptionToWoofApplicationPathModel link = this.model.getWoofExceptions().get(B).getWoofApplicationPath();
+		WoofExceptionToWoofHttpContinuationModel link = this.model.getWoofExceptions().get(B).getWoofApplicationPath();
 
 		// Remove the link
-		Change<WoofExceptionToWoofApplicationPathModel> change = this.operations.removeExceptionToApplicationPath(link);
+		Change<WoofExceptionToWoofHttpContinuationModel> change = this.operations.removeExceptionToApplicationPath(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Exception to Application Path", true);

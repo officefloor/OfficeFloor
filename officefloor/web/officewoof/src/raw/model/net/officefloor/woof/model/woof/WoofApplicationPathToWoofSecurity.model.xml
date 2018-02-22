@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="http security name" />
-	<field type="WoofApplicationPathModel" name="woof application path"
-		end-field="woof security" />
-	<field type="WoofSecurityModel" name="woof security" end-list="woof application path" />
-</model>

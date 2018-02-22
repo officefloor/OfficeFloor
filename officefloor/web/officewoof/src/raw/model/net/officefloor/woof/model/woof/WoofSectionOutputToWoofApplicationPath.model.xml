@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="application path" />
-	<field type="WoofSectionOutputModel" name="woof section output" end-field="woof application path" />
-	<field type="WoofApplicationPathModel" name="woof application path" end-list="woof section output" />
-</model>

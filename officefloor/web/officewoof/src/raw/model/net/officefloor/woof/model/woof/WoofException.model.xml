@@ -5,5 +5,5 @@
 	<field type="WoofExceptionToWoofTemplateModel" name="woof template" />
 	<field type="WoofExceptionToWoofResourceModel" name="woof resource" />
 	<field type="WoofExceptionToWoofSecurityModel" name="woof security" />
-	<field type="WoofExceptionToWoofApplicationPathModel" name="woof application path" />
+	<field type="WoofExceptionToWoofHttpContinuationModel" name="woof http continuation" />
 </model>

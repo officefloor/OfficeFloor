@@ -16,7 +16,8 @@
 	<list type="WoofSectionOutputToWoofTemplateModel" name="woof section output" />
 	<list type="WoofTemplateOutputToWoofTemplateModel" name="woof template output" />
 	<list type="WoofSecurityOutputToWoofTemplateModel" name="woof security output" />
-	<list type="WoofApplicationPathToWoofTemplateModel" name="woof application path" />
+	<list type="WoofHttpContinuationToWoofTemplateModel" name="woof http continuation" />
+	<list type="WoofHttpInputToWoofTemplateModel" name="woof http input" />
 	<list type="WoofExceptionToWoofTemplateModel" name="woof exception" />
 	<list type="WoofTemplateOutputModel" name="output" />
 </model>

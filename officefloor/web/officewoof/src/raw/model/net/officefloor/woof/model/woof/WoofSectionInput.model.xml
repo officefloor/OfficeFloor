@@ -6,6 +6,7 @@
 	<list type="WoofSecurityOutputToWoofSectionInputModel" name="woof security output" />
 	<list type="WoofSectionOutputToWoofSectionInputModel" name="woof section output" />
 	<list type="WoofExceptionToWoofSectionInputModel" name="woof exception" />
-	<list type="WoofApplicationPathToWoofSectionInputModel" name="woof application path" />
+	<list type="WoofHttpContinuationToWoofSectionInputModel" name="woof http continuation" />
+	<list type="WoofHttpInputToWoofSectionInputModel" name="woof http input" />
 	<list type="WoofStartToWoofSectionInputModel" name="woof start" />
 </model>

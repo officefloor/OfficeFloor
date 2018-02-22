@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="boolean" name="is secure" />
+	<field type="String" name="http method" />
+	<field type="String" name="application path" />
+	<field type="WoofHttpInputToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofHttpInputToWoofTemplateModel" name="woof template" />
+	<field type="WoofHttpInputToWoofResourceModel" name="woof resource" />
+	<field type="WoofHttpInputToWoofSecurityModel" name="woof security" />
+	<field type="WoofHttpInputToWoofHttpContinuationModel" name="woof http continuation" />
+</model>

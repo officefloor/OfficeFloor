@@ -91,17 +91,17 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the application paths
 		// ----------------------------------------
 		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofApplicationPaths(),
-				new WoofApplicationPathModel("/pathA", true), new WoofApplicationPathModel("/pathB", false));
-		WoofApplicationPathModel applicationPath = woof.getWoofApplicationPaths().get(0);
+				new WoofHttpContinuationModel("/pathA", true), new WoofHttpContinuationModel("/pathB", false));
+		WoofHttpContinuationModel applicationPath = woof.getWoofApplicationPaths().get(0);
 		assertList(new String[] { "getHttpMethodName" }, applicationPath.getHttpMethods(),
 				new WoofApplicationPathHttpMethodModel("GET"), new WoofApplicationPathHttpMethodModel("POST"));
-		assertProperties(new WoofApplicationPathToWoofSectionInputModel("SECTION_A", "INPUT_A"),
+		assertProperties(new WoofHttpContinuationToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				applicationPath.getWoofSectionInput(), "getSectionName", "getInputName");
-		assertProperties(new WoofApplicationPathToWoofTemplateModel("/templateB"), applicationPath.getWoofTemplate(),
+		assertProperties(new WoofHttpContinuationToWoofTemplateModel("/templateB"), applicationPath.getWoofTemplate(),
 				"getApplicationPath");
-		assertProperties(new WoofApplicationPathToWoofResourceModel("/resourceA.html"),
+		assertProperties(new WoofHttpContinuationToWoofResourceModel("/resourceA.html"),
 				applicationPath.getWoofResource(), "getResourcePath");
-		assertProperties(new WoofApplicationPathToWoofApplicationPathModel("/pathB"),
+		assertProperties(new WoofHttpContinuationToWoofHttpContinuationModel("/pathB"),
 				applicationPath.getWoofApplicationPath(), "getApplicationPath");
 
 		// ----------------------------------------
@@ -138,7 +138,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new WoofTemplateOutputToWoofSecurityModel("SECURITY_B"),
 				templateOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofTemplateOutputModel templateOutputApplicationPath = template.getOutputs().get(4);
-		assertProperties(new WoofTemplateOutputToWoofApplicationPathModel("/pathA"),
+		assertProperties(new WoofTemplateOutputToWoofHttpContinuationModel("/pathA"),
 				templateOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
 
 		// Validate links
@@ -189,7 +189,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new WoofSectionOutputToWoofSecurityModel("SECURITY_A"),
 				sectionOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofSectionOutputModel sectionOutputApplicationPath = section.getOutputs().get(4);
-		assertProperties(new WoofSectionOutputToWoofApplicationPathModel("/pathB"),
+		assertProperties(new WoofSectionOutputToWoofHttpContinuationModel("/pathB"),
 				sectionOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
 
 		// ----------------------------------------
@@ -226,7 +226,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new WoofSecurityOutputToWoofSecurityModel("SECURITY_B"),
 				securityOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofSecurityOutputModel securityOutputApplicationPath = security.getOutputs().get(4);
-		assertProperties(new WoofSecurityOutputToWoofApplicationPathModel("/pathA"),
+		assertProperties(new WoofSecurityOutputToWoofHttpContinuationModel("/pathA"),
 				securityOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
 
 		// ----------------------------------------
@@ -275,7 +275,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new WoofExceptionToWoofSecurityModel("SECURITY_B"), exceptionSecurity.getWoofSecurity(),
 				"getHttpSecurityName");
 		WoofExceptionModel exceptionApplicationPath = woof.getWoofExceptions().get(4);
-		assertProperties(new WoofExceptionToWoofApplicationPathModel("/pathB"),
+		assertProperties(new WoofExceptionToWoofHttpContinuationModel("/pathB"),
 				exceptionApplicationPath.getWoofApplicationPath(), "getApplicationPath");
 
 		// ----------------------------------------

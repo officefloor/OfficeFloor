@@ -59,7 +59,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw WoOF to be connected
 		WoofModel woof = new WoofModel();
-		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false);
+		WoofHttpContinuationModel applicationPath = new WoofHttpContinuationModel("APPLICATION_PATH", false);
 		woof.addWoofApplicationPath(applicationPath);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
 		woof.addWoofTemplate(template);
@@ -87,27 +87,27 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		 */
 
 		// Application Path -> Section Input
-		WoofApplicationPathToWoofSectionInputModel applicationPathToSectionInput = new WoofApplicationPathToWoofSectionInputModel(
+		WoofHttpContinuationToWoofSectionInputModel applicationPathToSectionInput = new WoofHttpContinuationToWoofSectionInputModel(
 				"SECTION", "SECTION_INPUT");
 		applicationPath.setWoofSectionInput(applicationPathToSectionInput);
 
 		// Application Path -> Template
-		WoofApplicationPathToWoofTemplateModel applicationPathToTemplate = new WoofApplicationPathToWoofTemplateModel(
+		WoofHttpContinuationToWoofTemplateModel applicationPathToTemplate = new WoofHttpContinuationToWoofTemplateModel(
 				"TEMPLATE");
 		applicationPath.setWoofTemplate(applicationPathToTemplate);
 
 		// Application Path -> Resource
-		WoofApplicationPathToWoofResourceModel applicationPathToResource = new WoofApplicationPathToWoofResourceModel(
+		WoofHttpContinuationToWoofResourceModel applicationPathToResource = new WoofHttpContinuationToWoofResourceModel(
 				"RESOURCE");
 		applicationPath.setWoofResource(applicationPathToResource);
 
 		// Application Path -> Security
-		WoofApplicationPathToWoofSecurityModel applicationPathToSecurity = new WoofApplicationPathToWoofSecurityModel(
+		WoofHttpContinuationToWoofSecurityModel applicationPathToSecurity = new WoofHttpContinuationToWoofSecurityModel(
 				"SECURITY");
 		applicationPath.setWoofSecurity(applicationPathToSecurity);
 
 		// Application Path -> Application Path
-		WoofApplicationPathToWoofApplicationPathModel applicationPathToApplicationPath = new WoofApplicationPathToWoofApplicationPathModel(
+		WoofHttpContinuationToWoofHttpContinuationModel applicationPathToApplicationPath = new WoofHttpContinuationToWoofHttpContinuationModel(
 				"APPLICATION_PATH");
 		applicationPath.setWoofApplicationPath(applicationPathToApplicationPath);
 
@@ -141,7 +141,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		templateOutput.setWoofSecurity(templateOutputToSecurity);
 
 		// Template Output -> Application Path
-		WoofTemplateOutputToWoofApplicationPathModel templateOutputToApplicationpath = new WoofTemplateOutputToWoofApplicationPathModel(
+		WoofTemplateOutputToWoofHttpContinuationModel templateOutputToApplicationpath = new WoofTemplateOutputToWoofHttpContinuationModel(
 				"APPLICATION_PATH");
 		templateOutput.setWoofApplicationPath(templateOutputToApplicationpath);
 
@@ -170,7 +170,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		sectionOutput.setWoofSecurity(sectionOutputToSecurity);
 
 		// Section Output -> Application Path
-		WoofSectionOutputToWoofApplicationPathModel sectionOutputToApplicationPath = new WoofSectionOutputToWoofApplicationPathModel(
+		WoofSectionOutputToWoofHttpContinuationModel sectionOutputToApplicationPath = new WoofSectionOutputToWoofHttpContinuationModel(
 				"APPLICATION_PATH");
 		sectionOutput.setWoofApplicationPath(sectionOutputToApplicationPath);
 
@@ -199,7 +199,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		securityOutput.setWoofSecurity(securityOutputToSecurity);
 
 		// Security Output -> Application Path
-		WoofSecurityOutputToWoofApplicationPathModel securityOutputToApplicationPath = new WoofSecurityOutputToWoofApplicationPathModel(
+		WoofSecurityOutputToWoofHttpContinuationModel securityOutputToApplicationPath = new WoofSecurityOutputToWoofHttpContinuationModel(
 				"APPLICATION_PATH");
 		securityOutput.setWoofApplicationPath(securityOutputToApplicationPath);
 
@@ -225,7 +225,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		exception.setWoofSecurity(exceptionToSecurity);
 
 		// Exception -> Application Path
-		WoofExceptionToWoofApplicationPathModel exceptionToApplicationPath = new WoofExceptionToWoofApplicationPathModel(
+		WoofExceptionToWoofHttpContinuationModel exceptionToApplicationPath = new WoofExceptionToWoofHttpContinuationModel(
 				"APPLICATION_PATH");
 		exception.setWoofApplicationPath(exceptionToApplicationPath);
 
@@ -255,7 +255,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Application Path links
-		AssertLinks<WoofApplicationPathModel> assertApplicationPath = new AssertLinks<>("application path",
+		AssertLinks<WoofHttpContinuationModel> assertApplicationPath = new AssertLinks<>("application path",
 				applicationPath);
 		assertApplicationPath.assertLink(applicationPathToSectionInput, "section input", sectionInput);
 		assertApplicationPath.assertLink(applicationPathToTemplate, "template", template);
@@ -358,7 +358,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the WoOF (without connections)
 		WoofModel woof = new WoofModel();
-		WoofApplicationPathModel applicationPath = new WoofApplicationPathModel("APPLICATION_PATH", false);
+		WoofHttpContinuationModel applicationPath = new WoofHttpContinuationModel("APPLICATION_PATH", false);
 		woof.addWoofApplicationPath(applicationPath);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
 		woof.addWoofTemplate(template);
@@ -382,16 +382,16 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		woof.addWoofStart(start);
 
 		// Application Path links
-		WoofApplicationPathToWoofSectionInputModel applicationPathToSectionInput = link(
-				new WoofApplicationPathToWoofSectionInputModel(), applicationPath, sectionInput);
-		WoofApplicationPathToWoofTemplateModel applicationPathToTemplate = link(
-				new WoofApplicationPathToWoofTemplateModel(), applicationPath, template);
-		WoofApplicationPathToWoofResourceModel applicationPathToResource = link(
-				new WoofApplicationPathToWoofResourceModel(), applicationPath, resource);
-		WoofApplicationPathToWoofSecurityModel applicationPathToSecurity = link(
-				new WoofApplicationPathToWoofSecurityModel(), applicationPath, security);
-		WoofApplicationPathToWoofApplicationPathModel applicationPathToApplicationPath = link(
-				new WoofApplicationPathToWoofApplicationPathModel(), applicationPath, applicationPath);
+		WoofHttpContinuationToWoofSectionInputModel applicationPathToSectionInput = link(
+				new WoofHttpContinuationToWoofSectionInputModel(), applicationPath, sectionInput);
+		WoofHttpContinuationToWoofTemplateModel applicationPathToTemplate = link(
+				new WoofHttpContinuationToWoofTemplateModel(), applicationPath, template);
+		WoofHttpContinuationToWoofResourceModel applicationPathToResource = link(
+				new WoofHttpContinuationToWoofResourceModel(), applicationPath, resource);
+		WoofHttpContinuationToWoofSecurityModel applicationPathToSecurity = link(
+				new WoofHttpContinuationToWoofSecurityModel(), applicationPath, security);
+		WoofHttpContinuationToWoofHttpContinuationModel applicationPathToApplicationPath = link(
+				new WoofHttpContinuationToWoofHttpContinuationModel(), applicationPath, applicationPath);
 
 		// Template links
 		WoofTemplateToSuperWoofTemplateModel templateToSuperTemplate = link(new WoofTemplateToSuperWoofTemplateModel(),
@@ -406,8 +406,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				new WoofTemplateOutputToWoofResourceModel(), templateOutput, resource);
 		WoofTemplateOutputToWoofSecurityModel templateOutputToSecurity = link(
 				new WoofTemplateOutputToWoofSecurityModel(), templateOutput, security);
-		WoofTemplateOutputToWoofApplicationPathModel templateOutputToApplicationPath = link(
-				new WoofTemplateOutputToWoofApplicationPathModel(), templateOutput, applicationPath);
+		WoofTemplateOutputToWoofHttpContinuationModel templateOutputToApplicationPath = link(
+				new WoofTemplateOutputToWoofHttpContinuationModel(), templateOutput, applicationPath);
 
 		// Section Output links
 		WoofSectionOutputToWoofSectionInputModel sectionOutputToSectionInput = link(
@@ -418,8 +418,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				sectionOutput, resource);
 		WoofSectionOutputToWoofSecurityModel sectionOutputToSecurity = link(new WoofSectionOutputToWoofSecurityModel(),
 				sectionOutput, security);
-		WoofSectionOutputToWoofApplicationPathModel sectionOutputToApplicationPath = link(
-				new WoofSectionOutputToWoofApplicationPathModel(), sectionOutput, applicationPath);
+		WoofSectionOutputToWoofHttpContinuationModel sectionOutputToApplicationPath = link(
+				new WoofSectionOutputToWoofHttpContinuationModel(), sectionOutput, applicationPath);
 
 		// Security Output links
 		WoofSecurityOutputToWoofSectionInputModel securityOutputToSectionInput = link(
@@ -430,8 +430,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				new WoofSecurityOutputToWoofResourceModel(), securityOutput, resource);
 		WoofSecurityOutputToWoofSecurityModel securityOutputToSecurity = link(
 				new WoofSecurityOutputToWoofSecurityModel(), securityOutput, security);
-		WoofSecurityOutputToWoofApplicationPathModel securityOutputToApplicationPath = link(
-				new WoofSecurityOutputToWoofApplicationPathModel(), securityOutput, applicationPath);
+		WoofSecurityOutputToWoofHttpContinuationModel securityOutputToApplicationPath = link(
+				new WoofSecurityOutputToWoofHttpContinuationModel(), securityOutput, applicationPath);
 
 		// Exception links
 		WoofExceptionToWoofSectionInputModel exceptionToSectionInput = link(new WoofExceptionToWoofSectionInputModel(),
@@ -442,8 +442,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				resource);
 		WoofExceptionToWoofSecurityModel exceptionToSecurity = link(new WoofExceptionToWoofSecurityModel(), exception,
 				security);
-		WoofExceptionToWoofApplicationPathModel exceptionToApplicationPath = link(
-				new WoofExceptionToWoofApplicationPathModel(), exception, applicationPath);
+		WoofExceptionToWoofHttpContinuationModel exceptionToApplicationPath = link(
+				new WoofExceptionToWoofHttpContinuationModel(), exception, applicationPath);
 
 		// Start -> Section Input
 		WoofStartToWoofSectionInputModel startToSectionInput = link(new WoofStartToWoofSectionInputModel(), start,

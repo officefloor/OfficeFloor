@@ -1,22 +1,33 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/pathA" secure="true">
-			<service method="GET" />
-			<service method="POST" />
+	<http-continuations>
+		<http-continuation path="/pathA" secure="true">
 			<section name="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
 			<security name="SECURITY_A" />
 			<resource path="/resourceA.html" />
 			<redirect path="/pathB" />
-		</application-path>
-		<application-path path="/pathB" />
-	</application-paths>
+		</http-continuation>
+		<http-continuation path="/pathB" />
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/pathC" method="POST" secure="true">
+			<alias path="/pathAliasA" secure="true" />
+			<alias path="/pathAliasB" secure="false" />
+			<section name="SECTION_A" input="INPUT_A" />
+			<template path="/templateB" />
+			<security name="SECURITY_A" />
+			<resource path="/resourceA.html" />
+			<redirect path="/pathB" />
+		</http-input>
+		<http-input path="/pathD" method="PUT" />
+	</http-inputs>
 
 	<templates>
-		<template path="/templateA" location="example/TemplateA.ofp"
+		<template path="/templateA" secure="true" location="example/TemplateA.ofp"
 			class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
-			charset="UTF-16" secure="true" redirect-values-function="redirect"
+			charset="UTF-16" redirect-values-function="redirect"
 			link-separator-character="_" x="300" y="301">
 			<extends template="/templateB" />
 			<output name="OUTPUT_0" argument-type="java.lang.Integer">

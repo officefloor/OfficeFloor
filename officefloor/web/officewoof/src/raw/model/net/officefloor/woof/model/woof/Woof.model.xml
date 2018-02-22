@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<list type="WoofApplicationPathModel" name="woof application path" />
+	<list type="WoofHttpContinuationModel" name="woof http continuation" />
+	<list type="WoofHttpInputModel" name="woof http input" />
 	<list type="WoofTemplateModel" name="woof template" />
 	<list type="WoofSecurityModel" name="woof security" plural="woof securities" />
 	<list type="WoofSectionModel" name="woof section" />

@@ -52,30 +52,30 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
 public class AddTest extends AbstractWoofChangesTestCase {
 
 	/**
-	 * Ensure able to add {@link WoofApplicationPathModel}.
+	 * Ensure able to add {@link WoofHttpContinuationModel}.
 	 */
 	public void testAddApplicationPath() {
 
 		// Add the application path
-		Change<WoofApplicationPathModel> change = this.operations.addApplicationPath("/path", false, null);
+		Change<WoofHttpContinuationModel> change = this.operations.addApplicationPath("/path", false, null);
 
 		// Validate the chnage
 		this.assertChange(change, null, "Add Application Path", true);
 
 		// Enusre appropriately added template
 		change.apply();
-		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(0);
+		WoofHttpContinuationModel applicationPath = this.model.getWoofApplicationPaths().get(0);
 		assertSame("Incorrect application path", applicationPath, change.getTarget());
 	}
 
 	/**
-	 * Ensure able to add {@link WoofApplicationPathModel} with service
+	 * Ensure able to add {@link WoofHttpContinuationModel} with service
 	 * {@link HttpMethod} instances.
 	 */
 	public void testAddApplicationPathWithServiceHttpMethods() {
 
 		// Add the application path
-		Change<WoofApplicationPathModel> change = this.operations.addApplicationPath("/path", true,
+		Change<WoofHttpContinuationModel> change = this.operations.addApplicationPath("/path", true,
 				new String[] { "POST", "GET", "PUT" });
 
 		// Validate the chnage
@@ -83,7 +83,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Enusre appropriately added template
 		change.apply();
-		WoofApplicationPathModel applicationPath = this.model.getWoofApplicationPaths().get(0);
+		WoofHttpContinuationModel applicationPath = this.model.getWoofApplicationPaths().get(0);
 		assertSame("Incorrect application path", applicationPath, change.getTarget());
 	}
 
