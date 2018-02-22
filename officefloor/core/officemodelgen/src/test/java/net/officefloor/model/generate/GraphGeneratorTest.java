@@ -54,14 +54,10 @@ public class GraphGeneratorTest extends OfficeFrameTestCase {
 		File javaFileDir = new File(outputDir, "graph/test");
 
 		// Validate the generation correct
-		this.assertContents(javaFileDir, "OneModel.java",
-				"Graph_OneExpectedContent.txt");
-		this.assertContents(javaFileDir, "TwoModel.java",
-				"Graph_TwoExpectedContent.txt");
-		this.assertContents(javaFileDir, "ConnectionModel.java",
-				"Graph_ConnectionExpectedContent.txt");
-		this.assertContents(javaFileDir, "CascadeModel.java",
-				"Graph_CascadeExpectedContent.txt");
+		this.assertContents(javaFileDir, "OneModel.java", "Graph_OneExpectedContent.txt");
+		this.assertContents(javaFileDir, "TwoModel.java", "Graph_TwoExpectedContent.txt");
+		this.assertContents(javaFileDir, "ConnectionModel.java", "Graph_ConnectionExpectedContent.txt");
+		this.assertContents(javaFileDir, "CascadeModel.java", "Graph_CascadeExpectedContent.txt");
 	}
 
 	/**
@@ -74,20 +70,17 @@ public class GraphGeneratorTest extends OfficeFrameTestCase {
 	 * @param expectedContentFileName
 	 *            Name of the file containing the expected content.
 	 */
-	private void assertContents(File javaFileDir, String javaFileName,
-			String expectedContentFileName) throws Exception {
+	private void assertContents(File javaFileDir, String javaFileName, String expectedContentFileName)
+			throws Exception {
 
 		// Obtain the contents of the generated java file
-		String javaFileContents = this.getFileContents(new File(javaFileDir,
-				javaFileName));
+		String javaFileContents = this.getFileContents(new File(javaFileDir, javaFileName));
 
 		// Obtain the expected file contents
-		String expectedContents = this.getFileContents(this.findFile(this
-				.getClass(), expectedContentFileName));
+		String expectedContents = this.getFileContents(this.findFile(this.getClass(), expectedContentFileName));
 
 		// Ensure contents match
-		assertContents(new StringReader(expectedContents), new StringReader(
-				javaFileContents));
+		assertContents(new StringReader(expectedContents), new StringReader(javaFileContents));
 	}
 
 }

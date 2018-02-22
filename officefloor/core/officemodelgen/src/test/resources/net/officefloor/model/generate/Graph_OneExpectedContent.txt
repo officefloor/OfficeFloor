@@ -38,6 +38,23 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
     }
 
     /**
+     * Convenience constructor for new non-linked instance allowing XY initialising.
+     *
+     * @param nonModelField Non model field.
+     * @param x Horizontal location.
+     * @param y Vertical location.
+     */
+    public OneModel(
+      String nonModelField
+    , int x
+    , int y
+    ) {
+        this.nonModelField = nonModelField;
+        this.setX(x);
+        this.setY(y);
+    }
+
+    /**
      * Convenience constructor.
      *
      * @param nonModelField Non model field.

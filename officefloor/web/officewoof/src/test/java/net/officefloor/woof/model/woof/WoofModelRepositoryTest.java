@@ -88,21 +88,26 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		repository.retrieve(woof, this.configurationItem);
 
 		// ----------------------------------------
-		// Validate the application paths
+		// Validate the HTTP continuations
 		// ----------------------------------------
-		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofApplicationPaths(),
-				new WoofHttpContinuationModel("/pathA", true), new WoofHttpContinuationModel("/pathB", false));
-		WoofHttpContinuationModel applicationPath = woof.getWoofApplicationPaths().get(0);
-		assertList(new String[] { "getHttpMethodName" }, applicationPath.getHttpMethods(),
-				new WoofApplicationPathHttpMethodModel("GET"), new WoofApplicationPathHttpMethodModel("POST"));
+		assertList(new String[] { "getApplicationPath", "getIsSecure" }, woof.getWoofHttpContinuations(),
+				new WoofHttpContinuationModel(true, "/pathA"), new WoofHttpContinuationModel(false, "/pathB"));
+		WoofHttpContinuationModel continuation = woof.getWoofHttpContinuations().get(0);
 		assertProperties(new WoofHttpContinuationToWoofSectionInputModel("SECTION_A", "INPUT_A"),
-				applicationPath.getWoofSectionInput(), "getSectionName", "getInputName");
-		assertProperties(new WoofHttpContinuationToWoofTemplateModel("/templateB"), applicationPath.getWoofTemplate(),
+				continuation.getWoofSectionInput(), "getSectionName", "getInputName");
+		assertProperties(new WoofHttpContinuationToWoofTemplateModel("/templateB"), continuation.getWoofTemplate(),
 				"getApplicationPath");
-		assertProperties(new WoofHttpContinuationToWoofResourceModel("/resourceA.html"),
-				applicationPath.getWoofResource(), "getResourcePath");
+		assertProperties(new WoofHttpContinuationToWoofResourceModel("/resourceA.html"), continuation.getWoofResource(),
+				"getResourcePath");
 		assertProperties(new WoofHttpContinuationToWoofHttpContinuationModel("/pathB"),
-				applicationPath.getWoofApplicationPath(), "getApplicationPath");
+				continuation.getWoofHttpContinuation(), "getApplicationPath");
+
+		// ----------------------------------------
+		// Validate the HTTP inputs
+		// ----------------------------------------
+		assertList(new String[] { "getApplicationPath", "getIsSecure", "getHttpMethodName" }, woof.getWoofHttpInputs(),
+				new WoofHttpInputModel(isSecure, httpMethod, applicationPath, woofSectionInput, woofTemplate,
+						woofResource, woofSecurity, woofHttpContinuation, x, y));
 
 		// ----------------------------------------
 		// Validate the templates
@@ -114,9 +119,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				woof.getWoofTemplates(),
 				new WoofTemplateModel("/templateA", "example/TemplateA.ofp", "net.example.ExampleClassA", "redirect",
 						"text/plain; charset=UTF-16", "UTF-16", "_", true, null, null, null, null, null, null, null,
-						null, null, null, null, 300, 301),
+						null, null, null, null, null, 300, 301),
 				new WoofTemplateModel("/templateB", "example/TemplateB.ofp", null, null, null, null, null, false, null,
-						null, null, null, null, null, null, null, null, null, null, 302, 303));
+						null, null, null, null, null, null, null, null, null, null, null, 302, 303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertProperties(new WoofTemplateToSuperWoofTemplateModel("/templateB"), template.getSuperWoofTemplate(),
 				"getSuperWoofTemplateApplicationPath");
@@ -139,7 +144,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				templateOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofTemplateOutputModel templateOutputApplicationPath = template.getOutputs().get(4);
 		assertProperties(new WoofTemplateOutputToWoofHttpContinuationModel("/pathA"),
-				templateOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
+				templateOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
 
 		// Validate links
 		assertList(new String[] { "getWoofTemplateLinkName", "getIsLinkSecure" }, template.getLinks(),
@@ -190,7 +195,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				sectionOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofSectionOutputModel sectionOutputApplicationPath = section.getOutputs().get(4);
 		assertProperties(new WoofSectionOutputToWoofHttpContinuationModel("/pathB"),
-				sectionOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
+				sectionOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
 
 		// ----------------------------------------
 		// Validate the security
@@ -199,9 +204,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new String[] { "getHttpSecurityName", "getHttpSecuritySourceClassName", "getTimeout", "getX", "getY" },
 				woof.getWoofSecurities(),
 				new WoofSecurityModel("SECURITY_A", "net.example.HttpSecuritySource", 2000, null, null, null, null,
-						null, null, null, null, 500, 501),
+						null, null, null, null, null, 500, 501),
 				new WoofSecurityModel("SECURITY_B", "net.example.AnotherHttpSecuritySource", 0, null, null, null, null,
-						null, null, null, null, 510, 511));
+						null, null, null, null, null, 510, 511));
 		WoofSecurityModel security = woof.getWoofSecurities().get(0);
 		assertList(new String[] { "getName", "getValue" }, security.getProperties(),
 				new PropertyModel("name.first", "value.first"), new PropertyModel("name.second", "value.second"));
@@ -227,7 +232,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				securityOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
 		WoofSecurityOutputModel securityOutputApplicationPath = security.getOutputs().get(4);
 		assertProperties(new WoofSecurityOutputToWoofHttpContinuationModel("/pathA"),
-				securityOutputApplicationPath.getWoofApplicationPath(), "getApplicationPath");
+				securityOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
 
 		// ----------------------------------------
 		// Validate the governances
@@ -249,8 +254,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the resources
 		// ----------------------------------------
 		assertList(new String[] { "getResourcePath", "getX", "getY" }, woof.getWoofResources(),
-				new WoofResourceModel("/resourceA.html", null, null, null, null, null, 700, 701),
-				new WoofResourceModel("/resourceB.png", null, null, null, null, null, 710, 711));
+				new WoofResourceModel("/resourceA.html", null, null, null, null, null, null, 700, 701),
+				new WoofResourceModel("/resourceB.png", null, null, null, null, null, null, 710, 711));
 
 		// ----------------------------------------
 		// Validate the exceptions
@@ -276,7 +281,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				"getHttpSecurityName");
 		WoofExceptionModel exceptionApplicationPath = woof.getWoofExceptions().get(4);
 		assertProperties(new WoofExceptionToWoofHttpContinuationModel("/pathB"),
-				exceptionApplicationPath.getWoofApplicationPath(), "getApplicationPath");
+				exceptionApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
 
 		// ----------------------------------------
 		// Validate the starts

@@ -74,8 +74,7 @@ public class ModelGenerator {
 	 * @throws Exception
 	 *             If fail.
 	 */
-	public synchronized ModelFile generateModel(ModelContext context)
-			throws Exception {
+	public synchronized ModelFile generateModel(ModelContext context) throws Exception {
 
 		// Create the writer to output contents
 		ByteArrayOutputStream marshalledModel = new ByteArrayOutputStream();
@@ -93,8 +92,7 @@ public class ModelGenerator {
 
 		// Create the configuration item
 		return context.createModelFile(
-				this.metaData.getPackageName().replace('.', '/') + "/"
-						+ this.metaData.getClassName() + ".java",
+				this.metaData.getPackageName().replace('.', '/') + "/" + this.metaData.getClassName() + ".java",
 				new ByteArrayInputStream(marshalledModel.toByteArray()));
 	}
 
@@ -102,8 +100,7 @@ public class ModelGenerator {
 	 * Indicates if object has fields or list state.
 	 */
 	private boolean isStateForObject() {
-		return (this.metaData.getFields().size() > 0)
-				|| (this.metaData.getLists().size() > 0);
+		return (this.metaData.getFields().size() > 0) || (this.metaData.getLists().size() > 0);
 	}
 
 	/**
@@ -160,11 +157,8 @@ public class ModelGenerator {
 
 		// Class signature
 		StringBuilder signature = new StringBuilder();
-		signature.append("public class "
-				+ this.metaData.getClassName()
-				+ this.metaData.getClassSuffix()
-				+ " extends AbstractModel implements "
-				+ (this.metaData.isConnectionModel() ? "ConnectionModel"
+		signature.append("public class " + this.metaData.getClassName() + this.metaData.getClassSuffix()
+				+ " extends AbstractModel implements " + (this.metaData.isConnectionModel() ? "ConnectionModel"
 						: "ItemModel<" + this.metaData.getClassName() + ">"));
 		for (String interfaceName : this.metaData.getInterfaces()) {
 			signature.append(", " + interfaceName);
@@ -178,15 +172,18 @@ public class ModelGenerator {
 		writeLine();
 		this.defaultConstructor();
 		writeLine();
-		if (this.nonLinkedConstructor()) {
+		if (this.nonLinkedConstructor(false)) {
+			writeLine();
+		}
+		if (this.nonLinkedConstructor(true)) {
 			writeLine();
 		}
 		if (this.isStateForObject()) {
 			// Have state so provide convenience
-			this.convenienceConstructor();
+			this.fullConstructor(false);
 			writeLine();
 		}
-		this.convenienceXyConstructor();
+		this.fullConstructor(true);
 		writeLine();
 		this.fields();
 		this.lists();
@@ -206,8 +203,7 @@ public class ModelGenerator {
 	 */
 	@SuppressWarnings("unchecked")
 	private void events() throws Exception {
-		writeLine("    public static enum " + this.metaData.getEventName()
-				+ " {");
+		writeLine("    public static enum " + this.metaData.getEventName() + " {");
 		write("    ");
 		writeListing(",", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
@@ -215,8 +211,7 @@ public class ModelGenerator {
 			}
 
 			protected void writeList(ListMetaData list) {
-				write(" ADD_" + list.getCapitalisedName() + ", REMOVE_"
-						+ list.getCapitalisedName());
+				write(" ADD_" + list.getCapitalisedName() + ", REMOVE_" + list.getCapitalisedName());
 			}
 		}, this.metaData.getFields(), this.metaData.getLists());
 		writeLine();
@@ -237,10 +232,12 @@ public class ModelGenerator {
 	/**
 	 * Convenience constructor for a new non-linked instance.
 	 * 
+	 * @param isIncludeCoordinates
+	 *            Indicates if to include X/Y co-ordinates.
 	 * @return <code>true</code> if constructor written.
 	 */
 	@SuppressWarnings("unchecked")
-	private boolean nonLinkedConstructor() throws Exception {
+	private boolean nonLinkedConstructor(boolean isIncludeCoordinates) throws Exception {
 
 		final String MODEL_TYPE_SUFFIX = "Model";
 
@@ -274,23 +271,25 @@ public class ModelGenerator {
 
 		// Write the non-linked construct
 		writeLine("    /**");
-		writeLine("     * Convenience constructor for new non-linked instance.");
+		writeLine("     * Convenience constructor for new non-linked instance"
+				+ (isIncludeCoordinates ? " allowing XY initialising" : "") + ".");
 		writeLine("     *");
 
 		// Parameters
 		for (FieldMetaData field : this.metaData.getFields()) {
 			if (!field.getType().endsWith(MODEL_TYPE_SUFFIX)) {
-				writeLine("     * @param " + field.getPropertyName() + " "
-						+ field.getDescription());
+				writeLine("     * @param " + field.getPropertyName() + " " + field.getDescription());
 			}
 		}
 		for (ListMetaData list : this.metaData.getLists()) {
 			if (!list.getType().endsWith(MODEL_TYPE_SUFFIX)) {
-				writeLine("     * @param " + list.getPropertyName() + " "
-						+ list.getDescription());
+				writeLine("     * @param " + list.getPropertyName() + " " + list.getDescription());
 			}
 		}
-
+		if (isIncludeCoordinates) {
+			writeLine("     * @param x Horizontal location.");
+			writeLine("     * @param y Vertical location.");
+		}
 		writeLine("     */");
 		writeLine("    public " + this.metaData.getClassName() + "(");
 
@@ -318,30 +317,41 @@ public class ModelGenerator {
 				writeLine(list.getType() + "[] " + list.getPropertyName());
 			}
 		}
+
+		if (isIncludeCoordinates) {
+			if (this.isStateForObject()) {
+				writeLine("    , int x");
+			} else {
+				writeLine("      int x");
+			}
+			writeLine("    , int y");
+		}
+
 		writeLine("    ) {");
 
 		// Specify values
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
 				if (!field.getType().endsWith(MODEL_TYPE_SUFFIX)) {
-					writeLine("        this." + field.getPropertyName() + " = "
-							+ field.getPropertyName() + ";");
+					writeLine("        this." + field.getPropertyName() + " = " + field.getPropertyName() + ";");
 				}
 			}
 
 			protected void writeList(ListMetaData list) {
 				if (!list.getType().endsWith(MODEL_TYPE_SUFFIX)) {
-					writeLine("        if (" + list.getPropertyName()
-							+ " != null) {");
-					writeLine("            for (" + list.getType()
-							+ " model : " + list.getPropertyName() + ") {");
-					writeLine("                this." + list.getPropertyName()
-							+ ".add(model);");
+					writeLine("        if (" + list.getPropertyName() + " != null) {");
+					writeLine("            for (" + list.getType() + " model : " + list.getPropertyName() + ") {");
+					writeLine("                this." + list.getPropertyName() + ".add(model);");
 					writeLine("            }");
 					writeLine("        }");
 				}
 			}
 		}, this.metaData.getFields(), this.metaData.getLists());
+
+		if (isIncludeCoordinates) {
+			writeLine("        this.setX(x);");
+			writeLine("        this.setY(y);");
+		}
 
 		writeLine("    }");
 
@@ -351,92 +361,37 @@ public class ModelGenerator {
 
 	/**
 	 * Convenience constructor.
+	 * 
+	 * @param isIncludeCoordinates
+	 *            Indicates if to include X/Y co-ordinates.
 	 */
 	@SuppressWarnings("unchecked")
-	private void convenienceConstructor() throws Exception {
+	private void fullConstructor(boolean isIncludeCoordinates) throws Exception {
+		boolean isFieldsLists = ((this.metaData.getFields().size() > 0) || (this.metaData.getLists().size() > 0));
 		writeLine("    /**");
-		writeLine("     * Convenience constructor.");
+		writeLine("     * Convenience constructor" + (isIncludeCoordinates ? " allowing XY initialising" : "") + ".");
 		writeLine("     *");
-		write("     * ");
+		if (isFieldsLists) {
+			write("     * ");
+		}
 		writeListing("     * ", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
-				writeLine("@param " + field.getPropertyName() + " "
-						+ field.getDescription());
+				writeLine("@param " + field.getPropertyName() + " " + field.getDescription());
 			}
 
 			protected void writeList(ListMetaData list) {
-				writeLine("@param " + list.getPropertyName() + " "
-						+ list.getDescription());
+				writeLine("@param " + list.getPropertyName() + " " + list.getDescription());
 			}
 		}, this.metaData.getFields(), this.metaData.getLists());
-		writeLine("     */");
-		writeLine("    public " + this.metaData.getClassName() + "(");
-
-		// Parameters
-		write("      ");
-		writeListing("    , ", new WriteAction() {
-			protected void writeField(FieldMetaData field) {
-				writeLine(field.getType() + " " + field.getPropertyName());
-			}
-
-			protected void writeList(ListMetaData list) {
-				writeLine(list.getType() + "[] " + list.getPropertyName());
-			}
-		}, this.metaData.getFields(), this.metaData.getLists());
-
-		writeLine("    ) {");
-
-		// Specify values
-		writeListing("", new WriteAction() {
-			protected void writeField(FieldMetaData field) {
-				writeLine("        this." + field.getPropertyName() + " = "
-						+ field.getPropertyName() + ";");
-			}
-
-			protected void writeList(ListMetaData list) {
-				writeLine("        if (" + list.getPropertyName()
-						+ " != null) {");
-				writeLine("            for (" + list.getType() + " model : "
-						+ list.getPropertyName() + ") {");
-				writeLine("                this." + list.getPropertyName()
-						+ ".add(model);");
-				writeLine("            }");
-				writeLine("        }");
-			}
-		}, this.metaData.getFields(), this.metaData.getLists());
-
-		writeLine("    }");
-	}
-
-	/**
-	 * Convenience constructor.
-	 */
-	@SuppressWarnings("unchecked")
-	private void convenienceXyConstructor() throws Exception {
-		writeLine("    /**");
-		writeLine("     * Convenience constructor allowing XY initialising.");
-		writeLine("     *");
-		if (this.isStateForObject()) {
-			write("     * ");
-			writeListing("     * ", new WriteAction() {
-				protected void writeField(FieldMetaData field) {
-					writeLine("@param " + field.getPropertyName() + " "
-							+ field.getDescription());
-				}
-
-				protected void writeList(ListMetaData list) {
-					writeLine("@param " + list.getPropertyName() + " "
-							+ list.getDescription());
-				}
-			}, this.metaData.getFields(), this.metaData.getLists());
+		if (isIncludeCoordinates) {
+			writeLine("     * @param x Horizontal location.");
+			writeLine("     * @param y Vertical location.");
 		}
-		writeLine("     * @param x Horizontal location.");
-		writeLine("     * @param y Vertical location.");
 		writeLine("     */");
 		writeLine("    public " + this.metaData.getClassName() + "(");
 
 		// Parameters
-		if (this.isStateForObject()) {
+		if (isFieldsLists) {
 			write("      ");
 		}
 		writeListing("    , ", new WriteAction() {
@@ -449,38 +404,36 @@ public class ModelGenerator {
 			}
 		}, this.metaData.getFields(), this.metaData.getLists());
 
-		// X/Y parameters
-		if (this.isStateForObject()) {
-			writeLine("    , int x");
-		} else {
-			writeLine("      int x");
+		if (isIncludeCoordinates) {
+			if (this.isStateForObject()) {
+				writeLine("    , int x");
+			} else {
+				writeLine("      int x");
+			}
+			writeLine("    , int y");
 		}
-		writeLine("    , int y");
 
 		writeLine("    ) {");
 
 		// Specify values
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
-				writeLine("        this." + field.getPropertyName() + " = "
-						+ field.getPropertyName() + ";");
+				writeLine("        this." + field.getPropertyName() + " = " + field.getPropertyName() + ";");
 			}
 
 			protected void writeList(ListMetaData list) {
-				writeLine("        if (" + list.getPropertyName()
-						+ " != null) {");
-				writeLine("            for (" + list.getType() + " model : "
-						+ list.getPropertyName() + ") {");
-				writeLine("                this." + list.getPropertyName()
-						+ ".add(model);");
+				writeLine("        if (" + list.getPropertyName() + " != null) {");
+				writeLine("            for (" + list.getType() + " model : " + list.getPropertyName() + ") {");
+				writeLine("                this." + list.getPropertyName() + ".add(model);");
 				writeLine("            }");
 				writeLine("        }");
 			}
 		}, this.metaData.getFields(), this.metaData.getLists());
 
-		// Specify the X/Y values
-		writeLine("        this.setX(x);");
-		writeLine("        this.setY(y);");
+		if (isIncludeCoordinates) {
+			writeLine("        this.setX(x);");
+			writeLine("        this.setY(y);");
+		}
 
 		writeLine("    }");
 	}
@@ -500,37 +453,28 @@ public class ModelGenerator {
 				writeLine("    /**");
 				writeLine("     * " + field.getDescription());
 				writeLine("     */");
-				writeLine("    private " + field.getType() + " "
-						+ field.getPropertyName() + ";");
+				writeLine("    private " + field.getType() + " " + field.getPropertyName() + ";");
 				writeLine();
 
 				// Accessor
 				writeLine("    /**");
 				writeLine("     * @return " + field.getDescription());
 				writeLine("     */");
-				writeLine("    public " + field.getType() + " get"
-						+ field.getCamelCaseName() + "() {");
-				writeLine("        return this." + field.getPropertyName()
-						+ ";");
+				writeLine("    public " + field.getType() + " get" + field.getCamelCaseName() + "() {");
+				writeLine("        return this." + field.getPropertyName() + ";");
 				writeLine("    }");
 				writeLine();
 
 				// Mutator
 				writeLine("    /**");
-				writeLine("     * @param " + field.getPropertyName() + " "
-						+ field.getDescription());
+				writeLine("     * @param " + field.getPropertyName() + " " + field.getDescription());
 				writeLine("     */");
-				writeLine("    public void set" + field.getCamelCaseName()
-						+ "(" + field.getType() + " " + field.getPropertyName()
-						+ ") {");
-				writeLine("        " + field.getType() + " oldValue = this."
-						+ field.getPropertyName() + ";");
-				writeLine("        this." + field.getPropertyName() + " = "
-						+ field.getPropertyName() + ";");
-				writeLine("        this.changeField(oldValue, this."
-						+ field.getPropertyName() + ", "
-						+ ModelGenerator.this.metaData.getEventName()
-						+ ".CHANGE_" + field.getCapitalisedName() + ");");
+				writeLine("    public void set" + field.getCamelCaseName() + "(" + field.getType() + " "
+						+ field.getPropertyName() + ") {");
+				writeLine("        " + field.getType() + " oldValue = this." + field.getPropertyName() + ";");
+				writeLine("        this." + field.getPropertyName() + " = " + field.getPropertyName() + ";");
+				writeLine("        this.changeField(oldValue, this." + field.getPropertyName() + ", "
+						+ ModelGenerator.this.metaData.getEventName() + ".CHANGE_" + field.getCapitalisedName() + ");");
 				writeLine("    }");
 				writeLine();
 			}
@@ -552,8 +496,7 @@ public class ModelGenerator {
 				writeLine("    /**");
 				writeLine("     * " + list.getDescription());
 				writeLine("     */");
-				writeLine("    private List<" + list.getType() + "> "
-						+ list.getPropertyName() + " = new LinkedList<"
+				writeLine("    private List<" + list.getType() + "> " + list.getPropertyName() + " = new LinkedList<"
 						+ list.getType() + ">();");
 				writeLine();
 
@@ -561,40 +504,32 @@ public class ModelGenerator {
 				writeLine("    /**");
 				writeLine("     * @return " + list.getDescription());
 				writeLine("     */");
-				writeLine("    public List<" + list.getType() + "> get"
-						+ list.getPluralName() + "() {");
+				writeLine("    public List<" + list.getType() + "> get" + list.getPluralName() + "() {");
 				writeLine("        return this." + list.getPropertyName() + ";");
 				writeLine("    }");
 				writeLine();
 
 				// Add method
 				writeLine("    /**");
-				writeLine("     * @param " + list.getPropertyName() + " "
-						+ list.getDescription());
+				writeLine("     * @param " + list.getPropertyName() + " " + list.getDescription());
 				writeLine("     */");
-				writeLine("    public void add" + list.getCamelCaseName() + "("
-						+ list.getType() + " " + list.getPropertyName() + ") {");
-				writeLine("        this.addItemToList("
-						+ list.getPropertyName() + ", this."
-						+ list.getPropertyName() + ", "
-						+ ModelGenerator.this.metaData.getEventName() + ".ADD_"
-						+ list.getCapitalisedName() + ");");
+				writeLine("    public void add" + list.getCamelCaseName() + "(" + list.getType() + " "
+						+ list.getPropertyName() + ") {");
+				writeLine("        this.addItemToList(" + list.getPropertyName() + ", this." + list.getPropertyName()
+						+ ", " + ModelGenerator.this.metaData.getEventName() + ".ADD_" + list.getCapitalisedName()
+						+ ");");
 				writeLine("    }");
 				writeLine();
 
 				// Remove method
 				writeLine("    /**");
-				writeLine("     * @param " + list.getPropertyName() + " "
-						+ list.getDescription());
+				writeLine("     * @param " + list.getPropertyName() + " " + list.getDescription());
 				writeLine("     */");
-				writeLine("    public void remove" + list.getCamelCaseName()
-						+ "(" + list.getType() + " " + list.getPropertyName()
-						+ ") {");
-				writeLine("        this.removeItemFromList("
-						+ list.getPropertyName() + ", this."
-						+ list.getPropertyName() + ", "
-						+ ModelGenerator.this.metaData.getEventName()
-						+ ".REMOVE_" + list.getCapitalisedName() + ");");
+				writeLine("    public void remove" + list.getCamelCaseName() + "(" + list.getType() + " "
+						+ list.getPropertyName() + ") {");
+				writeLine("        this.removeItemFromList(" + list.getPropertyName() + ", this."
+						+ list.getPropertyName() + ", " + ModelGenerator.this.metaData.getEventName() + ".REMOVE_"
+						+ list.getCapitalisedName() + ");");
 				writeLine("    }");
 				writeLine();
 			}
@@ -624,8 +559,7 @@ public class ModelGenerator {
 			protected void writeField(FieldMetaData field) {
 				String endPointConnect = field.getEndPointConnect();
 				if (endPointConnect != null) {
-					writeLine("        this." + field.getPropertyName() + "."
-							+ endPointConnect + ";");
+					writeLine("        this." + field.getPropertyName() + "." + endPointConnect + ";");
 				}
 			}
 		}, this.metaData.getFields());
@@ -641,8 +575,7 @@ public class ModelGenerator {
 			protected void writeField(FieldMetaData field) {
 				String endPointRemove = field.getEndPointRemove();
 				if (endPointRemove != null) {
-					writeLine("        this." + field.getPropertyName() + "."
-							+ endPointRemove + ";");
+					writeLine("        this." + field.getPropertyName() + "." + endPointRemove + ";");
 				}
 			}
 		}, this.metaData.getFields());
@@ -664,14 +597,11 @@ public class ModelGenerator {
 		writeLine("     *");
 		writeLine("     * @return {@link RemoveConnectionsAction} to remove the {@link ConnectionModel} instances.");
 		writeLine("     */");
-		writeLine("    public RemoveConnectionsAction<"
-				+ this.metaData.getClassName() + "> removeConnections() {");
+		writeLine("    public RemoveConnectionsAction<" + this.metaData.getClassName() + "> removeConnections() {");
 
 		// Create the action for return
-		writeLine("        RemoveConnectionsAction<"
-				+ this.metaData.getClassName()
-				+ "> _action = new RemoveConnectionsAction<"
-				+ this.metaData.getClassName() + ">(this);");
+		writeLine("        RemoveConnectionsAction<" + this.metaData.getClassName()
+				+ "> _action = new RemoveConnectionsAction<" + this.metaData.getClassName() + ">(this);");
 
 		// Create the listing of properties
 		List<AbstractPropertyMetaData> allProperties = new LinkedList<AbstractPropertyMetaData>();
@@ -681,16 +611,13 @@ public class ModelGenerator {
 		// Disconnect connections
 		this.writeListing("", new WriteAction() {
 			@Override
-			protected void writeProperty(AbstractPropertyMetaData property)
-					throws Exception {
+			protected void writeProperty(AbstractPropertyMetaData property) throws Exception {
 				// Obtain the type meta-data
-				ModelMetaData typeMetaData = ModelGenerator.this.graphNode
-						.getModelMetaData(property.getType());
+				ModelMetaData typeMetaData = ModelGenerator.this.graphNode.getModelMetaData(property.getType());
 				if (typeMetaData != null) {
 					// Remove connection
 					if (typeMetaData.isConnectionModel()) {
-						writeLine("        _action.disconnect(this."
-								+ property.getPropertyName() + ");");
+						writeLine("        _action.disconnect(this." + property.getPropertyName() + ");");
 					}
 				}
 			}
@@ -702,10 +629,8 @@ public class ModelGenerator {
 			@Override
 			protected void writeField(FieldMetaData field) throws Exception {
 				if (field.isCascadeRemove()) {
-					writeLine("        if (this." + field.getPropertyName()
-							+ " != null) {");
-					writeLine("            _action.addCascadeModel(this."
-							+ field.getPropertyName()
+					writeLine("        if (this." + field.getPropertyName() + " != null) {");
+					writeLine("            _action.addCascadeModel(this." + field.getPropertyName()
 							+ ".removeConnections());");
 					writeLine("        }");
 				}
@@ -714,9 +639,7 @@ public class ModelGenerator {
 			@Override
 			protected void writeList(ListMetaData list) throws Exception {
 				if (list.isCascadeRemove()) {
-					writeLine("        for (" + list.getType()
-							+ " _cascade : this." + list.getPropertyName()
-							+ ") {");
+					writeLine("        for (" + list.getType() + " _cascade : this." + list.getPropertyName() + ") {");
 					writeLine("            _action.addCascadeModel(_cascade.removeConnections());");
 					writeLine("        }");
 				}
@@ -739,8 +662,7 @@ public class ModelGenerator {
 	 */
 	@SuppressWarnings("unchecked")
 	private void writeListing(String separator, WriteAction action,
-			List<? extends AbstractPropertyMetaData>... properties)
-			throws Exception {
+			List<? extends AbstractPropertyMetaData>... properties) throws Exception {
 
 		// Flag first
 		boolean isFirst = true;
@@ -771,15 +693,13 @@ public class ModelGenerator {
 		 * @throws Exception
 		 *             If fails.
 		 */
-		protected void writeProperty(AbstractPropertyMetaData property)
-				throws Exception {
+		protected void writeProperty(AbstractPropertyMetaData property) throws Exception {
 			if (property instanceof FieldMetaData) {
 				writeField((FieldMetaData) property);
 			} else if (property instanceof ListMetaData) {
 				writeList((ListMetaData) property);
 			} else {
-				throw new UnsupportedOperationException("Unkown type "
-						+ property.getClass().getName());
+				throw new UnsupportedOperationException("Unkown type " + property.getClass().getName());
 			}
 		}
 

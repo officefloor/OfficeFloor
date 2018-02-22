@@ -45,15 +45,12 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		GraphNodeMetaData general = new GraphNodeMetaData("License", null);
 
 		// Create the model meta-data
-		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor",
-				"", new String[] { "net.officefloor.test.SpecialType" },
+		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor", "",
+				new String[] { "net.officefloor.test.SpecialType" },
 				new String[] { "net.officefloor.test.MarkerInterface" },
-				new FieldMetaData[] {
-						new FieldMetaData("field one", "int", "Field one.",
-								null, null),
-						new FieldMetaData("field two", "String", null, null,
-								null) }, new ListMetaData[] {
-						new ListMetaData("list one", "Integer", "List one."),
+				new FieldMetaData[] { new FieldMetaData("field one", "int", "Field one.", null, null),
+						new FieldMetaData("field two", "String", null, null, null) },
+				new ListMetaData[] { new ListMetaData("list one", "Integer", "List one."),
 						new ListMetaData("list two", "SpecialType", null) });
 
 		// Validate conversions
@@ -66,14 +63,11 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		ModelFile modelFile = generator.generateModel(context);
 
 		// Validate file name
-		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
-				modelFile.getLocation());
+		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java", modelFile.getLocation());
 
 		// Validate content
-		String content = this.getFileContents(this.findFile(this.getClass(),
-				"Model_ModelExpectedContent.txt"));
-		assertContents(new StringReader(content), new StringReader(
-				context.modelText));
+		String content = this.getFileContents(this.findFile(this.getClass(), "Model_ModelExpectedContent.txt"));
+		assertContents(new StringReader(content), new StringReader(context.modelText));
 	}
 
 	/**
@@ -85,9 +79,8 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		GraphNodeMetaData general = new GraphNodeMetaData("License", null);
 
 		// Create the model meta-data
-		ModelMetaData metaData = new ModelMetaData("Empty", "net.officefloor",
-				"", new String[0], new String[0], new FieldMetaData[0],
-				new ListMetaData[0]);
+		ModelMetaData metaData = new ModelMetaData("Empty", "net.officefloor", "", new String[0], new String[0],
+				new FieldMetaData[0], new ListMetaData[0]);
 
 		// Validate conversions
 		assertEquals("Incorrect class", "EmptyModel", metaData.getClassName());
@@ -99,14 +92,11 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		ModelFile modelFile = generator.generateModel(context);
 
 		// Validate file name
-		assertEquals("Incorrect file name", "net/officefloor/EmptyModel.java",
-				modelFile.getLocation());
+		assertEquals("Incorrect file name", "net/officefloor/EmptyModel.java", modelFile.getLocation());
 
 		// Validate content
-		String content = this.getFileContents(this.findFile(this.getClass(),
-				"Model_EmptyModelExpectedContent.txt"));
-		assertContents(new StringReader(content), new StringReader(
-				context.modelText));
+		String content = this.getFileContents(this.findFile(this.getClass(), "Model_EmptyModelExpectedContent.txt"));
+		assertContents(new StringReader(content), new StringReader(context.modelText));
 	}
 
 	/**
@@ -118,12 +108,9 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		GraphNodeMetaData general = new GraphNodeMetaData("License", null);
 
 		// Create the model meta-data
-		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor",
-				"", new String[] {}, new String[] {}, new FieldMetaData[] {
-						new FieldMetaData("field one", "String",
-								"Test field one.", "link one", null),
-						new FieldMetaData("field two", "String",
-								"Test field two.", null, "link two") },
+		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor", "", new String[] {}, new String[] {},
+				new FieldMetaData[] { new FieldMetaData("field one", "String", "Test field one.", "link one", null),
+						new FieldMetaData("field two", "String", "Test field two.", null, "link two") },
 				new ListMetaData[] {});
 
 		// Generate the model
@@ -132,21 +119,17 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		ModelFile modelFile = generator.generateModel(context);
 
 		// Validate file name
-		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
-				modelFile.getLocation());
+		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java", modelFile.getLocation());
 
 		// Validate content
-		String content = this.getFileContents(this.findFile(this.getClass(),
-				"Model_ConnectionExpectedContent.txt"));
+		String content = this.getFileContents(this.findFile(this.getClass(), "Model_ConnectionExpectedContent.txt"));
 		BufferedReader actual = new BufferedReader(new StringReader(content));
-		BufferedReader expected = new BufferedReader(new StringReader(
-				context.modelText));
+		BufferedReader expected = new BufferedReader(new StringReader(context.modelText));
 		String actualLine, expectedLine;
 		int lineNumber = 1;
 		while ((actualLine = actual.readLine()) != null) {
 			expectedLine = expected.readLine();
-			assertEquals("Incorrect line " + lineNumber, actualLine,
-					expectedLine);
+			assertEquals("Incorrect line " + lineNumber, actualLine, expectedLine);
 			lineNumber++;
 		}
 	}
@@ -171,8 +154,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public ModelFile createModelFile(String location, InputStream contents)
-				throws Exception {
+		public ModelFile createModelFile(String location, InputStream contents) throws Exception {
 
 			// Record the location
 			this.location = location;

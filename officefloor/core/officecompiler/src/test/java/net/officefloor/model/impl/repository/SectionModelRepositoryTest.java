@@ -107,7 +107,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		assertList(new String[] { "getExternalManagedObjectName", "getObjectType", "getX", "getY" },
 				section.getExternalManagedObjects(),
-				new ExternalManagedObjectModel("MO", Object.class.getName(), null, null, null, 100, 101));
+				new ExternalManagedObjectModel("MO", Object.class.getName(), 100, 101));
 
 		// ----------------------------------------------
 		// Validate the managed object sources
@@ -115,9 +115,8 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(
 				new String[] { "getSectionManagedObjectSourceName", "getManagedObjectSourceClassName", "getObjectType",
 						"getTimeout", "getX", "getY" },
-				section.getSectionManagedObjectSources(),
-				new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource",
-						"net.orm.Session", "10", null, null, null, null, 200, 201));
+				section.getSectionManagedObjectSources(), new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
+						"net.example.ExampleManagedObjectSource", "net.orm.Session", "10", 200, 201));
 		SectionManagedObjectSourceModel mos = section.getSectionManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
@@ -139,8 +138,8 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		assertList(new String[] { "getSectionManagedObjectName", "getManagedObjectScope", "getX", "getY" },
 				section.getSectionManagedObjects(),
-				new SectionManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, 300, 301),
-				new SectionManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, 310, 311));
+				new SectionManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", 300, 301),
+				new SectionManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", 310, 311));
 		SectionManagedObjectModel mo = section.getSectionManagedObjects().get(0);
 		assertProperties(new SectionManagedObjectToSectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				mo.getSectionManagedObjectSource(), "getSectionManagedObjectSourceName");
@@ -162,7 +161,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 				new String[] { "getSectionManagedObjectPoolName", "getManagedObjectPoolSourceClassName", "getX",
 						"getY" },
 				section.getSectionManagedObjectPools(), new SectionManagedObjectPoolModel("MANAGED_OBJECT_POOL",
-						"net.example.ExampleManagedObjectPoolSource", null, null, 400, 401));
+						"net.example.ExampleManagedObjectPoolSource", 400, 401));
 		SectionManagedObjectPoolModel pool = section.getSectionManagedObjectPools().get(0);
 		assertList(new String[] { "getName", "getValue" }, pool.getProperties(),
 				new PropertyModel("POOL_ONE", "VALUE_ONE"), new PropertyModel("POOL_TWO", "VALUE_TWO"));
@@ -171,16 +170,15 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the external flows
 		// ----------------------------------------------
 		assertList(new String[] { "getExternalFlowName", "getArgumentType", "getX", "getY" },
-				section.getExternalFlows(),
-				new ExternalFlowModel("FLOW", String.class.getName(), null, null, null, null, null, 500, 501),
-				new ExternalFlowModel("ESCALATION", "java.lang.Throwable", null, null, null, null, null, 510, 511));
+				section.getExternalFlows(), new ExternalFlowModel("FLOW", String.class.getName(), 500, 501),
+				new ExternalFlowModel("ESCALATION", "java.lang.Throwable", 510, 511));
 
 		// ----------------------------------------
 		// Validate the Function Namespace
 		// ----------------------------------------
 		assertList(new String[] { "getFunctionNamespaceName", "getManagedFunctionSourceClassName", "getX", "getY" },
-				section.getFunctionNamespaces(), new FunctionNamespaceModel("function-namespace",
-						"net.example.ExampleManagedFunctionSource", null, null, 600, 601));
+				section.getFunctionNamespaces(),
+				new FunctionNamespaceModel("function-namespace", "net.example.ExampleManagedFunctionSource", 600, 601));
 		FunctionNamespaceModel namespace = section.getFunctionNamespaces().get(0);
 
 		// Validate properties of namespace
@@ -231,13 +229,11 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		List<FunctionModel> functions = new LinkedList<FunctionModel>();
 		functions.add(new FunctionModel("functionOne", true, "namespace", "managedFunctionOne", "java.lang.Integer",
-				null, null, null, null, null, null, null, null, null, null, null, 700, 701));
-		functions.add(new FunctionModel("functionTwo", false, "namespace", "managedFunctionTwo", null, null, null, null,
-				null, null, null, null, null, null, null, null, 710, 711));
+				700, 701));
+		functions.add(new FunctionModel("functionTwo", false, "namespace", "managedFunctionTwo", null, 710, 711));
 		functions.add(new FunctionModel("functionThree", false, "namespace", "managedFunctionThree",
-				"java.lang.Integer", null, null, null, null, null, null, null, null, null, null, null, 720, 721));
-		functions.add(new FunctionModel("functionFour", false, "namespace", "managedFunctionFour", null, null, null,
-				null, null, null, null, null, null, null, null, null, 730, 731));
+				"java.lang.Integer", 720, 721));
+		functions.add(new FunctionModel("functionFour", false, "namespace", "managedFunctionFour", null, 730, 731));
 		assertList(new String[] { "getFunctionName", "getFunctionNamespaceName", "getManagedFunctionName",
 				"getReturnType", "getX", "getY" }, section.getFunctions(), functions.toArray(new FunctionModel[0]));
 		FunctionModel functionOne = section.getFunctions().get(0);
@@ -318,11 +314,9 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		assertList(
 				new String[] { "getSubSectionName", "getSectionSourceClassName", "getSectionLocation", "getX", "getY" },
-				section.getSubSections(),
-				new SubSectionModel("SECTION_A", "DESK", "DESK_LOCATION", null, null, null, null, 800, 801),
-				new SubSectionModel("SECTION_B", "SECTION", "SECTION_LOCATION", null, null, null, null, 810, 811),
-				new SubSectionModel("SECTION_C", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", null, null,
-						null, null, 820, 821));
+				section.getSubSections(), new SubSectionModel("SECTION_A", "DESK", "DESK_LOCATION", 800, 801),
+				new SubSectionModel("SECTION_B", "SECTION", "SECTION_LOCATION", 810, 811),
+				new SubSectionModel("SECTION_C", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", 820, 821));
 		SubSectionModel subSectionA = section.getSubSections().get(0);
 		SubSectionModel subSectionB = section.getSubSections().get(1);
 		SubSectionModel subSectionC = section.getSubSections().get(2);

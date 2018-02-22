@@ -1,14 +1,15 @@
 <woof>
 
 	<http-continuations>
-		<http-continuation path="/pathA" secure="true">
+		<http-continuation path="/pathA" secure="true" x="100"
+			y="1001">
 			<section name="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
 			<security name="SECURITY_A" />
 			<resource path="/resourceA.html" />
 			<redirect path="/pathB" />
 		</http-continuation>
-		<http-continuation path="/pathB" />
+		<http-continuation path="/pathB" x="110" y="111" />
 	</http-continuations>
 
 	<http-inputs>
