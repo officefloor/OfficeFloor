@@ -1,0 +1,7 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path" />
+	</http-continuations>
+
+</woof>

@@ -1,8 +1,12 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/path" />
-	</application-paths>
+	<http-continuations>
+		<http-continuation path="/path" />
+	</http-continuations>
+
+	<http-inputs>
+		<http-input method="POST" path="/input" />
+	</http-inputs>
 
 	<templates />
 
@@ -26,7 +30,7 @@
 	<exceptions>
 		<exception class="java.lang.Exception" />
 	</exceptions>
-	
+
 	<starts>
 		<start />
 	</starts>

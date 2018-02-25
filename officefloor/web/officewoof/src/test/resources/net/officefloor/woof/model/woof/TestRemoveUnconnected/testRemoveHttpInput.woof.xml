@@ -4,9 +4,7 @@
 		<http-continuation path="/path" />
 	</http-continuations>
 
-	<http-inputs>
-		<http-input method="POST" path="/input" />
-	</http-inputs>
+	<http-inputs />
 
 	<templates>
 		<template path="/template" location="example/Template.ofp"
@@ -30,7 +28,9 @@
 		<security name="SECURITY" source="net.example.HttpSecuritySource" />
 	</securities>
 
-	<governances />
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
+	</governances>
 
 	<resources>
 		<resource path="Example.html" />

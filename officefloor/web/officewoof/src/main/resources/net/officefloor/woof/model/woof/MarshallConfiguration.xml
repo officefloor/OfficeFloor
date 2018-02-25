@@ -2,23 +2,16 @@
 <marshall type="net.officefloor.woof.model.woof.WoofModel"
 	element="woof">
 
-	<!-- APPLICATION PATHS -->
-	<collection method="getWoofApplicationPaths" element="application-paths">
-		<item type="net.officefloor.woof.model.woof.WoofApplicationPathModel"
-			element="application-path">
+	<!-- HTTP CONTINUATIONS -->
+	<collection method="getWoofHttpContinuations" element="http-continuations">
+		<item type="net.officefloor.woof.model.woof.WoofHttpContinuationModel"
+			element="http-continuation">
 			<attributes>
 				<attribute method="getApplicationPath" attribute="path" />
 				<attribute method="getIsSecure" attribute="secure" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
-			<collection method="getHttpMethods">
-				<item
-					type="net.officefloor.woof.model.woof.WoofApplicationPathHttpMethodModel"
-					element="service">
-					<attributes>
-						<attribute method="getHttpMethodName" attribute="method" />
-					</attributes>
-				</item>
-			</collection>
 			<object method="getWoofSectionInput" element="section">
 				<attributes>
 					<attribute method="getSectionName" attribute="name" />
@@ -40,7 +33,47 @@
 					<attribute method="getResourcePath" attribute="path" />
 				</attributes>
 			</object>
-			<object method="getWoofApplicationPath" element="redirect">
+			<object method="getWoofHttpContinuation" element="redirect">
+				<attributes>
+					<attribute method="getApplicationPath" attribute="path" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
+
+	<!-- HTTP INPUTS -->
+	<collection method="getWoofHttpInputs" element="http-inputs">
+		<item type="net.officefloor.woof.model.woof.WoofHttpInputModel"
+			element="http-input">
+			<attributes>
+				<attribute method="getApplicationPath" attribute="path" />
+				<attribute method="getHttpMethod" attribute="method" />
+				<attribute method="getIsSecure" attribute="secure" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getWoofSectionInput" element="section">
+				<attributes>
+					<attribute method="getSectionName" attribute="name" />
+					<attribute method="getInputName" attribute="input" />
+				</attributes>
+			</object>
+			<object method="getWoofTemplate" element="template">
+				<attributes>
+					<attribute method="getApplicationPath" attribute="path" />
+				</attributes>
+			</object>
+			<object method="getWoofSecurity" element="security">
+				<attributes>
+					<attribute method="getHttpSecurityName" attribute="name" />
+				</attributes>
+			</object>
+			<object method="getWoofResource" element="resource">
+				<attributes>
+					<attribute method="getResourcePath" attribute="path" />
+				</attributes>
+			</object>
+			<object method="getWoofHttpContinuation" element="redirect">
 				<attributes>
 					<attribute method="getApplicationPath" attribute="path" />
 				</attributes>
@@ -117,7 +150,7 @@
 							<attribute method="getResourcePath" attribute="path" />
 						</attributes>
 					</object>
-					<object method="getWoofApplicationPath" element="redirect">
+					<object method="getWoofHttpContinuation" element="redirect">
 						<attributes>
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
@@ -201,7 +234,7 @@
 							<attribute method="getResourcePath" attribute="path" />
 						</attributes>
 					</object>
-					<object method="getWoofApplicationPath" element="redirect">
+					<object method="getWoofHttpContinuation" element="redirect">
 						<attributes>
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
@@ -268,7 +301,7 @@
 							<attribute method="getResourcePath" attribute="path" />
 						</attributes>
 					</object>
-					<object method="getWoofApplicationPath" element="redirect">
+					<object method="getWoofHttpContinuation" element="redirect">
 						<attributes>
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
@@ -354,7 +387,7 @@
 					<attribute method="getResourcePath" attribute="path" />
 				</attributes>
 			</object>
-			<object method="getWoofApplicationPath" element="redirect">
+			<object method="getWoofHttpContinuation" element="redirect">
 				<attributes>
 					<attribute method="getApplicationPath" attribute="path" />
 				</attributes>

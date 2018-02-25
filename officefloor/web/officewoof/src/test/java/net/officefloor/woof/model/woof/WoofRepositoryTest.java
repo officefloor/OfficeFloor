@@ -75,7 +75,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addOutput(sectionOutput);
 		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000);
 		woof.addWoofSecurity(security);
-		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("ACCESS_OUTPUT", null);
+		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("SECURITY_OUTPUT", null);
 		security.addOutput(securityOutput);
 		WoofResourceModel resource = new WoofResourceModel("RESOURCE");
 		woof.addWoofResource(resource);
@@ -109,9 +109,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		httpContinuation.setWoofSecurity(continuationToSecurity);
 
 		// Continuation -> Continuation
-		WoofHttpContinuationToWoofHttpContinuationModel continuationToApplicationPath = new WoofHttpContinuationToWoofHttpContinuationModel(
+		WoofHttpContinuationToWoofHttpContinuationModel continuationToContinuation = new WoofHttpContinuationToWoofHttpContinuationModel(
 				"HTTP_CONTINUATION");
-		httpContinuation.setWoofHttpContinuation(continuationToApplicationPath);
+		httpContinuation.setWoofHttpContinuation(continuationToContinuation);
 
 		/*
 		 * HTTP Input links
@@ -135,9 +135,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		httpInput.setWoofSecurity(httpInputToSecurity);
 
 		// HTTP Input -> Continuation
-		WoofHttpInputToWoofHttpContinuationModel httpInputToApplicationPath = new WoofHttpInputToWoofHttpContinuationModel(
+		WoofHttpInputToWoofHttpContinuationModel httpInputToContinuation = new WoofHttpInputToWoofHttpContinuationModel(
 				"HTTP_CONTINUATION");
-		httpInput.setWoofHttpContinuation(httpInputToApplicationPath);
+		httpInput.setWoofHttpContinuation(httpInputToContinuation);
 
 		/**
 		 * Template Output links
@@ -285,11 +285,19 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// HTTP Continuation links
 		AssertLinks<WoofHttpContinuationModel> assertHttpContinuation = new AssertLinks<>("http continuation",
 				httpContinuation);
-		assertHttpContinuation.assertLink(httpInputToSectionInput, "section input", sectionInput);
-		assertHttpContinuation.assertLink(httpInputToTemplate, "template", template);
-		assertHttpContinuation.assertLink(httpInputToResource, "resource", resource);
-		assertHttpContinuation.assertLink(httpInputToSecurity, "security", security);
-		assertHttpContinuation.assertLink(httpInputToApplicationPath, "application path", httpContinuation);
+		assertHttpContinuation.assertLink(continuationToSectionInput, "section input", sectionInput);
+		assertHttpContinuation.assertLink(continuationToTemplate, "template", template);
+		assertHttpContinuation.assertLink(continuationToResource, "resource", resource);
+		assertHttpContinuation.assertLink(continuationToSecurity, "security", security);
+		assertHttpContinuation.assertLink(continuationToContinuation, "http continuation", httpContinuation);
+
+		// HTTP Input links
+		AssertLinks<WoofHttpInputModel> assertHttpInput = new AssertLinks<>("http input", httpInput);
+		assertHttpInput.assertLink(httpInputToSectionInput, "section input", sectionInput);
+		assertHttpInput.assertLink(httpInputToTemplate, "template", template);
+		assertHttpInput.assertLink(httpInputToResource, "resource", resource);
+		assertHttpInput.assertLink(httpInputToSecurity, "security", security);
+		assertHttpInput.assertLink(httpInputToContinuation, "http continuation", httpContinuation);
 
 		// Template links
 		AssertLinks<WoofTemplateModel> assertTemplate = new AssertLinks<>("template", template);
@@ -302,7 +310,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertTemplateOutput.assertLink(templateOutputToTemplate, "template", template);
 		assertTemplateOutput.assertLink(templateOutputToResource, "resource", resource);
 		assertTemplateOutput.assertLink(templateOutputToSecurity, "security", security);
-		assertTemplateOutput.assertLink(templateOutputToContinuation, "application path", httpContinuation);
+		assertTemplateOutput.assertLink(templateOutputToContinuation, "http continuation", httpContinuation);
 
 		// Section Output links
 		AssertLinks<WoofSectionOutputModel> assertSectionOutput = new AssertLinks<>("section output", sectionOutput);
@@ -310,7 +318,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertSectionOutput.assertLink(sectionOutputToTemplate, "template", template);
 		assertSectionOutput.assertLink(sectionOutputToResource, "resource", resource);
 		assertSectionOutput.assertLink(sectionOutputToSecurity, "security", security);
-		assertSectionOutput.assertLink(sectionOutputToContinuation, "application path", httpContinuation);
+		assertSectionOutput.assertLink(sectionOutputToContinuation, "http continuation", httpContinuation);
 
 		// Security Output links
 		AssertLinks<WoofSecurityOutputModel> assertSecurityOutput = new AssertLinks<>("security output",
@@ -319,7 +327,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertSecurityOutput.assertLink(securityOutputToTemplate, "template", template);
 		assertSecurityOutput.assertLink(securityOutputToResource, "resource", resource);
 		assertSecurityOutput.assertLink(securityOutputToSecurity, "security", security);
-		assertSecurityOutput.assertLink(securityOutputToContinuation, "application path", httpContinuation);
+		assertSecurityOutput.assertLink(securityOutputToContinuation, "http continuation", httpContinuation);
 
 		// Exception links
 		AssertLinks<WoofExceptionModel> assertException = new AssertLinks<>("exception", exception);
@@ -327,7 +335,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertException.assertLink(exceptionToTemplate, "template", template);
 		assertException.assertLink(exceptionToResource, "resource", resource);
 		assertException.assertLink(exceptionToSecurity, "security", security);
-		assertException.assertLink(exceptionToContinuation, "application path", httpContinuation);
+		assertException.assertLink(exceptionToContinuation, "http continuation", httpContinuation);
 
 		// Start links
 		AssertLinks<WoofStartModel> assertStart = new AssertLinks<>("start", start);
@@ -425,15 +433,15 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// HTTP Input links
 		WoofHttpInputToWoofSectionInputModel httpInputToSectionInput = link(new WoofHttpInputToWoofSectionInputModel(),
-				httpContinuation, sectionInput);
+				httpInput, sectionInput);
 		WoofHttpInputToWoofTemplateModel httpInputPathToTemplate = link(new WoofHttpInputToWoofTemplateModel(),
-				httpContinuation, template);
+				httpInput, template);
 		WoofHttpInputToWoofResourceModel httpInputPathToResource = link(new WoofHttpInputToWoofResourceModel(),
-				httpContinuation, resource);
+				httpInput, resource);
 		WoofHttpInputToWoofSecurityModel httpInputPathToSecurity = link(new WoofHttpInputToWoofSecurityModel(),
-				httpContinuation, security);
+				httpInput, security);
 		WoofHttpInputToWoofHttpContinuationModel httpInputPathToApplicationPath = link(
-				new WoofHttpInputToWoofHttpContinuationModel(), httpContinuation, httpContinuation);
+				new WoofHttpInputToWoofHttpContinuationModel(), httpInput, httpContinuation);
 
 		// Template links
 		WoofTemplateToSuperWoofTemplateModel templateToSuperTemplate = link(new WoofTemplateToSuperWoofTemplateModel(),

@@ -1,16 +1,7 @@
 <woof>
 
 	<http-continuations>
-		<http-continuation path="/applicationPath">
-			<section name="SECTION" input="INPUT" />
-			<template path="/template" />
-			<security name="SECURITY" />
-			<resource path="/resource.html" />
-			<redirect path="/applicationPathLink" />
-		</http-continuation>
-		<http-continuation path="/applicationPathLink">
-			<redirect path="/applicationPath" />
-		</http-continuation>
+		<http-continuation path="/applicationPathLink" />
 	</http-continuations>
 
 	<http-inputs>
@@ -19,9 +10,9 @@
 			<template path="/template" />
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
-			<redirect path="/applicationPath" />
 		</http-input>
 	</http-inputs>
+
 
 	<templates>
 		<template path="/template" location="example/Template.ofp"
@@ -39,9 +30,7 @@
 			<output name="OUTPUT_4">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_5">
-				<redirect path="/applicationPath" />
-			</output>
+			<output name="OUTPUT_5" />
 		</template>
 		<template path="/templateChild" location="example/Child.ofp">
 			<extends template="/template" />
@@ -69,9 +58,7 @@
 			<output name="OUTPUT_D">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_E">
-				<redirect path="/applicationPath" />
-			</output>
+			<output name="OUTPUT_E" />
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
 			location="LINK_LOCATION">
@@ -96,9 +83,7 @@
 			<output name="OUTPUT_d">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_e">
-				<redirect path="/applicationPath" />
-			</output>
+			<output name="OUTPUT_e" />
 		</security>
 		<security name="SECURITY_LINK" source="net.another.HttpSecuritySource">
 			<output name="OUTPUT">
@@ -111,7 +96,14 @@
 		<resource path="/resource.html" />
 	</resources>
 
-	<exceptions />
+	<exceptions>
+		<exception class="java.lang.Exception">
+			<section name="SECTION" input="INPUT" />
+			<template path="/template" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+		</exception>
+	</exceptions>
 
 	<starts>
 		<start>

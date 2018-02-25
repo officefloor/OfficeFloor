@@ -509,6 +509,13 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
+	 * Sorts the {@link WoofHttpInputModel} instances.
+	 */
+	private void sortHttpInputs() {
+		sortModelList(this.model.getWoofHttpInputs(), (model) -> model.getApplicationPath());
+	}
+
+	/**
 	 * Obtains the {@link WoofSectionModel} for the
 	 * {@link WoofSectionInputModel}.
 	 * 
@@ -633,7 +640,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpContinuationModel> addHttpContinuation(String applicationPath, boolean isSecure) {
 
-		// Create the application path
+		// Create the HTTP continuation
 		final WoofHttpContinuationModel path = new WoofHttpContinuationModel(isSecure, applicationPath);
 
 		// Return change to add HTTP continuation
@@ -669,7 +676,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to remove application path
 		return new AbstractChange<WoofHttpContinuationModel>(httpContinuation,
-				"Remove HTTP continuation" + httpContinuation.getApplicationPath()) {
+				"Remove HTTP continuation " + httpContinuation.getApplicationPath()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -686,6 +693,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(httpContinuation.getWoofSecurityOutputs(), list);
 				removeConnections(httpContinuation.getWoofExceptions(), list);
 				removeConnections(httpContinuation.getWoofRedirects(), list);
+				removeConnections(httpContinuation.getWoofHttpInputs(), list);
 				removeConnection(httpContinuation.getWoofSectionInput(), list);
 				removeConnection(httpContinuation.getWoofTemplate(), list);
 				removeConnection(httpContinuation.getWoofSecurity(), list);
@@ -709,14 +717,74 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofHttpInputModel> addHttpInput(String applicationPath, String httpMethodName, boolean isSecure) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the HTTP input
+		final WoofHttpInputModel path = new WoofHttpInputModel(isSecure, httpMethodName, applicationPath);
+
+		// Return change to add HTTP input
+		return new AbstractChange<WoofHttpInputModel>(path, "Add HTTP Input") {
+			@Override
+			public void apply() {
+				WoofChangesImpl.this.model.addWoofHttpInput(path);
+				WoofChangesImpl.this.sortHttpInputs();
+			}
+
+			@Override
+			public void revert() {
+				WoofChangesImpl.this.model.removeWoofHttpInput(path);
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpInputModel> removeHttpInput(WoofHttpInputModel httpInput) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Ensure HTTP input available to remove
+		boolean isInModel = false;
+		for (WoofHttpInputModel model : this.model.getWoofHttpInputs()) {
+			if (model == httpInput) {
+				isInModel = true;
+			}
+		}
+		if (!isInModel) {
+			// Application path model not in model
+			return new NoChange<WoofHttpInputModel>(httpInput, "Remove HTTP input " + httpInput.getApplicationPath(),
+					" is not in WoOF model");
+		}
+
+		// Return change to remove application path
+		return new AbstractChange<WoofHttpInputModel>(httpInput,
+				"Remove HTTP input " + httpInput.getHttpMethod() + " " + httpInput.getApplicationPath()) {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+
+				// Remove the connections
+				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+				removeConnection(httpInput.getWoofSectionInput(), list);
+				removeConnection(httpInput.getWoofTemplate(), list);
+				removeConnection(httpInput.getWoofSecurity(), list);
+				removeConnection(httpInput.getWoofResource(), list);
+				removeConnection(httpInput.getWoofHttpContinuation(), list);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
+
+				// Remove the HTTP input
+				WoofChangesImpl.this.model.removeWoofHttpInput(httpInput);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the HTTP input
+				WoofChangesImpl.this.model.addWoofHttpInput(httpInput);
+				reconnectConnections(this.connections);
+				WoofChangesImpl.this.sortHttpInputs();
+			}
+		};
 	}
 
 	@Override
@@ -1116,6 +1184,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(template.getWoofSecurityOutputs(), list);
 				removeConnections(template.getWoofExceptions(), list);
 				removeConnections(template.getWoofHttpContinuations(), list);
+				removeConnections(template.getWoofHttpInputs(), list);
 				for (WoofTemplateOutputModel output : template.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
@@ -1566,6 +1635,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnections(input.getWoofSecurityOutputs(), list);
 					removeConnections(input.getWoofExceptions(), list);
 					removeConnections(input.getWoofHttpContinuations(), list);
+					removeConnections(input.getWoofHttpInputs(), list);
 					removeConnections(input.getWoofStarts(), list);
 				}
 				for (WoofSectionOutputModel output : section.getOutputs()) {
@@ -1867,6 +1937,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(security.getWoofSecurityOutputs(), list);
 				removeConnections(security.getWoofExceptions(), list);
 				removeConnections(security.getWoofHttpContinuations(), list);
+				removeConnections(security.getWoofHttpInputs(), list);
 				for (WoofSecurityOutputModel output : security.getOutputs()) {
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofTemplate(), list);
@@ -2180,6 +2251,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(resource.getWoofSecurityOutputs(), list);
 				removeConnections(resource.getWoofExceptions(), list);
 				removeConnections(resource.getWoofHttpContinuations(), list);
+				removeConnections(resource.getWoofHttpInputs(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the resource

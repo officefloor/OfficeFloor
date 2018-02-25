@@ -1,8 +1,19 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/applicationPathLink" />
-	</application-paths>
+	<http-continuations>
+		<http-continuation path="/applicationPath">
+			<section name="SECTION" input="INPUT" />
+			<template path="/template" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPathLink" />
+		</http-continuation>
+		<http-continuation path="/applicationPathLink">
+			<redirect path="/applicationPath" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs />
 
 	<templates>
 		<template path="/template" location="example/Template.ofp"
@@ -20,7 +31,9 @@
 			<output name="OUTPUT_4">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_5" />
+			<output name="OUTPUT_5">
+				<redirect path="/applicationPath" />
+			</output>
 		</template>
 		<template path="/templateChild" location="example/Child.ofp">
 			<extends template="/template" />
@@ -48,7 +61,9 @@
 			<output name="OUTPUT_D">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_E" />
+			<output name="OUTPUT_E">
+				<redirect path="/applicationPath" />
+			</output>
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
 			location="LINK_LOCATION">
@@ -73,7 +88,9 @@
 			<output name="OUTPUT_d">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_e" />
+			<output name="OUTPUT_e">
+				<redirect path="/applicationPath" />
+			</output>
 		</security>
 		<security name="SECURITY_LINK" source="net.another.HttpSecuritySource">
 			<output name="OUTPUT">
@@ -92,6 +109,7 @@
 			<template path="/template" />
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
+			<redirect path="/applicationPath" />
 		</exception>
 	</exceptions>
 

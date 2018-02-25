@@ -49,7 +49,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 
 		// Remove the HTTP Input
 		Change<WoofHttpInputModel> change = this.operations.removeHttpInput(httpInput);
-		this.assertChange(change, httpInput, "Remove HTTP input /applicationPath", true);
+		this.assertChange(change, httpInput, "Remove HTTP input POST /inputPath", true);
 	}
 
 	/**

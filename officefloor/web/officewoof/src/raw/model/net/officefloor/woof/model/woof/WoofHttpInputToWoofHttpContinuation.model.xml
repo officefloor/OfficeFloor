@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="application path" />
-	<field type="WoofHttpInputModel" name="woof input" end-field="woof http continuation" />
+	<field type="WoofHttpInputModel" name="woof http input"
+		end-field="woof http continuation" />
 	<field type="WoofHttpContinuationModel" name="woof http continuation"
 		end-list="woof http input" />
 </model>

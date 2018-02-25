@@ -1,34 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="woof" class="net.officefloor.woof.model.woof.WoofModel">
 
-	<!-- APPLICATION PATH -->
-	<object method="addWoofApplicationPath" node="application-path"
-		class="net.officefloor.woof.model.woof.WoofApplicationPathModel">
-		<value method="setApplicationPath" node="application-path@path" />
-		<value method="setIsSecure" node="application-path@secure" />
-		<object method="addHttpMethod" node="service"
-			class="net.officefloor.woof.model.woof.WoofApplicationPathHttpMethodModel">
-			<value method="setHttpMethodName" node="service@method" />
-		</object>
+	<!-- HTTP CONTINUATION -->
+	<object method="addWoofHttpContinuation" node="http-continuation"
+		class="net.officefloor.woof.model.woof.WoofHttpContinuationModel">
+		<value method="setIsSecure" node="http-continuation@secure" />
+		<value method="setApplicationPath" node="http-continuation@path" />
+		<value method="setX" node="http-continuation@x" />
+		<value method="setY" node="http-continuation@y" />
 		<object method="setWoofSectionInput" node="section"
-			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofSectionInputModel">
+			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel">
 			<value method="setSectionName" node="section@name" />
 			<value method="setInputName" node="section@input" />
 		</object>
 		<object method="setWoofTemplate" node="template"
-			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofTemplateModel">
+			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel">
 			<value method="setApplicationPath" node="template@path" />
 		</object>
 		<object method="setWoofResource" node="resource"
-			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofResourceModel">
+			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofResourceModel">
 			<value method="setResourcePath" node="resource@path" />
 		</object>
 		<object method="setWoofSecurity" node="security"
-			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofSecurityModel">
+			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel">
 			<value method="setHttpSecurityName" node="security@name" />
 		</object>
-		<object method="setWoofApplicationPath" node="redirect"
-			class="net.officefloor.woof.model.woof.WoofApplicationPathToWoofApplicationPathModel">
+		<object method="setWoofHttpContinuation" node="redirect"
+			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofHttpContinuationModel">
+			<value method="setApplicationPath" node="redirect@path" />
+		</object>
+	</object>
+
+	<!-- HTTP INPUT -->
+	<object method="addWoofHttpInput" node="http-input"
+		class="net.officefloor.woof.model.woof.WoofHttpInputModel">
+		<value method="setIsSecure" node="http-input@secure" />
+		<value method="setHttpMethod" node="http-input@method" />
+		<value method="setApplicationPath" node="http-input@path" />
+		<value method="setX" node="http-input@x" />
+		<value method="setY" node="http-input@y" />
+		<object method="setWoofSectionInput" node="section"
+			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofSectionInputModel">
+			<value method="setSectionName" node="section@name" />
+			<value method="setInputName" node="section@input" />
+		</object>
+		<object method="setWoofTemplate" node="template"
+			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofTemplateModel">
+			<value method="setApplicationPath" node="template@path" />
+		</object>
+		<object method="setWoofResource" node="resource"
+			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofResourceModel">
+			<value method="setResourcePath" node="resource@path" />
+		</object>
+		<object method="setWoofSecurity" node="security"
+			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel">
+			<value method="setHttpSecurityName" node="security@name" />
+		</object>
+		<object method="setWoofHttpContinuation" node="redirect"
+			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel">
 			<value method="setApplicationPath" node="redirect@path" />
 		</object>
 	</object>
@@ -80,8 +109,8 @@
 				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel">
 				<value method="setResourcePath" node="resource@path" />
 			</object>
-			<object method="setWoofApplicationPath" node="redirect"
-				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofApplicationPathModel">
+			<object method="setWoofHttpContinuation" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofHttpContinuationModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
 		</object>
@@ -135,8 +164,8 @@
 				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel">
 				<value method="setResourcePath" node="resource@path" />
 			</object>
-			<object method="setWoofApplicationPath" node="redirect"
-				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofApplicationPathModel">
+			<object method="setWoofHttpContinuation" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofHttpContinuationModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
 		</object>
@@ -180,8 +209,8 @@
 				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel">
 				<value method="setHttpSecurityName" node="security@name" />
 			</object>
-			<object method="setWoofApplicationPath" node="redirect"
-				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofApplicationPathModel">
+			<object method="setWoofHttpContinuation" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofHttpContinuationModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
 		</object>
@@ -239,8 +268,8 @@
 			class="net.officefloor.woof.model.woof.WoofExceptionToWoofSecurityModel">
 			<value method="setHttpSecurityName" node="security@name" />
 		</object>
-		<object method="setWoofApplicationPath" node="redirect"
-			class="net.officefloor.woof.model.woof.WoofExceptionToWoofApplicationPathModel">
+		<object method="setWoofHttpContinuation" node="redirect"
+			class="net.officefloor.woof.model.woof.WoofExceptionToWoofHttpContinuationModel">
 			<value method="setApplicationPath" node="redirect@path" />
 		</object>
 	</object>

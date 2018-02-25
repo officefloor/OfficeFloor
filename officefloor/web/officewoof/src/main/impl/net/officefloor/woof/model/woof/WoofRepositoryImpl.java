@@ -132,6 +132,46 @@ public class WoofRepositoryImpl implements WoofRepository {
 					});
 		}
 
+		// Connect HTTP Inputs
+		for (WoofHttpInputModel httpInput : woof.getWoofHttpInputs()) {
+			Connector<WoofHttpInputModel> connector = new Connector<>(httpInput);
+
+			// Section Inputs
+			connector.connect(httpInput.getWoofSectionInput(),
+					(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()), (conn, source, target) -> {
+						conn.setWoofHttpInput(source);
+						conn.setWoofSectionInput(target);
+					});
+
+			// Templates
+			connector.connect(httpInput.getWoofTemplate(), (conn) -> templates.get(conn.getApplicationPath()),
+					(conn, source, target) -> {
+						conn.setWoofHttpInput(source);
+						conn.setWoofTemplate(target);
+					});
+
+			// Resources
+			connector.connect(httpInput.getWoofResource(), (conn) -> resources.get(conn.getResourcePath()),
+					(conn, source, target) -> {
+						conn.setWoofHttpInput(source);
+						conn.setWoofResource(target);
+					});
+
+			// Securities
+			connector.connect(httpInput.getWoofSecurity(), (conn) -> securities.get(conn.getHttpSecurityName()),
+					(conn, source, target) -> {
+						conn.setWoofHttpInput(source);
+						conn.setWoofSecurity(target);
+					});
+
+			// Redirects
+			connector.connect(httpInput.getWoofHttpContinuation(),
+					(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
+						conn.setWoofHttpInput(source);
+						conn.setWoofHttpContinuation(target);
+					});
+		}
+
 		// Connect Template
 		for (WoofTemplateModel template : woof.getWoofTemplates()) {
 			Connector<WoofTemplateModel> connector = new Connector<>(template);
@@ -415,6 +455,11 @@ public class WoofRepositoryImpl implements WoofRepository {
 			for (WoofHttpContinuationToWoofHttpContinuationModel conn : httpContinuation.getWoofRedirects()) {
 				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
+
+			// Specify HTTP inputs
+			for (WoofHttpInputToWoofHttpContinuationModel conn : httpContinuation.getWoofHttpInputs()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
+			}
 		}
 
 		// Specify section inputs
@@ -447,6 +492,12 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 				// Specify HTTP continuation
 				for (WoofHttpContinuationToWoofSectionInputModel conn : input.getWoofHttpContinuations()) {
+					conn.setSectionName(section.getWoofSectionName());
+					conn.setInputName(input.getWoofSectionInputName());
+				}
+
+				// Specify HTTP input
+				for (WoofHttpInputToWoofSectionInputModel conn : input.getWoofHttpInputs()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
@@ -491,6 +542,11 @@ public class WoofRepositoryImpl implements WoofRepository {
 			for (WoofHttpContinuationToWoofTemplateModel conn : template.getWoofHttpContinuations()) {
 				conn.setApplicationPath(template.getApplicationPath());
 			}
+
+			// Specify HTTP inputs
+			for (WoofHttpInputToWoofTemplateModel conn : template.getWoofHttpInputs()) {
+				conn.setApplicationPath(template.getApplicationPath());
+			}
 		}
 
 		// Specify securities
@@ -520,6 +576,11 @@ public class WoofRepositoryImpl implements WoofRepository {
 			for (WoofHttpContinuationToWoofSecurityModel conn : security.getWoofHttpContinuations()) {
 				conn.setHttpSecurityName(security.getHttpSecurityName());
 			}
+
+			// Specify HTTP inputs
+			for (WoofHttpInputToWoofSecurityModel conn : security.getWoofHttpInputs()) {
+				conn.setHttpSecurityName(security.getHttpSecurityName());
+			}
 		}
 
 		// Specify resources
@@ -547,6 +608,11 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 			// Specify HTTP continuations
 			for (WoofHttpContinuationToWoofResourceModel conn : resource.getWoofHttpContinuations()) {
+				conn.setResourcePath(resource.getResourcePath());
+			}
+
+			// Specify HTTP inputs
+			for (WoofHttpInputToWoofResourceModel conn : resource.getWoofHttpInputs()) {
 				conn.setResourcePath(resource.getResourcePath());
 			}
 		}

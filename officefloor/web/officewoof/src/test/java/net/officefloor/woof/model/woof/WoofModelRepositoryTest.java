@@ -91,8 +91,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the HTTP continuations
 		// ----------------------------------------
 		assertList(new String[] { "getApplicationPath", "getIsSecure", "getX", "getY" },
-				woof.getWoofHttpContinuations(), new WoofHttpContinuationModel(true, "/pathA"),
-				new WoofHttpContinuationModel(false, "/pathB"));
+				woof.getWoofHttpContinuations(), new WoofHttpContinuationModel(true, "/pathA", 100, 101),
+				new WoofHttpContinuationModel(false, "/pathB", 110, 111));
 		WoofHttpContinuationModel continuation = woof.getWoofHttpContinuations().get(0);
 		assertProperties(new WoofHttpContinuationToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				continuation.getWoofSectionInput(), "getSectionName", "getInputName");
@@ -108,19 +108,19 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the HTTP inputs
 		// ----------------------------------------
-		assertList(new String[] { "getApplicationPath", "getIsSecure", "getHttpMethodName", "getX", "getY" },
+		assertList(new String[] { "getApplicationPath", "getIsSecure", "getHttpMethod", "getX", "getY" },
 				woof.getWoofHttpInputs(), new WoofHttpInputModel(true, "POST", "/pathC", 200, 201),
 				new WoofHttpInputModel(false, "PUT", "/pathD", 210, 211));
 		WoofHttpInputModel httpInput = woof.getWoofHttpInputs().get(0);
 		assertProperties(new WoofHttpInputToWoofSectionInputModel("SECTION_B", "INPUT_0"),
 				httpInput.getWoofSectionInput(), "getSectionName", "getInputName");
 		assertProperties(new WoofHttpInputToWoofTemplateModel("/templateA"), httpInput.getWoofTemplate(),
-				"getApplictaionPath");
+				"getApplicationPath");
 		assertProperties(new WoofHttpInputToWoofSecurityModel("SECURITY_B"), httpInput.getWoofSecurity(),
 				"getHttpSecurityName");
 		assertProperties(new WoofHttpInputToWoofResourceModel("/resourceB.png"), httpInput.getWoofResource(),
 				"getResourcePath");
-		assertProperties(new WoofHttpInputToWoofHttpContinuationModel("/pathD"), httpInput.getWoofHttpContinuation(),
+		assertProperties(new WoofHttpInputToWoofHttpContinuationModel("/pathA"), httpInput.getWoofHttpContinuation(),
 				"getApplicationPath");
 
 		// ----------------------------------------

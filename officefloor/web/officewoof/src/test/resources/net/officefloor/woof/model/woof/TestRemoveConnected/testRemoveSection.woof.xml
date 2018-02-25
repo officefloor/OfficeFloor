@@ -1,16 +1,25 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/applicationPath">
+	<http-continuations>
+		<http-continuation path="/applicationPath">
 			<template path="/template" />
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
 			<redirect path="/applicationPathLink" />
-		</application-path>
-		<application-path path="/applicationPathLink">
+		</http-continuation>
+		<http-continuation path="/applicationPathLink">
 			<redirect path="/applicationPath" />
-		</application-path>
-	</application-paths>
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input method="POST" path="/inputPath">
+			<template path="/template" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPath" />
+		</http-input>
+	</http-inputs>
 
 	<templates>
 		<template path="/template" location="example/Template.ofp"

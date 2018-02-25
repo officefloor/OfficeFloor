@@ -2,7 +2,7 @@
 
 	<http-continuations>
 		<http-continuation path="/pathA" secure="true" x="100"
-			y="1001">
+			y="101">
 			<section name="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
 			<security name="SECURITY_A" />
