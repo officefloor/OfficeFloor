@@ -1,38 +1,55 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/pathA" secure="true">
-			<service method="GET" />
-			<service method="POST" />
+	<http-continuations>
+		<http-continuation path="/pathA" secure="true">
 			<section name="SECTION_A" input="INPUT_A" />
-		</application-path>
-		<application-path path="/pathB">
+		</http-continuation>
+		<http-continuation path="/pathB">
 			<template path="/template/{param}" />
-		</application-path>
-		<application-path path="/pathC">
+		</http-continuation>
+		<http-continuation path="/pathC">
 			<security name="SECURITY_ONE" />
-		</application-path>
-		<application-path path="/pathD">
-			<resource path="/resourceA.html" />
-		</application-path>
-		<application-path path="/pathE">
+		</http-continuation>
+		<http-continuation path="/pathD">
+			<resource path="/resource.html" />
+		</http-continuation>
+		<http-continuation path="/pathE">
 			<redirect path="/pathA" />
-		</application-path>
-	</application-paths>
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/inputA" method="POST" secure="true">
+			<section name="SECTION_B" input="INPUT_0" />
+		</http-input>
+		<http-input path="/inputB" method="PUT">
+			<template path="/template/another" />
+		</http-input>
+		<http-input path="/inputC" method="DELETE">
+			<security name="SECURITY_TWO" />
+		</http-input>
+		<http-input path="/inputD" method="OPTIONS">
+			<resource path="/resource.png" />
+		</http-input>
+		<http-input path="/inputE" method="OTHER">
+			<redirect path="/pathA" />
+		</http-input>
+	</http-inputs>
+
 
 	<templates>
 		<template path="/template/{param}" location="WOOF/TemplateA.ofp"
-			class="net.officefloor.plugin.woof.WoofLoaderTest$Template"
-			redirect-values-function="redirect" content-type="text/html; charset=UTF-8"
-			charset="UTF-8" link-character-seprator="_" secure="true" x="20" y="20">
+			class="net.example.Template" redirect-values-function="redirect"
+			content-type="text/html; charset=UTF-16" charset="UTF-16"
+			link-separator-character="_" secure="true" x="20" y="20">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<section name="SECTION_A" input="INPUT_A" />
 			</output>
-			<output name="OUTPUT_2">
+			<output name="OUTPUT_2" argument-type="java.lang.Character">
 				<template path="/template/another" />
 			</output>
 			<output name="OUTPUT_3">
-				<security name="SECURITY" />
+				<security name="SECURITY_ONE" />
 			</output>
 			<output name="OUTPUT_4">
 				<resource path="/resource.html" />
@@ -40,7 +57,6 @@
 			<output name="OUTPUT_5" argument-type="java.lang.String">
 				<redirect path="/pathA" />
 			</output>
-			<output name="OUTPUT_6" />
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
 			<render method="POST" />
@@ -52,16 +68,15 @@
 	<sections>
 		<section name="SECTION_A"
 			source="net.officefloor.plugin.section.clazz.ClassSectionSource"
-			location="net.officefloor.plugin.woof.WoofLoaderTest$Section" x="80"
-			y="80">
+			location="net.example.Section" x="80" y="80">
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
 			<input name="INPUT_A" parameter-type="java.lang.Integer" />
 			<input name="INPUT_B" uri="example" />
 			<output name="OUTPUT_A" argument-type="java.lang.String">
-				<input section="SECTION_B" input="INPUT_1" />
+				<section name="SECTION_B" input="INPUT_0" />
 			</output>
-			<output name="OUTPUT_B">
+			<output name="OUTPUT_B" argument-type="java.lang.Short">
 				<template path="/template/{param}" />
 			</output>
 			<output name="OUTPUT_C">
@@ -73,26 +88,23 @@
 			<output name="OUTPUT_E" argument-type="java.lang.Long">
 				<redirect path="/pathC" />
 			</output>
-			<output name="OUTPUT_F" />
 		</section>
-		<section name="SECTION_B" source="CLASS"
-			location="net.officefloor.plugin.woof.WoofLoaderTest$Section">
-			<input name="INPUT_1" />
+		<section name="SECTION_B" source="CLASS" location="net.another.Section">
+			<input name="INPUT_0" />
 		</section>
 	</sections>
 
 	<securities>
-		<security name="SECURITY_ONE"
-			source="net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource"
+		<security name="SECURITY_ONE" source="net.example.HttpSecuritySource"
 			timeout="2000">
 			<property name="name.first" value="value.first" />
 			<property name="name.second" value="value.second" />
 			<content type="application/json" />
 			<content type="application/xml" />
-			<output name="OUTPUT_ONE">
-				<section name="SECTION_B" input="INPUT_1" />
+			<output name="OUTPUT_ONE" argument-type="java.lang.Number">
+				<section name="SECTION_B" input="INPUT_0" />
 			</output>
-			<output name="OUTPUT_TWO">
+			<output name="OUTPUT_TWO" argument-type="java.lang.Object">
 				<template path="/template/another" />
 			</output>
 			<output name="OUTPUT_THREE">
@@ -101,13 +113,11 @@
 			<output name="OUTPUT_FOUR">
 				<resource path="/resource.html" />
 			</output>
-			<output name="OUTPUT_FIVE">
+			<output name="OUTPUT_FIVE" argument-type="java.util.Map">
 				<redirect path="/pathD" />
 			</output>
-			<output name="OUTPUT_SIX" />
 		</security>
-		<security name="SECURITY_TWO"
-			source="net.officefloor.web.http.security.scheme.MockHttpSecuritySource" />
+		<security name="SECURITY_TWO" source="net.another.HttpSecuritySource" />
 	</securities>
 
 	<resources>
@@ -150,7 +160,7 @@
 			<section name="SECTION_A" input="INPUT_A" />
 		</start>
 		<start>
-			<section name="SECTION_B" input="INPUT_1" />
+			<section name="SECTION_B" input="INPUT_0" />
 		</start>
 	</starts>
 

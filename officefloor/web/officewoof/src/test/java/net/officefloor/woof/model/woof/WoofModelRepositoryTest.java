@@ -102,8 +102,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				"getHttpSecurityName");
 		assertProperties(new WoofHttpContinuationToWoofResourceModel("/resourceA.html"), continuation.getWoofResource(),
 				"getResourcePath");
-		assertProperties(new WoofHttpContinuationToWoofHttpContinuationModel("/pathB"),
-				continuation.getWoofHttpContinuation(), "getApplicationPath");
+		assertProperties(new WoofHttpContinuationToWoofHttpContinuationModel("/pathB"), continuation.getWoofRedirect(),
+				"getApplicationPath");
 
 		// ----------------------------------------
 		// Validate the HTTP inputs
@@ -132,10 +132,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 						"getRedirectValuesFunction", "getLinkSeparatorCharacter", "getX", "getY" },
 				woof.getWoofTemplates(),
 				new WoofTemplateModel("/templateA", "example/TemplateA.ofp", "net.example.ExampleClassA", "redirect",
-						"text/plain; charset=UTF-16", "UTF-16", "_", true, null, null, null, null, null, null, null,
-						null, null, null, null, null, 300, 301),
-				new WoofTemplateModel("/templateB", "example/TemplateB.ofp", null, null, null, null, null, false, null,
-						null, null, null, null, null, null, null, null, null, null, null, 302, 303));
+						"text/plain; charset=UTF-16", "UTF-16", "_", true, 300, 301),
+				new WoofTemplateModel("/templateB", "example/TemplateB.ofp", null, null, null, null, null, false, 302,
+						303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertProperties(new WoofTemplateToSuperWoofTemplateModel("/templateB"), template.getSuperWoofTemplate(),
 				"getSuperWoofTemplateApplicationPath");

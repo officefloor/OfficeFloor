@@ -33,7 +33,7 @@
 					<attribute method="getResourcePath" attribute="path" />
 				</attributes>
 			</object>
-			<object method="getWoofHttpContinuation" element="redirect">
+			<object method="getWoofRedirect" element="redirect">
 				<attributes>
 					<attribute method="getApplicationPath" attribute="path" />
 				</attributes>

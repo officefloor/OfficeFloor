@@ -179,7 +179,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
 			});
 			compile.web((context) -> {
-				WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
+				WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(context.getWebArchitect(),
 						context.getOfficeArchitect(), context.getOfficeSourceContext());
 				WebTemplate parent = templater.addTemplate(false, "/parent", new StringReader(parentContent));
 				WebTemplate child = templater.addTemplate(false, "/child", new StringReader(childContent));
@@ -238,7 +238,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
 		});
 		compile.web((context) -> {
-			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
+			WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(context.getWebArchitect(),
 					context.getOfficeArchitect(), context.getOfficeSourceContext());
 			WebTemplate parent = templater.addTemplate(false, "/parent", new StringReader(parentContent));
 			WebTemplate child = templater.addTemplate(false, "/child", new StringReader(childContent));

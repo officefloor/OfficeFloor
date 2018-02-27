@@ -41,7 +41,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.template.parse.ParsedTemplate;
@@ -88,14 +87,14 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("getBeanArray", null);
 		expected.addSectionInput("getList", null);
 		expected.addSectionInput("nextFunction", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "next", new HttpMethod[0]));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "next", new String[0]));
 		expected.addSectionInput("submit", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "submit", new HttpMethod[0]));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "submit", new String[0]));
 		expected.addSectionInput("doInternalFlow", Integer.class.getName());
 		expected.addSectionInput("notRenderTemplateAfter", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "notRenderTemplateAfter", new HttpMethod[0]));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "notRenderTemplateAfter", new String[0]));
 		expected.addSectionInput("nonMethodLink", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink", new HttpMethod[0]));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink", new String[0]));
 
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(), false);
@@ -317,9 +316,9 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Input (for HTTP Template rending)
 		expected.addSectionInput("doExternalFlow", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "doExternalFlow", new HttpMethod[0]));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "doExternalFlow", new String[0]));
 		expected.addSectionInput("nonMethodLink", null)
-				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink", new HttpMethod[0]));
+				.addAnnotation(new WebTemplateLinkAnnotation(false, "nonMethodLink", new String[0]));
 		expected.addSectionInput("renderTemplate", null);
 
 		// Outputs

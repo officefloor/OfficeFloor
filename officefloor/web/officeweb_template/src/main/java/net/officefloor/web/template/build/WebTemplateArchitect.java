@@ -23,11 +23,11 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
 
 /**
- * Creates web templates.
+ * Architect to create web templates.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebTemplater {
+public interface WebTemplateArchitect {
 
 	/**
 	 * Adds a {@link WebTemplate}.

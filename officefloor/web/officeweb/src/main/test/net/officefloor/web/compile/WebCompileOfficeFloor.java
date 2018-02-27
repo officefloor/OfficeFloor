@@ -25,7 +25,6 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpUrlContinuation;
@@ -110,8 +109,8 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 			this.officeArchitect = this.officeContext.getOfficeArchitect();
 
 			// Always employ the web architect
-			this.webArchitect = WebArchitectEmployer.employWebArchitect(this.officeArchitect,
-					WebCompileOfficeFloor.this.contextPath);
+			this.webArchitect = WebArchitectEmployer.employWebArchitect(WebCompileOfficeFloor.this.contextPath,
+					this.officeArchitect, this.officeContext.getOfficeSourceContext());
 		}
 
 		/*
@@ -160,13 +159,13 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		}
 
 		@Override
-		public HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass) {
+		public HttpInput link(boolean isSecure, String httpMethodName, String applicationPath, Class<?> sectionClass) {
 
 			// Add the section
-			OfficeSection section = this.addSection(httpMethod.getName() + "_" + applicationPath, sectionClass);
+			OfficeSection section = this.addSection(httpMethodName + "_" + applicationPath, sectionClass);
 
 			// Create the link to the section service method
-			HttpInput input = this.webArchitect.getHttpInput(isSecure, httpMethod, applicationPath);
+			HttpInput input = this.webArchitect.getHttpInput(isSecure, httpMethodName, applicationPath);
 			this.officeArchitect.link(input.getInput(), section.getOfficeSectionInput("service"));
 			return input;
 		}

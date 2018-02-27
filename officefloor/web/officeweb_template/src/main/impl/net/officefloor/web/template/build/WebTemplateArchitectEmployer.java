@@ -55,14 +55,14 @@ import net.officefloor.web.template.section.WebTemplateRedirectAnnotation;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
 
 /**
- * {@link WebTemplater} implementation.
+ * {@link WebTemplateArchitect} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebTemplaterEmployer implements WebTemplater {
+public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 
 	/**
-	 * Employs the {@link WebTemplater}.
+	 * Employs the {@link WebTemplateArchitect}.
 	 * 
 	 * @param webArchitect
 	 *            {@link WebArchitect}.
@@ -70,11 +70,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
 	 *            {@link OfficeSourceContext}.
-	 * @return {@link WebTemplater}.
+	 * @return {@link WebTemplateArchitect}.
 	 */
-	public static WebTemplater employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect,
+	public static WebTemplateArchitect employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect,
 			OfficeSourceContext officeSourceContext) {
-		return new WebTemplaterEmployer(webArchitect, officeArchitect, officeSourceContext);
+		return new WebTemplateArchitectEmployer(webArchitect, officeArchitect, officeSourceContext);
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 	 * @param sourceContext
 	 *            {@link OfficeSourceContext}.
 	 */
-	private WebTemplaterEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect,
+	private WebTemplateArchitectEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect,
 			OfficeSourceContext sourceContext) {
 		this.webArchitect = webArchitect;
 		this.officeArchitect = officeArchitect;
@@ -230,9 +230,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private final HttpUrlContinuation templateInput;
 
 		/**
-		 * Logic {@link Class} for the {@link WebTemplate}.
+		 * Name of the logic {@link Class} for the {@link WebTemplate}.
 		 */
-		private Class<?> logicClass = null;
+		private String logicClassName = null;
 
 		/**
 		 * Name of {@link Method} on the logic {@link Class} to return the
@@ -257,14 +257,14 @@ public class WebTemplaterEmployer implements WebTemplater {
 		private String contentType = null;
 
 		/**
-		 * {@link Charset}.
+		 * Name of the {@link Charset}.
 		 */
-		private Charset charset = null;
+		private String charsetName = null;
 
 		/**
-		 * Render {@link HttpMethod} instances.
+		 * Render {@link HttpMethod} names.
 		 */
-		private final List<HttpMethod> renderMethods = new LinkedList<>();
+		private final List<String> renderHttpMethodNames = new LinkedList<>();
 
 		/**
 		 * Super {@link WebTemplate}.
@@ -275,7 +275,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 		 * {@link OfficeFlowSinkNode} to render {@link WebTemplate} by values
 		 * type.
 		 */
-		private final Map<Class<?>, OfficeFlowSinkNode> renderInputs = new HashMap<>();
+		private final Map<String, OfficeFlowSinkNode> renderInputs = new HashMap<>();
 
 		/**
 		 * Instantiate.
@@ -303,9 +303,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 			// Configure the input
 			this.sectionInput = this.section.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
-			this.templateInput = WebTemplaterEmployer.this.webArchitect.getHttpInput(this.isSecure,
+			this.templateInput = WebTemplateArchitectEmployer.this.webArchitect.getHttpInput(this.isSecure,
 					this.applicationPath);
-			WebTemplaterEmployer.this.officeArchitect.link(this.templateInput.getInput(), this.sectionInput);
+			WebTemplateArchitectEmployer.this.officeArchitect.link(this.templateInput.getInput(), this.sectionInput);
 		}
 
 		/**
@@ -318,9 +318,9 @@ public class WebTemplaterEmployer implements WebTemplater {
 			this.webTemplateSectionSource.setHttpInputPath(templateInputPath);
 
 			// Configure properties for the template
-			if (this.logicClass != null) {
+			if (this.logicClassName != null) {
 				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
-						.setValue(this.logicClass.getName());
+						.setValue(this.logicClassName);
 			}
 			if (this.redirectValuesFunctionName != null) {
 				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_REDIRECT_VALUES_FUNCTION)
@@ -332,9 +332,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CONTENT_TYPE)
 						.setValue(this.contentType);
 			}
-			if (this.charset != null) {
-				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CHARSET)
-						.setValue(this.charset.name());
+			if (this.charsetName != null) {
+				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CHARSET).setValue(this.charsetName);
 			}
 			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE)
 					.setValue(String.valueOf(this.isSecure));
@@ -353,7 +352,7 @@ public class WebTemplaterEmployer implements WebTemplater {
 
 				// Determine if inheritance cycle
 				if (inheritanceHeirarchy.contains(parent)) {
-					throw WebTemplaterEmployer.this.officeArchitect.addIssue(
+					throw WebTemplateArchitectEmployer.this.officeArchitect.addIssue(
 							WebTemplate.class.getSimpleName() + " inheritance cycle " + cycle.toString() + " ...");
 				}
 
@@ -395,34 +394,37 @@ public class WebTemplaterEmployer implements WebTemplater {
 			if (templateInputPath.isPathParameters()) {
 
 				// Must have logic class
-				if (this.logicClass == null) {
-					throw WebTemplaterEmployer.this.officeArchitect
+				if (this.logicClassName == null) {
+					throw WebTemplateArchitectEmployer.this.officeArchitect
 							.addIssue("Must provide template logic class for template " + this.applicationPath
 									+ ", as has dynamic path");
 				}
 
 				// Must have redirect values function
 				if (CompileUtil.isBlank(this.redirectValuesFunctionName)) {
-					throw WebTemplaterEmployer.this.officeArchitect.addIssue(
+					throw WebTemplateArchitectEmployer.this.officeArchitect.addIssue(
 							"Must provide redirect values function for template /{param}, as has dynamic path");
 				}
 			}
 
 			// Load the type
-			OfficeSectionType type = WebTemplaterEmployer.this.sourceContext.loadOfficeSectionType(this.applicationPath,
-					WebTemplateSectionSource.class.getName(), this.applicationPath, this.properties);
+			OfficeSectionType type = WebTemplateArchitectEmployer.this.sourceContext.loadOfficeSectionType(
+					this.applicationPath, WebTemplateSectionSource.class.getName(), this.applicationPath,
+					this.properties);
 
 			// Load other methods
-			for (HttpMethod method : this.renderMethods) {
+			for (String httpMethodName : this.renderHttpMethodNames) {
 
 				// Ignore GET, as added with continuation
-				if (method == HttpMethod.GET) {
+				if (HttpMethod.GET.getName().equals(httpMethodName)) {
 					continue;
 				}
 
 				// Route to template for method
-				WebTemplaterEmployer.this.officeArchitect.link(WebTemplaterEmployer.this.webArchitect
-						.getHttpInput(this.isSecure, method, this.applicationPath).getInput(), this.sectionInput);
+				WebTemplateArchitectEmployer.this.officeArchitect.link(
+						WebTemplateArchitectEmployer.this.webArchitect
+								.getHttpInput(this.isSecure, httpMethodName, this.applicationPath).getInput(),
+						this.sectionInput);
 			}
 
 			// Load the link inputs
@@ -440,9 +442,11 @@ public class WebTemplaterEmployer implements WebTemplater {
 						String linkPath = this.applicationPath + String.valueOf(this.linkSeparatorCharacter) + linkName;
 
 						// Configure the link inputs for each method supported
-						for (HttpMethod method : link.getMethods()) {
-							WebTemplaterEmployer.this.officeArchitect.link(WebTemplaterEmployer.this.webArchitect
-									.getHttpInput(isLinkSecure, method, linkPath).getInput(), linkInput);
+						for (String httpMethodName : link.getHttpMethods()) {
+							WebTemplateArchitectEmployer.this.officeArchitect.link(
+									WebTemplateArchitectEmployer.this.webArchitect
+											.getHttpInput(isLinkSecure, httpMethodName, linkPath).getInput(),
+									linkInput);
 						}
 					}
 				}
@@ -460,8 +464,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 						// Configure the redirect
 						OfficeSectionOutput redirectOutput = this.section
 								.getOfficeSectionOutput(outputType.getOfficeSectionOutputName());
-						WebTemplaterEmployer.this.officeArchitect.link(redirectOutput,
-								this.templateInput.getRedirect(valuesType));
+						WebTemplateArchitectEmployer.this.officeArchitect.link(redirectOutput,
+								this.templateInput.getRedirect(valuesType == null ? null : valuesType.getName()));
 					}
 				}
 			}
@@ -477,8 +481,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate setLogicClass(Class<?> logicClass) {
-			this.logicClass = logicClass;
+		public WebTemplate setLogicClass(String logicClassName) {
+			this.logicClassName = logicClassName;
 			return this;
 		}
 
@@ -495,8 +499,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate setCharset(Charset charset) {
-			this.charset = charset;
+		public WebTemplate setCharset(String charsetName) {
+			this.charsetName = charsetName;
 			return this;
 		}
 
@@ -519,8 +523,8 @@ public class WebTemplaterEmployer implements WebTemplater {
 		}
 
 		@Override
-		public WebTemplate addRenderMethod(HttpMethod method) {
-			this.renderMethods.add(method);
+		public WebTemplate addRenderHttpMethod(String httpMethodName) {
+			this.renderHttpMethodNames.add(httpMethodName);
 			return this;
 		}
 
@@ -533,15 +537,15 @@ public class WebTemplaterEmployer implements WebTemplater {
 		@Override
 		public WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension) {
 			return this.webTemplateSectionSource.addWebTemplateExtension(extension,
-					WebTemplaterEmployer.this.sourceContext.createPropertyList());
+					WebTemplateArchitectEmployer.this.sourceContext.createPropertyList());
 		}
 
 		@Override
-		public OfficeFlowSinkNode getRender(Class<?> valuesType) {
-			OfficeFlowSinkNode renderInput = this.renderInputs.get(valuesType);
+		public OfficeFlowSinkNode getRender(String valuesTypeName) {
+			OfficeFlowSinkNode renderInput = this.renderInputs.get(valuesTypeName);
 			if (renderInput == null) {
-				renderInput = this.templateInput.getRedirect(valuesType);
-				this.renderInputs.put(valuesType, renderInput);
+				renderInput = this.templateInput.getRedirect(valuesTypeName);
+				this.renderInputs.put(valuesTypeName, renderInput);
 			}
 			return renderInput;
 		}

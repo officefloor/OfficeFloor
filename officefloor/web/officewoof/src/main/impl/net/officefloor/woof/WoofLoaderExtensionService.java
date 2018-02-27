@@ -39,10 +39,12 @@ import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.woof.WoofExtensionService;
-import net.officefloor.woof.WoofExtensionServiceContext;
-import net.officefloor.woof.WoofLoader;
-import net.officefloor.woof.WoofLoaderContext;
+import net.officefloor.web.resource.build.HttpResourceArchitect;
+import net.officefloor.web.resource.build.HttpResourceArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.template.build.WebTemplateArchitect;
+import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
 import net.officefloor.woof.model.objects.WoofObjectsRepositoryImpl;
 import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofModel;
@@ -252,8 +254,13 @@ public class WoofLoaderExtensionService
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
 
-		// Employ the Web Architect
+		// Employ the architects
 		WebArchitect web = WebArchitectEmployer.employWebArchitect(officeArchitect, context);
+		HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, officeArchitect,
+				context);
+		WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(web, officeArchitect, context);
+		HttpResourceArchitect resources = HttpResourceArchitectEmployer.employHttpResourceArchitect(web, security,
+				officeArchitect, context);
 
 		// Obtain the woof configuration (ensuring exists)
 		String woofLocation = context.getProperty(PROPERTY_WOOF_CONFIGURATION_LOCATION,
@@ -285,6 +292,21 @@ public class WoofLoaderExtensionService
 			@Override
 			public WebArchitect getWebArchitect() {
 				return web;
+			}
+
+			@Override
+			public HttpSecurityArchitect getHttpSecurityArchitect() {
+				return security;
+			}
+
+			@Override
+			public WebTemplateArchitect getWebTemplater() {
+				return templater;
+			}
+
+			@Override
+			public HttpResourceArchitect getHttpResourceArchitect() {
+				return resources;
 			}
 		});
 

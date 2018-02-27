@@ -58,11 +58,11 @@ import net.officefloor.web.template.section.WebTemplateSectionSource;
 import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateManagedFunctionSource;
 
 /**
- * Tests the {@link WebTemplater}.
+ * Tests the {@link WebTemplateArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebTemplaterTest extends OfficeFrameTestCase {
+public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the context path to use in testing.
@@ -132,8 +132,9 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure can add template with logic.
 	 */
 	public void testTemplateLogic() throws Exception {
-		this.template("/path", (context, templater) -> templater
-				.addTemplate(false, "/path", new StringReader("Data=${value}")).setLogicClass(TemplateLogic.class),
+		this.template("/path",
+				(context, templater) -> templater.addTemplate(false, "/path", new StringReader("Data=${value}"))
+						.setLogicClass(TemplateLogic.class.getName()),
 				"Data=&lt;value&gt;");
 	}
 
@@ -154,7 +155,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("Bean=${bean ${property} $}"))
-						.setLogicClass(BeanLogic.class),
+						.setLogicClass(BeanLogic.class.getName()),
 				"Bean=value");
 	}
 
@@ -186,7 +187,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		}, (context, templater) -> templater.addTemplate(false, "/path", new StringReader("Bean=${bean ${missing} $}"))
-				.setLogicClass(BeanLogic.class));
+				.setLogicClass(BeanLogic.class.getName()));
 	}
 
 	/**
@@ -196,7 +197,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("Bean=${beans  ${property} $}"))
-						.setLogicClass(ArrayBeanLogic.class),
+						.setLogicClass(ArrayBeanLogic.class.getName()),
 				"Bean= 1 2");
 	}
 
@@ -231,7 +232,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("Template <!-- {section} -->${property}"))
-						.setLogicClass(TemplateSectionPropertyLogic.class),
+						.setLogicClass(TemplateSectionPropertyLogic.class.getName()),
 				"Template value");
 	}
 
@@ -252,7 +253,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("${bean ignored ${property} $}${property}"))
-						.setLogicClass(NullBeanLogic.class),
+						.setLogicClass(NullBeanLogic.class.getName()),
 				"");
 	}
 
@@ -277,7 +278,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testSectionWithVoidMethod() throws Exception {
 		VoidBeanLogic.isInvoked = false;
 		this.template("/path", (context, templater) -> templater
-				.addTemplate(false, "/path", new StringReader("TEMPLATE")).setLogicClass(VoidBeanLogic.class),
+				.addTemplate(false, "/path", new StringReader("TEMPLATE")).setLogicClass(VoidBeanLogic.class.getName()),
 				"TEMPLATE");
 		assertTrue("Should invoke void template method", VoidBeanLogic.isInvoked);
 	}
@@ -298,7 +299,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 				(context, templater) -> templater
 						.addTemplate(false, "/path",
 								new StringReader("First <!-- {second} -->second <!-- {last} -->last"))
-						.setLogicClass(FlowLogic.class),
+						.setLogicClass(FlowLogic.class.getName()),
 				"First last");
 	}
 
@@ -327,7 +328,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		}, (context, templater) -> {
 			templater.addTemplate(false, "/path", new StringReader("TEMPLATE"))
-					.setLogicClass(IllegalNextFunctionLogic.class);
+					.setLogicClass(IllegalNextFunctionLogic.class.getName());
 		});
 	}
 
@@ -345,7 +346,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("Template <!-- {section} --> Section"))
-						.setLogicClass(NullDataLogic.class),
+						.setLogicClass(NullDataLogic.class.getName()),
 				"");
 	}
 
@@ -381,7 +382,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("<html>${content}</html>"))
-						.setLogicClass(NotEscapedLogic.class),
+						.setLogicClass(NotEscapedLogic.class.getName()),
 				"<html><body>Hello World</body></html>");
 	}
 
@@ -403,7 +404,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/dynamic/value",
 				(context, templater) -> templater
 						.addTemplate(false, "/dynamic/{param}", new StringReader("Data=${value}"))
-						.setLogicClass(DynamicPathLogic.class).setRedirectValuesFunction("getPathValues"),
+						.setLogicClass(DynamicPathLogic.class.getName()).setRedirectValuesFunction("getPathValues"),
 				"Data=value");
 	}
 
@@ -454,7 +455,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 
 		}, (context, templater) -> {
 			templater.addTemplate(false, "/{param}", new StringReader("TEMPLATE"))
-					.setLogicClass(DynamicPathLogic.class);
+					.setLogicClass(DynamicPathLogic.class.getName());
 		});
 	}
 
@@ -487,7 +488,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testLinkRerenderTemplate() throws Exception {
 		this.template("/path",
 				(context, templater) -> templater.addTemplate(false, "/path", new StringReader("Template #{link}"))
-						.setLogicClass(LinkRerenderTemplateLogic.class),
+						.setLogicClass(LinkRerenderTemplateLogic.class.getName()),
 				"Template /path+link");
 
 		// Ensure can GET link triggers redirect to template
@@ -511,7 +512,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	public void testLinkNotRerenderTemplate() throws Exception {
 		this.template("/path+link",
 				(context, templater) -> templater.addTemplate(false, "/path", new StringReader("Template #{link}"))
-						.setLogicClass(LinkNotRerenderTemplateLogic.class),
+						.setLogicClass(LinkNotRerenderTemplateLogic.class.getName()),
 				"LINK");
 	}
 
@@ -545,7 +546,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/dynamic", (context, templater) -> {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			WebTemplate template = templater.addTemplate(false, "/{param}", new StringReader("Link=#{link}"))
-					.setLogicClass(DynamicLinkLogic.class).setRedirectValuesFunction("getPathValues");
+					.setLogicClass(DynamicLinkLogic.class.getName()).setRedirectValuesFunction("getPathValues");
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
 		}, "Link=/dynamic+link");
 
@@ -574,7 +575,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/dynamic", (context, templater) -> {
 			OfficeSection section = context.addSection("SECTION", MockSection.class);
 			WebTemplate template = templater.addTemplate(false, "/{param}", new StringReader("Link=#{link}"))
-					.setLogicClass(DynamicLinkLogic.class).setRedirectValuesFunction("getPathValues");
+					.setLogicClass(DynamicLinkLogic.class.getName()).setRedirectValuesFunction("getPathValues");
 			template.setLinkSeparatorCharacter('|');
 			context.getOfficeArchitect().link(template.getOutput("link"), section.getOfficeSectionInput("service"));
 		}, "Link=/dynamic|link");
@@ -643,10 +644,10 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * GET.
 	 */
 	public void testOtherMethod() throws Exception {
-		final HttpMethod method = HttpMethod.getHttpMethod("TEST");
-		MockHttpResponse response = this.template((context, templater) -> templater
-				.addTemplate(false, "/path", new StringReader("TEMPLATE")).addRenderMethod(method),
-				this.mockRequest("/path").method(method));
+		MockHttpResponse response = this.template(
+				(context, templater) -> templater.addTemplate(false, "/path", new StringReader("TEMPLATE"))
+						.addRenderHttpMethod("TEST"),
+				this.mockRequest("/path").method(HttpMethod.getHttpMethod("TEST")));
 		response.assertResponse(200, "TEMPLATE");
 	}
 
@@ -679,8 +680,9 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 			OfficeSection section = context.addSection("SECTION", DynamicPathSection.class);
 			office.link(web.getHttpInput(false, "/redirect").getInput(), section.getOfficeSectionInput("service"));
 			WebTemplate template = templater.addTemplate(false, "/{param}", new StringReader("TEMPLATE"))
-					.setLogicClass(LinkDynamicPathLogic.class).setRedirectValuesFunction("getPathValues");
-			office.link(section.getOfficeSectionOutput("template"), template.getRender(DynamicPathSection.class));
+					.setLogicClass(LinkDynamicPathLogic.class.getName()).setRedirectValuesFunction("getPathValues");
+			office.link(section.getOfficeSectionOutput("template"),
+					template.getRender(DynamicPathSection.class.getName()));
 		}, "");
 
 		// Ensure redirect
@@ -727,12 +729,11 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 * Ensure can change the {@link Charset} for rendering the template.
 	 */
 	public void testCharset() throws Exception {
-		Charset charset = Charset.forName("UTF-16");
-		MockHttpResponse response = this
-				.template(
-						(context, templater) -> templater
-								.addTemplate(false, "/path", new StringReader("UTF-16 rendered")).setCharset(charset),
-						this.mockRequest("/path"));
+		String charsetName = "UTF-16";
+		Charset charset = Charset.forName(charsetName);
+		MockHttpResponse response = this.template((context, templater) -> templater
+				.addTemplate(false, "/path", new StringReader("UTF-16 rendered")).setCharset(charsetName),
+				this.mockRequest("/path"));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect content", "UTF-16 rendered", response.getEntity(charset));
 	}
@@ -902,7 +903,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		this.template("/path",
 				(context, templater) -> templater
 						.addTemplate(false, "/path", new StringReader("${property}=<!-- {section} -->${property}"))
-						.setLogicClass(DataSuffixLogic.class),
+						.setLogicClass(DataSuffixLogic.class.getName()),
 				"value=value");
 	}
 
@@ -926,7 +927,8 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 */
 	public void testStatefulTemplate() throws Exception {
 		MockHttpResponse response = this.template("/path", (context, templater) -> templater
-				.addTemplate(false, "/path", new StringReader("${count}")).setLogicClass(StatefulLogic.class), "1");
+				.addTemplate(false, "/path", new StringReader("${count}")).setLogicClass(StatefulLogic.class.getName()),
+				"1");
 		for (int i = 2; i < 10; i++) {
 			assertEquals("Should stateful increment call count to " + i, String.valueOf(i),
 					this.server.send(this.mockRequest("/path").cookies(response)).getEntity(null));
@@ -1018,9 +1020,9 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		 * @param context
 		 *            {@link CompileWebContext}.
 		 * @param templater
-		 *            {@link WebTemplater}.
+		 *            {@link WebTemplateArchitect}.
 		 */
-		void initialise(CompileWebContext context, WebTemplater templater);
+		void initialise(CompileWebContext context, WebTemplateArchitect templater);
 	}
 
 	/**
@@ -1034,7 +1036,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	 */
 	private MockHttpResponse template(Initialiser initialiser, MockHttpRequestBuilder request) throws Exception {
 		this.compile.web((context) -> {
-			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
+			WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(context.getWebArchitect(),
 					context.getOfficeArchitect(), context.getOfficeSourceContext());
 			initialiser.initialise(context, templater);
 			templater.informWebArchitect();
@@ -1064,7 +1066,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Attempts to load {@link WebTemplater}, however should have
+	 * Attempts to load {@link WebTemplateArchitect}, however should have
 	 * {@link CompilerIssues}.
 	 * 
 	 * @param configureIssues
@@ -1084,7 +1086,7 @@ public class WebTemplaterTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		this.compile.web((context) -> {
-			WebTemplater templater = WebTemplaterEmployer.employWebTemplater(context.getWebArchitect(),
+			WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(context.getWebArchitect(),
 					context.getOfficeArchitect(), context.getOfficeSourceContext());
 			initialiser.initialise(context, templater);
 			templater.informWebArchitect();

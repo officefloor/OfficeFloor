@@ -230,13 +230,13 @@ public abstract interface WebArchitect {
 	 * 
 	 * @param isSecure
 	 *            Indicates if secure connection required.
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
 	 * @param applicationPath
 	 *            URL path of the application to be linked.
 	 * @return {@link HttpInput}.
 	 */
-	HttpInput getHttpInput(boolean isSecure, HttpMethod httpMethod, String applicationPath);
+	HttpInput getHttpInput(boolean isSecure, String httpMethodName, String applicationPath);
 
 	/**
 	 * <p>

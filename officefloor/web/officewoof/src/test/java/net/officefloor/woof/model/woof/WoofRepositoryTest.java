@@ -61,6 +61,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofModel woof = new WoofModel();
 		WoofHttpContinuationModel httpContinuation = new WoofHttpContinuationModel(false, "HTTP_CONTINUATION");
 		woof.addWoofHttpContinuation(httpContinuation);
+		WoofHttpContinuationModel httpContinuationLink = new WoofHttpContinuationModel(false,
+				"HTTP_CONTINUATION_REDIRECT");
+		woof.addWoofHttpContinuation(httpContinuationLink);
 		WoofHttpInputModel httpInput = new WoofHttpInputModel(false, "POST", "HTTP_INPUT");
 		woof.addWoofHttpInput(httpInput);
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null, null, null, null, null, null, false);
@@ -108,10 +111,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"SECURITY");
 		httpContinuation.setWoofSecurity(continuationToSecurity);
 
-		// Continuation -> Continuation
-		WoofHttpContinuationToWoofHttpContinuationModel continuationToContinuation = new WoofHttpContinuationToWoofHttpContinuationModel(
-				"HTTP_CONTINUATION");
-		httpContinuation.setWoofHttpContinuation(continuationToContinuation);
+		// Continuation -> Continuation redirect
+		WoofHttpContinuationToWoofHttpContinuationModel continuationToRedirect = new WoofHttpContinuationToWoofHttpContinuationModel(
+				"HTTP_CONTINUATION_REDIRECT");
+		httpContinuation.setWoofRedirect(continuationToRedirect);
 
 		/*
 		 * HTTP Input links
@@ -289,7 +292,9 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertHttpContinuation.assertLink(continuationToTemplate, "template", template);
 		assertHttpContinuation.assertLink(continuationToResource, "resource", resource);
 		assertHttpContinuation.assertLink(continuationToSecurity, "security", security);
-		assertHttpContinuation.assertLink(continuationToContinuation, "http continuation", httpContinuation);
+		assertEquals("http continuation -> redirect", httpContinuationLink, continuationToRedirect.getWoofRedirect());
+		assertEquals("http continuation <- redirect", httpContinuation,
+				continuationToRedirect.getWoofHttpContinuation());
 
 		// HTTP Input links
 		AssertLinks<WoofHttpInputModel> assertHttpInput = new AssertLinks<>("http input", httpInput);

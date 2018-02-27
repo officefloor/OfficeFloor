@@ -328,7 +328,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 				// Obtain the link name
 				String linkName = link.getName();
-				List<HttpMethod> linkMethods = new LinkedList<>();
+				List<String> linkHttpMethodNames = new LinkedList<>();
 				if (linkName.contains(":")) {
 					String[] parts = linkName.split(":");
 
@@ -337,8 +337,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 					// Supported methods listed first
 					for (String methodName : parts[0].split(",")) {
-						HttpMethod method = HttpMethod.getHttpMethod(methodName);
-						linkMethods.add(method);
+						linkHttpMethodNames.add(methodName);
 					}
 				}
 
@@ -356,9 +355,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Add the methods to the link
-				for (HttpMethod linkMethod : linkMethods) {
-					if (!(parsedLink.methods.contains(linkMethod))) {
-						parsedLink.methods.add(linkMethod);
+				for (String linkMethod : linkHttpMethodNames) {
+					if (!(parsedLink.httpMethodNames.contains(linkMethod))) {
+						parsedLink.httpMethodNames.add(linkMethod);
 					}
 				}
 			}
@@ -989,10 +988,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			boolean isLinkSecure = isLinkSecure(link.linkName, isTemplateSecure, context);
 
 			// Obtain the methods for the link
-			HttpMethod[] linkMethods = link.methods.toArray(new HttpMethod[link.methods.size()]);
+			String[] linkMethods = link.httpMethodNames.toArray(new String[link.httpMethodNames.size()]);
 			if (linkMethods.length == 0) {
 				// Use default link methods
-				linkMethods = new HttpMethod[] { HttpMethod.GET, HttpMethod.POST };
+				linkMethods = new String[] { HttpMethod.GET.getName(), HttpMethod.POST.getName() };
 			}
 
 			// Add the link annotation
@@ -1105,9 +1104,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private final String linkName;
 
 		/**
-		 * {@link HttpMethod} instances.
+		 * {@link HttpMethod} names.
 		 */
-		private final List<HttpMethod> methods = new LinkedList<>();
+		private final List<String> httpMethodNames = new LinkedList<>();
 
 		/**
 		 * Instantiate.

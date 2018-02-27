@@ -125,7 +125,7 @@ public class WoofRepositoryImpl implements WoofRepository {
 					});
 
 			// Redirects
-			connector.connect(httpContinuation.getWoofHttpContinuation(),
+			connector.connect(httpContinuation.getWoofRedirect(),
 					(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 						conn.setWoofHttpContinuation(source);
 						conn.setWoofRedirect(target);
@@ -452,7 +452,7 @@ public class WoofRepositoryImpl implements WoofRepository {
 			}
 
 			// Specify redirects
-			for (WoofHttpContinuationToWoofHttpContinuationModel conn : httpContinuation.getWoofRedirects()) {
+			for (WoofHttpContinuationToWoofHttpContinuationModel conn : httpContinuation.getWoofHttpContinuations()) {
 				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 

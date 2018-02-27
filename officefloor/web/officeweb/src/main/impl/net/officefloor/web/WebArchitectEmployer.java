@@ -94,22 +94,31 @@ public class WebArchitectEmployer implements WebArchitect {
 		String contextPath = officeSourceContext.getProperty(PROPERTY_CONTEXT_PATH, null);
 
 		// Employ the web architect
-		return employWebArchitect(officeArchitect, contextPath);
+		return employWebArchitect(contextPath, officeArchitect, officeSourceContext);
 	}
 
 	/**
 	 * Employs a {@link WebArchitect}.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
 	 * @param contextPath
 	 *            Context path for the web application. May be <code>null</code>
 	 *            for no context path.
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param officeSourceContext
+	 *            {@link OfficeSourceContext} used to source {@link Property}
+	 *            values to configure the {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
-	public static WebArchitect employWebArchitect(OfficeArchitect officeArchitect, String contextPath) {
-		return new WebArchitectEmployer(officeArchitect, contextPath);
+	public static WebArchitect employWebArchitect(String contextPath, OfficeArchitect officeArchitect,
+			OfficeSourceContext officeSourceContext) {
+		return new WebArchitectEmployer(contextPath, officeArchitect, officeSourceContext);
 	}
+
+	/**
+	 * Context path. May be <code>null</code> for no context path.
+	 */
+	private final String contextPath;
 
 	/**
 	 * {@link OfficeArchitect}.
@@ -117,9 +126,9 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final OfficeArchitect officeArchitect;
 
 	/**
-	 * Context path. May be <code>null</code> for no context path.
+	 * {@link OfficeSourceContext}.
 	 */
-	private final String contextPath;
+	private final OfficeSourceContext officeSourceContext;
 
 	/**
 	 * {@link HttpRouteSectionSource}.
@@ -193,15 +202,19 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
 	 * @param contextPath
 	 *            Context path for the web application. May be <code>null</code>
 	 *            for no context path.
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param officeSourceContext
+	 *            {@link OfficeSourceContext}.
 	 */
-	private WebArchitectEmployer(OfficeArchitect officeArchitect, String contextPath) {
-		this.officeArchitect = officeArchitect;
+	private WebArchitectEmployer(String contextPath, OfficeArchitect officeArchitect,
+			OfficeSourceContext officeSourceContext) {
 		this.contextPath = contextPath;
+		this.officeArchitect = officeArchitect;
+		this.officeSourceContext = officeSourceContext;
 		this.routing = new HttpRouteSectionSource(this.contextPath);
 		this.routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
 	}
@@ -384,7 +397,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpInput getHttpInput(boolean isSecure, HttpMethod httpMethod, String applicationPath) {
+	public HttpInput getHttpInput(boolean isSecure, String httpMethodName, String applicationPath) {
+		HttpMethod httpMethod = HttpMethod.getHttpMethod(httpMethodName);
 		HttpInputImpl input = new HttpInputImpl(isSecure, httpMethod, applicationPath);
 		this.inputs.add(input);
 		return input;
@@ -621,7 +635,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * {@link HttpMethod}.
 		 */
-		private final HttpMethod method;
+		private final HttpMethod httpMethod;
 
 		/**
 		 * Application path.
@@ -644,16 +658,17 @@ public class WebArchitectEmployer implements WebArchitect {
 		 * 
 		 * @param isSecure
 		 *            Indicates if secure.
-		 * @param method
+		 * @param httpMethod
 		 *            {@link HttpMethod}.
 		 * @param applicationPath
 		 *            Application path.
 		 */
-		private HttpInputImpl(boolean isSecure, HttpMethod method, String applicationPath) {
+		private HttpInputImpl(boolean isSecure, HttpMethod httpMethod, String applicationPath) {
 			this.isSecure = isSecure;
-			this.method = method;
+			this.httpMethod = httpMethod;
 			this.applicationPath = applicationPath;
-			this.routeInput = WebArchitectEmployer.this.routing.addRoute(isSecure, this.method, this.applicationPath);
+			this.routeInput = WebArchitectEmployer.this.routing.addRoute(isSecure, this.httpMethod,
+					this.applicationPath);
 			this.input = WebArchitectEmployer.this.routingSection
 					.getOfficeSectionOutput(this.routeInput.getOutputName());
 		}
@@ -682,7 +697,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		 * Mapping of parameter type to {@link OfficeFlowSinkNode} for
 		 * redirects.
 		 */
-		private final Map<Class<?>, OfficeFlowSinkNode> redirects = new HashMap<>();
+		private final Map<String, OfficeFlowSinkNode> redirects = new HashMap<>();
 
 		/**
 		 * Instantiate.
@@ -701,10 +716,14 @@ public class WebArchitectEmployer implements WebArchitect {
 		 */
 
 		@Override
-		public OfficeFlowSinkNode getRedirect(Class<?> parameterType) {
+		public OfficeFlowSinkNode getRedirect(String parameterTypeName) {
+
+			// Obtain the parameter type class
+			Class<?> parameterType = CompileUtil.isBlank(parameterTypeName) ? Object.class
+					: WebArchitectEmployer.this.officeSourceContext.loadClass(parameterTypeName);
 
 			// Determine if already cached
-			OfficeFlowSinkNode flowSinkNode = this.redirects.get(parameterType);
+			OfficeFlowSinkNode flowSinkNode = this.redirects.get(parameterTypeName);
 			if (flowSinkNode != null) {
 				return flowSinkNode;
 			}
@@ -717,17 +736,15 @@ public class WebArchitectEmployer implements WebArchitect {
 
 				// Obtain and cache the flow sink node for the redirect
 				flowSinkNode = WebArchitectEmployer.this.routingSection.getOfficeSectionInput(redirect.getInputName());
-				this.redirects.put(parameterType, flowSinkNode);
+				this.redirects.put(parameterTypeName, flowSinkNode);
 
 				// Return the section input for redirect
 				return flowSinkNode;
 
 			} catch (Exception ex) {
 				throw WebArchitectEmployer.this.officeArchitect
-						.addIssue(
-								"Failed to create redirect to " + this.applicationPath + (parameterType == null
-										? " with null value type" : " with values type " + parameterType.getName()),
-								ex);
+						.addIssue("Failed to create redirect to " + this.applicationPath + (parameterTypeName == null
+								? " with null value type" : " with values type " + parameterTypeName), ex);
 			}
 		}
 	}

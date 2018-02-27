@@ -25,7 +25,7 @@
 			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel">
 			<value method="setHttpSecurityName" node="security@name" />
 		</object>
-		<object method="setWoofHttpContinuation" node="redirect"
+		<object method="setWoofRedirect" node="redirect"
 			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofHttpContinuationModel">
 			<value method="setApplicationPath" node="redirect@path" />
 		</object>

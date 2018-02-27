@@ -39,9 +39,9 @@ public class WebTemplateLinkAnnotation {
 	private final String linkName;
 
 	/**
-	 * {@link HttpMethod} instances supported by the link.
+	 * {@link HttpMethod} names supported by the link.
 	 */
-	private final HttpMethod[] methods;
+	private final String[] httpMethodNames;
 
 	/**
 	 * Instantiate.
@@ -50,13 +50,13 @@ public class WebTemplateLinkAnnotation {
 	 *            Indicates if the link is secure.
 	 * @param linkName
 	 *            Name of link.
-	 * @param methods
-	 *            {@link HttpMethod} instances supported by the link.
+	 * @param httpMethodNames
+	 *            {@link HttpMethod} names supported by the link.
 	 */
-	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName, HttpMethod[] methods) {
+	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName, String[] httpMethodNames) {
 		this.isLinkSecure = isLinkSecure;
 		this.linkName = linkName;
-		this.methods = methods;
+		this.httpMethodNames = httpMethodNames;
 	}
 
 	/**
@@ -78,12 +78,12 @@ public class WebTemplateLinkAnnotation {
 	}
 
 	/**
-	 * Obtains the {@link HttpMethod} instances for the link.
+	 * Obtains the {@link HttpMethod} names for the link.
 	 * 
-	 * @return {@link HttpMethod} instances for the link.
+	 * @return {@link HttpMethod} names for the link.
 	 */
-	public HttpMethod[] getMethods() {
-		return this.methods;
+	public String[] getHttpMethods() {
+		return this.httpMethodNames;
 	}
 
 }

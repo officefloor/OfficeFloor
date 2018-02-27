@@ -7,11 +7,11 @@
 	<field type="WoofHttpContinuationToWoofResourceModel" name="woof resource" />
 	<field type="WoofHttpContinuationToWoofSecurityModel" name="woof security" />
 	<field type="WoofHttpContinuationToWoofHttpContinuationModel"
-		name="woof http continuation" />
+		name="woof redirect" />
 	<list type="WoofTemplateOutputToWoofHttpContinuationModel" name="woof template output" />
 	<list type="WoofSectionOutputToWoofHttpContinuationModel" name="woof section output" />
 	<list type="WoofExceptionToWoofHttpContinuationModel" name="woof exception" />
 	<list type="WoofSecurityOutputToWoofHttpContinuationModel" name="woof security output" />
-	<list type="WoofHttpContinuationToWoofHttpContinuationModel" name="woof redirect" />
+	<list type="WoofHttpContinuationToWoofHttpContinuationModel" name="woof http continuation" />
 	<list type="WoofHttpInputToWoofHttpContinuationModel" name="woof http input" />
 </model>

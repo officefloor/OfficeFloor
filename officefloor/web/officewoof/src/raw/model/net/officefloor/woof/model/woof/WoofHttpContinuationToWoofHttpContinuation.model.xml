@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="application path" />
-	<field type="WoofHttpContinuationModel" name="woof redirect"
-		end-field="woof http continuation" />
 	<field type="WoofHttpContinuationModel" name="woof http continuation"
-		end-list="woof redirect" />
+		end-field="woof redirect" />
+	<field type="WoofHttpContinuationModel" name="woof redirect"
+		end-list="woof http continuation" />
 </model>

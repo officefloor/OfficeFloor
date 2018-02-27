@@ -692,13 +692,13 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(httpContinuation.getWoofTemplateOutputs(), list);
 				removeConnections(httpContinuation.getWoofSecurityOutputs(), list);
 				removeConnections(httpContinuation.getWoofExceptions(), list);
-				removeConnections(httpContinuation.getWoofRedirects(), list);
+				removeConnections(httpContinuation.getWoofHttpContinuations(), list);
 				removeConnections(httpContinuation.getWoofHttpInputs(), list);
 				removeConnection(httpContinuation.getWoofSectionInput(), list);
 				removeConnection(httpContinuation.getWoofTemplate(), list);
 				removeConnection(httpContinuation.getWoofSecurity(), list);
 				removeConnection(httpContinuation.getWoofResource(), list);
-				removeConnection(httpContinuation.getWoofHttpContinuation(), list);
+				removeConnection(httpContinuation.getWoofRedirect(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the HTTP continuation

@@ -21,6 +21,9 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.resource.build.HttpResourceArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.template.build.WebTemplateArchitect;
 import net.officefloor.woof.objects.WoofObjectsLoader;
 
 /**
@@ -43,6 +46,27 @@ public interface WoofLoaderContext {
 	 * @return {@link WebArchitect}.
 	 */
 	WebArchitect getWebArchitect();
+
+	/**
+	 * Obtains the {@link HttpSecurityArchitect}.
+	 * 
+	 * @return {@link HttpSecurityArchitect}.
+	 */
+	HttpSecurityArchitect getHttpSecurityArchitect();
+
+	/**
+	 * Obtains the {@link WebTemplateArchitect}.
+	 * 
+	 * @return {@link WebTemplateArchitect}.
+	 */
+	WebTemplateArchitect getWebTemplater();
+
+	/**
+	 * Obtains the {@link HttpResourceArchitect}.
+	 * 
+	 * @return {@link HttpResourceArchitect}.
+	 */
+	HttpResourceArchitect getHttpResourceArchitect();
 
 	/**
 	 * Obtains the {@link OfficeArchitect}.

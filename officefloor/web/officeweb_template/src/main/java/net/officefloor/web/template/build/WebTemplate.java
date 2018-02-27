@@ -44,10 +44,10 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * Specifies the logic {@link Class}.
 	 * 
 	 * @param logicClass
-	 *            Logic {@link Class}.
+	 *            Name of the logic {@link Class}.
 	 * @return <code>this</code>.
 	 */
-	WebTemplate setLogicClass(Class<?> logicClass);
+	WebTemplate setLogicClass(String logicClassName);
 
 	/**
 	 * <p>
@@ -79,11 +79,11 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * Allow overriding the default {@link Charset} to render the
 	 * {@link WebTemplate}.
 	 * 
-	 * @param charset
-	 *            {@link Charset} to render the {@link WebTemplate}.
+	 * @param charsetName
+	 *            Name of {@link Charset} to render the {@link WebTemplate}.
 	 * @return <code>this</code>.
 	 */
-	WebTemplate setCharset(Charset charset);
+	WebTemplate setCharset(String charsetName);
 
 	/**
 	 * Allows overriding the default separator character between the path and
@@ -132,11 +132,12 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * <p>
 	 * Note that {@link HttpMethodEnum#GET} is added by default.
 	 * 
-	 * @param method
-	 *            {@link HttpMethod} that will render the {@link WebTemplate}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod} that will render the
+	 *            {@link WebTemplate}.
 	 * @return <code>this</code>.
 	 */
-	WebTemplate addRenderMethod(HttpMethod method);
+	WebTemplate addRenderHttpMethod(String httpMethodName);
 
 	/**
 	 * Specifies the super (parent) {@link WebTemplate}.
@@ -161,14 +162,14 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * Obtains the {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
 	 * 
 	 * @param valuesType
-	 *            Type provided as a parameter to the {@link OfficeFlowSinkNode}
-	 *            should the path parameters require being obtained. The type
-	 *            should provide a bean property for each path parameter for the
-	 *            {@link WebTemplate}. May be <code>null</code> if no path
-	 *            parameters are required.
+	 *            Name of type provided as a parameter to the
+	 *            {@link OfficeFlowSinkNode} should the path parameters require
+	 *            being obtained. The type should provide a bean property for
+	 *            each path parameter for the {@link WebTemplate}. May be
+	 *            <code>null</code> if no path parameters are required.
 	 * @return {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
 	 */
-	OfficeFlowSinkNode getRender(Class<?> valuesType);
+	OfficeFlowSinkNode getRender(String valuesTypeName);
 
 	/**
 	 * Obtains the {@link OfficeFlowSourceNode} from the {@link WebTemplate}.

@@ -57,14 +57,14 @@ public interface CompileWebContext extends CompileOfficeContext {
 	 * 
 	 * @param isSecure
 	 *            Indicates if secure.
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
 	 * @param applicationPath
 	 *            Application path.
 	 * @param sectionClass
 	 *            {@link Class} containing a <code>service</code> method.
 	 * @return {@link HttpInput}.
 	 */
-	HttpInput link(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> sectionClass);
+	HttpInput link(boolean isSecure, String httpMethodName, String applicationPath, Class<?> sectionClass);
 
 }

@@ -109,7 +109,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to GET root.
 	 */
 	public void testGetRoot() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/", MockSection.class, this.mockRequest("/"));
+		MockHttpResponse response = this.service("GET", "/", MockSection.class, this.mockRequest("/"));
 		response.assertResponse(200, "TEST");
 	}
 
@@ -123,7 +123,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to GET secure root.
 	 */
 	public void testSecureGetRoot() throws Exception {
-		this.secureService(HttpMethod.GET, "/", MockSection.class, "/", "TEST");
+		this.secureService("GET", "/", MockSection.class, "/", "TEST");
 	}
 
 	/**
@@ -140,7 +140,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to POST root.
 	 */
 	public void testPostRoot() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.POST, "/", MockSection.class,
+		MockHttpResponse response = this.service("POST", "/", MockSection.class,
 				this.mockRequest("/").method(HttpMethod.POST));
 		response.assertResponse(200, "TEST");
 	}
@@ -149,14 +149,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to POST secure root.
 	 */
 	public void testSecurePostRoot() throws Exception {
-		this.secureService(HttpMethod.POST, "/", MockSection.class, "/", "TEST");
+		this.secureService("POST", "/", MockSection.class, "/", "TEST");
 	}
 
 	/**
 	 * Ensure appropriately indicates {@link HttpMethod} not allowed.
 	 */
 	public void testPostNotAllowed() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/", MockSection.class,
+		MockHttpResponse response = this.service("GET", "/", MockSection.class,
 				this.mockRequest("/").method(HttpMethod.POST));
 		response.assertResponse(405, "", "Allow", "GET, HEAD, OPTIONS");
 	}
@@ -165,7 +165,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain resource at path.
 	 */
 	public void testPath() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/to/resource", MockSection.class,
+		MockHttpResponse response = this.service("GET", "/path/to/resource", MockSection.class,
 				this.mockRequest("/path/to/resource"));
 		response.assertResponse(200, "TEST");
 	}
@@ -174,14 +174,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure redirect on secure path.
 	 */
 	public void testSecurePath() throws Exception {
-		this.secureService(HttpMethod.GET, "/path/to/resource", MockSection.class, "/path/to/resource", "TEST");
+		this.secureService("GET", "/path/to/resource", MockSection.class, "/path/to/resource", "TEST");
 	}
 
 	/**
 	 * Ensure able to provide parameter via path.
 	 */
 	public void testPathParameter() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}", MockPathParameter.class,
+		MockHttpResponse response = this.service("GET", "/path/{param}", MockPathParameter.class,
 				this.mockRequest("/path/value"));
 		response.assertResponse(200, "Parameter=value");
 	}
@@ -203,7 +203,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide value via path.
 	 */
 	public void testPathValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/{param}/{two}", MockPathValue.class,
+		MockHttpResponse response = this.service("GET", "/path/{param}/{two}", MockPathValue.class,
 				this.mockRequest("/path/value/2"));
 		response.assertResponse(200, "Value=value");
 	}
@@ -219,14 +219,14 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide value via secure path.
 	 */
 	public void testSecurePathValue() throws Exception {
-		this.secureService(HttpMethod.GET, "/path/{param}/{two}", MockPathValue.class, "/path/value/2", "Value=value");
+		this.secureService("GET", "/path/{param}/{two}", MockPathValue.class, "/path/value/2", "Value=value");
 	}
 
 	/**
 	 * Ensure can have multiple parameters on the path.
 	 */
 	public void testPathMultipleParameters() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/with/first-{param}/and/{second}/param",
+		MockHttpResponse response = this.service("GET", "/path/with/first-{param}/and/{second}/param",
 				MockMultipleParameters.class, this.mockRequest("/path/with/first-one/and/two/param"));
 		response.assertResponse(200, "One=one and Two=two");
 	}
@@ -251,7 +251,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can have multiple values on the path.
 	 */
 	public void testPathMultipleValues() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path/with/first-{param}/and/{second}/param",
+		MockHttpResponse response = this.service("GET", "/path/with/first-{param}/and/{second}/param",
 				MockMultipleValues.class, this.mockRequest("/path/with/first-one/and/two/param"));
 		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
 		assertEquals("Incorrect response", "One=one and Two=two", response.getEntity(null));
@@ -268,7 +268,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide parameter via query string.
 	 */
 	public void testQueryParameter() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockQueryParameter.class,
+		MockHttpResponse response = this.service("GET", "/path", MockQueryParameter.class,
 				this.mockRequest("/path?param=value"));
 		response.assertResponse(200, "Parameter=value");
 	}
@@ -293,7 +293,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide value via query string.
 	 */
 	public void testQueryValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockQueryValue.class,
+		MockHttpResponse response = this.service("GET", "/path", MockQueryValue.class,
 				this.mockRequest("/path?param=value"));
 		response.assertResponse(200, "Value=value");
 	}
@@ -309,7 +309,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide value via {@link HttpHeader}.
 	 */
 	public void testHeaderValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockHeaderValue.class,
+		MockHttpResponse response = this.service("GET", "/path", MockHeaderValue.class,
 				this.mockRequest("/path").header("x-test", "value"));
 		response.assertResponse(200, "Value=value");
 	}
@@ -325,7 +325,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide value via {@link HttpCookie}.
 	 */
 	public void testCookieValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.GET, "/path", MockCookieValue.class,
+		MockHttpResponse response = this.service("GET", "/path", MockCookieValue.class,
 				this.mockRequest("/path").header("cookie", new HttpCookie("param", "value").toString()));
 		response.assertResponse(200, "Value=value");
 	}
@@ -341,7 +341,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide form parameter.
 	 */
 	public void testFormParameter() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockFormParameter.class,
+		MockHttpResponse response = this.service("POST", "/path", MockFormParameter.class,
 				this.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
 		response.assertResponse(200, "Parameter=value");
@@ -366,7 +366,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to provide form value.
 	 */
 	public void testFormValue() throws Exception {
-		MockHttpResponse response = this.service(HttpMethod.POST, "/path", MockFormValue.class,
+		MockHttpResponse response = this.service("POST", "/path", MockFormValue.class,
 				this.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
 		response.assertResponse(200, "Parameter=value");
@@ -461,7 +461,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			context.getWebArchitect().addHttpArgument("param", HttpValueLocation.QUERY);
-			context.link(false, HttpMethod.GET, "/", HttpArgumentSection.class);
+			context.link(false, "GET", "/", HttpArgumentSection.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -484,7 +484,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.compile.web((context) -> {
 			context.getWebArchitect().addHttpObjectParser(new ObjectValueFactory());
-			context.link(false, HttpMethod.POST, "/path", MockObjectValue.class);
+			context.link(false, "POST", "/path", MockObjectValue.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -555,7 +555,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			WebArchitect web = context.getWebArchitect();
 			web.addHttpObjectParser(new ObjectAliasFactory());
 			web.addHttpObjectAnnotationAlias(MockAlias.class, "application/alias");
-			context.link(false, HttpMethod.POST, "/path", MockObjectAlias.class);
+			context.link(false, "POST", "/path", MockObjectAlias.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -625,7 +625,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			context.link(false, HttpMethod.GET, "/path/{param}", MockObjectSection.class);
+			context.link(false, "GET", "/path/{param}", MockObjectSection.class);
 			context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
@@ -709,7 +709,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			context.link(false, HttpMethod.GET, "/path", MockEscalate.class);
+			context.link(false, "GET", "/path", MockEscalate.class);
 			context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
@@ -735,8 +735,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			OfficeSection servicer = context.addSection("SECTION", MockApplication.class);
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
-			office.link(web.getHttpInput(false, HttpMethod.POST, "/path").getInput(),
-					servicer.getOfficeSectionInput("post"));
+			office.link(web.getHttpInput(false, "POST", "/path").getInput(), servicer.getOfficeSectionInput("post"));
 			office.link(web.getHttpInput(false, "/path").getInput(), servicer.getOfficeSectionInput("get"));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
@@ -777,8 +776,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			OfficeSection servicer = context.addSection("SECTION", MockSession.class);
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
-			office.link(web.getHttpInput(false, HttpMethod.POST, "/path").getInput(),
-					servicer.getOfficeSectionInput("post"));
+			office.link(web.getHttpInput(false, "POST", "/path").getInput(), servicer.getOfficeSectionInput("post"));
 			office.link(web.getHttpInput(false, "/path").getInput(), servicer.getOfficeSectionInput("get"));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
@@ -824,7 +822,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 			// Configure to redirect to continuation
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			office.link(web.getHttpInput(false, HttpMethod.POST, "/redirect").getInput(),
+			office.link(web.getHttpInput(false, "POST", "/redirect").getInput(),
 					section.getOfficeSectionInput("service"));
 			office.link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
 		});
@@ -860,7 +858,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 			// Configure to redirect to continuation
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			office.link(web.getHttpInput(false, HttpMethod.POST, "/redirect").getInput(),
+			office.link(web.getHttpInput(false, "POST", "/redirect").getInput(),
 					section.getOfficeSectionInput("service"));
 			office.link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(null));
 		});
@@ -911,9 +909,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 			// Configure to redirect to continuation
 			OfficeSection section = context.addSection("REDIRECT", MockRedirect.class);
-			office.link(context.getWebArchitect().getHttpInput(false, HttpMethod.POST, "/redirect").getInput(),
+			office.link(context.getWebArchitect().getHttpInput(false, "POST", "/redirect").getInput(),
 					section.getOfficeSectionInput("service"));
-			office.link(section.getOfficeSectionOutput("redirect"), continuation.getRedirect(MockPathParameters.class));
+			office.link(section.getOfficeSectionOutput("redirect"),
+					continuation.getRedirect(MockPathParameters.class.getName()));
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
@@ -1091,8 +1090,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Services the {@link MockHttpRequestBuilder}.
 	 * 
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
 	 * @param applicationPath
 	 *            Application path.
 	 * @param servicer
@@ -1101,9 +1100,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 *            {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpResponse}.
 	 */
-	private MockHttpResponse service(HttpMethod httpMethod, String applicationPath, Class<?> servicer,
+	private MockHttpResponse service(String httpMethodName, String applicationPath, Class<?> servicer,
 			MockHttpRequestBuilder request) throws Exception {
-		return this.service(false, httpMethod, applicationPath, servicer, request);
+		return this.service(false, httpMethodName, applicationPath, servicer, request);
 	}
 
 	/**
@@ -1111,8 +1110,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * 
 	 * @param isSecure
 	 *            Indicates if route is secure.
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
 	 * @param applicationPath
 	 *            Application path.
 	 * @param servicer
@@ -1121,9 +1120,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 *            {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpResponse}.
 	 */
-	private MockHttpResponse service(boolean isSecure, HttpMethod httpMethod, String applicationPath, Class<?> servicer,
+	private MockHttpResponse service(boolean isSecure, String httpMethodName, String applicationPath, Class<?> servicer,
 			MockHttpRequestBuilder request) throws Exception {
-		this.compile.web((context) -> context.link(isSecure, httpMethod, applicationPath, servicer));
+		this.compile.web((context) -> context.link(isSecure, httpMethodName, applicationPath, servicer));
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 		return this.server.send(request);
 	}
@@ -1131,8 +1130,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Validates the redirect for requiring a secure connection.
 	 * 
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
 	 * @param applicationPath
 	 *            Application path. May contain parameters.
 	 * @param servicer
@@ -1142,9 +1141,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * @param expectedEntity
 	 *            Expected secure entity.
 	 */
-	private void secureService(HttpMethod httpMethod, String applicationPath, Class<?> servicer, String requestPath,
+	private void secureService(String httpMethodName, String applicationPath, Class<?> servicer, String requestPath,
 			String expectedEntity) throws Exception {
-		MockHttpResponse response = this.service(true, httpMethod, applicationPath, servicer,
+		HttpMethod httpMethod = HttpMethod.getHttpMethod(httpMethodName);
+		MockHttpResponse response = this.service(true, httpMethodName, applicationPath, servicer,
 				this.mockRequest(requestPath).method(httpMethod));
 		assertEquals("Incorrect status", 307, response.getStatus().getStatusCode());
 		response.assertHeader("location", this.contextUrl("https://mock.officefloor.net", requestPath));
