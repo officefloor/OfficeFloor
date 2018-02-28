@@ -18,13 +18,14 @@
 package net.officefloor.woof;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.LogRecord;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -40,8 +41,6 @@ import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
@@ -53,12 +52,10 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
-import net.officefloor.web.security.type.HttpSecuritySourceSpecificationRunnableTest.MockHttpSecuritySource;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplateArchitect;
 import net.officefloor.woof.model.woof.WoofRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofTemplateModel;
-import net.officefloor.woof.template.WoofTemplateExtensionException;
 import net.officefloor.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.woof.template.WoofTemplateExtensionSourceService;
@@ -117,7 +114,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	public void testLoading() throws Exception {
 
 		// Record loading templates
-		this.recordImplicitTemplateExtensions();
+		this.recordNoImplicitTemplateExtensions();
 		WebTemplateRecorder templateA = new WebTemplateRecorder(true, "/template/{param}", "WOOF/TemplateA.ofp");
 		templateA.record((template) -> template.setLogicClass("net.example.Template"));
 		templateA.record((template) -> template.setRedirectValuesFunction("redirect"));
@@ -240,7 +237,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	public void testInheritance() throws Exception {
 
 		// Record no implicit template extensions
-		this.recordImplicitTemplateExtensions();
+		this.recordNoImplicitTemplateExtensions();
 
 		// Record loading parent template
 		WebTemplateRecorder parentTemplate = new WebTemplateRecorder(false, "/parent", "WOOF/Parent.ofp");
@@ -300,33 +297,56 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load implicit {@link WoofTemplateExtensionSource}.
+	 */
+	public void testImplicitTemplateExtension() throws Exception {
+
+		// Record implicit template extensions
+		MockImplicitWoofTemplateExtensionSourceService.recordLoadImplicit(this.extensionContext, this, "example");
+
+		// Record loading template
+		new WebTemplateRecorder(false, "example", "WOOF/Template.html");
+
+		// Record extending template
+		this.recordTemplateExtension(null);
+
+		// Test
+		this.replayMockObjects();
+		this.loadConfiguration("implicit-template-extension.woof.xml");
+		this.verifyMockObjects();
+
+		// Ensure implicit extension invoked
+		MockImplicitWoofTemplateExtensionSourceService.assertTemplatesExtended();
+	}
+
+	/**
 	 * Ensure can load explicit {@link WoofTemplateExtensionSource}.
 	 */
 	public void testExplicitTemplateExtension() throws Exception {
 
-		// Record initiating from source context
-		MockImplicitWoofTemplateExtensionSourceService.reset("example");
+		// Record implicit template extensions
+		this.recordNoImplicitTemplateExtensions();
 
 		// Record loading template
-		WebTemplateRecorder example = new WebTemplateRecorder(false, "example", "WOOF/Template.html");
-		example.record((template) -> template.setLogicClass("net.example.Template"));
+		new WebTemplateRecorder(false, "example", "WOOF/Template.html");
 
 		// Record extending with explicit template extension
 		this.recordTemplateExtension(MockExplicitWoofTemplateExtensionSource.class);
 
-		// Record implicit template extensions
-		this.recordImplicitTemplateExtensions();
-
 		// Test
+		MockExplicitWoofTemplateExtensionSource.isInvoked = false;
 		this.replayMockObjects();
 		this.loadConfiguration("explicit-template-extension.woof.xml");
 		this.verifyMockObjects();
+		assertTrue("Should invoke explicit templae extension", MockExplicitWoofTemplateExtensionSource.isInvoked);
 	}
 
 	/**
 	 * Mock explicit {@link WoofTemplateExtensionSource}.
 	 */
 	public static class MockExplicitWoofTemplateExtensionSource extends AbstractWoofTemplateExtensionSource {
+
+		private static boolean isInvoked = false;
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
@@ -336,41 +356,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		@Override
 		public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 			// Ensure correct template
-			assertEquals("Obtain location to ensure extending", "URI", context.getApplicationPath());
+			assertEquals("Obtain location to ensure extending", "example", context.getApplicationPath());
+			assertEquals("Should obtain property", "VALUE", context.getProperty("NAME"));
+			isInvoked = true;
 		}
-	}
-
-	/**
-	 * Ensure issue if unknown template extension.
-	 */
-	public void testUnknownTemplateExtension() throws Exception {
-
-		final WebTemplate template = this.createMock(WebTemplate.class);
-
-		// Record initiating from source context
-		MockImplicitWoofTemplateExtensionSourceService.reset();
-
-		// Record loading template
-		this.recordReturn(this.templater, this.templater.addTemplate(false, "example", "WOOF/Template.html"), template);
-		template.setLogicClass("net.example.Template");
-
-		// Should not load further as unknown template extension
-		this.recordReturn(this.extensionContext, this.extensionContext.isLoadingType(), true);
-		final UnknownClassError unknownClassError = new UnknownClassError("UNKNOWN");
-		this.extensionContext.loadClass("UNKNOWN");
-		this.control(this.extensionContext).setThrowable(unknownClassError);
-
-		// Test
-		this.replayMockObjects();
-		try {
-			this.loadConfiguration("unknown-template-extension.woof.xml");
-			fail("Should not load successfully");
-		} catch (WoofTemplateExtensionException ex) {
-			assertEquals("Incorrect exception",
-					"Failed loading Template Extension UNKNOWN. " + unknownClassError.getMessage(), ex.getMessage());
-			assertTrue("Incorrect cause", ex.getCause() == unknownClassError);
-		}
-		this.verifyMockObjects();
 	}
 
 	/**
@@ -449,10 +438,6 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		private void record(Function<WebTemplate, WebTemplate> action) {
 			WoofLoaderTest.this.recordReturn(this.template, action.apply(this.template), this.template);
-		}
-
-		private <R> void record(Function<WebTemplate, R> action, R returnValue) {
-			WoofLoaderTest.this.recordReturn(this.template, action.apply(this.template), returnValue);
 		}
 
 		private OfficeFlowSinkNode recordGetRender(Class<?> valuesType) {
@@ -621,32 +606,41 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Record a template extension.
-	 * 
-	 * @param extensionSourceClass
-	 *            {@link Class} of the {@link WoofTemplateExtensionSource}.
-	 */
-	private void recordTemplateExtension(Class<? extends WoofTemplateExtensionSource> extensionSourceClass) {
-
-		// Load the source context
-		this.recordReturn(this.extensionContext, this.extensionContext.isLoadingType(), true);
-
-		// Record loading the template extension
-		this.recordReturn(this.extensionContext, this.extensionContext.loadClass(extensionSourceClass.getName()),
-				extensionSourceClass);
-	}
-
-	/**
 	 * Records implicit {@link WoofTemplateExtensionSource} on the
 	 * {@link WebTemplate}.
 	 * 
 	 * @param extensionSources
 	 *            {@link WoofTemplateExtensionSource} instances.
 	 */
-	private void recordImplicitTemplateExtensions(WoofTemplateExtensionSource... extensionSources) {
+	private void recordNoImplicitTemplateExtensions() {
 		this.recordReturn(this.extensionContext,
 				this.extensionContext.loadOptionalServices(WoofTemplateExtensionSourceService.class),
-				Arrays.asList(extensionSources));
+				Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Record a template extension.
+	 * 
+	 * @param extensionSourceClass
+	 *            {@link Class} of the {@link WoofTemplateExtensionSource}.
+	 * @param nameValuePairs
+	 *            Name/value {@link Property} pairs.
+	 */
+	private void recordTemplateExtension(Class<? extends WoofTemplateExtensionSource> extensionSourceClass,
+			String... nameValuePairs) {
+
+		// Record loading the template extension
+		if (extensionSourceClass != null) {
+			this.recordReturn(this.extensionContext, this.extensionContext.loadClass(extensionSourceClass.getName()),
+					extensionSourceClass);
+		}
+
+		// Record obtaining properties
+		PropertyList properties = new PropertyListImpl(nameValuePairs);
+		this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), properties);
+
+		// Load the source context
+		this.recordReturn(this.extensionContext, this.extensionContext.isLoadingType(), true);
 	}
 
 }

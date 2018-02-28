@@ -1,11 +1,11 @@
 <woof>
 
 	<templates>
-		<template path="/grandparent" location="example/GrandParent.ofp">
+		<template path="/ancestor" template="example/GrandParent.ofp">
 			<output name="OUTPUT_GRAND_PARENT" />
 		</template>
 		<template path="/parent" location="example/Parent.ofp">
-			<extends template="/grandparent" />
+			<extends template="/ancestor" />
 			<output name="OUTPUT_PARENT" />
 		</template>
 	</templates>

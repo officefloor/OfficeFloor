@@ -544,7 +544,7 @@ public class WoofLoaderImpl implements WoofLoader {
 						explicitTemplateExtensions.add(extensionSourceClass);
 
 						// Create the context for the extension source
-						PropertyList properties = OfficeFloorCompiler.newPropertyList();
+						PropertyList properties = extensionContext.createPropertyList();
 						for (PropertyModel property : extensionModel.getProperties()) {
 							properties.addProperty(property.getName()).setValue(property.getValue());
 						}

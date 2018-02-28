@@ -45,15 +45,6 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
 public interface WoofChanges {
 
 	/**
-	 * Obtains the {@link WoofTemplateInheritance} instances by their super
-	 * {@link WoofTemplateModel} application path.
-	 * 
-	 * @return {@link WoofTemplateInheritance} instances by their super
-	 *         {@link WoofTemplateModel} application path.
-	 */
-	Map<String, WoofTemplateInheritance> getWoofTemplateInheritances();
-
-	/**
 	 * Adds a {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param applicationPath

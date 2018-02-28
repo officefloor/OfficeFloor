@@ -1,0 +1,7 @@
+<woof>
+
+	<templates>
+		<template path="example" location="WOOF/Template.html" />
+	</templates>
+
+</woof>

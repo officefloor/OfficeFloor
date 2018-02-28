@@ -23,7 +23,9 @@ import java.util.LinkedList;
 
 import org.junit.Assert;
 
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
@@ -41,12 +43,38 @@ public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoof
 	/**
 	 * Resets for testing loading implicit {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param templateUris
-	 *            URIs of the {@link WebTemplate} instances being extended.
+	 * @param templateApplicationPaths
+	 *            Application paths of the {@link WebTemplate} instances being
+	 *            extended.
 	 */
-	public static void reset(String... templateUris) {
+	public static void reset(String... templateApplicationPaths) {
 		MockImplicitWoofTemplateExtensionSourceService.templateApplicationPaths = new LinkedList<String>(
-				Arrays.asList(templateUris));
+				Arrays.asList(templateApplicationPaths));
+	}
+
+	/**
+	 * Records loading as implicit {@link WoofTemplateExtensionSource}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSourceContext}.
+	 * @param testCase
+	 *            {@link OfficeFrameTestCase}.
+	 * @param templateApplicationPaths
+	 *            Application paths of the {@link WebTemplate} instances being
+	 *            extended.
+	 */
+	public static void recordLoadImplicit(OfficeSourceContext context, OfficeFrameTestCase testCase,
+			String... templateApplicationPaths) {
+		MockImplicitWoofTemplateExtensionSourceService.reset(templateApplicationPaths);
+		testCase.recordReturn(context, context.loadOptionalServices(WoofTemplateExtensionSourceService.class),
+				Arrays.asList(new MockImplicitWoofTemplateExtensionSourceService()));
+	}
+
+	/**
+	 * Ensures the {@link WebTemplate} instances were extended.
+	 */
+	public static void assertTemplatesExtended() {
+		Assert.assertEquals("Should have extended all template", 0, templateApplicationPaths.size());
 	}
 
 	/**
@@ -79,7 +107,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoof
 		String applicationPath = context.getApplicationPath();
 
 		// Ensure expecting the template
-		String expectedApplicationPath = templateApplicationPaths.pollFirst();
+		String expectedApplicationPath = templateApplicationPaths.pop();
 		Assert.assertNotNull("Not expecting template " + applicationPath, expectedApplicationPath);
 		Assert.assertEquals("Incorrect template application path for extension", expectedApplicationPath,
 				applicationPath);

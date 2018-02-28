@@ -20,7 +20,6 @@ package net.officefloor.woof.model.woof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -572,70 +571,6 @@ public class WoofChangesImpl implements WoofChanges {
 	/*
 	 * ======================= WoofChanges =======================
 	 */
-
-	@Override
-	public Map<String, WoofTemplateInheritance> getWoofTemplateInheritances() {
-
-		// Create mapping of template by its application path
-		Map<String, WoofTemplateModel> templates = new HashMap<String, WoofTemplateModel>();
-		for (WoofTemplateModel template : this.model.getWoofTemplates()) {
-			String applicationPath = template.getApplicationPath();
-			templates.put(applicationPath, template);
-		}
-
-		// Obtain the inheritance for each template
-		Map<String, WoofTemplateInheritance> templateInheritances = new HashMap<String, WoofTemplateInheritance>();
-		for (WoofTemplateModel template : this.model.getWoofTemplates()) {
-
-			// Create the hierarchy for the template
-			List<WoofTemplateModel> hierarchyList = new LinkedList<WoofTemplateModel>();
-			WoofTemplateModel currentTemplate = template;
-			boolean isCyclicHierarchy = false;
-			while ((currentTemplate != null) && (!isCyclicHierarchy)) {
-
-				// Include current template in hierarchy
-				hierarchyList.add(currentTemplate);
-
-				// Obtain the super template for next iteration
-				WoofTemplateToSuperWoofTemplateModel superConn = currentTemplate.getSuperWoofTemplate();
-				String superTemplateName = superConn.getSuperWoofTemplateApplicationPath();
-				currentTemplate = templates.get(superTemplateName);
-				if (hierarchyList.contains(currentTemplate)) {
-					isCyclicHierarchy = true;
-				}
-			}
-			WoofTemplateModel[] hierarchy = hierarchyList.toArray(new WoofTemplateModel[hierarchyList.size()]);
-
-			// Create the template path value and set of inherited output names
-			StringBuilder templatePathValue = new StringBuilder();
-			Set<String> inheritedOutputNames = new HashSet<String>();
-			boolean isFirst = true;
-			for (int i = (hierarchy.length - 1); i >= 0; i--) {
-				WoofTemplateModel superTemplate = hierarchy[i];
-
-				// Include the template path
-				if (!isFirst) {
-					templatePathValue.append(", ");
-				}
-				isFirst = false;
-				templatePathValue.append(superTemplate.getApplicationPath());
-
-				// Include the inherited output names
-				for (WoofTemplateOutputModel output : superTemplate.getOutputs()) {
-					String outputName = output.getWoofTemplateOutputName();
-					inheritedOutputNames.add(outputName);
-				}
-			}
-
-			// Create and include template inheritance
-			WoofTemplateInheritance inheritance = new WoofTemplateInheritanceImpl(template, hierarchy,
-					templatePathValue.toString(), inheritedOutputNames);
-			templateInheritances.put(template.getApplicationPath(), inheritance);
-		}
-
-		// Return the template inheritances
-		return templateInheritances;
-	}
 
 	@Override
 	public Change<WoofHttpContinuationModel> addHttpContinuation(String applicationPath, boolean isSecure) {
