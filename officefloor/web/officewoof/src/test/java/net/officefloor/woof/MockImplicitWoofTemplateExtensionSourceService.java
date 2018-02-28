@@ -23,6 +23,7 @@ import java.util.LinkedList;
 
 import org.junit.Assert;
 
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
@@ -35,37 +36,31 @@ import net.officefloor.woof.template.impl.AbstractWoofTemplateExtensionSource;
  * @author Daniel Sagenschneider
  */
 public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoofTemplateExtensionSource
-		implements WoofTemplateExtensionSourceService<MockImplicitWoofTemplateExtensionSourceService> {
+		implements WoofTemplateExtensionSourceService {
 
 	/**
 	 * Resets for testing loading implicit {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param templateUris
-	 *            URIs of the {@link WebTemplate} instances being
-	 *            extended.
+	 *            URIs of the {@link WebTemplate} instances being extended.
 	 */
 	public static void reset(String... templateUris) {
-		MockImplicitWoofTemplateExtensionSourceService.templateUris = new LinkedList<String>(
+		MockImplicitWoofTemplateExtensionSourceService.templateApplicationPaths = new LinkedList<String>(
 				Arrays.asList(templateUris));
 	}
 
 	/**
 	 * Expected {@link WebTemplate} URIs.
 	 */
-	private static Deque<String> templateUris = null;
+	private static Deque<String> templateApplicationPaths = null;
 
 	/*
 	 * =================== WoofTemplateExtensionSourceService ==================
 	 */
 
 	@Override
-	public boolean isImplicitExtension() {
-		return true;
-	}
-
-	@Override
-	public Class<MockImplicitWoofTemplateExtensionSourceService> getWoofTemplateExtensionSourceClass() {
-		return MockImplicitWoofTemplateExtensionSourceService.class;
+	public WoofTemplateExtensionSource createService(ServiceContext context) throws Throwable {
+		return this;
 	}
 
 	/*
@@ -80,13 +75,14 @@ public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoof
 	@Override
 	public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 
-		// Obtain the template URI
-		String uri = context.getApplicationPath();
+		// Obtain the template application path
+		String applicationPath = context.getApplicationPath();
 
 		// Ensure expecting the template
-		String expectedUri = templateUris.pollFirst();
-		Assert.assertNotNull("Not expecting template " + uri, expectedUri);
-		Assert.assertEquals("Incorrect template URI for extension", expectedUri, uri);
+		String expectedApplicationPath = templateApplicationPaths.pollFirst();
+		Assert.assertNotNull("Not expecting template " + applicationPath, expectedApplicationPath);
+		Assert.assertEquals("Incorrect template application path for extension", expectedApplicationPath,
+				applicationPath);
 	}
 
 }

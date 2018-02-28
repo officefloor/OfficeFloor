@@ -91,8 +91,8 @@ public interface WoofTemplateExtensionLoader {
 	 * Extends the {@link WebTemplate} with the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param extensionSourceClassName
-	 *            Name of the {@link WoofTemplateExtensionSource} class name.
+	 * @param extensionSource
+	 *            {@link WoofTemplateExtensionSource}.
 	 * @param properties
 	 *            {@link PropertyList} to configure the
 	 *            {@link WoofTemplateExtensionSource}.
@@ -109,7 +109,7 @@ public interface WoofTemplateExtensionLoader {
 	 * @throws WoofTemplateExtensionException
 	 *             If fails to extend the {@link WebTemplate}.
 	 */
-	void extendTemplate(String extensionSourceClassName, PropertyList properties, String applicationPath,
+	void extendTemplate(WoofTemplateExtensionSource extensionSource, PropertyList properties, String applicationPath,
 			WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
 			SourceContext sourceContext) throws WoofTemplateExtensionException;
 

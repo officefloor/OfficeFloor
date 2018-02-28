@@ -17,13 +17,11 @@
  */
 package net.officefloor.woof;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -463,51 +461,11 @@ public class WoofLoaderImpl implements WoofLoader {
 				throws WoofTemplateExtensionException {
 			this.officeArchitect = officeArchitect;
 
-			// Obtain the class loader
-			ClassLoader classLoader = extensionContext.getClassLoader();
-
 			// Load the implicit template extension sources
-			Set<String> implicitExtensionSources = new HashSet<String>();
-			ServiceLoader<WoofTemplateExtensionSourceService> extensionServiceLoader = ServiceLoader
-					.load(WoofTemplateExtensionSourceService.class, classLoader);
-			Iterator<WoofTemplateExtensionSourceService> extensionIterator = extensionServiceLoader.iterator();
-			while (extensionIterator.hasNext()) {
-
-				// Obtain the extension service
-				WoofTemplateExtensionSourceService<?> extensionService;
-				try {
-					extensionService = extensionIterator.next();
-				} catch (ServiceConfigurationError ex) {
-					// Issue that service not available
-					officeArchitect.addIssue(WoofTemplateExtensionSource.class.getSimpleName()
-							+ " configuration failure: " + ex.getMessage(), ex);
-
-					// Carry on to next service (likely not on class path)
-					continue;
-				}
-
-				// Register the extension if implicit
-				try {
-					// Determine if extension is implicit
-					boolean isImplicitExtension = extensionService.isImplicitExtension();
-					if (!isImplicitExtension) {
-						continue; // ignore as only include implicit
-					}
-
-					// Obtain instance of the extension source
-					String extensionSourceClassName = extensionService.getWoofTemplateExtensionSourceClass().getName();
-
-					// Register the extension source
-					implicitExtensionSources.add(extensionSourceClassName);
-
-				} catch (Throwable ex) {
-					// Issue that error with service
-					officeArchitect.addIssue("Failed loading extension from " + extensionService.getClass().getName()
-							+ " : " + ex.getMessage(), ex);
-
-					// Carry on to next service
-					continue;
-				}
+			List<WoofTemplateExtensionSource> implicitExtensionSources = new LinkedList<>();
+			for (WoofTemplateExtensionSource extension : extensionContext
+					.loadOptionalServices(WoofTemplateExtensionSourceService.class)) {
+				implicitExtensionSources.add(extension);
 			}
 
 			// Create the template extension loader
@@ -569,43 +527,49 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Maintain reference to template by application path
 				this.templates.put(applicationPath, template);
 
-				// Keep track of the explicit HTTP template extensions
-				Set<String> explicitTemplateExtensions = new HashSet<String>();
-
-				// Configure the HTTP template extensions
+				// Configure the template explicit extensions
+				Set<Class<?>> explicitTemplateExtensions = new HashSet<>();
 				for (WoofTemplateExtensionModel extensionModel : templateModel.getExtensions()) {
 
-					// Obtain the extension source class name
+					// Configure the extension
 					String extensionSourceClassName = extensionModel.getExtensionClassName();
+					try {
 
-					// Keep track of the explicit extension
-					explicitTemplateExtensions.add(extensionSourceClassName);
+						// Obtain the extension source
+						Class<?> extensionSourceClass = extensionContext.loadClass(extensionSourceClassName);
+						WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) extensionSourceClass
+								.newInstance();
 
-					// Create the context for the extension source
-					PropertyList properties = OfficeFloorCompiler.newPropertyList();
-					for (PropertyModel property : extensionModel.getProperties()) {
-						properties.addProperty(property.getName()).setValue(property.getValue());
+						// Keep track of the explicit extension
+						explicitTemplateExtensions.add(extensionSourceClass);
+
+						// Create the context for the extension source
+						PropertyList properties = OfficeFloorCompiler.newPropertyList();
+						for (PropertyModel property : extensionModel.getProperties()) {
+							properties.addProperty(property.getName()).setValue(property.getValue());
+						}
+
+						// Load the extension
+						extensionLoader.extendTemplate(extensionSource, properties, applicationPath, template,
+								officeArchitect, webArchitect, extensionContext);
+
+					} catch (Exception ex) {
+						throw new WoofTemplateExtensionException(
+								"Failed to load template extension " + extensionSourceClassName, ex);
 					}
-
-					// Load the extension
-					extensionLoader.extendTemplate(extensionSourceClassName, properties, applicationPath, template,
-							officeArchitect, webArchitect, extensionContext);
 				}
 
-				// Include implicit extensions (in deterministic order)
-				String[] implicitExtensionSourceClassNames = implicitExtensionSources.toArray(new String[0]);
-				Arrays.sort(implicitExtensionSourceClassNames, String.CASE_INSENSITIVE_ORDER);
-				for (String implicitExtensionSourceClassName : implicitExtensionSourceClassNames) {
+				// Include implicit extensions
+				for (WoofTemplateExtensionSource implicitExtensionSource : implicitExtensionSources) {
 
 					// Ignore if explicitly included (by class name)
-					if (explicitTemplateExtensions.contains(implicitExtensionSourceClassName)) {
+					if (explicitTemplateExtensions.contains(implicitExtensionSource.getClass())) {
 						continue;
 					}
 
 					// Extend the template with implicit extension
-					extensionLoader.extendTemplate(implicitExtensionSourceClassName,
-							extensionContext.createPropertyList(), applicationPath, template, officeArchitect,
-							webArchitect, extensionContext);
+					extensionLoader.extendTemplate(implicitExtensionSource, extensionContext.createPropertyList(),
+							applicationPath, template, officeArchitect, webArchitect, extensionContext);
 				}
 			}
 		}

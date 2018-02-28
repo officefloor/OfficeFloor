@@ -345,7 +345,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		PropertyList properties = new PropertyListImpl(propertyNameValues);
 
 		// Undertake the extension of the template
-		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.getName(), properties, templatePath,
+		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.newInstance(), properties, templatePath,
 				template, officeArchitect, webArchitect, sourceContext);
 	}
 

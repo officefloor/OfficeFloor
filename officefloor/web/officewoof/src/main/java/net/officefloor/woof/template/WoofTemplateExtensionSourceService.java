@@ -17,38 +17,12 @@
  */
 package net.officefloor.woof.template;
 
-import java.util.ServiceLoader;
-
-import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.frame.api.source.ServiceFactory;
 
 /**
- * {@link ServiceLoader} service for providing a
- * {@link WoofTemplateExtensionSource}.
+ * {@link ServiceFactory} for providing a {@link WoofTemplateExtensionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateExtensionSourceService<S extends WoofTemplateExtensionSource> {
-
-	/**
-	 * <p>
-	 * An implicit extension does not require explicit configuration.
-	 * <p>
-	 * Should a {@link WoofTemplateExtensionSource} be implicit it will extend
-	 * every {@link WoofTemplateModel} and unless explicitly configured will
-	 * have no property values. Therefore all implicit
-	 * {@link WoofTemplateExtensionSource} instances must be able to configure
-	 * themselves without properties (from the
-	 * {@link WoofTemplateExtensionSourceContext} declared configuration).
-	 * 
-	 * @return <code>true</code> if implicit extension.
-	 */
-	boolean isImplicitExtension();
-
-	/**
-	 * Obtains the {@link WoofTemplateExtensionSource} {@link Class}.
-	 * 
-	 * @return {@link WoofTemplateExtensionSource} {@link Class}.
-	 */
-	Class<S> getWoofTemplateExtensionSourceClass();
-
+public interface WoofTemplateExtensionSourceService extends ServiceFactory<WoofTemplateExtensionSource> {
 }

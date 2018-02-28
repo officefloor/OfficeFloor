@@ -77,30 +77,6 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure escalate appropriately if fail to instantiate the
-	 * {@link MockWoofTemplateExtensionSource}.
-	 */
-	public void testFailToInstantiateExtension() throws Exception {
-
-		UnknownClassError error = new UnknownClassError("UNKNOWN");
-
-		// Record fail to instantiate
-		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
-		this.sourceContext.loadClass("UNKNOWN");
-		this.control(this.sourceContext).setThrowable(error);
-
-		// Test
-		try {
-			this.extendTemplate("UNKNOWN");
-			fail("Should not be successful");
-		} catch (WoofTemplateExtensionException ex) {
-			assertEquals("Incorrect exception",
-					"Failed loading Template Extension UNKNOWN. Can not load class 'UNKNOWN'", ex.getMessage());
-			assertSame("Incorrect cause", error, ex.getCause());
-		}
-	}
-
-	/**
 	 * Ensure escalate appropriately if failure in extending the
 	 * {@link WebTemplate}.
 	 */
@@ -119,7 +95,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		try {
-			this.extendTemplate(MockWoofTemplateExtensionSource.class.getName());
+			this.extendTemplate(MockWoofTemplateExtensionSource.class);
 		} catch (WoofTemplateExtensionException ex) {
 			assertEquals("Incorrect exception",
 					"Failed loading Template Extension " + MockWoofTemplateExtensionSource.class.getName() + ". TEST",
@@ -143,19 +119,19 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		this.properties.addProperty("NAME").setValue("VALUE");
 
 		// Test
-		this.extendTemplate(MockWoofTemplateExtensionSource.class.getName());
+		this.extendTemplate(MockWoofTemplateExtensionSource.class);
 	}
 
 	/**
 	 * Extends the {@link WebTemplate}.
 	 * 
-	 * @param extensionSourceClassName
-	 *            {@link WoofTemplateExtensionSource} class name.
+	 * @param extensionSourceClass
+	 *            {@link WoofTemplateExtensionSource} {@link Class}.
 	 */
-	private void extendTemplate(String extensionSourceClassName) throws Exception {
+	private void extendTemplate(Class<? extends WoofTemplateExtensionSource> extensionSourceClass) throws Exception {
 		this.replayMockObjects();
-		this.loader.extendTemplate(extensionSourceClassName, this.properties, "URI", this.template, this.officeArchitet,
-				this.webArchitect, this.sourceContext);
+		this.loader.extendTemplate(extensionSourceClass.newInstance(), this.properties, "URI", this.template,
+				this.officeArchitet, this.webArchitect, this.sourceContext);
 		this.verifyMockObjects();
 	}
 

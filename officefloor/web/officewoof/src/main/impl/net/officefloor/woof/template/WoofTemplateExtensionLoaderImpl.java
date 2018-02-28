@@ -329,28 +329,22 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	}
 
 	@Override
-	public void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath,
-			WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+	public void extendTemplate(WoofTemplateExtensionSource extensionSource, PropertyList properties,
+			String templatePath, WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
 			SourceContext sourceContext) throws WoofTemplateExtensionException {
 
 		// Create the context for the extension source
 		WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(
 				templatePath, template, officeArchitect, webArchitect, properties, sourceContext);
 
-		// Load the extension
+		// Extend the template
 		try {
-
-			// Instantiate the extension source
-			WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) sourceContext
-					.loadClass(extensionSourceClassName).newInstance();
-
-			// Extend the template
 			extensionSource.extendTemplate(extensionSourceContext);
 
 		} catch (Throwable ex) {
 			// Indicate failure to extend template
-			throw new WoofTemplateExtensionException(
-					"Failed loading Template Extension " + extensionSourceClassName + ". " + ex.getMessage(), ex);
+			throw new WoofTemplateExtensionException("Failed loading Template Extension "
+					+ extensionSource.getClass().getName() + ". " + ex.getMessage(), ex);
 		}
 	}
 
