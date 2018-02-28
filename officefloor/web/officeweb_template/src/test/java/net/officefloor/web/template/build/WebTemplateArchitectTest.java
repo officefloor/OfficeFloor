@@ -49,6 +49,10 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
+import net.officefloor.web.security.scheme.MockCredentials;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.template.NotEscaped;
 import net.officefloor.web.template.NotRenderTemplateAfter;
@@ -816,7 +820,32 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	 * Ensure {@link HttpSecurity} can be applied to the {@link WebTemplate}.
 	 */
 	public void testAuthentication() throws Exception {
-		fail("TODO implement test requiring authentication to render template");
+		MockHttpResponse response = this.template((context, templater) -> {
+			WebArchitect web = context.getWebArchitect();
+			OfficeArchitect office = context.getOfficeArchitect();
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, office,
+					context.getOfficeSourceContext());
+			security.addHttpSecurity("SECURITY", new MockChallengeHttpSecuritySource("REALM"));
+			WebTemplate template = templater.addTemplate(false, "/path", new StringReader("SECURE"));
+			template.getHttpSecurer();
+			OfficeSection section = context.addSection("SECTION", NoAccessSection.class);
+			context.getOfficeArchitect().link(template.getOutput("AcccessDisallowed"),
+					section.getOfficeSectionInput("service"));
+		}, this.mockRequest("/path"));
+
+		// Ensure require being authenticated
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"));
+
+		// Ensure can access template after authentication
+		response = this.server.send(new MockCredentials("test", "test").loadHttpRequest(this.mockRequest("/path")));
+		response.assertResponse(200, "SECURE");
+	}
+
+	public static class NoAccessSection {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("No Access");
+		}
 	}
 
 	/**
@@ -824,7 +853,30 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	 * {@link WebTemplate}.
 	 */
 	public void testAccessControl() throws Exception {
-		fail("TODO implement test requiring access controls to render template");
+		MockHttpResponse response = this.template((context, templater) -> {
+			WebArchitect web = context.getWebArchitect();
+			OfficeArchitect office = context.getOfficeArchitect();
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, office,
+					context.getOfficeSourceContext());
+			security.addHttpSecurity("SECURITY", new MockChallengeHttpSecuritySource("REALM"));
+			WebTemplate template = templater.addTemplate(false, "/path", new StringReader("SECURE"));
+			template.getHttpSecurer().addRole("role");
+			OfficeSection section = context.addSection("SECTION", NoAccessSection.class);
+			context.getOfficeArchitect().link(template.getOutput("AcccessDisallowed"),
+					section.getOfficeSectionInput("service"));
+		}, this.mockRequest("/path"));
+
+		// Ensure require being authenticated
+		response.assertResponse(401, "", "www-authenticate",
+				MockChallengeHttpSecuritySource.getHeaderChallengeValue("REALM"));
+
+		// Ensure route to no access
+		response = this.server.send(new MockCredentials("test", "test").loadHttpRequest(this.mockRequest("/path")));
+		response.assertResponse(200, "No Access");
+
+		// Ensure can access template with role
+		response = this.server.send(new MockCredentials("role", "role").loadHttpRequest(this.mockRequest("/path")));
+		response.assertResponse(200, "SECURE");
 	}
 
 	/**
