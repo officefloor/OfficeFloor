@@ -1,9 +1,9 @@
 <woof>
 
-	<application-paths>
-		<application-path path="/path" />
-		<application-path path="/pathLink" />
-	</application-paths>
+	<http-continuations>
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink" />
+	</http-continuations>
 
 	<templates>
 		<template path="/template" />
@@ -30,15 +30,12 @@
 	</resources>
 
 	<exceptions>
-		<exception class="A">
-			<redirect path="/pathLink" />
-		</exception>
+		<exception class="A" />
 		<exception class="B">
 			<template path="/template" />
 			<section name="SECTION" input="INPUT" />
 			<security name="SECURITY" />
 			<resource path="/resource" />
-			<redirect path="/path" />
 		</exception>
 	</exceptions>
 

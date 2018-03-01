@@ -680,6 +680,29 @@ public interface WoofChanges {
 			WoofSectionOutputToWoofResourceModel link);
 
 	/**
+	 * Links the {@link WoofSectionOutputModel} to the
+	 * {@link WoofHttpContinuationModel} .
+	 * 
+	 * @param sectionOutput
+	 *            {@link WoofSectionOutputModel}.
+	 * @param resource
+	 *            {@link WoofHttpContinuationModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSectionOutputToWoofHttpContinuationModel> linkSectionOutputToHttpContinuation(
+			WoofSectionOutputModel sectionOutput, WoofHttpContinuationModel httpContinuation);
+
+	/**
+	 * Removes the {@link WoofSectionOutputToWoofHttpContinuationModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSectionOutputToWoofHttpContinuationModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSectionOutputToWoofHttpContinuationModel> removeSectionOuputToHttpContinuation(
+			WoofSectionOutputToWoofHttpContinuationModel link);
+
+	/**
 	 * Links the {@link WoofSecurityOutputModel} to the
 	 * {@link WoofTemplateModel}.
 	 * 

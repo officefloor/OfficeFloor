@@ -1,36 +1,42 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink" />
+	</http-continuations>
+
 	<templates>
-		<template name="TEMPLATE" />
-		<template name="TEMPLATE_LINK" />
+		<template path="/template" />
+		<template path="/templateLink" />
 	</templates>
 
 	<sections>
 		<section name="A">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<template name="TEMPLATE_LINK" />
+				<template path="/templateLink" />
 			</output>
 		</section>
 		<section name="B">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<template name="TEMPLATE" />
-				<input section="A" input="INPUT" />
-				<access input="Authenticate" />
-				<resource name="RESOURCE" />
+				<template path="/template" />
+				<section name="A" input="INPUT" />
+				<security name="SECURITY" />
+				<resource path="/resource.html" />
+				<redirect path="/path" />
 			</output>
 		</section>
 	</sections>
-	
-	<access>
-		<input name="Authenticate" />
-		<input name="Authenticate_LINK" />
-	</access>
+
+	<securities>
+		<security name="SECURITY" />
+		<security name="SECURITY_LINK" />
+	</securities>
 
 	<resources>
-		<resource name="RESOURCE" />
-		<resource name="RESOURCE_LINK" />
+		<resource path="/resource.html" />
+		<resource path="/resource.png" />
 	</resources>
 
 </woof>

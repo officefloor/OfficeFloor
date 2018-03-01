@@ -11,11 +11,15 @@
 	</templates>
 
 	<sections>
-		<section name="SECTION">
+		<section name="A">
 			<input name="INPUT" />
+			<output name="OUTPUT" />
 		</section>
-		<section name="SECTION_LINK">
+		<section name="B">
 			<input name="INPUT" />
+			<output name="OUTPUT">
+				<redirect path="/pathLink" />
+			</output>
 		</section>
 	</sections>
 
@@ -25,15 +29,8 @@
 	</securities>
 
 	<resources>
-		<resource path="/resource" />
-		<resource path="/resourceLink" />
+		<resource path="/resource.html" />
+		<resource path="/resource.png" />
 	</resources>
-
-	<exceptions>
-		<exception class="A" />
-		<exception class="B">
-			<section name="SECTION_LINK" input="INPUT" />
-		</exception>
-	</exceptions>
 
 </woof>

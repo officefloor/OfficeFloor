@@ -117,8 +117,8 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		Change<?> change = this.refactorTemplateExtension("UNKNOWN CLASS", "OLD", null, null, null);
 
 		// Ensure correct conflict reporting issue
-		assertConflictForChange(change, "Extension UNKNOWN CLASS on template OLD prevented change as TEST ["
-				+ error.getClass().getName() + "]");
+		assertConflictForChange(change, "Extension UNKNOWN CLASS on template OLD prevented change as "
+				+ error.getMessage() + " [" + error.getClass().getName() + "]");
 	}
 
 	/**

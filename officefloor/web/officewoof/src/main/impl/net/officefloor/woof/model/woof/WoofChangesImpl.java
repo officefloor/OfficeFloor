@@ -1436,7 +1436,7 @@ public class WoofChangesImpl implements WoofChanges {
 			existingOutputNameMapping.put(output.getWoofSectionOutputName(), output);
 		}
 
-		// Refactor the ouputs (either refactoring, adding or removing)
+		// Refactor the outputs (either refactoring, adding or removing)
 		for (final SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
 
 			// Ignore escalations
@@ -2544,6 +2544,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2579,6 +2580,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2600,13 +2602,14 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to add connection
 		return new AddLinkChange<WoofSectionOutputToWoofSecurityModel, WoofSectionOutputModel>(connection,
-				sectionOutput, "Link Section Output to Access Input") {
+				sectionOutput, "Link Section Output to Security") {
 			@Override
 			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2634,6 +2637,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2642,6 +2646,35 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
 			WoofSectionOutputToWoofResourceModel link) {
 		return new RemoveLinkChange<WoofSectionOutputToWoofResourceModel>(link, "Remove Section Output to Resource");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofHttpContinuationModel> linkSectionOutputToHttpContinuation(
+			WoofSectionOutputModel sectionOutput, WoofHttpContinuationModel httpContinuation) {
+
+		// Create the connection
+		final WoofSectionOutputToWoofHttpContinuationModel connection = new WoofSectionOutputToWoofHttpContinuationModel(
+				httpContinuation.getApplicationPath(), sectionOutput, httpContinuation);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSectionOutputToWoofHttpContinuationModel, WoofSectionOutputModel>(connection,
+				sectionOutput, "Link Section Output to HTTP Continuation") {
+			@Override
+			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofHttpContinuationModel> removeSectionOuputToHttpContinuation(
+			WoofSectionOutputToWoofHttpContinuationModel link) {
+		return new RemoveLinkChange<WoofSectionOutputToWoofHttpContinuationModel>(link,
+				"Remove Section Output to HTTP Continuation");
 	}
 
 	@Override
@@ -2741,7 +2774,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to add connection
 		return new AddLinkChange<WoofExceptionToWoofHttpContinuationModel, WoofExceptionModel>(connection, exception,
-				"Link Exception to Application Path") {
+				"Link Exception to HTTP Continuation") {
 			@Override
 			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
@@ -2757,7 +2790,7 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToHttpContinuation(
 			WoofExceptionToWoofHttpContinuationModel link) {
 		return new RemoveLinkChange<WoofExceptionToWoofHttpContinuationModel>(link,
-				"Remove Exception to Application Path");
+				"Remove Exception to HTTP Continuation");
 	}
 
 	@Override

@@ -49,6 +49,59 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	private static final int B = 1;
 
 	/**
+	 * Ensure can link to {@link WoofHttpContinuationModel}.
+	 */
+	public void testLinkToHttpContinuation() {
+		this.doLinkToHttpContinuation(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofSectionOutputToWoofHttpContinuationModel}.
+	 */
+	public void testLinkOverrideToHttpContinuation() {
+		this.doLinkToHttpContinuation(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param sectionIndex
+	 *            {@link WoofSectionModel} index.
+	 */
+	private void doLinkToHttpContinuation(int sectionIndex) {
+
+		// Obtain the items to link
+		WoofSectionOutputModel sectionOutput = this.model.getWoofSections().get(sectionIndex).getOutputs().get(0);
+		WoofHttpContinuationModel httpContinuation = this.model.getWoofHttpContinuations().get(1);
+
+		// Link the section output to HTTP continuation
+		Change<WoofSectionOutputToWoofHttpContinuationModel> change = this.operations
+				.linkSectionOutputToHttpContinuation(sectionOutput, httpContinuation);
+
+		// Validate change
+		this.assertChange(change, null, "Link Section Output to HTTP Continuation", true);
+	}
+
+	/**
+	 * Ensure can remove the
+	 * {@link WoofSectionOutputToWoofHttpContinuationModel}.
+	 */
+	public void testRemoveToHttpContinuationLink() {
+
+		// Obtain the link to remove
+		WoofSectionOutputToWoofHttpContinuationModel link = this.model.getWoofSections().get(B).getOutputs().get(0)
+				.getWoofHttpContinuation();
+
+		// Remove the link
+		Change<WoofSectionOutputToWoofHttpContinuationModel> change = this.operations
+				.removeSectionOuputToHttpContinuation(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Section Output to HTTP Continuation", true);
+	}
+
+	/**
 	 * Ensure can link to {@link WoofSectionModel}.
 	 */
 	public void testLinkToTemplate() {
@@ -176,7 +229,7 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 
 		// Obtain the items to link
 		WoofSectionOutputModel sectionOutput = this.model.getWoofSections().get(sectionIndex).getOutputs().get(0);
-		WoofSecurityModel securityInput = this.model.getWoofSecurities().get(0);
+		WoofSecurityModel securityInput = this.model.getWoofSecurities().get(1);
 
 		// Link the section output to security input
 		Change<WoofSectionOutputToWoofSecurityModel> change = this.operations.linkSectionOutputToSecurity(sectionOutput,
