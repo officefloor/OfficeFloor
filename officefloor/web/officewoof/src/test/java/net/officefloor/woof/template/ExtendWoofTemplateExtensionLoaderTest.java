@@ -21,15 +21,9 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.build.WebTemplate;
-import net.officefloor.woof.template.WoofTemplateExtensionException;
-import net.officefloor.woof.template.WoofTemplateExtensionLoader;
-import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
-import net.officefloor.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
 /**
@@ -111,9 +105,6 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 
 		// Record initiate
 		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
-		this.recordReturn(this.sourceContext,
-				this.sourceContext.loadClass(MockWoofTemplateExtensionSource.class.getName()),
-				MockWoofTemplateExtensionSource.class);
 
 		// Add the property
 		this.properties.addProperty("NAME").setValue("VALUE");

@@ -1,10 +1,8 @@
 <woof>
 
 	<templates>
-		<template application-path="/path" location="Path1.ofp"
-			class="Class1" />
-		<template application-path="/same/path" location="Path2.ofp"
-			class="Class2" />
+		<template path="/path" location="Path1.ofp" class="Class1" />
+		<template path="/same/path" location="Path2.ofp" class="Class2" />
 	</templates>
 
 </woof>
