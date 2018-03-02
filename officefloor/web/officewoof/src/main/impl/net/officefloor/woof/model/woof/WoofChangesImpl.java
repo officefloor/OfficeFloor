@@ -2399,50 +2399,115 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpContinuationToWoofHttpContinuationModel> linkHttpContinuationToHttpContinuation(
 			WoofHttpContinuationModel httpContinuation, WoofHttpContinuationModel httpRedirect) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpContinuationToWoofHttpContinuationModel connection = new WoofHttpContinuationToWoofHttpContinuationModel(
+				httpRedirect.getApplicationPath(), httpContinuation, httpRedirect);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpContinuationToWoofHttpContinuationModel, WoofHttpContinuationModel>(connection,
+				httpContinuation, "Link HTTP Continuation to HTTP Continuation") {
+			@Override
+			protected void addExistingConnections(WoofHttpContinuationModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofRedirect());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofHttpContinuationModel> removeHttpContinuationToHttpContinuation(
 			WoofHttpContinuationToWoofHttpContinuationModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Continuation to HTTP Continuation");
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofTemplateModel> linkHttpContinuationToTemplate(
 			WoofHttpContinuationModel httpContinuation, WoofTemplateModel template) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpContinuationToWoofTemplateModel connection = new WoofHttpContinuationToWoofTemplateModel(
+				template.getApplicationPath(), httpContinuation, template);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpContinuationToWoofTemplateModel, WoofHttpContinuationModel>(connection,
+				httpContinuation, "Link HTTP Continuation to Template") {
+			@Override
+			protected void addExistingConnections(WoofHttpContinuationModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofRedirect());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofTemplateModel> removeHttpContinuationToTemplate(
 			WoofHttpContinuationToWoofTemplateModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Continuation to Template");
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofSectionInputModel> linkHttpContinuationToSectionInput(
 			WoofHttpContinuationModel httpContinuation, WoofSectionInputModel sectionInput) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofHttpContinuationToWoofSectionInputModel>(
+					new WoofHttpContinuationToWoofSectionInputModel(), "Link HTTP Continuation to Section Input",
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
+		}
+
+		// Create the connection
+		final WoofHttpContinuationToWoofSectionInputModel connection = new WoofHttpContinuationToWoofSectionInputModel(
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), httpContinuation, sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofHttpContinuationToWoofSectionInputModel, WoofHttpContinuationModel>(connection,
+				httpContinuation, "Link HTTP Continuation to Section Input") {
+			@Override
+			protected void addExistingConnections(WoofHttpContinuationModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofRedirect());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofSectionInputModel> removeHttpContinuationToSectionInput(
 			WoofHttpContinuationToWoofSectionInputModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Continuation to Section Input");
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofSecurityModel> linkHttpContinuationToSecurity(
 			WoofHttpContinuationModel httpContinuation, WoofSecurityModel security) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpContinuationToWoofSecurityModel connection = new WoofHttpContinuationToWoofSecurityModel(
+				security.getHttpSecurityName(), httpContinuation, security);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpContinuationToWoofSecurityModel, WoofHttpContinuationModel>(connection,
+				httpContinuation, "Link HTTP Continuation to Security") {
+			@Override
+			protected void addExistingConnections(WoofHttpContinuationModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofRedirect());
+			}
+		};
 	}
 
 	@Override
@@ -2476,22 +2541,35 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpContinuationToWoofSecurityModel> removeHttpContinuationToSecurity(
 			WoofHttpContinuationToWoofSecurityModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Continuation to Security");
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofResourceModel> linkHttpContinuationToResource(
 			WoofHttpContinuationModel httpContinuation, WoofResourceModel resource) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpContinuationToWoofResourceModel connection = new WoofHttpContinuationToWoofResourceModel(
+				resource.getResourcePath(), httpContinuation, resource);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpContinuationToWoofResourceModel, WoofHttpContinuationModel>(connection,
+				httpContinuation, "Link HTTP Continuation to Resource") {
+			@Override
+			protected void addExistingConnections(WoofHttpContinuationModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofRedirect());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofResourceModel> removeHttpContinuationToResource(
 			WoofHttpContinuationToWoofResourceModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Continuation to Resource");
 	}
 
 	@Override

@@ -75,7 +75,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	 * Ensure can remove the
 	 * {@link WoofHttpContinuationToWoofHttpContinuationModel}.
 	 */
-	public void testRemoveToHttpContinuationLink() {
+	public void testRemoveToHttpContinuation() {
 
 		// Obtain the link to remove
 		WoofHttpContinuationToWoofHttpContinuationModel link = this.model.getWoofHttpContinuations().get(B)
@@ -127,7 +127,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofHttpContinuationToWoofTemplateModel}.
 	 */
-	public void testRemoveToTemplateLink() {
+	public void testRemoveToTemplate() {
 
 		// Obtain the link to remove
 		WoofHttpContinuationToWoofTemplateModel link = this.model.getWoofHttpContinuations().get(B).getWoofTemplate();
@@ -230,7 +230,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofHttpInputToWoofSecurityModel}.
 	 */
-	public void testRemoveToSecurityLink() {
+	public void testRemoveToSecurity() {
 
 		// Obtain the link to remove
 		WoofHttpContinuationToWoofSecurityModel link = this.model.getWoofHttpContinuations().get(B).getWoofSecurity();

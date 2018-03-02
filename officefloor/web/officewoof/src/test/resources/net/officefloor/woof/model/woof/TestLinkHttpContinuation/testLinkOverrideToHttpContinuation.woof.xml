@@ -1,0 +1,34 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/pathA" />
+		<http-continuation path="/pathB">
+			<redirect path="/pathB" />
+		</http-continuation>
+	</http-continuations>
+
+	<templates>
+		<template path="/template" />
+		<template path="/templateLink" />
+	</templates>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" />
+		<security name="SECURITY_LINK" />
+	</securities>
+
+	<resources>
+		<resource path="/resource.html" />
+		<resource path="/resource.png" />
+	</resources>
+
+</woof>
