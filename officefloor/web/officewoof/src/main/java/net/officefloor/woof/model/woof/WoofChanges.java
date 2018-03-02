@@ -473,6 +473,230 @@ public interface WoofChanges {
 	Change<WoofStartModel> removeStart(WoofStartModel start);
 
 	/**
+	 * Links the {@link WoofHttpContinuationModel} to the
+	 * {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param httpContinuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @param httpRedirect
+	 *            {@link WoofHttpContinuationModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpContinuationToWoofHttpContinuationModel> linkHttpContinuationToHttpContinuation(
+			WoofHttpContinuationModel httpContinuation, WoofHttpContinuationModel httpRedirect);
+
+	/**
+	 * Removes the {@link WoofHttpContinuationToWoofHttpContinuationModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpContinuationToWoofHttpContinuationModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpContinuationToWoofHttpContinuationModel> removeHttpContinuationToHttpContinuation(
+			WoofHttpContinuationToWoofHttpContinuationModel link);
+
+	/**
+	 * Links the {@link WoofHttpContinuationModel} to the
+	 * {@link WoofTemplateModel} .
+	 * 
+	 * @param httpContinuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpContinuationToWoofTemplateModel> linkHttpContinuationToTemplate(
+			WoofHttpContinuationModel httpContinuation, WoofTemplateModel template);
+
+	/**
+	 * Removes the {@link WoofHttpContinuationToWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpContinuationToWoofTemplateModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpContinuationToWoofTemplateModel> removeHttpContinuationToTemplate(
+			WoofHttpContinuationToWoofTemplateModel link);
+
+	/**
+	 * Links the {@link WoofHttpContinuationModel} to the
+	 * {@link WoofSectionInputModel}.
+	 * 
+	 * @param httpContinuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpContinuationToWoofSectionInputModel> linkHttpContinuationToSectionInput(
+			WoofHttpContinuationModel httpContinuation, WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofHttpContinuationToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpContinuationToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpContinuationToWoofSectionInputModel> removeHttpContinuationToSectionInput(
+			WoofHttpContinuationToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofHttpContinuationModel} to the
+	 * {@link WoofSecurityModel} .
+	 * 
+	 * @param httpContinuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @param security
+	 *            {@link WoofSecurityModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpContinuationToWoofSecurityModel> linkHttpContinuationToSecurity(
+			WoofHttpContinuationModel httpContinuation, WoofSecurityModel security);
+
+	/**
+	 * Removes the {@link WoofHttpInputToWoofHttpContinuationModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpInputToWoofHttpContinuationModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpInputToWoofHttpContinuationModel> removeHttpInputToHttpContinuation(
+			WoofHttpInputToWoofHttpContinuationModel link);
+
+	/**
+	 * Links the {@link WoofHttpInputModel} to the
+	 * {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param httpInput
+	 *            {@link WoofHttpInputModel}.
+	 * @param applicationPath
+	 *            {@link WoofHttpContinuationModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpInputToWoofHttpContinuationModel> linkHttpInputToHttpContinuation(WoofHttpInputModel httpInput,
+			WoofHttpContinuationModel applicationPath);
+
+	/**
+	 * Removes the {@link WoofHttpContinuationToWoofSecurityModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpContinuationToWoofSecurityModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpContinuationToWoofSecurityModel> removeHttpContinuationToSecurity(
+			WoofHttpContinuationToWoofSecurityModel link);
+
+	/**
+	 * Links the {@link WoofHttpContinuationModel} to the
+	 * {@link WoofResourceModel} .
+	 * 
+	 * @param httpContinuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpContinuationToWoofResourceModel> linkHttpContinuationToResource(
+			WoofHttpContinuationModel httpContinuation, WoofResourceModel resource);
+
+	/**
+	 * Removes the {@link WoofHttpContinuationToWoofResourceModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpContinuationToWoofResourceModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpContinuationToWoofResourceModel> removeHttpContinuationToResource(
+			WoofHttpContinuationToWoofResourceModel link);
+
+	/**
+	 * Links the {@link WoofHttpInputModel} to the {@link WoofTemplateModel} .
+	 * 
+	 * @param httpInput
+	 *            {@link WoofHttpInputModel}.
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpInputToWoofTemplateModel> linkHttpInputToTemplate(WoofHttpInputModel httpInput,
+			WoofTemplateModel template);
+
+	/**
+	 * Removes the {@link WoofHttpInputToWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpInputToWoofTemplateModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpInputToWoofTemplateModel> removeHttpInputToTemplate(WoofHttpInputToWoofTemplateModel link);
+
+	/**
+	 * Links the {@link WoofHttpInputModel} to the
+	 * {@link WoofSectionInputModel}.
+	 * 
+	 * @param httpInput
+	 *            {@link WoofHttpInputModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpInputToWoofSectionInputModel> linkHttpInputToSectionInput(WoofHttpInputModel httpInput,
+			WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofHttpInputToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpInputToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpInputToWoofSectionInputModel> removeHttpInputToSectionInput(
+			WoofHttpInputToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofHttpInputModel} to the {@link WoofSecurityModel} .
+	 * 
+	 * @param httpInput
+	 *            {@link WoofHttpInputModel}.
+	 * @param security
+	 *            {@link WoofSecurityModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpInputToWoofSecurityModel> linkHttpInputToSecurity(WoofHttpInputModel httpInput,
+			WoofSecurityModel security);
+
+	/**
+	 * Removes the {@link WoofHttpInputToWoofSecurityModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpInputToWoofSecurityModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpInputToWoofSecurityModel> removeHttpInputToSecurity(WoofHttpInputToWoofSecurityModel link);
+
+	/**
+	 * Links the {@link WoofHttpInputModel} to the {@link WoofResourceModel} .
+	 * 
+	 * @param httpInput
+	 *            {@link WoofHttpInputModel}.
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofHttpInputToWoofResourceModel> linkHttpInputToResource(WoofHttpInputModel httpInput,
+			WoofResourceModel resource);
+
+	/**
+	 * Removes the {@link WoofHttpInputToWoofResourceModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofHttpInputToWoofResourceModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofHttpInputToWoofResourceModel> removeHttpInputToResource(WoofHttpInputToWoofResourceModel link);
+
+	/**
 	 * Link the {@link WoofTemplateModel} to its super
 	 * {@link WoofTemplateModel}.
 	 * 
@@ -750,6 +974,29 @@ public interface WoofChanges {
 
 	/**
 	 * Links the {@link WoofSecurityOutputModel} to the
+	 * {@link WoofSecurityModel}.
+	 * 
+	 * @param securityOutput
+	 *            {@link WoofSecurityOutputModel}.
+	 * @param security
+	 *            {@link WoofSecurityModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSecurityOutputToWoofSecurityModel> linkSecurityOutputToSecurity(WoofSecurityOutputModel securityOutput,
+			WoofSecurityModel security);
+
+	/**
+	 * Removes the {@link WoofSecurityOutputToWoofSecurityModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSecurityOutputToWoofSecurityModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSecurityOutputToWoofSecurityModel> removeSecurityOuputToSecurity(
+			WoofSecurityOutputToWoofSecurityModel link);
+
+	/**
+	 * Links the {@link WoofSecurityOutputModel} to the
 	 * {@link WoofResourceModel} .
 	 * 
 	 * @param securityOutput
@@ -770,6 +1017,29 @@ public interface WoofChanges {
 	 */
 	Change<WoofSecurityOutputToWoofResourceModel> removeSecurityOuputToResource(
 			WoofSecurityOutputToWoofResourceModel link);
+
+	/**
+	 * Links the {@link WoofSecurityOutputModel} to the
+	 * {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param securityOutput
+	 *            {@link WoofSecurityOutputModel}.
+	 * @param httpContinuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSecurityOutputToWoofHttpContinuationModel> linkSecurityOutputToHttpContinuation(
+			WoofSecurityOutputModel securityOutput, WoofHttpContinuationModel httpContinuation);
+
+	/**
+	 * Removes the {@link WoofSecurityOutputToWoofHttpContinuationModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSecurityOutputToWoofHttpContinuationModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSecurityOutputToWoofHttpContinuationModel> removeSecurityOuputToHttpContinuation(
+			WoofSecurityOutputToWoofHttpContinuationModel link);
 
 	/**
 	 * Links the {@link WoofExceptionModel} to the

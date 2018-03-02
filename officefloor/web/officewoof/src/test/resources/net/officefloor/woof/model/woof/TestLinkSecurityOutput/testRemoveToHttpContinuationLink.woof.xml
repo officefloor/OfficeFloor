@@ -21,9 +21,7 @@
 
 	<securities>
 		<security name="A">
-			<output name="OUTPUT">
-				<template path="/templateLink" />
-			</output>
+			<output name="OUTPUT" />
 		</security>
 		<security name="B">
 			<output name="OUTPUT">
@@ -31,7 +29,6 @@
 				<section name="SECTION" input="INPUT" />
 				<security name="A" />
 				<resource path="/resource.html" />
-				<redirect path="/path" />
 			</output>
 		</security>
 	</securities>

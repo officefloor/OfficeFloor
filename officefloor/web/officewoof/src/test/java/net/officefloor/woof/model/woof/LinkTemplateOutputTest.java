@@ -173,7 +173,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 
 		// Obtain the items to link
 		WoofTemplateOutputModel templateOutput = this.model.getWoofTemplates().get(templateIndex).getOutputs().get(0);
-		WoofSecurityModel security = this.model.getWoofSecurities().get(0);
+		WoofSecurityModel security = this.model.getWoofSecurities().get(1);
 
 		// Link the template output to security
 		Change<WoofTemplateOutputToWoofSecurityModel> change = this.operations

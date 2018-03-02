@@ -44,6 +44,59 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	private static final int B = 1;
 
 	/**
+	 * Ensure can link to {@link WoofHttpContinuationModel}.
+	 */
+	public void testLinkToHttpContinuation() {
+		this.doLinkToHttpContinuation(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofSecurityOutputToWoofHttpContinuationModel}.
+	 */
+	public void testLinkOverrideToHttpContinuation() {
+		this.doLinkToHttpContinuation(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofTemplateModel}.
+	 * 
+	 * @param securityIndex
+	 *            {@link WoofSecurityOutputModel} index.
+	 */
+	private void doLinkToHttpContinuation(int securityIndex) {
+
+		// Obtain the items to link
+		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(securityIndex).getOutputs().get(0);
+		WoofHttpContinuationModel httpContinuation = this.model.getWoofHttpContinuations().get(1);
+
+		// Link the security output to template
+		Change<WoofSecurityOutputToWoofHttpContinuationModel> change = this.operations
+				.linkSecurityOutputToHttpContinuation(securityOutput, httpContinuation);
+
+		// Validate change
+		this.assertChange(change, null, "Link Security Output to HTTP Continuation", true);
+	}
+
+	/**
+	 * Ensure can remove the
+	 * {@link WoofSecurityOutputToWoofHttpContinuationModel}.
+	 */
+	public void testRemoveToHttpContinuationLink() {
+
+		// Obtain the link to remove
+		WoofSecurityOutputToWoofHttpContinuationModel link = this.model.getWoofSecurities().get(B).getOutputs().get(0)
+				.getWoofHttpContinuation();
+
+		// Remove the link
+		Change<WoofSecurityOutputToWoofHttpContinuationModel> change = this.operations
+				.removeSecurityOuputToHttpContinuation(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Security Output to HTTP Continuation", true);
+	}
+
+	/**
 	 * Ensure can link to {@link WoofTemplateModel}.
 	 */
 	public void testLinkToTemplate() {
@@ -67,7 +120,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToTemplate(int securityIndex) {
 
 		// Obtain the items to link
-		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(0).getOutputs().get(securityIndex);
+		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(securityIndex).getOutputs().get(0);
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 
 		// Link the security output to template
@@ -84,7 +137,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToTemplateLink() {
 
 		// Obtain the link to remove
-		WoofSecurityOutputToWoofTemplateModel link = this.model.getWoofSecurities().get(0).getOutputs().get(B)
+		WoofSecurityOutputToWoofTemplateModel link = this.model.getWoofSecurities().get(B).getOutputs().get(0)
 				.getWoofTemplate();
 
 		// Remove the link
@@ -118,7 +171,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToSectionInput(int securityIndex) {
 
 		// Obtain the items to link
-		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(0).getOutputs().get(securityIndex);
+		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(securityIndex).getOutputs().get(0);
 		WoofSectionInputModel sectionInput = this.model.getWoofSections().get(B).getInputs().get(0);
 
 		// Link the security output to section input
@@ -135,7 +188,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToSectionInput() {
 
 		// Obtain the link to remove
-		WoofSecurityOutputToWoofSectionInputModel link = this.model.getWoofSecurities().get(0).getOutputs().get(B)
+		WoofSecurityOutputToWoofSectionInputModel link = this.model.getWoofSecurities().get(B).getOutputs().get(0)
 				.getWoofSectionInput();
 
 		// Remove the link
@@ -144,6 +197,57 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 
 		// Validate change
 		this.assertChange(change, null, "Remove Security Output to Section Input", true);
+	}
+
+	/**
+	 * Ensure can link to {@link WoofSecurityModel}.
+	 */
+	public void testLinkToSecurity() {
+		this.doLinkToSecurity(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofSecurityOutputToWoofSecurityModel}.
+	 */
+	public void testLinkOverrideToSecurity() {
+		this.doLinkToSecurity(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofSecurityModel}.
+	 * 
+	 * @param securityIndex
+	 *            {@link WoofSecurityOutputModel} index.
+	 */
+	private void doLinkToSecurity(int securityIndex) {
+
+		// Obtain the items to link
+		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(securityIndex).getOutputs().get(0);
+		WoofSecurityModel security = this.model.getWoofSecurities().get(1);
+
+		// Link the security output to security
+		Change<WoofSecurityOutputToWoofSecurityModel> change = this.operations
+				.linkSecurityOutputToSecurity(securityOutput, security);
+
+		// Validate change
+		this.assertChange(change, null, "Link Security Output to Security", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofSecurityOutputToWoofSecurityModel}.
+	 */
+	public void testRemoveToSecurityLink() {
+
+		// Obtain the link to remove
+		WoofSecurityOutputToWoofSecurityModel link = this.model.getWoofSecurities().get(B).getOutputs().get(0)
+				.getWoofSecurity();
+
+		// Remove the link
+		Change<WoofSecurityOutputToWoofSecurityModel> change = this.operations.removeSecurityOuputToSecurity(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Security Output to Security", true);
 	}
 
 	/**
@@ -170,7 +274,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToResource(int securityIndex) {
 
 		// Obtain the items to link
-		WoofSecurityOutputModel accessOutput = this.model.getWoofSecurities().get(0).getOutputs().get(securityIndex);
+		WoofSecurityOutputModel accessOutput = this.model.getWoofSecurities().get(securityIndex).getOutputs().get(0);
 		WoofResourceModel resource = this.model.getWoofResources().get(1);
 
 		// Link the security output to resource
@@ -187,7 +291,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToResource() {
 
 		// Obtain the link to remove
-		WoofSecurityOutputToWoofResourceModel link = this.model.getWoofSecurities().get(0).getOutputs().get(B)
+		WoofSecurityOutputToWoofResourceModel link = this.model.getWoofSecurities().get(B).getOutputs().get(0)
 				.getWoofResource();
 
 		// Remove the link

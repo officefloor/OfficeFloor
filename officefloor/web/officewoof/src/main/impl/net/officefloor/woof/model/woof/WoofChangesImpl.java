@@ -2397,6 +2397,143 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofHttpContinuationToWoofHttpContinuationModel> linkHttpContinuationToHttpContinuation(
+			WoofHttpContinuationModel httpContinuation, WoofHttpContinuationModel httpRedirect) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofHttpContinuationModel> removeHttpContinuationToHttpContinuation(
+			WoofHttpContinuationToWoofHttpContinuationModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofTemplateModel> linkHttpContinuationToTemplate(
+			WoofHttpContinuationModel httpContinuation, WoofTemplateModel template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofTemplateModel> removeHttpContinuationToTemplate(
+			WoofHttpContinuationToWoofTemplateModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofSectionInputModel> linkHttpContinuationToSectionInput(
+			WoofHttpContinuationModel httpContinuation, WoofSectionInputModel sectionInput) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofSectionInputModel> removeHttpContinuationToSectionInput(
+			WoofHttpContinuationToWoofSectionInputModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofSecurityModel> linkHttpContinuationToSecurity(
+			WoofHttpContinuationModel httpContinuation, WoofSecurityModel security) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofHttpContinuationModel> removeHttpInputToHttpContinuation(
+			WoofHttpInputToWoofHttpContinuationModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofHttpContinuationModel> linkHttpInputToHttpContinuation(
+			WoofHttpInputModel httpInput, WoofHttpContinuationModel applicationPath) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofSecurityModel> removeHttpContinuationToSecurity(
+			WoofHttpContinuationToWoofSecurityModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofResourceModel> linkHttpContinuationToResource(
+			WoofHttpContinuationModel httpContinuation, WoofResourceModel resource) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpContinuationToWoofResourceModel> removeHttpContinuationToResource(
+			WoofHttpContinuationToWoofResourceModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofTemplateModel> linkHttpInputToTemplate(WoofHttpInputModel httpInput,
+			WoofTemplateModel template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofTemplateModel> removeHttpInputToTemplate(WoofHttpInputToWoofTemplateModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofSectionInputModel> linkHttpInputToSectionInput(WoofHttpInputModel httpInput,
+			WoofSectionInputModel sectionInput) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofSectionInputModel> removeHttpInputToSectionInput(
+			WoofHttpInputToWoofSectionInputModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofSecurityModel> linkHttpInputToSecurity(WoofHttpInputModel httpInput,
+			WoofSecurityModel security) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofSecurityModel> removeHttpInputToSecurity(WoofHttpInputToWoofSecurityModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofResourceModel> linkHttpInputToResource(WoofHttpInputModel httpInput,
+			WoofResourceModel resource) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Change<WoofHttpInputToWoofResourceModel> removeHttpInputToResource(WoofHttpInputToWoofResourceModel link) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Change<WoofTemplateToSuperWoofTemplateModel> linkTemplateToSuperTemplate(WoofTemplateModel childTemplate,
 			WoofTemplateModel superTemplate) {
 		// TODO Auto-generated method stub
@@ -2427,6 +2564,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2462,6 +2600,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2490,6 +2629,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2517,6 +2657,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2687,12 +2828,14 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to add connection
 		return new AddLinkChange<WoofSecurityOutputToWoofTemplateModel, WoofSecurityOutputModel>(connection,
-				accessOutput, "Link Access Output to Template") {
+				accessOutput, "Link Security Output to Template") {
 			@Override
 			protected void addExistingConnections(WoofSecurityOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2726,7 +2869,9 @@ public class WoofChangesImpl implements WoofChanges {
 			protected void addExistingConnections(WoofSecurityOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2739,6 +2884,34 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofSecurityOutputToWoofSecurityModel> linkSecurityOutputToSecurity(
+			WoofSecurityOutputModel securityOutput, WoofSecurityModel security) {
+
+		// Create the connection
+		final WoofSecurityOutputToWoofSecurityModel connection = new WoofSecurityOutputToWoofSecurityModel(
+				security.getHttpSecurityName(), securityOutput, security);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSecurityOutputToWoofSecurityModel, WoofSecurityOutputModel>(connection,
+				securityOutput, "Link Security Output to Security") {
+			@Override
+			protected void addExistingConnections(WoofSecurityOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofSecurityOutputToWoofSecurityModel> removeSecurityOuputToSecurity(
+			WoofSecurityOutputToWoofSecurityModel link) {
+		return new RemoveLinkChange<WoofSecurityOutputToWoofSecurityModel>(link, "Remove Security Output to Security");
+	}
+
+	@Override
 	public Change<WoofSecurityOutputToWoofResourceModel> linkSecurityOutputToResource(
 			WoofSecurityOutputModel securityOutput, WoofResourceModel resource) {
 
@@ -2748,12 +2921,14 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to add connection
 		return new AddLinkChange<WoofSecurityOutputToWoofResourceModel, WoofSecurityOutputModel>(connection,
-				securityOutput, "Link Access Output to Resource") {
+				securityOutput, "Link Security Output to Resource") {
 			@Override
 			protected void addExistingConnections(WoofSecurityOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
 			}
 		};
 	}
@@ -2762,6 +2937,35 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofSecurityOutputToWoofResourceModel> removeSecurityOuputToResource(
 			WoofSecurityOutputToWoofResourceModel link) {
 		return new RemoveLinkChange<WoofSecurityOutputToWoofResourceModel>(link, "Remove Security Output to Resource");
+	}
+
+	@Override
+	public Change<WoofSecurityOutputToWoofHttpContinuationModel> linkSecurityOutputToHttpContinuation(
+			WoofSecurityOutputModel securityOutput, WoofHttpContinuationModel httpContinuation) {
+
+		// Create the connection
+		final WoofSecurityOutputToWoofHttpContinuationModel connection = new WoofSecurityOutputToWoofHttpContinuationModel(
+				httpContinuation.getApplicationPath(), securityOutput, httpContinuation);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSecurityOutputToWoofHttpContinuationModel, WoofSecurityOutputModel>(connection,
+				securityOutput, "Link Security Output to HTTP Continuation") {
+			@Override
+			protected void addExistingConnections(WoofSecurityOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofSecurityOutputToWoofHttpContinuationModel> removeSecurityOuputToHttpContinuation(
+			WoofSecurityOutputToWoofHttpContinuationModel link) {
+		return new RemoveLinkChange<WoofSecurityOutputToWoofHttpContinuationModel>(link,
+				"Remove Security Output to HTTP Continuation");
 	}
 
 	@Override

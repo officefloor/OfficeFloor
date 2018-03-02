@@ -1,8 +1,13 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink" />
+	</http-continuations>
+
 	<templates>
-		<template name="TEMPLATE" />
-		<template name="TEMPLATE_LINK" />
+		<template path="/template" />
+		<template path="/templateLink" />
 	</templates>
 
 	<sections>
@@ -14,17 +19,20 @@
 		</section>
 	</sections>
 
-	<access>
-		<input name="Authenticate" />
-		<output name="OUTPUT_A" />
-		<output name="OUTPUT_B">
-			<input section="SECTION_LINK" input="INPUT" />
-		</output>
-	</access>
+	<securities>
+		<security name="A">
+			<output name="OUTPUT" />
+		</security>
+		<security name="B">
+			<output name="OUTPUT">
+				<section name="SECTION_LINK" input="INPUT" />
+			</output>
+		</security>
+	</securities>
 
 	<resources>
-		<resource name="RESOURCE" />
-		<resource name="RESOURCE_LINK" />
+		<resource path="/resource.html" />
+		<resource path="/resource.png" />
 	</resources>
 
 </woof>

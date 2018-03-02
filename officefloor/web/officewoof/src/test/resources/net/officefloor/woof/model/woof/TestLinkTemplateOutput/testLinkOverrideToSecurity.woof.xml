@@ -6,8 +6,14 @@
 	</http-continuations>
 
 	<templates>
-		<template path="/template" />
-		<template path="/templateLink" />
+		<template path="/template">
+			<output name="OUTPUT" />
+		</template>
+		<template path="/templateLink">
+			<output name="OUTPUT">
+				<security name="SECURITY_LINK" />
+			</output>
+		</template>
 	</templates>
 
 	<sections>
@@ -20,20 +26,8 @@
 	</sections>
 
 	<securities>
-		<security name="A">
-			<output name="OUTPUT">
-				<template path="/templateLink" />
-			</output>
-		</security>
-		<security name="B">
-			<output name="OUTPUT">
-				<template path="/template" />
-				<section name="SECTION" input="INPUT" />
-				<security name="A" />
-				<resource path="/resource.html" />
-				<redirect path="/path" />
-			</output>
-		</security>
+		<security name="SECURITY" />
+		<security name="SECURITY_LINK" />
 	</securities>
 
 	<resources>

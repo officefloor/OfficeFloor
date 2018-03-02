@@ -22,7 +22,7 @@
 	<securities>
 		<security name="A">
 			<output name="OUTPUT">
-				<template path="/templateLink" />
+				<security name="B" />
 			</output>
 		</security>
 		<security name="B">
