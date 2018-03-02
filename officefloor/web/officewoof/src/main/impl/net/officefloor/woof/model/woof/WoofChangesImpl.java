@@ -2448,15 +2448,29 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpInputToWoofHttpContinuationModel> removeHttpInputToHttpContinuation(
 			WoofHttpInputToWoofHttpContinuationModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Input to HTTP Continuation");
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofHttpContinuationModel> linkHttpInputToHttpContinuation(
-			WoofHttpInputModel httpInput, WoofHttpContinuationModel applicationPath) {
-		// TODO Auto-generated method stub
-		return null;
+			WoofHttpInputModel httpInput, WoofHttpContinuationModel httpContinuation) {
+
+		// Create the connection
+		final WoofHttpInputToWoofHttpContinuationModel connection = new WoofHttpInputToWoofHttpContinuationModel(
+				httpContinuation.getApplicationPath(), httpInput, httpContinuation);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpInputToWoofHttpContinuationModel, WoofHttpInputModel>(connection, httpInput,
+				"Link HTTP Input to HTTP Continuation") {
+			@Override
+			protected void addExistingConnections(WoofHttpInputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
 	}
 
 	@Override
@@ -2483,54 +2497,118 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpInputToWoofTemplateModel> linkHttpInputToTemplate(WoofHttpInputModel httpInput,
 			WoofTemplateModel template) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpInputToWoofTemplateModel connection = new WoofHttpInputToWoofTemplateModel(
+				template.getApplicationPath(), httpInput, template);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpInputToWoofTemplateModel, WoofHttpInputModel>(connection, httpInput,
+				"Link HTTP Input to Template") {
+			@Override
+			protected void addExistingConnections(WoofHttpInputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofTemplateModel> removeHttpInputToTemplate(WoofHttpInputToWoofTemplateModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Input to Template");
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofSectionInputModel> linkHttpInputToSectionInput(WoofHttpInputModel httpInput,
 			WoofSectionInputModel sectionInput) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofHttpInputToWoofSectionInputModel>(new WoofHttpInputToWoofSectionInputModel(),
+					"Link Http Input to Section Input",
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
+		}
+
+		// Create the connection
+		final WoofHttpInputToWoofSectionInputModel connection = new WoofHttpInputToWoofSectionInputModel(
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), httpInput, sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofHttpInputToWoofSectionInputModel, WoofHttpInputModel>(connection, httpInput,
+				"Link HTTP Input to Section Input") {
+			@Override
+			protected void addExistingConnections(WoofHttpInputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofSectionInputModel> removeHttpInputToSectionInput(
 			WoofHttpInputToWoofSectionInputModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Input to Section Input");
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofSecurityModel> linkHttpInputToSecurity(WoofHttpInputModel httpInput,
 			WoofSecurityModel security) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpInputToWoofSecurityModel connection = new WoofHttpInputToWoofSecurityModel(
+				security.getHttpSecurityName(), httpInput, security);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpInputToWoofSecurityModel, WoofHttpInputModel>(connection, httpInput,
+				"Link HTTP Input to Security") {
+			@Override
+			protected void addExistingConnections(WoofHttpInputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofSecurityModel> removeHttpInputToSecurity(WoofHttpInputToWoofSecurityModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Input to Security");
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofResourceModel> linkHttpInputToResource(WoofHttpInputModel httpInput,
 			WoofResourceModel resource) {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create the connection
+		final WoofHttpInputToWoofResourceModel connection = new WoofHttpInputToWoofResourceModel(
+				resource.getResourcePath(), httpInput, resource);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpInputToWoofResourceModel, WoofHttpInputModel>(connection, httpInput,
+				"Link HTTP Input to Resource") {
+			@Override
+			protected void addExistingConnections(WoofHttpInputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpInputToWoofResourceModel> removeHttpInputToResource(WoofHttpInputToWoofResourceModel link) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoveLinkChange<>(link, "Remove HTTP Input to Resource");
 	}
 
 	@Override

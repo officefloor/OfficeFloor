@@ -74,7 +74,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofHttpContinuationModel}.
 	 */
-	public void testRemoveToHttpContinuationLink() {
+	public void testRemoveToHttpContinuation() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofHttpContinuationModel link = this.model.getWoofExceptions().get(B).getWoofHttpContinuation();
@@ -124,7 +124,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofTemplateModel}.
 	 */
-	public void testRemoveToTemplateLink() {
+	public void testRemoveToTemplate() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofTemplateModel link = this.model.getWoofExceptions().get(B).getWoofTemplate();
@@ -174,7 +174,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofSectionInputModel}.
 	 */
-	public void testRemoveToSectionInputLink() {
+	public void testRemoveToSectionInput() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofSectionInputModel link = this.model.getWoofExceptions().get(B).getWoofSectionInput();
@@ -223,7 +223,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofSecurityModel}.
 	 */
-	public void testRemoveToSecurityLink() {
+	public void testRemoveToSecurity() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofSecurityModel link = this.model.getWoofExceptions().get(B).getWoofSecurity();
@@ -272,7 +272,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofResourceModel}.
 	 */
-	public void testRemoveToResourceLink() {
+	public void testRemoveToResource() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofResourceModel link = this.model.getWoofExceptions().get(B).getWoofResource();

@@ -83,7 +83,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofTemplateOutputToWoofTemplateModel}.
 	 */
-	public void testRemoveToTemplateLink() {
+	public void testRemoveToTemplate() {
 
 		// Obtain the link to remove
 		WoofTemplateOutputToWoofTemplateModel link = this.model.getWoofTemplates().get(B).getOutputs().get(0)

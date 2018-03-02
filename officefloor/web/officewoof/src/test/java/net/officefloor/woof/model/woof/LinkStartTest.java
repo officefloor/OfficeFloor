@@ -78,7 +78,7 @@ public class LinkStartTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofStartToWoofSectionInputModel}.
 	 */
-	public void testRemoveToSectionInputLink() {
+	public void testRemoveToSectionInput() {
 
 		// Obtain the link to remove
 		WoofStartToWoofSectionInputModel link = this.model.getWoofStarts()

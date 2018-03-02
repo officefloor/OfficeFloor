@@ -87,7 +87,7 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	 * Ensure can remove the
 	 * {@link WoofSectionOutputToWoofHttpContinuationModel}.
 	 */
-	public void testRemoveToHttpContinuationLink() {
+	public void testRemoveToHttpContinuation() {
 
 		// Obtain the link to remove
 		WoofSectionOutputToWoofHttpContinuationModel link = this.model.getWoofSections().get(B).getOutputs().get(0)
@@ -139,7 +139,7 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofSectionOutputToWoofTemplateModel}.
 	 */
-	public void testRemoveToTemplateLink() {
+	public void testRemoveToTemplate() {
 
 		// Obtain the link to remove
 		WoofSectionOutputToWoofTemplateModel link = this.model.getWoofSections().get(B).getOutputs().get(0)

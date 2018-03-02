@@ -1,0 +1,45 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink" />
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/inputA" method="POST">
+			<security name="SECURITY_LINK" />
+		</http-input>
+		<http-input path="/inputB" method="PUT">
+			<template path="/template" />
+			<section name="SECTION" input="INPUT" />
+			<security name="SECURITY" />
+			<resource path="/resource" />
+			<redirect path="/path" />
+		</http-input>
+	</http-inputs>
+
+	<templates>
+		<template path="/template" />
+		<template path="/templateLink" />
+	</templates>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" />
+		<security name="SECURITY_LINK" />
+	</securities>
+
+	<resources>
+		<resource path="/resource" />
+		<resource path="/resourceLink" />
+	</resources>
+
+</woof>
