@@ -1,9 +1,22 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<security name="SECURITY" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<security name="SECURITY" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+		<template path="/template" location="example/Template.ofp"
+			class="net.example.LogicClass">
 			<output name="OUTPUT">
-				<access input="Authenticate" />
+				<security name="SECURITY" />
 			</output>
 		</template>
 	</templates>
@@ -13,30 +26,46 @@
 			location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<access input="Authenticate" />
+				<security name="SECURITY" />
 			</output>
 		</section>
 	</sections>
 
-	<access source="net.example.HttpSecuritySource" timeout="4000">
-		<property name="name.one" value="value.one" />
-		<property name="name.two" value="value.two" />
-		<input name="Authenticate"
-			parameter-type="net.officefloor.plugin.web.http.security.HttpCredentials" />
-		<output name="OUTPUT_A" argument-type="java.lang.Integer">
-			<input section="SECTION" input="INPUT" />
-		</output>
-		<output name="OUTPUT_B" argument-type="java.lang.String">
-			<template name="TEMPLATE" />
-		</output>
-		<output name="OUTPUT_C">
-			<resource name="RESOURCE" />
-		</output>
-		<output name="Failure" argument-type="java.lang.Throwable" />
-	</access>
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource" timeout="4000">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B" argument-type="java.lang.String">
+				<template path="/template" />
+			</output>
+			<output name="OUTPUT_C">
+				<security name="SECURITY_LINK" />
+			</output>
+			<output name="OUTPUT_D">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_E">
+				<redirect path="/path" />
+			</output>
+		</security>
+		<security name="SECURITY_LINK" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
+		</security>
+	</securities>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<security name="SECURITY" />
+		</exception>
+	</exceptions>
 
 </woof>

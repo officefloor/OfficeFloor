@@ -1,8 +1,23 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<security name="SECURITY" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<security name="SECURITY" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
-			<output name="OUTPUT" />
+		<template path="/template" location="example/Template.ofp"
+			class="net.example.LogicClass">
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
 		</template>
 	</templates>
 
@@ -10,16 +25,29 @@
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION">
 			<input name="INPUT" />
-			<output name="OUTPUT" />
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
 		</section>
 	</sections>
 
-	<access source="net.example.RemoveSecuritySource" timeout="4000">
-		<output name="Failure" argument-type="java.lang.Throwable" />
-	</access>
+	<securities>
+		<security name="SECURITY" source="net.example.RemoveSecuritySource" timeout="10" />
+		<security name="SECURITY_LINK" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
+		</security>
+	</securities>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<security name="SECURITY" />
+		</exception>
+	</exceptions>
 
 </woof>

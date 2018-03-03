@@ -72,6 +72,8 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 					context.addFlow("OUTPUT_A", Integer.class, null);
 					context.addFlow("OUTPUT_B", String.class, null);
 					context.addFlow("OUTPUT_C", null, null);
+					context.addFlow("OUTPUT_D", null, null);
+					context.addFlow("OUTPUT_E", null, null);
 					context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
 				});
 
@@ -84,9 +86,11 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_A");
 		this.securityOutputNameMapping.put("OUTPUT_B", "OUTPUT_B");
 		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
+		this.securityOutputNameMapping.put("OUTPUT_D", "OUTPUT_D");
+		this.securityOutputNameMapping.put("OUTPUT_E", "OUTPUT_E");
 
 		// Refactor the access with same details
-		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
 				"net.example.HttpSecuritySource", 4000, properties, securityType, this.securityOutputNameMapping);
 
 		// Validate change
@@ -103,6 +107,8 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 			context.addFlow("OUTPUT_A", Integer.class, null);
 			context.addFlow("OUTPUT_B", String.class, null);
 			context.addFlow("OUTPUT_C", null, null);
+			context.addFlow("OUTPUT_D", null, null);
+			context.addFlow("OUTPUT_E", null, null);
 			context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
 		});
 
@@ -114,14 +120,16 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		// Keep section output names
 		this.securityOutputNameMapping.put("OUTPUT_B", "OUTPUT_A");
 		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_B");
-		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_C");
+		this.securityOutputNameMapping.put("OUTPUT_D", "OUTPUT_C");
+		this.securityOutputNameMapping.put("OUTPUT_E", "OUTPUT_D");
+		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_E");
 
 		// Refactor the section with same details
-		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "CHANGE",
 				"net.change.ChangeSecuritySource", 5000, properties, securityType, this.securityOutputNameMapping);
 
 		// Validate change
-		this.assertChange(change, null, "Refactor Access", true);
+		this.assertChange(change, null, "Refactor Security", true);
 	}
 
 	/**
@@ -137,11 +145,11 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 				});
 
 		// Refactor the access removing details
-		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
-				"net.example.RemoveSecuritySource", 4000, null, securityType, null);
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
+				"net.example.RemoveSecuritySource", 10, null, securityType, null);
 
 		// Validate change
-		this.assertChange(change, null, "Refactor Access", true);
+		this.assertChange(change, null, "Refactor Security", true);
 	}
 
 	/**
@@ -164,11 +172,11 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Refactor the access with added details
-		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "test",
+		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
 				"net.example.AddSecuritySource", 5000, properties, securityType, this.securityOutputNameMapping);
 
 		// Validate change
-		this.assertChange(change, null, "Refactor Access", true);
+		this.assertChange(change, null, "Refactor Security", true);
 	}
 
 }

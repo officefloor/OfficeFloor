@@ -1,13 +1,14 @@
 <woof>
 
-	<access source="net.example.AddSecuritySource" timeout="5000">
-		<property name="name.one" value="value.one" />
-		<property name="name.two" value="value.two" />
-		<input name="Authenticate" parameter-type="java.lang.String" />
-		<output name="OUTPUT_A" argument-type="java.lang.Integer" />
-		<output name="OUTPUT_B" argument-type="java.lang.String" />
-		<output name="OUTPUT_C" />
-		<output name="Failure" argument-type="java.lang.Throwable" />
-	</access>
+	<securities>
+		<security name="SECURITY" source="net.example.AddSecuritySource"
+			timeout="5000">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer" />
+			<output name="OUTPUT_B" argument-type="java.lang.String" />
+			<output name="OUTPUT_C" />
+		</security>
+	</securities>
 
 </woof>

@@ -1,9 +1,22 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<security name="CHANGE" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<security name="CHANGE" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+		<template path="/template" location="example/Template.ofp"
+			class="net.example.LogicClass">
 			<output name="OUTPUT">
-				<access input="Authenticate" />
+				<security name="CHANGE" />
 			</output>
 		</template>
 	</templates>
@@ -13,29 +26,47 @@
 			location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<access input="Authenticate" />
+				<security name="CHANGE" />
 			</output>
 		</section>
 	</sections>
 
-	<access source="net.change.ChangeSecuritySource" timeout="5000">
-		<property name="name.1" value="value.one" />
-		<property name="name.two" value="value.2" />
-		<input name="Authenticate" parameter-type="java.lang.String" />
-		<output name="OUTPUT_A" argument-type="java.lang.Integer">
-			<resource name="RESOURCE" />
-		</output>
-		<output name="OUTPUT_B" argument-type="java.lang.String">
-			<input section="SECTION" input="INPUT" />
-		</output>
-		<output name="OUTPUT_C">
-			<template name="TEMPLATE" />
-		</output>
-		<output name="Failure" argument-type="java.lang.Throwable" />
-	</access>
+	<securities>
+		<security name="CHANGE" source="net.change.ChangeSecuritySource"
+			timeout="5000">
+			<property name="name.1" value="value.one" />
+			<property name="name.two" value="value.2" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
+				<redirect path="/path" />
+			</output>
+			<output name="OUTPUT_B" argument-type="java.lang.String">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_C">
+				<template path="/template" />
+			</output>
+			<output name="OUTPUT_D">
+				<security name="SECURITY_LINK" />
+			</output>
+			<output name="OUTPUT_E">
+				<resource path="/resource.html" />
+			</output>
+		</security>
+		<security name="SECURITY_LINK" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<security name="CHANGE" />
+			</output>
+		</security>
+	</securities>
 
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<security name="CHANGE" />
+		</exception>
+	</exceptions>
 
 </woof>

@@ -1693,6 +1693,7 @@ public class WoofChangesImpl implements WoofChanges {
 		changes.add(sortChange);
 
 		// Obtain the existing details
+		final String existingHttpSecurityName = security.getHttpSecurityName();
 		final String existingHttpSecuritySourceClassName = security.getHttpSecuritySourceClassName();
 		final long existingTimeout = security.getTimeout();
 		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(security.getProperties());
@@ -1703,6 +1704,7 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void apply() {
 				// Refactor details
+				security.setHttpSecurityName(httpSecurityName);
 				security.setHttpSecuritySourceClassName(httpSecuritySourceClassName);
 				security.setTimeout(timeout);
 
@@ -1713,11 +1715,15 @@ public class WoofChangesImpl implements WoofChanges {
 						security.addProperty(new PropertyModel(property.getName(), property.getValue()));
 					}
 				}
+
+				// Rename connection links
+				this.renameConnections(security);
 			}
 
 			@Override
 			public void revert() {
 				// Revert attributes
+				security.setHttpSecurityName(existingHttpSecurityName);
 				security.setHttpSecuritySourceClassName(existingHttpSecuritySourceClassName);
 				security.setTimeout(existingTimeout);
 
@@ -1725,6 +1731,49 @@ public class WoofChangesImpl implements WoofChanges {
 				security.getProperties().clear();
 				for (PropertyModel property : existingProperties) {
 					security.addProperty(property);
+				}
+
+				// Revert connection links
+				this.renameConnections(security);
+			}
+
+			/**
+			 * Renames the {@link WoofSecurityModel} connection names.
+			 * 
+			 * @param security
+			 *            {@link WoofSecurityModel}.
+			 */
+			private void renameConnections(WoofSecurityModel security) {
+				String securityName = security.getHttpSecurityName();
+
+				// Rename exception connections
+				for (WoofExceptionToWoofSecurityModel conn : security.getWoofExceptions()) {
+					conn.setHttpSecurityName(securityName);
+				}
+
+				// Rename section output connections
+				for (WoofSectionOutputToWoofSecurityModel conn : security.getWoofSectionOutputs()) {
+					conn.setHttpSecurityName(securityName);
+				}
+
+				// Rename template connections
+				for (WoofTemplateOutputToWoofSecurityModel conn : security.getWoofTemplateOutputs()) {
+					conn.setHttpSecurityName(securityName);
+				}
+
+				// Rename security connections
+				for (WoofSecurityOutputToWoofSecurityModel conn : security.getWoofSecurityOutputs()) {
+					conn.setHttpSecurityName(securityName);
+				}
+
+				// Rename the HTTP continuation connections
+				for (WoofHttpContinuationToWoofSecurityModel conn : security.getWoofHttpContinuations()) {
+					conn.setHttpSecurityName(securityName);
+				}
+
+				// Rename the HTTP input connections
+				for (WoofHttpInputToWoofSecurityModel conn : security.getWoofHttpInputs()) {
+					conn.setHttpSecurityName(securityName);
 				}
 			}
 		};
@@ -1818,6 +1867,8 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(unmappedOutputModel.getWoofResource(), list);
 					removeConnection(unmappedOutputModel.getWoofSectionInput(), list);
 					removeConnection(unmappedOutputModel.getWoofTemplate(), list);
+					removeConnection(unmappedOutputModel.getWoofSecurity(), list);
+					removeConnection(unmappedOutputModel.getWoofHttpContinuation(), list);
 					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the access output
