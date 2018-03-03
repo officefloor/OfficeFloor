@@ -1,7 +1,7 @@
 <woof>
 
 	<templates>
-		<template application-path="/change/path" class="Class1">
+		<template path="/change/path" class="Class1">
 			<extension
 				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
 			<extension
@@ -10,7 +10,7 @@
 				<property name="TWO" value="B" />
 			</extension>
 		</template>
-		<template application-path="/same/path" class="Class2" />
+		<template path="/same/path" class="Class2" />
 	</templates>
 
 </woof>

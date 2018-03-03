@@ -115,16 +115,16 @@ public class MockChangeWoofTemplateExtensionSource extends MockNoChangeWoofTempl
 	 * 
 	 * @param configuration
 	 *            {@link WoofTemplateExtensionConfiguration} to test.
-	 * @param expectedUrl
+	 * @param expectedApplicationPath
 	 *            Expected URL.
 	 * @param expectedPropertyNameValuePairs
 	 *            Expected property name value pairs.
 	 */
 	private static void assertConfiguration(String configurationType, WoofTemplateExtensionConfiguration configuration,
-			String expectedUrl, String... expectedPropertyNameValuePairs) {
+			String expectedApplicationPath, String... expectedPropertyNameValuePairs) {
 
 		// Determine if expecting configuration
-		if (expectedUrl == null) {
+		if (expectedApplicationPath == null) {
 			Assert.assertNull("Should be no " + configurationType + " configuration", configuration);
 			return; // correctly no configuration
 		}
@@ -133,7 +133,7 @@ public class MockChangeWoofTemplateExtensionSource extends MockNoChangeWoofTempl
 		Assert.assertNotNull("Should have " + configurationType + " configuration", configuration);
 
 		// Validate the URL and properties
-		Assert.assertEquals("Incorrect " + configurationType + " application path", expectedUrl,
+		Assert.assertEquals("Incorrect " + configurationType + " application path", expectedApplicationPath,
 				configuration.getApplicationPath());
 		Assert.assertEquals("Incorrect number of " + configurationType + " properties",
 				(expectedPropertyNameValuePairs.length / 2), configuration.getPropertyNames().length);
