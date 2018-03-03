@@ -1,9 +1,21 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<section name="CHANGE" input="INPUT_CHANGE" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<section name="CHANGE" input="INPUT_CHANGE" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
-			<output name="OUTPUT_1">
-				<input section="CHANGE" input="INPUT_CHANGE" />
+		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT">
+				<section name="CHANGE" input="INPUT_CHANGE" />
 			</output>
 		</template>
 	</templates>
@@ -15,35 +27,52 @@
 			<property name="name.two" value="value.2" />
 			<input name="INPUT_CHANGE" parameter-type="java.lang.Double" />
 			<output name="OUTPUT_A" argument-type="java.lang.Integer">
-				<resource name="RESOURCE" />
+				<redirect path="/path" />
 			</output>
 			<output name="OUTPUT_B" argument-type="java.lang.String">
-				<input section="SECTION_LINK" input="INPUT" />
+				<section name="SECTION_LINK" input="INPUT" />
 			</output>
 			<output name="OUTPUT_C">
-				<template name="TEMPLATE" />
+				<template path="/template" />
+			</output>
+			<output name="OUTPUT_D">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_E">
+				<resource path="/resource.html" />
 			</output>
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
 			location="LINK_LOCATION">
 			<input name="INPUT" />
+			<output name="OUTPUT">
+				<section name="CHANGE" input="INPUT_CHANGE" />
+			</output>
 		</section>
 	</sections>
 
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<section name="CHANGE" input="INPUT_CHANGE" />
+			</output>
+		</security>
+	</securities>
+
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
 
 	<exceptions>
 		<exception class="java.io.IOException">
-			<input section="CHANGE" input="INPUT_CHANGE" />
+			<section name="CHANGE" input="INPUT_CHANGE" />
 		</exception>
 	</exceptions>
 
-	<starting>
+	<starts>
 		<start>
-			<flow section="CHANGE" input="INPUT_CHANGE" />
+			<section name="CHANGE" input="INPUT_CHANGE" />
 		</start>
-	</starting>
+	</starts>
 
 </woof>

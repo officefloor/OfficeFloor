@@ -1372,6 +1372,24 @@ public class WoofChangesImpl implements WoofChanges {
 							conn.setSectionName(sectionName);
 							conn.setInputName(inputName);
 						}
+
+						// Rename security connections
+						for (WoofSecurityOutputToWoofSectionInputModel conn : input.getWoofSecurityOutputs()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
+						}
+
+						// Rename the HTTP continuation connections
+						for (WoofHttpContinuationToWoofSectionInputModel conn : input.getWoofHttpContinuations()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
+						}
+
+						// Rename the HTTP input connections
+						for (WoofHttpInputToWoofSectionInputModel conn : input.getWoofHttpInputs()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
+						}
 					}
 				};
 
@@ -1411,6 +1429,9 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnections(unmappedInputModel.getWoofSectionOutputs(), list);
 					removeConnections(unmappedInputModel.getWoofStarts(), list);
 					removeConnections(unmappedInputModel.getWoofTemplateOutputs(), list);
+					removeConnections(unmappedInputModel.getWoofSecurityOutputs(), list);
+					removeConnections(unmappedInputModel.getWoofHttpContinuations(), list);
+					removeConnections(unmappedInputModel.getWoofHttpInputs(), list);
 					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the section input
@@ -1508,6 +1529,8 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(unmappedOutputModel.getWoofResource(), list);
 					removeConnection(unmappedOutputModel.getWoofSectionInput(), list);
 					removeConnection(unmappedOutputModel.getWoofTemplate(), list);
+					removeConnection(unmappedOutputModel.getWoofSecurity(), list);
+					removeConnection(unmappedOutputModel.getWoofHttpContinuation(), list);
 					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the section output

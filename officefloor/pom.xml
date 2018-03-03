@@ -64,7 +64,7 @@
 -->
 	</modules>
 	<properties>
-		<current.year>2015</current.year>
+		<current.year>2018</current.year>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>1.0.0</tycho-version>
@@ -759,9 +759,9 @@
 					<version>2.6</version>
 				</plugin>
 				<plugin>
-					<groupId>com.mycila.maven-license-plugin</groupId>
-					<artifactId>maven-license-plugin</artifactId>
-					<version>1.10.b1</version>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
@@ -940,8 +940,8 @@
 				<!-- -->
 				<!-- Run the following to fix licenses in files: -->
 				<!-- mvn -N license:format -->
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
 				<configuration>
 					<header>src/license/license-header.txt</header>
 					<strictCheck>true</strictCheck>

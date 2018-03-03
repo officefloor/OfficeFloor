@@ -54,17 +54,17 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	 */
 	private Map<String, String> sectionOutputNameMapping = new HashMap<String, String>();;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		this.section = this.model.getWoofSections().get(0);
-	}
-
 	/**
 	 * Initiate.
 	 */
 	public RefactorSectionTest() {
 		super(true);
+	}
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		this.section = this.model.getWoofSections().get(0);
 	}
 
 	/**
@@ -73,22 +73,19 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	public void testNoChange() {
 
 		// Create the section type
-		SectionType sectionType = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT", Double.class);
-						context.addSectionOutput("OUTPUT_A", Integer.class,
-								false);
-						context.addSectionOutput("OUTPUT_B", String.class,
-								false);
-						context.addSectionOutput("OUTPUT_C", null, false);
-						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
-								IOException.class, true);
-						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class, null);
-					}
-				});
+		SectionType sectionType = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("INPUT", Double.class);
+				context.addSectionOutput("OUTPUT_A", Integer.class, false);
+				context.addSectionOutput("OUTPUT_B", String.class, false);
+				context.addSectionOutput("OUTPUT_C", null, false);
+				context.addSectionOutput("OUTPUT_D", null, false);
+				context.addSectionOutput("OUTPUT_E", null, false);
+				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
+			}
+		});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -102,11 +99,12 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 		this.sectionOutputNameMapping.put("OUTPUT_A", "OUTPUT_A");
 		this.sectionOutputNameMapping.put("OUTPUT_B", "OUTPUT_B");
 		this.sectionOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
+		this.sectionOutputNameMapping.put("OUTPUT_D", "OUTPUT_D");
+		this.sectionOutputNameMapping.put("OUTPUT_E", "OUTPUT_E");
 
 		// Refactor the section with same details
-		Change<WoofSectionModel> change = this.operations.refactorSection(
-				this.section, "SECTION", "net.example.ExampleSectionSource",
-				"SECTION_LOCATION", properties, sectionType,
+		Change<WoofSectionModel> change = this.operations.refactorSection(this.section, "SECTION",
+				"net.example.ExampleSectionSource", "SECTION_LOCATION", properties, sectionType,
 				this.sectionInputNameMapping, this.sectionOutputNameMapping);
 
 		// Validate change
@@ -117,24 +115,21 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	 * Ensure handle change to all details.
 	 */
 	public void testChange() {
-		
+
 		// Create the section type
-		SectionType sectionType = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT_CHANGE", Double.class);
-						context.addSectionOutput("OUTPUT_A", Integer.class,
-								false);
-						context.addSectionOutput("OUTPUT_B", String.class,
-								false);
-						context.addSectionOutput("OUTPUT_C", null, false);
-						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
-								IOException.class, true);
-						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class, null);
-					}
-				});
+		SectionType sectionType = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("INPUT_CHANGE", Double.class);
+				context.addSectionOutput("OUTPUT_A", Integer.class, false);
+				context.addSectionOutput("OUTPUT_B", String.class, false);
+				context.addSectionOutput("OUTPUT_C", null, false);
+				context.addSectionOutput("OUTPUT_D", null, false);
+				context.addSectionOutput("OUTPUT_E", null, false);
+				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
+			}
+		});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -144,15 +139,16 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 		// Keep section input names
 		this.sectionInputNameMapping.put("INPUT_CHANGE", "INPUT");
 
-		// Keep section output names
+		// Change section output names around
 		this.sectionOutputNameMapping.put("OUTPUT_B", "OUTPUT_A");
 		this.sectionOutputNameMapping.put("OUTPUT_C", "OUTPUT_B");
-		this.sectionOutputNameMapping.put("OUTPUT_A", "OUTPUT_C");
+		this.sectionOutputNameMapping.put("OUTPUT_D", "OUTPUT_C");
+		this.sectionOutputNameMapping.put("OUTPUT_E", "OUTPUT_D");
+		this.sectionOutputNameMapping.put("OUTPUT_A", "OUTPUT_E");
 
 		// Refactor the section with same details
-		Change<WoofSectionModel> change = this.operations.refactorSection(
-				this.section, "CHANGE", "net.example.ChangeSectionSource",
-				"CHANGE_LOCATION", properties, sectionType,
+		Change<WoofSectionModel> change = this.operations.refactorSection(this.section, "CHANGE",
+				"net.example.ChangeSectionSource", "CHANGE_LOCATION", properties, sectionType,
 				this.sectionInputNameMapping, this.sectionOutputNameMapping);
 
 		// Validate change
@@ -166,18 +162,16 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	public void testRemoveDetails() {
 
 		// Create the section type
-		SectionType sectionType = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						// No inputs/outputs
-					}
-				});
+		SectionType sectionType = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				// No inputs/outputs
+			}
+		});
 
 		// Refactor the section removing details
-		Change<WoofSectionModel> change = this.operations.refactorSection(
-				this.section, "REMOVE", "net.example.RemoveSectionSource",
-				"REMOVE_LOCATION", null, sectionType, null, null);
+		Change<WoofSectionModel> change = this.operations.refactorSection(this.section, "REMOVE",
+				"net.example.RemoveSectionSource", "REMOVE_LOCATION", null, sectionType, null, null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Section", true);
@@ -190,23 +184,18 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	public void testAddDetails() {
 
 		// Create the section type
-		SectionType sectionType = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT_1", Double.class);
-						context.addSectionInput("INPUT_2", null);
-						context.addSectionOutput("OUTPUT_A", Integer.class,
-								false);
-						context.addSectionOutput("OUTPUT_B", String.class,
-								false);
-						context.addSectionOutput("OUTPUT_C", null, false);
-						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
-								IOException.class, true);
-						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class, null);
-					}
-				});
+		SectionType sectionType = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("INPUT_1", Double.class);
+				context.addSectionInput("INPUT_2", null);
+				context.addSectionOutput("OUTPUT_A", Integer.class, false);
+				context.addSectionOutput("OUTPUT_B", String.class, false);
+				context.addSectionOutput("OUTPUT_C", null, false);
+				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
+			}
+		});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -214,10 +203,9 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Refactor the section with same details
-		Change<WoofSectionModel> change = this.operations.refactorSection(
-				this.section, "ADD", "net.example.AddSectionSource",
-				"ADD_LOCATION", properties, sectionType,
-				this.sectionInputNameMapping, this.sectionOutputNameMapping);
+		Change<WoofSectionModel> change = this.operations.refactorSection(this.section, "ADD",
+				"net.example.AddSectionSource", "ADD_LOCATION", properties, sectionType, this.sectionInputNameMapping,
+				this.sectionOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Section", true);
