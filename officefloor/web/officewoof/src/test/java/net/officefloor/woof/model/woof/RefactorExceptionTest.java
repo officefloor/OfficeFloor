@@ -46,8 +46,8 @@ public class RefactorExceptionTest extends AbstractWoofChangesTestCase {
 	public void testNoChange() {
 
 		// Change to a unique exception
-		Change<WoofExceptionModel> change = this.operations.refactorException(
-				this.exception, RuntimeException.class.getName());
+		Change<WoofExceptionModel> change = this.operations.refactorException(this.exception,
+				RuntimeException.class.getName());
 
 		// Validate the change
 		this.assertChange(change, this.exception, "Refactor Exception", true);
@@ -59,8 +59,8 @@ public class RefactorExceptionTest extends AbstractWoofChangesTestCase {
 	public void testChangeException() {
 
 		// Change to a unique exception
-		Change<WoofExceptionModel> change = this.operations.refactorException(
-				this.exception, NullPointerException.class.getName());
+		Change<WoofExceptionModel> change = this.operations.refactorException(this.exception,
+				NullPointerException.class.getName());
 
 		// Validate the change
 		this.assertChange(change, this.exception, "Refactor Exception", true);
@@ -72,13 +72,12 @@ public class RefactorExceptionTest extends AbstractWoofChangesTestCase {
 	public void testExceptionAlreadyExists() {
 
 		// Change to a unique exception
-		Change<WoofExceptionModel> change = this.operations.refactorException(
-				this.exception, IOException.class.getName());
+		Change<WoofExceptionModel> change = this.operations.refactorException(this.exception,
+				IOException.class.getName());
 
 		// Validate no change (as exception is already handled)
 		this.assertChange(change, this.exception, "Refactor Exception", false,
-				"Exception " + IOException.class.getName()
-						+ " is already handled");
+				"Exception already exists for '" + IOException.class.getName() + "'");
 	}
 
 }

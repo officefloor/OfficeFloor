@@ -80,7 +80,7 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(grandParent, "/ancestor",
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(grandParent, "/ancestor",
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change

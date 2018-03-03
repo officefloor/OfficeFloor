@@ -1,8 +1,47 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<template path="/template" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<template path="/template" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template path="/path" location="Path1.ofp" class="Class1" />
-		<template path="/same/path" location="Path2.ofp" class="Class2" />
+		<template path="/template" location="example/Template.ofp" />
+		<template path="/templateLink" location="example/TemplateLink.ofp">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</template>
 	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</security>
+	</securities>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<template path="/template" />
+		</exception>
+	</exceptions>
 
 </woof>

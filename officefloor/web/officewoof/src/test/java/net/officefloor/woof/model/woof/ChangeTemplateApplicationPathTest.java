@@ -46,8 +46,8 @@ public class ChangeTemplateApplicationPathTest extends AbstractWoofChangesTestCa
 		// Test
 		this.replayMockObjects();
 
-		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template, "/path",
+		// Change with same details
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(this.template, "/template",
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change
@@ -60,13 +60,13 @@ public class ChangeTemplateApplicationPathTest extends AbstractWoofChangesTestCa
 	/**
 	 * Ensure can change to unique application path.
 	 */
-	public void testUniqueApplicationPath() {
+	public void testChangeApplicationPath() {
 
 		// Test
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template, "/unique/path",
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(this.template, "/change",
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change
@@ -85,12 +85,12 @@ public class ChangeTemplateApplicationPathTest extends AbstractWoofChangesTestCa
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template, "/same/path",
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(this.template, "/templateLink",
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template Application Path", false,
-				"Template already exists with application path /same/path");
+				"Application path '/templateLink' already configured for Template");
 
 		// Verify
 		this.verifyMockObjects();

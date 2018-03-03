@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,42 +18,47 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofResourceModel;
 
 /**
- * Tests refactoring the {@link WoofResourceModel}.
+ * Tests refactoring the {@link WoofHttpInputModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorResourceTest extends AbstractWoofChangesTestCase {
+public class RefactorHttpInputTest extends AbstractWoofChangesTestCase {
 
 	/**
-	 * {@link WoofResourceModel}.
+	 * {@link WoofHttpInputModel}.
 	 */
-	private WoofResourceModel resource;
+	private WoofHttpInputModel httpInput;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.resource = this.model.getWoofResources().get(0);
+		this.httpInput = this.model.getWoofHttpInputs().get(0);
 	}
 
 	/**
-	 * Ensure can refactor.
+	 * Ensure handle no change.
 	 */
-	public void testRefactor() {
+	public void testNoChange() {
 
-		/*
-		 * Expecting the refactor method delegates to the change resource path
-		 * method which will handle all refactoring. Therefore only providing
-		 * simple test to ensure delegating.
-		 */
+		// Refactor with same details
+		Change<WoofHttpInputModel> change = this.operations.refactorHttpInput(this.httpInput, "/input", "POST", false);
 
-		// Refactor template to change path
-		Change<WoofResourceModel> change = this.operations.refactorResource(this.resource, "/resource.png");
+		// Validate change
+		this.assertChange(change, null, "Refactor HTTP Input", true);
+	}
 
-		// Validate the change
-		this.assertChange(change, this.resource, "Refactor Resource", true);
+	/**
+	 * Ensure handle change to all details.
+	 */
+	public void testChange() {
+
+		// Refactor with changes
+		Change<WoofHttpInputModel> change = this.operations.refactorHttpInput(this.httpInput, "/change", "PUT", true);
+
+		// Validate change
+		this.assertChange(change, null, "Refactor HTTP Input", true);
 	}
 
 }

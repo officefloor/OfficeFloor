@@ -459,16 +459,21 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure able to add multiple {@link WoofResourceModel} instances with
-	 * clashing names.
+	 * Check add multiple {@link WoofResourceModel} instances with clashing
+	 * names.
 	 */
 	public void testAddMultipleResources() {
 
 		// Add the resources
 		this.operations.addResource("example/index.html").apply();
-		this.operations.addResource("example/index.html").apply();
+		this.validateModel();
 
-		// Validate appropriately added resources
+		// Ensure conflict
+		Change<WoofResourceModel> conflict = this.operations.addResource("example/index.html");
+		assertFalse("Should not be able to add another resource by same path", conflict.canApply());
+
+		// Ensure no further change
+		conflict.apply();
 		this.validateModel();
 	}
 
@@ -497,15 +502,16 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testAddMultipleExceptions() {
 
-		// Add the exceptions
-		for (int i = 0; i <= 2; i++) {
-			Change<WoofExceptionModel> change = this.operations.addException(SQLException.class.getName());
-			change.getTarget().setX(i);
-			change.getTarget().setY(i);
-			change.apply();
-		}
+		// Add the exception
+		this.operations.addException(SQLException.class.getName()).apply();
+		this.validateModel();
 
-		// Validate appropriately added one exception moved
+		// Ensure can not add exception again
+		Change<WoofExceptionModel> change = this.operations.addException(SQLException.class.getName());
+		assertFalse("Should not be able to add same exception", change.canApply());
+
+		// Ensure not add
+		change.apply();
 		this.validateModel();
 	}
 

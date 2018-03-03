@@ -57,6 +57,32 @@ public interface WoofChanges {
 	Change<WoofHttpContinuationModel> addHttpContinuation(String applicationPath, boolean isSecure);
 
 	/**
+	 * Refactors the {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param continuation
+	 *            {@link WoofHttpContinuationModel} to be refactored.
+	 * @param applicationPath
+	 *            Application path for the {@link WoofHttpContinuationModel}.
+	 * @param isSecure
+	 *            Indicates if secure.
+	 * @return {@link Change} to refactor the {@link WoofHttpContinuationModel}.
+	 */
+	Change<WoofHttpContinuationModel> refactorHttpContinuation(WoofHttpContinuationModel continuation,
+			String applicationPath, boolean isSecure);
+
+	/**
+	 * Changes the application path for the {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param continuation
+	 *            {@link WoofHttpContinuationModel}.
+	 * @param applicationPath
+	 *            New application path.
+	 * @return {@link Change} for the application path.
+	 */
+	Change<WoofHttpContinuationModel> changeApplicationPath(WoofHttpContinuationModel continuation,
+			String applicationPath);
+
+	/**
 	 * Removes a {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param httpContinuation
@@ -78,6 +104,29 @@ public interface WoofChanges {
 	 * @return {@link Change} to add a {@link WoofHttpInputModel}.
 	 */
 	Change<WoofHttpInputModel> addHttpInput(String applicationPath, String httpMethodName, boolean isSecure);
+
+	/**
+	 * Refactors the {@link WoofHttpInputModel}.
+	 * 
+	 * @param input
+	 *            {@link WoofHttpInputModel} to refactor.
+	 * @param applicationPath
+	 *            New application path.
+	 * @param httpMethod
+	 *            New {@link HttpMethod} name.
+	 * @param isSecure
+	 *            Indicates if secure.
+	 * @return {@link Change} to refactor the {@link WoofHttpInputModel}.
+	 */
+	Change<WoofHttpInputModel> refactorHttpInput(WoofHttpInputModel input, String applicationPath, String httpMethod,
+			boolean isSecure);
+
+	/**
+	 * Changes the application path for the {@link WoofHttpInputModel}.
+	 * 
+	 * @return {@link Change} to the application path.
+	 */
+	Change<WoofHttpInputModel> changeApplicationPath(WoofHttpInputModel input, String applicationPath);
 
 	/**
 	 * Removes a {@link WoofHttpInputModel}.
@@ -195,7 +244,7 @@ public interface WoofChanges {
 	 *            {@link WoofTemplateChangeContext}.
 	 * @return {@link Change} for the URI.
 	 */
-	Change<WoofTemplateModel> changeTemplateApplicationPath(WoofTemplateModel template, String applicationPath,
+	Change<WoofTemplateModel> changeApplicationPath(WoofTemplateModel template, String applicationPath,
 			WoofTemplateChangeContext context);
 
 	/**

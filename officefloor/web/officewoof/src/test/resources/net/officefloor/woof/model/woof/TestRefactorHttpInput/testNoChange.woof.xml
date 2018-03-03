@@ -1,0 +1,7 @@
+<woof>
+
+	<http-inputs>
+		<http-input path="/input" method="POST" />
+	</http-inputs>
+
+</woof>

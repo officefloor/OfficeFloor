@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -40,9 +41,11 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.woof.template.WoofTemplateExtensionLoader;
@@ -511,7 +514,126 @@ public class WoofChangesImpl implements WoofChanges {
 	 * Sorts the {@link WoofHttpInputModel} instances.
 	 */
 	private void sortHttpInputs() {
-		sortModelList(this.model.getWoofHttpInputs(), (model) -> model.getApplicationPath());
+		sortModelList(this.model.getWoofHttpInputs(),
+				(model) -> model.getHttpMethod() + ":" + model.getApplicationPath());
+	}
+
+	/**
+	 * Checks for unique GET application path.
+	 * 
+	 * @param applicationPath
+	 *            Application path to check if unique.
+	 * @param modelWithPath
+	 *            {@link Model} with the existing application path (not included
+	 *            in check).
+	 * @param changeDescription
+	 *            Change description.
+	 * @return {@link Change} for the {@link Conflict}, or <code>null</code> no
+	 *         {@link Conflict}.
+	 */
+	private <T extends Model> Change<T> checkUniqueGetApplicationPath(String applicationPath, T modelWithPath,
+			String changeDescription) {
+
+		// Check HTTP Continutations
+		Change<T> change = this.checkUniqueApplicationPath(applicationPath, modelWithPath, changeDescription,
+				this.model.getWoofHttpContinuations().stream(), "HTTP Continuation",
+				(httpContinuation) -> httpContinuation.getApplicationPath());
+		if (change != null) {
+			return change;
+		}
+
+		// Check HTTP Inputs (for GET)
+		change = this.checkUniqueApplicationPath(applicationPath, modelWithPath, changeDescription,
+				this.model.getWoofHttpInputs().stream().filter((model) -> "GET".equals(model.getHttpMethod())),
+				"HTTP Input", (httpInput) -> httpInput.getApplicationPath());
+		if (change != null) {
+			return change;
+		}
+
+		// Check Templates
+		change = this.checkUniqueApplicationPath(applicationPath, modelWithPath, changeDescription,
+				this.model.getWoofTemplates().stream(), "Template", (template) -> template.getApplicationPath());
+		if (change != null) {
+			return change;
+		}
+
+		// No conflict in application path
+		return null;
+	}
+
+	/**
+	 * Checks for unique application path for specified {@link HttpMethod}.
+	 * 
+	 * @param httpMethodName
+	 *            Name of the {@link HttpMethod}.
+	 * @param applicationPath
+	 *            Application path to check if unique. {@link Model} with the
+	 *            existing application path (not included in check).
+	 * @param changeDescription
+	 *            Change description.
+	 * @return {@link Change} for the {@link Conflict}, or <code>null</code> no
+	 *         {@link Conflict}.
+	 */
+	private <T extends Model> Change<T> checkUniqueMethodApplicationPath(String httpMethodName, String applicationPath,
+			T modelWithPath, String changeDescription) {
+
+		// Handle GET HTTP method
+		if ("GET".equals(httpMethodName)) {
+			return this.checkUniqueGetApplicationPath(applicationPath, modelWithPath, changeDescription);
+		}
+
+		// Determine if unique for particular HTTP method
+		return this.checkUniqueApplicationPath(applicationPath, modelWithPath, changeDescription,
+				this.model.getWoofHttpInputs().stream().filter((model) -> httpMethodName.equals(model.getHttpMethod())),
+				"HTTP Input", (httpInput) -> httpInput.getApplicationPath());
+	}
+
+	/**
+	 * Determines if application path is unique within the {@link List}.
+	 * 
+	 * @param applicationPath
+	 *            Application path.
+	 * @param modelWithPath
+	 *            {@link Model} with the existing application path (not included
+	 *            in check).
+	 * @param changeDescription
+	 *            Change description.
+	 * @param modelList
+	 *            {@link Model} {@link List} to check.
+	 * @param modelItemTypeName
+	 *            Type name of the {@link Model}.
+	 * @param getApplicationPath
+	 *            {@link Function} to obtain the application path from the
+	 *            {@link Model}.
+	 * @return {@link Change} for the {@link Conflict}, or <code>null</code> no
+	 *         {@link Conflict}.
+	 */
+	private <T extends Model, M extends Model> Change<T> checkUniqueApplicationPath(String applicationPath,
+			T modelWithPath, String changeDescription, Stream<M> modelList, String modelItemTypeName,
+			Function<M, String> getApplicationPath) {
+
+		// Must have application path
+		if (CompileUtil.isBlank(applicationPath)) {
+			return new NoChange<T>(modelWithPath, changeDescription, "Must provide an application path");
+		}
+
+		// Ensure no conflict in application path
+		boolean isNoConflict = modelList.allMatch((model) -> {
+
+			// Ignore if model with the application path
+			if (modelWithPath == model) {
+				return true;
+			}
+
+			// Obtain the application path
+			String modelApplicationPath = getApplicationPath.apply(model);
+			return (!applicationPath.equals(modelApplicationPath));
+		});
+
+		// Return possible change conflict
+		return isNoConflict ? null
+				: new NoChange<T>(modelWithPath, changeDescription,
+						"Application path '" + applicationPath + "' already configured for " + modelItemTypeName);
 	}
 
 	/**
@@ -578,6 +700,13 @@ public class WoofChangesImpl implements WoofChanges {
 		// Create the HTTP continuation
 		final WoofHttpContinuationModel path = new WoofHttpContinuationModel(isSecure, applicationPath);
 
+		// Determine if not unique application path
+		Change<WoofHttpContinuationModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, path,
+				"Add HTTP Continuation");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
+
 		// Return change to add HTTP continuation
 		return new AbstractChange<WoofHttpContinuationModel>(path, "Add HTTP Continuation") {
 			@Override
@@ -591,6 +720,100 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.removeWoofHttpContinuation(path);
 			}
 		};
+	}
+
+	@Override
+	public Change<WoofHttpContinuationModel> refactorHttpContinuation(WoofHttpContinuationModel continuation,
+			String applicationPath, boolean isSecure) {
+
+		// Determine if not unique application path
+		Change<WoofHttpContinuationModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, continuation,
+				"Refactor HTTP Continuation");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
+
+		// Capture the existing values
+		final String existingApplicationPath = continuation.getApplicationPath();
+		final boolean existingIsSecure = continuation.getIsSecure();
+
+		// Refactor
+		return new AbstractChange<WoofHttpContinuationModel>(continuation, "Refactor HTTP Continuation") {
+			@Override
+			public void apply() {
+				continuation.setApplicationPath(applicationPath);
+				continuation.setIsSecure(isSecure);
+				WoofChangesImpl.this.sortHttpContinuations();
+				WoofChangesImpl.renameConnections(continuation);
+			}
+
+			@Override
+			public void revert() {
+				continuation.setApplicationPath(existingApplicationPath);
+				continuation.setIsSecure(existingIsSecure);
+				WoofChangesImpl.this.sortHttpContinuations();
+				WoofChangesImpl.renameConnections(continuation);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofHttpContinuationModel> changeApplicationPath(WoofHttpContinuationModel continuation,
+			String applicationPath) {
+
+		// Determine if not unique application path
+		Change<WoofHttpContinuationModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, continuation,
+				"Change Application Path");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
+
+		// Capture existing application path
+		final String existingApplicationPath = continuation.getApplicationPath();
+
+		// Change the application path
+		return new AbstractChange<WoofHttpContinuationModel>(continuation, "Change Application Path") {
+			@Override
+			public void apply() {
+				continuation.setApplicationPath(applicationPath);
+				WoofChangesImpl.this.sortHttpContinuations();
+				WoofChangesImpl.renameConnections(continuation);
+			}
+
+			@Override
+			public void revert() {
+				continuation.setApplicationPath(existingApplicationPath);
+				WoofChangesImpl.this.sortHttpContinuations();
+				WoofChangesImpl.renameConnections(continuation);
+			}
+		};
+	}
+
+	/**
+	 * Renames the {@link ConnectionModel} instances referencing the
+	 * {@link WoofHttpContinuationModel}.
+	 */
+	private static void renameConnections(WoofHttpContinuationModel continuation) {
+		String applicationPath = continuation.getApplicationPath();
+
+		for (WoofSectionOutputToWoofHttpContinuationModel conn : continuation.getWoofSectionOutputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofTemplateOutputToWoofHttpContinuationModel conn : continuation.getWoofTemplateOutputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofSecurityOutputToWoofHttpContinuationModel conn : continuation.getWoofSecurityOutputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofExceptionToWoofHttpContinuationModel conn : continuation.getWoofExceptions()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofHttpInputToWoofHttpContinuationModel conn : continuation.getWoofHttpInputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofHttpContinuationToWoofHttpContinuationModel conn : continuation.getWoofHttpContinuations()) {
+			conn.setApplicationPath(applicationPath);
+		}
 	}
 
 	@Override
@@ -656,6 +879,13 @@ public class WoofChangesImpl implements WoofChanges {
 		// Create the HTTP input
 		final WoofHttpInputModel path = new WoofHttpInputModel(isSecure, httpMethodName, applicationPath);
 
+		// Determine if not unique application path
+		Change<WoofHttpInputModel> nonUnique = this.checkUniqueMethodApplicationPath(httpMethodName, applicationPath,
+				path, "Add HTTP Input");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
+
 		// Return change to add HTTP input
 		return new AbstractChange<WoofHttpInputModel>(path, "Add HTTP Input") {
 			@Override
@@ -667,6 +897,71 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void revert() {
 				WoofChangesImpl.this.model.removeWoofHttpInput(path);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofHttpInputModel> refactorHttpInput(final WoofHttpInputModel input, String applicationPath,
+			String httpMethod, boolean isSecure) {
+
+		// Determine if not unique application path
+		Change<WoofHttpInputModel> nonUnique = this.checkUniqueMethodApplicationPath(httpMethod, applicationPath, input,
+				"Refactor HTTP Input");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
+
+		// Capture existing details
+		final String existingApplicationPath = input.getApplicationPath();
+		final String existingHttpMethod = input.getHttpMethod();
+		final boolean existingIsSecure = input.getIsSecure();
+
+		// Return change to refactor
+		return new AbstractChange<WoofHttpInputModel>(input, "Refactor HTTP Input") {
+			@Override
+			public void apply() {
+				input.setApplicationPath(applicationPath);
+				input.setHttpMethod(httpMethod);
+				input.setIsSecure(isSecure);
+				WoofChangesImpl.this.sortHttpInputs();
+			}
+
+			@Override
+			public void revert() {
+				input.setApplicationPath(existingApplicationPath);
+				input.setHttpMethod(existingHttpMethod);
+				input.setIsSecure(existingIsSecure);
+				WoofChangesImpl.this.sortHttpInputs();
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofHttpInputModel> changeApplicationPath(WoofHttpInputModel input, String applicationPath) {
+
+		// Determine if not unique application path
+		Change<WoofHttpInputModel> nonUnique = this.checkUniqueMethodApplicationPath(input.getHttpMethod(),
+				applicationPath, input, "Change Application Path");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
+
+		// Capture existing application path
+		final String existingApplicationPath = input.getApplicationPath();
+
+		// Return change to refactor
+		return new AbstractChange<WoofHttpInputModel>(input, "Change Application Path") {
+			@Override
+			public void apply() {
+				input.setApplicationPath(applicationPath);
+				WoofChangesImpl.this.sortHttpInputs();
+			}
+
+			@Override
+			public void revert() {
+				input.setApplicationPath(existingApplicationPath);
+				WoofChangesImpl.this.sortHttpInputs();
 			}
 		};
 	}
@@ -732,6 +1027,13 @@ public class WoofChangesImpl implements WoofChanges {
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(applicationPath, templateLocation, templateLogicClass,
 				redirectValuesFunction, contentType, charsetName, linkSeparatorCharacter, isTemplateSecure);
+
+		// Determine if not unique application path
+		Change<WoofTemplateModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, template,
+				"Add Template");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
 
 		// Determine if have links
 		if (linksSecure != null) {
@@ -805,6 +1107,13 @@ public class WoofChangesImpl implements WoofChanges {
 			String linkSeparatorCharacter, Map<String, Boolean> linksSecure, String[] renderHttpMethods,
 			WoofTemplateExtension[] extensions, Map<String, String> templateOutputNameMapping,
 			WoofTemplateChangeContext context) {
+
+		// Determine if not unique application path
+		Change<WoofTemplateModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, template,
+				"Refactor Template");
+		if (nonUnique != null) {
+			return nonUnique;
+		}
 
 		// Create change to sort outputs
 		Change<WoofTemplateModel> sortChange = new AbstractChange<WoofTemplateModel>(template, "Sort outputs") {
@@ -1031,14 +1340,14 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofTemplateModel> changeTemplateApplicationPath(final WoofTemplateModel template,
+	public Change<WoofTemplateModel> changeApplicationPath(final WoofTemplateModel template,
 			final String applicationPath, WoofTemplateChangeContext context) {
 
-		// Ensure the application path is unique
-		if (!isUniqueModelIdentifier(applicationPath, template, this.model.getWoofTemplates(),
-				(model) -> model.getApplicationPath())) {
-			return new NoChange<WoofTemplateModel>(template, "Change Template Application Path",
-					"Template already exists with application path " + applicationPath);
+		// Determine if not unique application path
+		Change<WoofTemplateModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, template,
+				"Change Template Application Path");
+		if (nonUnique != null) {
+			return nonUnique;
 		}
 
 		// Keep track of original values
@@ -1049,17 +1358,16 @@ public class WoofChangesImpl implements WoofChanges {
 				"Change Template Application Path") {
 			@Override
 			public void apply() {
-				// Update template application path
 				template.setApplicationPath(applicationPath);
 				WoofChangesImpl.this.sortTemplates();
+				WoofChangesImpl.renameConnections(template);
 			}
 
 			@Override
 			public void revert() {
-
-				// Revert template application path
 				template.setApplicationPath(originalApplicationPath);
 				WoofChangesImpl.this.sortTemplates();
+				WoofChangesImpl.renameConnections(template);
 			}
 		};
 
@@ -1076,6 +1384,33 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return the change
 		return change;
+	}
+
+	/**
+	 * Renames the {@link ConnectionModel} instances referencing the
+	 * {@link WoofTemplateModel}.
+	 */
+	private static void renameConnections(WoofTemplateModel template) {
+		String applicationPath = template.getApplicationPath();
+
+		for (WoofSectionOutputToWoofTemplateModel conn : template.getWoofSectionOutputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofTemplateOutputToWoofTemplateModel conn : template.getWoofTemplateOutputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofSecurityOutputToWoofTemplateModel conn : template.getWoofSecurityOutputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofExceptionToWoofTemplateModel conn : template.getWoofExceptions()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofHttpInputToWoofTemplateModel conn : template.getWoofHttpInputs()) {
+			conn.setApplicationPath(applicationPath);
+		}
+		for (WoofHttpContinuationToWoofTemplateModel conn : template.getWoofHttpContinuations()) {
+			conn.setApplicationPath(applicationPath);
+		}
 	}
 
 	@Override
@@ -1624,6 +1959,10 @@ public class WoofChangesImpl implements WoofChanges {
 			long timeout, PropertyList properties, String[] contentTypes,
 			HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType) {
 
+		// Obtain the unique name
+		httpSecurityName = getUniqueName(httpSecurityName, null, this.model.getWoofSecurities(),
+				(model) -> model.getHttpSecurityName());
+
 		// Create the security
 		final WoofSecurityModel woofSecurity = new WoofSecurityModel(httpSecurityName, httpSecuritySourceClassName,
 				timeout);
@@ -1698,13 +2037,17 @@ public class WoofChangesImpl implements WoofChanges {
 		final long existingTimeout = security.getTimeout();
 		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(security.getProperties());
 
+		// Obtain the unique name
+		final String uniqueHttpSecurityName = getUniqueName(httpSecurityName, security, this.model.getWoofSecurities(),
+				(model) -> model.getHttpSecurityName());
+
 		// Create change to attributes and properties
 		Change<WoofSecurityModel> attributeChange = new AbstractChange<WoofSecurityModel>(security,
 				"Refactor attributes") {
 			@Override
 			public void apply() {
 				// Refactor details
-				security.setHttpSecurityName(httpSecurityName);
+				security.setHttpSecurityName(uniqueHttpSecurityName);
 				security.setHttpSecuritySourceClassName(httpSecuritySourceClassName);
 				security.setTimeout(timeout);
 
@@ -1717,7 +2060,7 @@ public class WoofChangesImpl implements WoofChanges {
 				}
 
 				// Rename connection links
-				this.renameConnections(security);
+				this.renameConnections();
 			}
 
 			@Override
@@ -1734,44 +2077,31 @@ public class WoofChangesImpl implements WoofChanges {
 				}
 
 				// Revert connection links
-				this.renameConnections(security);
+				this.renameConnections();
 			}
 
 			/**
 			 * Renames the {@link WoofSecurityModel} connection names.
-			 * 
-			 * @param security
-			 *            {@link WoofSecurityModel}.
 			 */
-			private void renameConnections(WoofSecurityModel security) {
+			private void renameConnections() {
 				String securityName = security.getHttpSecurityName();
 
-				// Rename exception connections
+				// Rename connections
 				for (WoofExceptionToWoofSecurityModel conn : security.getWoofExceptions()) {
 					conn.setHttpSecurityName(securityName);
 				}
-
-				// Rename section output connections
 				for (WoofSectionOutputToWoofSecurityModel conn : security.getWoofSectionOutputs()) {
 					conn.setHttpSecurityName(securityName);
 				}
-
-				// Rename template connections
 				for (WoofTemplateOutputToWoofSecurityModel conn : security.getWoofTemplateOutputs()) {
 					conn.setHttpSecurityName(securityName);
 				}
-
-				// Rename security connections
 				for (WoofSecurityOutputToWoofSecurityModel conn : security.getWoofSecurityOutputs()) {
 					conn.setHttpSecurityName(securityName);
 				}
-
-				// Rename the HTTP continuation connections
 				for (WoofHttpContinuationToWoofSecurityModel conn : security.getWoofHttpContinuations()) {
 					conn.setHttpSecurityName(securityName);
 				}
-
-				// Rename the HTTP input connections
 				for (WoofHttpInputToWoofSecurityModel conn : security.getWoofHttpInputs()) {
 					conn.setHttpSecurityName(securityName);
 				}
@@ -2163,6 +2493,13 @@ public class WoofChangesImpl implements WoofChanges {
 		// Create the resource
 		final WoofResourceModel resource = new WoofResourceModel(resourcePath);
 
+		// Ensure resource not already added
+		if (!isUniqueModelIdentifier(resourcePath, resource, this.model.getWoofResources(),
+				(model) -> model.getResourcePath())) {
+			return new NoChange<WoofResourceModel>(resource, "Add Resource",
+					"Resource already exists for '" + resourcePath + "'");
+		}
+
 		// Return change to add resource
 		return new AbstractChange<WoofResourceModel>(resource, "Add Resource") {
 			@Override
@@ -2207,6 +2544,13 @@ public class WoofChangesImpl implements WoofChanges {
 			return new NoChange<WoofResourceModel>(resource, changeDescription, "Must provide resource path");
 		}
 
+		// Ensure resource not already added
+		if (!isUniqueModelIdentifier(resourcePath, resource, this.model.getWoofResources(),
+				(model) -> model.getResourcePath())) {
+			return new NoChange<WoofResourceModel>(resource, changeDescription,
+					"Resource already exists for '" + resourcePath + "'");
+		}
+
 		// Track original values
 		final String originalResourcePath = resource.getResourcePath();
 
@@ -2216,12 +2560,41 @@ public class WoofChangesImpl implements WoofChanges {
 			public void apply() {
 				resource.setResourcePath(resourcePath);
 				WoofChangesImpl.this.sortResources();
+				this.renameConnections();
 			}
 
 			@Override
 			public void revert() {
 				resource.setResourcePath(originalResourcePath);
 				WoofChangesImpl.this.sortResources();
+				this.renameConnections();
+			}
+
+			/**
+			 * Renames the {@link WoofResourceModel} connection names.
+			 */
+			private void renameConnections() {
+				String resourcePath = resource.getResourcePath();
+
+				// Rename connections
+				for (WoofExceptionToWoofResourceModel conn : resource.getWoofExceptions()) {
+					conn.setResourcePath(resourcePath);
+				}
+				for (WoofSectionOutputToWoofResourceModel conn : resource.getWoofSectionOutputs()) {
+					conn.setResourcePath(resourcePath);
+				}
+				for (WoofTemplateOutputToWoofResourceModel conn : resource.getWoofTemplateOutputs()) {
+					conn.setResourcePath(resourcePath);
+				}
+				for (WoofSecurityOutputToWoofResourceModel conn : resource.getWoofSecurityOutputs()) {
+					conn.setResourcePath(resourcePath);
+				}
+				for (WoofHttpContinuationToWoofResourceModel conn : resource.getWoofHttpContinuations()) {
+					conn.setResourcePath(resourcePath);
+				}
+				for (WoofHttpInputToWoofResourceModel conn : resource.getWoofHttpInputs()) {
+					conn.setResourcePath(resourcePath);
+				}
 			}
 		};
 	};
@@ -2280,35 +2653,15 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofExceptionModel> addException(String exceptionClassName) {
 
-		// Determine if the exception has already been added
-		WoofExceptionModel existingModel = null;
-		for (WoofExceptionModel model : this.model.getWoofExceptions()) {
-			if (model.getClassName().equals(exceptionClassName)) {
-				existingModel = model;
-			}
-		}
-		if (existingModel != null) {
-			// Provide change to only move model back on revert
-			final WoofExceptionModel model = existingModel;
-			final int x = existingModel.getX();
-			final int y = existingModel.getY();
-			return new AbstractChange<WoofExceptionModel>(model, "Add Exception") {
-				@Override
-				public void apply() {
-					// No change as will be positioned
-				}
-
-				@Override
-				public void revert() {
-					// Move back to old position
-					model.setX(x);
-					model.setY(y);
-				}
-			};
-		}
-
 		// Create the exception
 		final WoofExceptionModel exception = new WoofExceptionModel(exceptionClassName);
+
+		// Ensure exception not already added
+		if (!isUniqueModelIdentifier(exceptionClassName, null, this.model.getWoofExceptions(),
+				(model) -> model.getClassName())) {
+			return new NoChange<WoofExceptionModel>(exception, "Add Exception",
+					"Exception already exists for '" + exceptionClassName + "'");
+		}
 
 		// Return change to add exception
 		return new AbstractChange<WoofExceptionModel>(exception, "Add Exception") {
@@ -2331,24 +2684,11 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofExceptionModel> refactorException(final WoofExceptionModel exception,
 			final String exceptionClassName) {
 
-		// Determine if the exception has already been handled
-		boolean isAlreadyHandled = false;
-		for (WoofExceptionModel model : this.model.getWoofExceptions()) {
-
-			// Ignore the exception being refactored
-			if (model == exception) {
-				continue; // ignore
-			}
-
-			// Determine if handling exception
-			if (model.getClassName().equals(exceptionClassName)) {
-				isAlreadyHandled = true;
-			}
-		}
-		if (isAlreadyHandled) {
-			// Exception already handled
+		// Ensure exception not already added
+		if (!isUniqueModelIdentifier(exceptionClassName, exception, this.model.getWoofExceptions(),
+				(model) -> model.getClassName())) {
 			return new NoChange<WoofExceptionModel>(exception, "Refactor Exception",
-					"Exception " + exceptionClassName + " is already handled");
+					"Exception already exists for '" + exceptionClassName + "'");
 		}
 
 		// Obtain the existing exception class name (for revert)

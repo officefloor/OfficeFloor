@@ -1,7 +1,50 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<resource path="/resource.png" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<resource path="/resource.png" />
+		</http-input>
+	</http-inputs>
+
+	<templates>
+		<template path="/template" location="example/Template.ofp">
+			<output name="OUTPUT">
+				<resource path="/resource.png" />
+			</output>
+		</template>
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<output name="OUTPUT">
+				<resource path="/resource.png" />
+			</output>
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<resource path="/resource.png" />
+			</output>
+		</security>
+	</securities>
+
 	<resources>
-		<resource name="change/path" path="change/path" />
+		<resource path="/resource.png" />
 	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<resource path="/resource.png" />
+		</exception>
+	</exceptions>
 
 </woof>

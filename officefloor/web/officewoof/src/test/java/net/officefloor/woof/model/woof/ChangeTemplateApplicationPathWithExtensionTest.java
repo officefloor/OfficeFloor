@@ -63,7 +63,7 @@ public class ChangeTemplateApplicationPathWithExtensionTest extends AbstractWoof
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template,
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(this.template,
 				TEMPLATE_APPLICATION_PATH, this.getWoofTemplateChangeContext());
 
 		// Validate the change
@@ -93,7 +93,7 @@ public class ChangeTemplateApplicationPathWithExtensionTest extends AbstractWoof
 		this.replayMockObjects();
 
 		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateApplicationPath(this.template,
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(this.template,
 				TEMPLATE_APPLICATION_PATH, this.getWoofTemplateChangeContext());
 
 		// Validate the change

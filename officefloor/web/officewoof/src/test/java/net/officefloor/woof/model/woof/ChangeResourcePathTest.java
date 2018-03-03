@@ -44,8 +44,7 @@ public class ChangeResourcePathTest extends AbstractWoofChangesTestCase {
 	public void testNotChangeResourcePath() {
 
 		// Change resource path to be same
-		Change<WoofResourceModel> change = this.operations.changeResourcePath(
-				this.resource, "path");
+		Change<WoofResourceModel> change = this.operations.changeResourcePath(this.resource, "/resource.html");
 
 		// Validate the change
 		this.assertChange(change, this.resource, "Change Resource Path", true);
@@ -54,11 +53,10 @@ public class ChangeResourcePathTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can change to unique resource path.
 	 */
-	public void testUniqueResourcePath() {
+	public void testChangeResourcePath() {
 
 		// Change template to unique path
-		Change<WoofResourceModel> change = this.operations.changeResourcePath(
-				this.resource, "unique/path");
+		Change<WoofResourceModel> change = this.operations.changeResourcePath(this.resource, "/resource.gif");
 
 		// Validate the change
 		this.assertChange(change, this.resource, "Change Resource Path", true);
@@ -70,11 +68,11 @@ public class ChangeResourcePathTest extends AbstractWoofChangesTestCase {
 	public void testNonUniqueResourcePath() {
 
 		// Change template to non-unique path
-		Change<WoofResourceModel> change = this.operations.changeResourcePath(
-				this.resource, "same/path");
+		Change<WoofResourceModel> change = this.operations.changeResourcePath(this.resource, "/resource.png");
 
 		// Validate the change
-		this.assertChange(change, this.resource, "Change Resource Path", true);
+		this.assertChange(change, this.resource, "Change Resource Path", false,
+				"Resource already exists for '/resource.png'");
 	}
 
 	/**
@@ -83,12 +81,10 @@ public class ChangeResourcePathTest extends AbstractWoofChangesTestCase {
 	public void testClearResourcePath() {
 
 		// Change to attempting to clear resource path
-		Change<WoofResourceModel> change = this.operations.changeResourcePath(
-				this.resource, null);
+		Change<WoofResourceModel> change = this.operations.changeResourcePath(this.resource, null);
 
 		// Validate the change
-		this.assertChange(change, this.resource, "Change Resource Path", true,
-				"Must provide resource path");
+		this.assertChange(change, this.resource, "Change Resource Path", false, "Must provide resource path");
 	}
 
 }

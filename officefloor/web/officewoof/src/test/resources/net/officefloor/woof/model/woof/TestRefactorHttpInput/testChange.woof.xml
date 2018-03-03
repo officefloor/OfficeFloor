@@ -1,0 +1,7 @@
+<woof>
+
+	<http-inputs>
+		<http-input path="/change" method="PUT" secure="true" />
+	</http-inputs>
+
+</woof>

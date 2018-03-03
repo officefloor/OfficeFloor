@@ -1,22 +1,22 @@
 <woof>
 
 	<http-continuations>
-		<http-continuation path="/path">
-			<template path="/template" />
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink">
+			<redirect path="/path" />
 		</http-continuation>
 	</http-continuations>
 
 	<http-inputs>
-		<http-input path="/path" method="POST">
-			<template path="/template" />
+		<http-input path="/input" method="POST">
+			<redirect path="/path" />
 		</http-input>
 	</http-inputs>
 
 	<templates>
-		<template path="/template" location="example/Template.ofp" />
-		<template path="/templateLink" location="example/TemplateLink.ofp">
+		<template path="/template" location="example/Template.ofp">
 			<output name="OUTPUT">
-				<template path="/template" />
+				<redirect path="/path" />
 			</output>
 		</template>
 	</templates>
@@ -25,7 +25,7 @@
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION">
 			<output name="OUTPUT">
-				<template path="/template" />
+				<redirect path="/path" />
 			</output>
 		</section>
 	</sections>
@@ -33,14 +33,14 @@
 	<securities>
 		<security name="SECURITY" source="net.example.HttpSecuritySource">
 			<output name="OUTPUT">
-				<template path="/template" />
+				<redirect path="/path" />
 			</output>
 		</security>
 	</securities>
 
 	<exceptions>
 		<exception class="java.io.IOException">
-			<template path="/template" />
+			<redirect path="/path" />
 		</exception>
 	</exceptions>
 

@@ -2,21 +2,20 @@
 
 	<http-continuations>
 		<http-continuation path="/path">
-			<template path="/template" />
+			<resource path="/resource.gif" />
 		</http-continuation>
 	</http-continuations>
 
 	<http-inputs>
 		<http-input path="/path" method="POST">
-			<template path="/template" />
+			<resource path="/resource.gif" />
 		</http-input>
 	</http-inputs>
 
 	<templates>
-		<template path="/template" location="example/Template.ofp" />
-		<template path="/templateLink" location="example/TemplateLink.ofp">
+		<template path="/template" location="example/Template.ofp">
 			<output name="OUTPUT">
-				<template path="/template" />
+				<resource path="/resource.gif" />
 			</output>
 		</template>
 	</templates>
@@ -25,7 +24,7 @@
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION">
 			<output name="OUTPUT">
-				<template path="/template" />
+				<resource path="/resource.gif" />
 			</output>
 		</section>
 	</sections>
@@ -33,14 +32,19 @@
 	<securities>
 		<security name="SECURITY" source="net.example.HttpSecuritySource">
 			<output name="OUTPUT">
-				<template path="/template" />
+				<resource path="/resource.gif" />
 			</output>
 		</security>
 	</securities>
 
+	<resources>
+		<resource path="/resource.gif" />
+		<resource path="/resource.png" />
+	</resources>
+
 	<exceptions>
 		<exception class="java.io.IOException">
-			<template path="/template" />
+			<resource path="/resource.gif" />
 		</exception>
 	</exceptions>
 
