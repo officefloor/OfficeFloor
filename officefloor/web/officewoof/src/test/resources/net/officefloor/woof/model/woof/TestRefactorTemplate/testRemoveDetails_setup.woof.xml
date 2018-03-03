@@ -1,48 +1,86 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<template path="/template" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<template path="/template" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template name="template" uri="template" path="example/Template.html"
-			class="net.example.LogicClass" content-type="text/html; charset=UTF-8"
-			secure="true" extends="TEMPLATE_PARENT">
-			<output name="OUTPUT_1">
-				<input section="SECTION" input="INPUT" />
+		<template path="/parent" location="example/Parent.ofp">
+			<output name="OUTPUT_INHERIT" />
+		</template>
+		<template path="/template" secure="true" location="example/Remove.ofp"
+			class="net.example.AddClass" content-type="text/html; charset=UTF-8"
+			charset="UTF-8" redirect-values-function="redirect"
+			link-separator-character="_">
+			<extends template="/parent" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
+				<section name="SECTION" input="INPUT" />
 			</output>
-			<output name="OUTPUT_2">
-				<template name="TEMPLATE_LINK" />
+			<output name="OUTPUT_B" argument-type="java.lang.String">
+				<template path="/templateLink" />
 			</output>
-			<output name="OUTPUT_3">
-				<resource name="RESOURCE" />
+			<output name="OUTPUT_C">
+				<security name="SECURITY" />
 			</output>
-			<link name="LINK_1" secure="true" />
-			<link name="LINK_2" secure="false" />
-			<redirect method="OTHER" />
-			<redirect method="POST" />
-			<redirect method="PUT" />
+			<output name="OUTPUT_D">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_E">
+				<redirect path="/path" />
+			</output>
 			<extension
-				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource">
+				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
 				<property name="name" value="value" />
 			</extension>
 			<extension
-				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
 			<extension
-				class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
+				class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
 				<property name="ONE" value="A" />
 				<property name="TWO" value="B" />
 			</extension>
 		</template>
-		<template name="TEMPLATE_LINK" path="example/Link.html" />
-		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
+		<template path="/templateLink" location="example/Link.ofp">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</template>
 	</templates>
 
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION">
 			<input name="INPUT" />
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
 		</section>
 	</sections>
 
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</security>
+	</securities>
+
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<template path="/template" />
+		</exception>
+	</exceptions>
 
 </woof>

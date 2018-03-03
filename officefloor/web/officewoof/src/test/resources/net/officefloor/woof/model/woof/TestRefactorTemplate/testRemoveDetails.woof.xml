@@ -1,20 +1,57 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<template path="/template" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<template path="/template" />
+		</http-input>
+	</http-inputs>
+
 	<templates>
-		<template name="remove" uri="remove" path="example/Remove.html" />
-		<template name="TEMPLATE_LINK" path="example/Link.html" />
-		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
+		<template path="/parent" location="example/Parent.ofp">
+			<output name="OUTPUT_INHERIT" />
+		</template>
+		<template path="/template" location="example/Remove.ofp">
+			<extends template="/parent" />
+		</template>
+		<template path="/templateLink" location="example/Link.ofp">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</template>
 	</templates>
 
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION">
 			<input name="INPUT" />
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
 		</section>
 	</sections>
 
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</security>
+	</securities>
+
 	<resources>
-		<resource name="RESOURCE" path="Example.html" />
+		<resource path="/resource.html" />
 	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<template path="/template" />
+		</exception>
+	</exceptions>
 
 </woof>

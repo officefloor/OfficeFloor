@@ -1,29 +1,39 @@
 <woof>
 
 	<templates>
-		<template name="add" uri="add" path="example/Add.html" class="net.example.AddClass"
-			content-type="text/html; charset=UTF-8" secure="true"
-			continue-rendering="true" extends="TEMPLATE_PARENT">
+		<template path="/grand/parent" location="example/GrandParent.ofp">
+			<output name="OUTPUT_4" />
+			<output name="OUTPUT_GRAND_INHERIT" />
+		</template>
+		<template path="/parent" location="example/Parent.ofp">
+			<extends template="/grand/parent" />
+			<output name="OUTPUT_INHERIT" />
+		</template>
+		<template path="/template" secure="true" location="example/Add.html"
+			class="net.example.AddClass" content-type="text/html; charset=UTF-8"
+			charset="UTF-8" redirect-values-function="redirect"
+			link-separator-character="_">
+			<extends template="/parent" />
 			<output name="OUTPUT_1" argument-type="java.lang.Integer" />
 			<output name="OUTPUT_2" argument-type="java.lang.String" />
 			<output name="OUTPUT_3" />
+			<output name="OUTPUT_4" />
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
-			<redirect method="OTHER" />
-			<redirect method="POST" />
+			<render method="OTHER" />
+			<render method="POST" />
 			<extension
-				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource">
+				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
 				<property name="name" value="value" />
 			</extension>
 			<extension
-				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
 			<extension
-				class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
+				class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
 				<property name="ONE" value="A" />
 				<property name="TWO" value="B" />
 			</extension>
 		</template>
-		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
 	</templates>
 
 </woof>

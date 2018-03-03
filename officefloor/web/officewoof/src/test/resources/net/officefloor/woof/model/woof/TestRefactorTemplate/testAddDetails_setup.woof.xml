@@ -1,8 +1,17 @@
 <woof>
 
 	<templates>
-		<template name="template" path="example/Template.html" />
-		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
+		<template path="/grand/parent" location="example/GrandParent.ofp">
+			<output name="OUTPUT_4" />
+			<output name="OUTPUT_GRAND_INHERIT" />
+		</template>
+		<template path="/parent" location="example/Parent.ofp">
+			<extends template="/grand/parent" />
+			<output name="OUTPUT_INHERIT" />
+		</template>
+		<template path="/template" location="example/Template.html">
+			<extends template="/parent" />
+		</template>
 	</templates>
 
 </woof>

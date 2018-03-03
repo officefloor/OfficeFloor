@@ -1136,11 +1136,13 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the existing details
 		final String existingApplicationPath = template.getApplicationPath();
+		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
 		final String existingTemplateLocation = template.getTemplateLocation();
 		final String existingTemplateClassName = template.getTemplateClassName();
 		final String existingContentType = template.getTemplateContentType();
 		final String existingCharsetName = template.getTemplateCharset();
-		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
+		final String existingRedirectValuesFunction = template.getRedirectValuesFunction();
+		final String existingLinkSeparatorCharacter = template.getLinkSeparatorCharacter();
 		final List<WoofTemplateLinkModel> existingTemplateLinks = new ArrayList<WoofTemplateLinkModel>(
 				template.getLinks());
 		final List<WoofTemplateRenderHttpMethodModel> existingTemplateRenderHttpMethods = new ArrayList<>(
@@ -1153,11 +1155,13 @@ public class WoofChangesImpl implements WoofChanges {
 			public void apply() {
 				// Refactor details
 				template.setApplicationPath(applicationPath);
+				template.setIsTemplateSecure(isTemplateSecure);
 				template.setTemplateLocation(templateLocation);
 				template.setTemplateClassName(templateLogicClass);
 				template.setTemplateContentType(contentType);
 				template.setTemplateCharset(charsetName);
-				template.setIsTemplateSecure(isTemplateSecure);
+				template.setRedirectValuesFunction(redirectValuesFunction);
+				template.setLinkSeparatorCharacter(linkSeparatorCharacter);
 
 				// Refactor the links
 				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(template.getLinks())) {
@@ -1182,17 +1186,23 @@ public class WoofChangesImpl implements WoofChanges {
 						template.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel(renderHttpMethod));
 					}
 				}
+
+				// Ensure reflect application path change
+				WoofChangesImpl.this.sortTemplates();
+				WoofChangesImpl.renameConnections(template);
 			}
 
 			@Override
 			public void revert() {
 				// Revert attributes
 				template.setApplicationPath(existingApplicationPath);
+				template.setIsTemplateSecure(existingIsTemplateSecure);
 				template.setTemplateLocation(existingTemplateLocation);
 				template.setTemplateClassName(existingTemplateClassName);
 				template.setTemplateContentType(existingContentType);
 				template.setTemplateCharset(existingCharsetName);
-				template.setIsTemplateSecure(existingIsTemplateSecure);
+				template.setRedirectValuesFunction(existingRedirectValuesFunction);
+				template.setLinkSeparatorCharacter(existingLinkSeparatorCharacter);
 
 				// Revert the links
 				for (WoofTemplateLinkModel link : new ArrayList<>(template.getLinks())) {
@@ -1210,6 +1220,10 @@ public class WoofChangesImpl implements WoofChanges {
 				for (WoofTemplateRenderHttpMethodModel renderHttpMethod : existingTemplateRenderHttpMethods) {
 					template.addRenderHttpMethod(renderHttpMethod);
 				}
+
+				// Ensure reflect application path change
+				WoofChangesImpl.this.sortTemplates();
+				WoofChangesImpl.renameConnections(template);
 			}
 		};
 		changes.add(attributeChange);
@@ -1309,6 +1323,8 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(unmappedOutputModel.getWoofResource(), list);
 					removeConnection(unmappedOutputModel.getWoofSectionInput(), list);
 					removeConnection(unmappedOutputModel.getWoofTemplate(), list);
+					removeConnection(unmappedOutputModel.getWoofSecurity(), list);
+					removeConnection(unmappedOutputModel.getWoofHttpContinuation(), list);
 					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the template output
