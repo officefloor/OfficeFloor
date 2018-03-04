@@ -7,9 +7,9 @@
 		<artifactId>web</artifactId>
 		<version>3.0.0</version>
 	</parent>
-	<artifactId>officewoof</artifactId>
-	<name>WoOF Plug-in</name>
-	<description>OfficeFloor plug-in for WoOF (Web on OfficeFloor)</description>
+	<artifactId>officeweb_configuration</artifactId>
+	<name>Web configuration</name>
+	<description>Configuration for WoOF (Web on OfficeFloor)</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

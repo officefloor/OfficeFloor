@@ -166,16 +166,6 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_cookie</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_session</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_security</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -191,12 +181,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_application</artifactId>
+				<artifactId>officeweb_configuration</artifactId>
 				<version>${project.version}</version>
-			</dependency>
+			</dependency>			
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officewoof</artifactId>
+				<artifactId>woof</artifactId>
 				<version>${project.version}</version>
 			</dependency>			
 			<!-- Plugins -->
