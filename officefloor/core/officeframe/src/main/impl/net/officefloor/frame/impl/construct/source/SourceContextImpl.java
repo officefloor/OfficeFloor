@@ -238,7 +238,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
 				throws LoadServiceError {
-			return this.loadOptionalServices(serviceFactoryType);
+			return this.delegate.loadOptionalServices(serviceFactoryType);
 		}
 	}
 

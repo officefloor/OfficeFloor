@@ -18,9 +18,7 @@
 package net.officefloor.woof;
 
 import java.io.IOException;
-import java.util.logging.LogRecord;
 
-import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
@@ -40,45 +38,10 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 	 */
 	private MockWoofServer server;
 
-	/**
-	 * {@link LoggerAssertion} for the {@link WoofLoader}.
-	 */
-	private LoggerAssertion loaderLoggerAssertion;
-
-	/**
-	 * {@link LoggerAssertion} for the {@link WoofLoaderExtensionService}.
-	 */
-	private LoggerAssertion sourceLoggerAssertion;
-
-	@Override
-	protected void setUp() throws Exception {
-
-		// Provide chain servicer extension property
-		System.setProperty("CHAIN.TEST", "VALUE");
-
-		// Create the logger assertions
-		this.loaderLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofLoaderImpl.class.getName());
-		this.sourceLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofLoaderExtensionService.class.getName());
-
-		// Clear implicit template extension
-		MockImplicitWoofTemplateExtensionSourceService.reset();
-	}
-
 	@Override
 	protected void tearDown() throws Exception {
-
-		// Clear property
-		System.clearProperty("CHAIN.TEST");
-
-		// Shutdown
-		try {
-			if (this.server != null) {
-				this.server.close();
-			}
-		} finally {
-			// Disconnect from loggers
-			this.sourceLoggerAssertion.disconnectFromLogger();
-			this.loaderLoggerAssertion.disconnectFromLogger();
+		if (this.server != null) {
+			this.server.close();
 		}
 	}
 
@@ -90,29 +53,21 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		// Start WoOF application for testing
 		this.server = MockWoofServer.open();
 
-		// Validate log not loading unknown extension
-		LogRecord[] records = this.sourceLoggerAssertion.getLogRecords();
-		StringBuilder messages = new StringBuilder();
-		for (LogRecord record : records) {
-			messages.append("\t" + record.getMessage() + "\n");
-		}
-		assertEquals("Incorrect number of records:\n" + messages.toString(), 1, records.length);
-		LogRecord record = records[0];
-		assertEquals("Incorrect unknown extension log record", WoofLoaderExtensionService.class.getName()
-				+ ": Provider woof.application.extension.not.available.Service not found", record.getMessage());
-
 		// Ensure WoOF configuration loaded
-		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/path"));
-		response.assertResponse(200, "TEST");
-		
-		// Ensure Objects loaded
-		
-		
-		// Ensure Resources loaded
-		
-		
-		// Ensure Teams loaded
+		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/template"));
+		response.assertResponse(200, "TEMPLATE");
 
+		// Ensure Objects loaded
+		response = this.server.send(MockWoofServer.mockRequest("/objects"));
+		response.assertResponse(200, "OBJECT");
+
+		// Ensure Resources loaded
+		response = this.server.send(MockWoofServer.mockRequest("/resource"));
+		response.assertResponse(200, "RESOURCE");
+
+		// Ensure Teams loaded
+		response = this.server.send(MockWoofServer.mockRequest("/teams"));
+		response.assertResponse(200, "TEAMS");
 	}
 
 	/**

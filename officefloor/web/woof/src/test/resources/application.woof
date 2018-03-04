@@ -1,0 +1,7 @@
+<woof>
+
+	<templates>
+		<template path="/template" location="template.ofp" />
+	</templates>
+
+</woof>

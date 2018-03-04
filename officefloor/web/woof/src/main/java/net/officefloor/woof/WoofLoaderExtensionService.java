@@ -161,7 +161,8 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		woofLoader.loadWoofConfiguration(woofContext);
 
 		// Load the optional objects configuration to the application
-		final ConfigurationItem objectsConfiguration = context.getConfigurationItem("application.objects", null);
+		final ConfigurationItem objectsConfiguration = context.getOptionalConfigurationItem("application.objects",
+				null);
 		if (objectsConfiguration != null) {
 
 			// Load the objects configuration
@@ -187,7 +188,8 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		}
 
 		// Load the optional resources configuration to the application
-		final ConfigurationItem resourcesConfiguration = context.getConfigurationItem("application.resources", null);
+		final ConfigurationItem resourcesConfiguration = context.getOptionalConfigurationItem("application.resources",
+				null);
 		if (resourcesConfiguration != null) {
 
 			// Load the resources configuration
