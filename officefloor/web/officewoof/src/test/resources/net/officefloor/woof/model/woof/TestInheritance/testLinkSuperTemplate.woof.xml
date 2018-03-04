@@ -39,6 +39,7 @@
 			<output name="OUTPUT_PARENT_F" />
 		</template>
 		<template path="/template" location="example/Template.ofp">
+			<extends template="/parent" />
 			<output name="OUTPUT_GRAND_PARENT_A">
 				<template path="/parent" />
 			</output>
@@ -54,7 +55,6 @@
 			<output name="OUTPUT_GRAND_PARENT_E">
 				<redirect path="/path" />
 			</output>
-			<output name="OUTPUT_GRAND_PARENT_F" />
 			<output name="OUTPUT_GRAND_PARENT_G" />
 			<output name="OUTPUT_PARENT_A">
 				<template path="/parent" />
@@ -71,7 +71,6 @@
 			<output name="OUTPUT_PARENT_E">
 				<redirect path="/path" />
 			</output>
-			<output name="OUTPUT_PARENT_F" />
 			<output name="OUTPUT_PARENT_G" />
 		</template>
 		<template path="/templateLink" location="example/TemplateLink.ofp" />

@@ -20,7 +20,6 @@
 			<output name="OUTPUT_PARENT_F" />
 		</template>
 		<template path="/parent" location="example/Parent.ofp">
-			<extends template="/grandparent" />
 			<output name="OUTPUT_PARENT_A">
 				<template path="/parent" />
 			</output>

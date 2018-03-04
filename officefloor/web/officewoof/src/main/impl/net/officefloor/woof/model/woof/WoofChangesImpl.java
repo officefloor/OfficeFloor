@@ -20,6 +20,7 @@ package net.officefloor.woof.model.woof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -1101,6 +1102,107 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Set<String> getInheritableOutputNames(WoofTemplateModel childTemplate) {
+		Set<String> outputNames = new HashSet<>();
+
+		// Load the super templates
+		WoofTemplateToSuperWoofTemplateModel superLink = childTemplate.getSuperWoofTemplate();
+		while (superLink != null) {
+			WoofTemplateModel superTemplate = superLink.getSuperWoofTemplate();
+			if (superTemplate != null) {
+
+				// Load the template outputs
+				for (WoofTemplateOutputModel output : superTemplate.getOutputs()) {
+					outputNames.add(output.getWoofTemplateOutputName());
+				}
+			}
+
+			// Setup for next iteration
+			superLink = (superTemplate == null) ? null : superTemplate.getSuperWoofTemplate();
+		}
+
+		// Return the output names
+		return outputNames;
+	}
+
+	@Override
+	public Change<WoofTemplateToSuperWoofTemplateModel> linkTemplateToSuperTemplate(WoofTemplateModel childTemplate,
+			WoofTemplateModel superTemplate) {
+
+		// Create the connection
+		WoofTemplateToSuperWoofTemplateModel conn = new WoofTemplateToSuperWoofTemplateModel(
+				superTemplate.getApplicationPath(), childTemplate, superTemplate);
+
+		// Capture the existing connection
+		final WoofTemplateToSuperWoofTemplateModel existingConn = childTemplate.getSuperWoofTemplate();
+
+		// Return change to link super template
+		return new AbstractChange<WoofTemplateToSuperWoofTemplateModel>(conn, "Link Template to Super Template") {
+
+			/**
+			 * Inherited {@link WoofTemplateOutputModel} instances.
+			 */
+			private List<WoofTemplateOutputModel> inheritedOutputs;
+
+			@Override
+			public void apply() {
+
+				// Connect template to super template
+				if (existingConn != null) {
+					existingConn.remove();
+				}
+				conn.connect();
+
+				// Obtain the inheritable output names for new super template
+				final Set<String> inheritableOutputNames = WoofChangesImpl.this
+						.getInheritableOutputNames(childTemplate);
+
+				// Load the list of inheritable outputs
+				this.inheritedOutputs = new LinkedList<>();
+				for (WoofTemplateOutputModel output : childTemplate.getOutputs()) {
+					if (inheritableOutputNames.contains(output.getWoofTemplateOutputName())) {
+
+						// Potential inherited link (if not already connected)
+						boolean isNotLinked = (output.getWoofHttpContinuation() == null)
+								&& (output.getWoofResource() == null) && (output.getWoofSectionInput() == null)
+								&& (output.getWoofSecurity() == null) && (output.getWoofTemplate() == null);
+						if (isNotLinked) {
+							this.inheritedOutputs.add(output);
+						}
+					}
+				}
+
+				// Clear the inherited outputs
+				for (WoofTemplateOutputModel output : this.inheritedOutputs) {
+					childTemplate.removeOutput(output);
+				}
+			}
+
+			@Override
+			public void revert() {
+
+				// Add the template outputs back in
+				for (WoofTemplateOutputModel output : this.inheritedOutputs) {
+					childTemplate.addOutput(output);
+				}
+				WoofChangesImpl.sortTemplateConfiguration(childTemplate);
+
+				// Connect previous possible super template
+				conn.remove();
+				if (existingConn != null) {
+					existingConn.connect();
+				}
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofTemplateToSuperWoofTemplateModel> removeTemplateToSuperTemplate(
+			WoofTemplateToSuperWoofTemplateModel link) {
+		return new RemoveLinkChange<WoofTemplateToSuperWoofTemplateModel>(link, "Remove Template to Super Template");
+	}
+
+	@Override
 	public Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template, String applicationPath,
 			String templateLocation, String templateLogicClass, SectionType sectionType, String redirectValuesFunction,
 			Set<String> inheritedTemplateOutputNames, String contentType, String charsetName, boolean isTemplateSecure,
@@ -1409,6 +1511,9 @@ public class WoofChangesImpl implements WoofChanges {
 	private static void renameConnections(WoofTemplateModel template) {
 		String applicationPath = template.getApplicationPath();
 
+		for (WoofTemplateToSuperWoofTemplateModel conn : template.getChildWoofTemplates()) {
+			conn.setSuperWoofTemplateApplicationPath(template.getApplicationPath());
+		}
 		for (WoofSectionOutputToWoofTemplateModel conn : template.getWoofSectionOutputs()) {
 			conn.setApplicationPath(applicationPath);
 		}
@@ -3117,20 +3222,6 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpInputToWoofResourceModel> removeHttpInputToResource(WoofHttpInputToWoofResourceModel link) {
 		return new RemoveLinkChange<>(link, "Remove HTTP Input to Resource");
-	}
-
-	@Override
-	public Change<WoofTemplateToSuperWoofTemplateModel> linkTemplateToSuperTemplate(WoofTemplateModel childTemplate,
-			WoofTemplateModel superTemplate) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Change<WoofTemplateToSuperWoofTemplateModel> removeTemplateToSuperTemplate(
-			WoofTemplateToSuperWoofTemplateModel link) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

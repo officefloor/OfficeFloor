@@ -1,13 +1,94 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path" />
+	</http-continuations>
+
 	<templates>
-		<template path="/ancestor" template="example/GrandParent.ofp">
-			<output name="OUTPUT_GRAND_PARENT" />
+		<template path="/change" location="example/GrandParent.ofp">
+			<output name="OUTPUT_GRAND_PARENT_A" />
+			<output name="OUTPUT_GRAND_PARENT_B" />
+			<output name="OUTPUT_GRAND_PARENT_C" />
+			<output name="OUTPUT_GRAND_PARENT_D" />
+			<output name="OUTPUT_GRAND_PARENT_E" />
+			<output name="OUTPUT_GRAND_PARENT_F" />
+			<output name="OUTPUT_PARENT_A" />
+			<output name="OUTPUT_PARENT_B" />
+			<output name="OUTPUT_PARENT_C" />
+			<output name="OUTPUT_PARENT_D" />
+			<output name="OUTPUT_PARENT_E" />
+			<output name="OUTPUT_PARENT_F" />
 		</template>
 		<template path="/parent" location="example/Parent.ofp">
-			<extends template="/ancestor" />
-			<output name="OUTPUT_PARENT" />
+			<extends template="/change" />
+			<output name="OUTPUT_PARENT_A">
+				<template path="/parent" />
+			</output>
+			<output name="OUTPUT_PARENT_B">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_PARENT_C">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_PARENT_D">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_PARENT_E">
+				<redirect path="/path" />
+			</output>
+			<output name="OUTPUT_PARENT_F" />
 		</template>
+		<template path="/template" location="example/Template.ofp">
+			<output name="OUTPUT_GRAND_PARENT_A">
+				<template path="/parent" />
+			</output>
+			<output name="OUTPUT_GRAND_PARENT_B">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_GRAND_PARENT_C">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_GRAND_PARENT_D">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_GRAND_PARENT_E">
+				<redirect path="/path" />
+			</output>
+			<output name="OUTPUT_GRAND_PARENT_F" />
+			<output name="OUTPUT_GRAND_PARENT_G" />
+			<output name="OUTPUT_PARENT_A">
+				<template path="/parent" />
+			</output>
+			<output name="OUTPUT_PARENT_B">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_PARENT_C">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_PARENT_D">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_PARENT_E">
+				<redirect path="/path" />
+			</output>
+			<output name="OUTPUT_PARENT_F" />
+			<output name="OUTPUT_PARENT_G" />
+		</template>
+		<template path="/templateLink" location="example/TemplateLink.ofp" />
 	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.exampleSection">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource" />
+	</securities>
+
+	<resources>
+		<resource path="/resource.html" />
+	</resources>
 
 </woof>

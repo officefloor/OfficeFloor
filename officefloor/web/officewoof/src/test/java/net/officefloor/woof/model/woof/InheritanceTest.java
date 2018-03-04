@@ -17,10 +17,9 @@
  */
 package net.officefloor.woof.model.woof;
 
-import java.io.IOException;
+import java.util.Set;
 
-import javax.sql.DataSource;
-
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 
 /**
@@ -31,60 +30,148 @@ import net.officefloor.model.change.Change;
 public class InheritanceTest extends AbstractWoofChangesTestCase {
 
 	/**
-	 * Ensure able to add {@link WoofTemplateModel} with super
-	 * {@link WoofTemplateModel}.
+	 * Grand parent.
 	 */
-	public void testAddTemplateWithSuperTemplate() {
+	private WoofTemplateModel grandParent;
 
-		// Create the section type
-		this.constructSectionType(new SectionTypeConstructor() {
-			@Override
-			public void construct(SectionTypeContext context) {
-				context.addSectionInput("renderTemplate", null);
-				context.addSectionOutput("OUTPUT_GRAND_PARENT", Integer.class, false);
-				context.addSectionOutput("OUTPUT_PARENT", null, false);
-				context.addSectionOutput("OUTPUT_CHILD", null, false);
-				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
-				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
-			}
-		});
+	/**
+	 * Parent.
+	 */
+	private WoofTemplateModel parent;
 
-		// Obtain the orphan template
-		WoofTemplateModel orphanTemplate = this.model.getWoofTemplates().get(2);
-		assertEquals("Incorrect orphan template", "ORPHAN", orphanTemplate.getApplicationPath());
+	/**
+	 * Template.
+	 */
+	private WoofTemplateModel template;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Obtain the grand parent
+		this.grandParent = this.model.getWoofTemplates().get(0);
+		assertEquals("Incorrect parent template", "/grandparent", this.grandParent.getApplicationPath());
 
 		// Obtain the parent
-		WoofTemplateModel superTemplate = this.model.getWoofTemplates().get(1);
-		assertEquals("Incorrect super template", "PARENT", superTemplate.getApplicationPath());
+		this.parent = this.model.getWoofTemplates().get(1);
+		assertEquals("Incorrect parent template", "/parent", this.parent.getApplicationPath());
 
-		// Link super template
-		Change<WoofTemplateToSuperWoofTemplateModel> change = this.operations
-				.linkTemplateToSuperTemplate(orphanTemplate, superTemplate);
+		// Obtain the template
+		this.template = this.model.getWoofTemplates().get(2);
+		assertEquals("Incorrect orphan template", "/template", this.template.getApplicationPath());
 
-		// Validate change
-		this.assertChange(change, null, "Add Template", true);
 	}
 
 	/**
-	 * Ensure able to change super {@link WoofTemplateModel} URI causing a name
-	 * change and therefore child {@link WoofTemplateModel} to updates its
-	 * reference to parent {@link WoofTemplateModel}.
+	 * Ensure appropriate listing of inheritable {@link WoofTemplateOutputModel}
+	 * names.
+	 */
+	public void testInheritableOutputs() {
+		assertOutputs(this.operations.getInheritableOutputNames(this.grandParent));
+		assertOutputs(this.operations.getInheritableOutputNames(this.parent), "OUTPUT_GRAND_PARENT_A",
+				"OUTPUT_GRAND_PARENT_B", "OUTPUT_GRAND_PARENT_C", "OUTPUT_GRAND_PARENT_D", "OUTPUT_GRAND_PARENT_E",
+				"OUTPUT_GRAND_PARENT_F", "OUTPUT_PARENT_A", "OUTPUT_PARENT_B", "OUTPUT_PARENT_C", "OUTPUT_PARENT_D",
+				"OUTPUT_PARENT_E", "OUTPUT_PARENT_F");
+		assertOutputs(this.operations.getInheritableOutputNames(this.template));
+	}
+
+	/**
+	 * Asserts the inheritable output names
+	 * 
+	 * @param actual
+	 *            Actual names.
+	 * @param expected
+	 *            Expected names.
+	 */
+	private static void assertOutputs(Set<String> actual, String... expected) {
+		assertEquals("Inocrrect number of outputs", expected.length, actual.size());
+		for (String expectedName : expected) {
+			assertTrue("Should contain output " + expectedName, actual.contains(expectedName));
+		}
+	}
+
+	/**
+	 * Ensure able to link {@link WoofTemplateModel} with super
+	 * {@link WoofTemplateModel}.
+	 */
+	public void testLinkSuperTemplate() {
+
+		// Link super template
+		Change<WoofTemplateToSuperWoofTemplateModel> change = this.operations.linkTemplateToSuperTemplate(this.template,
+				this.parent);
+
+		// Validate change
+		this.assertChange(change, null, "Link Template to Super Template", true);
+	}
+
+	/**
+	 * Ensure able to link {@link WoofTemplateToSuperWoofTemplateModel}.
+	 */
+	public void testRemoveSuperTemplate() {
+
+		// Link super template
+		Change<WoofTemplateToSuperWoofTemplateModel> change = this.operations
+				.removeTemplateToSuperTemplate(this.parent.getSuperWoofTemplate());
+
+		// Validate change
+		this.assertChange(change, null, "Remove Template to Super Template", true);
+	}
+
+	/**
+	 * Ensure able to change super {@link WoofTemplateModel}.
+	 */
+	public void testChangeSuperTemplate() {
+
+		// Link super template
+		Change<WoofTemplateToSuperWoofTemplateModel> change = this.operations.linkTemplateToSuperTemplate(this.parent,
+				this.template);
+
+		// Validate change
+		this.assertChange(change, null, "Link Template to Super Template", true);
+	}
+
+	/**
+	 * Ensure able to change super {@link WoofTemplateModel} application path
+	 * causing a name change and therefore child {@link WoofTemplateModel} to
+	 * updates its reference to parent {@link WoofTemplateModel}.
 	 */
 	public void testChangeSuperTemplateApplicationPath() {
-
-		// Obtain the grand parent template
-		WoofTemplateModel grandParent = this.model.getWoofTemplates().get(0);
-		assertEquals("Incorrect grand parent template", "/grandparent", grandParent.getApplicationPath());
 
 		// Test
 		this.replayMockObjects();
 
-		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(grandParent, "/ancestor",
+		// Change template application path
+		Change<WoofTemplateModel> change = this.operations.changeApplicationPath(this.grandParent, "/change",
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change
-		this.assertChange(change, grandParent, "Change Template Application Path", true);
+		this.assertChange(change, this.grandParent, "Change Template Application Path", true);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to change super {@link WoofTemplateModel} application path
+	 * causing a name change and therefore child {@link WoofTemplateModel} to
+	 * updates its reference to parent {@link WoofTemplateModel}.
+	 */
+	public void testRefactorSuperTemplateApplicationPath() {
+
+		// Create the section type
+		SectionType section = this.constructSectionType((context) -> {
+		});
+
+		// Test
+		this.replayMockObjects();
+
+		// Change template application path
+		Change<WoofTemplateModel> change = this.operations.refactorTemplate(this.grandParent, "/change",
+				"example/Change.ofp", null, section, null, null, null, null, false, null, null, null, null, null,
+				this.getWoofTemplateChangeContext());
+
+		// Validate the change
+		this.assertChange(change, this.grandParent, "Refactor Template", true);
 
 		// Verify
 		this.verifyMockObjects();

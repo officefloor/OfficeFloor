@@ -179,6 +179,19 @@ public interface WoofChanges {
 			String[] renderHttpMethods, WoofTemplateExtension[] extensions, WoofTemplateChangeContext context);
 
 	/**
+	 * <p>
+	 * Obtains the inheritable {@link WoofTemplateOutputModel} names for the
+	 * {@link WoofTemplateModel}.
+	 * <p>
+	 * Note that this searches the super {@link WoofTemplateModel} of the input
+	 * {@link WoofTemplateModel}. The {@link WoofTemplateOutputModel} instances
+	 * from the input {@link WoofTemplateModel} are not included.
+	 * 
+	 * @return Inheritable {@link WoofTemplateOutputModel} names.
+	 */
+	Set<String> getInheritableOutputNames(WoofTemplateModel childTemplate);
+
+	/**
 	 * Refactors the {@link WoofTemplateModel}.
 	 * 
 	 * @param template

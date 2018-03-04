@@ -5,22 +5,9 @@
 	</http-continuations>
 
 	<templates>
-		<template path="/grandparent" location="example/GrandParent.ofp">
-			<output name="OUTPUT_GRAND_PARENT_A" />
-			<output name="OUTPUT_GRAND_PARENT_B" />
-			<output name="OUTPUT_GRAND_PARENT_C" />
-			<output name="OUTPUT_GRAND_PARENT_D" />
-			<output name="OUTPUT_GRAND_PARENT_E" />
-			<output name="OUTPUT_GRAND_PARENT_F" />
-			<output name="OUTPUT_PARENT_A" />
-			<output name="OUTPUT_PARENT_B" />
-			<output name="OUTPUT_PARENT_C" />
-			<output name="OUTPUT_PARENT_D" />
-			<output name="OUTPUT_PARENT_E" />
-			<output name="OUTPUT_PARENT_F" />
-		</template>
+		<template path="/change" location="example/Change.ofp" />
 		<template path="/parent" location="example/Parent.ofp">
-			<extends template="/grandparent" />
+			<extends template="/change" />
 			<output name="OUTPUT_PARENT_A">
 				<template path="/parent" />
 			</output>
