@@ -30,10 +30,10 @@ public interface WoofLoader {
 	 * Loads the WoOF configuration.
 	 * 
 	 * @param context
-	 *            {@link WoofLoaderContext}.
+	 *            {@link WoofContext}.
 	 * @throws Exception
 	 *             If fails to load the configuration.
 	 */
-	void loadWoofConfiguration(WoofLoaderContext context) throws Exception;
+	void loadWoofConfiguration(WoofContext context) throws Exception;
 
 }

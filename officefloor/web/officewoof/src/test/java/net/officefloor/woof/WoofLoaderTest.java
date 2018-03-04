@@ -369,7 +369,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 *            Location of the {@link ConfigurationItem}.
 	 */
 	private void loadConfiguration(String configurationFileLocation) throws Exception {
-		this.loader.loadWoofConfiguration(new WoofLoaderContext() {
+		this.loader.loadWoofConfiguration(new WoofContext() {
 
 			@Override
 			public ConfigurationItem getConfiguration() {

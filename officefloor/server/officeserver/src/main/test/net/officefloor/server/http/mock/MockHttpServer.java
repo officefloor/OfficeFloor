@@ -96,8 +96,21 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 */
 	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) {
 		MockHttpServer httpServer = new MockHttpServer();
-		new HttpServer(httpServer, httpServer, true, null, input, null, null);
+		configureMockHttpServer(httpServer, input);
 		return httpServer;
+	}
+
+	/**
+	 * Enables extending implementations to configure themselves as the
+	 * {@link MockHttpServer}.
+	 * 
+	 * @param httpServer
+	 *            {@link MockHttpServer}.
+	 * @param input
+	 *            {@link DeployedOfficeInput}.
+	 */
+	protected static void configureMockHttpServer(MockHttpServer httpServer, DeployedOfficeInput input) {
+		new HttpServer(httpServer, httpServer, true, null, input, null, null);
 	}
 
 	/**
@@ -252,9 +265,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
 
 	/**
-	 * Instantiated via static methods.
+	 * Instantiated via static methods or extending.
 	 */
-	private MockHttpServer() {
+	protected MockHttpServer() {
 	}
 
 	/**

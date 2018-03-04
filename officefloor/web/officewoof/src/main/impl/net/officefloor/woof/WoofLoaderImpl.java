@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -101,7 +100,7 @@ public class WoofLoaderImpl implements WoofLoader {
 	 */
 
 	@Override
-	public void loadWoofConfiguration(WoofLoaderContext context) throws Exception {
+	public void loadWoofConfiguration(WoofContext context) throws Exception {
 
 		// Load the WoOF model
 		WoofModel woof = new WoofModel();

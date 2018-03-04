@@ -30,9 +30,6 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.woof.WoofExtensionService;
-import net.officefloor.woof.WoofExtensionServiceContext;
-import net.officefloor.woof.WoofLoaderExtensionService;
 
 /**
  * Mock {@link WoofLoaderExtensionService} for testing.
@@ -46,7 +43,7 @@ public class MockWoofExtensionService implements WoofExtensionService {
 	 */
 
 	@Override
-	public void extend(WoofExtensionServiceContext context) throws Exception {
+	public void extend(WoofContext context) throws Exception {
 
 		// Obtain the extension context
 		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
@@ -79,12 +76,12 @@ public class MockWoofExtensionService implements WoofExtensionService {
 	 * Obtains the content of the resource.
 	 * 
 	 * @param context
-	 *            {@link WoofExtensionServiceContext}.
+	 *            {@link WoofContext}.
 	 * @param resourcePath
 	 *            Path to the resource.
 	 * @return Content of the resource.
 	 */
-	private String getResourceContent(WoofExtensionServiceContext context, String resourcePath) throws IOException {
+	private String getResourceContent(WoofContext context, String resourcePath) throws IOException {
 
 		// Obtain the resource content
 		InputStream resource = context.getOfficeExtensionContext().getResource(resourcePath);

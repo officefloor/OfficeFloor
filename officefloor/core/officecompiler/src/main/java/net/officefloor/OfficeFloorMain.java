@@ -124,14 +124,12 @@ public class OfficeFloorMain {
 	 * use. This is typically for unit testing.
 	 * <p>
 	 * Note previously open {@link OfficeFloor} instance by this method will be
-	 * closed. Hence, avoids tests re-using the a previous {@link OfficeFloor}
+	 * closed. Hence, avoids tests re-using the previous {@link OfficeFloor}
 	 * instance.
-	 * 
-	 * @param args
-	 *            Optional command line arguments. Enables testing running from
-	 *            command line.
+	 *
+	 * @return Opened {@link OfficeFloor}.
 	 */
-	public synchronized static void open(String... args) {
+	public synchronized static OfficeFloor open() {
 
 		// Ensure closed
 		close();
@@ -176,6 +174,9 @@ public class OfficeFloorMain {
 				throw new Error("Failed to open OfficeFloor", (Throwable) activeOfficeFloor.openResult);
 			}
 		}
+
+		// Return the OfficeFloor
+		return officeFloor;
 	}
 
 	/**

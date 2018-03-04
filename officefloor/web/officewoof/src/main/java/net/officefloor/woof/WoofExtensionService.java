@@ -23,8 +23,7 @@ import net.officefloor.web.build.WebArchitect;
 
 /**
  * {@link ServiceLoader} service that enables extending functionality over and
- * above the {@link WoofLoader} by directly configuring the
- * {@link WebArchitect}.
+ * above the {@link WoofLoader} by direct configuration.
  * 
  * @author Daniel Sagenschneider
  */
@@ -34,10 +33,10 @@ public interface WoofExtensionService {
 	 * Extends the {@link WebArchitect}.
 	 * 
 	 * @param context
-	 *            {@link WoofExtensionServiceContext}.
+	 *            {@link WoofContext}.
 	 * @throws Exception
-	 *             If fails to extend the {@link WebArchitect}.
+	 *             If fails to extend.
 	 */
-	void extend(WoofExtensionServiceContext context) throws Exception;
+	void extend(WoofContext context) throws Exception;
 
 }
