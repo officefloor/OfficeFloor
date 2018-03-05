@@ -8,7 +8,7 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>officeweb_template</artifactId>
-	<name>OfficeFloor Web Template</name>
+	<name>Web Template</name>
 	<description>OfficeFloor Web Template</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

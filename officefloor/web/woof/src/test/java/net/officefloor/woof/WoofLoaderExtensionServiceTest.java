@@ -70,29 +70,4 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		response.assertResponse(200, "TEAMS");
 	}
 
-	/**
-	 * Class for {@link ClassSectionSource} in testing.
-	 */
-	public static class LinkToResource {
-		@NextFunction("resource")
-		public void service() {
-		}
-	}
-
-	/**
-	 * Class for {@link ClassSectionSource} in testing.
-	 */
-	public static class Section {
-		public void service(ServerHttpConnection connection, MockDependency dependency) throws IOException {
-
-			// Obtain content to validate objects and teams
-			Thread thread = Thread.currentThread();
-			String content = "WOOF " + dependency.getMessage() + " " + thread.getName();
-
-			// Write response
-			net.officefloor.server.http.HttpResponse response = connection.getResponse();
-			response.getEntity().write(content.getBytes());
-		}
-	}
-
 }

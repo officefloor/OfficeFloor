@@ -8,7 +8,7 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>officeweb_security</artifactId>
-	<name>OfficeFloor Web Security</name>
+	<name>Web Security</name>
 	<description>OfficeFloor Web Security</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
