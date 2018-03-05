@@ -29,6 +29,7 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.value.load.ValueLoader;
 import net.officefloor.web.value.load.ValueLoaderFactory;
 import net.officefloor.web.value.load.ValueLoaderSource;
@@ -39,6 +40,7 @@ import net.officefloor.web.value.load.ValueLoaderSource;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpRequestObjectManagedObjectSource
 		extends AbstractManagedObjectSource<HttpRequestObjectManagedObjectSource.HttpRequestObjectDependencies, None> {
 
@@ -61,8 +63,8 @@ public class HttpRequestObjectManagedObjectSource
 	public static final String PROPERTY_BIND_NAME = "bind.name";
 
 	/**
-	 * Name of property flagging whether to load the {@link HttpRequestState}
-	 * values to a new object.
+	 * Name of property flagging whether to load the {@link HttpRequestState} values
+	 * to a new object.
 	 */
 	public static final String PROPERTY_IS_LOAD_HTTP_PARAMETERS = "load.http.parameters";
 
@@ -188,7 +190,8 @@ public class HttpRequestObjectManagedObjectSource
 		public void setBoundManagedObjectName(String boundManagedObjectName) {
 			// Use bind name in preference to managed object name
 			this.boundName = (HttpRequestObjectManagedObjectSource.this.bindName != null
-					? HttpRequestObjectManagedObjectSource.this.bindName : boundManagedObjectName);
+					? HttpRequestObjectManagedObjectSource.this.bindName
+					: boundManagedObjectName);
 		}
 
 		@Override

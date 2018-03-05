@@ -139,8 +139,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	private final Map<String, ManagedFunctionType<?, ?>> _functionTypesByName = new HashMap<>();
 
 	/**
-	 * Obtains the {@link ManagedFunctionType} for the {@link SectionFunction}
-	 * by its name.
+	 * Obtains the {@link ManagedFunctionType} for the {@link SectionFunction} by
+	 * its name.
 	 * 
 	 * @param functionName
 	 *            Name of the {@link SectionFunction}.
@@ -157,8 +157,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	private final Map<String, SectionFunction> _functionsByTypeName = new HashMap<>();
 
 	/**
-	 * Obtains the {@link SectionFunction} by its {@link ManagedFunctionType}
-	 * name.
+	 * Obtains the {@link SectionFunction} by its {@link ManagedFunctionType} name.
 	 * 
 	 * @param functionTypeName
 	 *            {@link ManagedFunctionType} name.
@@ -171,12 +170,11 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 
 	/**
 	 * <p>
-	 * Allows being made aware of further {@link SectionFunction} instances
-	 * within the section to be considered for linking flows.
+	 * Allows being made aware of further {@link SectionFunction} instances within
+	 * the section to be considered for linking flows.
 	 * <p>
-	 * This allows {@link ClassSectionSource} to be used in conjunction with
-	 * other functionality - such as template rendering for dynamic HTTP web
-	 * pages.
+	 * This allows {@link ClassSectionSource} to be used in conjunction with other
+	 * functionality - such as template rendering for dynamic HTTP web pages.
 	 * 
 	 * @param functionTypeName
 	 *            Name to register the {@link SectionFunction}.
@@ -301,8 +299,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
-	 * {@link SubSection} instances by the {@link SectionInterface} annotated
-	 * type.
+	 * {@link SubSection} instances by the {@link SectionInterface} annotated type.
 	 */
 	private final Map<Class<?>, SubSection> _subSectionsByType = new HashMap<Class<?>, SubSection>();
 
@@ -330,7 +327,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		String subSectionName = sectionInterfaceType.getSimpleName();
 		String subSectionSourceClassName = sectionAnnotation.source().getName();
 		String subSectionLocation = ("".equals(sectionAnnotation.location()))
-				? sectionAnnotation.locationClass().getName() : sectionAnnotation.location();
+				? sectionAnnotation.locationClass().getName()
+				: sectionAnnotation.location();
 		subSection = this.getDesigner().addSubSection(subSectionName, subSectionSourceClassName, subSectionLocation);
 		PropertyList subSectionProperties = this.getContext().createPropertyList();
 		for (Property property : sectionAnnotation.properties()) {
@@ -412,8 +410,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
-	 * Creates the {@link SectionManagedObject} for providing the section
-	 * object.
+	 * Creates the {@link SectionManagedObject} for providing the section object.
 	 * 
 	 * @param objectName
 	 *            Name of the object within the section.
@@ -539,8 +536,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * @param flowMethod
 	 *            Method on the interface for the flow to be linked.
 	 * @param flowArgumentType
-	 *            {@link FunctionFlow} argument type. May be <code>null</code>
-	 *            if no argument.
+	 *            {@link FunctionFlow} argument type. May be <code>null</code> if no
+	 *            argument.
 	 */
 	protected void linkFunctionFlow(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
@@ -579,8 +576,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * @param flowMethod
 	 *            Method on the interface for the flow to be linked.
 	 * @param flowArgumentType
-	 *            {@link FunctionFlow} argument type. May be <code>null</code>
-	 *            if no argument.
+	 *            {@link FunctionFlow} argument type. May be <code>null</code> if no
+	 *            argument.
 	 */
 	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
 			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
@@ -614,15 +611,15 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * @param escalationType
 	 *            {@link ManagedFunctionEscalationType}.
 	 * @param escalationHandler
-	 *            Potential {@link SectionFunction} that can handle escalation
-	 *            based on its parameter. May be <code>null</code> if no
+	 *            Potential {@link SectionFunction} that can handle escalation based
+	 *            on its parameter. May be <code>null</code> if no
 	 *            {@link SectionFunction} can handle the escalation.
 	 */
 	protected void linkFunctionEscalation(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			ManagedFunctionEscalationType escalationType, SectionFunction escalationHandler) {
 
 		// Obtain the escalation type name
-		String escalationTypeName = escalationType.getEscalationType().getName();
+		String escalationTypeName = escalationType.getEscalationType();
 
 		// Obtain the function escalation
 		FunctionFlow functionEscalation = function.getFunctionEscalation(escalationTypeName);
@@ -655,7 +652,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 
 		// Obtain the object name and its type
 		String objectName = objectType.getObjectName();
-		String objectTypeName = objectType.getObjectType().getName();
+		String objectTypeName = objectType.getObjectType();
 		String typeQualifier = objectType.getTypeQualifier();
 
 		// Obtain the function object
@@ -813,7 +810,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			for (ManagedObjectDependencyType<?> dependencyType : moType.getDependencyTypes()) {
 
 				// Obtain the dependency type information
-				String dependencyTypeName = dependencyType.getDependencyType().getName();
+				String dependencyTypeName = dependencyType.getDependencyType();
 				String dependencyTypeQualifier = dependencyType.getTypeQualifier();
 
 				// Obtain the managed object dependency
@@ -1003,7 +1000,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
 
 				// Obtain function handling escalation (if available)
-				String escalationTypeName = escalationType.getEscalationType().getName();
+				String escalationTypeName = escalationType.getEscalationType();
 				SectionFunction escalationHandler = functionsByParameterType.get(escalationTypeName);
 
 				// Link escalation

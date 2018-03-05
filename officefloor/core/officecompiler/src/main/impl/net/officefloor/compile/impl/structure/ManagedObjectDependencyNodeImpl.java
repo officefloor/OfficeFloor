@@ -56,8 +56,7 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 	private final NodeContext context;
 
 	/**
-	 * {@link ManagedObjectSourceNode} for this
-	 * {@link ManagedObjectDependencyNode}.
+	 * {@link ManagedObjectSourceNode} for this {@link ManagedObjectDependencyNode}.
 	 */
 	private final ManagedObjectSourceNode managedObjectSource;
 
@@ -199,7 +198,7 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 		}
 
 		// Obtain the type information
-		String dependencyType = dependency.getDependencyType().getName();
+		String dependencyType = dependency.getDependencyType();
 		String typeQualifier = dependency.getTypeQualifier();
 
 		// Obtain dependent object

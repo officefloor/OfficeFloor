@@ -139,9 +139,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		private final String managedObjectSourceClassName;
 
 		/**
-		 * {@link ManagedObjectSource} instance to use. If this is specified its
-		 * use overrides the {@link Class}. Will be <code>null</code> if not to
-		 * override.
+		 * {@link ManagedObjectSource} instance to use. If this is specified its use
+		 * overrides the {@link Class}. Will be <code>null</code> if not to override.
 		 */
 		@SuppressWarnings("rawtypes")
 		private final ManagedObjectSource managedObjectSource;
@@ -195,14 +194,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private InputManagedObjectNode inputManagedObjectNode = null;
 
 	/**
-	 * {@link ManagedObjectFlowNode} instances by their
-	 * {@link ManagedObjectFlow} names.
+	 * {@link ManagedObjectFlowNode} instances by their {@link ManagedObjectFlow}
+	 * names.
 	 */
 	private final Map<String, ManagedObjectFlowNode> flows = new HashMap<String, ManagedObjectFlowNode>();
 
 	/**
-	 * {@link ManagedObjectTeamNode} instances by their
-	 * {@link ManagedObjectTeam} names.
+	 * {@link ManagedObjectTeamNode} instances by their {@link ManagedObjectTeam}
+	 * names.
 	 */
 	private final Map<String, ManagedObjectTeamNode> teams = new HashMap<String, ManagedObjectTeamNode>();
 
@@ -220,20 +219,20 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 *            Name of this {@link ManagedObjectSource}.
 	 * @param containingSectionNode
 	 *            {@link SectionNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link Office} or {@link OfficeFloor}.
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if contained in
+	 *            the {@link Office} or {@link OfficeFloor}.
 	 * @param containingOfficeNode
 	 *            {@link OfficeNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link OfficeFloor}.
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if contained in
+	 *            the {@link OfficeFloor}.
 	 * @param containingSuppliedManagedObjectNode
 	 *            {@link SuppliedManagedObjectSourceNode} containing this
 	 *            {@link ManagedObjectSource}. <code>null</code> if not provided
 	 *            from {@link SupplierSource}.
 	 * @param containingSuppliedManagedObjectNode
-	 *            {@link SuppliedManagedObjectSourceNode} should this be a
-	 *            supplied {@link ManagedObjectSource}. Will be
-	 *            <code>null</code> if not supplied.
+	 *            {@link SuppliedManagedObjectSourceNode} should this be a supplied
+	 *            {@link ManagedObjectSource}. Will be <code>null</code> if not
+	 *            supplied.
 	 * @param containingOfficeFloorNode
 	 *            {@link OfficeFloorNode} containing this
 	 *            {@link ManagedObjectSourceNode}.
@@ -270,8 +269,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		 * @param managedObjectSource
 		 *            {@link ManagedObjectSource}.
 		 * @param properties
-		 *            {@link PropertyList} to configure the
-		 *            {@link ManagedObjectSource}.
+		 *            {@link PropertyList} to configure the {@link ManagedObjectSource}.
 		 * @param managedObjectLoader
 		 *            {@link ManagedObjectLoader}.
 		 * @return Specific type.
@@ -616,7 +614,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				: this.getManagingOfficeNode());
 
 		// Obtain the object type
-		String objectType = managedObjectType.getObjectClass().getName();
+		String objectType = managedObjectType.getObjectType();
 
 		// Auto-wire the teams
 		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
@@ -753,7 +751,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 									this.context.getRootSourceContext(), this, this.context.getCompilerIssues());
 
 							// Ensure compatible type
-							Class<?> objectType = managedObjectType.getObjectClass();
+							String objectTypeName = managedObjectType.getObjectType();
+							Class<?> objectType = this.context.getRootSourceContext().loadClass(objectTypeName);
 							if (!inputObjectType.isAssignableFrom(objectType)) {
 								// MOS object type not compatible to input type
 								this.context.getCompilerIssues().addIssue(this,

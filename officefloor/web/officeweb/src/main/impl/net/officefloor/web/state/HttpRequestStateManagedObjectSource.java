@@ -35,6 +35,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestCookie;
@@ -49,6 +50,7 @@ import net.officefloor.web.value.load.ValueLoader;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpRequestStateManagedObjectSource
 		extends AbstractManagedObjectSource<HttpRequestStateManagedObjectSource.HttpRequestStateDependencies, None> {
 

@@ -26,6 +26,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.generator.UuidHttpSessionIdGenerator;
@@ -38,6 +39,7 @@ import net.officefloor.web.session.store.MemoryHttpSessionStore;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpSessionManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed> {
 
 	/**

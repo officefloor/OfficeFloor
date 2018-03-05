@@ -67,6 +67,7 @@ import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 
 /**
  * {@link SectionInputNode} node.
@@ -441,6 +442,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param <O>
 	 *            {@link ExternalServiceInput} object type.
 	 */
+	@PrivateSource
 	private static class ExternalServiceInputManagedObjectSource<O, M extends ManagedObject>
 			extends AbstractManagedObjectSource<None, Flows>
 			implements ExternalServiceInput<O, M>, ManagedFunction<None, None> {

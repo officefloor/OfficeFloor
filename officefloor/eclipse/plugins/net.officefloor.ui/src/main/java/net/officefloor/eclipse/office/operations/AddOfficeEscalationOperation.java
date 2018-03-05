@@ -24,14 +24,14 @@ import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 
 /**
  * {@link Operation} to add an {@link OfficeEscalationModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddOfficeEscalationOperation extends
-		AbstractOfficeChangeOperation<OfficeEditPart> {
+public class AddOfficeEscalationOperation extends AbstractOfficeChangeOperation<OfficeEditPart> {
 
 	/**
 	 * Initiate.
@@ -56,16 +56,15 @@ public class AddOfficeEscalationOperation extends
 		// Create the populated Office Escalation
 		final OfficeEscalationModel escalation = new OfficeEscalationModel();
 		BeanDialog dialog = editPart.createBeanDialog(escalation, "X", "Y");
-		dialog.registerPropertyInput("Escalation Type",
-				new ClasspathClassInput(editPart.getEditor()));
+		dialog.registerPropertyInput("Escalation Type", new ClasspathClassInput(editPart.getEditor()));
+		dialog.addIgnoreType(OfficeEscalationToOfficeSectionInputModel.class);
 		if (!dialog.populate()) {
 			// Not created so do not provide command
 			return null;
 		}
 
 		// Add the office escalation
-		Change<OfficeEscalationModel> change = changes
-				.addOfficeEscalation(escalation.getEscalationType());
+		Change<OfficeEscalationModel> change = changes.addOfficeEscalation(escalation.getEscalationType());
 
 		// Position the model
 		context.positionModel(change.getTarget());

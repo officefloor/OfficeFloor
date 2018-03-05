@@ -267,8 +267,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link ManagedObjectNode} within
-	 * {@link OfficeFloorNode}.
+	 * Ensure can create {@link ManagedObjectNode} within {@link OfficeFloorNode}.
 	 */
 	public void testCreateManagedObjectPoolNode_withinOfficeFloor() {
 		ManagedObjectPoolNode node = this
@@ -296,7 +295,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		ManagedObjectType<?> managedObjectType = this.createMock(ManagedObjectType.class);
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.loadManagedObjectType(compileContext),
 				managedObjectType);
-		this.recordReturn(managedObjectType, managedObjectType.getObjectClass(), String.class);
+		this.recordReturn(managedObjectType, managedObjectType.getObjectType(), String.class.getName());
 		ManagedObjectNode node = this.doTest(() -> {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
 
@@ -359,8 +358,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link ManagedObjectNode} within
-	 * {@link OfficeFloorNode}.
+	 * Ensure can create {@link ManagedObjectNode} within {@link OfficeFloorNode}.
 	 */
 	public void testCreateManagedObjectNode_withinOfficeFloor() {
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), null);
@@ -413,7 +411,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getInputSectionManagedObjectDependency("DEPENDENCY"));
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"),
+				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -447,8 +446,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link ManagedObjectSourceNode} from
-	 * {@link SupplierNode}.
+	 * Ensure can create {@link ManagedObjectSourceNode} from {@link SupplierNode}.
 	 */
 	public void testCreateManagedObjectSourceNode_fromSupplier_withinOfficeFloor() {
 		SuppliedManagedObjectSourceNode suppliedManagedObject = this.createMock(SuppliedManagedObjectSourceNode.class);
@@ -476,8 +474,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link ManagedObjectSourceNode} from
-	 * {@link SupplierNode}.
+	 * Ensure can create {@link ManagedObjectSourceNode} from {@link SupplierNode}.
 	 */
 	public void testCreateManagedObjectSourceNode_fromSupplier_withinOffice() {
 		SuppliedManagedObjectSourceNode suppliedManagedObject = this.createMock(SuppliedManagedObjectSourceNode.class);

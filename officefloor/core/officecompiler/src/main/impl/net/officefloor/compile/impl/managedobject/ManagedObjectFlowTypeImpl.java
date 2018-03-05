@@ -94,8 +94,8 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 	}
 
 	@Override
-	public Class<?> getArgumentType() {
-		return this.argumentType;
+	public String getArgumentType() {
+		return this.argumentType.getName();
 	}
 
 	@Override

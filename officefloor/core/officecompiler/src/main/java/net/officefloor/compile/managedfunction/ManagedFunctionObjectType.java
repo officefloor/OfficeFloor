@@ -46,11 +46,11 @@ public interface ManagedFunctionObjectType<M extends Enum<M>> {
 	int getIndex();
 
 	/**
-	 * Obtains the required type of the dependent {@link Object}.
+	 * Obtains the required type name of the dependent {@link Object}.
 	 * 
-	 * @return Required type of the dependent {@link Object}.
+	 * @return Required type name of the dependent {@link Object}.
 	 */
-	Class<?> getObjectType();
+	String getObjectType();
 
 	/**
 	 * <p>
@@ -58,16 +58,16 @@ public interface ManagedFunctionObjectType<M extends Enum<M>> {
 	 * <p>
 	 * This is to enable qualifying the type of dependency required.
 	 * 
-	 * @return Qualifier on the type. May be <code>null</code> if not qualifying
-	 *         the type.
+	 * @return Qualifier on the type. May be <code>null</code> if not qualifying the
+	 *         type.
 	 */
 	String getTypeQualifier();
 
 	/**
 	 * Obtains the {@link Enum} key for the {@link ManagedFunctionObjectType}.
 	 * 
-	 * @return {@link Enum} key for the {@link ManagedFunctionObjectType}. May
-	 *         be <code>null</code> if no {@link Enum} for objects.
+	 * @return {@link Enum} key for the {@link ManagedFunctionObjectType}. May be
+	 *         <code>null</code> if no {@link Enum} for objects.
 	 */
 	M getKey();
 

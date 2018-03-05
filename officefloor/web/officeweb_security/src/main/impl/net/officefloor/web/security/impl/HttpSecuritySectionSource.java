@@ -43,6 +43,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.LogoutRequest;
@@ -61,6 +62,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
 		extends AbstractSectionSource {
 
@@ -137,7 +139,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		for (int i = 0; i < dependencyObjects.length; i++) {
 			HttpSecurityDependencyType<?> dependencyType = dependencyTypes[i];
 			dependencyObjects[i] = designer.addSectionObject("Dependency_" + dependencyType.getDependencyName(),
-					dependencyType.getDependencyType().getName());
+					dependencyType.getDependencyType());
 			dependencyObjects[i].setTypeQualifier(dependencyType.getTypeQualifier());
 		}
 
@@ -160,8 +162,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
 			String flowName = flowType.getFlowName();
 			FunctionFlow functionFlow = challengeFunction.getFunctionFlow("Flow_" + flowName);
-			SectionOutput sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(),
-					false);
+			SectionOutput sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType(), false);
 			designer.link(functionFlow, sectionOutput, false);
 		}
 
@@ -240,6 +241,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 	 * {@link ManagedFunctionSource} for the {@link HttpSecurity}
 	 * {@link ManagedFunction} instances.
 	 */
+	@PrivateSource
 	private class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -334,8 +336,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			moAuthenticate.addObject(FunctionAuthenticateContext.class)
 					.setLabel(FunctionAuthenticateContext.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
-				moAuthenticate.addObject(dependencyType.getDependencyType())
-						.setLabel("Dependency_" + dependencyType.getDependencyName());
+				Class<?> dependencyClass = context.loadClass(dependencyType.getDependencyType());
+				moAuthenticate.addObject(dependencyClass).setLabel("Dependency_" + dependencyType.getDependencyName());
 			}
 
 			// Add the managed object logout function
@@ -344,8 +346,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 					None.class);
 			logout.addObject(FunctionLogoutContext.class).setLabel(FunctionLogoutContext.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
-				logout.addObject(dependencyType.getDependencyType())
-						.setLabel("Dependency_" + dependencyType.getDependencyName());
+				Class<?> dependencyClass = context.loadClass(dependencyType.getDependencyType());
+				logout.addObject(dependencyClass).setLabel("Dependency_" + dependencyType.getDependencyName());
 			}
 
 			// Add the challenge function
@@ -355,12 +357,14 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			challenge.addObject(ServerHttpConnection.class).setLabel(ServerHttpConnection.class.getSimpleName());
 			challenge.addObject(HttpSession.class).setLabel(HttpSession.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
-				challenge.addObject(dependencyType.getDependencyType())
-						.setLabel("Dependency_" + dependencyType.getDependencyName());
+				Class<?> dependencyClass = context.loadClass(dependencyType.getDependencyType());
+				challenge.addObject(dependencyClass).setLabel("Dependency_" + dependencyType.getDependencyName());
 			}
 			for (HttpSecurityFlowType<?> flowType : flowTypes) {
 				ManagedFunctionFlowTypeBuilder<?> flow = challenge.addFlow();
-				flow.setArgumentType(flowType.getArgumentType());
+				String argumentTypeName = flowType.getArgumentType();
+				Class<?> argumentType = argumentTypeName == null ? null : context.loadClass(argumentTypeName);
+				flow.setArgumentType(argumentType);
 				flow.setLabel("Flow_" + flowType.getFlowName());
 			}
 

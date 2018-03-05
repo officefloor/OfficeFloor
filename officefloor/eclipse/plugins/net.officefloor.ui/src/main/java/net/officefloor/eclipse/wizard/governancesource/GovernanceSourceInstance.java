@@ -55,8 +55,8 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 	private final String governanceSourceClassName;
 
 	/**
-	 * {@link GovernanceSourceExtension}. May be <code>null</code> if not
-	 * obtained via extension point.
+	 * {@link GovernanceSourceExtension}. May be <code>null</code> if not obtained
+	 * via extension point.
 	 */
 	private final GovernanceSourceExtension<?, ?, ?> governanceSourceExtension;
 
@@ -161,6 +161,7 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 	/**
 	 * Attempts to load the {@link GovernanceType}.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadGovernanceType() {
 
 		// Ensure have name
@@ -176,7 +177,8 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 		}
 
 		// Attempt to load the governance type
-		this.governanceType = this.governanceLoader.loadGovernanceType(this.governanceSourceClass, this.properties);
+		this.governanceType = this.governanceLoader.loadGovernanceType((Class) this.governanceSourceClass,
+				this.properties);
 	}
 
 	/**
@@ -218,8 +220,8 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 	}
 
 	/**
-	 * Obtains the {@link PropertyList} to source the {@link Governance} from
-	 * the {@link GovernanceSource}.
+	 * Obtains the {@link PropertyList} to source the {@link Governance} from the
+	 * {@link GovernanceSource}.
 	 * 
 	 * @return Populated {@link PropertyList}.
 	 */
@@ -230,8 +232,7 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 	/**
 	 * Obtains the loaded {@link GovernanceType}.
 	 * 
-	 * @return Loaded {@link GovernanceType} or <code>null</code> if issue
-	 *         loading.
+	 * @return Loaded {@link GovernanceType} or <code>null</code> if issue loading.
 	 */
 	public GovernanceType<?, ?> getGovernanceType() {
 		return this.governanceType;
@@ -244,7 +245,7 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void createControls(Composite page) {
 
 		// Obtain the governance source class
@@ -273,7 +274,7 @@ public class GovernanceSourceInstance extends AbstractCompilerIssues implements 
 		}
 
 		// Obtain specification properties for governance source
-		this.properties = this.governanceLoader.loadSpecification(this.governanceSourceClass);
+		this.properties = this.governanceLoader.loadSpecification((Class) this.governanceSourceClass);
 
 		// Load governance instance properties if available
 		if (this.governanceInstance != null) {

@@ -22,18 +22,18 @@ import org.eclipse.gef.EditPart;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.skin.office.OfficeManagedObjectToAdministrationFigureContext;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel.OfficeManagedObjectToAdministrationEvent;
+import net.officefloor.eclipse.skin.office.AdministrationToExternalManagedObjectFigureContext;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel.AdministrationToExternalManagedObjectEvent;
 
 /**
- * {@link EditPart} for the {@link OfficeManagedObjectToAdministrationModel}.
- *
+ * {@link EditPart} for the {@link AdministrationToExternalManagedObjectModel}.
+ * 
  * @author Daniel Sagenschneider
  */
-public class OfficeManagedObjectToAdministrationEditPart extends
-		AbstractOfficeFloorConnectionEditPart<OfficeManagedObjectToAdministrationModel, OfficeManagedObjectToAdministrationEvent>
-		implements OfficeManagedObjectToAdministrationFigureContext {
+public class AdministrationToExternalManagedObjectEditPart extends
+		AbstractOfficeFloorConnectionEditPart<AdministrationToExternalManagedObjectModel, AdministrationToExternalManagedObjectEvent>
+		implements AdministrationToExternalManagedObjectFigureContext {
 
 	/*
 	 * ================ AbstractOfficeFloorConnectionEditPart ================
@@ -41,7 +41,7 @@ public class OfficeManagedObjectToAdministrationEditPart extends
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		OfficeFloorPlugin.getSkin().getOfficeFigureFactory().decorateOfficeManagedObjectToAdministrationFigure(figure,
+		OfficeFloorPlugin.getSkin().getOfficeFigureFactory().decorateAdministrationToExternalManagedObjectFigure(figure,
 				this);
 	}
 

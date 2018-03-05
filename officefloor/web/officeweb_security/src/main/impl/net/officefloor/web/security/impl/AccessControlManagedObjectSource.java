@@ -28,6 +28,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.spi.security.AccessControlListener;
@@ -39,6 +40,7 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class AccessControlManagedObjectSource<AC extends Serializable, C>
 		extends AbstractManagedObjectSource<AccessControlManagedObjectSource.Dependencies, None> {
 

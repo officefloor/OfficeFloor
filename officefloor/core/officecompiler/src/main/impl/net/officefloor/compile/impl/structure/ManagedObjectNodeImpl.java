@@ -106,8 +106,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		private final ManagedObjectScope managedObjectScope;
 
 		/**
-		 * {@link ManagedObjectSourceNode} for the {@link ManagedObjectSource}
-		 * to source this {@link ManagedObject}.
+		 * {@link ManagedObjectSourceNode} for the {@link ManagedObjectSource} to source
+		 * this {@link ManagedObject}.
 		 */
 		private final ManagedObjectSourceNode managedObjectSourceNode;
 
@@ -136,8 +136,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		 *            {@link ManagedObjectScope} of this {@link ManagedObject}.
 		 * @param managedObjectSourceNode
 		 *            {@link ManagedObjectSourceNode} for the
-		 *            {@link ManagedObjectSource} to source this
-		 *            {@link ManagedObject}.
+		 *            {@link ManagedObjectSource} to source this {@link ManagedObject}.
 		 */
 		public InitialiseState(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode) {
 			this.managedObjectScope = managedObjectScope;
@@ -169,8 +168,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final List<AdministrationNode> preLoadAdministrations = new LinkedList<>();
 
 	/**
-	 * Pre-load {@link AdministrationNode} instances over
-	 * {@link ManagedObjectNode} within the specified {@link OfficeNode}.
+	 * Pre-load {@link AdministrationNode} instances over {@link ManagedObjectNode}
+	 * within the specified {@link OfficeNode}.
 	 */
 	private final Map<OfficeNode, List<AdministrationNode>> preLoadAdministrationsPerOffice = new HashMap<>();
 
@@ -252,7 +251,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 			// Use the managed object type
 			qualifications = new TypeQualification[] {
-					new TypeQualificationImpl(null, managedObjectType.getObjectClass().getName()) };
+					new TypeQualificationImpl(null, managedObjectType.getObjectType()) };
 		}
 		return qualifications;
 	}
@@ -347,8 +346,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Create the type qualifications
 		TypeQualification[] qualifications = this.getTypeQualifications(compileContext);
 
-		// Obtain the extension interfaces
-		Class<?>[] extensionInterfaces = managedObjectType.getExtensionInterfaces();
+		// Obtain the extension types
+		String[] extensionTypeNames = managedObjectType.getExtensionTypes();
+		Class<?>[] extensionTypes = new Class[extensionTypeNames.length];
+		for (int i = 0; i < extensionTypes.length; i++) {
+			extensionTypes[i] = this.context.getRootSourceContext().loadClass(extensionTypeNames[i]);
+		}
 
 		// Obtain the dependencies
 		ObjectDependencyType[] objectDependencyTypes = CompileUtil.loadTypes(this.dependencies,
@@ -366,7 +369,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		}
 
 		// Create and return the managed object type
-		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName, qualifications, extensionInterfaces,
+		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName, qualifications, extensionTypes,
 				objectDependencyTypes, managedObjectSourceType);
 	}
 

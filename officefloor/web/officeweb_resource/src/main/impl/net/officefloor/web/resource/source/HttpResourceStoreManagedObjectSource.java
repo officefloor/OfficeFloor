@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.resource.HttpResourceStore;
 
 /**
@@ -28,6 +29,7 @@ import net.officefloor.web.resource.HttpResourceStore;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpResourceStoreManagedObjectSource extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject {
 

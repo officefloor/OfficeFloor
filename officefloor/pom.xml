@@ -56,9 +56,9 @@
 		<module>core</module>
 		<module>server</module>
 		<module>web</module>
+		<module>eclipse</module>
 <!--  
 		<module>plugins</module>
-		<module>eclipse</module>
 		<module>maven</module>
 		<module>tutorials</module>
 -->

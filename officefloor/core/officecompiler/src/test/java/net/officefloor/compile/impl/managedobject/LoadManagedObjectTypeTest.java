@@ -88,8 +88,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link ManagedObject} via
-	 * {@link ClassManagedObjectSource} {@link Class}.
+	 * Ensure can load {@link ManagedObject} via {@link ClassManagedObjectSource}
+	 * {@link Class}.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testLoadByClass() {
@@ -110,8 +110,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link ManagedObject} via
-	 * {@link ClassManagedObjectSource} instance.
+	 * Ensure can load {@link ManagedObject} via {@link ClassManagedObjectSource}
+	 * instance.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testLoadByInstance() {
@@ -343,8 +343,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link ManagedObjectDependencyMetaData}
-	 * in array.
+	 * Ensure issue if <code>null</code> {@link ManagedObjectDependencyMetaData} in
+	 * array.
 	 */
 	public void testNullDependencyMetaData() {
 
@@ -475,8 +475,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link ManagedObjectFlowMetaData} in
-	 * array.
+	 * Ensure issue if <code>null</code> {@link ManagedObjectFlowMetaData} in array.
 	 */
 	public void testNullFlowMetaData() {
 
@@ -519,10 +518,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
 		ManagedObjectFlowType<?> defaulted = flowTypes[0];
 		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED", defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class, defaulted.getArgumentType());
+		assertEquals("Incorrect defaulted argument type", Void.class.getName(), defaulted.getArgumentType());
 		ManagedObjectFlowType<?> provided = flowTypes[1];
 		assertEquals("Incorrect name for provided argument flow", "1", provided.getFlowName());
-		assertEquals("Incorrect provided argument type", Connection.class, provided.getArgumentType());
+		assertEquals("Incorrect provided argument type", Connection.class.getName(), provided.getArgumentType());
 	}
 
 	/**
@@ -620,8 +619,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link ManagedObjectType} correct with keyed dependencies and
-	 * flows.
+	 * Ensure {@link ManagedObjectType} correct with keyed dependencies and flows.
 	 */
 	public void testKeyedDependenciesAndFlows() {
 
@@ -662,13 +660,15 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(), dependencyTypeOne.getIndex());
 		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(), dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Connection.class, dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type", Connection.class.getName(),
+				dependencyTypeOne.getDependencyType());
 		assertNull("First dependency type should not be qualified", dependencyTypeOne.getTypeQualifier());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(), dependencyTypeTwo.getIndex());
 		assertEquals("Incorrect second dependency name", TwoKey.TWO.toString(), dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Integer.class, dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type", Integer.class.getName(),
+				dependencyTypeTwo.getDependencyType());
 		assertEquals("Incorrect second dependency type qualification", "QUALIFIED",
 				dependencyTypeTwo.getTypeQualifier());
 
@@ -679,17 +679,16 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Keys should be ordered", TwoKey.ONE, flowTypeOne.getKey());
 		assertEquals("Incorrect first flow index", TwoKey.ONE.ordinal(), flowTypeOne.getIndex());
 		assertEquals("Incorrect first flow name", TwoKey.ONE.toString(), flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", String.class, flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow argument type", String.class.getName(), flowTypeOne.getArgumentType());
 		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow index", TwoKey.TWO.ordinal(), flowTypeTwo.getIndex());
 		assertEquals("Incorrect second flow name", TwoKey.TWO.toString(), flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", Long.class, flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow argument type", Long.class.getName(), flowTypeTwo.getArgumentType());
 	}
 
 	/**
-	 * Ensure {@link ManagedObjectType} correct with indexed dependencies and
-	 * flows.
+	 * Ensure {@link ManagedObjectType} correct with indexed dependencies and flows.
 	 */
 	public void testIndexedDependenciesAndFlows() {
 
@@ -731,7 +730,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency name", Integer.class.getSimpleName(),
 				dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Integer.class, dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type", Integer.class.getName(), dependencyTypeOne.getDependencyType());
 		assertEquals("Incorrect first dependency type qualification", "QUALIFIED",
 				dependencyTypeOne.getTypeQualifier());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
@@ -739,7 +738,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertNull("Should be no dependency key", dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency name", Connection.class.getSimpleName(),
 				dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Connection.class, dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type", Connection.class.getName(),
+				dependencyTypeTwo.getDependencyType());
 		assertNull("Second dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows
@@ -749,12 +749,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect first flow index", 0, flowTypeOne.getIndex());
 		assertNull("Should be no flow key", flowTypeOne.getKey());
 		assertEquals("Incorrect first flow name", "0", flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", Long.class, flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow argument type", Long.class.getName(), flowTypeOne.getArgumentType());
 		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Incorrect second flow index", 1, flowTypeTwo.getIndex());
 		assertNull("Should be no dependency key", flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow name", "1", flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", String.class, flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow argument type", String.class.getName(), flowTypeTwo.getArgumentType());
 	}
 
 	/**
@@ -836,8 +836,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (Init<None>) null);
 
 		// Ensure provide extension interface
-		assertEquals("Incorrect number of extension interfaces", 1, moType.getExtensionInterfaces().length);
-		assertEquals("Incorrect extension interface type", XAResource.class, moType.getExtensionInterfaces()[0]);
+		assertEquals("Incorrect number of extension interfaces", 1, moType.getExtensionTypes().length);
+		assertEquals("Incorrect extension interface type", XAResource.class.getName(), moType.getExtensionTypes()[0]);
 	}
 
 	/**
@@ -949,9 +949,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures only a multiple {@link ManagedObjectTeamType} are available for
-	 * added {@link ManagedFunction} instances that use various {@link Team}
-	 * instances.
+	 * Ensures only a multiple {@link ManagedObjectTeamType} are available for added
+	 * {@link ManagedFunction} instances that use various {@link Team} instances.
 	 */
 	public void testMultipleTeams() {
 
@@ -978,8 +977,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if an added {@link ManagedFunction} is linking an unknown
-	 * added {@link ManagedFunction}.
+	 * Ensures issue if an added {@link ManagedFunction} is linking an unknown added
+	 * {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testAddFunctionLinkingUnknownFunction() {
@@ -1000,8 +999,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures only the {@link ManagedObjectTeamType} is available for the added
-	 * {@link ManagedFunction} with a link to another added
-	 * {@link ManagedFunction}.
+	 * {@link ManagedFunction} with a link to another added {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testAddFunctionWithLinkToAddedFunction() {
@@ -1032,8 +1030,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures a {@link ManagedObjectFlowType} is added for the link from the
-	 * added {@link ManagedFunction}.
+	 * Ensures a {@link ManagedObjectFlowType} is added for the link from the added
+	 * {@link ManagedFunction}.
 	 */
 	public void testAddFunctionRequiringFlow() {
 
@@ -1061,7 +1059,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect flow name", "KEY", flow.getFlowName());
 		assertEquals("Incorrect index", 0, flow.getIndex());
 		assertEquals("Incorrect flow key", OneKey.KEY, flow.getKey());
-		assertEquals("Incorrect argument type", Integer.class, flow.getArgumentType());
+		assertEquals("Incorrect argument type", Integer.class.getName(), flow.getArgumentType());
 	}
 
 	/**
@@ -1123,8 +1121,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures issue if {@link ManagedObjectSourceMetaData} uses indexing for
-	 * {@link ManagedObjectFlowMetaData} but linking a process is done with a
-	 * key.
+	 * {@link ManagedObjectFlowMetaData} but linking a process is done with a key.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testLinkProcessWithKeyWhenIndexed() {
@@ -1202,8 +1199,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures can link to added {@link ManagedFunction} which removes the
-	 * {@link ManagedObjectFlowType} for the {@link ManagedObjectFlowMetaData}
-	 * from being included in the {@link ManagedObjectType}.
+	 * {@link ManagedObjectFlowType} for the {@link ManagedObjectFlowMetaData} from
+	 * being included in the {@link ManagedObjectType}.
 	 */
 	public void testLinkProcessToFunction() {
 
@@ -1248,8 +1245,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link Object} and {@link ManagedObject} class from
-	 * the {@link ManagedObjectSourceMetaData}.
+	 * Records obtaining the {@link Object} and {@link ManagedObject} class from the
+	 * {@link ManagedObjectSourceMetaData}.
 	 */
 	private void record_objectAndManagedObject() {
 		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Connection.class);
@@ -1261,8 +1258,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * {@link ManagedObjectSourceMetaData}.
 	 * 
 	 * @param flowKeys
-	 *            Flow keys to be defined in meta-data. Provide
-	 *            <code>null</code> values for indexing.
+	 *            Flow keys to be defined in meta-data. Provide <code>null</code>
+	 *            values for indexing.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {

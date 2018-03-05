@@ -53,6 +53,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.AcceptedSocketDecorator;
 import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ServerSocketDecorator;
@@ -71,6 +72,7 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpServerSocketManagedObjectSource
 		extends AbstractManagedObjectSource<None, HttpServerSocketManagedObjectSource.Flows>
 		implements ManagedFunction<Indexed, None> {

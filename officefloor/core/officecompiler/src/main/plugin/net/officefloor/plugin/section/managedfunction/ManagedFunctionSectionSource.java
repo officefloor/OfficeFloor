@@ -62,9 +62,8 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 	public static final String PROPERTY_PARAMETER_PREFIX = "parameter.index.prefix.";
 
 	/**
-	 * Name of property specifying a comma separated list of
-	 * {@link ManagedFunction} names that will have a {@link SectionOutput}
-	 * created and linked as next.
+	 * Name of property specifying a comma separated list of {@link ManagedFunction}
+	 * names that will have a {@link SectionOutput} created and linked as next.
 	 */
 	public static final String PROPERTY_FUNCTIONS_NEXT_TO_OUTPUTS = "functions.next.to.outputs";
 
@@ -124,17 +123,17 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 			int parameterIndex = Integer.parseInt(context.getProperty(PROPERTY_PARAMETER_PREFIX + functionName, "-1"));
 
 			// Link objects and flag parameter
-			Class<?> parameterType = null;
+			String parameterType = null;
 			int objectIndex = 1;
 			for (ManagedFunctionObjectType<?> objectType : functionType.getObjectTypes()) {
 
 				// Obtain object details
 				String objectName = objectType.getObjectName();
-				Class<?> objectClass = objectType.getObjectType();
+				String objectClassName = objectType.getObjectType();
 				String typeQualifier = objectType.getTypeQualifier();
 
 				// Determine the section object name
-				String sectionObjectName = (typeQualifier == null ? "" : typeQualifier + "-") + objectClass.getName();
+				String sectionObjectName = (typeQualifier == null ? "" : typeQualifier + "-") + objectClassName;
 
 				// Obtain the object
 				FunctionObject object = function.getFunctionObject(objectName);
@@ -142,14 +141,14 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 				// Determine if parameter
 				if (objectIndex == parameterIndex) {
 					// Flag as parameter
-					parameterType = objectClass;
+					parameterType = objectClassName;
 					object.flagAsParameter();
 
 				} else {
 					// Obtain the section object
 					SectionObject sectionObject = sectionObjects.get(sectionObjectName);
 					if (sectionObject == null) {
-						sectionObject = designer.addSectionObject(sectionObjectName, objectClass.getName());
+						sectionObject = designer.addSectionObject(sectionObjectName, objectClassName);
 						if (typeQualifier != null) {
 							sectionObject.setTypeQualifier(typeQualifier);
 						}
@@ -167,14 +166,10 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 			// Link next output (if configured)
 			if (functionsWithNextOutput.contains(functionName)) {
 
-				// Obtain argument type for function
-				Class<?> returnType = functionType.getReturnType();
-
 				// Obtain the section output
 				SectionOutput sectionOutput = sectionOutputs.get(functionName);
 				if (sectionOutput == null) {
-					sectionOutput = designer.addSectionOutput(functionName,
-							(returnType == null ? null : returnType.getName()), false);
+					sectionOutput = designer.addSectionOutput(functionName, functionType.getReturnType(), false);
 					sectionOutputs.put(functionName, sectionOutput);
 				}
 
@@ -187,7 +182,7 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 
 				// Obtain the flow details
 				String flowName = flowType.getFlowName();
-				Class<?> argumentType = flowType.getArgumentType();
+				String argumentType = flowType.getArgumentType();
 
 				// Obtain the flow
 				FunctionFlow flow = function.getFunctionFlow(flowName);
@@ -195,8 +190,7 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 				// Obtain the section output
 				SectionOutput sectionOutput = sectionOutputs.get(flowName);
 				if (sectionOutput == null) {
-					sectionOutput = designer.addSectionOutput(flowName,
-							(argumentType == null ? null : argumentType.getName()), false);
+					sectionOutput = designer.addSectionOutput(flowName, argumentType, false);
 					sectionOutputs.put(flowName, sectionOutput);
 				}
 
@@ -208,16 +202,16 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 			for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
 
 				// Obtain the escalation type
-				Class<? extends Throwable> escalation = escalationType.getEscalationType();
+				String escalationTypeName = escalationType.getEscalationType();
 
 				// Obtain the escalation
-				FunctionFlow flow = function.getFunctionEscalation(escalation.getName());
+				FunctionFlow flow = function.getFunctionEscalation(escalationTypeName);
 
 				// Obtain the section output
-				String outputName = escalation.getName();
+				String outputName = escalationTypeName;
 				SectionOutput sectionOutput = sectionOutputs.get(outputName);
 				if (sectionOutput == null) {
-					sectionOutput = designer.addSectionOutput(outputName, escalation.getName(), true);
+					sectionOutput = designer.addSectionOutput(outputName, escalationTypeName, true);
 					sectionOutputs.put(outputName, sectionOutput);
 				}
 
@@ -226,8 +220,7 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 			}
 
 			// Link function for input
-			SectionInput input = designer.addSectionInput(functionName,
-					(parameterType == null ? null : parameterType.getName()));
+			SectionInput input = designer.addSectionInput(functionName, parameterType);
 			designer.link(input, function);
 		}
 	}

@@ -102,14 +102,12 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	private class InitialisedState {
 
 		/**
-		 * Name of the {@link ManagedFunctionType} for this
-		 * {@link SectionFunction}.
+		 * Name of the {@link ManagedFunctionType} for this {@link SectionFunction}.
 		 */
 		private final String functionTypeName;
 
 		/**
-		 * {@link FunctionNamespaceNode} containing this
-		 * {@link ManagedFunctionNode}.
+		 * {@link FunctionNamespaceNode} containing this {@link ManagedFunctionNode}.
 		 */
 		private final FunctionNamespaceNode namespaceNode;
 
@@ -135,8 +133,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	private final Map<String, FunctionFlowNode> functionFlows = new HashMap<String, FunctionFlowNode>();
 
 	/**
-	 * {@link FunctionObjectNode} instances by their {@link FunctionObject}
-	 * names.
+	 * {@link FunctionObjectNode} instances by their {@link FunctionObject} names.
 	 */
 	private final Map<String, FunctionObjectNode> functionObjects = new HashMap<String, FunctionObjectNode>();
 
@@ -158,14 +155,13 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	private final List<AdministrationNode> postFunctionAdministration = new LinkedList<AdministrationNode>();
 
 	/**
-	 * Listing of {@link OfficeGovernance} instances providing
-	 * {@link Governance} over this {@link ManagedFunction}.
+	 * Listing of {@link OfficeGovernance} instances providing {@link Governance}
+	 * over this {@link ManagedFunction}.
 	 */
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
-	 * {@link ResponsibleTeam} responsible for this
-	 * {@link OfficeSectionFunction}.
+	 * {@link ResponsibleTeam} responsible for this {@link OfficeSectionFunction}.
 	 */
 	private final ResponsibleTeamNode teamResponsible;
 
@@ -332,7 +328,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// Initialise the escalations
 		for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
-			String escalationName = escalationType.getEscalationType().getName();
+			String escalationName = escalationType.getEscalationType();
 			NodeUtil.getInitialisedNode(escalationName, this.functionEscalations, this.context,
 					() -> this.context.createFunctionFlowNode(escalationName, true, this),
 					(escalation) -> escalation.initialise());
@@ -422,7 +418,9 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			// Obtain type details for linking
 			String flowName = flowType.getFlowName();
 			Enum<?> flowKey = flowType.getKey();
-			Class<?> argumentType = flowType.getArgumentType();
+			String argumentTypeName = flowType.getArgumentType();
+			Class<?> argumentType = (argumentTypeName == null) ? null
+					: this.context.getRootSourceContext().loadClass(argumentTypeName);
 
 			// Obtain the linked function for the flow
 			FunctionFlowNode flowNode = this.functionFlows.get(flowName);
@@ -458,7 +456,9 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 				// Obtain next details for linking
 				String nextFunctionName = nextFunction.getQualifiedFunctionName();
-				Class<?> argumentType = functionType.getReturnType();
+				String argumentTypeName = functionType.getReturnType();
+				Class<?> argumentType = (argumentTypeName == null) ? null
+						: this.context.getRootSourceContext().loadClass(argumentTypeName);
 
 				// Link to next function
 				functionBuilder.setNextFunction(nextFunctionName, argumentType);
@@ -473,7 +473,8 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			// Obtain the type details for linking
 			String objectName = objectType.getObjectName();
 			Enum<?> objectKey = objectType.getKey();
-			Class<?> objectClass = objectType.getObjectType();
+			String objectClassName = objectType.getObjectType();
+			Class<?> objectClass = this.context.getRootSourceContext().loadClass(objectClassName);
 
 			// Obtain the object node for the function object
 			FunctionObjectNode objectNode = this.functionObjects.get(objectName);
@@ -516,7 +517,9 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			ManagedFunctionEscalationType escalationType = escalationTypes[i];
 
 			// Obtain the type details for linking
-			Class<? extends Throwable> escalationClass = escalationType.getEscalationType();
+			String escalationClassName = escalationType.getEscalationType();
+			Class<? extends Throwable> escalationClass = (Class<? extends Throwable>) this.context
+					.getRootSourceContext().loadClass(escalationClassName);
 			String escalationName = escalationClass.getName();
 
 			// Obtain the linked function for the escalation
@@ -748,7 +751,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		public ExecutionManagedFunction getManagedFunction(ManagedFunctionEscalationType escalationType) {
 
 			// Obtain the escalation
-			String escalationName = escalationType.getEscalationType().getName();
+			String escalationName = escalationType.getEscalationType();
 			FunctionFlowNode flow = this.node.functionEscalations.get(escalationName);
 			if (flow == null) {
 				return null;

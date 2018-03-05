@@ -301,8 +301,7 @@ public class SectionChangesImpl implements SectionChanges {
 	 *
 	 * @param managedFunctionType
 	 *            {@link ManagedFunctionType}.
-	 * @return {@link ManagedFunctionkModel} for the
-	 *         {@link ManagedFunctionType}.
+	 * @return {@link ManagedFunctionkModel} for the {@link ManagedFunctionType}.
 	 */
 	private ManagedFunctionModel createManagedFunctionModel(ManagedFunctionType<?, ?> managedFunctionType) {
 
@@ -314,7 +313,7 @@ public class SectionChangesImpl implements SectionChanges {
 			Enum<?> key = managedFunctionObjectType.getKey();
 			ManagedFunctionObjectModel managedFunctionObject = new ManagedFunctionObjectModel(
 					managedFunctionObjectType.getObjectName(), (key == null ? null : key.name()),
-					managedFunctionObjectType.getObjectType().getName(), false);
+					managedFunctionObjectType.getObjectType(), false);
 			managedFunction.addManagedFunctionObject(managedFunctionObject);
 		}
 
@@ -568,8 +567,7 @@ public class SectionChangesImpl implements SectionChanges {
 				"Remove namespace " + namespaceModel.getFunctionNamespaceName()) {
 
 			/**
-			 * {@link FunctionModel} instances associated to
-			 * {@link FunctionNamespaceModel}.
+			 * {@link FunctionModel} instances associated to {@link FunctionNamespaceModel}.
 			 */
 			private FunctionModel[] functions;
 
@@ -748,8 +746,7 @@ public class SectionChangesImpl implements SectionChanges {
 
 			// Obtain the details of the function type
 			final String managedFunctionName = functionType.getFunctionName();
-			Class<?> returnClass = functionType.getReturnType();
-			final String returnTypeName = (returnClass == null ? null : returnClass.getName());
+			final String returnTypeName = functionType.getReturnType();
 
 			// Determine if include the function
 			if ((includeFunctionNames.size() > 0) && (!(includeFunctionNames.contains(managedFunctionName)))) {
@@ -760,7 +757,8 @@ public class SectionChangesImpl implements SectionChanges {
 			ManagedFunctionModel findManagedFunction = this.getExistingItem(managedFunctionName,
 					managedFunctionNameMapping, existingManagedFunctions);
 			final ManagedFunctionModel managedFunction = ((findManagedFunction == null)
-					? new ManagedFunctionModel(managedFunctionName) : findManagedFunction);
+					? new ManagedFunctionModel(managedFunctionName)
+					: findManagedFunction);
 			targetFunctionList.add(managedFunction);
 
 			// Refactor details of managed function (and functions)
@@ -821,8 +819,7 @@ public class SectionChangesImpl implements SectionChanges {
 				final String objectName = objectType.getObjectName();
 				Enum<?> objectKey = objectType.getKey();
 				final String objectKeyName = (objectKey == null ? null : objectKey.name());
-				Class<?> objectClass = objectType.getObjectType();
-				final String objectTypeName = (objectClass == null ? null : objectClass.getName());
+				final String objectTypeName = objectType.getObjectType();
 
 				// Obtain the object for object type (may need to create)
 				ManagedFunctionObjectModel findManagedFunctionObject = this.getExistingItem(objectName,
@@ -939,14 +936,14 @@ public class SectionChangesImpl implements SectionChanges {
 					final String flowName = flowType.getFlowName();
 					Enum<?> flowKey = flowType.getKey();
 					final String flowKeyName = (flowKey == null ? null : flowKey.name());
-					Class<?> argumentType = flowType.getArgumentType();
-					final String argumentTypeName = (argumentType == null ? null : argumentType.getName());
+					final String argumentTypeName = flowType.getArgumentType();
 
 					// Obtain the flow for flow type (may need to create)
 					FunctionFlowModel findFunctionFlow = this.getExistingItem(flowName, flowTargetToExisting,
 							existingFunctionFlows);
 					final FunctionFlowModel functionFlow = ((findFunctionFlow == null)
-							? new FunctionFlowModel(flowName, flowKeyName, argumentTypeName) : findFunctionFlow);
+							? new FunctionFlowModel(flowName, flowKeyName, argumentTypeName)
+							: findFunctionFlow);
 					targetFlowOrder[f] = functionFlow;
 
 					// Refactor details of flow
@@ -1037,13 +1034,14 @@ public class SectionChangesImpl implements SectionChanges {
 					ManagedFunctionEscalationType escalationType = escalationTypes[e];
 
 					// Obtain details of the escalation type
-					final String escalationTypeName = escalationType.getEscalationType().getName();
+					final String escalationTypeName = escalationType.getEscalationType();
 
 					// Obtain the escalation for escalation type (may create)
 					FunctionEscalationModel findFunctionEscalation = this.getExistingItem(escalationTypeName,
 							escalationTargetToExisting, existingFunctionEscalations);
 					final FunctionEscalationModel functionEscalation = ((findFunctionEscalation == null)
-							? new FunctionEscalationModel(escalationTypeName) : findFunctionEscalation);
+							? new FunctionEscalationModel(escalationTypeName)
+							: findFunctionEscalation);
 					targetEscalationOrder[e] = functionEscalation;
 
 					// Refactor details of escalation
@@ -1338,19 +1336,17 @@ public class SectionChangesImpl implements SectionChanges {
 			final ManagedFunctionModel managedFunction, ManagedFunctionType<M, F> functionType) {
 
 		// Create the function model
-		Class<?> returnType = functionType.getReturnType();
 		final FunctionModel function = new FunctionModel(functionName, false, null,
-				managedFunction.getManagedFunctionName(), (returnType != null ? returnType.getName() : null));
+				managedFunction.getManagedFunctionName(), functionType.getReturnType());
 		for (ManagedFunctionFlowType<?> flowType : functionType.getFlowTypes()) {
 			Enum<?> key = flowType.getKey();
-			Class<?> argumentType = flowType.getArgumentType();
 			FunctionFlowModel functionFlow = new FunctionFlowModel(flowType.getFlowName(),
-					(key != null ? key.name() : null), (argumentType != null ? argumentType.getName() : null));
+					(key != null ? key.name() : null), flowType.getArgumentType());
 			function.addFunctionFlow(functionFlow);
 		}
 		for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
 			FunctionEscalationModel functionEscalation = new FunctionEscalationModel(
-					escalationType.getEscalationType().getName());
+					escalationType.getEscalationType());
 			function.addFunctionEscalation(functionEscalation);
 		}
 
@@ -2065,7 +2061,7 @@ public class SectionChangesImpl implements SectionChanges {
 
 		// Create the managed object source
 		final SectionManagedObjectSourceModel managedObjectSource = new SectionManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectClass().getName(),
+				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectType(),
 				String.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property.getName(), property.getValue()));
@@ -2074,7 +2070,7 @@ public class SectionChangesImpl implements SectionChanges {
 		// Add the flows for the managed object source
 		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
 			managedObjectSource.addSectionManagedObjectSourceFlow(
-					new SectionManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType().getName()));
+					new SectionManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType()));
 		}
 
 		// Return the change to add the managed object source
@@ -2150,7 +2146,7 @@ public class SectionChangesImpl implements SectionChanges {
 		// Add the dependencies for the managed object
 		for (ManagedObjectDependencyType<?> dependency : managedObjectType.getDependencyTypes()) {
 			managedObject.addSectionManagedObjectDependency(new SectionManagedObjectDependencyModel(
-					dependency.getDependencyName(), dependency.getDependencyType().getName()));
+					dependency.getDependencyName(), dependency.getDependencyType()));
 		}
 
 		// Create connection to the managed object source

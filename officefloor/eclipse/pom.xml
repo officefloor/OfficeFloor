@@ -23,15 +23,19 @@
 		<module>features/net.officefloor.feature</module>
 
 		<!-- WoOF eclipse functionality -->
+<!--  
 		<module>plugins/net.officefloor.woof</module>
 		<module>features/net.officefloor.woof.feature</module>
-
+-->
 		<!-- Extras eclipse functionality -->
+<!--  
 		<module>plugins/net.officefloor.extras</module>
 		<module>features/net.officefloor.extras.feature</module>
-
+-->
 		<!-- Deploy to Update Site -->
+<!--  
 		<module>update.site</module>
+-->
 	</modules>
 	<build>
 		<plugins>
@@ -171,7 +175,7 @@
 					<!-- Eclipse -->
 					<id>eclipse-neon</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/neon</url>
+					<url>http://download.eclipse.org/releases/oxygen</url>
 				</repository>
 			</repositories>
 		</profile>

@@ -43,6 +43,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -86,8 +87,8 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * <p>
 	 * Obtains the {@link OfficeFloorCompiler}.
 	 * <p>
-	 * Note the {@link OfficeFloorSource} is overridden on compiling to ensure
-	 * the extensions are available.
+	 * Note the {@link OfficeFloorSource} is overridden on compiling to ensure the
+	 * extensions are available.
 	 * 
 	 * @return {@link OfficeFloorCompiler}.
 	 */
@@ -215,9 +216,10 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	}
 
 	/**
-	 * {@link OfficeSource} that allows {@link CompileOfficeExtension} instances
-	 * to configure it.
+	 * {@link OfficeSource} that allows {@link CompileOfficeExtension} instances to
+	 * configure it.
 	 */
+	@PrivateSource
 	private class CompileOfficeSource extends AbstractOfficeSource {
 
 		/**
@@ -309,9 +311,10 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	}
 
 	/**
-	 * {@link SectionSource} that allows {@link CompileSectionExtension}
-	 * instances to configure it.
+	 * {@link SectionSource} that allows {@link CompileSectionExtension} instances
+	 * to configure it.
 	 */
+	@PrivateSource
 	private class CompileSectionSource extends AbstractSectionSource {
 
 		/*

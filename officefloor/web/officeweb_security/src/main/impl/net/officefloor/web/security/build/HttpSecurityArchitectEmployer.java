@@ -54,6 +54,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.web.accept.AcceptNegotiator;
@@ -900,8 +901,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 * @param securable
 		 *            {@link HttpSecurable}.
 		 * @param httpSecurityName
-		 *            Name of the {@link HttpSecurity}. May be
-		 *            <code>null</code>.
+		 *            Name of the {@link HttpSecurity}. May be <code>null</code>.
 		 */
 		private HttpSecurerBuilderImpl(HttpSecurable securable, String httpSecurityName) {
 			this.securable = securable;
@@ -1014,11 +1014,12 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * {@link HttpFlowSecurer} {@link SectionSource}.
 	 */
+	@PrivateSource
 	private class HttpFlowSecurerSectionSource extends AbstractSectionSource {
 
 		/**
-		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction}
-		 * annotation processing.
+		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction} annotation
+		 * processing.
 		 */
 		private final HttpFlowSecurerAnnotation annotation;
 
@@ -1072,6 +1073,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * {@link HttpFlowSecurer} {@link ManagedFunctionSource}.
 	 */
+	@PrivateSource
 	private class HttpFlowSecurerManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -1080,8 +1082,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		private static final String FUNCTION_NAME = "secure";
 
 		/**
-		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction}
-		 * annotation processing.
+		 * {@link HttpFlowSecurerAnnotation} for {@link ManagedFunction} annotation
+		 * processing.
 		 */
 		private final HttpFlowSecurerAnnotation annotation;
 
@@ -1162,8 +1164,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 * @param allRoles
 		 *            All Roles.
 		 * @param argumentType
-		 *            Type of argument to pass through on secure {@link Flow}.
-		 *            May be <code>null</code> for no argument.
+		 *            Type of argument to pass through on secure {@link Flow}. May be
+		 *            <code>null</code> for no argument.
 		 */
 		private HttpFlowSecurerAnnotation(String qualifier, String[] anyRoles, String[] allRoles,
 				Class<?> argumentType) {

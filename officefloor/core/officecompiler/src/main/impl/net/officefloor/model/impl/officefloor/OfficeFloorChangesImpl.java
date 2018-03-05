@@ -629,7 +629,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Add the dependencies for the managed object
 		for (ManagedObjectDependencyType<?> dependency : managedObjectType.getDependencyTypes()) {
 			managedObject.addOfficeFloorManagedObjectDependency(new OfficeFloorManagedObjectDependencyModel(
-					dependency.getDependencyName(), dependency.getDependencyType().getName()));
+					dependency.getDependencyName(), dependency.getDependencyType()));
 		}
 
 		// Create connection to the managed object source
@@ -799,7 +799,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Create the managed object source
 		final OfficeFloorManagedObjectSourceModel managedObjectSource = new OfficeFloorManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectClass().getName(),
+				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectType(),
 				String.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property.getName(), property.getValue()));
@@ -808,7 +808,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Add the flows for the managed object source
 		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
 			managedObjectSource.addOfficeFloorManagedObjectSourceFlow(
-					new OfficeFloorManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType().getName()));
+					new OfficeFloorManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType()));
 		}
 
 		// Add the teams for the managed object source

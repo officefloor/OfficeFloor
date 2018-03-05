@@ -33,6 +33,7 @@ import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.AuthenticateRequest;
 import net.officefloor.web.security.HttpAccessControl;
@@ -50,6 +51,7 @@ import net.officefloor.web.spi.security.RatifyContext;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class AuthenticationContextManagedObjectSource<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
 		extends
 		AbstractManagedObjectSource<AuthenticationContextManagedObjectSource.Dependencies, AuthenticationContextManagedObjectSource.Flows> {
@@ -196,8 +198,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 * Notifies the change.
 		 * 
 		 * @param authenticateRequest
-		 *            Optional {@link AuthenticateRequest}. May be
-		 *            <code>null</code>.
+		 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
 		 * @param logoutRequest
 		 *            Optional {@link LogoutRequest}. May be <code>null</code>.
 		 */
@@ -224,8 +225,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 * @param escalation
 		 *            Possible {@link Escalation}.
 		 * @param authenticateRequest
-		 *            Optional {@link AuthenticateRequest}. May be
-		 *            <code>null</code>.
+		 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
 		 * @param logoutRequest
 		 *            Optional {@link LogoutRequest}. May be <code>null</code>.
 		 */

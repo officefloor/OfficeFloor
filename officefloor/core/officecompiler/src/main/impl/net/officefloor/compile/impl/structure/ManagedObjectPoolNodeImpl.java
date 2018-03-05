@@ -125,11 +125,11 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	 * @param managedObjectPoolName
 	 *            Name of this {@link ManagedObjectPoolNode}.
 	 * @param containingSectionNode
-	 *            Containing {@link SectionNode}. <code>null</code> if contained
-	 *            in the {@link Office} or {@link OfficeFloor}.
+	 *            Containing {@link SectionNode}. <code>null</code> if contained in
+	 *            the {@link Office} or {@link OfficeFloor}.
 	 * @param containingOfficeNode
-	 *            Containing {@link OfficeNode}. <code>null</code> if contained
-	 *            in the {@link OfficeFloor}.
+	 *            Containing {@link OfficeNode}. <code>null</code> if contained in
+	 *            the {@link OfficeFloor}.
 	 * @param containingOfficeFloorNode
 	 *            Containing {@link OfficeFloorNode}.
 	 * @param context
@@ -292,7 +292,8 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 		// Ensure able to pool managed objects from managed object source
 		Class<?> pooledObjectType = poolType.getPooledObjectType();
-		Class<?> objectType = managedObjectType.getObjectClass();
+		String objectTypeName = managedObjectType.getObjectType();
+		Class<?> objectType = this.context.getRootSourceContext().loadClass(objectTypeName);
 		if (!pooledObjectType.isAssignableFrom(objectType)) {
 			this.context.getCompilerIssues().addIssue(this, "Pooled object " + pooledObjectType.getName()
 					+ " must be super (or same) type for ManagedObjectSource object " + objectType.getName());

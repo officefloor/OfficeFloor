@@ -23,6 +23,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
@@ -34,6 +35,7 @@ import net.officefloor.web.spi.security.HttpChallengeContext;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpChallengeContextManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**

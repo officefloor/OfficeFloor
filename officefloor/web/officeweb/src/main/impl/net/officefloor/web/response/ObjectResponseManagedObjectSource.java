@@ -30,6 +30,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpEscalationContext;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
@@ -51,6 +52,7 @@ import net.officefloor.web.build.NoAcceptHandlersException;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class ObjectResponseManagedObjectSource
 		extends AbstractManagedObjectSource<ObjectResponseManagedObjectSource.ObjectResponseDependencies, None>
 		implements HttpEscalationHandler {
@@ -73,8 +75,7 @@ public class ObjectResponseManagedObjectSource
 	private AcceptNegotiator<ContentTypeCache> objectNegotiator;
 
 	/**
-	 * {@link AcceptNegotiator} for the {@link Escalation}
-	 * {@link ContentTypeCache}.
+	 * {@link AcceptNegotiator} for the {@link Escalation} {@link ContentTypeCache}.
 	 */
 	private AcceptNegotiator<ContentTypeCache> escalationNegotiator;
 
@@ -289,8 +290,8 @@ public class ObjectResponseManagedObjectSource
 	 * @param object
 	 *            Object for the response.
 	 * @param head
-	 *            Head {@link AcceptType} for the linked list of
-	 *            {@link AcceptType} instances.
+	 *            Head {@link AcceptType} for the linked list of {@link AcceptType}
+	 *            instances.
 	 * @param cache
 	 *            {@link ContentTypeCache} instances.
 	 * @param responderFactory

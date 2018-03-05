@@ -27,6 +27,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.route.WebRouter;
@@ -36,6 +37,7 @@ import net.officefloor.web.route.WebRouter;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpApplicationStateManagedObjectSource extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject, HttpApplicationState {
 

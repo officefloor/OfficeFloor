@@ -25,6 +25,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.ValueLoader;
 
@@ -33,6 +34,7 @@ import net.officefloor.web.value.load.ValueLoader;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpArgumentManagedObjectSource
 		extends AbstractManagedObjectSource<HttpArgumentManagedObjectSource.HttpArgumentDependencies, None> {
 

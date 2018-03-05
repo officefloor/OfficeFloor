@@ -25,6 +25,7 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the
@@ -32,6 +33,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpApplicationObjectManagedObjectSource
 		extends AbstractManagedObjectSource<HttpApplicationObjectManagedObjectSource.Dependencies, None> {
 
@@ -107,8 +109,7 @@ public class HttpApplicationObjectManagedObjectSource
 		private final Class<?> objectClass;
 
 		/**
-		 * Specific name to bind the object into the
-		 * {@link HttpApplicationState}.
+		 * Specific name to bind the object into the {@link HttpApplicationState}.
 		 */
 		private final String bindName;
 

@@ -51,6 +51,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
@@ -141,8 +142,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	private final List<HttpResourceSource> httpResourceSources = new LinkedList<>();
 
 	/**
-	 * {@link Map} of {@link HttpResource} path to its
-	 * {@link OfficeFlowSinkNode}.
+	 * {@link Map} of {@link HttpResource} path to its {@link OfficeFlowSinkNode}.
 	 */
 	private final Map<String, OfficeFlowSinkNode> linkedResources = new HashMap<>();
 
@@ -432,6 +432,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	/**
 	 * {@link SectionSource} to service the {@link HttpResource}.
 	 */
+	@PrivateSource
 	private class HttpResourceSectionSource extends AbstractSectionSource {
 
 		/**
@@ -584,6 +585,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	/**
 	 * {@link ManagedFunctionSource} for the {@link ServiceHttpRequestFunction}.
 	 */
+	@PrivateSource
 	private static class ServiceHttpRequestManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -614,9 +616,9 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} for the
-	 * {@link AbstractSendHttpFileFunction}.
+	 * {@link ManagedFunctionSource} for the {@link AbstractSendHttpFileFunction}.
 	 */
+	@PrivateSource
 	private static class SendHttpFileManagedFunctionSource<R> extends AbstractManagedFunctionSource {
 
 		/**
@@ -671,9 +673,9 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} for the
-	 * {@link TriggerSendHttpFileFunction}.
+	 * {@link ManagedFunctionSource} for the {@link TriggerSendHttpFileFunction}.
 	 */
+	@PrivateSource
 	private static class TriggerSendHttpFileManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**

@@ -52,17 +52,17 @@ public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 	Object[] getAnnotations();
 
 	/**
-	 * Obtains the type of {@link Object} returned from the
+	 * Obtains the type name of {@link Object} returned from the
 	 * {@link ManagedFunction} that is to be used as the argument to the next
 	 * {@link ManagedFunction}.
 	 * 
-	 * @return Return type of the {@link ManagedFunction}.
+	 * @return Return type name of the {@link ManagedFunction}.
 	 */
-	Class<?> getReturnType();
+	String getReturnType();
 
 	/**
-	 * Obtains the {@link Enum} providing the keys for the dependent
-	 * {@link Object} instances.
+	 * Obtains the {@link Enum} providing the keys for the dependent {@link Object}
+	 * instances.
 	 * 
 	 * @return {@link Enum} providing the dependent {@link Object} keys or
 	 *         <code>null</code> if {@link Indexed} or no dependencies.
@@ -70,9 +70,8 @@ public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 	Class<M> getObjectKeyClass();
 
 	/**
-	 * Obtains the {@link ManagedFunctionObjectType} definitions for the
-	 * dependent {@link Object} instances required by the
-	 * {@link ManagedFunction}.
+	 * Obtains the {@link ManagedFunctionObjectType} definitions for the dependent
+	 * {@link Object} instances required by the {@link ManagedFunction}.
 	 * 
 	 * @return {@link ManagedFunctionObjectType} definitions for the dependent
 	 *         {@link Object} instances required by the {@link ManagedFunction}.
@@ -80,12 +79,12 @@ public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 	ManagedFunctionObjectType<M>[] getObjectTypes();
 
 	/**
-	 * Obtains the {@link Enum} providing the keys for the {@link Flow}
-	 * instances instigated by the {@link ManagedFunction}.
+	 * Obtains the {@link Enum} providing the keys for the {@link Flow} instances
+	 * instigated by the {@link ManagedFunction}.
 	 * 
 	 * @return {@link Enum} providing instigated {@link Flow} keys or
-	 *         <code>null</code> if {@link Indexed} or no instigated
-	 *         {@link Flow} instances.
+	 *         <code>null</code> if {@link Indexed} or no instigated {@link Flow}
+	 *         instances.
 	 */
 	Class<F> getFlowKeyClass();
 
@@ -102,9 +101,8 @@ public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 	 * Obtains the {@link ManagedFunctionEscalationType} definitions for the
 	 * possible {@link EscalationFlow} instances by the {@link ManagedFunction}.
 	 * 
-	 * @return {@link ManagedFunctionEscalationType} definitions for the
-	 *         possible {@link EscalationFlow} instances by the
-	 *         {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionEscalationType} definitions for the possible
+	 *         {@link EscalationFlow} instances by the {@link ManagedFunction}.
 	 */
 	ManagedFunctionEscalationType[] getEscalationTypes();
 

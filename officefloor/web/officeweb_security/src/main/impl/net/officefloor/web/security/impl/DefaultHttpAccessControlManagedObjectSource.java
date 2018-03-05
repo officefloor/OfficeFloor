@@ -25,6 +25,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 
@@ -33,6 +34,7 @@ import net.officefloor.web.security.HttpAuthentication;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class DefaultHttpAccessControlManagedObjectSource
 		extends AbstractManagedObjectSource<DefaultHttpAccessControlManagedObjectSource.Dependencies, None> {
 

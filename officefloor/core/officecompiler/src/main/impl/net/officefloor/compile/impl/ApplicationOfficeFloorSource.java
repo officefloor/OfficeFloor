@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.source.PrivateSource;
 
 /**
  * <p>
@@ -38,6 +39,7 @@ import net.officefloor.frame.api.manage.Office;
  *
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class ApplicationOfficeFloorSource extends AbstractOfficeFloorSource {
 
 	/**
@@ -64,6 +66,7 @@ public class ApplicationOfficeFloorSource extends AbstractOfficeFloorSource {
 	/**
 	 * {@link OfficeSource} to create an empty {@link Office}.
 	 */
+	@PrivateSource
 	private static class ApplicationOfficeSource extends AbstractOfficeSource {
 
 		@Override

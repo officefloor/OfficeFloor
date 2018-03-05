@@ -27,8 +27,8 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionFlowTypeImpl<F extends Enum<F>> implements ManagedFunctionFlowType<F>,
-		ManagedFunctionFlowTypeBuilder<F> {
+public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
+		implements ManagedFunctionFlowType<F>, ManagedFunctionFlowTypeBuilder<F> {
 
 	/**
 	 * Index of this {@link ManagedFunctionFlowType}.
@@ -102,8 +102,8 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>> implements ManagedFu
 	}
 
 	@Override
-	public Class<?> getArgumentType() {
-		return this.argumentType;
+	public String getArgumentType() {
+		return this.argumentType == null ? null : this.argumentType.getName();
 	}
 
 	@Override

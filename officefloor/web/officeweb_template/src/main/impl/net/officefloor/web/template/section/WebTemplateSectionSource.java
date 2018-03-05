@@ -64,6 +64,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
@@ -104,6 +105,7 @@ import net.officefloor.web.value.retrieve.ValueRetrieverSource;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class WebTemplateSectionSource extends ClassSectionSource {
 
 	/**
@@ -118,26 +120,24 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Name of the {@link SectionInput} for rendering this
-	 * {@link ParsedTemplate}.
+	 * Name of the {@link SectionInput} for rendering this {@link ParsedTemplate}.
 	 */
 	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
 
 	/**
-	 * Name of the {@link SectionOutput} for redirect to the
-	 * {@link WebTemplate}.
+	 * Name of the {@link SectionOutput} for redirect to the {@link WebTemplate}.
 	 */
 	public static final String REDIRECT_TEMPLATE_OUTPUT_NAME = "redirectToTemplate";
 
 	/**
-	 * Name of the {@link SectionOutput} for flow after completion of rending
-	 * the {@link ParsedTemplate}.
+	 * Name of the {@link SectionOutput} for flow after completion of rending the
+	 * {@link ParsedTemplate}.
 	 */
 	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
 
 	/**
-	 * Prefix on a {@link ParsedTemplateSection} name to indicate it is an
-	 * override section.
+	 * Prefix on a {@link ParsedTemplateSection} name to indicate it is an override
+	 * section.
 	 */
 	public static final String OVERRIDE_SECTION_PREFIX = ":";
 
@@ -147,14 +147,13 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_INHERITED_TEMPLATES_COUNT = "template.inherit.count";
 
 	/**
-	 * Name of {@link Property} to obtain the raw {@link ParsedTemplate}
-	 * content.
+	 * Name of {@link Property} to obtain the raw {@link ParsedTemplate} content.
 	 */
 	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
 
 	/**
-	 * Name of {@link Property} providing the location of the
-	 * {@link WebTemplate} content.
+	 * Name of {@link Property} providing the location of the {@link WebTemplate}
+	 * content.
 	 */
 	public static final String PROPERTY_TEMPLATE_LOCATION = "template.location";
 
@@ -166,8 +165,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_TEMPLATE_LOCATION_CHARSET = "template.location.charset";
 
 	/**
-	 * Name of {@link Property} for the {@link Class} providing the backing
-	 * logic to the template.
+	 * Name of {@link Property} for the {@link Class} providing the backing logic to
+	 * the template.
 	 */
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
@@ -183,8 +182,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 	/**
 	 * Name of {@link Property} for the {@link Method} name on the logic
-	 * {@link Class} that will return an object containing the values for the
-	 * path parameters in redirecting to this {@link WebTemplate}.
+	 * {@link Class} that will return an object containing the values for the path
+	 * parameters in redirecting to this {@link WebTemplate}.
 	 */
 	public static final String PROPERTY_REDIRECT_VALUES_FUNCTION = "template.redirect.values.function";
 
@@ -195,8 +194,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_BEAN_PREFIX = "bean.";
 
 	/**
-	 * Name of {@link Property} to indicate if the {@link ParsedTemplate}
-	 * requires a secure {@link ServerHttpConnection}.
+	 * Name of {@link Property} to indicate if the {@link ParsedTemplate} requires a
+	 * secure {@link ServerHttpConnection}.
 	 */
 	public static final String PROPERTY_TEMPLATE_SECURE = "template.secure";
 
@@ -309,8 +308,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Loads the link names from the {@link ParsedTemplateSectionContent}
-	 * instances.
+	 * Loads the link names from the {@link ParsedTemplateSectionContent} instances.
 	 * 
 	 * @param contents
 	 *            {@link ParsedTemplateSectionContent} instances.
@@ -371,8 +369,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Obtains the {@link ParsedTemplateSection} name (possibly removing
-	 * override prefix).
+	 * Obtains the {@link ParsedTemplateSection} name (possibly removing override
+	 * prefix).
 	 * 
 	 * @param sectionName
 	 *            {@link ParsedTemplateSection} raw name.
@@ -513,9 +511,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				.parse(new StringReader(templateInheritanceHierarchy[0]));
 
 		/*
-		 * Keep track of all link names. This is to allow inherited links to be
-		 * known even if they do not end up in the resulting inherited template
-		 * (i.e. containing sections have been overridden).
+		 * Keep track of all link names. This is to allow inherited links to be known
+		 * even if they do not end up in the resulting inherited template (i.e.
+		 * containing sections have been overridden).
 		 */
 		Set<String> knownLinkNames = new HashSet<String>();
 		for (ParsedLink link : getParsedTemplateLinkNames(highestAncestorTemplate)) {
@@ -748,7 +746,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 						"No method by name '" + redirectValuesFunctionName + "' on logic class " + sectionClassName);
 			} else {
 				// Obtain the redirect values type
-				redirectValuesType = this.getFunctionTypeByName(redirectValuesFunctionName).getReturnType();
+				String redirectValuesTypeName = this.getFunctionTypeByName(redirectValuesFunctionName).getReturnType();
+				redirectValuesType = context.loadClass(redirectValuesTypeName);
 			}
 		}
 		if (redirectValuesFunction == null) {
@@ -865,7 +864,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Obtain the return type for the template
-				Class<?> returnType = beanFunction.type.getReturnType();
+				String returnTypeName = beanFunction.type.getReturnType();
+				Class<?> returnType = returnTypeName == null ? null : context.loadClass(returnTypeName);
 				if ((returnType == null) || (Void.class.equals(returnType))) {
 					// Must provide return if require a bean
 					if (isRequireBean) {
@@ -1066,8 +1066,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private final Method method;
 
 		/**
-		 * Type of parameter for {@link SectionFunction}. <code>null</code>
-		 * indicates no parameter.
+		 * Type of parameter for {@link SectionFunction}. <code>null</code> indicates no
+		 * parameter.
 		 */
 		private final Class<?> parameter;
 
@@ -1081,8 +1081,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * @param method
 		 *            {@link Method} for the {@link SectionFunction}.
 		 * @param parameter
-		 *            Type of parameter for {@link SectionFunction}.
-		 *            <code>null</code> indicates no parameter.
+		 *            Type of parameter for {@link SectionFunction}. <code>null</code>
+		 *            indicates no parameter.
 		 */
 		private TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Method method,
 				Class<?> parameter) {
@@ -1156,8 +1156,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * @param functionFlow
 		 *            {@link FunctionFlow} to be linked.
 		 * @param functionType
-		 *            {@link ManagedFunctionType} of the {@link ManagedFunction}
-		 *            for the {@link FunctionFlow}.
+		 *            {@link ManagedFunctionType} of the {@link ManagedFunction} for the
+		 *            {@link FunctionFlow}.
 		 * @param flowInterfaceType
 		 *            Flow interface type.
 		 * @param flowMethod
@@ -1187,9 +1187,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private String templateContent;
 
 		/**
-		 * {@link Set} to be populated with keys to {@link ManagedFunction}
-		 * instances that are not to have the template rendered on their
-		 * completion.
+		 * {@link Set} to be populated with keys to {@link ManagedFunction} instances
+		 * that are not to have the template rendered on their completion.
 		 */
 		private final Set<String> nonRenderTemplateTaskKeys;
 
@@ -1202,9 +1201,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 *            {@link PropertyList} to configure the
 		 *            {@link WebTemplateExtension}.
 		 * @param nonRenderTemplateTaskKeys
-		 *            {@link Set} to be populated with keys to
-		 *            {@link ManagedFunction} instances that are not to have the
-		 *            template rendered on their completion.
+		 *            {@link Set} to be populated with keys to {@link ManagedFunction}
+		 *            instances that are not to have the template rendered on their
+		 *            completion.
 		 */
 		private WebTemplateSectionExtensionContextImpl(String templateContent, PropertyList extensionProperties,
 				Set<String> nonRenderTemplateTaskKeys) {
@@ -1272,6 +1271,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * {@link ManagedFunctionSource} to provide the
 	 * {@link WebTemplateInitialFunction}.
 	 */
+	@PrivateSource
 	static class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -1352,6 +1352,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
+	@PrivateSource
 	public static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -1602,11 +1603,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Iterates over the array objects sending them to the
-	 * {@link ParsedTemplate} for rendering.
+	 * Iterates over the array objects sending them to the {@link ParsedTemplate}
+	 * for rendering.
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
+	@PrivateSource
 	static class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**

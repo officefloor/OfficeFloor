@@ -83,7 +83,8 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 				// Validate can add objects for function parameters
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
-					Class<?> objectType = type.getObjectType();
+					String objectTypeName = type.getObjectType();
+					Class<?> objectType = context.getOfficeSourceContext().loadClass(objectTypeName);
 					if (objectType.isAnnotationPresent(MockAnnotation.class)) {
 
 						// Obtain the function object
@@ -157,7 +158,8 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 				// Validate can add objects for function parameters
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
-					Class<?> objectType = type.getObjectType();
+					String objectTypeName = type.getObjectType();
+					Class<?> objectType = context.getOfficeSourceContext().loadClass(objectTypeName);
 					if (objectType.isAnnotationPresent(MockAnnotation.class)) {
 
 						// Obtain the function object
@@ -200,8 +202,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can augment {@link ManagedFunction} by adding
-	 * {@link Administration}.
+	 * Ensure can augment {@link ManagedFunction} by adding {@link Administration}.
 	 */
 	public void testAugmentManagedFunctionWithAdministration() throws Exception {
 

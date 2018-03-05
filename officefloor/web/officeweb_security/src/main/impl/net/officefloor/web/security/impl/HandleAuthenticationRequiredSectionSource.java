@@ -34,6 +34,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.security.AuthenticationRequiredException;
@@ -48,6 +49,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSource {
 
 	/**
@@ -140,6 +142,7 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 	 * {@link ManagedFunctionSource} to handle the
 	 * {@link AuthenticationRequiredException}.
 	 */
+	@PrivateSource
 	private class HandleAuthenticationRequiredManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		@Override

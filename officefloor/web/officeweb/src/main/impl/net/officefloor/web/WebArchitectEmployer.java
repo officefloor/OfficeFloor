@@ -83,8 +83,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext} used to source {@link Property}
-	 *            values to configure the {@link WebArchitect}.
+	 *            {@link OfficeSourceContext} used to source {@link Property} values
+	 *            to configure the {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(OfficeArchitect officeArchitect,
@@ -101,13 +101,13 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Employs a {@link WebArchitect}.
 	 * 
 	 * @param contextPath
-	 *            Context path for the web application. May be <code>null</code>
-	 *            for no context path.
+	 *            Context path for the web application. May be <code>null</code> for
+	 *            no context path.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext} used to source {@link Property}
-	 *            values to configure the {@link WebArchitect}.
+	 *            {@link OfficeSourceContext} used to source {@link Property} values
+	 *            to configure the {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(String contextPath, OfficeArchitect officeArchitect,
@@ -146,9 +146,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final Map<String, OfficeManagedObject> httpArguments = new HashMap<>();
 
 	/**
-	 * Singleton {@link List} provided to the
-	 * {@link HttpObjectManagedObjectSource} for the registered
-	 * {@link HttpObjectParserFactory} instances.
+	 * Singleton {@link List} provided to the {@link HttpObjectManagedObjectSource}
+	 * for the registered {@link HttpObjectParserFactory} instances.
 	 */
 	private final List<HttpObjectParserFactory> singletonObjectParserList = new LinkedList<>();
 
@@ -203,8 +202,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Instantiate.
 	 * 
 	 * @param contextPath
-	 *            Context path for the web application. May be <code>null</code>
-	 *            for no context path.
+	 *            Context path for the web application. May be <code>null</code> for
+	 *            no context path.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
@@ -486,7 +485,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 			ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
 			for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
-				Class<?> objectType = functionParameterType.getObjectType();
+				Class<?> objectType = this.officeSourceContext.loadClass(functionParameterType.getObjectType());
 
 				// Determine if in-line configuration of dependency
 				for (Object annotation : functionParameterType.getAnnotations()) {
@@ -648,8 +647,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		protected final RouteInput routeInput;
 
 		/**
-		 * {@link OfficeFlowSourceNode} to configure handling of this
-		 * {@link HttpInput}.
+		 * {@link OfficeFlowSourceNode} to configure handling of this {@link HttpInput}.
 		 */
 		private final OfficeFlowSourceNode input;
 
@@ -694,8 +692,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	private class HttpUrlContinuationImpl extends HttpInputImpl implements HttpUrlContinuation {
 
 		/**
-		 * Mapping of parameter type to {@link OfficeFlowSinkNode} for
-		 * redirects.
+		 * Mapping of parameter type to {@link OfficeFlowSinkNode} for redirects.
 		 */
 		private final Map<String, OfficeFlowSinkNode> redirects = new HashMap<>();
 
@@ -742,9 +739,10 @@ public class WebArchitectEmployer implements WebArchitect {
 				return flowSinkNode;
 
 			} catch (Exception ex) {
-				throw WebArchitectEmployer.this.officeArchitect
-						.addIssue("Failed to create redirect to " + this.applicationPath + (parameterTypeName == null
-								? " with null value type" : " with values type " + parameterTypeName), ex);
+				throw WebArchitectEmployer.this.officeArchitect.addIssue("Failed to create redirect to "
+						+ this.applicationPath + (parameterTypeName == null ? " with null value type"
+								: " with values type " + parameterTypeName),
+						ex);
 			}
 		}
 	}

@@ -96,8 +96,7 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	 *            {@link Enum} providing keys for dependent {@link Object}
 	 *            instances.
 	 * @param flowKeyClass
-	 *            {@link Enum} providing keys for instigated {@link Flow}
-	 *            instances.
+	 *            {@link Enum} providing keys for instigated {@link Flow} instances.
 	 */
 	public ManagedFunctionTypeImpl(String functionName, ManagedFunctionFactory<M, F> functionFactory,
 			Class<M> objectKeyClass, Class<F> flowKeyClass) {
@@ -191,8 +190,8 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public Class<?> getReturnType() {
-		return this.returnType;
+	public String getReturnType() {
+		return this.returnType == null ? null : this.returnType.getName();
 	}
 
 }

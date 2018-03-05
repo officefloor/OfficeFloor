@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -40,6 +41,7 @@ import net.officefloor.web.build.WebArchitect;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpObjectManagedObjectSource<T>
 		extends AbstractManagedObjectSource<HttpObjectManagedObjectSource.HttpObjectDependencies, None> {
 
@@ -61,8 +63,8 @@ public class HttpObjectManagedObjectSource<T>
 	private final String[] acceptedContentTypes;
 
 	/**
-	 * {@link List} of {@link HttpObjectParserFactory} instances that are loaded
-	 * by the {@link WebArchitect}.
+	 * {@link List} of {@link HttpObjectParserFactory} instances that are loaded by
+	 * the {@link WebArchitect}.
 	 */
 	private final List<HttpObjectParserFactory> parserFactories;
 
@@ -79,8 +81,8 @@ public class HttpObjectManagedObjectSource<T>
 	 * @param acceptedContentTypes
 	 *            Accepted <code>content-type</code> values.
 	 * @param parserFactories
-	 *            {@link List} of {@link HttpObjectParserFactory} instances that
-	 *            are loaded by the {@link WebArchitect}.
+	 *            {@link List} of {@link HttpObjectParserFactory} instances that are
+	 *            loaded by the {@link WebArchitect}.
 	 */
 	public HttpObjectManagedObjectSource(Class<T> objectClass, String[] acceptedContentTypes,
 			List<HttpObjectParserFactory> parserFactories) {

@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -35,6 +36,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class Singleton extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject, ExtensionFactory<Object> {
 

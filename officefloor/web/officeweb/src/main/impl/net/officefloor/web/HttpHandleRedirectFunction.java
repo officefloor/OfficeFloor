@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpStatus;
@@ -34,6 +35,7 @@ import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpHandleRedirectFunction
 		implements ManagedFunctionFactory<HttpHandleRedirectFunction.HttpHandleRedirectDependencies, Indexed>,
 		ManagedFunction<HttpHandleRedirectFunction.HttpHandleRedirectDependencies, Indexed> {

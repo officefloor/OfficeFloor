@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaDat
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
@@ -46,6 +47,7 @@ import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implements ManagedObjectSource<O, Indexed> {
 
 	/**

@@ -34,18 +34,18 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 
 /**
  * Standard {@link AdministrationFigure}.
  *
  * @author Daniel Sagenschneider
  */
-public class StandardAdministratorFigure extends AbstractOfficeFloorFigure implements AdministrationFigure {
+public class StandardAdministrationFigure extends AbstractOfficeFloorFigure implements AdministrationFigure {
 
 	/**
 	 * {@link Label} containing the {@link AdministrationModel} name.
@@ -58,7 +58,7 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure imple
 	 * @param context
 	 *            {@link AdministrationFigureContext}.
 	 */
-	public StandardAdministratorFigure(AdministrationFigureContext context) {
+	public StandardAdministrationFigure(AdministrationFigureContext context) {
 
 		// Figure
 		Figure figure = new Figure();
@@ -73,8 +73,8 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure imple
 
 		// Register the anchor to external and office managed objects
 		ConnectionAnchor moOrFunctionAnchor = moOrFunction.getConnectionAnchor();
-		this.registerConnectionAnchor(ExternalManagedObjectToAdministrationModel.class, moOrFunctionAnchor);
-		this.registerConnectionAnchor(OfficeManagedObjectToAdministrationModel.class, moOrFunctionAnchor);
+		this.registerConnectionAnchor(AdministrationToExternalManagedObjectModel.class, moOrFunctionAnchor);
+		this.registerConnectionAnchor(AdministrationToOfficeManagedObjectModel.class, moOrFunctionAnchor);
 
 		// Register anchor to office functions
 		this.registerConnectionAnchor(OfficeFunctionToPreAdministrationModel.class, moOrFunctionAnchor);

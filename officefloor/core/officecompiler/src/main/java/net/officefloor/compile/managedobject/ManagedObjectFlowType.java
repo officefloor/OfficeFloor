@@ -51,11 +51,11 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	int getIndex();
 
 	/**
-	 * Obtains the type of the argument passed to the {@link Flow}.
+	 * Obtains the type name of the argument passed to the {@link Flow}.
 	 * 
-	 * @return Type of argument passed to the {@link Flow}. May be
+	 * @return Type name of argument passed to the {@link Flow}. May be
 	 *         <code>null</code> to indicate no argument.
 	 */
-	Class<?> getArgumentType();
+	String getArgumentType();
 
 }

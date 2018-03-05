@@ -32,8 +32,7 @@ import net.officefloor.frame.internal.structure.Flow;
 public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectType<D> {
 
 	/**
-	 * {@link Class} of the {@link Object} returned from the
-	 * {@link ManagedObject}.
+	 * {@link Class} of the {@link Object} returned from the {@link ManagedObject}.
 	 */
 	private final Class<?> objectClass;
 
@@ -60,7 +59,7 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	/**
 	 * Extension interfaces supported by the {@link ManagedObject}.
 	 */
-	private final Class<?>[] extensionInterfaces;
+	private final Class<?>[] extensionTypes;
 
 	/**
 	 * Initiate.
@@ -76,17 +75,17 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	 *            {@link ManagedObjectFlowType} instances.
 	 * @param teams
 	 *            {@link ManagedObjectTeamType} instances.
-	 * @param extensionInterfaces
-	 *            Extension interfaces supported by the {@link ManagedObject}.
+	 * @param extensionTypes
+	 *            Extension types supported by the {@link ManagedObject}.
 	 */
 	public ManagedObjectTypeImpl(Class<?> objectClass, boolean isInput, ManagedObjectDependencyType<D>[] dependencies,
-			ManagedObjectFlowType<?>[] flows, ManagedObjectTeamType[] teams, Class<?>[] extensionInterfaces) {
+			ManagedObjectFlowType<?>[] flows, ManagedObjectTeamType[] teams, Class<?>[] extensionTypes) {
 		this.objectClass = objectClass;
 		this.isInput = isInput;
 		this.dependencies = dependencies;
 		this.flows = flows;
 		this.teams = teams;
-		this.extensionInterfaces = extensionInterfaces;
+		this.extensionTypes = extensionTypes;
 	}
 
 	/*
@@ -94,8 +93,8 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	 */
 
 	@Override
-	public Class<?> getObjectClass() {
-		return this.objectClass;
+	public String getObjectType() {
+		return this.objectClass.getName();
 	}
 
 	@Override
@@ -119,8 +118,12 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	}
 
 	@Override
-	public Class<?>[] getExtensionInterfaces() {
-		return this.extensionInterfaces;
+	public String[] getExtensionTypes() {
+		String[] extensionTypeNames = new String[this.extensionTypes.length];
+		for (int i = 0; i < extensionTypeNames.length; i++) {
+			extensionTypeNames[i] = this.extensionTypes[i].getName();
+		}
+		return extensionTypeNames;
 	}
 
 }

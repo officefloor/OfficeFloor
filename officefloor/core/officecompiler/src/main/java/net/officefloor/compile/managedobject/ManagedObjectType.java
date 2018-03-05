@@ -31,17 +31,17 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface ManagedObjectType<D extends Enum<D>> {
 
 	/**
-	 * Obtains the {@link Class} of the object returned from
+	 * Obtains the {@link Class} name of the object returned from
 	 * {@link ManagedObject}.
 	 * 
-	 * @return The {@link Class} of the object being managed by the
+	 * @return The {@link Class} name of the object being managed by the
 	 *         {@link ManagedObject}.
 	 */
-	Class<?> getObjectClass();
+	String getObjectType();
 
 	/**
-	 * Obtains the {@link ManagedObjectDependencyType} definitions of the
-	 * required dependencies for the {@link ManagedObject}.
+	 * Obtains the {@link ManagedObjectDependencyType} definitions of the required
+	 * dependencies for the {@link ManagedObject}.
 	 * 
 	 * @return {@link ManagedObjectDependencyType} definitions of the required
 	 *         dependencies for the {@link ManagedObject}.
@@ -66,8 +66,7 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	 * instances required to be linked for the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectFlowType} definitions of the {@link Flow}
-	 *         instances required to be linked for the
-	 *         {@link ManagedObjectSource}.
+	 *         instances required to be linked for the {@link ManagedObjectSource}.
 	 */
 	ManagedObjectFlowType<?>[] getFlowTypes();
 
@@ -75,16 +74,16 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	 * Obtains the {@link ManagedObjectTeamType} definitions of {@link Team}
 	 * instances required by the {@link ManagedObject}.
 	 * 
-	 * @return {@link ManagedObjectTeamType} definitions of {@link Team}
-	 *         instances required by the {@link ManagedObject}.
+	 * @return {@link ManagedObjectTeamType} definitions of {@link Team} instances
+	 *         required by the {@link ManagedObject}.
 	 */
 	ManagedObjectTeamType[] getTeamTypes();
 
 	/**
-	 * Obtains the extension interfaces supported by the {@link ManagedObject}.
+	 * Obtains the extension types supported by the {@link ManagedObject}.
 	 * 
-	 * @return Extension interfaces supported by the {@link ManagedObject}.
+	 * @return Extension types supported by the {@link ManagedObject}.
 	 */
-	Class<?>[] getExtensionInterfaces();
+	String[] getExtensionTypes();
 
 }

@@ -27,8 +27,8 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionEscalationTypeImpl implements ManagedFunctionEscalationType,
-		ManagedFunctionEscalationTypeBuilder {
+public class ManagedFunctionEscalationTypeImpl
+		implements ManagedFunctionEscalationType, ManagedFunctionEscalationTypeBuilder {
 
 	/**
 	 * Type of the {@link EscalationFlow}.
@@ -64,9 +64,8 @@ public class ManagedFunctionEscalationTypeImpl implements ManagedFunctionEscalat
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <E extends Throwable> Class<E> getEscalationType() {
-		return (Class<E>) this.escalationType;
+	public String getEscalationType() {
+		return this.escalationType == null ? null : this.escalationType.getName();
 	}
 
 	@Override

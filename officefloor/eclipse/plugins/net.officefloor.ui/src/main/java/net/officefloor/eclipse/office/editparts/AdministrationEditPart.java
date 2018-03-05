@@ -62,8 +62,8 @@ public class AdministrationEditPart
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getExternalManagedObjects());
-		models.addAll(this.getCastedModel().getOfficeManagedObjects());
+		models.addAll(this.getCastedModel().getAdministeredExternalManagedObjects());
+		models.addAll(this.getCastedModel().getAdministeredOfficeManagedObjects());
 		models.addAll(this.getCastedModel().getPreOfficeFunctions());
 		models.addAll(this.getCastedModel().getPostOfficeFunctions());
 	}
@@ -125,10 +125,10 @@ public class AdministrationEditPart
 			this.refreshSourceConnections();
 			break;
 
-		case ADD_EXTERNAL_MANAGED_OBJECT:
-		case REMOVE_EXTERNAL_MANAGED_OBJECT:
-		case ADD_OFFICE_MANAGED_OBJECT:
-		case REMOVE_OFFICE_MANAGED_OBJECT:
+		case ADD_ADMINISTERED_EXTERNAL_MANAGED_OBJECT:
+		case REMOVE_ADMINISTERED_EXTERNAL_MANAGED_OBJECT:
+		case ADD_ADMINISTERED_OFFICE_MANAGED_OBJECT:
+		case REMOVE_ADMINISTERED_OFFICE_MANAGED_OBJECT:
 		case ADD_PRE_OFFICE_FUNCTION:
 		case REMOVE_PRE_OFFICE_FUNCTION:
 		case ADD_POST_OFFICE_FUNCTION:

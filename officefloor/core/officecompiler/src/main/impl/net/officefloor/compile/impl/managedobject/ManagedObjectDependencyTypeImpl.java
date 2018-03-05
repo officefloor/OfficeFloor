@@ -25,8 +25,7 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements
-		ManagedObjectDependencyType<D> {
+public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements ManagedObjectDependencyType<D> {
 
 	/**
 	 * Name describing this dependency.
@@ -67,8 +66,7 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements
 	 * @param label
 	 *            Label describing the dependency. May be <code>null</code>.
 	 */
-	public ManagedObjectDependencyTypeImpl(int index, Class<?> type,
-			String typeQualifier, D key, String label) {
+	public ManagedObjectDependencyTypeImpl(int index, Class<?> type, String typeQualifier, D key, String label) {
 		this.index = index;
 		this.type = type;
 		this.typeQualifier = typeQualifier;
@@ -99,8 +97,8 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public Class<?> getDependencyType() {
-		return this.type;
+	public String getDependencyType() {
+		return this.type.getName();
 	}
 
 	@Override

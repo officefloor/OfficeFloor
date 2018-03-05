@@ -29,6 +29,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
@@ -40,6 +41,7 @@ import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFact
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class SectionClassManagedFunctionSource extends ClassManagedFunctionSource {
 
 	/*

@@ -51,9 +51,11 @@ import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -70,8 +72,8 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
-import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
@@ -145,8 +147,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * @param changes
 	 *            List to be populated with the {@link Change} instances that
 	 *            occurred to clean up the {@link OfficeSubSectionModel}.
-	 * @return <code>true</code> if {@link OfficeSubSectionModel} may be
-	 *         cleaned.
+	 * @return <code>true</code> if {@link OfficeSubSectionModel} may be cleaned.
 	 */
 	private boolean cleanSubSection(final OfficeSubSectionModel subSection, List<Change<?>> changes) {
 
@@ -217,9 +218,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * 
 	 * @param function
 	 *            {@link OfficeFunctionModel}.
-	 * @return {@link OfficeSectionModel} containing the
-	 *         {@link OfficeFunctionModel} or <code>null</code> if
-	 *         {@link OfficeFunctionModel} not found in {@link OfficeModel}.
+	 * @return {@link OfficeSectionModel} containing the {@link OfficeFunctionModel}
+	 *         or <code>null</code> if {@link OfficeFunctionModel} not found in
+	 *         {@link OfficeModel}.
 	 */
 	private OfficeSectionModel getContainingOfficeSection(OfficeFunctionModel function) {
 
@@ -981,7 +982,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Create the managed object source
 		final OfficeManagedObjectSourceModel managedObjectSource = new OfficeManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectClass().getName(),
+				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectType(),
 				String.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property.getName(), property.getValue()));
@@ -990,7 +991,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// Add the flows for the managed object source
 		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
 			managedObjectSource.addOfficeManagedObjectSourceFlow(
-					new OfficeManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType().getName()));
+					new OfficeManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType()));
 		}
 
 		// Add the teams for the managed object source
@@ -1071,7 +1072,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// Add the dependencies for the managed object
 		for (ManagedObjectDependencyType<?> dependency : managedObjectType.getDependencyTypes()) {
 			managedObject.addOfficeManagedObjectDependency(new OfficeManagedObjectDependencyModel(
-					dependency.getDependencyName(), dependency.getDependencyType().getName()));
+					dependency.getDependencyName(), dependency.getDependencyType()));
 		}
 
 		// Create connection to the managed object source
@@ -1926,8 +1927,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministrationToExternalManagedObjectModel> linkExternalManagedObjectToAdministration(
-			ExternalManagedObjectModel externalManagedObject, AdministrationModel administration) {
+	public Change<AdministrationToExternalManagedObjectModel> linkAdministrationToExternalManagedObject(
+			AdministrationModel administration, ExternalManagedObjectModel externalManagedObject) {
 
 		// TODO test this method (linkExternalManagedObjectToAdministration)
 
@@ -1951,7 +1952,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministrationToExternalManagedObjectModel> removeExternalManagedObjectToAdministration(
+	public Change<AdministrationToExternalManagedObjectModel> removeAdministrationToExternalManagedObject(
 			final AdministrationToExternalManagedObjectModel externalManagedObjectToAdministration) {
 
 		// TODO test this method (removeExternalManagedObjectToAdministration)
@@ -1972,8 +1973,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministrationToOfficeManagedObjectModel> linkOfficeManagedObjectToAdministration(
-			OfficeManagedObjectModel managedObject, AdministrationModel administration) {
+	public Change<AdministrationToOfficeManagedObjectModel> linkAdministrationToOfficeManagedObject(
+			AdministrationModel administration, OfficeManagedObjectModel managedObject) {
 
 		// TODO test this method (linkOfficeManagedObjectToAdministration)
 
@@ -1997,7 +1998,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministrationToOfficeManagedObjectModel> removeOfficeManagedObjectToAdministration(
+	public Change<AdministrationToOfficeManagedObjectModel> removeAdministrationToOfficeManagedObject(
 			final AdministrationToOfficeManagedObjectModel managedObjectToAdministration) {
 
 		// TODO test this method (removeOfficeManagedObjectToAdministration)
@@ -2012,6 +2013,96 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				managedObjectToAdministration.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectToPreLoadAdministrationModel> linkOfficeManagedObjectToPreLoadAdministration(
+			OfficeManagedObjectModel officeManagedObject, AdministrationModel administration) {
+
+		// TODO test this method (linkOfficeManagedObjectToPreLoadAdministration)
+
+		// Create the connection
+		final OfficeManagedObjectToPreLoadAdministrationModel conn = new OfficeManagedObjectToPreLoadAdministrationModel();
+		conn.setOfficeManagedObject(officeManagedObject);
+		conn.setAdministration(administration);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeManagedObjectToPreLoadAdministrationModel>(conn, "Connect") {
+
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectToPreLoadAdministrationModel> removeOfficeManagedObjectToPreLoadAdministration(
+			OfficeManagedObjectToPreLoadAdministrationModel managedObjectToPreloadAdmin) {
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeManagedObjectToPreLoadAdministrationModel>(managedObjectToPreloadAdmin,
+				"Remove") {
+			@Override
+			public void apply() {
+				managedObjectToPreloadAdmin.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectToPreloadAdmin.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectToPreLoadAdministrationModel> linkExternalManagedObjectToPreLoadAdministration(
+			ExternalManagedObjectModel externalManagedObject, AdministrationModel administration) {
+
+		// TODO test this method (linkExternalManagedObjectToPreLoadAdministration)
+
+		// Create the connection
+		final ExternalManagedObjectToPreLoadAdministrationModel conn = new ExternalManagedObjectToPreLoadAdministrationModel();
+		conn.setExternalManagedObject(externalManagedObject);
+		conn.setAdministration(administration);
+
+		// Return change to add the connection
+		return new AbstractChange<ExternalManagedObjectToPreLoadAdministrationModel>(conn, "Connect") {
+
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectToPreLoadAdministrationModel> removeExternalManagedObjectToPreLoadAdministration(
+			ExternalManagedObjectToPreLoadAdministrationModel managedObjectToPreloadAdmin) {
+
+		// Return change to remove the connection
+		return new AbstractChange<ExternalManagedObjectToPreLoadAdministrationModel>(managedObjectToPreloadAdmin,
+				"Remove") {
+			@Override
+			public void apply() {
+				managedObjectToPreloadAdmin.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectToPreloadAdmin.connect();
 			}
 		};
 	}

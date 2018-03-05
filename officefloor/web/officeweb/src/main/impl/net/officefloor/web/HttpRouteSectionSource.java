@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpMethod;
@@ -63,6 +64,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpRouteSectionSource extends AbstractSectionSource {
 
 	/**
@@ -357,9 +359,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * @param applicationPath
 	 *            Application path for the redirect.
 	 * @param parameterType
-	 *            Type of parameter passed to the redirect
-	 *            {@link ManagedFunction} to source values for constructing the
-	 *            path. May be <code>null</code>.
+	 *            Type of parameter passed to the redirect {@link ManagedFunction}
+	 *            to source values for constructing the path. May be
+	 *            <code>null</code>.
 	 * @return {@link Redirect}.
 	 * @throws Exception
 	 *             If fails to add the redirect.
@@ -545,6 +547,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ManagedFunctionSource} for the {@link InterceptFunction}.
 	 */
+	@PrivateSource
 	private static class InterceptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -573,6 +576,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ManagedFunctionSource} for the {@link HttpRouteFunction}.
 	 */
+	@PrivateSource
 	private class HttpRouteManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -629,6 +633,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ManagedFunctionSource} for the {@link HttpHandleRedirectFunction}.
 	 */
+	@PrivateSource
 	private class HttpHandleRedirectFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -681,6 +686,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * {@link ManagedFunctionSource} for the
 	 * {@link InitialiseHttpRequestStateFunction}.
 	 */
+	@PrivateSource
 	private class InitialiseHttpRequestStateManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/*
@@ -710,6 +716,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ManagedFunctionSource} for the {@link HttpRedirectFunction}.
 	 */
+	@PrivateSource
 	private class RedirectManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -760,6 +767,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ManagedFunctionSource} for the {@link NotFoundFunction}.
 	 */
+	@PrivateSource
 	private class NotFoundManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/*

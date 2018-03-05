@@ -47,13 +47,13 @@ public interface ManagedFunctionFlowType<F extends Enum<F>> {
 	int getIndex();
 
 	/**
-	 * Obtains the type of the argument passed by the {@link ManagedFunction} to
-	 * the {@link Flow}.
+	 * Obtains the type name of the argument passed by the {@link ManagedFunction}
+	 * to the {@link Flow}.
 	 * 
-	 * @return Type of argument passed to {@link Flow}. May be <code>null</code>
-	 *         to indicate no argument.
+	 * @return Type name of argument passed to {@link Flow}. May be
+	 *         <code>null</code> to indicate no argument.
 	 */
-	Class<?> getArgumentType();
+	String getArgumentType();
 
 	/**
 	 * Obtains the {@link Enum} key for the {@link ManagedFunctionFlowType}.

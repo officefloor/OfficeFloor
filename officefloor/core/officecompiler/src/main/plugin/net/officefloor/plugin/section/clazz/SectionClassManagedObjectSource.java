@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 
@@ -32,6 +33,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class SectionClassManagedObjectSource extends ClassManagedObjectSource {
 
 	@Override
@@ -40,8 +42,7 @@ public class SectionClassManagedObjectSource extends ClassManagedObjectSource {
 		// Override to obtain both dependency and managed object fields
 		List<Field> dependencyFields = new LinkedList<Field>();
 		Class<?> interrogateClass = objectClass;
-		while ((interrogateClass != null)
-				&& (!Object.class.equals(interrogateClass))) {
+		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
 			for (Field field : interrogateClass.getDeclaredFields()) {
 				if ((field.getAnnotation(Dependency.class) != null)
 						|| (field.getAnnotation(ManagedObject.class) != null)) {

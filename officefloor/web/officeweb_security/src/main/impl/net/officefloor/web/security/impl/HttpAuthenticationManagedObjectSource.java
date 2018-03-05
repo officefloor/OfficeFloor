@@ -23,6 +23,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
@@ -32,6 +33,7 @@ import net.officefloor.web.spi.security.HttpAuthenticationFactory;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpAuthenticationManagedObjectSource<A, C>
 		extends AbstractManagedObjectSource<HttpAuthenticationManagedObjectSource.Dependencies, None> {
 

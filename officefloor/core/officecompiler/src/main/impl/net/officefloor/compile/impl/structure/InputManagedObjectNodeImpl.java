@@ -96,8 +96,8 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<>();
 
 	/**
-	 * Listing of pre-load {@link AdministrationNode} instances for the
-	 * particular {@link OfficeNode}.
+	 * Listing of pre-load {@link AdministrationNode} instances for the particular
+	 * {@link OfficeNode}.
 	 */
 	private final Map<OfficeNode, List<AdministrationNode>> preLoadAdministrationsPerOffice = new HashMap<>();
 
@@ -265,7 +265,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 				// Use the managed object type
 				qualifications = new TypeQualification[] {
-						new TypeQualificationImpl(null, managedObjectType.getObjectClass().getName()) };
+						new TypeQualificationImpl(null, managedObjectType.getObjectType()) };
 			}
 		}
 		return qualifications;

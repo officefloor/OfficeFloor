@@ -62,8 +62,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>> PropertyList validateSpecification(
@@ -93,8 +92,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>, S extends ManagedObjectSource<M, F>> PropertyList validateSpecification(
@@ -124,8 +122,8 @@ public class ManagedObjectLoaderUtil {
 
 	/**
 	 * Validates the {@link ManagedObjectType} contained in the
-	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
-	 * loaded from the {@link ManagedObjectSource}.
+	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType} loaded
+	 * from the {@link ManagedObjectSource}.
 	 * 
 	 * @param <M>
 	 *            Dependency keys type.
@@ -155,8 +153,8 @@ public class ManagedObjectLoaderUtil {
 
 	/**
 	 * Validates the {@link ManagedObjectType} contained in the
-	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
-	 * loaded from the {@link ManagedObjectSource}.
+	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType} loaded
+	 * from the {@link ManagedObjectSource}.
 	 * 
 	 * @param <M>
 	 *            Dependency keys type.
@@ -206,7 +204,7 @@ public class ManagedObjectLoaderUtil {
 		ManagedObjectType<M> eType = (ManagedObjectType<M>) expectedManagedObjectType;
 
 		// Verify the types match
-		Assert.assertEquals("Incorrect object type", eType.getObjectClass(), aType.getObjectClass());
+		Assert.assertEquals("Incorrect object type", eType.getObjectType(), aType.getObjectType());
 
 		// Verify input
 		Assert.assertEquals("Incorrect flagging input", eType.isInput(), aType.isInput());
@@ -253,8 +251,8 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		// Verify the extension interfaces
-		Class<?>[] eEis = eType.getExtensionInterfaces();
-		Class<?>[] aEis = aType.getExtensionInterfaces();
+		String[] eEis = eType.getExtensionTypes();
+		String[] aEis = aType.getExtensionTypes();
 		Assert.assertEquals("Incorrect number of extension interfaces", eEis.length, aEis.length);
 		for (int i = 0; i < eEis.length; i++) {
 			Assert.assertEquals("Incorrect extension interface " + i, eEis[i], aEis[i]);
@@ -266,8 +264,8 @@ public class ManagedObjectLoaderUtil {
 
 	/**
 	 * Convenience method to load the {@link ManagedObjectType} from the
-	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the
-	 * input {@link ManagedObjectSource} class.
+	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the input
+	 * {@link ManagedObjectSource} class.
 	 * 
 	 * @param <M>
 	 *            Dependency keys type.
@@ -413,8 +411,7 @@ public class ManagedObjectLoaderUtil {
 	}
 
 	/**
-	 * {@link ManagedObjectSource} to enable obtaining the
-	 * {@link MetaDataContext}.
+	 * {@link ManagedObjectSource} to enable obtaining the {@link MetaDataContext}.
 	 */
 	@TestSource
 	public static class CollectMetaDataContextManagedObjectSource extends AbstractManagedObjectSource<None, None> {
@@ -497,8 +494,8 @@ public class ManagedObjectLoaderUtil {
 		 */
 
 		@Override
-		public Class<?> getObjectClass() {
-			return this.objectClass;
+		public String getObjectType() {
+			return this.objectClass.getName();
 		}
 
 		@Override
@@ -523,8 +520,8 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
-		public Class<?>[] getExtensionInterfaces() {
-			return this.extensionInterfaces.toArray(new Class[0]);
+		public String[] getExtensionTypes() {
+			return this.extensionInterfaces.stream().map((clazz) -> clazz.getName()).toArray(String[]::new);
 		}
 
 		/*

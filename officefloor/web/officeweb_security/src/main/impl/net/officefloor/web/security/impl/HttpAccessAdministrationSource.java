@@ -25,6 +25,7 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.security.HttpAccess;
@@ -36,6 +37,7 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpAccessAdministrationSource extends AbstractAdministrationSource<HttpAccessControl, None, None> {
 
 	/**

@@ -164,7 +164,7 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 		}
 
 		// Obtain the type information
-		String dependencyType = object.getObjectType().getName();
+		String dependencyType = object.getObjectType();
 		String typeQualifier = object.getTypeQualifier();
 
 		// Obtain the dependent object type

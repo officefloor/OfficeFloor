@@ -30,9 +30,10 @@ import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.office.editparts.AdministrationEditPart;
+import net.officefloor.eclipse.office.editparts.AdministrationToExternalManagedObjectEditPart;
+import net.officefloor.eclipse.office.editparts.AdministrationToOfficeManagedObjectEditPart;
 import net.officefloor.eclipse.office.editparts.AdministrationToOfficeTeamEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
-import net.officefloor.eclipse.office.editparts.ExternalManagedObjectToAdministrationEditPart;
 import net.officefloor.eclipse.office.editparts.FunctionAdministrationJoinPointEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEscalationEditPart;
@@ -53,7 +54,6 @@ import net.officefloor.eclipse.office.editparts.OfficeManagedObjectSourceFlowEdi
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectSourceFlowToOfficeSectionInputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectSourceTeamEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectSourceTeamToOfficeTeamEditPart;
-import net.officefloor.eclipse.office.editparts.OfficeManagedObjectToAdministrationEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectToOfficeManagedObjectSourceEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionInputEditPart;
@@ -82,9 +82,10 @@ import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.impl.office.OfficeRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -104,7 +105,6 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -182,8 +182,8 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 				OfficeSectionOutputToOfficeSectionInputEditPart.class);
 		map.put(OfficeFunctionToOfficeTeamModel.class, OfficeFunctionToOfficeTeamEditPart.class);
 		map.put(AdministrationToOfficeTeamModel.class, AdministrationToOfficeTeamEditPart.class);
-		map.put(ExternalManagedObjectToAdministrationModel.class, ExternalManagedObjectToAdministrationEditPart.class);
-		map.put(OfficeManagedObjectToAdministrationModel.class, OfficeManagedObjectToAdministrationEditPart.class);
+		map.put(AdministrationToExternalManagedObjectModel.class, AdministrationToExternalManagedObjectEditPart.class);
+		map.put(AdministrationToOfficeManagedObjectModel.class, AdministrationToOfficeManagedObjectEditPart.class);
 		map.put(OfficeFunctionToPreAdministrationModel.class, OfficeFuntionToPreAdministrationEditPart.class);
 		map.put(OfficeFunctionToPostAdministrationModel.class, OfficeFunctionToPostAdministrationEditPart.class);
 		map.put(OfficeManagedObjectToOfficeManagedObjectSourceModel.class,
@@ -267,13 +267,13 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 		policy.addConnection(AdministrationModel.class, OfficeTeamModel.class,
 				(source, target, request) -> this.getModelChanges().linkAdministrationToOfficeTeam(source, target));
 
-		// Connect external managed object to administration
-		policy.addConnection(ExternalManagedObjectModel.class, AdministrationModel.class, (source, target,
-				request) -> this.getModelChanges().linkExternalManagedObjectToAdministration(source, target));
+		// Connect administration to external managed object
+		policy.addConnection(AdministrationModel.class, ExternalManagedObjectModel.class, (source, target,
+				request) -> this.getModelChanges().linkAdministrationToExternalManagedObject(source, target));
 
-		// Connect managed object to administration
-		policy.addConnection(OfficeManagedObjectModel.class, AdministrationModel.class, (source, target,
-				request) -> this.getModelChanges().linkOfficeManagedObjectToAdministration(source, target));
+		// Connect administration to managed object
+		policy.addConnection(AdministrationModel.class, OfficeManagedObjectModel.class, (source, target,
+				request) -> this.getModelChanges().linkAdministrationToOfficeManagedObject(source, target));
 
 		// Connect function to pre/post administration
 		policy.addConnection(AdministrationModel.class, OfficeSectionModel.class, (source, target, request) -> {
@@ -369,17 +369,17 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 		policy.addDelete(OfficeManagedObjectSourceTeamToOfficeTeamModel.class,
 				(target) -> this.getModelChanges().removeOfficeManagedObjectSourceTeamToOfficeTeam(target));
 
-		// Allow deleting administrator to team
+		// Allow deleting administration to team
 		policy.addDelete(AdministrationToOfficeTeamModel.class,
 				(target) -> this.getModelChanges().removeAdministrationToOfficeTeam(target));
 
-		// Allow deleting external managed object to administrator
-		policy.addDelete(ExternalManagedObjectToAdministrationModel.class,
-				(target) -> this.getModelChanges().removeExternalManagedObjectToAdministration(target));
+		// Allow deleting administrator to external managed object
+		policy.addDelete(AdministrationToExternalManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeAdministrationToExternalManagedObject(target));
 
-		// Allow deleting managed object to administration
-		policy.addDelete(OfficeManagedObjectToAdministrationModel.class,
-				(target) -> this.getModelChanges().removeOfficeManagedObjectToAdministration(target));
+		// Allow deleting administration to managed object
+		policy.addDelete(AdministrationToOfficeManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeAdministrationToOfficeManagedObject(target));
 
 		// Allow deleting function to pre administration
 		policy.addDelete(OfficeFunctionToPreAdministrationModel.class,

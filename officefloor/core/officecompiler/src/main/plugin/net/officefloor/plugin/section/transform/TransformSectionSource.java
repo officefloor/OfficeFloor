@@ -36,12 +36,14 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.source.PrivateSource;
 
 /**
  * Enables transforming a {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class TransformSectionSource extends AbstractSectionSource implements OfficeSectionTransformer {
 
 	/**
@@ -51,14 +53,14 @@ public class TransformSectionSource extends AbstractSectionSource implements Off
 	public static final String PROPERTY_SECTION_SOURCE_CLASS_NAME = "transform.section.source";
 
 	/**
-	 * Name of the {@link Property} for the location of the
-	 * {@link SectionSource} to transform.
+	 * Name of the {@link Property} for the location of the {@link SectionSource} to
+	 * transform.
 	 */
 	public static final String PROPERTY_SECTION_LOCATION = "transform.section.location";
 
 	/**
-	 * Prefix on the {@link Property} name for the {@link Property} instances of
-	 * the {@link SectionSource} to transform.
+	 * Prefix on the {@link Property} name for the {@link Property} instances of the
+	 * {@link SectionSource} to transform.
 	 */
 	public static final String PROPERTY_SECTION_PROPERTY_PREFIX = "transform.section.property.prefix.";
 

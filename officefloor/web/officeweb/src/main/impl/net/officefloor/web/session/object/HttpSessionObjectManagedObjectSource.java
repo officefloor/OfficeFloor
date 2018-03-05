@@ -24,6 +24,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObject.Dependencies;
 
@@ -33,6 +34,7 @@ import net.officefloor.web.session.object.HttpSessionObjectManagedObject.Depende
  * 
  * @author Daniel Sagenschneider
  */
+@PrivateSource
 public class HttpSessionObjectManagedObjectSource extends AbstractManagedObjectSource<Dependencies, None> {
 
 	/**

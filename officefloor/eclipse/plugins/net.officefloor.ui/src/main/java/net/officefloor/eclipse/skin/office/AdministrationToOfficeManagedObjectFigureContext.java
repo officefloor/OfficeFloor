@@ -17,13 +17,13 @@
  */
 package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 
 /**
- * Context to decorate the {@link OfficeManagedObjectToAdministrationModel}
+ * Context to decorate the {@link AdministrationToOfficeManagedObjectModel}
  * connection.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeManagedObjectToAdministrationFigureContext {
+public interface AdministrationToOfficeManagedObjectFigureContext {
 }

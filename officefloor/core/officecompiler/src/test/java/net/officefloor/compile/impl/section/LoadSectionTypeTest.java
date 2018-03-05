@@ -570,8 +570,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link SectionType} with multiple inputs, outputs or
-	 * objects.
+	 * Ensure can load {@link SectionType} with multiple inputs, outputs or objects.
 	 */
 	public void testSectionTypeWithMultipleInputsOutputObjects() {
 		// Load section type
@@ -607,7 +606,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load {@link FunctionNamespaceType}.
 	 */
-	public void testLoadWorkType() {
+	public void testLoadFunctionNamespaceType() {
 
 		// Record capture issues for loading work type
 		this.issues.recordCaptureIssues(false);
