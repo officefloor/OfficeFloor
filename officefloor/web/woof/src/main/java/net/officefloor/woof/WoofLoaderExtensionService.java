@@ -1,5 +1,5 @@
 /*
- * OfficeFloor - http://www.officefloor.net
+ * OOsfficeFloor - http://www.officefloor.net
  * Copyright (C) 2005-2013 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,15 +21,19 @@ import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
@@ -38,8 +42,11 @@ import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.template.build.WebTemplateArchitect;
 import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
+import net.officefloor.woof.model.objects.WoofObjectsModel;
 import net.officefloor.woof.model.objects.WoofObjectsRepositoryImpl;
+import net.officefloor.woof.model.resources.WoofResourcesModel;
 import net.officefloor.woof.model.resources.WoofResourcesRepositoryImpl;
+import net.officefloor.woof.model.teams.WoofTeamsModel;
 import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofRepositoryImpl;
@@ -61,6 +68,146 @@ import net.officefloor.woof.teams.WoofTeamsLoaderImpl;
  */
 public class WoofLoaderExtensionService implements OfficeFloorExtensionService, OfficeExtensionService {
 
+	/**
+	 * Runs within a context.
+	 */
+	public static interface WoofLoaderRunnable<R, E extends Throwable> {
+
+		/**
+		 * Runs.
+		 * 
+		 * @param context
+		 *            {@link WoofLoaderRunnableContext}.
+		 * @return Allows for return an object.
+		 * @throws E
+		 *             Potential failure.
+		 */
+		R run(WoofLoaderRunnableContext context) throws E;
+	}
+
+	/**
+	 * {@link WoofLoaderRunnable} context.
+	 */
+	public static interface WoofLoaderRunnableContext {
+
+		/**
+		 * Flags to not load the {@link HttpServer}.
+		 */
+		void notLoadHttpServer();
+
+		/**
+		 * Flags not to load the {@link WoofTeamsModel} configuration.
+		 */
+		void notLoadTeams();
+
+		/**
+		 * Flags not to load the {@link WoofModel} configuration.
+		 */
+		void notLoadWoof();
+
+		/**
+		 * Flags not to load the {@link WoofObjectsModel} configuration.
+		 */
+		void notLoadObjects();
+
+		/**
+		 * Flags not to load the {@link WoofResourcesModel} configuration.
+		 */
+		void notLoadResources();
+
+		/**
+		 * Flags not to load the {@link WoofExtensionService} instances.
+		 */
+		void notLoadWoofExtensions();
+	}
+
+	/**
+	 * Indicates to load the {@link HttpServer}.
+	 */
+	private static boolean isLoadHttpServer = true;
+
+	/**
+	 * Indicates to load the {@link WoofTeamsModel} configuration.
+	 */
+	private static boolean isLoadTeams = true;
+
+	/**
+	 * Indicates to load the {@link WoofModel} configuration.
+	 */
+	private static boolean isLoadWoof = true;
+
+	/**
+	 * Indicates to load the {@link WoofObjectsModel} configuration.
+	 */
+	private static boolean isLoadObjects = true;
+
+	/**
+	 * Indicates to load the {@link WoofResourcesModel} configuration.
+	 */
+	private static boolean isLoadResources = true;
+
+	/**
+	 * Indicates to load the {@link WoofExtensionService} instances.
+	 */
+	private static boolean isLoadWoofExtensions = true;
+
+	/**
+	 * Undertakes a contextual load.
+	 * 
+	 * @param runnable
+	 *            {@link WoofLoaderRunnable} to configure the contextual load.
+	 * @return Returned object from {@link WoofLoaderRunnable}.
+	 * @throws E
+	 *             Potential failure.
+	 */
+	public static <R, E extends Throwable> R contextualLoad(WoofLoaderRunnable<R, E> runnable) throws E {
+		try {
+
+			// Undertake runnable
+			return runnable.run(new WoofLoaderRunnableContext() {
+
+				@Override
+				public void notLoadWoof() {
+					isLoadWoof = false;
+				}
+
+				@Override
+				public void notLoadTeams() {
+					isLoadTeams = false;
+				}
+
+				@Override
+				public void notLoadResources() {
+					isLoadResources = false;
+				}
+
+				@Override
+				public void notLoadObjects() {
+					isLoadObjects = false;
+				}
+
+				@Override
+				public void notLoadHttpServer() {
+					isLoadHttpServer = false;
+				}
+
+				@Override
+				public void notLoadWoofExtensions() {
+					isLoadWoofExtensions = false;
+				}
+			});
+
+		} finally {
+			// Reset
+			isLoadHttpServer = true;
+			isLoadTeams = true;
+			isLoadWoof = true;
+			isLoadObjects = true;
+			isLoadResources = true;
+			isLoadWoofExtensions = true;
+		}
+	}
+
 	/*
 	 * ================= OfficeFloorExtensionService ===================
 	 */
@@ -69,29 +216,43 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)
 			throws Exception {
 
+		// Load the HTTP Server
+		if (isLoadHttpServer) {
+
+			// Obtain the input to service the HTTP requests
+			DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+			DeployedOfficeInput officeInput = office.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME,
+					WebArchitect.HANDLER_INPUT_NAME);
+
+			// Load the HTTP server
+			new HttpServer(officeInput, officeFloorDeployer, context);
+		}
+
 		// Load the optional teams configuration for the application
-		ConfigurationItem teamsConfiguration = context.getOptionalConfigurationItem("application.teams", null);
-		if (teamsConfiguration != null) {
-			// Load the teams configuration
-			WoofTeamsLoader teamsLoader = new WoofTeamsLoaderImpl(
-					new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
-			teamsLoader.loadWoofTeamsConfiguration(new WoofTeamsLoaderContext() {
+		if (isLoadTeams) {
+			ConfigurationItem teamsConfiguration = context.getOptionalConfigurationItem("application.teams", null);
+			if (teamsConfiguration != null) {
+				// Load the teams configuration
+				WoofTeamsLoader teamsLoader = new WoofTeamsLoaderImpl(
+						new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
+				teamsLoader.loadWoofTeamsConfiguration(new WoofTeamsLoaderContext() {
 
-				@Override
-				public OfficeFloorExtensionContext getOfficeFloorExtensionContext() {
-					return context;
-				}
+					@Override
+					public OfficeFloorExtensionContext getOfficeFloorExtensionContext() {
+						return context;
+					}
 
-				@Override
-				public OfficeFloorDeployer getOfficeFloorDeployer() {
-					return officeFloorDeployer;
-				}
+					@Override
+					public OfficeFloorDeployer getOfficeFloorDeployer() {
+						return officeFloorDeployer;
+					}
 
-				@Override
-				public ConfigurationItem getConfiguration() {
-					return teamsConfiguration;
-				}
-			});
+					@Override
+					public ConfigurationItem getConfiguration() {
+						return teamsConfiguration;
+					}
+				});
+			}
 		}
 	}
 
@@ -110,16 +271,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		HttpResourceArchitect resources = HttpResourceArchitectEmployer.employHttpResourceArchitect(web, security,
 				officeArchitect, context);
 
-		// Obtain the woof configuration (ensuring exists)
-		String woofLocation = "application.woof";
-		ConfigurationItem woofConfiguration = context.getConfigurationItem(woofLocation, null);
-		if (woofConfiguration == null) {
-			officeArchitect.addIssue("Can not find WoOF configuration file '" + woofLocation + "'");
-			return; // must have WoOF configuration
-		}
-
 		// Create the WoOF context
 		WoofContext woofContext = new WoofContext() {
+
 			@Override
 			public OfficeExtensionContext getOfficeExtensionContext() {
 				return context;
@@ -132,7 +286,7 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 			@Override
 			public ConfigurationItem getConfiguration() {
-				return woofConfiguration;
+				return context.getConfigurationItem("application.woof", null);
 			}
 
 			@Override
@@ -157,95 +311,103 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		};
 
 		// Load the WoOF configuration to the application
-		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
-		woofLoader.loadWoofConfiguration(woofContext);
+		if (isLoadWoof) {
+			WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
+			woofLoader.loadWoofConfiguration(woofContext);
+		}
 
 		// Load the optional objects configuration to the application
-		final ConfigurationItem objectsConfiguration = context.getOptionalConfigurationItem("application.objects",
-				null);
-		if (objectsConfiguration != null) {
+		if (isLoadObjects) {
+			final ConfigurationItem objectsConfiguration = context.getOptionalConfigurationItem("application.objects",
+					null);
+			if (objectsConfiguration != null) {
 
-			// Load the objects configuration
-			WoofObjectsLoader objectsLoader = new WoofObjectsLoaderImpl(
-					new WoofObjectsRepositoryImpl(new ModelRepositoryImpl()));
-			objectsLoader.loadWoofObjectsConfiguration(new WoofObjectsLoaderContext() {
+				// Load the objects configuration
+				WoofObjectsLoader objectsLoader = new WoofObjectsLoaderImpl(
+						new WoofObjectsRepositoryImpl(new ModelRepositoryImpl()));
+				objectsLoader.loadWoofObjectsConfiguration(new WoofObjectsLoaderContext() {
 
-				@Override
-				public OfficeExtensionContext getOfficeExtensionContext() {
-					return context;
-				}
+					@Override
+					public OfficeExtensionContext getOfficeExtensionContext() {
+						return context;
+					}
 
-				@Override
-				public OfficeArchitect getOfficeArchitect() {
-					return officeArchitect;
-				}
+					@Override
+					public OfficeArchitect getOfficeArchitect() {
+						return officeArchitect;
+					}
 
-				@Override
-				public ConfigurationItem getConfiguration() {
-					return objectsConfiguration;
-				}
-			});
+					@Override
+					public ConfigurationItem getConfiguration() {
+						return objectsConfiguration;
+					}
+				});
+			}
 		}
 
 		// Load the optional resources configuration to the application
-		final ConfigurationItem resourcesConfiguration = context.getOptionalConfigurationItem("application.resources",
-				null);
-		if (resourcesConfiguration != null) {
+		if (isLoadResources) {
+			final ConfigurationItem resourcesConfiguration = context
+					.getOptionalConfigurationItem("application.resources", null);
+			if (resourcesConfiguration != null) {
 
-			// Load the resources configuration
-			WoofResourcesLoader resourcesLoader = new WoofResourcesLoaderImpl(
-					new WoofResourcesRepositoryImpl(new ModelRepositoryImpl()));
-			resourcesLoader.loadWoofResourcesConfiguration(new WoofResourcesLoaderContext() {
+				// Load the resources configuration
+				WoofResourcesLoader resourcesLoader = new WoofResourcesLoaderImpl(
+						new WoofResourcesRepositoryImpl(new ModelRepositoryImpl()));
+				resourcesLoader.loadWoofResourcesConfiguration(new WoofResourcesLoaderContext() {
 
-				@Override
-				public OfficeExtensionContext getOfficeExtensionContext() {
-					return context;
-				}
+					@Override
+					public OfficeExtensionContext getOfficeExtensionContext() {
+						return context;
+					}
 
-				@Override
-				public OfficeArchitect getOfficeArchitect() {
-					return officeArchitect;
-				}
+					@Override
+					public OfficeArchitect getOfficeArchitect() {
+						return officeArchitect;
+					}
 
-				@Override
-				public HttpResourceArchitect getHttpResourceArchitect() {
-					return resources;
-				}
+					@Override
+					public HttpResourceArchitect getHttpResourceArchitect() {
+						return resources;
+					}
 
-				@Override
-				public ConfigurationItem getConfiguration() {
-					return resourcesConfiguration;
-				}
-			});
+					@Override
+					public ConfigurationItem getConfiguration() {
+						return resourcesConfiguration;
+					}
+				});
+			}
 		}
 
 		// Load the woof extensions
-		ClassLoader classLoader = context.getClassLoader();
-		ServiceLoader<WoofExtensionService> extensionServiceLoader = ServiceLoader.load(WoofExtensionService.class,
-				classLoader);
-		Iterator<WoofExtensionService> extensionIterator = extensionServiceLoader.iterator();
-		while (extensionIterator.hasNext()) {
+		if (isLoadWoofExtensions) {
+			ClassLoader classLoader = context.getClassLoader();
+			ServiceLoader<WoofExtensionService> extensionServiceLoader = ServiceLoader.load(WoofExtensionService.class,
+					classLoader);
+			Iterator<WoofExtensionService> extensionIterator = extensionServiceLoader.iterator();
+			while (extensionIterator.hasNext()) {
 
-			// Obtain the next extension service
-			WoofExtensionService extensionService;
-			try {
-				extensionService = extensionIterator.next();
-			} catch (ServiceConfigurationError ex) {
-				// Issue loading service
-				officeArchitect.addIssue(ex.getMessage(), ex);
+				// Obtain the next extension service
+				WoofExtensionService extensionService;
+				try {
+					extensionService = extensionIterator.next();
+				} catch (ServiceConfigurationError ex) {
+					// Issue loading service
+					officeArchitect.addIssue(ex.getMessage(), ex);
 
-				// Not loaded, so continue onto next
-				continue;
-			}
+					// Not loaded, so continue onto next
+					continue;
+				}
 
-			// Extend the application
-			try {
-				extensionService.extend(woofContext);
+				// Extend the application
+				try {
+					extensionService.extend(woofContext);
 
-			} catch (Throwable ex) {
-				// Issue with service
-				officeArchitect.addIssue(WoofLoaderExtensionService.class.getSimpleName() + " "
-						+ extensionService.getClass().getName() + " configuration failure: " + ex.getMessage(), ex);
+				} catch (Throwable ex) {
+					// Issue with service
+					officeArchitect.addIssue(WoofLoaderExtensionService.class.getSimpleName() + " "
+							+ extensionService.getClass().getName() + " configuration failure: " + ex.getMessage(), ex);
+				}
 			}
 		}
 

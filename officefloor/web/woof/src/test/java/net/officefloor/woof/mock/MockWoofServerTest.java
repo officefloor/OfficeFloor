@@ -15,23 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.woof;
-
-import java.io.IOException;
+package net.officefloor.woof.mock;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.WoofLoaderExtensionService;
 
 /**
  * Tests the {@link WoofLoaderExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
+public class MockWoofServerTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link MockWoofServer}.

@@ -537,7 +537,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			HttpResponse response = client.execute(new HttpGet(
 					this.serverLocation.createClientUrl(false, "/encoded-%3f-%23-+?query=string#fragment")));
 			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect response", "success", HttpClientTestUtil.getEntityBody(response));
+			assertEquals("Incorrect response", "success", HttpClientTestUtil.entityToString(response));
 		}
 	}
 
@@ -565,7 +565,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
 			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(isSecure, "/test")));
 			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.getEntityBody(response));
+			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.entityToString(response));
 		}
 	}
 
@@ -620,7 +620,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			StringWriter content = new StringWriter();
 			TEST_EXCEPTION.printStackTrace(new PrintWriter(content));
 			String contentText = content.toString();
-			assertEquals("Incorrect response", contentText, HttpClientTestUtil.getEntityBody(response));
+			assertEquals("Incorrect response", contentText, HttpClientTestUtil.entityToString(response));
 
 			// Ensure correct header information
 			assertEquals("Incorrect error Content-Length", String.valueOf(contentText.length()),

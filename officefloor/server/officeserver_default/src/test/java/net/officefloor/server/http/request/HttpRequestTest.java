@@ -275,7 +275,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				HttpResponse methodResponse = client.execute(method);
 
 				// Obtain the response body
-				String actualResponseBody = HttpClientTestUtil.getEntityBody(methodResponse);
+				String actualResponseBody = HttpClientTestUtil.entityToString(methodResponse);
 
 				// Indicate the expected response
 				ResponseConfig response = communication.response;

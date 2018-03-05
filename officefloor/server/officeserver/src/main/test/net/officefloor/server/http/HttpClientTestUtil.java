@@ -57,8 +57,8 @@ public class HttpClientTestUtil {
 	 * @throws IOException
 	 *             If fails to obtain content.
 	 */
-	public static String getEntityBody(HttpResponse response) throws IOException {
-		return getEntityBody(response, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+	public static String entityToString(HttpResponse response) throws IOException {
+		return entityToString(response, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class HttpClientTestUtil {
 	 * @throws IOException
 	 *             If fails to obtain content.
 	 */
-	public static String getEntityBody(HttpResponse response, Charset charset) throws IOException {
+	public static String entityToString(HttpResponse response, Charset charset) throws IOException {
 
 		// Obtain the entity
 		org.apache.http.HttpEntity entity = response.getEntity();
@@ -190,7 +190,7 @@ public class HttpClientTestUtil {
 		provider.setCredentials(new AuthScope(null, -1, realm, scheme),
 				new UsernamePasswordCredentials(username, password));
 		builder.setDefaultCredentialsProvider(provider);
-				
+
 		// Return the credentials provider
 		return provider;
 	}

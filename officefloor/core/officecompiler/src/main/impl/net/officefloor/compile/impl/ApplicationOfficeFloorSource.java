@@ -40,6 +40,11 @@ import net.officefloor.frame.api.manage.Office;
  */
 public class ApplicationOfficeFloorSource extends AbstractOfficeFloorSource {
 
+	/**
+	 * Name of the default {@link Office}.
+	 */
+	public static final String OFFICE_NAME = "OFFICE";
+
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// no properties required
@@ -53,8 +58,7 @@ public class ApplicationOfficeFloorSource extends AbstractOfficeFloorSource {
 
 	@Override
 	public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
-		// Add the single office
-		deployer.addDeployedOffice("OFFICE", new ApplicationOfficeSource(), null);
+		deployer.addDeployedOffice(OFFICE_NAME, new ApplicationOfficeSource(), null);
 	}
 
 	/**

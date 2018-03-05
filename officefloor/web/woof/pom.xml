@@ -40,5 +40,14 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officeweb_configuration</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_default</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

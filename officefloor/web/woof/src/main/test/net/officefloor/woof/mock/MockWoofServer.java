@@ -22,6 +22,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.woof.WoofLoaderExtensionService;
 
 /**
  * <p>
@@ -45,22 +46,29 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		// Create the server
 		MockWoofServer server = new MockWoofServer();
 
-		// Compile the OfficeFloor to run the server
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.officeFloor((context) -> {
+		// Undertake compiling (without HTTP Server loading)
+		return WoofLoaderExtensionService.contextualLoad((loadContext) -> {
 
-			// Configure server to send requests
-			DeployedOfficeInput input = context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
-			MockHttpServer.configureMockHttpServer(server, input);
-		});
-		compiler.office((context) -> {
-			// Configured by WoOF extension
-		});
-		server.officeFloor = compiler.compileAndOpenOfficeFloor();
+			// Mock the HTTP Server, so do not load
+			loadContext.notLoadHttpServer();
 
-		// Return the server
-		return server;
+			// Compile the OfficeFloor to run the server
+			CompileOfficeFloor compiler = new CompileOfficeFloor();
+			compiler.officeFloor((context) -> {
+
+				// Configure server to service requests
+				DeployedOfficeInput input = context.getDeployedOffice()
+						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
+				MockHttpServer.configureMockHttpServer(server, input);
+			});
+			compiler.office((context) -> {
+				// Configured by WoOF extension
+			});
+			server.officeFloor = compiler.compileAndOpenOfficeFloor();
+
+			// Return the server
+			return server;
+		});
 	}
 
 	/**

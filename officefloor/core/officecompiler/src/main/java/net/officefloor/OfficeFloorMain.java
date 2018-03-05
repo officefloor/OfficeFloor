@@ -19,6 +19,7 @@ package net.officefloor;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -127,15 +128,22 @@ public class OfficeFloorMain {
 	 * closed. Hence, avoids tests re-using the previous {@link OfficeFloor}
 	 * instance.
 	 *
+	 * @param propertyNameValuePairs
+	 *            Name/value {@link Property} pairs.
 	 * @return Opened {@link OfficeFloor}.
 	 */
-	public synchronized static OfficeFloor open() {
+	public synchronized static OfficeFloor open(String... propertyNameValuePairs) {
 
 		// Ensure closed
 		close();
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+			String name = propertyNameValuePairs[i];
+			String value = propertyNameValuePairs[i + 1];
+			compiler.addProperty(name, value);
+		}
 
 		// Handle listening on close of OfficeFloor
 		MainOfficeFloorListener closeListener = new MainOfficeFloorListener();
@@ -166,12 +174,13 @@ public class OfficeFloorMain {
 
 			// Determine if failed to open OfficeFloor
 			if (activeOfficeFloor.openResult instanceof Throwable) {
+				Throwable openFailure = (Throwable) activeOfficeFloor.openResult;
 
 				// Clear the active OfficeFloor as failed to open
 				activeOfficeFloor = null;
 
 				// Propagate failure
-				throw new Error("Failed to open OfficeFloor", (Throwable) activeOfficeFloor.openResult);
+				throw new Error("Failed to open OfficeFloor", openFailure);
 			}
 		}
 

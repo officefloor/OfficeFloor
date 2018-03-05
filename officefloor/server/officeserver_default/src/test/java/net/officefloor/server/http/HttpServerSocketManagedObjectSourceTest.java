@@ -76,7 +76,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 					response.getStatusLine().getStatusCode());
 			assertEquals("Incorrect header", "header", response.getFirstHeader("test").getValue());
 			assertEquals("Incorrect cookie", "test=cookie", response.getFirstHeader("set-cookie").getValue());
-			assertEquals("Incorrect content", "test", HttpClientTestUtil.getEntityBody(response));
+			assertEquals("Incorrect content", "test", HttpClientTestUtil.entityToString(response));
 		}
 	}
 
@@ -130,7 +130,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			HttpResponse response = client.execute(new HttpGet("https://localhost:7979"));
 			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
 					response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect content", "test", HttpClientTestUtil.getEntityBody(response));
+			assertEquals("Incorrect content", "test", HttpClientTestUtil.entityToString(response));
 		}
 	}
 
