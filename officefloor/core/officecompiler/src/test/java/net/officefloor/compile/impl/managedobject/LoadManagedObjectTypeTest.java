@@ -518,10 +518,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
 		ManagedObjectFlowType<?> defaulted = flowTypes[0];
 		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED", defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class.getName(), defaulted.getArgumentType());
+		assertEquals("Incorrect defaulted argument type", Void.class, defaulted.getArgumentType());
 		ManagedObjectFlowType<?> provided = flowTypes[1];
 		assertEquals("Incorrect name for provided argument flow", "1", provided.getFlowName());
-		assertEquals("Incorrect provided argument type", Connection.class.getName(), provided.getArgumentType());
+		assertEquals("Incorrect provided argument type", Connection.class, provided.getArgumentType());
 	}
 
 	/**
@@ -660,15 +660,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(), dependencyTypeOne.getIndex());
 		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(), dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Connection.class.getName(),
-				dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type", Connection.class, dependencyTypeOne.getDependencyType());
 		assertNull("First dependency type should not be qualified", dependencyTypeOne.getTypeQualifier());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(), dependencyTypeTwo.getIndex());
 		assertEquals("Incorrect second dependency name", TwoKey.TWO.toString(), dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Integer.class.getName(),
-				dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type", Integer.class, dependencyTypeTwo.getDependencyType());
 		assertEquals("Incorrect second dependency type qualification", "QUALIFIED",
 				dependencyTypeTwo.getTypeQualifier());
 
@@ -679,12 +677,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Keys should be ordered", TwoKey.ONE, flowTypeOne.getKey());
 		assertEquals("Incorrect first flow index", TwoKey.ONE.ordinal(), flowTypeOne.getIndex());
 		assertEquals("Incorrect first flow name", TwoKey.ONE.toString(), flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", String.class.getName(), flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow argument type", String.class, flowTypeOne.getArgumentType());
 		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow index", TwoKey.TWO.ordinal(), flowTypeTwo.getIndex());
 		assertEquals("Incorrect second flow name", TwoKey.TWO.toString(), flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", Long.class.getName(), flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow argument type", Long.class, flowTypeTwo.getArgumentType());
 	}
 
 	/**
@@ -730,7 +728,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency name", Integer.class.getSimpleName(),
 				dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Integer.class.getName(), dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type", Integer.class, dependencyTypeOne.getDependencyType());
 		assertEquals("Incorrect first dependency type qualification", "QUALIFIED",
 				dependencyTypeOne.getTypeQualifier());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
@@ -738,8 +736,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertNull("Should be no dependency key", dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency name", Connection.class.getSimpleName(),
 				dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Connection.class.getName(),
-				dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type", Connection.class, dependencyTypeTwo.getDependencyType());
 		assertNull("Second dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows
@@ -749,12 +746,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect first flow index", 0, flowTypeOne.getIndex());
 		assertNull("Should be no flow key", flowTypeOne.getKey());
 		assertEquals("Incorrect first flow name", "0", flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", Long.class.getName(), flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow argument type", Long.class, flowTypeOne.getArgumentType());
 		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Incorrect second flow index", 1, flowTypeTwo.getIndex());
 		assertNull("Should be no dependency key", flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow name", "1", flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", String.class.getName(), flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow argument type", String.class, flowTypeTwo.getArgumentType());
 	}
 
 	/**
@@ -837,7 +834,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Ensure provide extension interface
 		assertEquals("Incorrect number of extension interfaces", 1, moType.getExtensionTypes().length);
-		assertEquals("Incorrect extension interface type", XAResource.class.getName(), moType.getExtensionTypes()[0]);
+		assertEquals("Incorrect extension interface type", XAResource.class, moType.getExtensionTypes()[0]);
 	}
 
 	/**
@@ -1059,7 +1056,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect flow name", "KEY", flow.getFlowName());
 		assertEquals("Incorrect index", 0, flow.getIndex());
 		assertEquals("Incorrect flow key", OneKey.KEY, flow.getKey());
-		assertEquals("Incorrect argument type", Integer.class.getName(), flow.getArgumentType());
+		assertEquals("Incorrect argument type", Integer.class, flow.getArgumentType());
 	}
 
 	/**

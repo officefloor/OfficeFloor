@@ -614,7 +614,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				: this.getManagingOfficeNode());
 
 		// Obtain the object type
-		String objectType = managedObjectType.getObjectType();
+		Class<?> objectType = managedObjectType.getObjectType();
 
 		// Auto-wire the teams
 		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
@@ -751,8 +751,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 									this.context.getRootSourceContext(), this, this.context.getCompilerIssues());
 
 							// Ensure compatible type
-							String objectTypeName = managedObjectType.getObjectType();
-							Class<?> objectType = this.context.getRootSourceContext().loadClass(objectTypeName);
+							Class<?> objectType = managedObjectType.getObjectType();
 							if (!inputObjectType.isAssignableFrom(objectType)) {
 								// MOS object type not compatible to input type
 								this.context.getCompilerIssues().addIssue(this,

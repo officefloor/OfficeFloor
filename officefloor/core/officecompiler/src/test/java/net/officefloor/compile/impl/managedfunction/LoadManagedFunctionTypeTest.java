@@ -215,7 +215,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure issue if no {@link ManagedFunctionType} instances as no point of
-	 * {@link FunctionNamespaceType} without at least one {@link ManagedFunction}.
+	 * {@link FunctionNamespaceType} without at least one
+	 * {@link ManagedFunction}.
 	 */
 	public void testNoFunctions() {
 
@@ -340,8 +341,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if using {@link Enum} but no {@link ManagedFunctionObjectType}
-	 * provided for a key.
+	 * Ensure issue if using {@link Enum} but no
+	 * {@link ManagedFunctionObjectType} provided for a key.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testMissingObjectForKey() {
@@ -361,8 +362,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no key for {@link ManagedFunctionObjectType} by provided key
-	 * class.
+	 * Ensure issue if no key for {@link ManagedFunctionObjectType} by provided
+	 * key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNoKeyForObject() {
@@ -386,8 +387,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incorrect key type for {@link ManagedFunctionObjectType} by
-	 * provided key class.
+	 * Ensure issue if incorrect key type for {@link ManagedFunctionObjectType}
+	 * by provided key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForObject() {
@@ -411,7 +412,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if more {@link ManagedFunctionObjectType} instances than keys.
+	 * Ensure issue if more {@link ManagedFunctionObjectType} instances than
+	 * keys.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMoreObjectsThanKeys() {
@@ -437,8 +439,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if key provided for {@link ManagedFunctionObjectType} but no key
-	 * class.
+	 * Ensure issue if key provided for {@link ManagedFunctionObjectType} but no
+	 * key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testObjectHasKeyButNoKeyClass() {
@@ -537,12 +539,12 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect key one", ObjectKey.ONE, one.getKey());
 		assertEquals("Incorrect index one", ObjectKey.ONE.ordinal(), one.getIndex());
 		assertEquals("Incorrect name one", ObjectKey.ONE.toString(), one.getObjectName());
-		assertEquals("Incorrect type one", oneType.getName(), one.getObjectType());
+		assertEquals("Incorrect type one", oneType, one.getObjectType());
 		ManagedFunctionObjectType<?> two = objects[1];
 		assertEquals("Incorrect key two", ObjectKey.TWO, two.getKey());
 		assertEquals("Incorrect index two", ObjectKey.TWO.ordinal(), two.getIndex());
 		assertEquals("Incorrect name two", ObjectKey.TWO.toString(), two.getObjectName());
-		assertEquals("Incorrect type two", twoType.getName(), two.getObjectType());
+		assertEquals("Incorrect type two", twoType, two.getObjectType());
 	}
 
 	/**
@@ -577,12 +579,12 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Validate qualified object
 		ManagedFunctionObjectType<?> one = objects[0];
-		assertEquals("Incorrect type", Connection.class.getName(), one.getObjectType());
+		assertEquals("Incorrect type", Connection.class, one.getObjectType());
 		assertEquals("Incorrect qualifier", "QUALIFIED", one.getTypeQualifier());
 
 		// Validate unqualified object
 		ManagedFunctionObjectType<?> two = objects[1];
-		assertEquals("Incorrect type", Connection.class.getName(), two.getObjectType());
+		assertEquals("Incorrect type", Connection.class, two.getObjectType());
 		assertNull("Should be unqualified", two.getTypeQualifier());
 	}
 
@@ -607,8 +609,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no key for {@link ManagedFunctionFlowType} but provided key
-	 * class.
+	 * Ensure issue if no key for {@link ManagedFunctionFlowType} but provided
+	 * key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNoKeyForFlow() {
@@ -632,8 +634,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incorrect key type for {@link ManagedFunctionFlowType} but
-	 * provided key class.
+	 * Ensure issue if incorrect key type for {@link ManagedFunctionFlowType}
+	 * but provided key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForFlow() {
@@ -681,8 +683,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if key provided for {@link ManagedFunctionFlowType} but no key
-	 * class.
+	 * Ensure issue if key provided for {@link ManagedFunctionFlowType} but no
+	 * key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testFlowHasKeyButNoKeyClass() {
@@ -759,7 +761,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect key one", FlowKey.ONE, one.getKey());
 		assertEquals("Incorrect index one", FlowKey.ONE.ordinal(), one.getIndex());
 		assertEquals("Incorrect name one", FlowKey.ONE.toString(), one.getFlowName());
-		assertEquals("Incorrect argument type one", oneType.getName(), one.getArgumentType());
+		assertEquals("Incorrect argument type one", oneType, one.getArgumentType());
 		ManagedFunctionFlowType<?> two = flows[1];
 		assertEquals("Incorrect key two", FlowKey.TWO, two.getKey());
 		assertEquals("Incorrect index two", FlowKey.TWO.ordinal(), two.getIndex());
@@ -836,11 +838,10 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		// Validate the escalation
 		ManagedFunctionEscalationType[] escalations = namespaceType.getManagedFunctionTypes()[0].getEscalationTypes();
 		assertEquals("Incorrect number of escalation", 2, escalations.length);
-		assertEquals("Incorrect first escalation type", Error.class.getName(), escalations[0].getEscalationType());
+		assertEquals("Incorrect first escalation type", Error.class, escalations[0].getEscalationType());
 		assertEquals("Incorrect first escalation name", Error.class.getSimpleName(),
 				escalations[0].getEscalationName());
-		assertEquals("Incorrect second escalation type", RuntimeException.class.getName(),
-				escalations[1].getEscalationType());
+		assertEquals("Incorrect second escalation type", RuntimeException.class, escalations[1].getEscalationType());
 		assertEquals("Incorrect second escalation name", RuntimeException.class.getSimpleName(),
 				escalations[1].getEscalationName());
 	}

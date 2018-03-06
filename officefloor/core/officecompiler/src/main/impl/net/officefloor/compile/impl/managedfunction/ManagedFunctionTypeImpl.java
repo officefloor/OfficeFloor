@@ -190,8 +190,8 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public String getReturnType() {
-		return this.returnType == null ? null : this.returnType.getName();
+	public Class<?> getReturnType() {
+		return this.returnType;
 	}
 
 }

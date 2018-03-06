@@ -31,13 +31,12 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface ManagedObjectType<D extends Enum<D>> {
 
 	/**
-	 * Obtains the {@link Class} name of the object returned from
-	 * {@link ManagedObject}.
+	 * Obtains the {@link Class} of the object returned from {@link ManagedObject}.
 	 * 
-	 * @return The {@link Class} name of the object being managed by the
+	 * @return The {@link Class} of the object being managed by the
 	 *         {@link ManagedObject}.
 	 */
-	String getObjectType();
+	Class<?> getObjectType();
 
 	/**
 	 * Obtains the {@link ManagedObjectDependencyType} definitions of the required
@@ -84,6 +83,6 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	 * 
 	 * @return Extension types supported by the {@link ManagedObject}.
 	 */
-	String[] getExtensionTypes();
+	Class<?>[] getExtensionTypes();
 
 }

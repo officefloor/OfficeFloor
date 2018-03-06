@@ -251,8 +251,8 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		// Verify the extension interfaces
-		String[] eEis = eType.getExtensionTypes();
-		String[] aEis = aType.getExtensionTypes();
+		Class<?>[] eEis = eType.getExtensionTypes();
+		Class<?>[] aEis = aType.getExtensionTypes();
 		Assert.assertEquals("Incorrect number of extension interfaces", eEis.length, aEis.length);
 		for (int i = 0; i < eEis.length; i++) {
 			Assert.assertEquals("Incorrect extension interface " + i, eEis[i], aEis[i]);
@@ -494,8 +494,8 @@ public class ManagedObjectLoaderUtil {
 		 */
 
 		@Override
-		public String getObjectType() {
-			return this.objectClass.getName();
+		public Class<?> getObjectType() {
+			return this.objectClass;
 		}
 
 		@Override
@@ -520,8 +520,8 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
-		public String[] getExtensionTypes() {
-			return this.extensionInterfaces.stream().map((clazz) -> clazz.getName()).toArray(String[]::new);
+		public Class<?>[] getExtensionTypes() {
+			return this.extensionInterfaces.toArray(new Class[0]);
 		}
 
 		/*

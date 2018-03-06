@@ -272,7 +272,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		compileContext.registerPossibleMBean(GovernanceSource.class, qualifiedName, this.usedGovernanceSource);
 
 		// Build the governance
-		GovernanceBuilder govBuilder = officeBuilder.addGovernance(this.governanceName, govType.getExtensionInterface(),
+		GovernanceBuilder govBuilder = officeBuilder.addGovernance(this.governanceName, govType.getExtensionType(),
 				govType.getGovernanceFactory());
 
 		// Obtain the office team responsible for this governance

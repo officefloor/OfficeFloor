@@ -42,12 +42,12 @@ public interface HttpSecurityDependencyType<D extends Enum<D>> {
 	int getIndex();
 
 	/**
-	 * Obtains the {@link Class} name that the dependent object must
+	 * Obtains the {@link Class} that the dependent object must
 	 * extend/implement.
 	 * 
-	 * @return Type name of the dependency.
+	 * @return Type of the dependency.
 	 */
-	String getDependencyType();
+	Class<?> getDependencyType();
 
 	/**
 	 * <p>
@@ -55,8 +55,8 @@ public interface HttpSecurityDependencyType<D extends Enum<D>> {
 	 * <p>
 	 * This is to enable qualifying the type of dependency required.
 	 * 
-	 * @return Qualifier on the type. May be <code>null</code> if not qualifying the
-	 *         type.
+	 * @return Qualifier on the type. May be <code>null</code> if not qualifying
+	 *         the type.
 	 */
 	String getTypeQualifier();
 

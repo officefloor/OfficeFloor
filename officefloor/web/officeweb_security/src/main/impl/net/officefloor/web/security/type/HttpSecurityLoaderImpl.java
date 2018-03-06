@@ -396,7 +396,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		}
 
 		@Override
-		public String getDependencyType() {
+		public Class<?> getDependencyType() {
 			return this.dependency.getDependencyType();
 		}
 
@@ -412,7 +412,8 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	}
 
 	/**
-	 * {@link HttpSecurityFlowType} adapted from the {@link ManagedObjectFlowType}.
+	 * {@link HttpSecurityFlowType} adapted from the
+	 * {@link ManagedObjectFlowType}.
 	 */
 	private static class HttpSecurityFlowTypeImpl<F extends Enum<F>> implements HttpSecurityFlowType<F> {
 
@@ -451,7 +452,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		}
 
 		@Override
-		public String getArgumentType() {
+		public Class<?> getArgumentType() {
 			return this.flow.getArgumentType();
 		}
 	}

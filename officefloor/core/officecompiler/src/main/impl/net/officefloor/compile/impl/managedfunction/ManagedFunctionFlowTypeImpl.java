@@ -102,8 +102,8 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	}
 
 	@Override
-	public String getArgumentType() {
-		return this.argumentType == null ? null : this.argumentType.getName();
+	public Class<?> getArgumentType() {
+		return this.argumentType;
 	}
 
 	@Override

@@ -251,7 +251,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 			// Use the managed object type
 			qualifications = new TypeQualification[] {
-					new TypeQualificationImpl(null, managedObjectType.getObjectType()) };
+					new TypeQualificationImpl(null, managedObjectType.getObjectType().getName()) };
 		}
 		return qualifications;
 	}
@@ -347,11 +347,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		TypeQualification[] qualifications = this.getTypeQualifications(compileContext);
 
 		// Obtain the extension types
-		String[] extensionTypeNames = managedObjectType.getExtensionTypes();
-		Class<?>[] extensionTypes = new Class[extensionTypeNames.length];
-		for (int i = 0; i < extensionTypes.length; i++) {
-			extensionTypes[i] = this.context.getRootSourceContext().loadClass(extensionTypeNames[i]);
-		}
+		Class<?>[] extensionTypes = managedObjectType.getExtensionTypes();
 
 		// Obtain the dependencies
 		ObjectDependencyType[] objectDependencyTypes = CompileUtil.loadTypes(this.dependencies,

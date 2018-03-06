@@ -36,11 +36,10 @@ public interface ManagedFunctionEscalationType {
 	String getEscalationName();
 
 	/**
-	 * Obtains the type name of {@link EscalationFlow} by the
-	 * {@link ManagedFunction}.
+	 * Obtains the type of {@link EscalationFlow} by the {@link ManagedFunction}.
 	 * 
-	 * @return Type name of {@link EscalationFlow} by the {@link ManagedFunction}.
+	 * @return Type of {@link EscalationFlow} by the {@link ManagedFunction}.
 	 */
-	String getEscalationType();
+	<E extends Throwable> Class<E> getEscalationType();
 
 }

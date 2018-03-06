@@ -248,7 +248,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 			}
 
 			// Add the extension interface
-			Class<?> extensionInterface = govType.getExtensionInterface();
+			Class<?> extensionInterface = govType.getExtensionType();
 			extensionInterfaces.add(extensionInterface.getName());
 		}
 

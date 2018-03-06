@@ -82,7 +82,7 @@ public class GovernanceTypeImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public Class<I> getExtensionInterface() {
+	public Class<I> getExtensionType() {
 		return this.extensionInterface;
 	}
 

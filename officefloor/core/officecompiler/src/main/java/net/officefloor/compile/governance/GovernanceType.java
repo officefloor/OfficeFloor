@@ -29,32 +29,30 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceType<I, F extends Enum<F>> {
+public interface GovernanceType<E, F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link GovernanceFactory}.
 	 * 
 	 * @return {@link GovernanceFactory}.
 	 */
-	GovernanceFactory<? extends I, F> getGovernanceFactory();
+	GovernanceFactory<? extends E, F> getGovernanceFactory();
 
 	/**
-	 * Obtains the extension interface that the {@link ManagedObject} instances
-	 * are to provide to be enable {@link Governance} over them.
+	 * Obtains the extension type that the {@link ManagedObject} instances are to
+	 * provide to be enable {@link Governance} over them.
 	 * 
-	 * @return Extension interface that the {@link ManagedObject} instances are
-	 *         to provide to be enable {@link Governance} over them.
+	 * @return Extension type that the {@link ManagedObject} instances are to
+	 *         provide to be enable {@link Governance} over them.
 	 */
-	Class<I> getExtensionInterface();
+	Class<E> getExtensionType();
 
 	/**
 	 * Obtains the {@link GovernanceFlowType} definitions for the possible
-	 * {@link Flow} instances instigated by the
-	 * {@link GovernanceActivity}.
+	 * {@link Flow} instances instigated by the {@link GovernanceActivity}.
 	 * 
-	 * @return {@link GovernanceFlowType} definitions for the possible
-	 *         {@link Flow} instances instigated by the
-	 *         {@link GovernanceActivity}.
+	 * @return {@link GovernanceFlowType} definitions for the possible {@link Flow}
+	 *         instances instigated by the {@link GovernanceActivity}.
 	 */
 	GovernanceFlowType<F>[] getFlowTypes();
 
@@ -63,8 +61,7 @@ public interface GovernanceType<I, F extends Enum<F>> {
 	 * {@link EscalationFlow} instances by the {@link GovernanceActivity}.
 	 * 
 	 * @return {@link GovernanceEscalationType} definitions for the possible
-	 *         {@link EscalationFlow} instances by the
-	 *         {@link GovernanceActivity}.
+	 *         {@link EscalationFlow} instances by the {@link GovernanceActivity}.
 	 */
 	GovernanceEscalationType[] getEscalationTypes();
 

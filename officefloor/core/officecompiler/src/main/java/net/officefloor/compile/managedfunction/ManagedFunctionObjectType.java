@@ -46,11 +46,11 @@ public interface ManagedFunctionObjectType<M extends Enum<M>> {
 	int getIndex();
 
 	/**
-	 * Obtains the required type name of the dependent {@link Object}.
+	 * Obtains the required type of the dependent {@link Object}.
 	 * 
-	 * @return Required type name of the dependent {@link Object}.
+	 * @return Required type of the dependent {@link Object}.
 	 */
-	String getObjectType();
+	Class<?> getObjectType();
 
 	/**
 	 * <p>

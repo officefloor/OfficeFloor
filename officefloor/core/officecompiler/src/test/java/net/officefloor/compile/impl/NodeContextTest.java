@@ -295,7 +295,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		ManagedObjectType<?> managedObjectType = this.createMock(ManagedObjectType.class);
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.loadManagedObjectType(compileContext),
 				managedObjectType);
-		this.recordReturn(managedObjectType, managedObjectType.getObjectType(), String.class.getName());
+		this.recordReturn(managedObjectType, managedObjectType.getObjectType(), String.class);
 		ManagedObjectNode node = this.doTest(() -> {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
 

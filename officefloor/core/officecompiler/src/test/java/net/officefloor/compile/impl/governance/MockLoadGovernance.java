@@ -67,7 +67,7 @@ public class MockLoadGovernance {
 
 		TestCase.assertEquals("Incorrect extension interface",
 				MockExtensionInterface.class,
-				governanceType.getExtensionInterface());
+				governanceType.getExtensionType());
 
 		TestCase.assertEquals("Incorrect number of escalations", 1,
 				governanceType.getEscalationTypes().length);

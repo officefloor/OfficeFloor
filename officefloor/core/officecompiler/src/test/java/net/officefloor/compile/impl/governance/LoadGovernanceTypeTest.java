@@ -312,7 +312,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 
 		// Validate details of type
 		assertEquals("Incorrect governance factory", factory, type.getGovernanceFactory());
-		assertEquals("Incorrect extension interface", extensionInterface, type.getExtensionInterface());
+		assertEquals("Incorrect extension interface", extensionInterface, type.getExtensionType());
 		assertEquals("Should be no flows", 0, type.getFlowTypes().length);
 		assertEquals("Should be no escalations", 0, type.getEscalationTypes().length);
 	}

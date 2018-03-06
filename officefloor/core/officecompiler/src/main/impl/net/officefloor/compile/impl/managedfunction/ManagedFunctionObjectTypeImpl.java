@@ -122,8 +122,8 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>>
 	}
 
 	@Override
-	public String getObjectType() {
-		return this.objectType == null ? null : this.objectType.getName();
+	public Class<?> getObjectType() {
+		return this.objectType;
 	}
 
 	@Override

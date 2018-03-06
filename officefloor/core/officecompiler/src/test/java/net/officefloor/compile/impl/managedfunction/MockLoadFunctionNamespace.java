@@ -49,7 +49,7 @@ public class MockLoadFunctionNamespace {
 		Assert.assertEquals("Incorrect first function", "assertFunctionNamespaceType", functionOne.getFunctionName());
 		Assert.assertEquals("Incorrect number of flows", 0, functionOne.getFlowTypes().length);
 		Assert.assertEquals("Incorrect number of objects", 1, functionOne.getObjectTypes().length);
-		Assert.assertEquals("Incorrect object type", FunctionNamespaceType.class.getName(),
+		Assert.assertEquals("Incorrect object type", FunctionNamespaceType.class,
 				functionOne.getObjectTypes()[0].getObjectType());
 		Assert.assertEquals("Incorrect number of escalations", 0, functionOne.getEscalationTypes().length);
 
@@ -58,12 +58,11 @@ public class MockLoadFunctionNamespace {
 		Assert.assertEquals("Incorrect second function", "doFunction", functionTwo.getFunctionName());
 		Assert.assertEquals("Incorrect number of flows", 0, functionTwo.getFlowTypes().length);
 		Assert.assertEquals("Incorrect number of objects", 1, functionTwo.getObjectTypes().length);
-		Assert.assertEquals("Incorrect object type", Integer.class.getName(),
-				functionTwo.getObjectTypes()[0].getObjectType());
+		Assert.assertEquals("Incorrect object type", Integer.class, functionTwo.getObjectTypes()[0].getObjectType());
 		Assert.assertEquals("Incorrect number of escalations", 1, functionTwo.getEscalationTypes().length);
-		Assert.assertEquals("Incorrect escalation type", IOException.class.getName(),
+		Assert.assertEquals("Incorrect escalation type", IOException.class,
 				functionTwo.getEscalationTypes()[0].getEscalationType());
-		Assert.assertEquals("Incorrect return type", String.class.getName(), functionTwo.getReturnType());
+		Assert.assertEquals("Incorrect return type", String.class, functionTwo.getReturnType());
 	}
 
 	/**

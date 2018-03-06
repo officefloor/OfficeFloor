@@ -298,8 +298,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link HttpSecurityDependencyMetaData} in
-	 * array.
+	 * Ensure issue if <code>null</code> {@link HttpSecurityDependencyMetaData}
+	 * in array.
 	 */
 	public void testNullDependencyMetaData() {
 
@@ -424,7 +424,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link HttpSecurityFlowMetaData} in array.
+	 * Ensure issue if <code>null</code> {@link HttpSecurityFlowMetaData} in
+	 * array.
 	 */
 	public void testNullFlowMetaData() {
 
@@ -465,10 +466,10 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
 		HttpSecurityFlowType<?> defaulted = flowTypes[0];
 		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED", defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class.getName(), defaulted.getArgumentType());
+		assertEquals("Incorrect defaulted argument type", Void.class, defaulted.getArgumentType());
 		HttpSecurityFlowType<?> provided = flowTypes[1];
 		assertEquals("Incorrect name for provided argument flow", "1", provided.getFlowName());
-		assertEquals("Incorrect provided argument type", Connection.class.getName(), provided.getArgumentType());
+		assertEquals("Incorrect provided argument type", Connection.class, provided.getArgumentType());
 	}
 
 	/**
@@ -562,7 +563,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link HttpSecurityType} correct with keyed dependencies and flows.
+	 * Ensure {@link HttpSecurityType} correct with keyed dependencies and
+	 * flows.
 	 */
 	public void testKeyedDependenciesAndFlows() {
 
@@ -602,15 +604,13 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(), dependencyTypeOne.getIndex());
 		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(), dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Connection.class.getName(),
-				dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type", Connection.class, dependencyTypeOne.getDependencyType());
 		assertNull("First dependency type should not be qualified", dependencyTypeOne.getTypeQualifier());
 		HttpSecurityDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(), dependencyTypeTwo.getIndex());
 		assertEquals("Incorrect second dependency name", TwoKey.TWO.toString(), dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Integer.class.getName(),
-				dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type", Integer.class, dependencyTypeTwo.getDependencyType());
 		assertEquals("Incorrect second dependency type qualification", "QUALIFIED",
 				dependencyTypeTwo.getTypeQualifier());
 
@@ -621,16 +621,17 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertEquals("Keys should be ordered", TwoKey.ONE, flowTypeOne.getKey());
 		assertEquals("Incorrect first flow index", TwoKey.ONE.ordinal(), flowTypeOne.getIndex());
 		assertEquals("Incorrect first flow name", TwoKey.ONE.toString(), flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", String.class.getName(), flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow argument type", String.class, flowTypeOne.getArgumentType());
 		HttpSecurityFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow index", TwoKey.TWO.ordinal(), flowTypeTwo.getIndex());
 		assertEquals("Incorrect second flow name", TwoKey.TWO.toString(), flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", Long.class.getName(), flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow argument type", Long.class, flowTypeTwo.getArgumentType());
 	}
 
 	/**
-	 * Ensure {@link HttpSecurityType} correct with indexed dependencies and flows.
+	 * Ensure {@link HttpSecurityType} correct with indexed dependencies and
+	 * flows.
 	 */
 	public void testIndexedDependenciesAndFlows() {
 
@@ -671,7 +672,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency name", Integer.class.getSimpleName(),
 				dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Integer.class.getName(), dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type", Integer.class, dependencyTypeOne.getDependencyType());
 		assertEquals("Incorrect first dependency type qualification", "QUALIFIED",
 				dependencyTypeOne.getTypeQualifier());
 		HttpSecurityDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
@@ -679,8 +680,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertNull("Should be no dependency key", dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency name", Connection.class.getSimpleName(),
 				dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Connection.class.getName(),
-				dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type", Connection.class, dependencyTypeTwo.getDependencyType());
 		assertNull("Second dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows
@@ -690,12 +690,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect first flow index", 0, flowTypeOne.getIndex());
 		assertNull("Should be no flow key", flowTypeOne.getKey());
 		assertEquals("Incorrect first flow name", "0", flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", Long.class.getName(), flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow argument type", Long.class, flowTypeOne.getArgumentType());
 		HttpSecurityFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Incorrect second flow index", 1, flowTypeTwo.getIndex());
 		assertNull("Should be no dependency key", flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow name", "1", flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", String.class.getName(), flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow argument type", String.class, flowTypeTwo.getArgumentType());
 	}
 
 	/**
@@ -748,8 +748,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the authentication, access control and credentials class
-	 * from the {@link HttpSecuritySourceMetaData}.
+	 * Records obtaining the authentication, access control and credentials
+	 * class from the {@link HttpSecuritySourceMetaData}.
 	 */
 	private void record_authenticationAccessControlAndCredentialsClass() {
 		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
@@ -762,8 +762,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * {@link HttpSecuritySourceMetaData}.
 	 * 
 	 * @param flowKeys
-	 *            Flow keys to be defined in meta-data. Provide <code>null</code>
-	 *            values for indexing.
+	 *            Flow keys to be defined in meta-data. Provide
+	 *            <code>null</code> values for indexing.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {

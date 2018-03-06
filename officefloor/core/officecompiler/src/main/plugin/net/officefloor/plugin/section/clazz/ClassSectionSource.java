@@ -619,7 +619,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			ManagedFunctionEscalationType escalationType, SectionFunction escalationHandler) {
 
 		// Obtain the escalation type name
-		String escalationTypeName = escalationType.getEscalationType();
+		String escalationTypeName = escalationType.getEscalationType().getName();
 
 		// Obtain the function escalation
 		FunctionFlow functionEscalation = function.getFunctionEscalation(escalationTypeName);
@@ -652,7 +652,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 
 		// Obtain the object name and its type
 		String objectName = objectType.getObjectName();
-		String objectTypeName = objectType.getObjectType();
+		String objectTypeName = objectType.getObjectType().getName();
 		String typeQualifier = objectType.getTypeQualifier();
 
 		// Obtain the function object
@@ -810,7 +810,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			for (ManagedObjectDependencyType<?> dependencyType : moType.getDependencyTypes()) {
 
 				// Obtain the dependency type information
-				String dependencyTypeName = dependencyType.getDependencyType();
+				String dependencyTypeName = dependencyType.getDependencyType().getName();
 				String dependencyTypeQualifier = dependencyType.getTypeQualifier();
 
 				// Obtain the managed object dependency
@@ -1000,7 +1000,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
 
 				// Obtain function handling escalation (if available)
-				String escalationTypeName = escalationType.getEscalationType();
+				String escalationTypeName = escalationType.getEscalationType().getName();
 				SectionFunction escalationHandler = functionsByParameterType.get(escalationTypeName);
 
 				// Link escalation

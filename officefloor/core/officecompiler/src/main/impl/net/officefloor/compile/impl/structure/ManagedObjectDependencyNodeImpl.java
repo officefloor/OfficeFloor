@@ -198,7 +198,7 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 		}
 
 		// Obtain the type information
-		String dependencyType = dependency.getDependencyType();
+		Class<?> dependencyType = dependency.getDependencyType();
 		String typeQualifier = dependency.getTypeQualifier();
 
 		// Obtain dependent object
@@ -212,7 +212,7 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 		DependentObjectType dependentObjectType = dependentObjectNode.loadDependentObjectType(compileContext);
 
 		// Create and return the dependency type
-		return new ObjectDependencyTypeImpl(this.dependencyName, dependencyType, typeQualifier, false,
+		return new ObjectDependencyTypeImpl(this.dependencyName, dependencyType.getName(), typeQualifier, false,
 				dependentObjectType);
 	}
 

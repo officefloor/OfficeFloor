@@ -58,7 +58,7 @@ public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 	 * 
 	 * @return Return type name of the {@link ManagedFunction}.
 	 */
-	String getReturnType();
+	Class<?> getReturnType();
 
 	/**
 	 * Obtains the {@link Enum} providing the keys for the dependent {@link Object}

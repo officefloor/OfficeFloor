@@ -570,7 +570,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	}
 
 	/**
-	 * Item for {@link HttpSecurityDependencyType} and {@link HttpSecurityFlowType}.
+	 * Item for {@link HttpSecurityDependencyType} and
+	 * {@link HttpSecurityFlowType}.
 	 */
 	private class HttpSecurityTypeItem<E extends Enum<E>>
 			implements HttpSecurityDependencyType<E>, HttpSecurityFlowType<E> {
@@ -646,8 +647,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		}
 
 		@Override
-		public String getDependencyType() {
-			return this.itemType.getName();
+		public Class<?> getDependencyType() {
+			return this.itemType;
 		}
 
 		@Override
@@ -665,8 +666,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		}
 
 		@Override
-		public String getArgumentType() {
-			return this.itemType == null ? null : this.itemType.getName();
+		public Class<?> getArgumentType() {
+			return this.itemType;
 		}
 	}
 

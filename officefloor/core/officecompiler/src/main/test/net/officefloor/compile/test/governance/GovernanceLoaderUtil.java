@@ -124,7 +124,7 @@ public class GovernanceLoaderUtil {
 		TestCase.assertNotNull("Must have GovernanceFactory",
 				aType.getGovernanceFactory());
 		TestCase.assertEquals("Incorrect extension interface type",
-				eType.getExtensionInterface(), aType.getExtensionInterface());
+				eType.getExtensionType(), aType.getExtensionType());
 
 		// Validate the flows
 		GovernanceFlowType<?>[] eFlows = eType.getFlowTypes();
@@ -262,7 +262,7 @@ public class GovernanceLoaderUtil {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Class<I> getExtensionInterface() {
+		public Class<I> getExtensionType() {
 			return (Class<I>) this.extensionInterface;
 		}
 

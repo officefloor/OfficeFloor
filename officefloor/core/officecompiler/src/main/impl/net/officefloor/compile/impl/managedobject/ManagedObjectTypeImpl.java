@@ -93,8 +93,8 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	 */
 
 	@Override
-	public String getObjectType() {
-		return this.objectClass.getName();
+	public Class<?> getObjectType() {
+		return this.objectClass;
 	}
 
 	@Override
@@ -118,12 +118,8 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	}
 
 	@Override
-	public String[] getExtensionTypes() {
-		String[] extensionTypeNames = new String[this.extensionTypes.length];
-		for (int i = 0; i < extensionTypeNames.length; i++) {
-			extensionTypeNames[i] = this.extensionTypes[i].getName();
-		}
-		return extensionTypeNames;
+	public Class<?>[] getExtensionTypes() {
+		return this.extensionTypes;
 	}
 
 }

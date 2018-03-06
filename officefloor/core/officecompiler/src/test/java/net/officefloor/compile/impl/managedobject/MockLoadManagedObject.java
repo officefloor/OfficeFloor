@@ -65,22 +65,21 @@ public class MockLoadManagedObject {
 	public static void assertManagedObjectType(ManagedObjectType<?> managedObjectType) {
 
 		// Ensure correct object type
-		Assert.assertEquals("Incorrect object type", MockLoadManagedObject.class.getName(),
-				managedObjectType.getObjectType());
+		Assert.assertEquals("Incorrect object type", MockLoadManagedObject.class, managedObjectType.getObjectType());
 
 		// Ensure input
 		Assert.assertTrue("Should be input", managedObjectType.isInput());
 
 		// Ensure correct dependencies
 		Assert.assertEquals("Incorrect number of dependencies", 1, managedObjectType.getDependencyTypes().length);
-		Assert.assertEquals("Incorrect dependency", Connection.class.getName(),
+		Assert.assertEquals("Incorrect dependency", Connection.class,
 				managedObjectType.getDependencyTypes()[0].getDependencyType());
 
 		// Ensure correct flows
 		Assert.assertEquals("Incorrect number of flows", 1, managedObjectType.getFlowTypes().length);
 		ManagedObjectFlowType<?> flowType = managedObjectType.getFlowTypes()[0];
 		Assert.assertEquals("Incorrect flow name", "doProcess", flowType.getFlowName());
-		Assert.assertEquals("Incorrect flow argument type", Integer.class.getName(), flowType.getArgumentType());
+		Assert.assertEquals("Incorrect flow argument type", Integer.class, flowType.getArgumentType());
 
 		// Ensure no teams
 		Assert.assertEquals("Incorrect number of teams", 0, managedObjectType.getTeamTypes().length);
@@ -88,7 +87,7 @@ public class MockLoadManagedObject {
 		// Ensure correct extension interface
 		Assert.assertEquals("Incorrect number of extension interfaces", 1,
 				managedObjectType.getExtensionTypes().length);
-		Assert.assertEquals("Incorrect extension interface", MockLoadManagedObject.class.getName(),
+		Assert.assertEquals("Incorrect extension interface", MockLoadManagedObject.class,
 				managedObjectType.getExtensionTypes()[0]);
 	}
 

@@ -292,8 +292,7 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 		// Ensure able to pool managed objects from managed object source
 		Class<?> pooledObjectType = poolType.getPooledObjectType();
-		String objectTypeName = managedObjectType.getObjectType();
-		Class<?> objectType = this.context.getRootSourceContext().loadClass(objectTypeName);
+		Class<?> objectType = managedObjectType.getObjectType();
 		if (!pooledObjectType.isAssignableFrom(objectType)) {
 			this.context.getCompilerIssues().addIssue(this, "Pooled object " + pooledObjectType.getName()
 					+ " must be super (or same) type for ManagedObjectSource object " + objectType.getName());

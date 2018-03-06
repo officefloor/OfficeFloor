@@ -164,7 +164,7 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 		}
 
 		// Obtain the type information
-		String dependencyType = object.getObjectType();
+		Class<?> dependencyType = object.getObjectType();
 		String typeQualifier = object.getTypeQualifier();
 
 		// Obtain the dependent object type
@@ -186,7 +186,7 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 		}
 
 		// Create and return the type
-		return new ObjectDependencyTypeImpl(this.objectName, dependencyType, typeQualifier, this.isParameter,
+		return new ObjectDependencyTypeImpl(this.objectName, dependencyType.getName(), typeQualifier, this.isParameter,
 				dependentObjectType);
 	}
 

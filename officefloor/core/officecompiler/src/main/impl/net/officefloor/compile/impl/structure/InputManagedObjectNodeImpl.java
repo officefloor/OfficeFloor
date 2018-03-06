@@ -265,7 +265,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 				// Use the managed object type
 				qualifications = new TypeQualification[] {
-						new TypeQualificationImpl(null, managedObjectType.getObjectType()) };
+						new TypeQualificationImpl(null, managedObjectType.getObjectType().getName()) };
 			}
 		}
 		return qualifications;

@@ -51,7 +51,7 @@ public class ManagedFunctionEscalationTypeImpl
 	}
 
 	/*
-	 * =================== TaskEscalationTypeBuilder ====================
+	 * =================== ManagedFunctionEscalationTypeBuilder ====================
 	 */
 
 	@Override
@@ -60,12 +60,13 @@ public class ManagedFunctionEscalationTypeImpl
 	}
 
 	/*
-	 * =================== TaskEscalationType ==========================
+	 * =================== ManagedFunctionEscalationType ==========================
 	 */
 
 	@Override
-	public String getEscalationType() {
-		return this.escalationType == null ? null : this.escalationType.getName();
+	@SuppressWarnings("unchecked")
+	public <E extends Throwable> Class<E> getEscalationType() {
+		return (Class<E>) this.escalationType;
 	}
 
 	@Override

@@ -97,8 +97,8 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	}
 
 	@Override
-	public String getDependencyType() {
-		return this.type.getName();
+	public Class<?> getDependencyType() {
+		return this.type;
 	}
 
 	@Override

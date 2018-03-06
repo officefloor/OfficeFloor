@@ -746,8 +746,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 						"No method by name '" + redirectValuesFunctionName + "' on logic class " + sectionClassName);
 			} else {
 				// Obtain the redirect values type
-				String redirectValuesTypeName = this.getFunctionTypeByName(redirectValuesFunctionName).getReturnType();
-				redirectValuesType = context.loadClass(redirectValuesTypeName);
+				redirectValuesType = this.getFunctionTypeByName(redirectValuesFunctionName).getReturnType();
 			}
 		}
 		if (redirectValuesFunction == null) {
@@ -864,8 +863,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Obtain the return type for the template
-				String returnTypeName = beanFunction.type.getReturnType();
-				Class<?> returnType = returnTypeName == null ? null : context.loadClass(returnTypeName);
+				Class<?> returnType = beanFunction.type.getReturnType();
 				if ((returnType == null) || (Void.class.equals(returnType))) {
 					// Must provide return if require a bean
 					if (isRequireBean) {
@@ -1271,7 +1269,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * {@link ManagedFunctionSource} to provide the
 	 * {@link WebTemplateInitialFunction}.
 	 */
-	@PrivateSource
 	static class WebTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -1352,7 +1349,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
-	@PrivateSource
 	public static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
@@ -1608,7 +1604,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
-	@PrivateSource
 	static class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
