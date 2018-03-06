@@ -38,7 +38,7 @@ public class ManagedObjectScopeInput implements Input<List>, ValueTranslator {
 	/**
 	 * Listing of the {@link ManagedObjectScope} names.
 	 */
-	private static final String[] scopeNames = new String[] { "Process", "Thread", "Work" };
+	private static final String[] scopeNames = new String[] { "Process", "Thread", "Function" };
 
 	/**
 	 * Listing of {@link ManagedObjectScope} instances that correspond to the

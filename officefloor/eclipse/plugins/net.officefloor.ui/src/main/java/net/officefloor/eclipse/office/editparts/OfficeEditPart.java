@@ -22,6 +22,7 @@ import java.util.List;
 import org.eclipse.gef.EditPart;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
+import net.officefloor.eclipse.common.models.InformationModel;
 import net.officefloor.model.office.OfficeModel;
 
 /**
@@ -42,6 +43,13 @@ public class OfficeEditPart extends AbstractOfficeFloorDiagramEditPart<OfficeMod
 		childModels.addAll(office.getAdministrations());
 		childModels.addAll(office.getOfficeEscalations());
 		childModels.addAll(office.getOfficeStarts());
+
+		// Information that experimental
+		childModels.add(new InformationModel("WARNING: The " + this.getEditor().getClass().getSimpleName()
+				+ " is only to prove concepts.\n\n" + "It should NEVER be used for application developement.\n\n"
+				+ "The purpose of this editor is to prove the raw OfficeFloor model.\n"
+				+ "Much of the functionality is not complete for this editor (or likely very buggy).\n\n"
+				+ "For application development please use WoOF."));
 	}
 
 }

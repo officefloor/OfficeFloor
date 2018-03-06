@@ -19,18 +19,18 @@ package net.officefloor.eclipse.officefloor.editparts;
 
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.model.officefloor.OfficeFloorModel;
-
 import org.eclipse.gef.EditPart;
+
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
+import net.officefloor.eclipse.common.models.InformationModel;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorModel}.
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorEditPart extends
-		AbstractOfficeFloorDiagramEditPart<OfficeFloorModel> {
+public class OfficeFloorEditPart extends AbstractOfficeFloorDiagramEditPart<OfficeFloorModel> {
 
 	@Override
 	protected void populateChildren(List<Object> childModels) {
@@ -40,6 +40,13 @@ public class OfficeFloorEditPart extends
 		childModels.addAll(officeFloor.getOfficeFloorManagedObjectSources());
 		childModels.addAll(officeFloor.getOfficeFloorInputManagedObjects());
 		childModels.addAll(officeFloor.getOfficeFloorManagedObjects());
+
+		// Information that experimental
+		childModels.add(new InformationModel("WARNING: The " + this.getEditor().getClass().getSimpleName()
+				+ " is only to prove concepts.\n\n" + "It should NEVER be used for application developement.\n\n"
+				+ "The purpose of this editor is to prove the raw OfficeFloor model.\n"
+				+ "Much of the functionality is not complete for this editor (or likely very buggy).\n\n"
+				+ "For application development please use WoOF."));
 	}
 
 }

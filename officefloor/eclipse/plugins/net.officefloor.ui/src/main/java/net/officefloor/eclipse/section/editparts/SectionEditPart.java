@@ -20,6 +20,7 @@ package net.officefloor.eclipse.section.editparts;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
+import net.officefloor.eclipse.common.models.InformationModel;
 import net.officefloor.model.section.SectionModel;
 
 import org.eclipse.gef.EditPart;
@@ -29,8 +30,7 @@ import org.eclipse.gef.EditPart;
  *
  * @author Daniel Sagenschneider
  */
-public class SectionEditPart extends
-		AbstractOfficeFloorDiagramEditPart<SectionModel> {
+public class SectionEditPart extends AbstractOfficeFloorDiagramEditPart<SectionModel> {
 
 	@Override
 	protected void populateChildren(List<Object> childModels) {
@@ -40,6 +40,13 @@ public class SectionEditPart extends
 		childModels.addAll(section.getSectionManagedObjectSources());
 		childModels.addAll(section.getSectionManagedObjects());
 		childModels.addAll(section.getExternalFlows());
+
+		// Information that experimental
+		childModels.add(new InformationModel("WARNING: The " + this.getEditor().getClass().getSimpleName()
+				+ " is only to prove concepts.\n\n" + "It should NEVER be used for application developement.\n\n"
+				+ "The purpose of this editor is to prove the raw OfficeFloor model.\n"
+				+ "Much of the functionality is not complete for this editor (or likely very buggy).\n\n"
+				+ "For application development please use WoOF."));
 	}
 
 }

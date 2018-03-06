@@ -69,9 +69,11 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editparts.InformationEditPart;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
+import net.officefloor.eclipse.common.models.InformationModel;
 import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.Model;
@@ -311,6 +313,9 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 		viewer.setRootEditPart(this.rootEditPart);
 		viewer.setKeyHandler(new CommonGraphicalViewerKeyHandler(viewer));
 
+		// Load the common edit parts
+		this.modelTypeToEditPartTypeMap.put(InformationModel.class, InformationEditPart.class);
+
 		// Load the edit part factory and initialise contents
 		this.loadEditPartTypes();
 		viewer.setEditPartFactory(this);
@@ -321,8 +326,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 	}
 
 	/**
-	 * {@link MouseListener} that listens to last location the mouse down event
-	 * was fired so that context menu may obtain the location.
+	 * {@link MouseListener} that listens to last location the mouse down event was
+	 * fired so that context menu may obtain the location.
 	 */
 	private class MouseLocation extends MouseAdapter {
 
@@ -474,8 +479,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 	}
 
 	/**
-	 * Allows sub classes to trigger the population of the {@link EditPart}
-	 * types.
+	 * Allows sub classes to trigger the population of the {@link EditPart} types.
 	 */
 	protected void loadEditPartTypes() {
 		this.populateEditPartTypes(this.modelTypeToEditPartTypeMap);
