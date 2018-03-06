@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -32,6 +34,7 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionCon
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.WebArchitectEmployer;
@@ -67,6 +70,34 @@ import net.officefloor.woof.teams.WoofTeamsLoaderImpl;
  * @author Daniel Sagenschneider
  */
 public class WoofLoaderExtensionService implements OfficeFloorExtensionService, OfficeExtensionService {
+
+	/**
+	 * Name of the WoOF configuration file. This file is to exist at the root of the
+	 * class path for the {@link WoofLoaderExtensionService} to load any
+	 * configuration.
+	 */
+	public static final String APPLICATION_WOOF = "application.woof";
+
+	/**
+	 * Determines if a WoOF application.
+	 * 
+	 * @param context
+	 *            {@link SourceContext}.
+	 * @return <code>true</code> if a WoOF application.
+	 * @throws IOException
+	 *             If fails to check if WoOF application.
+	 */
+	private static boolean isWoofApplication(SourceContext context) throws IOException {
+
+		// Obtain configuration file
+		InputStream config = context.getOptionalResource(APPLICATION_WOOF);
+		if (config != null) {
+			config.close();
+		}
+
+		// WoOF application if configuration file
+		return config != null;
+	}
 
 	/**
 	 * Runs within a context.
@@ -216,6 +247,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)
 			throws Exception {
 
+		// Determine if WoOF application
+		if (!isWoofApplication(context)) {
+			return; // not WoOF application
+		}
+
 		// Load the HTTP Server
 		if (isLoadHttpServer) {
 
@@ -263,6 +299,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
 
+		// Determine if WoOF application
+		if (!isWoofApplication(context)) {
+			return; // not WoOF application
+		}
+
 		// Employ the architects
 		WebArchitect web = WebArchitectEmployer.employWebArchitect(officeArchitect, context);
 		HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, officeArchitect,
@@ -286,7 +327,7 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 			@Override
 			public ConfigurationItem getConfiguration() {
-				return context.getConfigurationItem("application.woof", null);
+				return context.getConfigurationItem(APPLICATION_WOOF, null);
 			}
 
 			@Override
