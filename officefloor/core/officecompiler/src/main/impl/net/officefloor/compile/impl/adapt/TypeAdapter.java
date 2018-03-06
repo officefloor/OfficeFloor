@@ -252,7 +252,10 @@ public class TypeAdapter implements InvocationHandler {
 		if (Class.class.getName().equals(objectClass.getName())) {
 			// Translate class
 			Class<?> classObject = (Class<?>) object;
-			return translateClass(classObject, implClassLoader);
+			Class<?> adaptedClass = translateClass(classObject, implClassLoader);
+
+			// Return adapted class (otherwise if not on class loader provide class)
+			return adaptedClass != null ? adaptedClass : classObject;
 		}
 
 		// Transform for enum
@@ -337,8 +340,8 @@ public class TypeAdapter implements InvocationHandler {
 	 *            {@link Class}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
-	 * @return Translated {@link Class}. May be <code>null</code> if
-	 *         {@link Class} not available from {@link ClassLoader}.
+	 * @return Translated {@link Class}. May be <code>null</code> if {@link Class}
+	 *         not available from {@link ClassLoader}.
 	 * @throws ClassNotFoundException
 	 *             If fails to obtain translated {@link Class}.
 	 */

@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,7 +47,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.NumberFormat;
@@ -70,6 +70,10 @@ import java.util.logging.StreamHandler;
 
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
@@ -190,9 +194,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param ex
 	 *            Failure.
-	 * @return {@link RuntimeException} to allow <code>throw fail(ex);</code>
-	 *         for compilation. Note this is never returned as always throws
-	 *         exception.
+	 * @return {@link RuntimeException} to allow <code>throw fail(ex);</code> for
+	 *         compilation. Note this is never returned as always throws exception.
 	 * @throws TestFail
 	 *             Handled by {@link #runBare()}.
 	 */
@@ -226,8 +229,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * <li>{@link Throwable} wrapped with an {@link Exception}</li>
 	 * </ol>
 	 * <p>
-	 * This is useful for such methods as {@link TestCase#tearDown()} that do
-	 * not allow throwing {@link Throwable}.
+	 * This is useful for such methods as {@link TestCase#tearDown()} that do not
+	 * allow throwing {@link Throwable}.
 	 * 
 	 * @param ex
 	 *            {@link Throwable} to propagate as an {@link Exception}.
@@ -245,34 +248,70 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * {@link Class} name of the extra class for the new {@link ClassLoader}.
+	 */
+	public static final String CLASS_LOADER_EXTRA_CLASS_NAME = "extra.MockExtra";
+
+	/**
 	 * <p>
 	 * Creates a new {@link ClassLoader} from current process's java class path.
 	 * <p>
-	 * {@link Class} instances loaded via this {@link ClassLoader} will be
-	 * different to the current {@link ClassLoader}. This is to allow testing
-	 * multiple {@link ClassLoader} environments (such as Eclipse plug-ins).
+	 * {@link Class} instances loaded via this {@link ClassLoader} will be different
+	 * to the current {@link ClassLoader}. This is to allow testing multiple
+	 * {@link ClassLoader} environments (such as Eclipse plug-ins).
 	 * 
 	 * @return New {@link ClassLoader}.
 	 */
 	public static ClassLoader createNewClassLoader() {
 
 		try {
+
+			// Provide additional class to this class loader
+			// (only compiled once as does not change)
+			File tempDir = new File(System.getProperty("java.io.tmpdir"));
+			File workingDir = new File(tempDir, "officefloor-extra-classpath");
+			if (!workingDir.isDirectory()) {
+				workingDir.mkdir();
+			}
+			File extraPackageDir = new File(workingDir, "extra");
+			if (!extraPackageDir.isDirectory()) {
+				extraPackageDir.mkdir();
+			}
+			File extraClassSrc = new File(extraPackageDir, "MockExtra.java");
+			if (!extraClassSrc.exists()) {
+				// Write the source file
+				FileWriter writer = new FileWriter(extraClassSrc);
+				writer.write("package extra;\n");
+				writer.write("public class MockExtra {}\n");
+				writer.close();
+			}
+			File extraClass = new File(extraPackageDir, "MockExtra.class");
+			if (!extraClass.exists()) {
+				// Compile the source to class
+				JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+				try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
+					Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(extraClassSrc);
+					compiler.getTask(null, fileManager, null, null, null, compilationUnits).call();
+				}
+			}
+
 			// Create Class Loader for testing
 			String[] classPathEntries = System.getProperty("java.class.path").split(File.pathSeparator);
-			URL[] urls = new URL[classPathEntries.length];
-			for (int i = 0; i < urls.length; i++) {
+			URL[] urls = new URL[classPathEntries.length + 1]; // include extra class
+			for (int i = 0; i < classPathEntries.length; i++) {
 				String classPathEntry = classPathEntries[i];
 				classPathEntry = (classPathEntry.startsWith(File.separator) ? "file://" + classPathEntry
 						: classPathEntry);
 				classPathEntry = (classPathEntry.endsWith(".jar") ? classPathEntry : classPathEntry + "/");
 				urls[i] = new URL(classPathEntry);
 			}
+			urls[classPathEntries.length] = workingDir.toURI().toURL();
 			ClassLoader classLoader = new URLClassLoader(urls, null);
 
 			// Return the class loader
 			return classLoader;
 
-		} catch (MalformedURLException ex) {
+		} catch (Exception ex) {
 			throw fail(ex);
 		}
 	}
@@ -290,8 +329,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Displays the graph of objects starting at root ignoring following
-	 * verticies by the input method names.
+	 * Displays the graph of objects starting at root ignoring following verticies
+	 * by the input method names.
 	 * 
 	 * @param root
 	 *            Root of graph to display.
@@ -644,15 +683,15 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Flags whether the {@link #assertGraph(O, O, Set, String)} exception has
-	 * been logged.
+	 * Flags whether the {@link #assertGraph(O, O, Set, String)} exception has been
+	 * logged.
 	 */
 	private static boolean isAssetGraphExceptionLogged = false;
 
 	/**
 	 * Wrapper around {@link Object} being checked to ensure
-	 * {@link Object#equals(Object)} does not equate {@link Object} instances to
-	 * be the same and not fully check the object graph.
+	 * {@link Object#equals(Object)} does not equate {@link Object} instances to be
+	 * the same and not fully check the object graph.
 	 */
 	private static class CheckedObject {
 
@@ -987,14 +1026,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Asserts that properties on items within list match after the list is
-	 * sorted.
+	 * Asserts that properties on items within list match after the list is sorted.
 	 * 
 	 * @param <O>
 	 *            Type.
 	 * @param sortMethod
-	 *            Name of method on the items to sort the list by to ensure
-	 *            match in order.
+	 *            Name of method on the items to sort the list by to ensure match in
+	 *            order.
 	 * @param methods
 	 *            Method names to specify the properties on the items to match.
 	 * @param list
@@ -1026,8 +1064,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Asserts that properties on the input objects match for the specified
-	 * methods.
+	 * Asserts that properties on the input objects match for the specified methods.
 	 * 
 	 * @param <O>
 	 *            Type.
@@ -1084,8 +1121,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Obtains the item within the items whose property by methodName matches
-	 * the input value.
+	 * Obtains the item within the items whose property by methodName matches the
+	 * input value.
 	 * 
 	 * @param <T>
 	 *            Item type.
@@ -1194,8 +1231,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Creates a mock object registering the {@link MockControl}of the mock
-	 * object with registry for management.
+	 * Creates a mock object registering the {@link MockControl}of the mock object
+	 * with registry for management.
 	 * 
 	 * @param <M>
 	 *            Interface type.
@@ -1298,8 +1335,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param mockObject
 	 *            Mock object.
 	 * @param ignore
-	 *            Result of operation on the mock object. This is only provided
-	 *            to obtain correct return type for recording return.
+	 *            Result of operation on the mock object. This is only provided to
+	 *            obtain correct return type for recording return.
 	 * @param recordedReturn
 	 *            Value that is recorded to be returned from the mock object.
 	 */
@@ -1331,16 +1368,16 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Convenience method to record a method, an {@link ArgumentsMatcher} and
-	 * return value.
+	 * Convenience method to record a method, an {@link ArgumentsMatcher} and return
+	 * value.
 	 *
 	 * @param <T>
 	 *            Expected result type.
 	 * @param mockObject
 	 *            Mock object.
 	 * @param ignore
-	 *            Result of operation on the mock object. This is only provided
-	 *            to obtain correct return type for recording return.
+	 *            Result of operation on the mock object. This is only provided to
+	 *            obtain correct return type for recording return.
 	 * @param recordedReturn
 	 *            Value that is recorded to be returned from the mock object.
 	 * @param matcher
@@ -1489,8 +1526,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Obtains the file by the input file name located in the package of the
-	 * input class.
+	 * Obtains the file by the input file name located in the package of the input
+	 * class.
 	 * 
 	 * @param packageClass
 	 *            Class to obtain the relative path from for its package.
@@ -1616,8 +1653,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * <p>
-	 * Obtains the input stream to the file by the input file name located in
-	 * the package of the input class.
+	 * Obtains the input stream to the file by the input file name located in the
+	 * package of the input class.
 	 * <p>
 	 * Note: this also searches the class path for the file.
 	 * 
@@ -1792,9 +1829,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Indicates if not to run stress tests.
 	 * <p>
 	 * Stress tests should normally be run, but in cases of quick unit testing
-	 * running for functionality the stress tests can reduce turn around time
-	 * and subsequently the effectiveness of the tests. This is therefore
-	 * provided to maintain effectiveness of unit tests.
+	 * running for functionality the stress tests can reduce turn around time and
+	 * subsequently the effectiveness of the tests. This is therefore provided to
+	 * maintain effectiveness of unit tests.
 	 * 
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */

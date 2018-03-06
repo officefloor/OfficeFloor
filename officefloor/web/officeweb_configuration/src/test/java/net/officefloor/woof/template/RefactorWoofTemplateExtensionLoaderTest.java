@@ -567,8 +567,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		 * Ensure {@link WoofTemplateExtensionConfiguration} is as expected.
 		 * 
 		 * @param configurationType
-		 *            Type of {@link WoofTemplateExtensionConfiguration} (old or
-		 *            new).
+		 *            Type of {@link WoofTemplateExtensionConfiguration} (old or new).
 		 * @param configuration
 		 *            {@link WoofTemplateExtensionConfiguration} to test.
 		 * @param uri

@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
-import net.officefloor.compile.impl.adapt.AdaptedException;
-import net.officefloor.compile.impl.adapt.TypeAdapter;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -41,7 +39,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Implementation {@link ClassLoader}.
 	 */
-	private final ClassLoader implClassLoader = createNewClassLoader();
+	private ClassLoader implClassLoader = createNewClassLoader();
 
 	/**
 	 * Adapt String parameter.
@@ -262,6 +260,62 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	public static class ReturnValue {
 		public MockInterface run() {
 			return new MockClass("TEST");
+		}
+	}
+
+	/**
+	 * Adapt the return {@link Class}.
+	 */
+	public void testClassReturnValue() {
+		Object value = this.doTest(ClassReturnValue.class);
+		assertTrue("Should be adapted return value", value instanceof Class);
+		Class<?> adapted = (Class<?>) value;
+		assertEquals("Incorrect adapted class return value", ClassReturnValue.class, adapted);
+	}
+
+	public static class ClassReturnValue {
+		public Class<?> run() {
+			return ClassReturnValue.class;
+		}
+	}
+
+	public void testClassNotOnClasspath() {
+		Object value = this.doTest(ClassNotOnClasspath.class);
+		assertNotNull("Should always get the class", value);
+		assertTrue("Should be adapted return value", value instanceof Class);
+		Class<?> clazz = (Class<?>) value;
+		assertEquals("Incorrect adapted class (name of class used by Eclipse plugins)", CLASS_LOADER_EXTRA_CLASS_NAME,
+				clazz.getName());
+	}
+
+	public static class ClassNotOnClasspath {
+		public Class<?> run() throws ClassNotFoundException {
+			return this.getClass().getClassLoader().loadClass(CLASS_LOADER_EXTRA_CLASS_NAME);
+		}
+	}
+
+	public void testPropertyClassReturnValue() throws ClassNotFoundException {
+		Object value = this.doTest(PropertyClassReturnValue.class);
+		assertTrue("Should be adapted return value", value instanceof PropertyClass);
+		PropertyClass propertyClass = (PropertyClass) value;
+		assertEquals("Incorrect adapted property class (name of class used by Eclipse plugins",
+				CLASS_LOADER_EXTRA_CLASS_NAME, propertyClass.getPropertyClass().getName());
+	}
+
+	public static class PropertyClassReturnValue {
+		public PropertyClass run() {
+			return new PropertyClassImpl();
+		}
+	}
+
+	public static interface PropertyClass {
+		Class<?> getPropertyClass() throws ClassNotFoundException;
+	}
+
+	public static class PropertyClassImpl implements PropertyClass {
+		@Override
+		public Class<?> getPropertyClass() throws ClassNotFoundException {
+			return this.getClass().getClassLoader().loadClass(CLASS_LOADER_EXTRA_CLASS_NAME);
 		}
 	}
 
