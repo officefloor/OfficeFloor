@@ -30,11 +30,11 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 public interface TemplateFigureContext {
 
 	/**
-	 * Obtains the display name of the {@link HttpTemplate}.
+	 * Obtains the application path for the {@link HttpTemplate}.
 	 * 
-	 * @return Display name of the {@link HttpTemplate}.
+	 * @return Application path for the {@link HttpTemplate}.
 	 */
-	String getTemplateDisplayName();
+	String getTemplateApplicationPath();
 
 	/**
 	 * Indicates if the {@link HttpTemplate} is secure.

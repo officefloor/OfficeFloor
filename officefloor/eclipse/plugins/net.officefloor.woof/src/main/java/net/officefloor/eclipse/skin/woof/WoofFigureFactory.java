@@ -113,14 +113,14 @@ public interface WoofFigureFactory {
 	AccessInputFigure createAccessInputFigure(AccessInputFigureContext context);
 
 	/**
-	 * Creates the {@link AccessOutputFigure}.
+	 * Creates the {@link SecurityOutputFigure}.
 	 * 
 	 * @param context
-	 *            {@link AccessOutputFigureContext}.
-	 * @return {@link AccessOutputFigure}.
+	 *            {@link SecurityOutputFigureContext}.
+	 * @return {@link SecurityOutputFigure}.
 	 */
-	AccessOutputFigure createAccessOutputFigure(
-			AccessOutputFigureContext context);
+	SecurityOutputFigure createSecurityOutputFigure(
+			SecurityOutputFigureContext context);
 
 	/**
 	 * Creates the {@link GovernanceFigure}.
@@ -198,7 +198,7 @@ public interface WoofFigureFactory {
 	 * @param context
 	 *            {@link TemplateOutputToAccessInputFigureContext}
 	 */
-	void decorateTemplateOutputToAccessInputFigure(PolylineConnection figure,
+	void decorateTemplateOutputToSecurityFigure(PolylineConnection figure,
 			TemplateOutputToAccessInputFigureContext context);
 
 	/**
@@ -262,10 +262,10 @@ public interface WoofFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link AccessOutputToTemplateFigureContext}
+	 *            {@link SecurityOutputToTemplateFigureContext}
 	 */
-	void decorateAccessOutputToTemplateFigure(PolylineConnection figure,
-			AccessOutputToTemplateFigureContext context);
+	void decorateSecurityOutputToTemplateFigure(PolylineConnection figure,
+			SecurityOutputToTemplateFigureContext context);
 
 	/**
 	 * Decorates the {@link WoofAccessOutputToWoofSectionInputModel} figure.
@@ -273,10 +273,10 @@ public interface WoofFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link AccessOutputToSectionInputFigureContext}.
+	 *            {@link SecurityOutputToSectionInputFigureContext}.
 	 */
-	void decorateAccessOutputToSectionInputFigure(PolylineConnection figure,
-			AccessOutputToSectionInputFigureContext context);
+	void decorateSecurityOutputToSectionInputFigure(PolylineConnection figure,
+			SecurityOutputToSectionInputFigureContext context);
 
 	/**
 	 * Decorates the {@link WoofAccessOutputToWoofResourceModel} figure.
@@ -284,10 +284,10 @@ public interface WoofFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link AccessOutputToResourceFigureContext}.
+	 *            {@link SecurityOutputToResourceFigureContext}.
 	 */
-	void decorateAccessOutputToResourceFigure(PolylineConnection figure,
-			AccessOutputToResourceFigureContext context);
+	void decorateSecurityOutputToResourceFigure(PolylineConnection figure,
+			SecurityOutputToResourceFigureContext context);
 
 	/**
 	 * Decorates the {@link WoofGovernanceToWoofGovernanceAreaModel} figure.

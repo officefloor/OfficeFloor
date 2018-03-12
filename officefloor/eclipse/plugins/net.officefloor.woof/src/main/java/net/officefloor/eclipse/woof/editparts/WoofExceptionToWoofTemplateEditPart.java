@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.editparts;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.woof.ExceptionToTemplateFigureContext;
-import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
-import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel.WoofExceptionToWoofTemplateEvent;
-
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel.WoofExceptionToWoofTemplateEvent;
 
 /**
  * {@link EditPart} for the {@link WoofExceptionToWoofTemplateEditPart}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofExceptionToWoofTemplateEditPart
-		extends
+public class WoofExceptionToWoofTemplateEditPart extends
 		AbstractOfficeFloorConnectionEditPart<WoofExceptionToWoofTemplateModel, WoofExceptionToWoofTemplateEvent>
 		implements ExceptionToTemplateFigureContext {
 
@@ -42,8 +41,7 @@ public class WoofExceptionToWoofTemplateEditPart
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		WoofPlugin.getSkin().getWoofFigureFactory()
-				.decorateExceptionToTemplateFigure(figure, this);
+		WoofPlugin.getSkin().getWoofFigureFactory().decorateExceptionToTemplateFigure(figure, this);
 	}
 
 }

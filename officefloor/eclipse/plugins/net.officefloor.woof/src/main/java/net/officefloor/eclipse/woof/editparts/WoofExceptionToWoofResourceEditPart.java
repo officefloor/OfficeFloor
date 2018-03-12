@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.editparts;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.woof.ExceptionToResourceFigureContext;
-import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.model.woof.WoofExceptionToWoofResourceModel.WoofExceptionToWoofResourceEvent;
-
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel.WoofExceptionToWoofResourceEvent;
 
 /**
  * {@link EditPart} for the {@link WoofExceptionToWoofResourceEditPart}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofExceptionToWoofResourceEditPart
-		extends
+public class WoofExceptionToWoofResourceEditPart extends
 		AbstractOfficeFloorConnectionEditPart<WoofExceptionToWoofResourceModel, WoofExceptionToWoofResourceEvent>
 		implements ExceptionToResourceFigureContext {
 
@@ -42,8 +41,7 @@ public class WoofExceptionToWoofResourceEditPart
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		WoofPlugin.getSkin().getWoofFigureFactory()
-				.decorateExceptionToResourceFigure(figure, this);
+		WoofPlugin.getSkin().getWoofFigureFactory().decorateExceptionToResourceFigure(figure, this);
 	}
 
 }

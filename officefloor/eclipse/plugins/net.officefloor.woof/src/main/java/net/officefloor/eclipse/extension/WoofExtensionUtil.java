@@ -23,8 +23,8 @@ import java.util.Map;
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.extension.access.HttpSecuritySourceExtension;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
-import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.woof.template.WoofTemplateExtensionSource;
 
 /**
  * Utility class for working with extensions.

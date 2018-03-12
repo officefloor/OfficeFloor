@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofGovernanceEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofGovernanceModel;
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Deletes a {@link WoofGovernanceModel} from the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeleteGovernanceOperation extends
-		AbstractWoofChangeOperation<WoofGovernanceEditPart> {
+public class DeleteGovernanceOperation extends AbstractWoofChangeOperation<WoofGovernanceEditPart> {
 
 	/**
 	 * Initiate.
@@ -52,8 +51,7 @@ public class DeleteGovernanceOperation extends
 		WoofGovernanceModel governance = context.getEditPart().getCastedModel();
 
 		// Create the change
-		Change<WoofGovernanceModel> change = changes
-				.removeGovernance(governance);
+		Change<WoofGovernanceModel> change = changes.removeGovernance(governance);
 
 		// Return the change
 		return change;

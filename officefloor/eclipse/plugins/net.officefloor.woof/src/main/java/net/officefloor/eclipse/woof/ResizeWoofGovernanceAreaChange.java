@@ -17,18 +17,17 @@
  */
 package net.officefloor.eclipse.woof;
 
-import net.officefloor.model.impl.change.AbstractChange;
-import net.officefloor.model.woof.WoofGovernanceAreaModel;
-
 import org.eclipse.draw2d.geometry.Rectangle;
+
+import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
 
 /**
  * Resizes the {@link WoofGovernanceAreaModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ResizeWoofGovernanceAreaChange extends
-		AbstractChange<WoofGovernanceAreaModel> {
+public class ResizeWoofGovernanceAreaChange extends AbstractChange<WoofGovernanceAreaModel> {
 
 	/**
 	 * New bounds.
@@ -48,14 +47,12 @@ public class ResizeWoofGovernanceAreaChange extends
 	 * @param bounds
 	 *            {@link Rectangle} for resize.
 	 */
-	public ResizeWoofGovernanceAreaChange(WoofGovernanceAreaModel target,
-			Rectangle bounds) {
+	public ResizeWoofGovernanceAreaChange(WoofGovernanceAreaModel target, Rectangle bounds) {
 		super(target, "Resize Governance Area");
 
 		// Store state
 		this.newBounds = bounds;
-		this.oldBounds = new Rectangle(target.getX(), target.getY(),
-				target.getWidth(), target.getHeight());
+		this.oldBounds = new Rectangle(target.getX(), target.getY(), target.getWidth(), target.getHeight());
 	}
 
 	/**
@@ -68,8 +65,7 @@ public class ResizeWoofGovernanceAreaChange extends
 		WoofGovernanceAreaModel area = this.getTarget();
 
 		// Determine if move
-		boolean isMove = ((area.getWidth() == bounds.width) && (area
-				.getHeight() == bounds.height));
+		boolean isMove = ((area.getWidth() == bounds.width) && (area.getHeight() == bounds.height));
 
 		// Resize
 		area.setX(bounds.x);

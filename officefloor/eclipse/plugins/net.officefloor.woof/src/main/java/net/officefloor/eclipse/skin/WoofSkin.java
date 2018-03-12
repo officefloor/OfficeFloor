@@ -18,7 +18,7 @@
 package net.officefloor.eclipse.skin;
 
 import net.officefloor.eclipse.skin.woof.WoofFigureFactory;
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Skin for the {@link WoofModel}.

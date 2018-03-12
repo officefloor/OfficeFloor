@@ -49,8 +49,7 @@ public class WoofNonResizableEditPolicy extends NonResizableEditPolicy {
 
 		// Provide ghost figure
 		IFigure figure = this.getHostFigure();
-		GhostImageFigure ghostFigure = new GhostImageFigure(figure, 100,
-				new RGB(31, 31, 31));
+		GhostImageFigure ghostFigure = new GhostImageFigure(figure, 100, new RGB(31, 31, 31));
 		ghostFigure.validate();
 		this.addFeedback(ghostFigure);
 
@@ -76,8 +75,7 @@ public class WoofNonResizableEditPolicy extends NonResizableEditPolicy {
 	protected void createDragHandle(List handles, int direction) {
 
 		// Create and register the handle
-		ResizeHandle handle = new ResizeHandle(
-				(GraphicalEditPart) this.getHost(), direction);
+		ResizeHandle handle = new ResizeHandle((GraphicalEditPart) this.getHost(), direction);
 		this.configureHandle(handle);
 		handles.add(handle);
 	}

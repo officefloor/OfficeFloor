@@ -17,13 +17,13 @@
  */
 package net.officefloor.eclipse.extension.template;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.WoofExtensionUtil;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import net.officefloor.woof.template.WoofTemplateExtensionSource;
 
 /**
  * Extension for the {@link WoofTemplateExtensionSource}.

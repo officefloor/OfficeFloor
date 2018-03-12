@@ -17,9 +17,6 @@
  */
 package net.officefloor.eclipse.woof.operations;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
@@ -27,16 +24,15 @@ import net.officefloor.eclipse.wizard.sectionsource.SectionInstance;
 import net.officefloor.eclipse.wizard.sectionsource.SectionSourceWizard;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofSectionModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofSectionModel;
 
 /**
  * {@link Operation} to add a {@link WoofSectionModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddSectionOperation extends
-		AbstractWoofChangeOperation<WoofEditPart> {
+public class AddSectionOperation extends AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
 	 * Initiate.
@@ -56,8 +52,7 @@ public class AddSectionOperation extends
 	protected Change<?> getChange(WoofChanges changes, Context context) {
 
 		// Obtain the section instance
-		SectionInstance instance = SectionSourceWizard.getSectionInstance(true,
-				context.getEditPart(), null, true);
+		SectionInstance instance = SectionSourceWizard.getSectionInstance(true, context.getEditPart(), null, true);
 		if (instance == null) {
 			return null; // must have section
 		}
@@ -69,13 +64,9 @@ public class AddSectionOperation extends
 		PropertyList properties = instance.getPropertylist();
 		SectionType sectionType = instance.getSectionType();
 
-		// URI's provided after section creation
-		Map<String, String> inputToUri = new HashMap<String, String>();
-
 		// Create change to add section
-		Change<WoofSectionModel> change = changes.addSection(sectionName,
-				sectionSourceClassName, sectionLocation, properties,
-				sectionType, inputToUri);
+		Change<WoofSectionModel> change = changes.addSection(sectionName, sectionSourceClassName, sectionLocation,
+				properties, sectionType);
 
 		// Position section
 		context.positionModel(change.getTarget());

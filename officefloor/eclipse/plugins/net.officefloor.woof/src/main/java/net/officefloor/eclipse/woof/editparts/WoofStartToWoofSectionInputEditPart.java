@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.editparts;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.woof.StartToSectionInputFigureContext;
-import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
-import net.officefloor.model.woof.WoofStartToWoofSectionInputModel.WoofStartToWoofSectionInputEvent;
-
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel.WoofStartToWoofSectionInputEvent;
 
 /**
  * {@link EditPart} for the {@link WoofStartToWoofSectionInputEditPart}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofStartToWoofSectionInputEditPart
-		extends
+public class WoofStartToWoofSectionInputEditPart extends
 		AbstractOfficeFloorConnectionEditPart<WoofStartToWoofSectionInputModel, WoofStartToWoofSectionInputEvent>
 		implements StartToSectionInputFigureContext {
 
@@ -42,8 +41,7 @@ public class WoofStartToWoofSectionInputEditPart
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		WoofPlugin.getSkin().getWoofFigureFactory()
-				.decorateStartToSectionInputFigure(figure, this);
+		WoofPlugin.getSkin().getWoofFigureFactory().decorateStartToSectionInputFigure(figure, this);
 	}
 
 }

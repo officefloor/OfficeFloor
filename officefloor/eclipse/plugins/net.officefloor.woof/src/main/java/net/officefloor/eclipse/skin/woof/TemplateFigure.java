@@ -20,7 +20,7 @@ package net.officefloor.eclipse.skin.woof;
 import org.eclipse.draw2d.IFigure;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link WoofTemplateModel}.
@@ -30,19 +30,19 @@ import net.officefloor.model.woof.WoofTemplateModel;
 public interface TemplateFigure extends OfficeFloorFigure {
 
 	/**
-	 * Specifies the template display name.
+	 * Specifies the template application path.
 	 * 
 	 * @param templateDisplayName
-	 *            Display name for the template.
+	 *            Application path for the template.
 	 */
-	void setTemplateDisplayName(String templateDisplayName);
+	void setTemplateApplicationPath(String templateDisplayName);
 
 	/**
-	 * Obtains the template display name {@link IFigure}.
+	 * Obtains the template application path {@link IFigure}.
 	 * 
-	 * @return Template display name {@link IFigure}.
+	 * @return Template application path {@link IFigure}.
 	 */
-	IFigure getTemplateDisplayFigure();
+	IFigure getTemplateApplicationPathFigure();
 
 	/**
 	 * Flags whether template is secure.

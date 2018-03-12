@@ -21,20 +21,19 @@ import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.dialog.input.WoofFileInput;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.model.woof.WoofModel;
-import net.officefloor.model.woof.WoofResourceModel;
-import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
-import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
 
 /**
  * Adds a {@link WoofResourceModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddResourceOperation extends
-		AbstractWoofChangeOperation<WoofEditPart> {
+public class AddResourceOperation extends AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
 	 * Initiate.
@@ -58,21 +57,18 @@ public class AddResourceOperation extends
 
 		// Create the populated Resource
 		final WoofResourceModel resource = new WoofResourceModel();
-		BeanDialog dialog = context.getEditPart().createBeanDialog(resource,
-				"Woof Resource Name", "X", "Y");
+		BeanDialog dialog = context.getEditPart().createBeanDialog(resource, "Woof Resource Name", "X", "Y");
 		dialog.addIgnoreType(WoofTemplateOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofSectionOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofExceptionToWoofResourceModel.class);
-		dialog.registerPropertyInput("Resource Path", new WoofFileInput(
-				editPart.getEditor()));
+		dialog.registerPropertyInput("Resource Path", new WoofFileInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created
 			return null;
 		}
 
 		// Create the change
-		Change<WoofResourceModel> change = changes.addResource(resource
-				.getResourcePath());
+		Change<WoofResourceModel> change = changes.addResource(resource.getResourcePath());
 
 		// Position the resource
 		context.positionModel(change.getTarget());

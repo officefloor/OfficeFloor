@@ -20,26 +20,24 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
-import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
-import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
 import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofTemplateChangeContext;
-import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.model.woof.WoofTemplateModel.WoofTemplateEvent;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 
 /**
  * {@link EditPart} for the {@link WoofTemplateModel}.
@@ -47,14 +45,12 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class WoofTemplateEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofTemplateModel, WoofTemplateEvent, TemplateFigure>
+		extends AbstractOfficeFloorEditPart<WoofTemplateModel, WoofTemplateEvent, TemplateFigure>
 		implements TemplateFigureContext {
 
 	@Override
 	protected TemplateFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createTemplateFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createTemplateFigure(this);
 	}
 
 	@Override
@@ -66,59 +62,48 @@ public class WoofTemplateEditPart
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
-		models.addAll(this.getCastedModel().getWoofAccessOutputs());
+		models.addAll(this.getCastedModel().getWoofSecurityOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
 	}
 
 	@Override
-	protected void populateOfficeFloorOpenEditPolicy(
-			OfficeFloorOpenEditPolicy<WoofTemplateModel> policy) {
-		policy.allowOpening(new OpenHandler<WoofTemplateModel>() {
-			@Override
-			public void doOpen(OpenHandlerContext<WoofTemplateModel> context) {
+	protected void populateOfficeFloorOpenEditPolicy(OfficeFloorOpenEditPolicy<WoofTemplateModel> policy) {
+		policy.allowOpening((context) -> {
 
-				// Obtain the editor and changes
-				WoofEditor editor = (WoofEditor) WoofTemplateEditPart.this
-						.getEditor();
-				WoofChanges changes = (WoofChanges) editor.getModelChanges();
+			// Obtain the editor and changes
+			WoofEditor editor = (WoofEditor) WoofTemplateEditPart.this.getEditor();
+			WoofChanges changes = (WoofChanges) editor.getModelChanges();
 
-				// Refactor template
-				WoofTemplateModel model = context.getModel();
-				OperationUtil.execute(new RefactorTemplateOperation(changes,
-						editor), model.getX(), model.getY(), context
-						.getEditPart());
-			}
+			// Refactor template
+			WoofTemplateModel model = context.getModel();
+			OperationUtil.execute(new RefactorTemplateOperation(changes, editor), model.getX(), model.getY(),
+					context.getEditPart());
 		});
 	}
 
 	@Override
-	protected void populateOfficeFloorDirectEditPolicy(
-			OfficeFloorDirectEditPolicy<WoofTemplateModel> policy) {
+	protected void populateOfficeFloorDirectEditPolicy(OfficeFloorDirectEditPolicy<WoofTemplateModel> policy) {
 		policy.allowDirectEdit(new DirectEditAdapter<WoofChanges, WoofTemplateModel>() {
 			@Override
 			public String getInitialValue() {
-				return WoofTemplateEditPart.this.getCastedModel().getUri();
+				return WoofTemplateEditPart.this.getCastedModel().getApplicationPath();
 			}
 
 			@Override
 			public IFigure getLocationFigure() {
-				return WoofTemplateEditPart.this.getOfficeFloorFigure()
-						.getTemplateDisplayFigure();
+				return WoofTemplateEditPart.this.getOfficeFloorFigure().getTemplateApplicationPathFigure();
 			}
 
 			@Override
-			public Change<WoofTemplateModel> createChange(WoofChanges changes,
-					WoofTemplateModel target, String newValue) {
+			public Change<WoofTemplateModel> createChange(WoofChanges changes, WoofTemplateModel target,
+					String newValue) {
 
 				// Obtain the editor and change context
-				WoofEditor editor = (WoofEditor) WoofTemplateEditPart.this
-						.getEditor();
-				WoofTemplateChangeContext changeContext = editor
-						.getWoofTemplateChangeContext();
+				WoofEditor editor = (WoofEditor) WoofTemplateEditPart.this.getEditor();
+				WoofTemplateChangeContext changeContext = editor.getWoofTemplateChangeContext();
 
 				// Create the change to the URI
-				return changes.changeTemplateUri(target, newValue,
-						changeContext);
+				return changes.changeApplicationPath(target, newValue, changeContext);
 			}
 		});
 	}
@@ -129,13 +114,10 @@ public class WoofTemplateEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofTemplateEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofTemplateEvent property, PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_WOOF_TEMPLATE_NAME:
-		case CHANGE_URI:
-			this.getOfficeFloorFigure().setTemplateDisplayName(
-					this.getTemplateDisplayName());
+		case CHANGE_APPLICATION_PATH:
+			this.getOfficeFloorFigure().setTemplateApplicationPath(this.getTemplateApplicationPath());
 			break;
 
 		case ADD_OUTPUT:
@@ -147,27 +129,21 @@ public class WoofTemplateEditPart
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
 		case REMOVE_WOOF_SECTION_OUTPUT:
-		case ADD_WOOF_ACCESS_OUTPUT:
-		case REMOVE_WOOF_ACCESS_OUTPUT:
+		case ADD_WOOF_SECURITY_OUTPUT:
+		case REMOVE_WOOF_SECURITY_OUTPUT:
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
 			this.refreshTargetConnections();
 			break;
 
 		case CHANGE_IS_TEMPLATE_SECURE:
-			this.getOfficeFloorFigure().setTemplateSecure(
-					this.isTemplateSecure());
+			this.getOfficeFloorFigure().setTemplateSecure(this.isTemplateSecure());
 			break;
 
 		case CHANGE_TEMPLATE_CLASS_NAME:
-		case CHANGE_TEMPLATE_PATH:
-		case CHANGE_SUPER_TEMPLATE:
 		case CHANGE_TEMPLATE_CONTENT_TYPE:
 		case ADD_LINK:
 		case REMOVE_LINK:
-		case ADD_REDIRECT:
-		case REMOVE_REDIRECT:
-		case CHANGE_IS_CONTINUE_RENDERING:
 		case ADD_EXTENSION:
 		case REMOVE_EXTENSION:
 			// No visual change
@@ -180,23 +156,8 @@ public class WoofTemplateEditPart
 	 */
 
 	@Override
-	public String getTemplateDisplayName() {
-
-		// Obtain the display name
-		String displayName;
-		String templateUri = this.getCastedModel().getUri();
-		if ("/".equals(templateUri)) {
-			// Root template
-			displayName = templateUri;
-
-		} else {
-			// Use simplified URI
-			displayName = (templateUri.startsWith("/") ? templateUri
-					.substring("/".length()) : templateUri);
-		}
-
-		// Provide the display name
-		return displayName;
+	public String getTemplateApplicationPath() {
+		return this.getCastedModel().getApplicationPath();
 	}
 
 	@Override

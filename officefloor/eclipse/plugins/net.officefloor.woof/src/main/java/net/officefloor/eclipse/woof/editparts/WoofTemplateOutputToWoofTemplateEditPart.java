@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.editparts;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.woof.TemplateOutputToTemplateFigureContext;
-import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel.WoofTemplateOutputToWoofTemplateEvent;
-
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel.WoofTemplateOutputToWoofTemplateEvent;
 
 /**
  * {@link EditPart} for the {@link WoofTemplateOutputToWoofTemplateEditPart}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofTemplateOutputToWoofTemplateEditPart
-		extends
+public class WoofTemplateOutputToWoofTemplateEditPart extends
 		AbstractOfficeFloorConnectionEditPart<WoofTemplateOutputToWoofTemplateModel, WoofTemplateOutputToWoofTemplateEvent>
 		implements TemplateOutputToTemplateFigureContext {
 
@@ -42,8 +41,7 @@ public class WoofTemplateOutputToWoofTemplateEditPart
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		WoofPlugin.getSkin().getWoofFigureFactory()
-				.decorateTemplateOutputToTemplateFigure(figure, this);
+		WoofPlugin.getSkin().getWoofFigureFactory().decorateTemplateOutputToTemplateFigure(figure, this);
 	}
 
 }

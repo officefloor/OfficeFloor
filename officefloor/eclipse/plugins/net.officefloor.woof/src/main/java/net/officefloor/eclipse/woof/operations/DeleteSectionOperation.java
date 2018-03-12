@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofSectionEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofModel;
-import net.officefloor.model.woof.WoofSectionModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofSectionModel;
 
 /**
  * Deletes a {@link WoofSectionModel} from the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeleteSectionOperation extends
-		AbstractWoofChangeOperation<WoofSectionEditPart> {
+public class DeleteSectionOperation extends AbstractWoofChangeOperation<WoofSectionEditPart> {
 
 	/**
 	 * Initiate.

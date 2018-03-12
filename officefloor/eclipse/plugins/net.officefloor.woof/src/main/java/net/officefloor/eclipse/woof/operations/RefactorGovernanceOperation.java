@@ -23,17 +23,16 @@ import net.officefloor.eclipse.wizard.governancesource.GovernanceInstance;
 import net.officefloor.eclipse.wizard.governancesource.GovernanceSourceWizard;
 import net.officefloor.eclipse.woof.editparts.WoofGovernanceEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.PropertyModel;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofGovernanceModel;
+import net.officefloor.woof.model.woof.PropertyModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceModel;
 
 /**
  * Refactors a {@link WoofGovernanceModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorGovernanceOperation extends
-		AbstractWoofChangeOperation<WoofGovernanceEditPart> {
+public class RefactorGovernanceOperation extends AbstractWoofChangeOperation<WoofGovernanceEditPart> {
 
 	/**
 	 * Initiate.
@@ -56,32 +55,27 @@ public class RefactorGovernanceOperation extends
 		WoofGovernanceModel governance = context.getEditPart().getCastedModel();
 
 		// Create the existing governance instance
-		GovernanceInstance existing = new GovernanceInstance(
-				governance.getWoofGovernanceName(),
+		GovernanceInstance existing = new GovernanceInstance(governance.getWoofGovernanceName(),
 				governance.getGovernanceSourceClassName());
 		for (PropertyModel property : governance.getProperties()) {
-			existing.getPropertyList().addProperty(property.getName())
-					.setValue(property.getValue());
+			existing.getPropertyList().addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Obtain the governance instance
-		GovernanceInstance instance = GovernanceSourceWizard
-				.getGovernanceInstance(context.getEditPart(), existing);
+		GovernanceInstance instance = GovernanceSourceWizard.getGovernanceInstance(context.getEditPart(), existing);
 		if (instance == null) {
 			return null; // must have governance
 		}
 
 		// Obtain governance details
 		String governanceName = instance.getGovernanceName();
-		String governanceSourceClassName = instance
-				.getGovernanceSourceClassName();
+		String governanceSourceClassName = instance.getGovernanceSourceClassName();
 		PropertyList properties = instance.getPropertyList();
 		GovernanceType<?, ?> governanceType = instance.getGovernanceType();
 
 		// Create change to refactor governance
-		Change<WoofGovernanceModel> change = changes.refactorGovernance(
-				governance, governanceName, governanceSourceClassName,
-				properties, governanceType);
+		Change<WoofGovernanceModel> change = changes.refactorGovernance(governance, governanceName,
+				governanceSourceClassName, properties, governanceType);
 
 		// Return change to refactor the governance
 		return change;

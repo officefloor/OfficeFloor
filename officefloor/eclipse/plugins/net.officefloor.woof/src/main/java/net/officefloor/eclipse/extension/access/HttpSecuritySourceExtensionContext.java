@@ -17,13 +17,13 @@
  */
 package net.officefloor.eclipse.extension.access;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
-
-import org.eclipse.core.resources.IProject;
+import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
 
 /**
  * Context for the {@link HttpSecuritySourceExtension}.

@@ -21,20 +21,19 @@ import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.woof.editparts.WoofResourceEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.model.woof.WoofModel;
-import net.officefloor.model.woof.WoofResourceModel;
-import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
-import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
 
 /**
  * Refactors a {@link WoofResourceModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorResourceOperation extends
-		AbstractWoofChangeOperation<WoofResourceEditPart> {
+public class RefactorResourceOperation extends AbstractWoofChangeOperation<WoofResourceEditPart> {
 
 	/**
 	 * Initiate.
@@ -60,23 +59,19 @@ public class RefactorResourceOperation extends
 		WoofResourceModel resource = editPart.getCastedModel();
 
 		// Create the populated Resource
-		WoofResourceModel bean = new WoofResourceModel(
-				resource.getWoofResourceName(), resource.getResourcePath());
-		BeanDialog dialog = context.getEditPart().createBeanDialog(bean,
-				"Woof Resource Name", "X", "Y");
+		WoofResourceModel bean = new WoofResourceModel(resource.getResourcePath());
+		BeanDialog dialog = context.getEditPart().createBeanDialog(bean, "Woof Resource Name", "X", "Y");
 		dialog.addIgnoreType(WoofTemplateOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofSectionOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofExceptionToWoofResourceModel.class);
-		dialog.registerPropertyInput("Resource Path", new ClasspathFileInput(
-				editPart.getEditor()));
+		dialog.registerPropertyInput("Resource Path", new ClasspathFileInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created
 			return null;
 		}
 
 		// Create the change
-		Change<WoofResourceModel> change = changes.refactorResource(resource,
-				bean.getResourcePath());
+		Change<WoofResourceModel> change = changes.refactorResource(resource, bean.getResourcePath());
 
 		// Return the change
 		return change;

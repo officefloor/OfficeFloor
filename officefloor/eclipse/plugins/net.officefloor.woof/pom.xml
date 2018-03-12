@@ -41,8 +41,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_woof</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>easymock</groupId>
@@ -76,10 +76,10 @@
 									</condition>
 								</fail>
 								<fail
-									message="Should not include net.officefloor.plugins dependencies (e.g. officeplugin_web)">
+									message="Should not include net.officefloor.plugins dependencies (e.g. woof)">
 									<condition>
 										<resourcecontains resource="build.properties"
-											substring="officeplugin_web" />
+											substring="woof" />
 									</condition>
 								</fail>
 							</target>

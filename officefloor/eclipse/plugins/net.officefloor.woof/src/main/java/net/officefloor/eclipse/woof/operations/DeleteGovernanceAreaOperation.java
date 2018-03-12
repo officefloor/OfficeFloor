@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofGovernanceAreaEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Deletes a {@link WoofGovernanceAreaModel} from the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeleteGovernanceAreaOperation extends
-		AbstractWoofChangeOperation<WoofGovernanceAreaEditPart> {
+public class DeleteGovernanceAreaOperation extends AbstractWoofChangeOperation<WoofGovernanceAreaEditPart> {
 
 	/**
 	 * Initiate.
@@ -38,8 +37,7 @@ public class DeleteGovernanceAreaOperation extends
 	 *            {@link WoofChanges}.
 	 */
 	public DeleteGovernanceAreaOperation(WoofChanges woofChanges) {
-		super("Delete governance area", WoofGovernanceAreaEditPart.class,
-				woofChanges);
+		super("Delete governance area", WoofGovernanceAreaEditPart.class, woofChanges);
 	}
 
 	/*
@@ -50,12 +48,10 @@ public class DeleteGovernanceAreaOperation extends
 	protected Change<?> getChange(WoofChanges changes, Context context) {
 
 		// Obtain the governance area to remove
-		WoofGovernanceAreaModel governanceArea = context.getEditPart()
-				.getCastedModel();
+		WoofGovernanceAreaModel governanceArea = context.getEditPart().getCastedModel();
 
 		// Create the change
-		Change<WoofGovernanceAreaModel> change = changes
-				.removeGovernanceArea(governanceArea);
+		Change<WoofGovernanceAreaModel> change = changes.removeGovernanceArea(governanceArea);
 
 		// Return the change
 		return change;

@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofGovernanceEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.model.woof.WoofGovernanceModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
+import net.officefloor.woof.model.woof.WoofGovernanceModel;
 
 /**
  * Adds a {@link WoofGovernanceAreaModel} to the {@link WoofGovernanceModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddGovernanceAreaOperation extends
-		AbstractWoofChangeOperation<WoofGovernanceEditPart> {
+public class AddGovernanceAreaOperation extends AbstractWoofChangeOperation<WoofGovernanceEditPart> {
 
 	/**
 	 * Initiate.
@@ -48,8 +47,7 @@ public class AddGovernanceAreaOperation extends
 		WoofGovernanceModel governance = context.getEditPart().getCastedModel();
 
 		// Create change to add the governance area
-		Change<WoofGovernanceAreaModel> change = changes.addGovernanceArea(
-				governance, 100, 100);
+		Change<WoofGovernanceAreaModel> change = changes.addGovernanceArea(governance, 100, 100);
 
 		// Position area just offset to governance location
 		WoofGovernanceAreaModel area = change.getTarget();

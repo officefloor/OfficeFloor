@@ -24,7 +24,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
-import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
  * Interface for extension to provide enriched {@link HttpSecuritySource} usage.

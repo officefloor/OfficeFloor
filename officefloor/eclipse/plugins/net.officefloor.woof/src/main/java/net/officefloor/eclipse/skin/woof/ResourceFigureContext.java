@@ -17,9 +17,9 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
-import net.officefloor.model.woof.WoofResourceModel;
-
 import org.eclipse.draw2d.IFigure;
+
+import net.officefloor.woof.model.woof.WoofResourceModel;
 
 /**
  * Context for the {@link WoofResourceModel} {@link IFigure}.
@@ -27,13 +27,6 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel Sagenschneider
  */
 public interface ResourceFigureContext {
-
-	/**
-	 * Obtains the name of the resource.
-	 * 
-	 * @return Name of the resource.
-	 */
-	String getResourceName();
 
 	/**
 	 * Obtains the resource path.

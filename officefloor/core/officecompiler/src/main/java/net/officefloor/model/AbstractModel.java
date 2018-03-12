@@ -31,8 +31,7 @@ public class AbstractModel implements Model {
 	/**
 	 * Support in handling property changes.
 	 */
-	private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
-			this);
+	private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
 	/**
 	 * The X location for the model.
@@ -54,11 +53,9 @@ public class AbstractModel implements Model {
 	 * @param newValue
 	 *            New value of property.
 	 */
-	public void firePropertyChange(String property, Object oldValue,
-			Object newValue) {
+	public void firePropertyChange(String property, Object oldValue, Object newValue) {
 		if (this.propertyChangeSupport.hasListeners(property)) {
-			this.propertyChangeSupport.firePropertyChange(property, oldValue,
-					newValue);
+			this.propertyChangeSupport.firePropertyChange(property, oldValue, newValue);
 		}
 	}
 
@@ -95,8 +92,7 @@ public class AbstractModel implements Model {
 	 * @param removeEvent
 	 *            Event to fire on item being removed.
 	 */
-	protected <T> void removeItemFromList(T item, List<T> list,
-			Enum<?> removeEvent) {
+	protected <T> void removeItemFromList(T item, List<T> list, Enum<?> removeEvent) {
 		if (list.contains(item)) {
 			list.remove(item);
 
@@ -166,14 +162,12 @@ public class AbstractModel implements Model {
 	}
 
 	@Override
-	public synchronized void addPropertyChangeListener(
-			PropertyChangeListener listener) {
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		this.propertyChangeSupport.addPropertyChangeListener(listener);
 	}
 
 	@Override
-	public synchronized void removePropertyChangeListener(
-			PropertyChangeListener listener) {
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.propertyChangeSupport.removePropertyChangeListener(listener);
 	}
 

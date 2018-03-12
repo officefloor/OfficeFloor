@@ -36,6 +36,8 @@
 			timeout="4000">
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
+			<content type="application/json" />
+			<content type="application/xml" />
 			<output name="OUTPUT_A" argument-type="java.lang.Integer">
 				<section name="SECTION" input="INPUT" />
 			</output>

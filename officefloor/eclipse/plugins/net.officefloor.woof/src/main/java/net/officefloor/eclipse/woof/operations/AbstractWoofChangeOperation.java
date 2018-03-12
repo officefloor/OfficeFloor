@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.operations;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.ChangeCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofChanges;
 
 /**
  * Abstract {@link WoofChanges} {@link Operation}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractWoofChangeOperation<E extends EditPart> extends
-		AbstractOperation<E> {
+public abstract class AbstractWoofChangeOperation<E extends EditPart> extends AbstractOperation<E> {
 
 	/**
 	 * {@link WoofChanges}.
@@ -50,8 +49,7 @@ public abstract class AbstractWoofChangeOperation<E extends EditPart> extends
 	 * @param woofChanges
 	 *            {@link WoofChanges}.
 	 */
-	public AbstractWoofChangeOperation(String actionText,
-			Class<E> editPartType, WoofChanges woofChanges) {
+	public AbstractWoofChangeOperation(String actionText, Class<E> editPartType, WoofChanges woofChanges) {
 		super(actionText, editPartType);
 		this.woofChanges = woofChanges;
 	}

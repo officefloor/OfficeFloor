@@ -17,10 +17,10 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
-import net.officefloor.model.woof.WoofTemplateOutputModel;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-
 import org.eclipse.draw2d.IFigure;
+
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
 
 /**
  * Context for the {@link WoofTemplateOutputModel} {@link IFigure}.
@@ -35,12 +35,5 @@ public interface TemplateOutputFigureContext {
 	 * @return Name of the {@link HttpTemplate} output.
 	 */
 	String getTemplateOutputName();
-
-	/**
-	 * Flags if the render complete output.
-	 * 
-	 * @return <code>true</code> if render complete output.
-	 */
-	boolean isRenderCompleteOutput();
 
 }

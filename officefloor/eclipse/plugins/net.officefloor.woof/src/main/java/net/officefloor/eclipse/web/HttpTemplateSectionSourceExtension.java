@@ -17,12 +17,12 @@
  */
 package net.officefloor.eclipse.web;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-
-import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link SectionSourceExtension} for the {@link HttpTemplateSectionSource}.

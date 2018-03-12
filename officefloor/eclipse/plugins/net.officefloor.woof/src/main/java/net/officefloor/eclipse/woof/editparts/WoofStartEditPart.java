@@ -20,36 +20,32 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.woof.StartFigure;
 import net.officefloor.eclipse.skin.woof.StartFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.model.woof.WoofStartModel;
-import net.officefloor.model.woof.WoofStartModel.WoofStartEvent;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofStartModel;
+import net.officefloor.woof.model.woof.WoofStartModel.WoofStartEvent;
 
 /**
  * {@link EditPart} for the {@link WoofStartModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofStartEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofStartModel, WoofStartEvent, StartFigure>
+public class WoofStartEditPart extends AbstractOfficeFloorEditPart<WoofStartModel, WoofStartEvent, StartFigure>
 		implements StartFigureContext {
 
 	@Override
 	protected StartFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createStartFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createStartFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getWoofSectionInput());
+		EclipseUtil.addToList(models, this.getCastedModel().getWoofSectionInput());
 	}
 
 	@Override
@@ -58,8 +54,7 @@ public class WoofStartEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofStartEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofStartEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_SECTION_INPUT:
 			this.refreshSourceConnections();

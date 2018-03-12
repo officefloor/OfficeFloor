@@ -20,6 +20,9 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -32,12 +35,9 @@ import net.officefloor.eclipse.skin.woof.ResourceFigure;
 import net.officefloor.eclipse.skin.woof.ResourceFigureContext;
 import net.officefloor.eclipse.woof.operations.RefactorResourceOperation;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofResourceModel;
-import net.officefloor.model.woof.WoofResourceModel.WoofResourceEvent;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 
 /**
  * {@link EditPart} for the {@link WoofResourceModel}.
@@ -45,62 +45,55 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class WoofResourceEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofResourceModel, WoofResourceEvent, ResourceFigure>
+		extends AbstractOfficeFloorEditPart<WoofResourceModel, WoofResourceEvent, ResourceFigure>
 		implements ResourceFigureContext {
 
 	@Override
 	protected ResourceFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createResourceFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createResourceFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
-		models.addAll(this.getCastedModel().getWoofAccessOutputs());
+		models.addAll(this.getCastedModel().getWoofSecurityOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
 	}
 
 	@Override
-	protected void populateOfficeFloorOpenEditPolicy(
-			OfficeFloorOpenEditPolicy<WoofResourceModel> policy) {
+	protected void populateOfficeFloorOpenEditPolicy(OfficeFloorOpenEditPolicy<WoofResourceModel> policy) {
 		policy.allowOpening(new OpenHandler<WoofResourceModel>() {
 			@Override
 			public void doOpen(OpenHandlerContext<WoofResourceModel> context) {
 
 				// Obtain the changes
-				WoofChanges changes = (WoofChanges) WoofResourceEditPart.this
-						.getEditor().getModelChanges();
+				WoofChanges changes = (WoofChanges) WoofResourceEditPart.this.getEditor().getModelChanges();
 
 				// Refactor resource
 				WoofResourceModel model = context.getModel();
-				OperationUtil.execute(new RefactorResourceOperation(changes),
-						model.getX(), model.getY(), context.getEditPart());
+				OperationUtil.execute(new RefactorResourceOperation(changes), model.getX(), model.getY(),
+						context.getEditPart());
 			}
 		});
 	}
 
 	@Override
-	protected void populateOfficeFloorDirectEditPolicy(
-			OfficeFloorDirectEditPolicy<WoofResourceModel> policy) {
+	protected void populateOfficeFloorDirectEditPolicy(OfficeFloorDirectEditPolicy<WoofResourceModel> policy) {
 		policy.allowDirectEdit(new DirectEditAdapter<WoofChanges, WoofResourceModel>() {
 			@Override
 			public String getInitialValue() {
-				return WoofResourceEditPart.this.getCastedModel()
-						.getResourcePath();
+				return WoofResourceEditPart.this.getCastedModel().getResourcePath();
 			}
 
 			@Override
 			public IFigure getLocationFigure() {
-				return WoofResourceEditPart.this.getOfficeFloorFigure()
-						.getResourcePathFigure();
+				return WoofResourceEditPart.this.getOfficeFloorFigure().getResourcePathFigure();
 			}
 
 			@Override
-			public Change<WoofResourceModel> createChange(WoofChanges changes,
-					WoofResourceModel target, String newValue) {
+			public Change<WoofResourceModel> createChange(WoofChanges changes, WoofResourceModel target,
+					String newValue) {
 				return changes.changeResourcePath(target, newValue);
 			}
 		});
@@ -112,20 +105,17 @@ public class WoofResourceEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofResourceEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofResourceEvent property, PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_WOOF_RESOURCE_NAME:
 		case CHANGE_RESOURCE_PATH:
-			this.getOfficeFloorFigure().setResourcePath(
-					this.getCastedModel().getResourcePath());
+			this.getOfficeFloorFigure().setResourcePath(this.getCastedModel().getResourcePath());
 			break;
 		case ADD_WOOF_TEMPLATE_OUTPUT:
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
 		case REMOVE_WOOF_SECTION_OUTPUT:
-		case ADD_WOOF_ACCESS_OUTPUT:
-		case REMOVE_WOOF_ACCESS_OUTPUT:
+		case ADD_WOOF_SECURITY_OUTPUT:
+		case REMOVE_WOOF_SECURITY_OUTPUT:
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
 			this.refreshTargetConnections();
@@ -136,11 +126,6 @@ public class WoofResourceEditPart
 	/*
 	 * =========================== ResourceFigureContext =======================
 	 */
-
-	@Override
-	public String getResourceName() {
-		return this.getCastedModel().getWoofResourceName();
-	}
 
 	@Override
 	public String getResourcePath() {

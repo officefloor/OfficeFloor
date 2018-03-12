@@ -91,7 +91,8 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the access with same details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
-				"net.example.HttpSecuritySource", 4000, properties, securityType, this.securityOutputNameMapping);
+				"net.example.HttpSecuritySource", 4000, properties,
+				new String[] { "application/json", "application/xml" }, securityType, this.securityOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Security", true);
@@ -126,7 +127,9 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the section with same details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "CHANGE",
-				"net.change.ChangeSecuritySource", 5000, properties, securityType, this.securityOutputNameMapping);
+				"net.change.ChangeSecuritySource", 5000, properties,
+				new String[] { "application/json", "text/html", "confirm/change" }, securityType,
+				this.securityOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Security", true);
@@ -146,7 +149,7 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the access removing details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
-				"net.example.RemoveSecuritySource", 10, null, securityType, null);
+				"net.example.RemoveSecuritySource", 10, null, null, securityType, null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Security", true);
@@ -173,7 +176,8 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the access with added details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
-				"net.example.AddSecuritySource", 5000, properties, securityType, this.securityOutputNameMapping);
+				"net.example.AddSecuritySource", 5000, properties,
+				new String[] { "application/json", "application/xml" }, securityType, this.securityOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Security", true);

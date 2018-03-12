@@ -20,16 +20,15 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigure;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.model.woof.WoofTemplateOutputModel;
-import net.officefloor.model.woof.WoofTemplateOutputModel.WoofTemplateOutputEvent;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputModel.WoofTemplateOutputEvent;
 
 /**
  * {@link EditPart} for the {@link WoofTemplateOutputEditPart}.
@@ -37,23 +36,19 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class WoofTemplateOutputEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofTemplateOutputModel, WoofTemplateOutputEvent, TemplateOutputFigure>
+		extends AbstractOfficeFloorEditPart<WoofTemplateOutputModel, WoofTemplateOutputEvent, TemplateOutputFigure>
 		implements TemplateOutputFigureContext {
 
 	@Override
 	protected TemplateOutputFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createTemplateOutputFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createTemplateOutputFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		EclipseUtil.addToList(models, this.getCastedModel().getWoofTemplate());
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getWoofSectionInput());
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getWoofAccessInput());
+		EclipseUtil.addToList(models, this.getCastedModel().getWoofSectionInput());
+		EclipseUtil.addToList(models, this.getCastedModel().getWoofSecurity());
 		EclipseUtil.addToList(models, this.getCastedModel().getWoofResource());
 	}
 
@@ -63,17 +58,15 @@ public class WoofTemplateOutputEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofTemplateOutputEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofTemplateOutputEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_TEMPLATE_OUTPUT_NAME:
-			this.getOfficeFloorFigure().setTemplateOutputName(
-					this.getTemplateOutputName());
+			this.getOfficeFloorFigure().setTemplateOutputName(this.getTemplateOutputName());
 			break;
 
 		case CHANGE_WOOF_TEMPLATE:
 		case CHANGE_WOOF_SECTION_INPUT:
-		case CHANGE_WOOF_ACCESS_INPUT:
+		case CHANGE_WOOF_SECURITY:
 		case CHANGE_WOOF_RESOURCE:
 			this.refreshSourceConnections();
 			break;
@@ -91,12 +84,6 @@ public class WoofTemplateOutputEditPart
 	@Override
 	public String getTemplateOutputName() {
 		return this.getCastedModel().getWoofTemplateOutputName();
-	}
-
-	@Override
-	public boolean isRenderCompleteOutput() {
-		return HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME.equals(this
-				.getCastedModel().getWoofTemplateOutputName());
 	}
 
 }

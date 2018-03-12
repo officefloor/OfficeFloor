@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.editparts;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.woof.ExceptionToSectionInputFigureContext;
-import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
-import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel.WoofExceptionToWoofSectionInputEvent;
-
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel.WoofExceptionToWoofSectionInputEvent;
 
 /**
  * {@link EditPart} for the {@link WoofExceptionToWoofSectionInputEditPart}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofExceptionToWoofSectionInputEditPart
-		extends
+public class WoofExceptionToWoofSectionInputEditPart extends
 		AbstractOfficeFloorConnectionEditPart<WoofExceptionToWoofSectionInputModel, WoofExceptionToWoofSectionInputEvent>
 		implements ExceptionToSectionInputFigureContext {
 
@@ -42,8 +41,7 @@ public class WoofExceptionToWoofSectionInputEditPart
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		WoofPlugin.getSkin().getWoofFigureFactory()
-				.decorateExceptionToSectionInputFigure(figure, this);
+		WoofPlugin.getSkin().getWoofFigureFactory().decorateExceptionToSectionInputFigure(figure, this);
 	}
 
 }

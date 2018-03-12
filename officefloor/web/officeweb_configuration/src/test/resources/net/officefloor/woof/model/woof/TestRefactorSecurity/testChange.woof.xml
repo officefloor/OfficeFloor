@@ -36,6 +36,9 @@
 			timeout="5000">
 			<property name="name.1" value="value.one" />
 			<property name="name.two" value="value.2" />
+			<content type="application/json" />
+			<content type="text/html" />
+			<content type="confirm/change" />
 			<output name="OUTPUT_A" argument-type="java.lang.Integer">
 				<redirect path="/path" />
 			</output>

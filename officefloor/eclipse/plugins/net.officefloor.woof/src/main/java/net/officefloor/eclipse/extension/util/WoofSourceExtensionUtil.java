@@ -17,11 +17,6 @@
  */
 package net.officefloor.eclipse.extension.util;
 
-import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -29,6 +24,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+import net.officefloor.woof.template.WoofTemplateExtensionSource;
 
 /**
  * Utility class providing helper methods for WoOF source extension

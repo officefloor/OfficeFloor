@@ -21,20 +21,19 @@ import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofExceptionModel;
-import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
-import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Refactors a {@link WoofExceptionModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorExceptionOperation extends
-		AbstractWoofChangeOperation<WoofExceptionEditPart> {
+public class RefactorExceptionOperation extends AbstractWoofChangeOperation<WoofExceptionEditPart> {
 
 	/**
 	 * Initiate.
@@ -60,23 +59,19 @@ public class RefactorExceptionOperation extends
 		WoofExceptionModel exception = editPart.getCastedModel();
 
 		// Create the populated Exception
-		WoofExceptionModel bean = new WoofExceptionModel(
-				exception.getClassName());
-		BeanDialog dialog = context.getEditPart().createBeanDialog(bean, "X",
-				"Y");
+		WoofExceptionModel bean = new WoofExceptionModel(exception.getClassName());
+		BeanDialog dialog = context.getEditPart().createBeanDialog(bean, "X", "Y");
 		dialog.addIgnoreType(WoofExceptionToWoofTemplateModel.class);
 		dialog.addIgnoreType(WoofExceptionToWoofSectionInputModel.class);
 		dialog.addIgnoreType(WoofExceptionToWoofResourceModel.class);
-		dialog.registerPropertyInput("Class Name", new ClasspathClassInput(
-				editPart.getEditor()));
+		dialog.registerPropertyInput("Class Name", new ClasspathClassInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created
 			return null;
 		}
 
 		// Create the change
-		Change<WoofExceptionModel> change = changes.refactorException(
-				exception, bean.getClassName());
+		Change<WoofExceptionModel> change = changes.refactorException(exception, bean.getClassName());
 
 		// Return the change
 		return change;

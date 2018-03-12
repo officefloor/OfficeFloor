@@ -23,17 +23,16 @@ import net.officefloor.eclipse.wizard.governancesource.GovernanceInstance;
 import net.officefloor.eclipse.wizard.governancesource.GovernanceSourceWizard;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofGovernanceModel;
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Adds a {@link WoofGovernanceModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddGovernanceOperation extends
-		AbstractWoofChangeOperation<WoofEditPart> {
+public class AddGovernanceOperation extends AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
 	 * Initiate.
@@ -53,23 +52,20 @@ public class AddGovernanceOperation extends
 	protected Change<?> getChange(WoofChanges changes, Context context) {
 
 		// Obtain the governance instance
-		GovernanceInstance instance = GovernanceSourceWizard
-				.getGovernanceInstance(context.getEditPart(), null);
+		GovernanceInstance instance = GovernanceSourceWizard.getGovernanceInstance(context.getEditPart(), null);
 		if (instance == null) {
 			return null; // must have governance
 		}
 
 		// Obtain governance details
 		String governanceName = instance.getGovernanceName();
-		String governanceSourceClassName = instance
-				.getGovernanceSourceClassName();
+		String governanceSourceClassName = instance.getGovernanceSourceClassName();
 		PropertyList properties = instance.getPropertyList();
 		GovernanceType<?, ?> governanceType = instance.getGovernanceType();
 
 		// Create change to add governance
-		Change<WoofGovernanceModel> change = changes.addGovernance(
-				governanceName, governanceSourceClassName, properties,
-				governanceType);
+		Change<WoofGovernanceModel> change = changes.addGovernance(governanceName, governanceSourceClassName,
+				properties, governanceType);
 
 		// Position governance
 		context.positionModel(change.getTarget());

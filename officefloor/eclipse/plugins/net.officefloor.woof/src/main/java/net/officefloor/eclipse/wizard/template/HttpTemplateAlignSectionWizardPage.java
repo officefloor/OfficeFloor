@@ -24,6 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
@@ -32,16 +40,8 @@ import net.officefloor.eclipse.conform.ConformInput;
 import net.officefloor.model.conform.ConformModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.woof.WoofTemplateInheritance;
-import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.model.woof.WoofTemplateOutputModel;
-
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
 
 /**
  * {@link IWizardPage} to align refactoring of {@link WoofTemplateModel}.

@@ -111,7 +111,7 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 		figure.add(window);
 
 		// Create the label for the template name
-		this.templateNameFigure = new Label(context.getTemplateDisplayName());
+		this.templateNameFigure = new Label(context.getTemplateApplicationPath());
 		this.templateNameFigure.setForegroundColor(titleBarTextColor);
 
 		// Create the image for identifying the template as secure
@@ -166,12 +166,12 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 	 */
 
 	@Override
-	public void setTemplateDisplayName(String templateDisplayName) {
+	public void setTemplateApplicationPath(String templateDisplayName) {
 		this.templateNameFigure.setText(templateDisplayName);
 	}
 
 	@Override
-	public IFigure getTemplateDisplayFigure() {
+	public IFigure getTemplateApplicationPathFigure() {
 		return this.templateNameFigure;
 	}
 

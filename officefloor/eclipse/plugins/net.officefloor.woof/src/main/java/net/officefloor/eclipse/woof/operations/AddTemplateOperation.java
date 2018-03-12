@@ -26,19 +26,18 @@ import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
 import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofTemplateChangeContext;
-import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateInheritance;
-import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
+import net.officefloor.woof.model.woof.WoofTemplateExtension;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * {@link Operation} to add a {@link WoofTemplateModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddTemplateOperation extends
-		AbstractWoofChangeOperation<WoofEditPart> {
+public class AddTemplateOperation extends AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
 	 * {@link WoofEditor}.
@@ -66,13 +65,11 @@ public class AddTemplateOperation extends
 	protected Change<?> getChange(WoofChanges changes, Context context) {
 
 		// Obtain the template inheritances
-		Map<String, WoofTemplateInheritance> templateInheritances = changes
-				.getWoofTemplateInheritances();
+		Map<String, WoofTemplateInheritance> templateInheritances = changes.getWoofTemplateInheritances();
 
 		// Obtain the template instance
-		HttpTemplateInstance instance = HttpTemplateWizard
-				.getHttpTemplateInstance(context.getEditPart(), null,
-						templateInheritances);
+		HttpTemplateInstance instance = HttpTemplateWizard.getHttpTemplateInstance(context.getEditPart(), null,
+				templateInheritances);
 		if (instance == null) {
 			return null; // must have template
 		}
@@ -86,23 +83,19 @@ public class AddTemplateOperation extends
 		String contentType = instance.getContentType();
 		boolean isTemplateSecure = instance.isTemplateSecure();
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
-		String[] renderRedirectHttpMethods = instance
-				.getRenderRedirectHttpMethods();
+		String[] renderRedirectHttpMethods = instance.getRenderRedirectHttpMethods();
 		boolean isContinueRendering = instance.isContinueRendering();
 
 		// Obtain the extensions
-		WoofTemplateExtension[] extensions = instance
-				.getWoofTemplateExtensions();
+		WoofTemplateExtension[] extensions = instance.getWoofTemplateExtensions();
 
 		// Obtain the change context
-		WoofTemplateChangeContext changeContext = this.editor
-				.getWoofTemplateChangeContext();
+		WoofTemplateChangeContext changeContext = this.editor.getWoofTemplateChangeContext();
 
 		// Create change to add template
-		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
-				logicClassName, type, superTemplate, contentType,
-				isTemplateSecure, linksSecure, renderRedirectHttpMethods,
-				isContinueRendering, extensions, changeContext);
+		Change<WoofTemplateModel> change = changes.addTemplate(uri, path, logicClassName, type, superTemplate,
+				contentType, isTemplateSecure, linksSecure, renderRedirectHttpMethods, isContinueRendering, extensions,
+				changeContext);
 
 		// Position template
 		context.positionModel(change.getTarget());

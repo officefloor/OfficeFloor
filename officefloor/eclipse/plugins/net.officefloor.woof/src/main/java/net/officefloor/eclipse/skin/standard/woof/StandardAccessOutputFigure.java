@@ -20,8 +20,8 @@ package net.officefloor.eclipse.skin.standard.woof;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
-import net.officefloor.eclipse.skin.woof.AccessOutputFigure;
-import net.officefloor.eclipse.skin.woof.AccessOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.SecurityOutputFigure;
+import net.officefloor.eclipse.skin.woof.SecurityOutputFigureContext;
 import net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
@@ -30,12 +30,12 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link AccessOutputFigure}.
+ * Standard {@link SecurityOutputFigure}.
  * 
  * @author Daniel Sagenschneider
  */
 public class StandardAccessOutputFigure extends AbstractOfficeFloorFigure
-		implements AccessOutputFigure {
+		implements SecurityOutputFigure {
 
 	/**
 	 * Name.
@@ -46,13 +46,13 @@ public class StandardAccessOutputFigure extends AbstractOfficeFloorFigure
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link AccessOutputFigureContext}.
+	 *            {@link SecurityOutputFigureContext}.
 	 */
-	public StandardAccessOutputFigure(AccessOutputFigureContext context) {
+	public StandardAccessOutputFigure(SecurityOutputFigureContext context) {
 
 		// Create figure
 		LabelConnectorFigure connector = new LabelConnectorFigure(
-				context.getAccessOutputName(), ConnectorDirection.EAST,
+				context.getSecurityOutputName(), ConnectorDirection.EAST,
 				CommonWoofColours.CONNECTIONS());
 		this.name = connector.getLabel();
 

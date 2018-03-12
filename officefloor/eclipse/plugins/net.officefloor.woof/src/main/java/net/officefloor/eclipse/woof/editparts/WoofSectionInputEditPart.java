@@ -20,19 +20,14 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
-import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.woof.SectionInputFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
-import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofSectionInputModel;
-import net.officefloor.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 
 /**
  * {@link EditPart} for the {@link WoofSectionInputEditPart}.
@@ -40,47 +35,21 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class WoofSectionInputEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofSectionInputModel, WoofSectionInputEvent, SectionInputFigure>
+		extends AbstractOfficeFloorEditPart<WoofSectionInputModel, WoofSectionInputEvent, SectionInputFigure>
 		implements SectionInputFigureContext {
 
 	@Override
 	protected SectionInputFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createSectionInputFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createSectionInputFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
-		models.addAll(this.getCastedModel().getWoofAccessOutputs());
+		models.addAll(this.getCastedModel().getWoofSecurityOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
 		models.addAll(this.getCastedModel().getWoofStarts());
-	}
-
-	@Override
-	protected void populateOfficeFloorDirectEditPolicy(
-			OfficeFloorDirectEditPolicy<WoofSectionInputModel> policy) {
-		policy.allowDirectEdit(new DirectEditAdapter<WoofChanges, WoofSectionInputModel>() {
-			@Override
-			public String getInitialValue() {
-				return WoofSectionInputEditPart.this.getCastedModel().getUri();
-			}
-
-			@Override
-			public IFigure getLocationFigure() {
-				return WoofSectionInputEditPart.this.getOfficeFloorFigure()
-						.getUriFigure();
-			}
-
-			@Override
-			public Change<WoofSectionInputModel> createChange(
-					WoofChanges changes, WoofSectionInputModel target,
-					String newValue) {
-				return changes.changeSectionInputUri(target, newValue);
-			}
-		});
 	}
 
 	@Override
@@ -89,16 +58,10 @@ public class WoofSectionInputEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofSectionInputEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofSectionInputEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_SECTION_INPUT_NAME:
-			this.getOfficeFloorFigure().setSectionInputName(
-					this.getCastedModel().getWoofSectionInputName());
-			break;
-
-		case CHANGE_URI:
-			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
+			this.getOfficeFloorFigure().setSectionInputName(this.getCastedModel().getWoofSectionInputName());
 			break;
 
 		case ADD_WOOF_TEMPLATE_OUTPUT:
@@ -109,8 +72,8 @@ public class WoofSectionInputEditPart
 		case REMOVE_WOOF_EXCEPTION:
 		case ADD_WOOF_START:
 		case REMOVE_WOOF_START:
-		case ADD_WOOF_ACCESS_OUTPUT:
-		case REMOVE_WOOF_ACCESS_OUTPUT:
+		case ADD_WOOF_SECURITY_OUTPUT:
+		case REMOVE_WOOF_SECURITY_OUTPUT:
 			this.refreshTargetConnections();
 			break;
 
@@ -127,11 +90,6 @@ public class WoofSectionInputEditPart
 	@Override
 	public String getSectionInputName() {
 		return this.getCastedModel().getWoofSectionInputName();
-	}
-
-	@Override
-	public String getUri() {
-		return this.getCastedModel().getUri();
 	}
 
 }

@@ -17,11 +17,14 @@
 	</properties>
 	<modules>
 		<!-- Core eclipse functionality -->
+		<module>plugins/net.officefloor.eclipse.target</module>
+		<module>plugins/net.officefloor.eclipse.ui</module>
+<!--  
 		<module>plugins/net.officefloor.core</module>
 		<module>plugins/net.officefloor.ui</module>
 		<module>plugins/net.officefloor.ui.tests</module>
 		<module>features/net.officefloor.feature</module>
-
+-->
 		<!-- WoOF eclipse functionality -->
 <!--  
 		<module>plugins/net.officefloor.woof</module>

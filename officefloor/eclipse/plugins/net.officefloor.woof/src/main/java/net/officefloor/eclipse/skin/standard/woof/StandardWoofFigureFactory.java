@@ -21,11 +21,11 @@ import net.officefloor.eclipse.skin.woof.AccessFigure;
 import net.officefloor.eclipse.skin.woof.AccessFigureContext;
 import net.officefloor.eclipse.skin.woof.AccessInputFigure;
 import net.officefloor.eclipse.skin.woof.AccessInputFigureContext;
-import net.officefloor.eclipse.skin.woof.AccessOutputFigure;
-import net.officefloor.eclipse.skin.woof.AccessOutputFigureContext;
-import net.officefloor.eclipse.skin.woof.AccessOutputToResourceFigureContext;
-import net.officefloor.eclipse.skin.woof.AccessOutputToSectionInputFigureContext;
-import net.officefloor.eclipse.skin.woof.AccessOutputToTemplateFigureContext;
+import net.officefloor.eclipse.skin.woof.SecurityOutputFigure;
+import net.officefloor.eclipse.skin.woof.SecurityOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.SecurityOutputToResourceFigureContext;
+import net.officefloor.eclipse.skin.woof.SecurityOutputToSectionInputFigureContext;
+import net.officefloor.eclipse.skin.woof.SecurityOutputToTemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionToResourceFigureContext;
@@ -136,8 +136,8 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
-	public AccessOutputFigure createAccessOutputFigure(
-			AccessOutputFigureContext context) {
+	public SecurityOutputFigure createSecurityOutputFigure(
+			SecurityOutputFigureContext context) {
 		return new StandardAccessOutputFigure(context);
 	}
 
@@ -183,7 +183,7 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
-	public void decorateTemplateOutputToAccessInputFigure(
+	public void decorateTemplateOutputToSecurityFigure(
 			PolylineConnection figure,
 			TemplateOutputToAccessInputFigureContext context) {
 		this.decorateConnection(figure);
@@ -225,21 +225,21 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
-	public void decorateAccessOutputToTemplateFigure(PolylineConnection figure,
-			AccessOutputToTemplateFigureContext context) {
+	public void decorateSecurityOutputToTemplateFigure(PolylineConnection figure,
+			SecurityOutputToTemplateFigureContext context) {
 		this.decorateConnection(figure);
 	}
 
 	@Override
-	public void decorateAccessOutputToSectionInputFigure(
+	public void decorateSecurityOutputToSectionInputFigure(
 			PolylineConnection figure,
-			AccessOutputToSectionInputFigureContext context) {
+			SecurityOutputToSectionInputFigureContext context) {
 		this.decorateConnection(figure);
 	}
 
 	@Override
-	public void decorateAccessOutputToResourceFigure(PolylineConnection figure,
-			AccessOutputToResourceFigureContext context) {
+	public void decorateSecurityOutputToResourceFigure(PolylineConnection figure,
+			SecurityOutputToResourceFigureContext context) {
 		this.decorateConnection(figure);
 	}
 

@@ -20,6 +20,8 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -29,26 +31,21 @@ import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.SectionFigure;
 import net.officefloor.eclipse.skin.woof.SectionFigureContext;
 import net.officefloor.eclipse.woof.operations.RefactorSectionOperation;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofSectionModel;
-import net.officefloor.model.woof.WoofSectionModel.WoofSectionEvent;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofSectionModel;
+import net.officefloor.woof.model.woof.WoofSectionModel.WoofSectionEvent;
 
 /**
  * {@link EditPart} for the {@link WoofSectionModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofSectionEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofSectionModel, WoofSectionEvent, SectionFigure>
+public class WoofSectionEditPart extends AbstractOfficeFloorEditPart<WoofSectionModel, WoofSectionEvent, SectionFigure>
 		implements SectionFigureContext {
 
 	@Override
 	protected SectionFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createSectionFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createSectionFigure(this);
 	}
 
 	@Override
@@ -58,20 +55,18 @@ public class WoofSectionEditPart
 	}
 
 	@Override
-	protected void populateOfficeFloorOpenEditPolicy(
-			OfficeFloorOpenEditPolicy<WoofSectionModel> policy) {
+	protected void populateOfficeFloorOpenEditPolicy(OfficeFloorOpenEditPolicy<WoofSectionModel> policy) {
 		policy.allowOpening(new OpenHandler<WoofSectionModel>() {
 			@Override
 			public void doOpen(OpenHandlerContext<WoofSectionModel> context) {
 
 				// Obtain the changes
-				WoofChanges changes = (WoofChanges) WoofSectionEditPart.this
-						.getEditor().getModelChanges();
+				WoofChanges changes = (WoofChanges) WoofSectionEditPart.this.getEditor().getModelChanges();
 
 				// Refactor section
 				WoofSectionModel model = context.getModel();
-				OperationUtil.execute(new RefactorSectionOperation(changes),
-						model.getX(), model.getY(), context.getEditPart());
+				OperationUtil.execute(new RefactorSectionOperation(changes), model.getX(), model.getY(),
+						context.getEditPart());
 			}
 		});
 	}
@@ -82,8 +77,7 @@ public class WoofSectionEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofSectionEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofSectionEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_SECTION_NAME:
 			this.getOfficeFloorFigure().setSectionName(this.getSectionName());

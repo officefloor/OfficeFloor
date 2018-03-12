@@ -17,13 +17,13 @@
  */
 package net.officefloor.eclipse.extension.template;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.model.change.Change;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceSpecification;
-
-import org.eclipse.core.resources.IProject;
+import net.officefloor.woof.template.WoofTemplateExtensionSource;
+import net.officefloor.woof.template.WoofTemplateExtensionSourceSpecification;
 
 /**
  * Context for the {@link WoofTemplateExtensionSourceExtension}.

@@ -116,8 +116,8 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
-	 * Sorts the {@link WoofSectionInputModel} and
-	 * {@link WoofSectionOutputModel} instances of the {@link WoofSectionModel}.
+	 * Sorts the {@link WoofSectionInputModel} and {@link WoofSectionOutputModel}
+	 * instances of the {@link WoofSectionModel}.
 	 * 
 	 * @param section
 	 *            {@link WoofSectionModel}.
@@ -249,8 +249,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 * Refactors the {@link WoofTemplateExtensionModel} instances.
 	 * 
 	 * @param existingTemplate
-	 *            Existing {@link WoofTemplateModel}. May be <code>null</code>
-	 *            if adding.
+	 *            Existing {@link WoofTemplateModel}. May be <code>null</code> if
+	 *            adding.
 	 * @param newUri
 	 *            New URI. May be <code>null</code> if removing
 	 *            {@link WoofTemplateModel}.
@@ -382,8 +382,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofTemplateExtensionModel}.
 	 * @param existingExtensions
 	 *            Existing {@link WoofTemplateExtensionModel} instances. As
-	 *            {@link WoofTemplateExtension} instances are refactored they
-	 *            are removed from this list.
+	 *            {@link WoofTemplateExtension} instances are refactored they are
+	 *            removed from this list.
 	 * @param changeTemplate
 	 *            {@link WoofTemplateModel} being changed.
 	 * @param sourceContext
@@ -525,8 +525,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param applicationPath
 	 *            Application path to check if unique.
 	 * @param modelWithPath
-	 *            {@link Model} with the existing application path (not included
-	 *            in check).
+	 *            {@link Model} with the existing application path (not included in
+	 *            check).
 	 * @param changeDescription
 	 *            Change description.
 	 * @return {@link Change} for the {@link Conflict}, or <code>null</code> no
@@ -595,8 +595,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param applicationPath
 	 *            Application path.
 	 * @param modelWithPath
-	 *            {@link Model} with the existing application path (not included
-	 *            in check).
+	 *            {@link Model} with the existing application path (not included in
+	 *            check).
 	 * @param changeDescription
 	 *            Change description.
 	 * @param modelList
@@ -638,14 +638,12 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
-	 * Obtains the {@link WoofSectionModel} for the
-	 * {@link WoofSectionInputModel}.
+	 * Obtains the {@link WoofSectionModel} for the {@link WoofSectionInputModel}.
 	 * 
 	 * @param input
 	 *            {@link WoofSectionInputModel}.
-	 * @return {@link WoofSectionModel} containing the
-	 *         {@link WoofSectionInputModel} or <code>null</code> if not within
-	 *         {@link WoofModel}.
+	 * @return {@link WoofSectionModel} containing the {@link WoofSectionInputModel}
+	 *         or <code>null</code> if not within {@link WoofModel}.
 	 */
 	public WoofSectionModel getSection(WoofSectionInputModel input) {
 
@@ -670,9 +668,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 * 
 	 * @param area
 	 *            {@link WoofGovernanceAreaModel}.
-	 * @return {@link WoofGovernanceModel} for the
-	 *         {@link WoofGovernanceAreaModel} or <code>null</code> if not
-	 *         within the {@link WoofModel}.
+	 * @return {@link WoofGovernanceModel} for the {@link WoofGovernanceAreaModel}
+	 *         or <code>null</code> if not within the {@link WoofModel}.
 	 */
 	private WoofGovernanceModel getGovernance(WoofGovernanceAreaModel area) {
 
@@ -1793,8 +1790,7 @@ public class WoofChangesImpl implements WoofChanges {
 					}
 
 					/**
-					 * Renames the {@link WoofSectionInputModel} connection
-					 * names.
+					 * Renames the {@link WoofSectionInputModel} connection names.
 					 * 
 					 * @param input
 					 *            {@link WoofSectionInputModel}.
@@ -2131,7 +2127,8 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSecurityModel> refactorSecurity(final WoofSecurityModel security, String httpSecurityName,
 			final String httpSecuritySourceClassName, final long timeout, final PropertyList properties,
-			HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType, Map<String, String> accessOutputNameMapping) {
+			String[] contentTypes, HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType,
+			Map<String, String> accessOutputNameMapping) {
 
 		// Create change to sort outputs
 		Change<WoofSecurityModel> sortChange = new AbstractChange<WoofSecurityModel>(security, "Sort outputs") {

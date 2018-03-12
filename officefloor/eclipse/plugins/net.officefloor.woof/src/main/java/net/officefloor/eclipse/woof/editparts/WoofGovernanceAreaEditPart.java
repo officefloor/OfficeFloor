@@ -20,15 +20,15 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.woof.GovernanceAreaFigure;
 import net.officefloor.eclipse.skin.woof.GovernanceAreaFigureContext;
-import net.officefloor.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.model.woof.WoofGovernanceAreaModel.WoofGovernanceAreaEvent;
-
-import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel.WoofGovernanceAreaEvent;
 
 /**
  * {@link EditPart} for the {@link WoofGovernanceAreaModel}.
@@ -36,8 +36,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class WoofGovernanceAreaEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofGovernanceAreaModel, WoofGovernanceAreaEvent, GovernanceAreaFigure>
+		extends AbstractOfficeFloorEditPart<WoofGovernanceAreaModel, WoofGovernanceAreaEvent, GovernanceAreaFigure>
 		implements GovernanceAreaFigureContext {
 
 	/*
@@ -46,8 +45,7 @@ public class WoofGovernanceAreaEditPart
 
 	@Override
 	protected GovernanceAreaFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createGovernanceAreaFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createGovernanceAreaFigure(this);
 	}
 
 	@Override
@@ -56,14 +54,12 @@ public class WoofGovernanceAreaEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofGovernanceAreaEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofGovernanceAreaEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_HEIGHT:
 		case CHANGE_WIDTH:
 			WoofGovernanceAreaModel area = this.getCastedModel();
-			this.getOfficeFloorFigure().resize(area.getWidth(),
-					area.getHeight());
+			this.getOfficeFloorFigure().resize(area.getWidth(), area.getHeight());
 			this.refresh();
 			break;
 
@@ -76,8 +72,7 @@ public class WoofGovernanceAreaEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Add the governance to area connection
-		models.add(WoofGovernanceEditPart
-				.getWoofGovernanceToWoofGovernanceArea(this.getCastedModel()));
+		models.add(WoofGovernanceEditPart.getWoofGovernanceToWoofGovernanceArea(this.getCastedModel()));
 	}
 
 	/**
@@ -90,9 +85,7 @@ public class WoofGovernanceAreaEditPart
 		WoofGovernanceAreaModel model = this.getCastedModel();
 
 		// Refresh the view off bounds defined by the model
-		this.getFigure().setBounds(
-				new Rectangle(model.getX(), model.getY(), model.getWidth(),
-						model.getHeight()));
+		this.getFigure().setBounds(new Rectangle(model.getX(), model.getY(), model.getWidth(), model.getHeight()));
 	}
 
 	/*

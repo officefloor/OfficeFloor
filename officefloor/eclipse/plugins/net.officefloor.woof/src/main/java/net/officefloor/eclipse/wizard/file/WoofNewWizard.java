@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.wizard.file;
 
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Wizard to create a new {@link WoofModel}.
@@ -30,8 +30,7 @@ public class WoofNewWizard extends AbstractNewWizard {
 	 * Initiate.
 	 */
 	public WoofNewWizard() {
-		super("New WoOF", "Create a new Web on OfficeFloor", "application",
-				"woof", "<woof/>");
+		super("New WoOF", "Create a new Web on OfficeFloor", "application", "woof", "<woof/>");
 	}
 
 }

@@ -23,29 +23,69 @@
 		<!-- Ensure correct versions on build class path -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_socket-@{officeplugin_socket_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeserver-@{officeserver_version}.jar]]></contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_web-@{officeplugin_web_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeserver_default-@{officeserver_default_version}.jar]]></contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_woof-@{officeplugin_woof_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeweb-@{officeweb_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeweb_security-@{officeweb_security_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeweb_resource-@{officeweb_resource_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeweb_template-@{officeweb_template_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeweb_configuration-@{officeweb_configuration_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)woof-@{woof_version}.jar]]></contains>
 		</file>
 
 		<!-- Ensure correct versions included for build -->
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_socket-@{officeplugin_socket_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)officeserver-@{officeserver_version}.jar]]></contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_web-@{officeplugin_web_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)officeserver_default-@{officeserver_default_version}.jar]]></contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_woof-@{officeplugin_woof_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)officeweb-@{officeweb_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officeweb_security-@{officeweb_security_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officeweb_resource-@{officeweb_resource_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officeweb_template-@{officeweb_template_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officeweb_configuration-@{officeweb_configuration_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)woof-@{woof_version}.jar]]></contains>
 		</file>
 		
 	</files>

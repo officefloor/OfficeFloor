@@ -17,9 +17,9 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
-import net.officefloor.model.woof.WoofSectionInputModel;
-
 import org.eclipse.draw2d.IFigure;
+
+import net.officefloor.woof.model.woof.WoofSectionInputModel;
 
 /**
  * Context for the {@link WoofSectionInputModel} {@link IFigure}.
@@ -34,12 +34,5 @@ public interface SectionInputFigureContext {
 	 * @return Name of the section input.
 	 */
 	String getSectionInputName();
-
-	/**
-	 * Obtains the URI.
-	 * 
-	 * @return URI. May be <code>null</code>.
-	 */
-	String getUri();
 
 }

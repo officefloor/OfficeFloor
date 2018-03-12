@@ -156,8 +156,8 @@ public interface WoofChanges {
 	 * @param charsetName
 	 *            Name of {@link Charset} for the {@link WoofTemplateModel}.
 	 * @param isTemplateSecure
-	 *            <code>true</code> for the {@link WoofTemplateModel} to require
-	 *            a secure {@link ServerHttpConnection}.
+	 *            <code>true</code> for the {@link WoofTemplateModel} to require a
+	 *            secure {@link ServerHttpConnection}.
 	 * @param linkSeparatorCharacter
 	 *            Link separator {@link Character}.
 	 * @param linksSecure
@@ -184,8 +184,8 @@ public interface WoofChanges {
 	 * {@link WoofTemplateModel}.
 	 * <p>
 	 * Note that this searches the super {@link WoofTemplateModel} of the input
-	 * {@link WoofTemplateModel}. The {@link WoofTemplateOutputModel} instances
-	 * from the input {@link WoofTemplateModel} are not included.
+	 * {@link WoofTemplateModel}. The {@link WoofTemplateOutputModel} instances from
+	 * the input {@link WoofTemplateModel} are not included.
 	 * 
 	 * @return Inheritable {@link WoofTemplateOutputModel} names.
 	 */
@@ -203,38 +203,35 @@ public interface WoofChanges {
 	 * @param templateLogicClass
 	 *            New logic class for the {@link WoofTemplateModel}.
 	 * @param sectionType
-	 *            {@link SectionType} for the refactored
-	 *            {@link WoofTemplateModel}.
+	 *            {@link SectionType} for the refactored {@link WoofTemplateModel}.
 	 * @param redirectValuesFunction
 	 *            New render redirect {@link ManagedFunction} name.
 	 * @param inheritedTemplateOutputNames
-	 *            Inherited {@link WoofTemplateOutputModel} configuration from
-	 *            the super {@link WoofTemplateModel} and its subsequent
-	 *            ancestors.
+	 *            Inherited {@link WoofTemplateOutputModel} configuration from the
+	 *            super {@link WoofTemplateModel} and its subsequent ancestors.
 	 * @param contentType
 	 *            Content-Type for the {@link WoofTemplateModel}. May be
 	 *            <code>null</code>.
 	 * @param charsetName
-	 *            Name of {@link Charset} for the {@link WoofTemplateModel}. May
-	 *            be <code>null</code>.
+	 *            Name of {@link Charset} for the {@link WoofTemplateModel}. May be
+	 *            <code>null</code>.
 	 * @param isTemplateSecure
-	 *            <code>true</code> for the {@link WoofTemplateModel} to require
-	 *            a secure {@link ServerHttpConnection}.
+	 *            <code>true</code> for the {@link WoofTemplateModel} to require a
+	 *            secure {@link ServerHttpConnection}.
 	 * @param linkSeparatorCharacter
 	 *            New link separator {@link Character}.
 	 * @param linksSecure
 	 *            Link secure configuration overriding {@link WoofTemplateModel}
 	 *            secure.
 	 * @param renderHttpMethods
-	 *            Listing of HTTP methods that render the
-	 *            {@link WoofTemplateModel}.
+	 *            Listing of HTTP methods that render the {@link WoofTemplateModel}.
 	 * @param extensions
 	 *            {@link WoofTemplateExtension} instances for the
 	 *            {@link WoofTemplateModel}.
 	 * @param templateOutputNameMapping
 	 *            Mapping of {@link SectionOutputType} name to existing
-	 *            {@link WoofTemplateOutputModel} name to allow maintaining
-	 *            links to other items within the {@link WoofModel}.
+	 *            {@link WoofTemplateOutputModel} name to allow maintaining links to
+	 *            other items within the {@link WoofModel}.
 	 * @param context
 	 *            {@link WoofTemplateChangeContext}.
 	 * @return {@link Change} to refactor the {@link WoofTemplateModel}.
@@ -307,12 +304,12 @@ public interface WoofChanges {
 	 *            {@link SectionType} of the refactor {@link WoofSectionModel}.
 	 * @param sectionInputNameMapping
 	 *            Mapping of {@link SectionInputType} name to existing
-	 *            {@link WoofSectionInputModel} name to allow maintaining links
-	 *            to other items within the {@link WoofModel}.
+	 *            {@link WoofSectionInputModel} name to allow maintaining links to
+	 *            other items within the {@link WoofModel}.
 	 * @param sectionOutputNameMapping
 	 *            Mapping of {@link SectionOutputType} name to existing
-	 *            {@link WoofSectionOutputModel} name to allow maintaining links
-	 *            to other items within the {@link WoofModel}.
+	 *            {@link WoofSectionOutputModel} name to allow maintaining links to
+	 *            other items within the {@link WoofModel}.
 	 * @return {@link Change} to refactor the {@link WoofSectionModel}.
 	 */
 	Change<WoofSectionModel> refactorSection(WoofSectionModel section, String sectionName,
@@ -361,16 +358,18 @@ public interface WoofChanges {
 	 *            Time out in authenticating.
 	 * @param properties
 	 *            {@link PropertyList}.
+	 * @param contentTypes
+	 *            Content types.
 	 * @param httpSecurityType
 	 *            {@link HttpSecurityType} for the {@link WoofSecurityModel}.
 	 * @param securityOutputNameMapping
 	 *            Mapping of {@link HttpSecurityFlowType} name to existing
-	 *            {@link WoofSecurityOutputModel} name to allow maintaining
-	 *            links to other items within the {@link WoofModel}.
+	 *            {@link WoofSecurityOutputModel} name to allow maintaining links to
+	 *            other items within the {@link WoofModel}.
 	 * @return {@link Change} to refactor the {@link WoofSecurityModel}.
 	 */
 	Change<WoofSecurityModel> refactorSecurity(WoofSecurityModel security, String httpSecurityName,
-			String httpSecuritySourceClassName, long timeout, PropertyList properties,
+			String httpSecuritySourceClassName, long timeout, PropertyList properties, String[] contentTypes,
 			HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType, Map<String, String> securityOutputNameMapping);
 
 	/**
@@ -558,8 +557,8 @@ public interface WoofChanges {
 			WoofHttpContinuationToWoofHttpContinuationModel link);
 
 	/**
-	 * Links the {@link WoofHttpContinuationModel} to the
-	 * {@link WoofTemplateModel} .
+	 * Links the {@link WoofHttpContinuationModel} to the {@link WoofTemplateModel}
+	 * .
 	 * 
 	 * @param httpContinuation
 	 *            {@link WoofHttpContinuationModel}.
@@ -604,8 +603,8 @@ public interface WoofChanges {
 			WoofHttpContinuationToWoofSectionInputModel link);
 
 	/**
-	 * Links the {@link WoofHttpContinuationModel} to the
-	 * {@link WoofSecurityModel} .
+	 * Links the {@link WoofHttpContinuationModel} to the {@link WoofSecurityModel}
+	 * .
 	 * 
 	 * @param httpContinuation
 	 *            {@link WoofHttpContinuationModel}.
@@ -650,8 +649,8 @@ public interface WoofChanges {
 			WoofHttpContinuationToWoofSecurityModel link);
 
 	/**
-	 * Links the {@link WoofHttpContinuationModel} to the
-	 * {@link WoofResourceModel} .
+	 * Links the {@link WoofHttpContinuationModel} to the {@link WoofResourceModel}
+	 * .
 	 * 
 	 * @param httpContinuation
 	 *            {@link WoofHttpContinuationModel}.
@@ -694,8 +693,7 @@ public interface WoofChanges {
 	Change<WoofHttpInputToWoofTemplateModel> removeHttpInputToTemplate(WoofHttpInputToWoofTemplateModel link);
 
 	/**
-	 * Links the {@link WoofHttpInputModel} to the
-	 * {@link WoofSectionInputModel}.
+	 * Links the {@link WoofHttpInputModel} to the {@link WoofSectionInputModel}.
 	 * 
 	 * @param httpInput
 	 *            {@link WoofHttpInputModel}.
@@ -759,8 +757,7 @@ public interface WoofChanges {
 	Change<WoofHttpInputToWoofResourceModel> removeHttpInputToResource(WoofHttpInputToWoofResourceModel link);
 
 	/**
-	 * Link the {@link WoofTemplateModel} to its super
-	 * {@link WoofTemplateModel}.
+	 * Link the {@link WoofTemplateModel} to its super {@link WoofTemplateModel}.
 	 * 
 	 * @param childTemplate
 	 *            Child {@link WoofTemplateModel}.
@@ -782,8 +779,7 @@ public interface WoofChanges {
 			WoofTemplateToSuperWoofTemplateModel link);
 
 	/**
-	 * Links the {@link WoofTemplateOutputModel} to the
-	 * {@link WoofTemplateModel}.
+	 * Links the {@link WoofTemplateOutputModel} to the {@link WoofTemplateModel}.
 	 * 
 	 * @param templateOutput
 	 *            {@link WoofTemplateOutputModel}.
@@ -828,8 +824,7 @@ public interface WoofChanges {
 			WoofTemplateOutputToWoofSectionInputModel link);
 
 	/**
-	 * Links the {@link WoofTemplateOutputModel} to the
-	 * {@link WoofSecurityModel}.
+	 * Links the {@link WoofTemplateOutputModel} to the {@link WoofSecurityModel}.
 	 * 
 	 * @param templateOutput
 	 *            {@link WoofTemplateOutputModel}.
@@ -851,8 +846,7 @@ public interface WoofChanges {
 			WoofTemplateOutputToWoofSecurityModel link);
 
 	/**
-	 * Links the {@link WoofTemplateOutputModel} to the
-	 * {@link WoofResourceModel}.
+	 * Links the {@link WoofTemplateOutputModel} to the {@link WoofResourceModel}.
 	 * 
 	 * @param templateOutput
 	 *            {@link WoofTemplateOutputModel}.
@@ -874,8 +868,7 @@ public interface WoofChanges {
 			WoofTemplateOutputToWoofResourceModel link);
 
 	/**
-	 * Links the {@link WoofSectionOutputModel} to the {@link WoofTemplateModel}
-	 * .
+	 * Links the {@link WoofSectionOutputModel} to the {@link WoofTemplateModel} .
 	 * 
 	 * @param sectionOutput
 	 *            {@link WoofSectionOutputModel}.
@@ -920,8 +913,7 @@ public interface WoofChanges {
 			WoofSectionOutputToWoofSectionInputModel link);
 
 	/**
-	 * Links the {@link WoofSectionOutputModel} to the
-	 * {@link WoofSecurityModel}.
+	 * Links the {@link WoofSectionOutputModel} to the {@link WoofSecurityModel}.
 	 * 
 	 * @param sectionOutput
 	 *            {@link WoofAccessOutputModel}.
@@ -943,8 +935,7 @@ public interface WoofChanges {
 			WoofSectionOutputToWoofSecurityModel link);
 
 	/**
-	 * Links the {@link WoofSectionOutputModel} to the {@link WoofResourceModel}
-	 * .
+	 * Links the {@link WoofSectionOutputModel} to the {@link WoofResourceModel} .
 	 * 
 	 * @param sectionOutput
 	 *            {@link WoofSectionOutputModel}.
@@ -989,8 +980,7 @@ public interface WoofChanges {
 			WoofSectionOutputToWoofHttpContinuationModel link);
 
 	/**
-	 * Links the {@link WoofSecurityOutputModel} to the
-	 * {@link WoofTemplateModel}.
+	 * Links the {@link WoofSecurityOutputModel} to the {@link WoofTemplateModel}.
 	 * 
 	 * @param securityOutput
 	 *            {@link WoofSecurityOutputModel}.
@@ -1035,8 +1025,7 @@ public interface WoofChanges {
 			WoofSecurityOutputToWoofSectionInputModel link);
 
 	/**
-	 * Links the {@link WoofSecurityOutputModel} to the
-	 * {@link WoofSecurityModel}.
+	 * Links the {@link WoofSecurityOutputModel} to the {@link WoofSecurityModel}.
 	 * 
 	 * @param securityOutput
 	 *            {@link WoofSecurityOutputModel}.
@@ -1058,8 +1047,7 @@ public interface WoofChanges {
 			WoofSecurityOutputToWoofSecurityModel link);
 
 	/**
-	 * Links the {@link WoofSecurityOutputModel} to the
-	 * {@link WoofResourceModel} .
+	 * Links the {@link WoofSecurityOutputModel} to the {@link WoofResourceModel} .
 	 * 
 	 * @param securityOutput
 	 *            {@link WoofSecurityOutputModel}.
@@ -1148,8 +1136,7 @@ public interface WoofChanges {
 	Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(WoofExceptionToWoofTemplateModel link);
 
 	/**
-	 * Links the {@link WoofExceptionModel} to the {@link WoofSectionInputModel}
-	 * .
+	 * Links the {@link WoofExceptionModel} to the {@link WoofSectionInputModel} .
 	 * 
 	 * @param exception
 	 *            {@link WoofExceptionModel}.

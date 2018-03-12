@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofStartEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofModel;
-import net.officefloor.model.woof.WoofStartModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofStartModel;
 
 /**
  * Deletes a {@link WoofStartModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeleteStartOperation extends
-		AbstractWoofChangeOperation<WoofStartEditPart> {
+public class DeleteStartOperation extends AbstractWoofChangeOperation<WoofStartEditPart> {
 
 	/**
 	 * Initiate.

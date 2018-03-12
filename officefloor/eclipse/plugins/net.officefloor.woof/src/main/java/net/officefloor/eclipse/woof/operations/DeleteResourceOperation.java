@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofResourceEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofModel;
-import net.officefloor.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofResourceModel;
 
 /**
  * Deletes a {@link WoofResourceModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeleteResourceOperation extends
-		AbstractWoofChangeOperation<WoofResourceEditPart> {
+public class DeleteResourceOperation extends AbstractWoofChangeOperation<WoofResourceEditPart> {
 
 	/**
 	 * Initiate.

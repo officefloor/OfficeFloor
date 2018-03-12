@@ -17,22 +17,21 @@
  */
 package net.officefloor.eclipse.woof.editparts;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.woof.GovernanceToGovernanceAreaFigureContext;
-import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
-import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel.WoofGovernanceToWoofGovernanceAreaEvent;
-
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
+import net.officefloor.woof.model.woof.WoofGovernanceToWoofGovernanceAreaModel.WoofGovernanceToWoofGovernanceAreaEvent;
 
 /**
  * {@link EditPart} for the {@link WoofGovernanceToWoofGovernanceAreaModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofGovernanceToWoofGovernanceAreaEditPart
-		extends
+public class WoofGovernanceToWoofGovernanceAreaEditPart extends
 		AbstractOfficeFloorConnectionEditPart<WoofGovernanceToWoofGovernanceAreaModel, WoofGovernanceToWoofGovernanceAreaEvent>
 		implements GovernanceToGovernanceAreaFigureContext {
 
@@ -42,8 +41,7 @@ public class WoofGovernanceToWoofGovernanceAreaEditPart
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		WoofPlugin.getSkin().getWoofFigureFactory()
-				.decorateGovernanceToGovernanceAreaFigure(figure, this);
+		WoofPlugin.getSkin().getWoofFigureFactory().decorateGovernanceToGovernanceAreaFigure(figure, this);
 	}
 
 }

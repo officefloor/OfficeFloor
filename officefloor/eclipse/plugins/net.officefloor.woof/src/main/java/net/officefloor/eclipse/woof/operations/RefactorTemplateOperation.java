@@ -27,19 +27,18 @@ import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
 import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofTemplateChangeContext;
-import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateInheritance;
-import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
+import net.officefloor.woof.model.woof.WoofTemplateExtension;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * {@link Operation} to refactor a {@link WoofTemplateModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorTemplateOperation extends
-		AbstractWoofChangeOperation<WoofTemplateEditPart> {
+public class RefactorTemplateOperation extends AbstractWoofChangeOperation<WoofTemplateEditPart> {
 
 	/**
 	 * {@link WoofEditor}.
@@ -70,17 +69,14 @@ public class RefactorTemplateOperation extends
 		WoofTemplateModel template = context.getEditPart().getCastedModel();
 
 		// Create the instance to aid refactoring
-		HttpTemplateInstance existing = new HttpTemplateInstance(template,
-				changes);
+		HttpTemplateInstance existing = new HttpTemplateInstance(template, changes);
 
 		// Obtain the template inheritances
-		Map<String, WoofTemplateInheritance> templateInheritances = changes
-				.getWoofTemplateInheritances();
+		Map<String, WoofTemplateInheritance> templateInheritances = changes.getWoofTemplateInheritances();
 
 		// Obtain the template instance
-		HttpTemplateInstance instance = HttpTemplateWizard
-				.getHttpTemplateInstance(context.getEditPart(), existing,
-						templateInheritances);
+		HttpTemplateInstance instance = HttpTemplateWizard.getHttpTemplateInstance(context.getEditPart(), existing,
+				templateInheritances);
 		if (instance == null) {
 			return null; // must have template
 		}
@@ -91,30 +87,24 @@ public class RefactorTemplateOperation extends
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
 		WoofTemplateModel superTemplate = instance.getSuperTemplate();
-		Set<String> inheritedTemplateOutputNames = instance
-				.getInheritedTemplateOutputNames();
+		Set<String> inheritedTemplateOutputNames = instance.getInheritedTemplateOutputNames();
 		String contentType = instance.getContentType();
 		boolean isTemplateSecure = instance.isTemplateSecure();
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
-		String[] renderRedirectHttpMethods = instance
-				.getRenderRedirectHttpMethods();
+		String[] renderRedirectHttpMethods = instance.getRenderRedirectHttpMethods();
 		boolean isContinueRendering = instance.isContinueRendering();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
 
 		// Obtain the extensions
-		WoofTemplateExtension[] extensions = instance
-				.getWoofTemplateExtensions();
+		WoofTemplateExtension[] extensions = instance.getWoofTemplateExtensions();
 
 		// Obtain the change context
-		WoofTemplateChangeContext changeContext = this.editor
-				.getWoofTemplateChangeContext();
+		WoofTemplateChangeContext changeContext = this.editor.getWoofTemplateChangeContext();
 
 		// Create change to refactor template
-		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
-				uri, path, logicClassName, type, superTemplate,
-				inheritedTemplateOutputNames, contentType, isTemplateSecure,
-				linksSecure, renderRedirectHttpMethods, isContinueRendering,
-				extensions, outputNameMapping, changeContext);
+		Change<WoofTemplateModel> change = changes.refactorTemplate(template, uri, path, logicClassName, type,
+				superTemplate, inheritedTemplateOutputNames, contentType, isTemplateSecure, linksSecure,
+				renderRedirectHttpMethods, isContinueRendering, extensions, outputNameMapping, changeContext);
 
 		// Return the change to refactor the template
 		return change;

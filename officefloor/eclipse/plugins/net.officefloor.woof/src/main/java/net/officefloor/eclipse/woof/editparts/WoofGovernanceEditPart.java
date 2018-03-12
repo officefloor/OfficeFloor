@@ -20,6 +20,8 @@ package net.officefloor.eclipse.woof.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -29,13 +31,11 @@ import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.GovernanceFigure;
 import net.officefloor.eclipse.skin.woof.GovernanceFigureContext;
 import net.officefloor.eclipse.woof.operations.RefactorGovernanceOperation;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.model.woof.WoofGovernanceModel;
-import net.officefloor.model.woof.WoofGovernanceModel.WoofGovernanceEvent;
-import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
+import net.officefloor.woof.model.woof.WoofGovernanceModel;
+import net.officefloor.woof.model.woof.WoofGovernanceModel.WoofGovernanceEvent;
+import net.officefloor.woof.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
 
 /**
  * {@link EditPart} for the {@link WoofGovernanceModel}.
@@ -43,8 +43,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class WoofGovernanceEditPart
-		extends
-		AbstractOfficeFloorEditPart<WoofGovernanceModel, WoofGovernanceEvent, GovernanceFigure>
+		extends AbstractOfficeFloorEditPart<WoofGovernanceModel, WoofGovernanceEvent, GovernanceFigure>
 		implements GovernanceFigureContext {
 
 	/**
@@ -57,8 +56,7 @@ public class WoofGovernanceEditPart
 	 */
 	public static WoofGovernanceToWoofGovernanceAreaModel getWoofGovernanceToWoofGovernanceArea(
 			WoofGovernanceAreaModel area) {
-		WoofGovernanceToWoofGovernanceAreaModel conn = area
-				.getGovernanceConnection();
+		WoofGovernanceToWoofGovernanceAreaModel conn = area.getGovernanceConnection();
 		if (conn == null) {
 			conn = new WoofGovernanceToWoofGovernanceAreaModel();
 			area.setGovernanceConnection(conn);
@@ -72,8 +70,7 @@ public class WoofGovernanceEditPart
 
 	@Override
 	protected GovernanceFigure createOfficeFloorFigure() {
-		return WoofPlugin.getSkin().getWoofFigureFactory()
-				.createGovernanceFigure(this);
+		return WoofPlugin.getSkin().getWoofFigureFactory().createGovernanceFigure(this);
 	}
 
 	@Override
@@ -82,12 +79,10 @@ public class WoofGovernanceEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(WoofGovernanceEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(WoofGovernanceEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_GOVERNANCE_NAME:
-			this.getOfficeFloorFigure().setGovernanceName(
-					this.getGovernanceName());
+			this.getOfficeFloorFigure().setGovernanceName(this.getGovernanceName());
 			break;
 		case ADD_GOVERNANCE_AREA:
 		case REMOVE_GOVERNANCE_AREA:
@@ -103,7 +98,7 @@ public class WoofGovernanceEditPart
 		case REMOVE_GOVERNANCE_AREA_CONNECTION:
 			// Handled in adding area
 			break;
-			
+
 		case CHANGE_GOVERNANCE_SOURCE_CLASS_NAME:
 		case ADD_PROPERTY:
 		case REMOVE_PROPERTY:
@@ -115,28 +110,25 @@ public class WoofGovernanceEditPart
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Load the listing of governance to area connections
-		for (WoofGovernanceAreaModel area : this.getCastedModel()
-				.getGovernanceAreas()) {
+		for (WoofGovernanceAreaModel area : this.getCastedModel().getGovernanceAreas()) {
 			WoofGovernanceToWoofGovernanceAreaModel conn = getWoofGovernanceToWoofGovernanceArea(area);
 			models.add(conn);
 		}
 	}
 
 	@Override
-	protected void populateOfficeFloorOpenEditPolicy(
-			OfficeFloorOpenEditPolicy<WoofGovernanceModel> policy) {
+	protected void populateOfficeFloorOpenEditPolicy(OfficeFloorOpenEditPolicy<WoofGovernanceModel> policy) {
 		policy.allowOpening(new OpenHandler<WoofGovernanceModel>() {
 			@Override
 			public void doOpen(OpenHandlerContext<WoofGovernanceModel> context) {
 
 				// Obtain the changes
-				WoofChanges changes = (WoofChanges) WoofGovernanceEditPart.this
-						.getEditor().getModelChanges();
+				WoofChanges changes = (WoofChanges) WoofGovernanceEditPart.this.getEditor().getModelChanges();
 
 				// Refactor governance
 				WoofGovernanceModel model = context.getModel();
-				OperationUtil.execute(new RefactorGovernanceOperation(changes),
-						model.getX(), model.getY(), context.getEditPart());
+				OperationUtil.execute(new RefactorGovernanceOperation(changes), model.getX(), model.getY(),
+						context.getEditPart());
 			}
 		});
 	}

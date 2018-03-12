@@ -29,19 +29,18 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
-import net.officefloor.model.woof.PropertyModel;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofSectionInputModel;
-import net.officefloor.model.woof.WoofSectionModel;
-import net.officefloor.model.woof.WoofSectionOutputModel;
+import net.officefloor.woof.model.woof.PropertyModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofSectionModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputModel;
 
 /**
  * {@link Operation} to refactor a {@link WoofSectionModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorSectionOperation extends
-		AbstractWoofChangeOperation<WoofSectionEditPart> {
+public class RefactorSectionOperation extends AbstractWoofChangeOperation<WoofSectionEditPart> {
 
 	/**
 	 * Initiate.
@@ -64,27 +63,24 @@ public class RefactorSectionOperation extends
 		WoofSectionModel section = context.getEditPart().getCastedModel();
 
 		// Create the existing section to refactor
-		OfficeSectionModel existing = new OfficeSectionModel(
-				section.getWoofSectionName(),
-				section.getSectionSourceClassName(),
-				section.getSectionLocation());
+		OfficeSectionModel existing = new OfficeSectionModel(section.getWoofSectionName(),
+				section.getSectionSourceClassName(), section.getSectionLocation());
 		for (PropertyModel property : section.getProperties()) {
-			existing.addProperty(new net.officefloor.model.office.PropertyModel(
-					property.getName(), property.getValue()));
+			existing.addProperty(
+					new net.officefloor.model.office.PropertyModel(property.getName(), property.getValue()));
 		}
 		for (WoofSectionInputModel input : section.getInputs()) {
-			existing.addOfficeSectionInput(new OfficeSectionInputModel(input
-					.getWoofSectionInputName(), input.getParameterType()));
+			existing.addOfficeSectionInput(
+					new OfficeSectionInputModel(input.getWoofSectionInputName(), input.getParameterType()));
 		}
 		for (WoofSectionOutputModel output : section.getOutputs()) {
-			existing.addOfficeSectionOutput(new OfficeSectionOutputModel(output
-					.getWoofSectionOutputName(), output.getArgumentType(),
-					false));
+			existing.addOfficeSectionOutput(
+					new OfficeSectionOutputModel(output.getWoofSectionOutputName(), output.getArgumentType(), false));
 		}
 
 		// Obtain the refactored section instance
-		SectionInstance instance = SectionSourceWizard.getSectionInstance(true,
-				context.getEditPart(), new SectionInstance(existing), true);
+		SectionInstance instance = SectionSourceWizard.getSectionInstance(true, context.getEditPart(),
+				new SectionInstance(existing), true);
 		if (instance == null) {
 			return null; // must have section
 		}
@@ -99,9 +95,8 @@ public class RefactorSectionOperation extends
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
 
 		// Create change to add section
-		Change<WoofSectionModel> change = changes.refactorSection(section,
-				sectionName, sectionSourceClassName, sectionLocation,
-				properties, sectionType, inputNameMapping, outputNameMapping);
+		Change<WoofSectionModel> change = changes.refactorSection(section, sectionName, sectionSourceClassName,
+				sectionLocation, properties, sectionType, inputNameMapping, outputNameMapping);
 
 		// Position section
 		context.positionModel(change.getTarget());

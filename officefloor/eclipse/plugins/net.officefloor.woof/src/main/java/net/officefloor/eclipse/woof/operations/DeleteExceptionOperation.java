@@ -19,17 +19,16 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.woof.WoofChanges;
-import net.officefloor.model.woof.WoofExceptionModel;
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionModel;
+import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Deletes a {@link WoofExceptionModel} to the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DeleteExceptionOperation extends
-		AbstractWoofChangeOperation<WoofExceptionEditPart> {
+public class DeleteExceptionOperation extends AbstractWoofChangeOperation<WoofExceptionEditPart> {
 
 	/**
 	 * Initiate.
