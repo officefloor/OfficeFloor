@@ -17,27 +17,19 @@
  */
 package net.officefloor.eclipse.editor;
 
-import net.officefloor.model.Model;
-
 /**
- * Provides means to build the adapted model.
+ * Builds the {@link AdaptedModel} instances.
  * 
  * @author Daniel Sagenschneider
  */
 public interface AdaptedBuilder {
 
 	/**
-	 * Adds an {@link AdaptedParent}.
+	 * Builds the {@link AdaptedModel} instances.
 	 * 
-	 * @param modelClass
-	 *            {@link Class} of the {@link Model}.
-	 * @param viewFactory
-	 *            {@link ViewFactory} to create the view for the
-	 *            {@link AdaptedParent}.
-	 * @return {@link AdaptedParentBuilder} to build the {@link AdaptedParent} over
-	 *         the {@link Model}.
+	 * @param context
+	 *            {@link AdaptedBuilderContext}.
 	 */
-	<M extends Model, E extends Enum<E>> AdaptedParentBuilder<M, E> addParent(Class<M> modelClass,
-			ViewFactory<M, AdaptedParent<M>> viewFactory);
+	void build(AdaptedBuilderContext context);
 
 }

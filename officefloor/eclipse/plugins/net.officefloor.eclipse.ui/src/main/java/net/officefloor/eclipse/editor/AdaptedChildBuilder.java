@@ -20,6 +20,7 @@ package net.officefloor.eclipse.editor;
 import java.util.List;
 import java.util.function.Function;
 
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 
@@ -75,6 +76,36 @@ public interface AdaptedChildBuilder<M extends Model, E extends Enum<E>> {
 	@SuppressWarnings("unchecked")
 	ChildGroupBuilder children(String childGroupName, Function<M, List<? extends Model>> getChildren,
 			E... childrenEvents);
+
+	/**
+	 * Registers a {@link ConnectionModel} from this {@link AdaptedModel}.
+	 * 
+	 * @param connectionClass
+	 *            {@link ConnectionModel} {@link Class}.
+	 * @param getConnection
+	 *            {@link Function} to get the {@link ConnectionModel} from the
+	 *            {@link Model}.
+	 * @param connectionChangeEvents
+	 *            {@link Enum} events fired by the model for {@link ConnectionModel}
+	 *            change.
+	 */
+	@SuppressWarnings("unchecked")
+	<C extends ConnectionModel> void connection(Class<C> connectionClass, Function<M, C> getConnection,
+			E... connectionChangeEvents);
+
+	/**
+	 * Registers multiple {@link ConnectionModel} from this {@link AdaptedModel}.
+	 * 
+	 * @param connectionClass
+	 *            {@link ConnectionModel} class.
+	 * @param getConnections
+	 *            {@link Function} to get the {@link List} of
+	 *            {@link ConnectionModel} instances from the {@link Model}.
+	 * @param connectionChangeEvents
+	 */
+	@SuppressWarnings("unchecked")
+	<C extends ConnectionModel> void connections(Class<C> connectionClass, Function<M, List<C>> getConnections,
+			E... connectionChangeEvents);
 
 	/**
 	 * Creates a {@link Change} for the label of the {@link Model}.

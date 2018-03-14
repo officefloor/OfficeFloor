@@ -9,7 +9,7 @@
  *     Alexander Nyßen (itemis AG) - initial API and implementation
  *
  *******************************************************************************/
-package net.officefloor.eclipse.editor.model;
+package net.officefloor.eclipse.editor.models;
 
 import org.eclipse.gef.geometry.planar.AffineTransform;
 import org.eclipse.gef.geometry.planar.IGeometry;

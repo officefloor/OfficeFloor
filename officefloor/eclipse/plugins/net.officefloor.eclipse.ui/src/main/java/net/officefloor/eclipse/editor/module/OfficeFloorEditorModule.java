@@ -9,7 +9,7 @@
  *     Alexander Nyßen (itemis AG) - initial API and implementation
  *
  *******************************************************************************/
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.module;
 
 import org.eclipse.gef.common.adapt.AdapterKey;
 import org.eclipse.gef.common.adapt.inject.AdaptableScopes;
@@ -57,6 +57,7 @@ import com.google.inject.Provider;
 import com.google.inject.multibindings.MapBinder;
 
 import javafx.scene.paint.Color;
+import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.behaviors.PaletteFocusBehavior;
 import net.officefloor.eclipse.editor.handlers.CloneCurveSupport;
 import net.officefloor.eclipse.editor.handlers.CloneOnClickHandler;
@@ -65,28 +66,36 @@ import net.officefloor.eclipse.editor.handlers.CreateCurveOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreationMenuItemProvider;
 import net.officefloor.eclipse.editor.handlers.CreationMenuOnClickHandler;
 import net.officefloor.eclipse.editor.handlers.DeleteFirstAnchorageOnClickHandler;
+import net.officefloor.eclipse.editor.parts.AdaptedChildPart;
+import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.parts.GeometricCurveCreationHoverHandlePart;
 import net.officefloor.eclipse.editor.parts.GeometricCurvePart;
 import net.officefloor.eclipse.editor.parts.GeometricElementDeletionHandlePart;
 import net.officefloor.eclipse.editor.parts.GeometricShapePart;
-import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorHoverHandlePartFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorSelectionHandlePartFactory;
-import net.officefloor.eclipse.editor.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.parts.PaletteRootPart;
 import net.officefloor.eclipse.editor.policies.ContentRestrictedChangeViewportPolicy;
 
-public abstract class AbstractEditorModule extends MvcFxModule {
+public class OfficeFloorEditorModule extends MvcFxModule {
 
 	public static final String PALETTE_VIEWER_ROLE = "paletteViewer";
 
 	/**
-	 * Builds the {@link AdaptedBuilder}.
-	 * 
-	 * @param builder {@link AdaptedBuilder}.
+	 * {@link AdaptedBuilder}.
 	 */
-	protected abstract void buildModels(AdaptedBuilder builder);
+	private final AdaptedBuilder adaptedBuilder;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param adaptedBuilder
+	 *            {@link AdaptedBuilder}.
+	 */
+	public OfficeFloorEditorModule(AdaptedBuilder adaptedBuilder) {
+		this.adaptedBuilder = adaptedBuilder;
+	}
 
 	@Override
 	protected void bindAbstractContentPartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -391,12 +400,12 @@ public abstract class AbstractEditorModule extends MvcFxModule {
 
 		// Bind the content part factory and initialise it
 		OfficeFloorContentPartFactory contentPartFactory = bindIContentPartFactory();
-		this.buildModels(contentPartFactory);
+		this.adaptedBuilder.build(contentPartFactory);
 		contentPartFactory.validateModels();
 
 		// Bind in the models
-		bindModelAdapterAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedParentPart.class,
-				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
+		bindModelAdapterAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
+				AdaptedParentPart.class, AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 		AdapterMaps.getAdapterMapBinder(binder(), AdaptedChildPart.class,
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
 

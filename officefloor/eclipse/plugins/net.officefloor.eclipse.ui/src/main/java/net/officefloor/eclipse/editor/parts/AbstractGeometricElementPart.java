@@ -16,7 +16,7 @@ import org.eclipse.gef.mvc.fx.parts.AbstractContentPart;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import net.officefloor.eclipse.editor.model.AbstractGeometricElement;
+import net.officefloor.eclipse.editor.models.AbstractGeometricElement;
 
 public abstract class AbstractGeometricElementPart<N extends Node>
 		extends AbstractContentPart<N> {

@@ -22,13 +22,18 @@ import com.google.common.collect.SetMultimap;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
-public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedModelPart<M, A> {
+public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedModelPart<M, A, Pane> {
 
 	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
-		return HashMultimap.create();
+		SetMultimap<Object, String> anchorages = HashMultimap.create();
+//		for (ConnectionModel connection : this.getContentAdapter().getConnections()) {
+//			anchorages.put(connection, "link");
+//		}
+		return anchorages;
 	}
 
 	@Override

@@ -28,8 +28,8 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.model.AbstractAdaptedModelFactory;
-import net.officefloor.eclipse.editor.model.ChildrenGroupFactory.ChildrenGroup;
+import net.officefloor.eclipse.editor.models.AbstractAdaptedModelFactory;
+import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 
 /**
  * {@link IContentPart} for the {@link ChildrenGroup}.

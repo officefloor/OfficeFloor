@@ -15,9 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor.model;
+package net.officefloor.eclipse.editor.models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -38,15 +42,16 @@ import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ChildGroupBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
 import net.officefloor.eclipse.editor.ViewFactoryContext;
-import net.officefloor.eclipse.editor.model.ChildrenGroupFactory.ChildrenGroup;
+import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 import net.officefloor.eclipse.editor.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
 
 /**
- * Adapter for an output {@link Model}.
+ * Factory for an {@link AdaptedChild}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -78,6 +83,11 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 	 * {@link Model}.
 	 */
 	private final List<ChildrenGroupFactory<M, E>> childrenGroups = new ArrayList<>();
+
+	/**
+	 * {@link ConnectionsExtractor} instances.
+	 */
+	private final Map<Class<? extends ConnectionModel>, ConnectionsExtractor<M, E, ? extends ConnectionModel>> connections = new HashMap<>();
 
 	/**
 	 * Instantiate as {@link AdaptedChild}.
@@ -158,6 +168,57 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 				this);
 		this.childrenGroups.add(factory);
 		return factory;
+	}
+
+	@Override
+	@SafeVarargs
+	public final <C extends ConnectionModel> void connection(Class<C> connectionClass, Function<M, C> getConnection,
+			E... connectionChangeEvents) {
+		this.connections(connectionClass, (model) -> {
+			C connection = getConnection.apply(model);
+			if (connection == null) {
+				return Collections.emptyList();
+			} else {
+				return Arrays.asList(connection);
+			}
+		}, connectionChangeEvents);
+	}
+
+	@Override
+	@SafeVarargs
+	public final <C extends ConnectionModel> void connections(Class<C> connectionClass,
+			Function<M, List<C>> getConnections, E... connectionChangeEvents) {
+		this.connections.put(connectionClass, new ConnectionsExtractor<>(getConnections, connectionChangeEvents));
+	}
+
+	/**
+	 * Details to extract the {@link ConnectionModel} instances.
+	 */
+	private static class ConnectionsExtractor<M extends Model, E extends Enum<E>, C extends ConnectionModel> {
+
+		/**
+		 * Obtains the {@link ConnectionModel} instances.
+		 */
+		private final Function<M, List<C>> getConnections;
+
+		/**
+		 * {@link Enum} events to indicate change in {@link ConnectionModel} instances.
+		 */
+		private final E[] connectionChangeEvents;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param getConnections
+		 *            Obtains the {@link ConnectionModel} instances.
+		 * @param connectionChangeEvents
+		 *            {@link Enum} events to indicate change in {@link ConnectionModel}
+		 *            instances.
+		 */
+		public ConnectionsExtractor(Function<M, List<C>> getConnections, E[] connectionChangeEvents) {
+			this.getConnections = getConnections;
+			this.connectionChangeEvents = connectionChangeEvents;
+		}
 	}
 
 	/**
@@ -268,6 +329,16 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 		}
 
 		@Override
+		public List<? extends ConnectionModel> getConnections() {
+			List<ConnectionModel> list = new LinkedList<>();
+			for (ConnectionsExtractor<M, E, ? extends ConnectionModel> extractor : this.getFactory().connections
+					.values()) {
+				list.addAll(extractor.getConnections.apply(this.getModel()));
+			}
+			return list;
+		}
+
+		@Override
 		@SuppressWarnings("unchecked")
 		public Pane createVisual() {
 
@@ -309,7 +380,7 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 		}
 
 		@Override
-		public void childGroup(String childGroupName, Pane parent) {
+		public <P extends Pane> P childGroup(String childGroupName, P parent) {
 			if (childGroupName == null) {
 				throw new NullPointerException(
 						"No child group name provided for view of " + this.getFactory().getModelClass().getName());
@@ -321,13 +392,20 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 
 					// Found the child group, so load the pane
 					childrenGroup.setPane(parent);
-					return;
+					return parent;
 				}
 			}
 
 			// As here, no children group registered
 			throw new IllegalStateException("No children group '" + childGroupName + "' registered for view of model "
 					+ this.getFactory().getModelClass().getName());
+		}
+
+		@Override
+		@SuppressWarnings("rawtypes")
+		public <N extends Node> N connect(String linkGroupName, N node, Class... connectionModelTypes) {
+			// TODO Auto-generated method stub
+			return node;
 		}
 	}
 

@@ -46,10 +46,10 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
-import net.officefloor.eclipse.editor.model.AbstractGeometricElement;
-import net.officefloor.eclipse.editor.model.GeometricCurve;
-import net.officefloor.eclipse.editor.model.GeometricCurve.Decoration;
-import net.officefloor.eclipse.editor.model.GeometricCurve.RoutingStyle;
+import net.officefloor.eclipse.editor.models.AbstractGeometricElement;
+import net.officefloor.eclipse.editor.models.GeometricCurve;
+import net.officefloor.eclipse.editor.models.GeometricCurve.Decoration;
+import net.officefloor.eclipse.editor.models.GeometricCurve.RoutingStyle;
 
 public class GeometricCurvePart extends AbstractGeometricElementPart<Connection>
 		implements IBendableContentPart<Connection> {

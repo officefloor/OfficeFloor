@@ -24,17 +24,23 @@ import com.google.inject.Injector;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import net.officefloor.eclipse.editor.module.OfficeFloorEditorModule;
 import net.officefloor.eclipse.editor.views.ViewersComposite;
 import net.officefloor.model.Model;
 
+/**
+ * Provides means to test editor configurations without loading the Eclipse
+ * platform.
+ */
 public abstract class AbstractEditorApplication extends Application {
 
 	/**
-	 * Creates the {@link AbstractEditorModule}.
+	 * Builds the {@link AdaptedModel} instances.
 	 * 
-	 * @return {@link AbstractEditorModule}.
+	 * @param context
+	 *            {@link AdaptedBuilderContext}.
 	 */
-	protected abstract AbstractEditorModule createModule();
+	protected abstract void buildModels(AdaptedBuilderContext context);
 
 	/**
 	 * Populate the {@link Model} instances.
@@ -44,6 +50,18 @@ public abstract class AbstractEditorApplication extends Application {
 	 */
 	protected abstract void populateModels(List<Model> models);
 
+	/**
+	 * <p>
+	 * Creates the {@link OfficeFloorEditorModule}.
+	 * <p>
+	 * Allows overriding the {@link OfficeFloorEditorModule}.
+	 * 
+	 * @return {@link OfficeFloorEditorModule}.
+	 */
+	protected OfficeFloorEditorModule createModule() {
+		return new OfficeFloorEditorModule((context) -> this.buildModels(context));
+	}
+
 	/*
 	 * ==================== Application ==========================
 	 */
@@ -52,13 +70,13 @@ public abstract class AbstractEditorApplication extends Application {
 	public void start(Stage stage) throws Exception {
 
 		// Create the module
-		AbstractEditorModule module = this.createModule();
+		OfficeFloorEditorModule module = this.createModule();
 		Injector injector = Guice.createInjector(module);
 
 		// Obtain the viewers
 		IDomain domain = injector.getInstance(IDomain.class);
 		IViewer content = domain.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
-		IViewer palette = domain.getAdapter(AdapterKey.get(IViewer.class, AbstractEditorModule.PALETTE_VIEWER_ROLE));
+		IViewer palette = domain.getAdapter(AdapterKey.get(IViewer.class, OfficeFloorEditorModule.PALETTE_VIEWER_ROLE));
 
 		// Setup visuals
 		Scene scene = new Scene(new ViewersComposite(content, palette).getComposite());
@@ -69,7 +87,7 @@ public abstract class AbstractEditorApplication extends Application {
 		stage.setTitle(this.getClass().getSimpleName());
 
 		// Provide CSS based on module
-		scene.getStylesheets().add(module.getClass().getName().replace('.', '/') + ".css");
+		scene.getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
 
 		// Show
 		stage.show();

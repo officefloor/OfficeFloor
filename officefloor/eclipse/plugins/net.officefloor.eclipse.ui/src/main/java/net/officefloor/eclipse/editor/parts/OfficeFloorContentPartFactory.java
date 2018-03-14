@@ -22,20 +22,20 @@ import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
 import com.google.inject.Injector;
 
 import javafx.scene.Node;
-import net.officefloor.eclipse.editor.AdaptedBuilder;
+import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
-import net.officefloor.eclipse.editor.model.AbstractAdaptedModelFactory;
-import net.officefloor.eclipse.editor.model.AdaptedParentModelFactory;
-import net.officefloor.eclipse.editor.model.ChangeExecutor;
-import net.officefloor.eclipse.editor.model.ChildrenGroupFactory.ChildrenGroup;
-import net.officefloor.eclipse.editor.model.GeometricCurve;
-import net.officefloor.eclipse.editor.model.GeometricShape;
+import net.officefloor.eclipse.editor.models.AbstractAdaptedModelFactory;
+import net.officefloor.eclipse.editor.models.AdaptedParentModelFactory;
+import net.officefloor.eclipse.editor.models.ChangeExecutor;
+import net.officefloor.eclipse.editor.models.GeometricCurve;
+import net.officefloor.eclipse.editor.models.GeometricShape;
+import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 import net.officefloor.model.Model;
 
-public class OfficeFloorContentPartFactory implements IContentPartFactory, AdaptedBuilder {
+public class OfficeFloorContentPartFactory implements IContentPartFactory, AdaptedBuilderContext {
 
 	@Inject
 	private Injector injector;

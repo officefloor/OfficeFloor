@@ -14,8 +14,8 @@ package net.officefloor.eclipse.editor.handlers;
 import org.eclipse.gef.geometry.planar.ICurve;
 import org.eclipse.gef.geometry.planar.Point;
 
-import net.officefloor.eclipse.editor.model.AbstractGeometricElement;
-import net.officefloor.eclipse.editor.model.GeometricCurve;
+import net.officefloor.eclipse.editor.models.AbstractGeometricElement;
+import net.officefloor.eclipse.editor.models.GeometricCurve;
 import net.officefloor.eclipse.editor.parts.GeometricCurvePart;
 
 public class CloneCurveSupport extends AbstractCloneContentSupport {

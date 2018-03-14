@@ -22,7 +22,8 @@ import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.model.ChildrenGroupFactory.ChildrenGroup;
+import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -54,6 +55,13 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 * @return {@link ChildrenGroup} instances.
 	 */
 	List<ChildrenGroup<M, ?>> getChildrenGroups();
+
+	/**
+	 * Obtains the {@link ConnectionModel} instances.
+	 * 
+	 * @return {@link ConnectionModel} instances.
+	 */
+	List<? extends ConnectionModel> getConnections();
 
 	/**
 	 * Creates the visual {@link Pane}.

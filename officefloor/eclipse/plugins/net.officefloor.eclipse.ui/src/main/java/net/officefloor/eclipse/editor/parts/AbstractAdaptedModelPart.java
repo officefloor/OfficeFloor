@@ -22,9 +22,9 @@ import javax.inject.Inject;
 import org.eclipse.gef.mvc.fx.parts.AbstractContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 
-import javafx.scene.layout.Pane;
+import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.model.AbstractAdaptedModelFactory;
+import net.officefloor.eclipse.editor.models.AbstractAdaptedModelFactory;
 import net.officefloor.model.Model;
 
 /**
@@ -32,8 +32,8 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdaptedModelPart<M extends Model, A extends AdaptedModel<M>>
-		extends AbstractContentPart<Pane> {
+public abstract class AbstractAdaptedModelPart<M extends Model, A extends AdaptedModel<M>, N extends Node>
+		extends AbstractContentPart<N> {
 
 	@Inject
 	private OfficeFloorContentPartFactory contentFactory;

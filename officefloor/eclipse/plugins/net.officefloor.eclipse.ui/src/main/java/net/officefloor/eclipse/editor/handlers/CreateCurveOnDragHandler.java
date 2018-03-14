@@ -40,7 +40,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import net.officefloor.eclipse.editor.model.GeometricCurve;
+import net.officefloor.eclipse.editor.models.GeometricCurve;
 import net.officefloor.eclipse.editor.parts.GeometricCurvePart;
 import net.officefloor.eclipse.editor.parts.GeometricShapePart;
 

@@ -40,8 +40,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Transform;
-import net.officefloor.eclipse.editor.model.AbstractGeometricElement;
-import net.officefloor.eclipse.editor.model.GeometricShape;
+import net.officefloor.eclipse.editor.models.AbstractGeometricElement;
+import net.officefloor.eclipse.editor.models.GeometricShape;
 
 public class GeometricShapePart extends AbstractGeometricElementPart<GeometryNode<IShape>>
 		implements ITransformableContentPart<GeometryNode<IShape>>, IResizableContentPart<GeometryNode<IShape>> {

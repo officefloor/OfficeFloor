@@ -9,7 +9,7 @@
  *     Alexander Nyßen (itemis AG) - initial API and implementation
  *
  *******************************************************************************/
-package net.officefloor.eclipse.editor.model;
+package net.officefloor.eclipse.editor.models;
 
 import java.util.HashSet;
 import java.util.Set;

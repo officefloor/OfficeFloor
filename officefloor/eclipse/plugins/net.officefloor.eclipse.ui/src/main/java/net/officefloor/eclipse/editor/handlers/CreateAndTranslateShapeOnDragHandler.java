@@ -39,7 +39,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import net.officefloor.eclipse.editor.model.GeometricShape;
+import net.officefloor.eclipse.editor.models.GeometricShape;
 import net.officefloor.eclipse.editor.parts.GeometricShapePart;
 
 public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implements IOnDragHandler {

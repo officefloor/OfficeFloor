@@ -17,23 +17,12 @@
  */
 package net.officefloor.eclipse.editor;
 
-import net.officefloor.model.Model;
+import net.officefloor.model.ConnectionModel;
 
 /**
- * Builder for the {@link AdaptedParent}.
+ * Builder for the {@link AdaptedConnection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
-
-	/**
-	 * Changes the location of the {@link Model}.
-	 * 
-	 * @param x
-	 *            X.
-	 * @param y
-	 *            Y.
-	 */
-	void changeLocation(int x, int y);
-
+public interface AdaptedConnectionBuilder<C extends ConnectionModel, E extends Enum<E>> {
 }

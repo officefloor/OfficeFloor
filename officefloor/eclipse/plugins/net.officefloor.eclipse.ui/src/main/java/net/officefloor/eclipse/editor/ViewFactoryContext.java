@@ -20,6 +20,7 @@ package net.officefloor.eclipse.editor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import net.officefloor.model.ConnectionModel;
 
 /**
  * Context for the {@link ViewFactory}.
@@ -59,7 +60,23 @@ public interface ViewFactoryContext {
 	 *            Name of the child group.
 	 * @param parent
 	 *            {@link Pane} to add the child group visuals.
+	 * @return Input {@link Pane}.
 	 */
-	void childGroup(String childGroupName, Pane parent);
+	<P extends Pane> P childGroup(String childGroupName, P parent);
+
+	/**
+	 * Specifies the {@link Node} as connection anchor.
+	 * 
+	 * @param linkGroupName
+	 *            Name of the connection anchor.
+	 * @param node
+	 *            {@link Node} to be used as the anchor.
+	 * @param connectionModelTypes
+	 *            {@link ConnectionModel} {@link Class} instances that this connect
+	 *            satisfies.
+	 * @return Input {@link Node}.
+	 */
+	@SuppressWarnings("rawtypes")
+	<N extends Node> N connect(String linkGroupName, N node, Class... connectionModelTypes);
 
 }

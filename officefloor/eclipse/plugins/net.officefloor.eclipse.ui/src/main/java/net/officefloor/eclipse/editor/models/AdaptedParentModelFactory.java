@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor.model;
+package net.officefloor.eclipse.editor.models;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
@@ -33,7 +33,7 @@ import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
 /**
- * Factory for the {@link AdaptedParent}.
+ * Factory for an {@link AdaptedParent}.
  * 
  * @author Daniel Sagenschneider
  */
