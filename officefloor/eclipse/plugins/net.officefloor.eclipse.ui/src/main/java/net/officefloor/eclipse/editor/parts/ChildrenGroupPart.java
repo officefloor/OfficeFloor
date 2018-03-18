@@ -28,7 +28,7 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.models.AbstractAdaptedModelFactory;
+import net.officefloor.eclipse.editor.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 
 /**
@@ -51,8 +51,8 @@ public class ChildrenGroupPart extends AbstractContentPart<Pane> {
 		super.setContent(content);
 
 		// Refresh on change
-		AbstractAdaptedModelFactory.registerEventListener(this.getContent().getModel(), this.getContent().getEvents(),
-				(event) -> {
+		AbstractAdaptedFactory.registerEventListener(this.getContent().getParent().getModel(),
+				this.getContent().getEvents(), (event) -> {
 					this.refreshContentChildren();
 				});
 	}
@@ -64,7 +64,7 @@ public class ChildrenGroupPart extends AbstractContentPart<Pane> {
 
 	@Override
 	protected List<? extends Object> doGetContentChildren() {
-		return this.getContent().getChildrenModels();
+		return this.getContent().getChildren();
 	}
 
 	@Override

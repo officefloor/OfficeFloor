@@ -16,6 +16,9 @@ import org.eclipse.gef.geometry.convert.fx.Geometry2FX;
 import org.eclipse.gef.geometry.planar.AffineTransform;
 import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -32,8 +35,13 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	@Override
 	public void init() {
 		// Capture the initial location
-		M model = this.getContent();
+		M model = this.getContent().getModel();
 		this.contentTransform = new AffineTransform(1, 0, 0, 1, model.getX(), model.getY());
+	}
+
+	@Override
+	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
+		return HashMultimap.create();
 	}
 
 	@Override
@@ -43,8 +51,8 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 		Pane container = super.doCreateVisual();
 
 		// Specify the initial location
-		container.setLayoutX(this.getContent().getX());
-		container.setLayoutY(this.getContent().getY());
+		container.setLayoutX(this.getContent().getModel().getX());
+		container.setLayoutY(this.getContent().getModel().getY());
 
 		// Return the pane
 		return container;
@@ -60,7 +68,7 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 		this.contentTransform = FX2Geometry.toAffineTransform(totalTransform);
 
 		// Update the location for the model
-		this.getContentAdapter().changeLocation((int) this.contentTransform.getTranslateX(),
+		this.getContent().changeLocation((int) this.contentTransform.getTranslateX(),
 				(int) this.contentTransform.getTranslateY());
 	}
 

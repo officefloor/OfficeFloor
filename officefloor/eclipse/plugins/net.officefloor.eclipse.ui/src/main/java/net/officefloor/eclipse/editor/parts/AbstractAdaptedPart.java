@@ -17,50 +17,33 @@
  */
 package net.officefloor.eclipse.editor.parts;
 
-import javax.inject.Inject;
-
 import org.eclipse.gef.mvc.fx.parts.AbstractContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.models.AbstractAdaptedModelFactory;
+import net.officefloor.eclipse.editor.models.AbstractAdaptedFactory;
 import net.officefloor.model.Model;
 
 /**
- * Abstract {@link IContentPart} for the {@link AbstractAdaptedModelFactory}.
+ * Abstract {@link IContentPart} for the {@link AbstractAdaptedFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdaptedModelPart<M extends Model, A extends AdaptedModel<M>, N extends Node>
+public abstract class AbstractAdaptedPart<M extends Model, A extends AdaptedModel<M>, N extends Node>
 		extends AbstractContentPart<N> {
-
-	@Inject
-	private OfficeFloorContentPartFactory contentFactory;
-
-	/**
-	 * {@link AbstractAdaptedModelFactory}.
-	 */
-	private A adapter;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M getContent() {
-		return (M) super.getContent();
+	public A getContent() {
+		return (A) super.getContent();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void setContent(Object content) {
-		if (content != null && !(content instanceof Model)) {
-			throw new IllegalArgumentException("Only " + Model.class.getSimpleName() + " supported.");
+		if (content != null && !(content instanceof AdaptedModel)) {
+			throw new IllegalArgumentException("Only " + AdaptedModel.class.getSimpleName() + " supported.");
 		}
-
-		// Wrap content with adapter
-		M model = (M) content;
-		this.adapter = (A) this.contentFactory.createContent(model);
-
-		// Load content once have adapter
 		super.setContent(content);
 
 		// Initialise
@@ -68,18 +51,9 @@ public abstract class AbstractAdaptedModelPart<M extends Model, A extends Adapte
 	}
 
 	/**
-	 * May override to initialise from {@link Model}.
+	 * May override to initialise.
 	 */
 	protected void init() {
-	}
-
-	/**
-	 * Obtains the {@link AbstractAdaptedModelFactory}.
-	 * 
-	 * @return {@link AbstractAdaptedModelFactory}.
-	 */
-	protected A getContentAdapter() {
-		return this.adapter;
 	}
 
 }

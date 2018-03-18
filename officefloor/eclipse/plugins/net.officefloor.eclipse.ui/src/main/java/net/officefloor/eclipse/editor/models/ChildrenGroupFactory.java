@@ -17,12 +17,14 @@
  */
 package net.officefloor.eclipse.editor.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.ChildGroupBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
 import net.officefloor.model.Model;
@@ -52,9 +54,9 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 	private final E[] childrenEvents;
 
 	/**
-	 * Parent {@link AbstractAdaptedModelFactory}.
+	 * Parent {@link AbstractAdaptedFactory}.
 	 */
-	private final AbstractAdaptedModelFactory<?, ?, ?> parentAdaptedModel;
+	private final AbstractAdaptedFactory<?, ?, ?> parentAdaptedModel;
 
 	/**
 	 * Instantiate.
@@ -68,10 +70,10 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 	 *            {@link Enum} events fired by the {@link Model} for output
 	 *            {@link Model} changes.
 	 * @param parentAdaptedModel
-	 *            Parent {@link AbstractAdaptedModelFactory}.
+	 *            Parent {@link AbstractAdaptedFactory}.
 	 */
 	public ChildrenGroupFactory(String childGroupName, Function<M, List<? extends Model>> getChildren,
-			E[] childrenEvents, AbstractAdaptedModelFactory<?, ?, ?> parentAdaptedModel) {
+			E[] childrenEvents, AbstractAdaptedFactory<?, ?, ?> parentAdaptedModel) {
 		this.childGroupName = childGroupName;
 		this.getChildren = getChildren;
 		this.childrenEvents = childrenEvents;
@@ -79,14 +81,14 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 	}
 
 	/**
-	 * Creates the {@link ChildrenGroup} for the {@link Model}.
+	 * Creates the {@link ChildrenGroup} for the parent {@link AdaptedChild}.
 	 * 
-	 * @param model
-	 *            {@link Model}.
+	 * @param parent
+	 *            Parent {@link AdaptedChild}.
 	 * @return {@link ChildrenGroup}.
 	 */
-	public ChildrenGroup<M, E> createChildrenGroup(M model) {
-		return new ChildrenGroup<>(model, this);
+	public ChildrenGroup<M, E> createChildrenGroup(AdaptedChild<M> parent) {
+		return new ChildrenGroup<>(parent, this);
 	}
 
 	/*
@@ -96,7 +98,7 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 	@Override
 	public <CM extends Model, CE extends Enum<CE>> AdaptedChildBuilder<CM, CE> addChild(Class<CM> modelClass,
 			ViewFactory<CM, AdaptedChild<CM>> viewFactory) {
-		return new AdaptedChildModelFactory<>(modelClass, viewFactory, this.parentAdaptedModel);
+		return new AdaptedChildFactory<>(modelClass, viewFactory, this.parentAdaptedModel);
 	}
 
 	/**
@@ -105,14 +107,19 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 	public static class ChildrenGroup<M extends Model, E extends Enum<E>> {
 
 		/**
-		 * {@link Model}.
+		 * Parent {@link AdaptedChild}.
 		 */
-		private final M model;
+		private final AdaptedChild<M> parent;
 
 		/**
 		 * {@link ChildrenGroupFactory}.
 		 */
 		private final ChildrenGroupFactory<M, E> factory;
+
+		/**
+		 * {@link AdaptedModel} children.
+		 */
+		private final List<AdaptedModel<?>> children;
 
 		/**
 		 * {@link Pane}.
@@ -122,14 +129,31 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		/**
 		 * Instantiate.
 		 * 
-		 * @param model
-		 *            {@link Model}.
+		 * @param parent
+		 *            Parent {@link AdaptedChild}.
 		 * @param factory
 		 *            {@link ChildrenGroupFactory}.
 		 */
-		private ChildrenGroup(M model, ChildrenGroupFactory<M, E> factory) {
-			this.model = model;
+		private ChildrenGroup(AdaptedChild<M> parent, ChildrenGroupFactory<M, E> factory) {
+			this.parent = parent;
 			this.factory = factory;
+
+			// Load the children
+			List<? extends Model> children = this.factory.getChildren.apply(this.parent.getModel());
+			this.children = new ArrayList<>(children.size());
+			for (Model child : children) {
+				AdaptedModel<?> adaptedChild = this.factory.parentAdaptedModel.getAdaptedModel(child);
+				this.children.add(adaptedChild);
+			}
+		}
+
+		/**
+		 * Obtains the parent {@link AdaptedChild}.
+		 * 
+		 * @return Parent {@link AdaptedChild}.
+		 */
+		public AdaptedChild<M> getParent() {
+			return this.parent;
 		}
 
 		/**
@@ -142,12 +166,12 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		}
 
 		/**
-		 * Obtains the {@link Model}.
+		 * Obtains the {@link AdaptedModel} children.
 		 * 
-		 * @return {@link Model}.
+		 * @return {@link AdaptedModel} children.
 		 */
-		public M getModel() {
-			return this.model;
+		public List<AdaptedModel<?>> getChildren() {
+			return this.children;
 		}
 
 		/**
@@ -157,15 +181,6 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		 */
 		public E[] getEvents() {
 			return this.factory.childrenEvents;
-		}
-
-		/**
-		 * Obtains the children {@link Model} instances.
-		 * 
-		 * @return Children {@link Model} instances.
-		 */
-		public List<? extends Model> getChildrenModels() {
-			return this.factory.getChildren.apply(this.model);
 		}
 
 		/**

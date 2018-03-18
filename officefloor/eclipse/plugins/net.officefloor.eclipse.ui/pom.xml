@@ -20,6 +20,12 @@
 			<artifactId>net.officefloor.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.eclipse.target</artifactId>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

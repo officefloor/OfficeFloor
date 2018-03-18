@@ -17,9 +17,14 @@
  */
 package net.officefloor.eclipse.editor;
 
+import org.eclipse.gef.fx.anchors.IAnchor;
+import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.geometry.planar.IGeometry;
+
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.editor.models.AdaptedConnector;
 import net.officefloor.model.ConnectionModel;
 
 /**
@@ -65,18 +70,18 @@ public interface ViewFactoryContext {
 	<P extends Pane> P childGroup(String childGroupName, P parent);
 
 	/**
-	 * Specifies the {@link Node} as connection anchor.
+	 * Specifies the {@link GeometryNode} as {@link AdaptedConnector}
+	 * {@link IAnchor}.
 	 * 
-	 * @param linkGroupName
-	 *            Name of the connection anchor.
-	 * @param node
-	 *            {@link Node} to be used as the anchor.
-	 * @param connectionModelTypes
-	 *            {@link ConnectionModel} {@link Class} instances that this connect
-	 *            satisfies.
+	 * @param geometryNode
+	 *            {@link GeometryNode} to be used as the {@link IAnchor}.
+	 * @param connectionModelClasses
+	 *            {@link ConnectionModel} {@link Class} instances that this
+	 *            connector satisfies.
 	 * @return Input {@link Node}.
 	 */
 	@SuppressWarnings("rawtypes")
-	<N extends Node> N connect(String linkGroupName, N node, Class... connectionModelTypes);
+	<G extends IGeometry, N extends GeometryNode<G>, C extends ConnectionModel> N connector(N geometryNode,
+			Class... connectionModelClasses);
 
 }

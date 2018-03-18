@@ -85,13 +85,17 @@ public interface AdaptedChildBuilder<M extends Model, E extends Enum<E>> {
 	 * @param getConnection
 	 *            {@link Function} to get the {@link ConnectionModel} from the
 	 *            {@link Model}.
+	 * @param getSource
+	 *            {@link Function} to get the source {@link Model} from the
+	 *            {@link ConnectionModel}.
 	 * @param connectionChangeEvents
 	 *            {@link Enum} events fired by the model for {@link ConnectionModel}
 	 *            change.
+	 * @return {@link AdaptedConnectionBuilder} for the {@link ConnectionModel}.
 	 */
 	@SuppressWarnings("unchecked")
-	<C extends ConnectionModel> void connection(Class<C> connectionClass, Function<M, C> getConnection,
-			E... connectionChangeEvents);
+	<C extends ConnectionModel> AdaptedConnectionBuilder<M, C, E> connectOne(Class<C> connectionClass,
+			Function<M, C> getConnection, Function<C, M> getSource, E... connectionChangeEvents);
 
 	/**
 	 * Registers multiple {@link ConnectionModel} from this {@link AdaptedModel}.
@@ -101,11 +105,15 @@ public interface AdaptedChildBuilder<M extends Model, E extends Enum<E>> {
 	 * @param getConnections
 	 *            {@link Function} to get the {@link List} of
 	 *            {@link ConnectionModel} instances from the {@link Model}.
+	 * @param getSource
+	 *            {@link Function} to get the source {@link Model} from the
+	 *            {@link ConnectionModel}.
 	 * @param connectionChangeEvents
+	 * @return {@link AdaptedConnectionBuilder} for the {@link ConnectionModel}.
 	 */
 	@SuppressWarnings("unchecked")
-	<C extends ConnectionModel> void connections(Class<C> connectionClass, Function<M, List<C>> getConnections,
-			E... connectionChangeEvents);
+	<C extends ConnectionModel> AdaptedConnectionBuilder<M, C, E> connectMany(Class<C> connectionClass,
+			Function<M, List<C>> getConnections, Function<C, M> getSource, E... connectionChangeEvents);
 
 	/**
 	 * Creates a {@link Change} for the label of the {@link Model}.

@@ -26,7 +26,6 @@ public class RelocateLinkedOnDragHandler extends TranslateSelectedOnDragHandler 
 		List<IContentPart<? extends Node>> selected = super.getTargetParts();
 		List<IContentPart<? extends Node>> linked = new ArrayList<>(selected);
 		for (IContentPart<? extends Node> cp : selected) {
-			// ensure that linked parts are moved with us during dragging
 			ArrayList<IContentPart<? extends Node>> linkedContentParts = new ArrayList<>(
 					PartUtils.filterParts(PartUtils.getAnchoreds(cp, "link"), IContentPart.class));
 			for (IContentPart<? extends Node> lcp : linkedContentParts) {

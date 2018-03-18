@@ -25,6 +25,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import net.officefloor.eclipse.editor.module.OfficeFloorEditorModule;
+import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.eclipse.editor.views.ViewersComposite;
 import net.officefloor.model.Model;
 
@@ -72,6 +73,7 @@ public abstract class AbstractEditorApplication extends Application {
 		// Create the module
 		OfficeFloorEditorModule module = this.createModule();
 		Injector injector = Guice.createInjector(module);
+		module.initialiseFromInjector(injector);
 
 		// Obtain the viewers
 		IDomain domain = injector.getInstance(IDomain.class);
@@ -98,7 +100,13 @@ public abstract class AbstractEditorApplication extends Application {
 		// Load the models
 		List<Model> models = new LinkedList<>();
 		this.populateModels(models);
-		content.getContents().setAll(models);
+		OfficeFloorContentPartFactory factory = injector.getInstance(OfficeFloorContentPartFactory.class);
+		List<AdaptedModel<?>> adaptedModels = new LinkedList<>();
+		for (Model model : models) {
+			AdaptedModel<?> adaptedModel = factory.createAdaptedModel(model);
+			adaptedModels.add(adaptedModel);
+		}
+		content.getContents().setAll(adaptedModels);
 	}
 
 }

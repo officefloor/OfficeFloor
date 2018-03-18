@@ -23,16 +23,18 @@ import com.google.inject.Injector;
 
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
+import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
-import net.officefloor.eclipse.editor.models.AbstractAdaptedModelFactory;
-import net.officefloor.eclipse.editor.models.AdaptedParentModelFactory;
-import net.officefloor.eclipse.editor.models.ChangeExecutor;
+import net.officefloor.eclipse.editor.models.AbstractAdaptedFactory;
+import net.officefloor.eclipse.editor.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.models.AdaptedParentFactory;
+import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 import net.officefloor.eclipse.editor.models.GeometricCurve;
 import net.officefloor.eclipse.editor.models.GeometricShape;
-import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 import net.officefloor.model.Model;
 
 public class OfficeFloorContentPartFactory implements IContentPartFactory, AdaptedBuilderContext {
@@ -41,27 +43,34 @@ public class OfficeFloorContentPartFactory implements IContentPartFactory, Adapt
 	private Injector injector;
 
 	/**
-	 * {@link AbstractAdaptedModelFactory} instances for the {@link Model} types.
+	 * {@link AbstractAdaptedFactory} instances for the {@link Model} types.
 	 */
-	private final Map<Class<?>, AbstractAdaptedModelFactory<?, ?, ?>> models = new HashMap<>();
+	private final Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models = new HashMap<>();
 
 	/**
-	 * Registers the {@link AbstractAdaptedModelFactory}.
+	 * Mapping of {@link Model} to its {@link AdaptedModel}.
+	 */
+	private final Map<Model, AdaptedModel<?>> modelToAdaption = new HashMap<>();
+
+	/**
+	 * Registers the {@link AbstractAdaptedFactory}.
 	 * 
 	 * @param builder
-	 *            {@link AbstractAdaptedModelFactory}.
+	 *            {@link AbstractAdaptedFactory}.
 	 */
-	public <M extends Model, E extends Enum<E>> void registerModel(AbstractAdaptedModelFactory<M, E, ?> builder) {
+	public <M extends Model, E extends Enum<E>> void registerModel(AbstractAdaptedFactory<M, E, ?> builder) {
 		this.models.put(builder.getModelClass(), builder);
 	}
 
 	/**
-	 * Validates the {@link Model} configuration.
-	 * 
-	 * @throws IllegalStateException
-	 *             If invalid.
+	 * Initialises from {@link Injector}.
 	 */
-	public void validateModels() throws IllegalStateException {
+	public void initialiseFromInjector() {
+
+		// Initialise all the models
+		this.models.values().forEach((model) -> model.init(this.injector, this.models));
+
+		// Validate all the models
 		this.models.values().forEach((model) -> model.validate(this.models));
 	}
 
@@ -70,21 +79,25 @@ public class OfficeFloorContentPartFactory implements IContentPartFactory, Adapt
 	 * 
 	 * @param model
 	 *            {@link Model}.
-	 * @return {@link AbstractAdaptedModelFactory} for the {@link Model}.
+	 * @return {@link AbstractAdaptedFactory} for the {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <M extends Model> AdaptedModel<M> createContent(M model) {
+	public <M extends Model> AdaptedModel<M> createAdaptedModel(M model) {
 
-		// Obtain the change executer
-		ChangeExecutor changeExecutor = this.injector.getInstance(ChangeExecutor.class);
+		// Determine if already and adapted model
+		AdaptedModel<M> adapted = (AdaptedModel<M>) this.modelToAdaption.get(model);
+		if (adapted != null) {
+			return adapted; // already adapted
+		}
 
 		// Look up the builder
-		AbstractAdaptedModelFactory<M, ?, ?> builder = (AbstractAdaptedModelFactory<M, ?, ?>) this.models
-				.get(model.getClass());
+		AbstractAdaptedFactory<M, ?, ?> builder = (AbstractAdaptedFactory<M, ?, ?>) this.models.get(model.getClass());
 		if (builder != null) {
 
-			// Create the model adapter
-			return builder.createAdaptedModel(model, changeExecutor);
+			// Create and register the adapted model
+			adapted = builder.newAdaptedModel(model);
+			this.modelToAdaption.put(model, adapted);
+			return adapted;
 		}
 
 		// As here, model is not configured
@@ -98,7 +111,7 @@ public class OfficeFloorContentPartFactory implements IContentPartFactory, Adapt
 	@Override
 	public <M extends Model, E extends Enum<E>> AdaptedParentBuilder<M, E> addParent(Class<M> modelClass,
 			ViewFactory<M, AdaptedParent<M>> viewFactory) {
-		return new AdaptedParentModelFactory<>(modelClass, viewFactory, this);
+		return new AdaptedParentFactory<>(modelClass, viewFactory, this);
 	}
 
 	/*
@@ -116,19 +129,21 @@ public class OfficeFloorContentPartFactory implements IContentPartFactory, Adapt
 			return injector.getInstance(GeometricCurvePart.class);
 		}
 
-		// Determine if Children Group
-		if (content instanceof ChildrenGroup) {
+		// Provide part for adapted
+		if (content instanceof AdaptedParent) {
+			return this.injector.getInstance(AdaptedParentPart.class);
+		} else if (content instanceof ChildrenGroup) {
 			return this.injector.getInstance(ChildrenGroupPart.class);
+		} else if (content instanceof AdaptedChild) {
+			return this.injector.getInstance(AdaptedChildPart.class);
+		} else if (content instanceof AdaptedConnection) {
+			return this.injector.getInstance(AdaptedConnectionPart.class);
+		} else if (content instanceof AdaptedConnector) {
+			return this.injector.getInstance(AdaptedConnectorPart.class);
 		}
 
-		// Look up the factory
-		AbstractAdaptedModelFactory<?, ?, ?> factory = this.models.get(content.getClass());
-		if (factory == null) {
-			throw new IllegalArgumentException("Unhandled model " + content.getClass().getName());
-		}
-
-		// Return the content part
-		return (IContentPart<? extends Node>) this.injector.getInstance(factory.getPartClass());
+		// Unknown model
+		throw new IllegalArgumentException("Unhandled model " + content.getClass().getName());
 	};
 
 }

@@ -11,6 +11,8 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.module;
 
+import java.util.Arrays;
+
 import org.eclipse.gef.common.adapt.AdapterKey;
 import org.eclipse.gef.common.adapt.inject.AdaptableScopes;
 import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport;
@@ -26,12 +28,15 @@ import org.eclipse.gef.mvc.fx.behaviors.SelectionBehavior;
 import org.eclipse.gef.mvc.fx.domain.IDomain;
 import org.eclipse.gef.mvc.fx.handlers.BendFirstAnchorageOnSegmentHandleDragHandler;
 import org.eclipse.gef.mvc.fx.handlers.BendOnSegmentDragHandler;
+import org.eclipse.gef.mvc.fx.handlers.ConnectedSupport;
 import org.eclipse.gef.mvc.fx.handlers.DeleteSelectedOnTypeHandler;
 import org.eclipse.gef.mvc.fx.handlers.FocusAndSelectOnClickHandler;
 import org.eclipse.gef.mvc.fx.handlers.HoverOnHoverHandler;
 import org.eclipse.gef.mvc.fx.handlers.RotateSelectedOnRotateHandler;
 import org.eclipse.gef.mvc.fx.handlers.SelectAllOnTypeHandler;
 import org.eclipse.gef.mvc.fx.handlers.SelectFocusedOnTypeHandler;
+import org.eclipse.gef.mvc.fx.handlers.SnapToGeometry;
+import org.eclipse.gef.mvc.fx.handlers.SnapToGrid;
 import org.eclipse.gef.mvc.fx.handlers.TranslateSelectedOnDragHandler;
 import org.eclipse.gef.mvc.fx.handlers.TraverseFocusOnTypeHandler;
 import org.eclipse.gef.mvc.fx.models.FocusModel;
@@ -49,10 +54,16 @@ import org.eclipse.gef.mvc.fx.parts.RectangleSegmentHandlePart;
 import org.eclipse.gef.mvc.fx.policies.BendConnectionPolicy;
 import org.eclipse.gef.mvc.fx.policies.ResizePolicy;
 import org.eclipse.gef.mvc.fx.policies.TransformPolicy;
+import org.eclipse.gef.mvc.fx.providers.BoundsSnappingLocationProvider;
+import org.eclipse.gef.mvc.fx.providers.CenterSnappingLocationProvider;
+import org.eclipse.gef.mvc.fx.providers.DefaultAnchorProvider;
 import org.eclipse.gef.mvc.fx.providers.GeometricOutlineProvider;
+import org.eclipse.gef.mvc.fx.providers.ISnappingLocationProvider;
 import org.eclipse.gef.mvc.fx.providers.ShapeBoundsProvider;
+import org.eclipse.gef.mvc.fx.providers.TopLeftSnappingLocationProvider;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
+import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.multibindings.MapBinder;
 
@@ -66,7 +77,8 @@ import net.officefloor.eclipse.editor.handlers.CreateCurveOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreationMenuItemProvider;
 import net.officefloor.eclipse.editor.handlers.CreationMenuOnClickHandler;
 import net.officefloor.eclipse.editor.handlers.DeleteFirstAnchorageOnClickHandler;
-import net.officefloor.eclipse.editor.parts.AdaptedChildPart;
+import net.officefloor.eclipse.editor.parts.AdaptedConnectionPart;
+import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
 import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.parts.GeometricCurveCreationHoverHandlePart;
 import net.officefloor.eclipse.editor.parts.GeometricCurvePart;
@@ -96,6 +108,21 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 	public OfficeFloorEditorModule(AdaptedBuilder adaptedBuilder) {
 		this.adaptedBuilder = adaptedBuilder;
 	}
+
+	/**
+	 * Initialises from the {@link Injector}.
+	 * 
+	 * @param injector
+	 *            {@link Injector}.
+	 */
+	public void initialiseFromInjector(Injector injector) {
+		OfficeFloorContentPartFactory factory = injector.getInstance(OfficeFloorContentPartFactory.class);
+		factory.initialiseFromInjector();
+	}
+
+	/*
+	 * ======================= Module ============================
+	 */
 
 	@Override
 	protected void bindAbstractContentPartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -151,7 +178,6 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		adapterMapBinder
 				.addBinding(AdapterKey.role(DefaultSelectionFeedbackPartFactory.SELECTION_FEEDBACK_GEOMETRY_PROVIDER))
 				.to(GeometricOutlineProvider.class);
-		// geometry provider for selection handles
 		adapterMapBinder
 				.addBinding(AdapterKey.role(DefaultSelectionHandlePartFactory.SELECTION_HANDLES_GEOMETRY_PROVIDER))
 				.to(GeometricOutlineProvider.class);
@@ -159,10 +185,8 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 				.addBinding(
 						AdapterKey.role(DefaultSelectionFeedbackPartFactory.SELECTION_LINK_FEEDBACK_GEOMETRY_PROVIDER))
 				.to(GeometricOutlineProvider.class);
-		// geometry provider for hover feedback
 		adapterMapBinder.addBinding(AdapterKey.role(DefaultHoverFeedbackPartFactory.HOVER_FEEDBACK_GEOMETRY_PROVIDER))
 				.to(GeometricOutlineProvider.class);
-		// geometry provider for focus feedback
 		adapterMapBinder.addBinding(AdapterKey.role(DefaultFocusFeedbackPartFactory.FOCUS_FEEDBACK_GEOMETRY_PROVIDER))
 				.to(GeometricOutlineProvider.class);
 
@@ -333,7 +357,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(SelectionModel.class);
 	}
 
-	protected void bindModelAdapterAdaptersInContentViewerContext(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
+	protected void bindAdaptedParentInContentViewerContext(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 
 		// Hover feedback
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(HoverOnHoverHandler.class);
@@ -377,21 +401,22 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		// register transform policies (writing changes also to model)
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TranslateSelectedOnDragHandler.class);
+	}
 
-		//
-		// // bind dynamic anchor provider
-		// adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(DefaultAnchorProvider.class);
-		//
+	protected void bindAdaptedConnectorInContentViewerContext(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
+
+		// bind dynamic anchor provider
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(DefaultAnchorProvider.class);
+
 		// normalize connected on drag
-		// adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ConnectedSupport.class);
-		// adapterMapBinder.addBinding(AdapterKey.role(SnapToGrid.SOURCE_SNAPPING_LOCATION_PROVIDER))
-		// .to(TopLeftSnappingLocationProvider.class);
-		// adapterMapBinder.addBinding(AdapterKey.role(SnapToGeometry.SOURCE_SNAPPING_LOCATION_PROVIDER))
-		// .toInstance(ISnappingLocationProvider.union(
-		// Arrays.asList(new CenterSnappingLocationProvider(), new
-		// BoundsSnappingLocationProvider())));
-		// adapterMapBinder.addBinding(AdapterKey.role(SnapToGeometry.TARGET_SNAPPING_LOCATION_PROVIDER))
-		// .to(BoundsSnappingLocationProvider.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ConnectedSupport.class);
+		adapterMapBinder.addBinding(AdapterKey.role(SnapToGrid.SOURCE_SNAPPING_LOCATION_PROVIDER))
+				.to(TopLeftSnappingLocationProvider.class);
+		adapterMapBinder.addBinding(AdapterKey.role(SnapToGeometry.SOURCE_SNAPPING_LOCATION_PROVIDER))
+				.toInstance(ISnappingLocationProvider.union(
+						Arrays.asList(new CenterSnappingLocationProvider(), new BoundsSnappingLocationProvider())));
+		adapterMapBinder.addBinding(AdapterKey.role(SnapToGeometry.TARGET_SNAPPING_LOCATION_PROVIDER))
+				.to(BoundsSnappingLocationProvider.class);
 	}
 
 	@Override
@@ -401,13 +426,14 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		// Bind the content part factory and initialise it
 		OfficeFloorContentPartFactory contentPartFactory = bindIContentPartFactory();
 		this.adaptedBuilder.build(contentPartFactory);
-		contentPartFactory.validateModels();
 
 		// Bind in the models
-		bindModelAdapterAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
-				AdaptedParentPart.class, AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
-		AdapterMaps.getAdapterMapBinder(binder(), AdaptedChildPart.class,
-				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
+		bindAdaptedParentInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedParentPart.class,
+				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
+		bindAdaptedConnectorInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedConnectorPart.class,
+				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
+		bindGeometricCurvePartAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
+				AdaptedConnectionPart.class, AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 
 		// content viewer
 		bindGeometricCurvePartAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),

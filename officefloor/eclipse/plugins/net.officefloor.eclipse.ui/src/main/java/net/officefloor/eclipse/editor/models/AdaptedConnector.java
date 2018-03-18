@@ -15,32 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.models;
 
-import org.eclipse.gef.geometry.planar.Point;
-
-import javafx.collections.ListChangeListener;
-import net.officefloor.model.ConnectionModel;
+import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.geometry.planar.IGeometry;
 
 /**
- * Adapted {@link ConnectionModel}.
+ * Adapted connector.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedModel<C> {
+public class AdaptedConnector<G extends IGeometry> {
 
 	/**
-	 * Obtains the source {@link AdaptedChild}.
-	 * 
-	 * @return Source {@link AdaptedChild}.
+	 * {@link GeometryNode}.
 	 */
-	AdaptedChild<?> getSource();
+	private GeometryNode<G> geometryNode = null;
 
 	/**
-	 * Obtains the target {@link AdaptedChild}.
+	 * Obtains the {@link GeometryNode}.
 	 * 
-	 * @return Target {@link AdaptedChild}.
+	 * @return {@link GeometryNode}.
 	 */
-	AdaptedChild<?> getTarget();
+	public GeometryNode<G> getGeometryNode() {
+		return this.geometryNode;
+	}
+
+	/**
+	 * Specifies the {@link GeometryNode}.
+	 * 
+	 * @param geometryNode
+	 *            {@link GeometryNode}.
+	 */
+	public void setGeometryNode(GeometryNode<G> geometryNode) {
+		this.geometryNode = geometryNode;
+	}
 
 }

@@ -18,9 +18,12 @@
 package net.officefloor.eclipse.officefloor.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
+
+import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.geometry.planar.Ellipse;
 
 import javafx.application.Application;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
@@ -29,6 +32,8 @@ import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
+import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel.OfficeFloorManagedObjectSourceFlowEvent;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -38,6 +43,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel.Off
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel.OfficeFloorManagedObjectSourceTeamEvent;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel.OfficeFloorTeamEvent;
 
@@ -64,6 +70,12 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 
 	@Override
 	protected void buildModels(AdaptedBuilderContext builder) {
+
+		// Create the changes
+		OfficeFloorChanges changes = new OfficeFloorChangesImpl(new OfficeFloorModel());
+
+		// Create connector
+		Supplier<GeometryNode<Ellipse>> createConnector = () -> new GeometryNode<>(new Ellipse(4, 4, 4, 4));
 
 		// Managed Object Source
 		AdaptedParentBuilder<OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent> mos = builder
@@ -112,28 +124,32 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 						OfficeFloorManagedObjectSourceEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM)
 				.addChild(OfficeFloorManagedObjectSourceTeamModel.class, (model, context) -> {
 					HBox container = new HBox();
-					Label label = context.label(container);
-					context.connect("team", label, OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class);
+					GeometryNode<Ellipse> anchor = context.addNode(container, createConnector.get());
+					context.connector(anchor, OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class);
+					context.label(container);
 					return container;
 				});
 		mosTeams.label((m) -> m.getOfficeFloorManagedObjectSourceTeamName(),
 				OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM_NAME);
-		mosTeams.connection(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
-				(m) -> m.getOfficeFloorTeam(), OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_TEAM);
+		mosTeams.connectOne(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
+				(s) -> s.getOfficeFloorTeam(), (c) -> c.getOfficeFloorManagedObjectSourceTeam(),
+				OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_TEAM).toMany(OfficeFloorTeamModel.class,
+						(t) -> t.getOfficeFloorManagedObjectSourceTeams(), (c) -> c.getOfficeFloorTeam(),
+						(s, t) -> changes.linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(s, t),
+						(c) -> changes.removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(c),
+						OfficeFloorTeamEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM,
+						OfficeFloorTeamEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM);
 
 		// Team
 		AdaptedParentBuilder<OfficeFloorTeamModel, OfficeFloorTeamEvent> team = builder
 				.addParent(OfficeFloorTeamModel.class, (model, context) -> {
-					VBox container = new VBox();
-					Label label = context.label(container);
-					context.connect("mos", label, OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class);
+					HBox container = new HBox();
+					context.label(container);
+					GeometryNode<Ellipse> anchor = context.addNode(container, createConnector.get());
+					context.connector(anchor, OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class);
 					return container;
 				});
 		team.label((m) -> m.getOfficeFloorTeamName(), OfficeFloorTeamEvent.CHANGE_OFFICE_FLOOR_TEAM_NAME);
-		team.connections(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
-				(m) -> m.getOfficeFloorManagedObjectSourceTeams(),
-				OfficeFloorTeamEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM,
-				OfficeFloorTeamEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM);
 	}
 
 	@Override
@@ -141,7 +157,7 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 
 		// Managed Object Source
 		OfficeFloorManagedObjectSourceModel mos = new OfficeFloorManagedObjectSourceModel("Managed Object Source",
-				"net.example.ManagedObjectSource", "net.example.Type", "0", 10, 10);
+				"net.example.ManagedObjectSource", "net.example.Type", "0", 100, 100);
 		models.add(mos);
 		mos.addOfficeFloorManagedObjectSourceInputDependency(
 				new OfficeFloorManagedObjectSourceInputDependencyModel("dependency", "net.example.Dependency"));
@@ -151,13 +167,14 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 		mos.addOfficeFloorManagedObjectSourceTeam(mosTeam);
 
 		// Team
-		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", "net.example.TeamSource", 10, 100);
+		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", "net.example.TeamSource", 100, 150);
 		models.add(team);
 
 		// Connection
 		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(
 				team.getOfficeFloorTeamName(), mosTeam, team);
 		mosTeamToTeam.connect();
+		models.add(mosTeamToTeam);
 	}
 
 }

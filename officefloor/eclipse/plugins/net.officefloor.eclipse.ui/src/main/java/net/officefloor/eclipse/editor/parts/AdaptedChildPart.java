@@ -22,40 +22,33 @@ import com.google.common.collect.SetMultimap;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
-public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedModelPart<M, A, Pane> {
+public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane> {
 
 	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
-		SetMultimap<Object, String> anchorages = HashMultimap.create();
-//		for (ConnectionModel connection : this.getContentAdapter().getConnections()) {
-//			anchorages.put(connection, "link");
-//		}
-		return anchorages;
+		return HashMultimap.create();
 	}
 
 	@Override
 	protected List<Object> doGetContentChildren() {
-		List<Object> children = new ArrayList<>();
-		children.addAll(this.getContentAdapter().getChildrenGroups());
-		return children;
+		return this.getContent().getChildren();
 	}
 
 	@Override
 	protected void doAddChildVisual(IVisualPart<? extends Node> child, int index) {
-		// Should only be children groups (already configured)
+		// Should only be children groups (already added)
 	}
 
 	@Override
 	protected Pane doCreateVisual() {
 
 		// Create the visual
-		Pane pane = this.getContentAdapter().createVisual();
+		Pane pane = this.getContent().createVisual();
 
 		// Provide model as class for CSS
-		pane.getStyleClass().add(this.getContentAdapter().getModel().getClass().getSimpleName());
+		pane.getStyleClass().add(this.getContent().getModel().getClass().getSimpleName());
 
 		// Return the visual
 		return pane;

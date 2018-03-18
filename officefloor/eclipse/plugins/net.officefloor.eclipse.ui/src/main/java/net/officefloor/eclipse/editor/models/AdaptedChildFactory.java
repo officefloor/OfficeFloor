@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.eclipse.gef.mvc.fx.parts.IContentPart;
+import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.geometry.planar.IGeometry;
 
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -37,13 +37,13 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ChildGroupBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
 import net.officefloor.eclipse.editor.ViewFactoryContext;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
-import net.officefloor.eclipse.editor.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -55,8 +55,8 @@ import net.officefloor.model.change.Conflict;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A extends AdaptedChild<M>>
-		extends AbstractAdaptedModelFactory<M, E, A> implements AdaptedChildBuilder<M, E> {
+public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends AdaptedChild<M>>
+		extends AbstractAdaptedFactory<M, E, A> implements AdaptedChildBuilder<M, E> {
 
 	/**
 	 * {@link ViewFactory}.
@@ -85,9 +85,9 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 	private final List<ChildrenGroupFactory<M, E>> childrenGroups = new ArrayList<>();
 
 	/**
-	 * {@link ConnectionsExtractor} instances.
+	 * {@link ModelToConnection} instances.
 	 */
-	private final Map<Class<? extends ConnectionModel>, ConnectionsExtractor<M, E, ? extends ConnectionModel>> connections = new HashMap<>();
+	private final Map<Class<? extends ConnectionModel>, ModelToConnection<M, E, ? extends ConnectionModel>> connections = new HashMap<>();
 
 	/**
 	 * Instantiate as {@link AdaptedChild}.
@@ -97,13 +97,12 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 	 * @param viewFactory
 	 *            {@link ViewFactory}.
 	 * @param parentAdaptedModel
-	 *            Parent {@link AbstractAdaptedModelFactory}.
+	 *            Parent {@link AbstractAdaptedFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	public AdaptedChildModelFactory(Class<M> modelClass, ViewFactory<M, A> viewFactory,
-			AbstractAdaptedModelFactory<?, ?, ?> parentAdaptedModel) {
-		super(modelClass, AdaptedChildPart.class, () -> (A) new AdaptedChildImpl<M, E, AdaptedChild<M>>(),
-				parentAdaptedModel);
+	public AdaptedChildFactory(Class<M> modelClass, ViewFactory<M, A> viewFactory,
+			AbstractAdaptedFactory<?, ?, ?> parentAdaptedModel) {
+		super(modelClass, () -> (A) new AdaptedChildImpl<M, E, AdaptedChild<M>>(), parentAdaptedModel);
 		this.viewFactory = viewFactory;
 	}
 
@@ -112,8 +111,6 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 	 * 
 	 * @param modelClass
 	 *            {@link Model} {@link Class}.
-	 * @param partClass
-	 *            {@link IContentPart} {@link Class}.
 	 * @param newAdaptedModel
 	 *            {@link Supplier} for the {@link AdaptedModel}.
 	 * @param viewFactory
@@ -121,14 +118,36 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 	 * @param contentPartFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	protected AdaptedChildModelFactory(Class<M> modelClass, Class<?> partClass, Supplier<A> newAdaptedModel,
-			ViewFactory<M, A> viewFactory, OfficeFloorContentPartFactory contentPartFactory) {
-		super(modelClass, partClass, newAdaptedModel, contentPartFactory);
+	protected AdaptedChildFactory(Class<M> modelClass, Supplier<A> newAdaptedModel, ViewFactory<M, A> viewFactory,
+			OfficeFloorContentPartFactory contentPartFactory) {
+		super(modelClass, newAdaptedModel, contentPartFactory);
 		this.viewFactory = viewFactory;
 	}
 
+	/**
+	 * Loads the {@link Model} to {@link ConnectionModel}.
+	 * 
+	 * @param connectionClass
+	 *            {@link Class} of the {@link ConnectionModel}.
+	 * @param modelToConnection
+	 *            {@link ModelToConnection}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void loadModelToConnection(Class<? extends ConnectionModel> connectionClass,
+			ModelToConnection<?, ?, ?> modelToConnection) {
+		if (this.connections.containsKey(connectionClass)) {
+			throw new IllegalStateException("Connection " + connectionClass.getName() + " already configured for model "
+					+ this.getModelClass().getName());
+		}
+		this.connections.put(connectionClass, (ModelToConnection<M, E, ? extends ConnectionModel>) modelToConnection);
+	}
+
+	/*
+	 * =================== AbstractAdaptedModelFactory =============
+	 */
+
 	@Override
-	public void validate(Map<Class<?>, AbstractAdaptedModelFactory<?, ?, ?>> models) throws IllegalStateException {
+	public void validate(Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) throws IllegalStateException {
 
 		// Construct the view (ensures all children groups are registered)
 		M model;
@@ -138,7 +157,7 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 			throw new IllegalStateException(
 					"Unable to instantiate with default constructor " + this.getModelClass().getName());
 		}
-		A adaptedModel = this.createAdaptedModel(model, null);
+		A adaptedModel = this.newAdaptedModel(model);
 		adaptedModel.createVisual();
 	}
 
@@ -172,66 +191,41 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 
 	@Override
 	@SafeVarargs
-	public final <C extends ConnectionModel> void connection(Class<C> connectionClass, Function<M, C> getConnection,
-			E... connectionChangeEvents) {
-		this.connections(connectionClass, (model) -> {
+	public final <C extends ConnectionModel> AdaptedConnectionBuilder<M, C, E> connectOne(Class<C> connectionClass,
+			Function<M, C> getConnection, Function<C, M> getSource, E... connectionChangeEvents) {
+		return this.connectMany(connectionClass, (model) -> {
 			C connection = getConnection.apply(model);
 			if (connection == null) {
 				return Collections.emptyList();
 			} else {
 				return Arrays.asList(connection);
 			}
-		}, connectionChangeEvents);
+		}, getSource, connectionChangeEvents);
 	}
 
 	@Override
 	@SafeVarargs
-	public final <C extends ConnectionModel> void connections(Class<C> connectionClass,
-			Function<M, List<C>> getConnections, E... connectionChangeEvents) {
-		this.connections.put(connectionClass, new ConnectionsExtractor<>(getConnections, connectionChangeEvents));
-	}
-
-	/**
-	 * Details to extract the {@link ConnectionModel} instances.
-	 */
-	private static class ConnectionsExtractor<M extends Model, E extends Enum<E>, C extends ConnectionModel> {
-
-		/**
-		 * Obtains the {@link ConnectionModel} instances.
-		 */
-		private final Function<M, List<C>> getConnections;
-
-		/**
-		 * {@link Enum} events to indicate change in {@link ConnectionModel} instances.
-		 */
-		private final E[] connectionChangeEvents;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param getConnections
-		 *            Obtains the {@link ConnectionModel} instances.
-		 * @param connectionChangeEvents
-		 *            {@link Enum} events to indicate change in {@link ConnectionModel}
-		 *            instances.
-		 */
-		public ConnectionsExtractor(Function<M, List<C>> getConnections, E[] connectionChangeEvents) {
-			this.getConnections = getConnections;
-			this.connectionChangeEvents = connectionChangeEvents;
-		}
+	public final <C extends ConnectionModel> AdaptedConnectionBuilder<M, C, E> connectMany(Class<C> connectionClass,
+			Function<M, List<C>> getConnections, Function<C, M> getSource, E... connectionChangeEvents) {
+		this.loadModelToConnection(connectionClass, new ModelToConnection<>(getConnections, connectionChangeEvents));
+		return new AdaptedConnectionFactory<>(connectionClass, getSource, this);
 	}
 
 	/**
 	 * {@link AdaptedChild} implementation.
 	 */
-	protected static class AdaptedChildImpl<M extends Model, E extends Enum<E>, A extends AdaptedChild<M>>
-			extends AbstractAdaptedModel<M, E, A, AdaptedChildModelFactory<M, E, A>>
-			implements AdaptedChild<M>, ViewFactoryContext {
+	protected static class AdaptedChildImpl<M extends Model, E extends Enum<E>, A extends AdaptedChild<M>> extends
+			AbstractAdaptedModel<M, E, A, AdaptedChildFactory<M, E, A>> implements AdaptedChild<M>, ViewFactoryContext {
 
 		/**
 		 * {@link ChildrenGroup} instances.
 		 */
 		private List<ChildrenGroup<M, ?>> childrenGroups;
+
+		/**
+		 * {@link GeometryNode} instances by {@link ConnectionModel} {@link Class}.
+		 */
+		private Map<Class<? extends ConnectionModel>, AdaptedConnector<?>> connectors;
 
 		/**
 		 * Label for the {@link Model}.
@@ -253,7 +247,13 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 			// Load the children groups
 			this.childrenGroups = new ArrayList<>(this.getFactory().childrenGroups.size());
 			for (ChildrenGroupFactory<M, E> childrenGroupFactory : this.getFactory().childrenGroups) {
-				this.childrenGroups.add(childrenGroupFactory.createChildrenGroup(this.getModel()));
+				this.childrenGroups.add(childrenGroupFactory.createChildrenGroup(this));
+			}
+
+			// Load the connectors
+			this.connectors = new HashMap<>(this.getFactory().connections.size());
+			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
+				this.connectors.put(connectionClass, new AdaptedConnector<>());
 			}
 
 			// Determine if label
@@ -324,18 +324,11 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 		}
 
 		@Override
-		public List<ChildrenGroup<M, ?>> getChildrenGroups() {
-			return this.childrenGroups;
-		}
-
-		@Override
-		public List<? extends ConnectionModel> getConnections() {
-			List<ConnectionModel> list = new LinkedList<>();
-			for (ConnectionsExtractor<M, E, ? extends ConnectionModel> extractor : this.getFactory().connections
-					.values()) {
-				list.addAll(extractor.getConnections.apply(this.getModel()));
-			}
-			return list;
+		public List<Object> getChildren() {
+			List<Object> children = new ArrayList<>(this.childrenGroups.size() + this.connectors.size());
+			children.addAll(this.childrenGroups);
+			children.addAll(this.connectors.values());
+			return children;
 		}
 
 		@Override
@@ -355,6 +348,15 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 				if (childrenGroup.getPane() == null) {
 					throw new IllegalStateException("Children group Pane '" + childrenGroup.getChildrenGroupName()
 							+ "' not configured in view of model " + this.getFactory().getModelClass().getName());
+				}
+			}
+
+			// Ensure connectors for all configured connections
+			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
+				AdaptedConnector<?> connector = this.connectors.get(connectionClass);
+				if ((connector == null) || (connector.getGeometryNode() == null)) {
+					throw new IllegalStateException("Connector to " + connectionClass.getName()
+							+ " not configured in view of model " + this.getFactory().getModelClass().getName());
 				}
 			}
 
@@ -402,10 +404,40 @@ public class AdaptedChildModelFactory<M extends Model, E extends Enum<E>, A exte
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public <N extends Node> N connect(String linkGroupName, N node, Class... connectionModelTypes) {
-			// TODO Auto-generated method stub
-			return node;
+		public AdaptedConnector<?> getConnector(Class<? extends ConnectionModel> connectionClass) {
+			AdaptedConnector<?> connector = this.connectors.get(connectionClass);
+			if (connector == null) {
+				throw new IllegalStateException("No connector for connection " + connectionClass.getName()
+						+ " from model " + this.getModel().getClass().getName());
+			}
+			return connector;
+		}
+
+		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public final <G extends IGeometry, N extends GeometryNode<G>, C extends ConnectionModel> N connector(
+				N geometryNode, Class... connectionClasses) {
+
+			// Register the geometry node
+			for (Class<? extends C> connectionClass : connectionClasses) {
+
+				// Obtain the adapted connector
+				AdaptedConnector<G> connector = (AdaptedConnector<G>) this.connectors.get(connectionClass);
+				if (connector == null) {
+					throw new IllegalStateException("Connection " + connectionClass.getName()
+							+ " not configured to connect to model " + this.getModel().getClass().getName());
+				}
+				if (connector.getGeometryNode() != null) {
+					throw new IllegalStateException("Connection " + connectionClass.getName()
+							+ " configured more than once for model " + this.getModel().getClass().getName());
+				}
+
+				// Load the connector
+				connector.setGeometryNode(geometryNode);
+			}
+
+			// Return geometry node
+			return geometryNode;
 		}
 	}
 

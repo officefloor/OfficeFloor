@@ -21,7 +21,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.eclipse.gef.mvc.fx.parts.IContentPart;
+import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
@@ -32,7 +32,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enum<E>, A extends AdaptedModel<M>> {
+public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>, A extends AdaptedModel<M>> {
 
 	/**
 	 * Registers {@link PropertyChangeListener} for the events.
@@ -72,11 +72,6 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 	private final Class<M> modelClass;
 
 	/**
-	 * {@link IContentPart} {@link Class}.
-	 */
-	private final Class<?> partClass;
-
-	/**
 	 * {@link Supplier} for a new {@link AdaptedModel} implementation.
 	 */
 	private final Supplier<A> newAdaptedModel;
@@ -87,21 +82,23 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 	private final OfficeFloorContentPartFactory contentPartFactory;
 
 	/**
+	 * {@link ChangeExecutor}.
+	 */
+	private ChangeExecutor changeExecutor;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param modelClass
 	 *            {@link Class} of the {@link Model}.
-	 * @param partClass
-	 *            {@link IContentPart} {@link Class}.
 	 * @param newAdaptedModel
 	 *            {@link Supplier} for a new {@link AbstractAdaptedModel}.
 	 * @param contentPartFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AbstractAdaptedModelFactory(Class<M> modelClass, Class<?> partClass, Supplier<A> newAdaptedModel,
+	public AbstractAdaptedFactory(Class<M> modelClass, Supplier<A> newAdaptedModel,
 			OfficeFloorContentPartFactory contentPartFactory) {
 		this.modelClass = modelClass;
-		this.partClass = partClass;
 		this.newAdaptedModel = newAdaptedModel;
 		this.contentPartFactory = contentPartFactory;
 
@@ -110,20 +107,28 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 	}
 
 	/**
-	 * Instantiate from existing {@link AbstractAdaptedModelFactory}.
+	 * Instantiate from existing {@link AbstractAdaptedFactory}.
 	 * 
 	 * @param modelClass
 	 *            {@link Class} of the {@link Model}.
-	 * @param partClass
-	 *            {@link IContentPart} {@link Class}.
 	 * @param newAdaptedModel
 	 *            {@link Supplier} for a new {@link AbstractAdaptedModel}.
 	 * @param parentAdaptedModel
 	 *            Parent {@link AbstractAdaptedModel}.
 	 */
-	public AbstractAdaptedModelFactory(Class<M> modelClass, Class<?> partClass, Supplier<A> newAdaptedModel,
-			AbstractAdaptedModelFactory<?, ?, ?> parentAdaptedModel) {
-		this(modelClass, partClass, newAdaptedModel, parentAdaptedModel.contentPartFactory);
+	public AbstractAdaptedFactory(Class<M> modelClass, Supplier<A> newAdaptedModel,
+			AbstractAdaptedFactory<?, ?, ?> parentAdaptedModel) {
+		this(modelClass, newAdaptedModel, parentAdaptedModel.contentPartFactory);
+	}
+
+	/**
+	 * Initialises.
+	 * 
+	 * @param injector
+	 *            {@link Injector}.
+	 */
+	public void init(Injector injector, Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) {
+		this.changeExecutor = injector.getInstance(ChangeExecutor.class);
 	}
 
 	/**
@@ -131,29 +136,39 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 	 * 
 	 * @param models
 	 *            {@link Map} of {@link Model} {@link Class} to
-	 *            {@link AbstractAdaptedModelFactory}.
+	 *            {@link AbstractAdaptedFactory}.
 	 * @throws IllegalStateException
 	 *             If invalid.
 	 */
-	public void validate(Map<Class<?>, AbstractAdaptedModelFactory<?, ?, ?>> models) throws IllegalStateException {
+	public void validate(Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) throws IllegalStateException {
 	}
 
 	/**
-	 * Creates the {@link AbstractAdaptedModelFactory} for the {@link Model}.
+	 * Creates the {@link AdaptedModel} for the {@link Model}.
+	 * 
+	 * @param model
+	 *            {@link Model}.
+	 * @return {@link AdaptedModel}.
+	 */
+	public <m extends Model> AdaptedModel<m> getAdaptedModel(m model) {
+		return this.contentPartFactory.createAdaptedModel(model);
+	}
+
+	/**
+	 * Creates a new {@link AdaptedModel} for the {@link Model}.
 	 * 
 	 * @param model
 	 *            {@link Model}.
 	 * @param changeExecutor
 	 *            {@link ChangeExecutor}.
-	 * @return {@link AbstractAdaptedModelFactory} for the {@link Model}.
+	 * @return {@link AbstractAdaptedFactory} for the {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
-	public A createAdaptedModel(M model, ChangeExecutor changeExecutor) {
+	public final A newAdaptedModel(M model) {
 		A adapted = this.newAdaptedModel.get();
 		AbstractAdaptedModel<M, E, A, ?> abstractAdapted = (AbstractAdaptedModel<M, E, A, ?>) adapted;
 		abstractAdapted.factory = this;
 		abstractAdapted.model = model;
-		abstractAdapted.changeExecutor = changeExecutor;
 		abstractAdapted.init();
 		return adapted;
 	}
@@ -168,35 +183,21 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 	}
 
 	/**
-	 * Obtains the {@link IContentPart} {@link Class}.
-	 * 
-	 * @return {@link IContentPart} {@link Class}.
-	 */
-	public Class<?> getPartClass() {
-		return this.partClass;
-	}
-
-	/**
-	 * Builder to create the {@link AbstractAdaptedModelFactory} for a particular
+	 * Builder to create the {@link AbstractAdaptedFactory} for a particular
 	 * {@link Model}.
 	 */
-	protected static abstract class AbstractAdaptedModel<M extends Model, E extends Enum<E>, A extends AdaptedModel<M>, F extends AbstractAdaptedModelFactory<M, E, A>>
+	protected static abstract class AbstractAdaptedModel<M extends Model, E extends Enum<E>, A extends AdaptedModel<M>, F extends AbstractAdaptedFactory<M, E, A>>
 			implements AdaptedModel<M> {
 
 		/**
-		 * {@link AbstractAdaptedModelFactory}.
+		 * {@link AbstractAdaptedFactory}.
 		 */
-		private AbstractAdaptedModelFactory<M, E, A> factory;
+		private AbstractAdaptedFactory<M, E, A> factory;
 
 		/**
 		 * {@link Model},
 		 */
 		private M model;
-
-		/**
-		 * {@link ChangeExecutor}.
-		 */
-		private ChangeExecutor changeExecutor;
 
 		/**
 		 * Initialises this {@link AdaptedModel}.
@@ -213,9 +214,9 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 		}
 
 		/**
-		 * Obtains the {@link AbstractAdaptedModelFactory}.
+		 * Obtains the {@link AbstractAdaptedFactory}.
 		 * 
-		 * @return {@link AbstractAdaptedModelFactory}.
+		 * @return {@link AbstractAdaptedFactory}.
 		 */
 		@SuppressWarnings("unchecked")
 		protected F getFactory() {
@@ -228,7 +229,7 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 		 * @return {@link ChangeExecutor}.
 		 */
 		protected ChangeExecutor getChangeExecutor() {
-			return this.changeExecutor;
+			return this.factory.changeExecutor;
 		}
 
 		/**
@@ -240,7 +241,7 @@ public abstract class AbstractAdaptedModelFactory<M extends Model, E extends Enu
 		 *            {@link PropertyChangeListener} for the events.
 		 */
 		protected void registerEventListener(E[] events, PropertyChangeListener listener) {
-			AbstractAdaptedModelFactory.registerEventListener(this.model, events, listener);
+			AbstractAdaptedFactory.registerEventListener(this.model, events, listener);
 		}
 	}
 

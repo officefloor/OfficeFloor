@@ -28,7 +28,6 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
-import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
@@ -37,8 +36,8 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedParentModelFactory<M extends Model, E extends Enum<E>>
-		extends AdaptedChildModelFactory<M, E, AdaptedParent<M>> implements AdaptedParentBuilder<M, E> {
+public class AdaptedParentFactory<M extends Model, E extends Enum<E>>
+		extends AdaptedChildFactory<M, E, AdaptedParent<M>> implements AdaptedParentBuilder<M, E> {
 
 	/**
 	 * Instantiate.
@@ -48,9 +47,9 @@ public class AdaptedParentModelFactory<M extends Model, E extends Enum<E>>
 	 * @param contentFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AdaptedParentModelFactory(Class<M> modelClass, ViewFactory<M, AdaptedParent<M>> viewFactory,
+	public AdaptedParentFactory(Class<M> modelClass, ViewFactory<M, AdaptedParent<M>> viewFactory,
 			OfficeFloorContentPartFactory contentFactory) {
-		super(modelClass, AdaptedParentPart.class, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
+		super(modelClass, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 	}
 
 	/**

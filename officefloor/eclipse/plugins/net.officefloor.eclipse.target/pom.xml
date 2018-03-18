@@ -9,7 +9,6 @@
 		<relativePath>../../pom.xml</relativePath>
 		<version>3.0.0</version>
 	</parent>
-	<groupId>net.officefloor.eclipse</groupId>
 	<artifactId>net.officefloor.eclipse.target</artifactId>
 	<packaging>pom</packaging>
 	<profiles>
