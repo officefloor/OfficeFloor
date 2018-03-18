@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.officefloor.editor;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
@@ -26,10 +25,12 @@ import org.eclipse.gef.geometry.planar.Ellipse;
 import javafx.application.Application;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
+import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
@@ -75,19 +76,31 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 		OfficeFloorChanges changes = new OfficeFloorChangesImpl(new OfficeFloorModel());
 
 		// Create connector
-		Supplier<GeometryNode<Ellipse>> createConnector = () -> new GeometryNode<>(new Ellipse(4, 4, 4, 4));
+		Supplier<GeometryNode<Ellipse>> createConnector = () -> {
+			GeometryNode<Ellipse> node = new GeometryNode<>(new Ellipse(0, 0, 10, 10));
+			node.setFill(Color.BLACK);
+			node.setMinWidth(10);
+			node.setMinWidth(10);
+			node.setMinHeight(10);
+			node.setMaxHeight(10);
+			return node;
+		};
+
+		// Specify the root model
+		AdaptedRootBuilder<OfficeFloorModel> root = builder.setRootModel(OfficeFloorModel.class);
 
 		// Managed Object Source
-		AdaptedParentBuilder<OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent> mos = builder
-				.addParent(OfficeFloorManagedObjectSourceModel.class, (model, context) -> {
-					VBox container = new VBox();
-					context.label(container);
-					HBox dependenciesFlows = context.addNode(container, new HBox());
-					context.addNode(dependenciesFlows, context.childGroup("dependencies", new VBox()));
-					context.addNode(dependenciesFlows, context.childGroup("flows", new VBox()));
-					context.addNode(container, context.childGroup("teams", new HBox()));
-					return container;
-				});
+		AdaptedParentBuilder<OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent> mos = root
+				.addParent(OfficeFloorManagedObjectSourceModel.class, (r) -> r.getOfficeFloorManagedObjectSources(),
+						(model, context) -> {
+							VBox container = new VBox();
+							context.label(container);
+							HBox dependenciesFlows = context.addNode(container, new HBox());
+							context.addNode(dependenciesFlows, context.childGroup("dependencies", new VBox()));
+							context.addNode(dependenciesFlows, context.childGroup("flows", new VBox()));
+							context.addNode(container, context.childGroup("teams", new HBox()));
+							return container;
+						});
 		mos.label((m) -> m.getOfficeFloorManagedObjectSourceName(),
 				OfficeFloorManagedObjectSourceEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_NAME);
 
@@ -141,8 +154,8 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 						OfficeFloorTeamEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM);
 
 		// Team
-		AdaptedParentBuilder<OfficeFloorTeamModel, OfficeFloorTeamEvent> team = builder
-				.addParent(OfficeFloorTeamModel.class, (model, context) -> {
+		AdaptedParentBuilder<OfficeFloorTeamModel, OfficeFloorTeamEvent> team = root
+				.addParent(OfficeFloorTeamModel.class, (r) -> r.getOfficeFloorTeams(), (model, context) -> {
 					HBox container = new HBox();
 					context.label(container);
 					GeometryNode<Ellipse> anchor = context.addNode(container, createConnector.get());
@@ -153,12 +166,15 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 	}
 
 	@Override
-	protected void populateModels(List<Model> models) {
+	protected Model createRootModel() {
+
+		// Create the OfficeFloor model
+		OfficeFloorModel root = new OfficeFloorModel();
 
 		// Managed Object Source
 		OfficeFloorManagedObjectSourceModel mos = new OfficeFloorManagedObjectSourceModel("Managed Object Source",
 				"net.example.ManagedObjectSource", "net.example.Type", "0", 100, 100);
-		models.add(mos);
+		root.addOfficeFloorManagedObjectSource(mos);
 		mos.addOfficeFloorManagedObjectSourceInputDependency(
 				new OfficeFloorManagedObjectSourceInputDependencyModel("dependency", "net.example.Dependency"));
 		mos.addOfficeFloorManagedObjectSourceFlow(
@@ -167,14 +183,16 @@ public class OfficeFloorEditorMain extends AbstractEditorApplication {
 		mos.addOfficeFloorManagedObjectSourceTeam(mosTeam);
 
 		// Team
-		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", "net.example.TeamSource", 100, 150);
-		models.add(team);
+		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", "net.example.TeamSource", 100, 300);
+		root.addOfficeFloorTeam(team);
 
 		// Connection
 		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(
 				team.getOfficeFloorTeamName(), mosTeam, team);
 		mosTeamToTeam.connect();
-		models.add(mosTeamToTeam);
+
+		// Return the OfficeFloor model
+		return root;
 	}
 
 }

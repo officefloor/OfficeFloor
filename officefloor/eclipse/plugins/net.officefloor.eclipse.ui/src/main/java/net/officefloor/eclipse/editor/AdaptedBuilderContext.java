@@ -27,17 +27,12 @@ import net.officefloor.model.Model;
 public interface AdaptedBuilderContext {
 
 	/**
-	 * Adds an {@link AdaptedParent}.
+	 * Specifies the root {@link Model}.
 	 * 
-	 * @param modelClass
-	 *            {@link Class} of the {@link Model}.
-	 * @param viewFactory
-	 *            {@link ViewFactory} to create the view for the
-	 *            {@link AdaptedParent}.
-	 * @return {@link AdaptedParentBuilder} to build the {@link AdaptedParent} over
-	 *         the {@link Model}.
+	 * @param rootModelClass
+	 *            {@link Class} of the root {@link Model}.
+	 * @return {@link AdaptedRootBuilder}.
 	 */
-	<M extends Model, E extends Enum<E>> AdaptedParentBuilder<M, E> addParent(Class<M> modelClass,
-			ViewFactory<M, AdaptedParent<M>> viewFactory);
+	<R extends Model> AdaptedRootBuilder<R> setRootModel(Class<R> rootModelClass);
 
 }

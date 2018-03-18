@@ -70,10 +70,10 @@ import com.google.inject.multibindings.MapBinder;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.behaviors.PaletteFocusBehavior;
-import net.officefloor.eclipse.editor.handlers.CloneCurveSupport;
+import net.officefloor.eclipse.editor.handlers.CloneAdaptedConnectionSupport;
 import net.officefloor.eclipse.editor.handlers.CloneOnClickHandler;
+import net.officefloor.eclipse.editor.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreateAndTranslateShapeOnDragHandler;
-import net.officefloor.eclipse.editor.handlers.CreateCurveOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreationMenuItemProvider;
 import net.officefloor.eclipse.editor.handlers.CreationMenuOnClickHandler;
 import net.officefloor.eclipse.editor.handlers.DeleteFirstAnchorageOnClickHandler;
@@ -81,14 +81,13 @@ import net.officefloor.eclipse.editor.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
 import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.parts.GeometricCurveCreationHoverHandlePart;
-import net.officefloor.eclipse.editor.parts.GeometricCurvePart;
 import net.officefloor.eclipse.editor.parts.GeometricElementDeletionHandlePart;
-import net.officefloor.eclipse.editor.parts.GeometricShapePart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorHoverHandlePartFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorSelectionHandlePartFactory;
 import net.officefloor.eclipse.editor.parts.PaletteRootPart;
 import net.officefloor.eclipse.editor.policies.ContentRestrictedChangeViewportPolicy;
+import net.officefloor.model.Model;
 
 public class OfficeFloorEditorModule extends MvcFxModule {
 
@@ -110,14 +109,21 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 	}
 
 	/**
-	 * Initialises from the {@link Injector}.
+	 * Loads the root {@link Model}.
 	 * 
+	 * @param rootModel
+	 *            Root {@link Model}.
 	 * @param injector
-	 *            {@link Injector}.
+	 *            {@link Injector} created with this
+	 *            {@link OfficeFloorEditorModule}.
+	 * @param content
+	 *            {@link IViewer} for the content.
+	 * @param palette
+	 *            {@link IViewer} for the palette.
 	 */
-	public void initialiseFromInjector(Injector injector) {
-		OfficeFloorContentPartFactory factory = injector.getInstance(OfficeFloorContentPartFactory.class);
-		factory.initialiseFromInjector();
+	public <R extends Model> void loadRootModel(R rootModel, Injector injector, IViewer content, IViewer palette) {
+		OfficeFloorContentPartFactory<?> factory = injector.getInstance(OfficeFloorContentPartFactory.class);
+		factory.loadRootModel(rootModel, content, palette);
 	}
 
 	/*
@@ -145,7 +151,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 	}
 
 	protected void bindCreateCurveHandlePartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
-		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CreateCurveOnDragHandler.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CreateAdaptedConnectionOnDragHandler.class);
 	}
 
 	protected void bindDeleteHandlePartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -204,7 +210,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
 
 		// cloning
-		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CloneCurveSupport.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CloneAdaptedConnectionSupport.class);
 
 		// clickable area resizing
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ConnectionClickableAreaBehavior.class);
@@ -241,8 +247,8 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(HoverModel.class);
 	}
 
-	protected OfficeFloorContentPartFactory bindIContentPartFactory() {
-		OfficeFloorContentPartFactory contentPartFactory = new OfficeFloorContentPartFactory();
+	protected OfficeFloorContentPartFactory<?> bindIContentPartFactory() {
+		OfficeFloorContentPartFactory<?> contentPartFactory = new OfficeFloorContentPartFactory<>();
 		binder().bind(IContentPartFactory.class).toInstance(contentPartFactory);
 		binder().bind(OfficeFloorContentPartFactory.class).toInstance(contentPartFactory);
 		return contentPartFactory;
@@ -424,7 +430,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		super.configure();
 
 		// Bind the content part factory and initialise it
-		OfficeFloorContentPartFactory contentPartFactory = bindIContentPartFactory();
+		OfficeFloorContentPartFactory<?> contentPartFactory = bindIContentPartFactory();
 		this.adaptedBuilder.build(contentPartFactory);
 
 		// Bind in the models
@@ -434,10 +440,6 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 		bindGeometricCurvePartAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
 				AdaptedConnectionPart.class, AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
-
-		// content viewer
-		bindGeometricCurvePartAdaptersInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
-				GeometricCurvePart.class, AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 
 		// curve selection handles
 		bindCircleSegmentHandlePartAdapters(AdapterMaps.getAdapterMapBinder(binder(), CircleSegmentHandlePart.class));
@@ -457,7 +459,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		bindPaletteRootPartAdaptersInPaletteViewerContext(AdapterMaps.getAdapterMapBinder(binder(), IRootPart.class,
 				AdapterKey.get(IViewer.class, PALETTE_VIEWER_ROLE)));
 		bindGeometricShapePartAdapterInPaletteViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
-				GeometricShapePart.class, AdapterKey.get(IViewer.class, PALETTE_VIEWER_ROLE)));
+				AdaptedParentPart.class, AdapterKey.get(IViewer.class, PALETTE_VIEWER_ROLE)));
 	}
 
 	@Override

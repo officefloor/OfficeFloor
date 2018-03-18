@@ -20,17 +20,45 @@ package net.officefloor.eclipse.editor.models;
 import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.geometry.planar.IGeometry;
 
+import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.model.Model;
+
 /**
  * Adapted connector.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedConnector<G extends IGeometry> {
+public class AdaptedConnector<M extends Model, G extends IGeometry> {
+
+	/**
+	 * Parent {@link AdaptedChild} containing this {@link AdaptedConnector}.
+	 */
+	private AdaptedChild<M> parentAdaptedChild;
 
 	/**
 	 * {@link GeometryNode}.
 	 */
 	private GeometryNode<G> geometryNode = null;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param parentAdaptedChild
+	 *            Parent {@link AdaptedChild} containing this
+	 *            {@link AdaptedConnector}.
+	 */
+	public AdaptedConnector(AdaptedChild<M> parentAdaptedChild) {
+		this.parentAdaptedChild = parentAdaptedChild;
+	}
+
+	/**
+	 * Obtains the parent {@link AdaptedChild}.
+	 * 
+	 * @return Parent {@link AdaptedChild}.
+	 */
+	public AdaptedChild<M> getParentAdaptedChild() {
+		return this.parentAdaptedChild;
+	}
 
 	/**
 	 * Obtains the {@link GeometryNode}.

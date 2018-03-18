@@ -39,17 +39,17 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import net.officefloor.eclipse.editor.models.GeometricShape;
-import net.officefloor.eclipse.editor.parts.GeometricShapePart;
+import net.officefloor.eclipse.editor.models.ProxyCreateAdaptedParent;
+import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 
 public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implements IOnDragHandler {
 
-	private GeometricShapePart createdShapePart;
+	private AdaptedParentPart<?> adaptedParentPart;
 	private Map<AdapterKey<? extends IOnDragHandler>, IOnDragHandler> dragPolicies;
 
 	@Override
 	public void abortDrag() {
-		if (createdShapePart == null) {
+		if (adaptedParentPart == null) {
 			return;
 		}
 
@@ -60,13 +60,13 @@ public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implem
 			}
 		}
 
-		createdShapePart = null;
+		adaptedParentPart = null;
 		dragPolicies = null;
 	}
 
 	@Override
 	public void drag(MouseEvent event, Dimension delta) {
-		if (createdShapePart == null) {
+		if (adaptedParentPart == null) {
 			return;
 		}
 
@@ -80,7 +80,7 @@ public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implem
 
 	@Override
 	public void endDrag(MouseEvent e, Dimension delta) {
-		if (createdShapePart == null) {
+		if (adaptedParentPart == null) {
 			return;
 		}
 
@@ -91,8 +91,8 @@ public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implem
 			}
 		}
 
-		restoreRefreshVisuals(createdShapePart);
-		createdShapePart = null;
+		restoreRefreshVisuals(adaptedParentPart);
+		adaptedParentPart = null;
 		dragPolicies = null;
 	}
 
@@ -102,8 +102,8 @@ public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implem
 	}
 
 	@Override
-	public GeometricShapePart getHost() {
-		return (GeometricShapePart) super.getHost();
+	public AdaptedParentPart<?> getHost() {
+		return (AdaptedParentPart<?>) super.getHost();
 	}
 
 	protected Point getLocation(MouseEvent e) {
@@ -131,31 +131,27 @@ public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implem
 		// find model part
 		IRootPart<? extends Node> contentRoot = getContentViewer().getRootPart();
 
-		// copy the prototype
-		GeometricShape copy = getHost().getContent().getCopy();
+		// Create proxy to create another of type
+		ProxyCreateAdaptedParent<?> proxy = new ProxyCreateAdaptedParent<>(this.getHost().getContent());
 		// determine coordinates of prototype's origin in model coordinates
 		Point2D localToScene = getHost().getVisual().localToScene(0, 0);
 		Point2D originInModel = ((LayeredRootPart) getContentViewer().getRootPart()).getContentLayer()
 				.sceneToLocal(localToScene.getX(), localToScene.getY());
-		// initially move to the originInModel
-		double[] matrix = copy.getTransform().getMatrix();
-		copy.getTransform().setTransform(matrix[0], matrix[1], matrix[2], matrix[3], originInModel.getX(),
-				originInModel.getY());
 
 		// create copy of host's geometry using CreationPolicy from root part
 		CreationPolicy creationPolicy = contentRoot.getAdapter(CreationPolicy.class);
 		init(creationPolicy);
-		createdShapePart = (GeometricShapePart) creationPolicy.create(copy, contentRoot,
-				HashMultimap.<IContentPart<? extends Node>, String> create());
+		adaptedParentPart = (AdaptedParentPart<?>) creationPolicy.create(proxy, contentRoot,
+				HashMultimap.<IContentPart<? extends Node>, String>create());
 		commit(creationPolicy);
 
 		// disable refresh visuals for the created shape part
-		storeAndDisableRefreshVisuals(createdShapePart);
+		storeAndDisableRefreshVisuals(adaptedParentPart);
 
 		// build operation to deselect all but the new part
 		List<IContentPart<? extends Node>> toBeDeselected = new ArrayList<>(
 				getContentViewer().getAdapter(SelectionModel.class).getSelectionUnmodifiable());
-		toBeDeselected.remove(createdShapePart);
+		toBeDeselected.remove(adaptedParentPart);
 		DeselectOperation deselectOperation = new DeselectOperation(getContentViewer(), toBeDeselected);
 
 		// execute on stack
@@ -166,7 +162,7 @@ public class CreateAndTranslateShapeOnDragHandler extends AbstractHandler implem
 		}
 
 		// find drag target part
-		dragPolicies = createdShapePart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
+		dragPolicies = adaptedParentPart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
 		if (dragPolicies != null) {
 			for (IOnDragHandler dragPolicy : dragPolicies.values()) {
 				dragPolicy.startDrag(event);

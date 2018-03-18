@@ -37,8 +37,8 @@ import net.officefloor.eclipse.editor.models.AdaptedConnector;
 public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 
 	@Override
-	public AdaptedConnector<?> getContent() {
-		return (AdaptedConnector<?>) super.getContent();
+	public AdaptedConnector<?, ?> getContent() {
+		return (AdaptedConnector<?, ?>) super.getContent();
 	}
 
 	@Override
@@ -50,20 +50,8 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 	}
 
 	@Override
-	protected void doAttachToContentAnchorage(Object contentAnchorage, String role) {
-		// TODO Auto-generated method stub
-		super.doAttachToContentAnchorage(contentAnchorage, role);
-	}
-
-	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
 		return HashMultimap.create();
-	}
-
-	@Override
-	protected void doDetachFromContentAnchorage(Object contentAnchorage, String role) {
-		// TODO Auto-generated method stub
-		super.doDetachFromContentAnchorage(contentAnchorage, role);
 	}
 
 	@Override

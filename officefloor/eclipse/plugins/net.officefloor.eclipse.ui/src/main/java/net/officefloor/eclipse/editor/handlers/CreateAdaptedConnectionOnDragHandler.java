@@ -40,11 +40,13 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import net.officefloor.eclipse.editor.models.GeometricCurve;
-import net.officefloor.eclipse.editor.parts.GeometricCurvePart;
-import net.officefloor.eclipse.editor.parts.GeometricShapePart;
+import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.models.ProxyAdaptedConnection;
+import net.officefloor.eclipse.editor.parts.AdaptedConnectionPart;
+import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
 
-public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDragHandler {
+public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implements IOnDragHandler {
 
 	public static final double GEF_STROKE_WIDTH = 3.5;
 	public static final Color GEF_COLOR_GREEN = Color.rgb(99, 123, 71);
@@ -52,7 +54,7 @@ public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDrag
 
 	private CircleSegmentHandlePart bendTargetPart;
 	private Map<AdapterKey<? extends IOnDragHandler>, IOnDragHandler> dragPolicies;
-	private GeometricCurvePart curvePart;
+	private AdaptedConnectionPart<?> connectionPart;
 
 	@Override
 	public void abortDrag() {
@@ -67,8 +69,8 @@ public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDrag
 			}
 		}
 
-		restoreRefreshVisuals(curvePart);
-		curvePart = null;
+		restoreRefreshVisuals(connectionPart);
+		connectionPart = null;
 		bendTargetPart = null;
 		dragPolicies = null;
 	}
@@ -100,15 +102,16 @@ public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDrag
 			}
 		}
 
-		restoreRefreshVisuals(curvePart);
-		curvePart = null;
+		restoreRefreshVisuals(connectionPart);
+		connectionPart = null;
 		bendTargetPart = null;
 		dragPolicies = null;
 	}
 
-	protected CircleSegmentHandlePart findBendTargetPart(GeometricCurvePart curvePart, EventTarget eventTarget) {
+	protected CircleSegmentHandlePart findBendTargetPart(AdaptedConnectionPart<?> connectionPart,
+			EventTarget eventTarget) {
 		// find last segment handle part
-		Multiset<IVisualPart<? extends Node>> anchoreds = curvePart.getAnchoredsUnmodifiable();
+		Multiset<IVisualPart<? extends Node>> anchoreds = connectionPart.getAnchoredsUnmodifiable();
 		for (IVisualPart<? extends Node> anchored : anchoreds) {
 			if (anchored instanceof CircleSegmentHandlePart) {
 				CircleSegmentHandlePart circleSegmentHandlePart = (CircleSegmentHandlePart) anchored;
@@ -133,8 +136,8 @@ public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDrag
 		return new Point(location.getX(), location.getY());
 	}
 
-	protected GeometricShapePart getShapePart() {
-		return (GeometricShapePart) getHost().getAnchoragesUnmodifiable().keySet().iterator().next();
+	protected AdaptedConnectorPart getAdaptedConnectorPart() {
+		return (AdaptedConnectorPart) getHost().getAnchoragesUnmodifiable().keySet().iterator().next();
 	}
 
 	@Override
@@ -153,28 +156,30 @@ public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDrag
 
 	@Override
 	public void startDrag(MouseEvent event) {
-		// create new curve
-		GeometricCurve curve = new GeometricCurve(new Point[] { new Point(), new Point() }, GEF_COLOR_GREEN,
-				GEF_STROKE_WIDTH, GEF_DASH_PATTERN, null);
-		curve.addSourceAnchorage(getShapePart().getContent());
+		
+		System.out.println("TODO REMOVE startDrag " + this.getClass().getName());
+		
+		// create new connection
+		AdaptedChild<?> child = this.getAdaptedConnectorPart().getContent().getParentAdaptedChild();
+		AdaptedConnection<?> connection = new ProxyAdaptedConnection(child);
 
 		// create using CreationPolicy from root part
 		CreationPolicy creationPolicy = getHost().getRoot().getAdapter(CreationPolicy.class);
 		init(creationPolicy);
-		curvePart = (GeometricCurvePart) creationPolicy.create(curve, getHost().getRoot(),
+		connectionPart = (AdaptedConnectionPart) creationPolicy.create(connection, getHost().getRoot(),
 				HashMultimap.<IContentPart<? extends Node>, String>create());
 		commit(creationPolicy);
 
 		// disable refresh visuals for the curvePart
-		storeAndDisableRefreshVisuals(curvePart);
+		storeAndDisableRefreshVisuals(connectionPart);
 
 		// move curve to pointer location
-		curvePart.getVisual().setEndPoint(getLocation(event));
+		connectionPart.getVisual().setEndPoint(getLocation(event));
 
 		// build operation to deselect all but the new curve part
 		List<IContentPart<? extends Node>> toBeDeselected = new ArrayList<>(
 				getHost().getRoot().getViewer().getAdapter(SelectionModel.class).getSelectionUnmodifiable());
-		toBeDeselected.remove(curvePart);
+		toBeDeselected.remove(connectionPart);
 		DeselectOperation deselectOperation = new DeselectOperation(getHost().getRoot().getViewer(), toBeDeselected);
 		// execute on stack
 		try {
@@ -184,7 +189,7 @@ public class CreateCurveOnDragHandler extends AbstractHandler implements IOnDrag
 		}
 
 		// find bend target part
-		bendTargetPart = findBendTargetPart(curvePart, event.getTarget());
+		bendTargetPart = findBendTargetPart(connectionPart, event.getTarget());
 		if (bendTargetPart != null) {
 			dragPolicies = bendTargetPart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
 		}

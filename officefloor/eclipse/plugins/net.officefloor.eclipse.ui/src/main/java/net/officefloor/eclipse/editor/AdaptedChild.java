@@ -50,11 +50,12 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	StringProperty getEditLabel();
 
 	/**
-	 * Obtains the children.
+	 * Obtains the {@link ConnectionModel} instances of this {@link AdaptedChild}
+	 * and all its {@link AdaptedChild} instances.
 	 * 
-	 * @return Children.
+	 * @return {@link ConnectionModel} instances.
 	 */
-	List<Object> getChildren();
+	List<ConnectionModel> getConnections();
 
 	/**
 	 * Obtains the {@link AdaptedConnector}.
@@ -63,7 +64,14 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 *            {@link ConnectionModel} {@link Class}.
 	 * @return {@link AdaptedConnector}.
 	 */
-	AdaptedConnector<?> getConnector(Class<? extends ConnectionModel> connectionClass);
+	AdaptedConnector<M, ?> getConnector(Class<? extends ConnectionModel> connectionClass);
+
+	/**
+	 * Obtains the children.
+	 * 
+	 * @return Children.
+	 */
+	List<Object> getChildren();
 
 	/**
 	 * Creates the visual {@link Pane}.

@@ -15,29 +15,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.models;
 
+import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.model.ConnectionModel;
 
 /**
- * Adapted {@link ConnectionModel}.
+ * Proxy {@link AdaptedConnection} to enable creating connections.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedModel<C> {
+public class ProxyAdaptedConnection implements AdaptedConnection<ConnectionModel> {
 
 	/**
-	 * Obtains the source {@link AdaptedChild}.
-	 * 
-	 * @return Source {@link AdaptedChild}.
+	 * Source {@link AdaptedChild}.
 	 */
-	AdaptedChild<?> getSource();
+	private AdaptedChild<?> source;
 
 	/**
-	 * Obtains the target {@link AdaptedChild}.
+	 * Instantiate.
 	 * 
-	 * @return Target {@link AdaptedChild}.
+	 * @param source
+	 *            Source {@link AdaptedChild}.
 	 */
-	AdaptedChild<?> getTarget();
+	public ProxyAdaptedConnection(AdaptedChild<?> source) {
+		this.source = source;
+	}
+
+	/*
+	 * ================ AdaptedConnection ====================
+	 */
+
+	@Override
+	public ConnectionModel getModel() {
+		return null;
+	}
+
+	@Override
+	public AdaptedChild<?> getSource() {
+		return this.source;
+	}
+
+	@Override
+	public AdaptedChild<?> getTarget() {
+		return null;
+	}
 
 }

@@ -17,27 +17,32 @@
  */
 package net.officefloor.eclipse.editor;
 
-import net.officefloor.model.ConnectionModel;
+import java.util.List;
+import java.util.function.Function;
+
+import net.officefloor.model.Model;
 
 /**
- * Adapted {@link ConnectionModel}.
+ * Builds the root {@link Model}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedModel<C> {
+public interface AdaptedRootBuilder<R extends Model> {
 
 	/**
-	 * Obtains the source {@link AdaptedChild}.
+	 * Adds an {@link AdaptedParent}.
 	 * 
-	 * @return Source {@link AdaptedChild}.
+	 * @param modelClass
+	 *            {@link Class} of the {@link Model}.
+	 * @param getParents
+	 *            {@link Function} to obtain the parent {@link Model} instances.
+	 * @param viewFactory
+	 *            {@link ViewFactory} to create the view for the
+	 *            {@link AdaptedParent}.
+	 * @return {@link AdaptedParentBuilder} to build the {@link AdaptedParent} over
+	 *         the {@link Model}.
 	 */
-	AdaptedChild<?> getSource();
-
-	/**
-	 * Obtains the target {@link AdaptedChild}.
-	 * 
-	 * @return Target {@link AdaptedChild}.
-	 */
-	AdaptedChild<?> getTarget();
+	<M extends Model, E extends Enum<E>> AdaptedParentBuilder<M, E> addParent(Class<M> modelClass,
+			Function<R, List<M>> getParents, ViewFactory<M, AdaptedParent<M>> viewFactory);
 
 }

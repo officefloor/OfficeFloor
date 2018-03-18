@@ -119,7 +119,7 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
 	protected AdaptedChildFactory(Class<M> modelClass, Supplier<A> newAdaptedModel, ViewFactory<M, A> viewFactory,
-			OfficeFloorContentPartFactory contentPartFactory) {
+			OfficeFloorContentPartFactory<?> contentPartFactory) {
 		super(modelClass, newAdaptedModel, contentPartFactory);
 		this.viewFactory = viewFactory;
 	}
@@ -225,7 +225,7 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 		/**
 		 * {@link GeometryNode} instances by {@link ConnectionModel} {@link Class}.
 		 */
-		private Map<Class<? extends ConnectionModel>, AdaptedConnector<?>> connectors;
+		private Map<Class<? extends ConnectionModel>, AdaptedConnector<M, ?>> connectors;
 
 		/**
 		 * Label for the {@link Model}.
@@ -253,7 +253,7 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 			// Load the connectors
 			this.connectors = new HashMap<>(this.getFactory().connections.size());
 			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
-				this.connectors.put(connectionClass, new AdaptedConnector<>());
+				this.connectors.put(connectionClass, new AdaptedConnector<>(this));
 			}
 
 			// Determine if label
@@ -353,7 +353,7 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 
 			// Ensure connectors for all configured connections
 			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
-				AdaptedConnector<?> connector = this.connectors.get(connectionClass);
+				AdaptedConnector<M, ?> connector = this.connectors.get(connectionClass);
 				if ((connector == null) || (connector.getGeometryNode() == null)) {
 					throw new IllegalStateException("Connector to " + connectionClass.getName()
 							+ " not configured in view of model " + this.getFactory().getModelClass().getName());
@@ -404,8 +404,31 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 		}
 
 		@Override
-		public AdaptedConnector<?> getConnector(Class<? extends ConnectionModel> connectionClass) {
-			AdaptedConnector<?> connector = this.connectors.get(connectionClass);
+		public List<ConnectionModel> getConnections() {
+
+			// Load the connections
+			List<ConnectionModel> connections = new ArrayList<>();
+
+			// Load direct connections
+			for (ModelToConnection<M, ?, ? extends ConnectionModel> modelToConnection : this.getFactory().connections
+					.values()) {
+				connections.addAll(modelToConnection.getConnections(this.getModel()));
+			}
+			
+			// Load the descendant connections
+			for (ChildrenGroup<M, ?> childrenGroup : this.childrenGroups) {
+				for (AdaptedChild<?> adaptedChild : childrenGroup.getChildren()) {
+					connections.addAll(adaptedChild.getConnections());
+				}
+			}
+
+			// Return the connections
+			return connections;
+		}
+
+		@Override
+		public AdaptedConnector<M, ?> getConnector(Class<? extends ConnectionModel> connectionClass) {
+			AdaptedConnector<M, ?> connector = this.connectors.get(connectionClass);
 			if (connector == null) {
 				throw new IllegalStateException("No connector for connection " + connectionClass.getName()
 						+ " from model " + this.getModel().getClass().getName());
@@ -422,7 +445,7 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 			for (Class<? extends C> connectionClass : connectionClasses) {
 
 				// Obtain the adapted connector
-				AdaptedConnector<G> connector = (AdaptedConnector<G>) this.connectors.get(connectionClass);
+				AdaptedConnector<M, G> connector = (AdaptedConnector<M, G>) this.connectors.get(connectionClass);
 				if (connector == null) {
 					throw new IllegalStateException("Connection " + connectionClass.getName()
 							+ " not configured to connect to model " + this.getModel().getClass().getName());

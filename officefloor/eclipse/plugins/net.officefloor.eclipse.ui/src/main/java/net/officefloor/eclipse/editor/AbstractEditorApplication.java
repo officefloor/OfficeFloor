@@ -11,9 +11,6 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.eclipse.gef.common.adapt.AdapterKey;
 import org.eclipse.gef.mvc.fx.domain.IDomain;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
@@ -25,7 +22,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import net.officefloor.eclipse.editor.module.OfficeFloorEditorModule;
-import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.eclipse.editor.views.ViewersComposite;
 import net.officefloor.model.Model;
 
@@ -44,12 +40,11 @@ public abstract class AbstractEditorApplication extends Application {
 	protected abstract void buildModels(AdaptedBuilderContext context);
 
 	/**
-	 * Populate the {@link Model} instances.
+	 * Creates the root {@link Model}.
 	 * 
-	 * @param models
-	 *            {@link Model} instances.
+	 * @return Root {@link Model}.
 	 */
-	protected abstract void populateModels(List<Model> models);
+	protected abstract Model createRootModel();
 
 	/**
 	 * <p>
@@ -73,7 +68,6 @@ public abstract class AbstractEditorApplication extends Application {
 		// Create the module
 		OfficeFloorEditorModule module = this.createModule();
 		Injector injector = Guice.createInjector(module);
-		module.initialiseFromInjector(injector);
 
 		// Obtain the viewers
 		IDomain domain = injector.getInstance(IDomain.class);
@@ -97,16 +91,9 @@ public abstract class AbstractEditorApplication extends Application {
 		// Activate the domain
 		domain.activate();
 
-		// Load the models
-		List<Model> models = new LinkedList<>();
-		this.populateModels(models);
-		OfficeFloorContentPartFactory factory = injector.getInstance(OfficeFloorContentPartFactory.class);
-		List<AdaptedModel<?>> adaptedModels = new LinkedList<>();
-		for (Model model : models) {
-			AdaptedModel<?> adaptedModel = factory.createAdaptedModel(model);
-			adaptedModels.add(adaptedModel);
-		}
-		content.getContents().setAll(adaptedModels);
+		// Load the root model
+		Model rootModel = this.createRootModel();
+		module.loadRootModel(rootModel, injector, content, palette);
 	}
 
 }

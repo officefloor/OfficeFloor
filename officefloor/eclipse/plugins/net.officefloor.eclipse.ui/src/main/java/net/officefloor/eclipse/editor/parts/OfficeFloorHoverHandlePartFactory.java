@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 
 import javafx.scene.Node;
+import net.officefloor.eclipse.editor.models.AdaptedConnector;
 
 public class OfficeFloorHoverHandlePartFactory extends DefaultHoverIntentHandlePartFactory {
 
@@ -36,7 +37,17 @@ public class OfficeFloorHoverHandlePartFactory extends DefaultHoverIntentHandleP
 			IVisualPart<? extends Node> target, Map<Object, Object> contextMap,
 			Provider<BezierCurve[]> segmentsProvider) {
 		List<IHandlePart<? extends Node>> handles = new ArrayList<>();
-		if (target instanceof GeometricShapePart) {
+		if (target instanceof AdaptedConnectorPart) {
+			// create root handle part
+			HoverHandleContainerPart parentHp = new HoverHandleContainerPart();
+			injector.injectMembers(parentHp);
+			handles.add(parentHp);
+
+			GeometricCurveCreationHoverHandlePart createCurveHp = new GeometricCurveCreationHoverHandlePart();
+			injector.injectMembers(createCurveHp);
+			parentHp.addChild(createCurveHp);
+		}
+		if (target instanceof AdaptedParentPart) {
 			// create root handle part
 			HoverHandleContainerPart parentHp = new HoverHandleContainerPart();
 			injector.injectMembers(parentHp);
@@ -46,10 +57,6 @@ public class OfficeFloorHoverHandlePartFactory extends DefaultHoverIntentHandleP
 			GeometricElementDeletionHandlePart deleteHp = new GeometricElementDeletionHandlePart();
 			injector.injectMembers(deleteHp);
 			parentHp.addChild(deleteHp);
-
-			GeometricCurveCreationHoverHandlePart createCurveHp = new GeometricCurveCreationHoverHandlePart();
-			injector.injectMembers(createCurveHp);
-			parentHp.addChild(createCurveHp);
 		}
 		return handles;
 	}

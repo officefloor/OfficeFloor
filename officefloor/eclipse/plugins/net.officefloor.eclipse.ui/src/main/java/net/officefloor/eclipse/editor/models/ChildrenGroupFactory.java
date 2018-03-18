@@ -24,7 +24,6 @@ import java.util.function.Function;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
-import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.ChildGroupBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
 import net.officefloor.model.Model;
@@ -117,9 +116,9 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		private final ChildrenGroupFactory<M, E> factory;
 
 		/**
-		 * {@link AdaptedModel} children.
+		 * {@link AdaptedChild} instances.
 		 */
-		private final List<AdaptedModel<?>> children;
+		private final List<AdaptedChild<?>> children;
 
 		/**
 		 * {@link Pane}.
@@ -142,7 +141,7 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 			List<? extends Model> children = this.factory.getChildren.apply(this.parent.getModel());
 			this.children = new ArrayList<>(children.size());
 			for (Model child : children) {
-				AdaptedModel<?> adaptedChild = this.factory.parentAdaptedModel.getAdaptedModel(child);
+				AdaptedChild<?> adaptedChild = (AdaptedChild<?>) this.factory.parentAdaptedModel.getAdaptedModel(child);
 				this.children.add(adaptedChild);
 			}
 		}
@@ -166,11 +165,11 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		}
 
 		/**
-		 * Obtains the {@link AdaptedModel} children.
+		 * Obtains the {@link AdaptedChild} instances.
 		 * 
-		 * @return {@link AdaptedModel} children.
+		 * @return {@link AdaptedChild} instances.
 		 */
-		public List<AdaptedModel<?>> getChildren() {
+		public List<AdaptedChild<?>> getChildren() {
 			return this.children;
 		}
 
