@@ -17,26 +17,21 @@
  */
 package net.officefloor.eclipse.editor.models;
 
-import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.model.Model;
 
 /**
- * Proxy to create an {@link AdaptedParent}.
+ * Allows a {@link Model} to be aware of the root {@link Model}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProxyCreateAdaptedParent<M extends Model> {
-
-	private final AdaptedParent<M> adapatedParent;
+public interface RootModelAware<R extends Model> {
 
 	/**
-	 * Instantiate.
+	 * Specifies the root {@link Model}.
 	 * 
-	 * @param adaptedParent
-	 *            {@link AdaptedParent}.
+	 * @param rootModel
+	 *            Root {@link Model}.
 	 */
-	public ProxyCreateAdaptedParent(AdaptedParent<M> adaptedParent) {
-		this.adapatedParent = adaptedParent;
-	}
+	void setRootModel(R rootModel);
 
 }

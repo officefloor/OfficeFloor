@@ -15,24 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.models;
 
+import org.eclipse.gef.geometry.planar.Point;
+
+import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.model.Model;
 
 /**
- * Provides means to build the adapted model.
+ * Adapted prototype for creating a new {@link AdaptedParent}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedBuilderContext {
+public interface AdaptedPrototype<M extends Model> {
 
 	/**
-	 * Specifies the root {@link Model}.
+	 * Triggers creating a new {@link AdaptedParent} at the location.
 	 * 
-	 * @param rootModelClass
-	 *            {@link Class} of the root {@link Model}.
-	 * @return {@link AdaptedRootBuilder}.
+	 * @param location
+	 *            Location for the new {@link AdaptedParent}.
 	 */
-	<R extends Model> AdaptedRootBuilder<R> root(Class<R> rootModelClass);
+	void newAdaptedParent(Point location);
 
 }

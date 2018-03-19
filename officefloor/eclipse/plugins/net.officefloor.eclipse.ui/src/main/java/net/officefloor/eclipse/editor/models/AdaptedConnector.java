@@ -17,10 +17,8 @@
  */
 package net.officefloor.eclipse.editor.models;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
-import org.eclipse.gef.geometry.planar.IGeometry;
-
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -28,17 +26,17 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedConnector<M extends Model, G extends IGeometry> {
+public class AdaptedConnector<M extends Model> {
 
 	/**
 	 * Parent {@link AdaptedChild} containing this {@link AdaptedConnector}.
 	 */
-	private AdaptedChild<M> parentAdaptedChild;
+	private final AdaptedChild<M> parentAdaptedChild;
 
 	/**
-	 * {@link GeometryNode}.
+	 * {@link ConnectionModel} {@link Class}.
 	 */
-	private GeometryNode<G> geometryNode = null;
+	private final Class<? extends ConnectionModel> connectionClass;
 
 	/**
 	 * Instantiate.
@@ -46,9 +44,12 @@ public class AdaptedConnector<M extends Model, G extends IGeometry> {
 	 * @param parentAdaptedChild
 	 *            Parent {@link AdaptedChild} containing this
 	 *            {@link AdaptedConnector}.
+	 * @param connectionClass
+	 *            {@link ConnectionModel} {@link Class}.
 	 */
-	public AdaptedConnector(AdaptedChild<M> parentAdaptedChild) {
+	public AdaptedConnector(AdaptedChild<M> parentAdaptedChild, Class<? extends ConnectionModel> connectionClass) {
 		this.parentAdaptedChild = parentAdaptedChild;
+		this.connectionClass = connectionClass;
 	}
 
 	/**
@@ -61,22 +62,12 @@ public class AdaptedConnector<M extends Model, G extends IGeometry> {
 	}
 
 	/**
-	 * Obtains the {@link GeometryNode}.
+	 * Obtains the {@link ConnectionModel} {@link Class}.
 	 * 
-	 * @return {@link GeometryNode}.
+	 * @return {@link ConnectionModel} {@link Class}.
 	 */
-	public GeometryNode<G> getGeometryNode() {
-		return this.geometryNode;
-	}
-
-	/**
-	 * Specifies the {@link GeometryNode}.
-	 * 
-	 * @param geometryNode
-	 *            {@link GeometryNode}.
-	 */
-	public void setGeometryNode(GeometryNode<G> geometryNode) {
-		this.geometryNode = geometryNode;
+	public Class<? extends ConnectionModel> getConnectionModelClass() {
+		return this.connectionClass;
 	}
 
 }

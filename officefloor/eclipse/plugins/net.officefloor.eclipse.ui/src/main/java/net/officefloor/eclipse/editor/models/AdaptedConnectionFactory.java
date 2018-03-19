@@ -79,7 +79,7 @@ public class AdaptedConnectionFactory<S extends Model, C extends ConnectionModel
 
 	@Override
 	public void init(Injector injector, Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) {
-		super.validate(models);
+		super.init(injector, models);
 
 		// Load the target to connection information to target model
 		AbstractAdaptedFactory<?, ?, ?> factory = models.get(this.targetModelClass);

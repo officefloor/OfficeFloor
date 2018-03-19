@@ -39,10 +39,14 @@ public interface AdaptedRootBuilder<R extends Model> {
 	 * @param viewFactory
 	 *            {@link ViewFactory} to create the view for the
 	 *            {@link AdaptedParent}.
+	 * @param changeParentEvents
+	 *            {@link Enum} events on root {@link Model} about change in parent
+	 *            {@link Model} listing.
 	 * @return {@link AdaptedParentBuilder} to build the {@link AdaptedParent} over
 	 *         the {@link Model}.
 	 */
-	<M extends Model, E extends Enum<E>> AdaptedParentBuilder<M, E> addParent(Class<M> modelClass,
-			Function<R, List<M>> getParents, ViewFactory<M, AdaptedParent<M>> viewFactory);
+	@SuppressWarnings("unchecked")
+	<M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, M, E> parent(Class<M> modelClass,
+			Function<R, List<M>> getParents, ViewFactory<M, AdaptedParent<M>> viewFactory, RE... changeParentEvents);
 
 }

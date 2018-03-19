@@ -23,10 +23,13 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
+import net.officefloor.eclipse.editor.ParentModelProvider;
+import net.officefloor.eclipse.editor.ParentModelProviderContext;
 import net.officefloor.eclipse.editor.ViewFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
@@ -36,8 +39,18 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedParentFactory<M extends Model, E extends Enum<E>>
-		extends AdaptedChildFactory<M, E, AdaptedParent<M>> implements AdaptedParentBuilder<M, E> {
+public class AdaptedParentFactory<R extends Model, M extends Model, E extends Enum<E>>
+		extends AdaptedChildFactory<M, E, AdaptedParent<M>> implements AdaptedParentBuilder<R, M, E> {
+
+	/**
+	 * Prototype {@link Model}.
+	 */
+	private M prototype = null;
+
+	/**
+	 * {@link ParentModelProvider}.
+	 */
+	private ParentModelProvider<R> parentModelProvider = null;
 
 	/**
 	 * Instantiate.
@@ -48,19 +61,119 @@ public class AdaptedParentFactory<M extends Model, E extends Enum<E>>
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
 	public AdaptedParentFactory(Class<M> modelClass, ViewFactory<M, AdaptedParent<M>> viewFactory,
-			OfficeFloorContentPartFactory contentFactory) {
+			OfficeFloorContentPartFactory<?> contentFactory) {
 		super(modelClass, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
+	}
+
+	/**
+	 * Obtains the palette prototype {@link Model}.
+	 * 
+	 * @return Palette prototype {@link Model}.
+	 */
+	public M getPalettePrototype() {
+		return this.prototype;
+	}
+
+	/*
+	 * ================ AdaptedParentBuilder ==================
+	 */
+
+	@Override
+	public void create(M prototype, ParentModelProvider<R> parentModelProvider) {
+		this.prototype = prototype;
+		this.parentModelProvider = parentModelProvider;
 	}
 
 	/**
 	 * {@link AdaptedParent} implementation.
 	 */
-	public static class AdaptedParentImpl<M extends Model, E extends Enum<E>>
-			extends AdaptedChildImpl<M, E, AdaptedParent<M>> implements AdaptedParent<M> {
+	public static class AdaptedParentImpl<R extends Model, M extends Model, E extends Enum<E>>
+			extends AdaptedChildImpl<M, E, AdaptedParent<M>>
+			implements AdaptedParent<M>, AdaptedPrototype<M>, RootModelAware<R> {
+
+		/**
+		 * Root {@link Model}.
+		 */
+		private R rootModel;
+
+		/**
+		 * Obtains the {@link AdaptedParentFactory}.
+		 * 
+		 * @return {@link AdaptedParentFactory}.
+		 */
+		@SuppressWarnings("unchecked")
+		private AdaptedParentFactory<R, M, E> getParentFactory() {
+			return (AdaptedParentFactory<R, M, E>) this.getFactory();
+		}
+
+		/*
+		 * ================= RootModelAware ===================
+		 */
+
+		@Override
+		public void setRootModel(R rootModel) {
+			this.rootModel = rootModel;
+		}
+
+		/*
+		 * ================== AdaptedParent ===================
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T getAdapter(Class<T> classKey) {
+
+			// Attempt to handle adapting
+			if (AdaptedPrototype.class.equals(classKey)) {
+				if (this.getParentFactory().parentModelProvider != null) {
+					return (T) this;
+				}
+			}
+
+			// Not able to adapt
+			return null;
+		}
 
 		@Override
 		public void changeLocation(int x, int y) {
 			this.getChangeExecutor().execute(new ChangeLocationOperation<>(this.getModel(), x, y));
+		}
+
+		/*
+		 * ================ AdaptedPrototype ===================
+		 */
+
+		@Override
+		public void newAdaptedParent(Point location) {
+			this.getParentFactory().parentModelProvider.provideNewParentModel(new ParentModelProviderContext<R>() {
+
+				@Override
+				public R getRootModel() {
+					return AdaptedParentImpl.this.rootModel;
+				}
+
+				@Override
+				public ChangeExecutor getChangeExecutor() {
+					return AdaptedParentImpl.this.getChangeExecutor();
+				}
+
+				@Override
+				public int getX() {
+					return (int) location.x;
+				}
+
+				@Override
+				public int getY() {
+					return (int) location.y;
+				}
+
+				@Override
+				public <m extends Model> m position(m model) {
+					model.setX(this.getX());
+					model.setY(this.getY());
+					return model;
+				}
+			});
 		}
 	}
 

@@ -47,7 +47,9 @@ public abstract class AbstractAdaptedPart<M extends Model, A extends AdaptedMode
 		super.setContent(content);
 
 		// Initialise
-		this.init();
+		if (content != null) {
+			this.init();
+		}
 	}
 
 	/**

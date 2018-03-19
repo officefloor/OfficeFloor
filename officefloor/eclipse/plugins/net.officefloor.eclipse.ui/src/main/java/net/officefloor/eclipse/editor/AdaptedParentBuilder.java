@@ -24,5 +24,17 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedParentBuilder<M extends Model, E extends Enum<E>> extends AdaptedChildBuilder<M, E> {
+public interface AdaptedParentBuilder<R extends Model, M extends Model, E extends Enum<E>>
+		extends AdaptedChildBuilder<M, E> {
+
+	/**
+	 * Configures creating the {@link Model}.
+	 * 
+	 * @param prototype
+	 *            Prototype {@link Model} to use in palette.
+	 * @param provideNewParentModel
+	 *            {@link ParentModelProvider}.
+	 */
+	void create(M prototype, ParentModelProvider<R> provideNewParentModel);
+
 }

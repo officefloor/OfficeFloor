@@ -37,8 +37,8 @@ import net.officefloor.eclipse.editor.models.AdaptedConnector;
 public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 
 	@Override
-	public AdaptedConnector<?, ?> getContent() {
-		return (AdaptedConnector<?, ?>) super.getContent();
+	public AdaptedConnector<?> getContent() {
+		return (AdaptedConnector<?>) super.getContent();
 	}
 
 	@Override
@@ -61,7 +61,19 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 
 	@Override
 	protected GeometryNode<?> doCreateVisual() {
-		return this.getContent().getGeometryNode();
+
+		// Obtain the parent
+		AdaptedChildPart<?, ?> parent = (AdaptedChildPart<?, ?>) this.getParent();
+
+		// Obtain the node for the connector
+		GeometryNode<?> node = parent.getAdaptedConnectorNode(this.getContent());
+
+		// Add the children group name for CSS
+		node.getStyleClass().add("connector");
+		node.getStyleClass().add(this.getContent().getConnectionModelClass().getSimpleName());
+
+		// Return the visual
+		return node;
 	}
 
 	@Override

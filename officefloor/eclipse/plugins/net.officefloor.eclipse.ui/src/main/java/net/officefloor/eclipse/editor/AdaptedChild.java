@@ -23,6 +23,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -50,12 +51,18 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	StringProperty getEditLabel();
 
 	/**
-	 * Obtains the {@link ConnectionModel} instances of this {@link AdaptedChild}
-	 * and all its {@link AdaptedChild} instances.
+	 * Obtains the {@link ChildrenGroup} instances.
 	 * 
-	 * @return {@link ConnectionModel} instances.
+	 * @return {@link ChildrenGroup} instances.
 	 */
-	List<ConnectionModel> getConnections();
+	List<ChildrenGroup<M, ?>> getChildrenGroups();
+
+	/**
+	 * Obtains the {@link AdaptedConnector} instances.
+	 * 
+	 * @return {@link AdaptedConnector} instances.
+	 */
+	List<AdaptedConnector<M>> getAdaptedConnectors();
 
 	/**
 	 * Obtains the {@link AdaptedConnector}.
@@ -64,20 +71,23 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 *            {@link ConnectionModel} {@link Class}.
 	 * @return {@link AdaptedConnector}.
 	 */
-	AdaptedConnector<M, ?> getConnector(Class<? extends ConnectionModel> connectionClass);
+	AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass);
 
 	/**
-	 * Obtains the children.
+	 * Obtains the {@link AdaptedConnection} instances of this {@link AdaptedChild}
+	 * and all its {@link AdaptedChild} instances.
 	 * 
-	 * @return Children.
+	 * @return {@link AdaptedConnection} instances.
 	 */
-	List<Object> getChildren();
+	List<AdaptedConnection<?>> getConnections();
 
 	/**
 	 * Creates the visual {@link Pane}.
 	 * 
+	 * @param context
+	 *            {@link ViewFactoryContext}.
 	 * @return Visual {@link Pane}.
 	 */
-	Pane createVisual();
+	Pane createVisual(ViewFactoryContext context);
 
 }

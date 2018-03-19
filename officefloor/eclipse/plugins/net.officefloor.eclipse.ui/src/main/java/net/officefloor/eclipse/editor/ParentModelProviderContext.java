@@ -17,22 +17,51 @@
  */
 package net.officefloor.eclipse.editor;
 
+import net.officefloor.eclipse.editor.models.ChangeExecutor;
 import net.officefloor.model.Model;
 
 /**
- * Provides means to build the adapted model.
+ * Context for the {@link ParentModelProvider}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedBuilderContext {
+public interface ParentModelProviderContext<R extends Model> {
 
 	/**
-	 * Specifies the root {@link Model}.
+	 * Obtains the root {@link Model}.
 	 * 
-	 * @param rootModelClass
-	 *            {@link Class} of the root {@link Model}.
-	 * @return {@link AdaptedRootBuilder}.
+	 * @return Root {@link Model}.
 	 */
-	<R extends Model> AdaptedRootBuilder<R> root(Class<R> rootModelClass);
+	R getRootModel();
+
+	/**
+	 * Obtains the {@link ChangeExecutor}.
+	 * 
+	 * @return {@link ChangeExecutor}.
+	 */
+	ChangeExecutor getChangeExecutor();
+
+	/**
+	 * Obtains the X location for the {@link AdaptedParent}.
+	 * 
+	 * @return X location.
+	 */
+	int getX();
+
+	/**
+	 * Obtains the Y location for the {@link AdaptedParent}.
+	 * 
+	 * @return Y location for the {@link AdaptedParent}.
+	 */
+	int getY();
+
+	/**
+	 * Convenience method to position the {@link Model}.
+	 * 
+	 * @param model
+	 *            {@link Model} to be positioned.
+	 * @return Input {@link Model}.
+	 */
+	<M extends Model> M position(M model);
 
 }

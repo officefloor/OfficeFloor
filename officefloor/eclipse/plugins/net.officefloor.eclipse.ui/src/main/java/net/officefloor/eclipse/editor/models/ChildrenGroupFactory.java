@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.ChildGroupBuilder;
@@ -121,11 +120,6 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		private final List<AdaptedChild<?>> children;
 
 		/**
-		 * {@link Pane}.
-		 */
-		private Pane pane = null;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param parent
@@ -180,25 +174,6 @@ public class ChildrenGroupFactory<M extends Model, E extends Enum<E>> implements
 		 */
 		public E[] getEvents() {
 			return this.factory.childrenEvents;
-		}
-
-		/**
-		 * Specifies the {@link Pane}.
-		 * 
-		 * @param pane
-		 *            {@link Pane}.
-		 */
-		public void setPane(Pane pane) {
-			this.pane = pane;
-		}
-
-		/**
-		 * Obtains the {@link Pane} for the children {@link Model} instances.
-		 * 
-		 * @return {@link Pane} for the children {@link Model} instances.
-		 */
-		public Pane getPane() {
-			return this.pane;
 		}
 	}
 

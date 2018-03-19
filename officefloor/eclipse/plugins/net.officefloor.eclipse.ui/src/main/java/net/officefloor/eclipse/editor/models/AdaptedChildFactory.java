@@ -26,17 +26,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
-import org.eclipse.gef.geometry.planar.IGeometry;
-
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.StringProperty;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
@@ -44,6 +40,7 @@ import net.officefloor.eclipse.editor.ChildGroupBuilder;
 import net.officefloor.eclipse.editor.ViewFactory;
 import net.officefloor.eclipse.editor.ViewFactoryContext;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
+import net.officefloor.eclipse.editor.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -143,11 +140,12 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 	}
 
 	/*
-	 * =================== AbstractAdaptedModelFactory =============
+	 * =================== AbstractAdaptedFactory =============
 	 */
 
 	@Override
-	public void validate(Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) throws IllegalStateException {
+	@SuppressWarnings("unchecked")
+	public void validate() throws IllegalStateException {
 
 		// Construct the view (ensures all children groups are registered)
 		M model;
@@ -158,7 +156,11 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 					"Unable to instantiate with default constructor " + this.getModelClass().getName());
 		}
 		A adaptedModel = this.newAdaptedModel(model);
-		adaptedModel.createVisual();
+
+		// Create the visual (will ensure valid)
+		AdaptedChildPart<M, AdaptedChild<M>> childPart = this.getInjector().getInstance(AdaptedChildPart.class);
+		childPart.setContent(adaptedModel);
+		childPart.doCreateVisual();
 	}
 
 	/*
@@ -214,18 +216,8 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 	/**
 	 * {@link AdaptedChild} implementation.
 	 */
-	protected static class AdaptedChildImpl<M extends Model, E extends Enum<E>, A extends AdaptedChild<M>> extends
-			AbstractAdaptedModel<M, E, A, AdaptedChildFactory<M, E, A>> implements AdaptedChild<M>, ViewFactoryContext {
-
-		/**
-		 * {@link ChildrenGroup} instances.
-		 */
-		private List<ChildrenGroup<M, ?>> childrenGroups;
-
-		/**
-		 * {@link GeometryNode} instances by {@link ConnectionModel} {@link Class}.
-		 */
-		private Map<Class<? extends ConnectionModel>, AdaptedConnector<M, ?>> connectors;
+	protected static class AdaptedChildImpl<M extends Model, E extends Enum<E>, A extends AdaptedChild<M>>
+			extends AbstractAdaptedModel<M, E, A, AdaptedChildFactory<M, E, A>> implements AdaptedChild<M> {
 
 		/**
 		 * Label for the {@link Model}.
@@ -236,6 +228,16 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 		 * Potential conflict in {@link LabelChange}.
 		 */
 		private ReadOnlyStringWrapper labelConflict;
+
+		/**
+		 * {@link ChildrenGroup} instances.
+		 */
+		private List<ChildrenGroup<M, ?>> childrenGroups;
+
+		/**
+		 * {@link AdaptedConnector} instances by {@link ConnectionModel} {@link Class}.
+		 */
+		private Map<Class<? extends ConnectionModel>, AdaptedConnector<M>> connectors;
 
 		/*
 		 * =================== AdaptedChild =====================
@@ -253,7 +255,7 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 			// Load the connectors
 			this.connectors = new HashMap<>(this.getFactory().connections.size());
 			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
-				this.connectors.put(connectionClass, new AdaptedConnector<>(this));
+				this.connectors.put(connectionClass, new AdaptedConnector<>(this, connectionClass));
 			}
 
 			// Determine if label
@@ -314,107 +316,28 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 		}
 
 		@Override
-		public ReadOnlyStringProperty getLabel() {
-			return this.label == null ? null : this.label.getReadOnlyProperty();
-		}
-
-		@Override
-		public StringProperty getEditLabel() {
-			return this.label;
-		}
-
-		@Override
-		public List<Object> getChildren() {
-			List<Object> children = new ArrayList<>(this.childrenGroups.size() + this.connectors.size());
-			children.addAll(this.childrenGroups);
-			children.addAll(this.connectors.values());
-			return children;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public Pane createVisual() {
-
-			// Clear the panes
-			for (ChildrenGroup<M, ?> childrenGroups : this.childrenGroups) {
-				childrenGroups.setPane(null);
-			}
-
-			// Create the visual pane
-			Pane pane = this.getFactory().viewFactory.createView((A) this, this);
-
-			// Ensure all children groups are configured
-			for (ChildrenGroup<M, ?> childrenGroup : this.childrenGroups) {
-				if (childrenGroup.getPane() == null) {
-					throw new IllegalStateException("Children group Pane '" + childrenGroup.getChildrenGroupName()
-							+ "' not configured in view of model " + this.getFactory().getModelClass().getName());
-				}
-			}
-
-			// Ensure connectors for all configured connections
-			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
-				AdaptedConnector<M, ?> connector = this.connectors.get(connectionClass);
-				if ((connector == null) || (connector.getGeometryNode() == null)) {
-					throw new IllegalStateException("Connector to " + connectionClass.getName()
-							+ " not configured in view of model " + this.getFactory().getModelClass().getName());
-				}
-			}
-
-			// Return the visual pane
-			return pane;
-		}
-
-		/*
-		 * ========================== ViewFactoryContext ==========================
-		 */
-
-		@Override
-		public Label label(Pane parent) {
-			Label label = this.addNode(parent, new Label());
-			label.textProperty().bind(this.label.getReadOnlyProperty());
-			return label;
-		}
-
-		@Override
-		public <N extends Node> N addNode(Pane parent, N node) {
-			parent.getChildren().add(node);
-			return node;
-		}
-
-		@Override
-		public <P extends Pane> P childGroup(String childGroupName, P parent) {
-			if (childGroupName == null) {
-				throw new NullPointerException(
-						"No child group name provided for view of " + this.getFactory().getModelClass().getName());
-			}
-
-			// Load the child group pane
-			for (ChildrenGroup<M, ?> childrenGroup : this.childrenGroups) {
-				if (childGroupName.equals(childrenGroup.getChildrenGroupName())) {
-
-					// Found the child group, so load the pane
-					childrenGroup.setPane(parent);
-					return parent;
-				}
-			}
-
-			// As here, no children group registered
-			throw new IllegalStateException("No children group '" + childGroupName + "' registered for view of model "
-					+ this.getFactory().getModelClass().getName());
-		}
-
-		@Override
-		public List<ConnectionModel> getConnections() {
+		public List<AdaptedConnection<?>> getConnections() {
 
 			// Load the connections
-			List<ConnectionModel> connections = new ArrayList<>();
+			List<AdaptedConnection<?>> connections = new ArrayList<>();
 
 			// Load direct connections
 			for (ModelToConnection<M, ?, ? extends ConnectionModel> modelToConnection : this.getFactory().connections
 					.values()) {
-				connections.addAll(modelToConnection.getConnections(this.getModel()));
+
+				// Obtain the connections
+				List<? extends ConnectionModel> connectionModels = modelToConnection.getConnections(this.getModel());
+
+				// Adapt the connections
+				for (ConnectionModel connectionModel : connectionModels) {
+
+					// Adapt the connection
+					AdaptedConnection<?> adaptedConnection = (AdaptedConnection<?>) this.getFactory()
+							.getContentPartFactory().createAdaptedModel(connectionModel);
+					connections.add(adaptedConnection);
+				}
 			}
-			
+
 			// Load the descendant connections
 			for (ChildrenGroup<M, ?> childrenGroup : this.childrenGroups) {
 				for (AdaptedChild<?> adaptedChild : childrenGroup.getChildren()) {
@@ -427,8 +350,28 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 		}
 
 		@Override
-		public AdaptedConnector<M, ?> getConnector(Class<? extends ConnectionModel> connectionClass) {
-			AdaptedConnector<M, ?> connector = this.connectors.get(connectionClass);
+		public ReadOnlyStringProperty getLabel() {
+			return this.label == null ? null : this.label.getReadOnlyProperty();
+		}
+
+		@Override
+		public StringProperty getEditLabel() {
+			return this.label;
+		}
+
+		@Override
+		public List<ChildrenGroup<M, ?>> getChildrenGroups() {
+			return this.childrenGroups;
+		}
+
+		@Override
+		public List<AdaptedConnector<M>> getAdaptedConnectors() {
+			return new ArrayList<>(this.connectors.values());
+		}
+
+		@Override
+		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass) {
+			AdaptedConnector<M> connector = this.connectors.get(connectionClass);
 			if (connector == null) {
 				throw new IllegalStateException("No connector for connection " + connectionClass.getName()
 						+ " from model " + this.getModel().getClass().getName());
@@ -437,30 +380,9 @@ public class AdaptedChildFactory<M extends Model, E extends Enum<E>, A extends A
 		}
 
 		@Override
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public final <G extends IGeometry, N extends GeometryNode<G>, C extends ConnectionModel> N connector(
-				N geometryNode, Class... connectionClasses) {
-
-			// Register the geometry node
-			for (Class<? extends C> connectionClass : connectionClasses) {
-
-				// Obtain the adapted connector
-				AdaptedConnector<M, G> connector = (AdaptedConnector<M, G>) this.connectors.get(connectionClass);
-				if (connector == null) {
-					throw new IllegalStateException("Connection " + connectionClass.getName()
-							+ " not configured to connect to model " + this.getModel().getClass().getName());
-				}
-				if (connector.getGeometryNode() != null) {
-					throw new IllegalStateException("Connection " + connectionClass.getName()
-							+ " configured more than once for model " + this.getModel().getClass().getName());
-				}
-
-				// Load the connector
-				connector.setGeometryNode(geometryNode);
-			}
-
-			// Return geometry node
-			return geometryNode;
+		@SuppressWarnings("unchecked")
+		public Pane createVisual(ViewFactoryContext context) {
+			return this.getFactory().viewFactory.createView((A) this, context);
 		}
 	}
 

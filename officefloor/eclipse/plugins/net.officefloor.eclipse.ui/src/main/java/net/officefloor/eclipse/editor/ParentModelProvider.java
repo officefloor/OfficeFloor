@@ -20,19 +20,18 @@ package net.officefloor.eclipse.editor;
 import net.officefloor.model.Model;
 
 /**
- * Provides means to build the adapted model.
+ * Provides a new parent {@link Model}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedBuilderContext {
+public interface ParentModelProvider<R extends Model> {
 
 	/**
-	 * Specifies the root {@link Model}.
+	 * Triggers providing a new parent {@link Model}.
 	 * 
-	 * @param rootModelClass
-	 *            {@link Class} of the root {@link Model}.
-	 * @return {@link AdaptedRootBuilder}.
+	 * @param context
+	 *            {@link ParentModelProviderContext}.
 	 */
-	<R extends Model> AdaptedRootBuilder<R> root(Class<R> rootModelClass);
+	void provideNewParentModel(ParentModelProviderContext<R> context);
 
 }

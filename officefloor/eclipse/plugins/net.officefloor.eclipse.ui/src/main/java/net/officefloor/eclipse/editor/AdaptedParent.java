@@ -27,6 +27,15 @@ import net.officefloor.model.Model;
 public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
 
 	/**
+	 * Obtains the adapter.
+	 * 
+	 * @param classKey
+	 *            {@link Class} key.
+	 * @return Adapter or <code>null</code> if no adapter available.
+	 */
+	<T> T getAdapter(Class<T> classKey);
+
+	/**
 	 * Changes the location of the {@link Model}.
 	 * 
 	 * @param x

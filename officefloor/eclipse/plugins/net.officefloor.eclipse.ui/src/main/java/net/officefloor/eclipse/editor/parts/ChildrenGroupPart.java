@@ -45,16 +45,18 @@ public class ChildrenGroupPart extends AbstractContentPart<Pane> {
 
 	@Override
 	public void setContent(Object content) {
-		if (content != null && !(content instanceof ChildrenGroup)) {
+		if ((content != null) && (!(content instanceof ChildrenGroup))) {
 			throw new IllegalArgumentException("Only " + ChildrenGroup.class.getSimpleName() + " supported.");
 		}
 		super.setContent(content);
 
 		// Refresh on change
-		AbstractAdaptedFactory.registerEventListener(this.getContent().getParent().getModel(),
-				this.getContent().getEvents(), (event) -> {
-					this.refreshContentChildren();
-				});
+		if (content != null) {
+			AbstractAdaptedFactory.registerEventListener(this.getContent().getParent().getModel(),
+					this.getContent().getEvents(), (event) -> {
+						this.refreshContentChildren();
+					});
+		}
 	}
 
 	@Override
@@ -70,10 +72,14 @@ public class ChildrenGroupPart extends AbstractContentPart<Pane> {
 	@Override
 	protected Pane doCreateVisual() {
 
-		// Create the visual
-		Pane pane = this.getContent().getPane();
+		// Obtain the parent
+		AdaptedChildPart<?, ?> parent = (AdaptedChildPart<?, ?>) this.getParent();
+
+		// Obtain the pane for this children group
+		Pane pane = parent.getChildrenGroupPane(this.getContent());
 
 		// Add the children group name for CSS
+		pane.getStyleClass().add("children");
 		pane.getStyleClass().add(this.getContent().getChildrenGroupName());
 
 		// Return the visual

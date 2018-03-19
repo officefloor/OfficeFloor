@@ -40,15 +40,32 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	}
 
 	@Override
+	public <T> T getAdapter(Class<T> classKey) {
+
+		// Determine if can adapt
+		T adapter = this.getContent().getAdapter(classKey);
+		if (adapter != null) {
+			return adapter;
+		}
+
+		// Inherit adapters
+		return super.getAdapter(classKey);
+	}
+
+	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
 		return HashMultimap.create();
 	}
 
 	@Override
-	protected Pane doCreateVisual() {
+	public Pane doCreateVisual() {
 
 		// Obtain the visual
 		Pane container = super.doCreateVisual();
+
+		// Provide parent styling
+		container.getStyleClass().remove("child");
+		container.getStyleClass().add("parent");
 
 		// Specify the initial location
 		container.setLayoutX(this.getContent().getModel().getX());

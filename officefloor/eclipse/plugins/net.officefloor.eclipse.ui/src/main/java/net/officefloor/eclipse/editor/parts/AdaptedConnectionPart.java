@@ -35,11 +35,11 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
 		SetMultimap<Object, String> anchorages = HashMultimap.create();
-		AdaptedConnector<?, ?> source = this.getContent().getSource()
-				.getConnector(this.getContent().getModel().getClass());
+		AdaptedConnector<?> source = this.getContent().getSource()
+				.getAdaptedConnector(this.getContent().getModel().getClass());
 		anchorages.put(source, SOURCE_ROLE);
-		AdaptedConnector<?, ?> target = this.getContent().getTarget()
-				.getConnector(this.getContent().getModel().getClass());
+		AdaptedConnector<?> target = this.getContent().getTarget()
+				.getAdaptedConnector(this.getContent().getModel().getClass());
 		anchorages.put(target, TARGET_ROLE);
 		return anchorages;
 	}

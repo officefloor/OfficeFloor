@@ -79,12 +79,17 @@ public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>,
 	/**
 	 * {@link OfficeFloorContentPartFactory}.
 	 */
-	private final OfficeFloorContentPartFactory contentPartFactory;
+	private final OfficeFloorContentPartFactory<?> contentPartFactory;
 
 	/**
-	 * {@link ChangeExecutor}.
+	 * {@link Injector}.
 	 */
-	private ChangeExecutor changeExecutor;
+	private Injector injector;
+
+	/**
+	 * {@link AbstractAdaptedFactory} for the {@link Model} {@link Class}.
+	 */
+	private Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> modelFactories;
 
 	/**
 	 * Instantiate.
@@ -97,7 +102,7 @@ public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>,
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
 	public AbstractAdaptedFactory(Class<M> modelClass, Supplier<A> newAdaptedModel,
-			OfficeFloorContentPartFactory contentPartFactory) {
+			OfficeFloorContentPartFactory<?> contentPartFactory) {
 		this.modelClass = modelClass;
 		this.newAdaptedModel = newAdaptedModel;
 		this.contentPartFactory = contentPartFactory;
@@ -122,13 +127,59 @@ public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>,
 	}
 
 	/**
+	 * Obtains the {@link Model} {@link Class}.
+	 * 
+	 * @return {@link Model} {@link Class}.
+	 */
+	public Class<M> getModelClass() {
+		return this.modelClass;
+	}
+
+	/**
 	 * Initialises.
 	 * 
 	 * @param injector
 	 *            {@link Injector}.
+	 * @param modelFactories
+	 *            {@link Map} of {@link Model} {@link Class} to
+	 *            {@link AbstractAdaptedFactory}.
+	 * @throws IllegalStateException
+	 *             If invalid.
 	 */
-	public void init(Injector injector, Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) {
-		this.changeExecutor = injector.getInstance(ChangeExecutor.class);
+	public void init(Injector injector, Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> modelFactories)
+			throws IllegalStateException {
+		this.injector = injector;
+		this.modelFactories = modelFactories;
+	}
+
+	/**
+	 * Obtains the {@link Injector}.
+	 * 
+	 * @return {@link Injector}.
+	 */
+	protected Injector getInjector() {
+		return this.injector;
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorContentPartFactory}.
+	 * 
+	 * @return {@link OfficeFloorContentPartFactory}.
+	 */
+	protected OfficeFloorContentPartFactory<?> getContentPartFactory() {
+		return this.contentPartFactory;
+	}
+
+	/**
+	 * Obtains the {@link AbstractAdaptedFactory} for the {@link Model}
+	 * {@link Class}.
+	 * 
+	 * @param modelClass
+	 *            {@link Model} {@link Class}.
+	 * @return {@link AbstractAdaptedFactory}.
+	 */
+	protected AbstractAdaptedFactory<?, ?, ?> getModelFactory(Class<?> modelClass) {
+		return this.modelFactories.get(modelClass);
 	}
 
 	/**
@@ -140,7 +191,7 @@ public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>,
 	 * @throws IllegalStateException
 	 *             If invalid.
 	 */
-	public void validate(Map<Class<?>, AbstractAdaptedFactory<?, ?, ?>> models) throws IllegalStateException {
+	public void validate() throws IllegalStateException {
 	}
 
 	/**
@@ -171,15 +222,6 @@ public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>,
 		abstractAdapted.model = model;
 		abstractAdapted.init();
 		return adapted;
-	}
-
-	/**
-	 * Obtains the {@link Model} {@link Class}.
-	 * 
-	 * @return {@link Model} {@link Class}.
-	 */
-	public Class<M> getModelClass() {
-		return this.modelClass;
 	}
 
 	/**
@@ -224,12 +266,21 @@ public abstract class AbstractAdaptedFactory<M extends Model, E extends Enum<E>,
 		}
 
 		/**
+		 * Obtains the {@link Injector}.
+		 * 
+		 * @return {@link Injector}.
+		 */
+		public Injector getInjector() {
+			return this.factory.injector;
+		}
+
+		/**
 		 * Obtains the {@link ChangeExecutor}.
 		 * 
 		 * @return {@link ChangeExecutor}.
 		 */
 		protected ChangeExecutor getChangeExecutor() {
-			return this.factory.changeExecutor;
+			return this.getInjector().getInstance(ChangeExecutor.class);
 		}
 
 		/**

@@ -73,7 +73,7 @@ import net.officefloor.eclipse.editor.behaviors.PaletteFocusBehavior;
 import net.officefloor.eclipse.editor.handlers.CloneAdaptedConnectionSupport;
 import net.officefloor.eclipse.editor.handlers.CloneOnClickHandler;
 import net.officefloor.eclipse.editor.handlers.CreateAdaptedConnectionOnDragHandler;
-import net.officefloor.eclipse.editor.handlers.CreateAndTranslateShapeOnDragHandler;
+import net.officefloor.eclipse.editor.handlers.CreateAdaptedParentOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreationMenuItemProvider;
 import net.officefloor.eclipse.editor.handlers.CreationMenuOnClickHandler;
 import net.officefloor.eclipse.editor.handlers.DeleteFirstAnchorageOnClickHandler;
@@ -219,12 +219,12 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CloneOnClickHandler.class);
 	}
 
-	protected void bindGeometricShapePartAdapterInPaletteViewerContext(
+	protected void bindAdaptedParentPartInPaletteViewerContext(
 			MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(HoverOnHoverHandler.class);
-		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CreateAndTranslateShapeOnDragHandler.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CreateAdaptedParentOnDragHandler.class);
 		adapterMapBinder.addBinding(AdapterKey.role(DefaultHoverFeedbackPartFactory.HOVER_FEEDBACK_GEOMETRY_PROVIDER))
-				.to(GeometricOutlineProvider.class);
+				.to(ShapeBoundsProvider.class);
 	}
 
 	protected void bindHoverFeedbackFactoryAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -458,7 +458,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 				AdapterKey.get(IViewer.class, PALETTE_VIEWER_ROLE)));
 		bindPaletteRootPartAdaptersInPaletteViewerContext(AdapterMaps.getAdapterMapBinder(binder(), IRootPart.class,
 				AdapterKey.get(IViewer.class, PALETTE_VIEWER_ROLE)));
-		bindGeometricShapePartAdapterInPaletteViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
+		bindAdaptedParentPartInPaletteViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
 				AdaptedParentPart.class, AdapterKey.get(IViewer.class, PALETTE_VIEWER_ROLE)));
 	}
 

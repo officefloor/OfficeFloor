@@ -25,7 +25,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 
 import javafx.scene.Node;
-import net.officefloor.eclipse.editor.models.AdaptedConnector;
 
 public class OfficeFloorHoverHandlePartFactory extends DefaultHoverIntentHandlePartFactory {
 

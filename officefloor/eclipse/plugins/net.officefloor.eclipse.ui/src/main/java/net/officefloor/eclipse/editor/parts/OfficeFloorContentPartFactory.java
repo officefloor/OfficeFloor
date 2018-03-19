@@ -40,7 +40,7 @@ import net.officefloor.eclipse.editor.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.models.AdaptedParentFactory;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroup;
-import net.officefloor.model.ConnectionModel;
+import net.officefloor.eclipse.editor.models.RootModelAware;
 import net.officefloor.model.Model;
 
 public class OfficeFloorContentPartFactory<R extends Model>
@@ -109,36 +109,60 @@ public class OfficeFloorContentPartFactory<R extends Model>
 		this.models.values().forEach((model) -> model.init(this.injector, this.models));
 
 		// Validate all the models
-		this.models.values().forEach((model) -> model.validate(this.models));
+		this.models.values().forEach((model) -> model.validate());
 
-		// Load the models
-		List<Model> models = new LinkedList<>();
-		for (Function<R, List<? extends Model>> getParents : this.getParentFunctions) {
-			List<? extends Model> parents = getParents.apply(this.rootModel);
-			models.addAll(parents);
-		}
-
-		// Adapt the models
-		Set<AdaptedModel<?>> adaptedModels = new HashSet<>();
+		// Load with dependencies injected
 		OfficeFloorContentPartFactory<?> factory = injector.getInstance(OfficeFloorContentPartFactory.class);
-		for (Model model : models) {
-			AdaptedParent<?> adaptedModel = (AdaptedParent<?>) factory.createAdaptedModel(model);
 
-			// Add the adapted model
-			adaptedModels.add(adaptedModel);
+		// Load the palette models
+		List<AdaptedModel<?>> paletteModels = new LinkedList<>();
+		for (AbstractAdaptedFactory<?, ?, ?> adaptedFactory : this.models.values()) {
+			if (adaptedFactory instanceof AdaptedParentFactory) {
+				AdaptedParentFactory<?, ?, ?> parentFactory = (AdaptedParentFactory<?, ?, ?>) adaptedFactory;
 
-			// Load the connections
-			List<ConnectionModel> connections = adaptedModel.getConnections();
-			for (ConnectionModel connection : connections) {
-
-				// Add the adapted connection
-				AdaptedModel<?> adaptedConnection = factory.createAdaptedModel(connection);
-				adaptedModels.add(adaptedConnection);
+				// Include if providing prototype
+				Model prototype = parentFactory.getPalettePrototype();
+				if (prototype != null) {
+					AdaptedModel<?> adaptedPrototype = factory.createAdaptedModel(prototype);
+					paletteModels.add(adaptedPrototype);
+				}
 			}
 		}
+		palette.getContents().setAll(paletteModels);
 
-		// Load the adapted models
-		content.getContents().setAll(adaptedModels);
+		// Create runnable to load the content models
+		Runnable loadContentModels = () -> {
+			// Load the content models
+			List<Model> contentModels = new LinkedList<>();
+			for (Function<R, List<? extends Model>> getParents : this.getParentFunctions) {
+				List<? extends Model> parents = getParents.apply(this.rootModel);
+				contentModels.addAll(parents);
+			}
+
+			// Adapt the content models
+			Set<AdaptedModel<?>> adaptedContentModels = new HashSet<>();
+			for (Model model : contentModels) {
+				AdaptedParent<?> adaptedModel = (AdaptedParent<?>) factory.createAdaptedModel(model);
+
+				// Add the adapted model
+				adaptedContentModels.add(adaptedModel);
+
+				// Load the adapted connections
+				adaptedContentModels.addAll(adaptedModel.getConnections());
+			}
+
+			// Load the adapted models
+			content.getContents().setAll(adaptedContentModels);
+		};
+
+		// Initial load of content models
+		loadContentModels.run();
+
+		// Create property change listener to reload on change
+		this.rootModel.addPropertyChangeListener((event) -> {
+
+			loadContentModels.run();
+		});
 	}
 
 	/**
@@ -162,7 +186,8 @@ public class OfficeFloorContentPartFactory<R extends Model>
 		if (builder != null) {
 
 			// Create and register the adapted model
-			adapted = builder.newAdaptedModel(model);
+			this.configure(model);
+			adapted = this.configure(builder.newAdaptedModel(model));
 			this.modelToAdaption.put(model, adapted);
 			return adapted;
 		}
@@ -171,13 +196,28 @@ public class OfficeFloorContentPartFactory<R extends Model>
 		throw new IllegalStateException("Non-adapted model " + model.getClass().getName());
 	}
 
+	/**
+	 * Loads the root {@link Model} if {@link RootModelAware}.
+	 * 
+	 * @param item
+	 *            Item.
+	 */
+	@SuppressWarnings("unchecked")
+	private <I> I configure(I item) {
+		if (item instanceof RootModelAware) {
+			RootModelAware<R> rootModelAware = (RootModelAware<R>) item;
+			rootModelAware.setRootModel(this.rootModel);
+		}
+		return item;
+	}
+
 	/*
 	 * ====================== AdaptedBuilderContext =======================
 	 */
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <r extends Model> AdaptedRootBuilder<r> setRootModel(Class<r> rootModelClass) {
+	public <r extends Model> AdaptedRootBuilder<r> root(Class<r> rootModelClass) {
 		this.rootModelClass = (Class<R>) rootModelClass;
 		return (AdaptedRootBuilder<r>) this;
 	};
@@ -188,10 +228,11 @@ public class OfficeFloorContentPartFactory<R extends Model>
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <M extends Model, E extends Enum<E>> AdaptedParentBuilder<M, E> addParent(Class<M> modelClass,
-			Function<R, List<M>> getParents, ViewFactory<M, AdaptedParent<M>> viewFactory) {
+	public <M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, M, E> parent(
+			Class<M> modelClass, Function<R, List<M>> getParents, ViewFactory<M, AdaptedParent<M>> viewFactory,
+			RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
-		return new AdaptedParentFactory<>(modelClass, viewFactory, this);
+		return new AdaptedParentFactory<R, M, E>(modelClass, viewFactory, this);
 	}
 
 	/*
@@ -204,15 +245,15 @@ public class OfficeFloorContentPartFactory<R extends Model>
 
 		// Provide part for adapted
 		if (content instanceof AdaptedParent) {
-			return this.injector.getInstance(AdaptedParentPart.class);
+			return this.configure(this.injector.getInstance(AdaptedParentPart.class));
 		} else if (content instanceof ChildrenGroup) {
-			return this.injector.getInstance(ChildrenGroupPart.class);
+			return this.configure(this.injector.getInstance(ChildrenGroupPart.class));
 		} else if (content instanceof AdaptedChild) {
-			return this.injector.getInstance(AdaptedChildPart.class);
+			return this.configure(this.injector.getInstance(AdaptedChildPart.class));
 		} else if (content instanceof AdaptedConnection) {
-			return this.injector.getInstance(AdaptedConnectionPart.class);
+			return this.configure(this.injector.getInstance(AdaptedConnectionPart.class));
 		} else if (content instanceof AdaptedConnector) {
-			return this.injector.getInstance(AdaptedConnectorPart.class);
+			return this.configure(this.injector.getInstance(AdaptedConnectorPart.class));
 		}
 
 		// Unknown model
