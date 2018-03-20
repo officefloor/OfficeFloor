@@ -1,0 +1,8 @@
+.OfficeFloorManagedObjectSourceModel {
+	-fx-background-color: #999;
+	
+}
+
+.OfficeFloorManagedObjectSourceModel .dependencies {
+	-fx-padding: 10px;
+}
