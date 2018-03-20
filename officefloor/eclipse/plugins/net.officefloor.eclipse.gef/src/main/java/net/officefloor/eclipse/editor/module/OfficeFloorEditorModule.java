@@ -179,20 +179,18 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.role(DefaultFocusFeedbackPartFactory.FOCUS_FEEDBACK_GEOMETRY_PROVIDER))
 				.to(GeometricOutlineProvider.class);
 
-		// transaction policy for resize + transform
+		// Allow moving
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ResizePolicy.class);
-
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(BendConnectionPolicy.class);
 
-		// interaction handler to relocate on drag
+		// Interaction handler to relocate on drag
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TranslateSelectedOnDragHandler.class);
 
 		// drag individual segments
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(BendOnSegmentDragHandler.class);
-
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
 
-		// clickable area resizing
+		// Clickable area resizing
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ConnectionClickableAreaBehavior.class);
 	}
 

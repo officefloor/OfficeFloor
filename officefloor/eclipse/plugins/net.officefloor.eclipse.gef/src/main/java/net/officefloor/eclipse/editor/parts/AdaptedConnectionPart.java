@@ -76,6 +76,11 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	}
 
 	@Override
+	protected void doDetachFromAnchorageVisual(IVisualPart<? extends Node> anchorage, String role) {
+		// Should be removed via operations
+	}
+
+	@Override
 	protected List<? extends Object> doGetContentChildren() {
 		return Collections.emptyList();
 	}
@@ -98,6 +103,17 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 
 	@Override
 	public void setContentBendPoints(List<BendPoint> bendPoints) {
+
+		// Update the bend points
+		for (BendPoint point : bendPoints) {
+			if (!point.isAttached()) {
+				System.out.println("TODO REMOVE bp " + point.getPosition() + " [disconnect]");
+			} else {
+				AdaptedConnector<?> connector = (AdaptedConnector<?>) point.getContentAnchorage();
+				System.out.println("TODO REMOVE bp " + point.getPosition() + " - "
+						+ connector.getParentAdaptedChild().getModel().getClass().getName());
+			}
+		}
 	}
 
 }

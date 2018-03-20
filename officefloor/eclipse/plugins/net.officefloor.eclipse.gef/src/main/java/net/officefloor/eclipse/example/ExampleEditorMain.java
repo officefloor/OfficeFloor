@@ -108,8 +108,7 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				(p) -> p.getRootModel().addOfficeFloorManagedObjectSource(p.position(
 						new OfficeFloorManagedObjectSourceModel("Created Managed Object Source", null, null, null))));
 		mos.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorManagedObjectSource(ctx.getModel())),
-				(ctx) -> ctx.createImageWithHover(OfficeFloorModel.class, DefaultImages.DELETE_IMAGE,
-						DefaultImages.DELETE_IMAGE_HOVER));
+				DefaultImages.DELETE);
 
 		// Managed Object Source Input Dependencies
 		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceInputDependencyModel, OfficeFloorManagedObjectSourceInputDependencyEvent> mosDependencies = mos
@@ -175,8 +174,7 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		team.create(new OfficeFloorTeamModel("Team", null),
 				(p) -> p.getRootModel().addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", null))));
 		team.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
-				(ctx) -> ctx.createImageWithHover(OfficeFloorModel.class, DefaultImages.DELETE_IMAGE,
-						DefaultImages.DELETE_IMAGE_HOVER));
+				DefaultImages.DELETE);
 	}
 
 	@Override

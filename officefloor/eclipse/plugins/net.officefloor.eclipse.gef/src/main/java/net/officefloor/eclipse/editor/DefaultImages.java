@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.editor;
 
+import net.officefloor.model.officefloor.OfficeFloorModel;
+
 /**
  * Default images.
  * 
@@ -33,6 +35,12 @@ public class DefaultImages {
 	 * Delete image hover name.
 	 */
 	public static final String DELETE_IMAGE_HOVER = "/delete_hover.gif";
+
+	/**
+	 * {@link AdaptedActionVisualFactory} for default delete image.
+	 */
+	public static final AdaptedActionVisualFactory DELETE = (context) -> context
+			.createImageWithHover(OfficeFloorModel.class, DELETE_IMAGE, DELETE_IMAGE_HOVER);
 
 	/**
 	 * All access via static methods.
