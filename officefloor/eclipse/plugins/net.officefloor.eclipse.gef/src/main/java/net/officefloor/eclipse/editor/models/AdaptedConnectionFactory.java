@@ -28,9 +28,11 @@ import com.google.inject.Injector;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
+import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
+import net.officefloor.model.change.Change;
 
 /**
  * Factory for an {@link AdaptedConnection}.
@@ -60,6 +62,11 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 * {@link ModelToConnection} for target {@link Model}.
 	 */
 	private ModelToConnection<?, ?, ?> targetConnector;
+
+	/**
+	 * {@link ConnectionRemover}.
+	 */
+	private ConnectionRemover<R, O, C> removeConnection;
 
 	/**
 	 * Instantiate.
@@ -123,6 +130,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		this.targetModelClass = targetModel;
 		this.getTarget = getTarget;
 		this.targetConnector = new ModelToConnection<>(getConnections, targetChangeEvents);
+		this.removeConnection = removeConnection;
 	}
 
 	/**
@@ -130,7 +138,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 */
 	public static class AdaptedConnectionImpl<R extends Model, O, S extends Model, C extends ConnectionModel, E extends Enum<E>>
 			extends AbstractAdaptedModel<R, O, C, E, AdaptedConnection<C>, AdaptedConnectionFactory<R, O, S, C, E>>
-			implements AdaptedConnection<C> {
+			implements AdaptedConnection<C>, ModelActionContext<R, O, C, AdaptedConnection<C>> {
 
 		@Override
 		protected void init() {
@@ -146,6 +154,25 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		public AdaptedChild<?> getTarget() {
 			Model target = this.getFactory().getTarget.apply(this.getModel());
 			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(target);
+		}
+
+		@Override
+		public void remove() {
+			this.getFactory().removeConnection.removeConnection(this);
+		}
+
+		/*
+		 * ===================== ModelActionContext =======================
+		 */
+		
+		@Override
+		public AdaptedConnection<C> getAdaptedModel() {
+			return this;
+		}
+
+		@Override
+		public void execute(Change<?> change) {
+			this.getChangeExecutor().execute(change);
 		}
 	}
 

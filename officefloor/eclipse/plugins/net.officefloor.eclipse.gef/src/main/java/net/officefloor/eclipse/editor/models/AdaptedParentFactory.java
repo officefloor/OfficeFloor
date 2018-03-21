@@ -259,16 +259,6 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		 */
 
 		@Override
-		public R getRootModel() {
-			return super.getRootModel();
-		}
-
-		@Override
-		public O getOperations() {
-			return super.getOperations();
-		}
-
-		@Override
 		public AdaptedParent<M> getAdaptedModel() {
 			return this;
 		}

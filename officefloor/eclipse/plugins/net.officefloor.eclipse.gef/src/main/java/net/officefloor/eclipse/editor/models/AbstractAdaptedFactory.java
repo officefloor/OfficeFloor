@@ -284,7 +284,7 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		 * 
 		 * @return Root {@link Model}.
 		 */
-		protected R getRootModel() {
+		public R getRootModel() {
 			return this.rootModel;
 		}
 
@@ -293,7 +293,7 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		 * 
 		 * @return Operations.
 		 */
-		protected O getOperations() {
+		public O getOperations() {
 			return this.operations;
 		}
 

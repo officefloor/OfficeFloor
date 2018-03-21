@@ -26,10 +26,11 @@ import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.ChildrenGroup;
-import net.officefloor.eclipse.editor.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroupImpl;
 
 /**
@@ -39,6 +40,11 @@ import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroupI
  */
 public class ChildrenGroupPart extends AbstractContentPart<Pane> {
 
+	/**
+	 * {@link ListChangeListener} to refresh the children.
+	 */
+	private final ListChangeListener<AdaptedChild<?>> changeListener = (change) -> this.refreshContentChildren();
+
 	@Override
 	public ChildrenGroup<?, ?> getContent() {
 		return (ChildrenGroup<?, ?>) super.getContent();
@@ -46,17 +52,21 @@ public class ChildrenGroupPart extends AbstractContentPart<Pane> {
 
 	@Override
 	public void setContent(Object content) {
+
+		// Stop listen on possible existing content
+		if (this.getContent() != null) {
+			this.getContent().getChildren().removeListener(this.changeListener);
+		}
+
+		// Load the new content
 		if ((content != null) && (!(content instanceof ChildrenGroup))) {
 			throw new IllegalArgumentException("Only " + ChildrenGroup.class.getSimpleName() + " supported.");
 		}
 		super.setContent(content);
 
-		// Refresh on change
+		// Listen on changes
 		if (content != null) {
-			AbstractAdaptedFactory.registerEventListener(this.getContent().getParent().getModel(),
-					this.getContent().getEvents(), (event) -> {
-						this.refreshContentChildren();
-					});
+			this.getContent().getChildren().addListener(this.changeListener);
 		}
 	}
 

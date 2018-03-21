@@ -40,4 +40,9 @@ public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedMod
 	 */
 	AdaptedChild<?> getTarget();
 
+	/**
+	 * Removes the {@link ConnectionModel}.
+	 */
+	void remove();
+
 }

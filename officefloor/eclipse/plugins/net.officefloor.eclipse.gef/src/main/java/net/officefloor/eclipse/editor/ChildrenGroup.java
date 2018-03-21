@@ -17,8 +17,7 @@
  */
 package net.officefloor.eclipse.editor;
 
-import java.util.List;
-
+import javafx.collections.ObservableList;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.model.Model;
 
@@ -48,7 +47,7 @@ public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
 	 * 
 	 * @return {@link AdaptedChild} instances.
 	 */
-	List<AdaptedChild<?>> getChildren();
+	ObservableList<AdaptedChild<?>> getChildren();
 
 	/**
 	 * Obtains the events.

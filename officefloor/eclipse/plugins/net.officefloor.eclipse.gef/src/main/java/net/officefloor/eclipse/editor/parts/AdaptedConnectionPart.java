@@ -104,15 +104,18 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	@Override
 	public void setContentBendPoints(List<BendPoint> bendPoints) {
 
-		// Update the bend points
-		for (BendPoint point : bendPoints) {
-			if (!point.isAttached()) {
-				System.out.println("TODO REMOVE bp " + point.getPosition() + " [disconnect]");
-			} else {
-				AdaptedConnector<?> connector = (AdaptedConnector<?>) point.getContentAnchorage();
-				System.out.println("TODO REMOVE bp " + point.getPosition() + " - "
-						+ connector.getParentAdaptedChild().getModel().getClass().getName());
-			}
+		// Obtain the start and end points
+		BendPoint start = bendPoints.get(0);
+		BendPoint end = bendPoints.get(bendPoints.size() - 1);
+
+		// Remove connection if no longer connected
+		if ((!start.isAttached()) || (!end.isAttached())) {
+
+			// TODO REMOVE
+			System.out.println("TODO REMOVE removing connection " + this.getContent().getModel().getClass().getName());
+
+			// Detached, so remove the connection
+			this.getContent().remove();
 		}
 	}
 
