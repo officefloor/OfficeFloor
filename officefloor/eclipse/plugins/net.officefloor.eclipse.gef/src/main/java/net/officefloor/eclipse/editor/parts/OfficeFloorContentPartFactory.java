@@ -85,6 +85,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private O operations;
 
 	/**
+	 * {@link IViewer} for the content.
+	 */
+	private IViewer contentViewer;
+
+	/**
 	 * Registers the {@link AbstractAdaptedFactory}.
 	 * 
 	 * @param builder
@@ -114,6 +119,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		}
 		this.rootModel = (R) rootModel;
 		this.operations = this.createOperations.apply(this.rootModel);
+		this.contentViewer = content;
 
 		// Initialise all the models
 		this.models.values().forEach((model) -> model.init(this.injector, this.models));
@@ -140,38 +146,41 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		}
 		palette.getContents().setAll(paletteModels);
 
-		// Create runnable to load the content models
-		Runnable loadContentModels = () -> {
-			// Load the content models
-			List<Model> contentModels = new LinkedList<>();
-			for (Function<R, List<? extends Model>> getParents : this.getParentFunctions) {
-				List<? extends Model> parents = getParents.apply(this.rootModel);
-				contentModels.addAll(parents);
-			}
-
-			// Adapt the content models
-			Set<AdaptedModel<?>> adaptedContentModels = new HashSet<>();
-			for (Model model : contentModels) {
-				AdaptedParent<?> adaptedModel = (AdaptedParent<?>) factory.createAdaptedModel(model);
-
-				// Add the adapted model
-				adaptedContentModels.add(adaptedModel);
-
-				// Load the adapted connections
-				adaptedContentModels.addAll(adaptedModel.getConnections());
-			}
-
-			// Load the adapted models
-			content.getContents().setAll(adaptedContentModels);
-		};
-
 		// Initial load of content models
-		loadContentModels.run();
+		this.loadContentModels();
 
 		// Create property change listener to reload on change
 		this.rootModel.addPropertyChangeListener((event) -> {
-			loadContentModels.run();
+			this.loadContentModels();
 		});
+	}
+	
+	/**
+	 * Loads the content {@link Model} instances into the content {@link IViewer}.
+	 */
+	public void loadContentModels() {
+
+		// Load the content models
+		List<Model> contentModels = new LinkedList<>();
+		for (Function<R, List<? extends Model>> getParents : this.getParentFunctions) {
+			List<? extends Model> parents = getParents.apply(this.rootModel);
+			contentModels.addAll(parents);
+		}
+
+		// Adapt the content models
+		Set<AdaptedModel<?>> adaptedContentModels = new HashSet<>();
+		for (Model model : contentModels) {
+			AdaptedParent<?> adaptedModel = (AdaptedParent<?>) this.createAdaptedModel(model);
+
+			// Add the adapted model
+			adaptedContentModels.add(adaptedModel);
+
+			// Load the adapted connections
+			adaptedContentModels.addAll(adaptedModel.getConnections());
+		}
+
+		// Load the adapted models
+		this.contentViewer.getContents().setAll(adaptedContentModels);
 	}
 
 	/**

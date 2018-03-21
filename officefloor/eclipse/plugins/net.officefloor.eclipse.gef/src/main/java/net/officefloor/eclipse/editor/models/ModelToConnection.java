@@ -63,4 +63,13 @@ public class ModelToConnection<M extends Model, E extends Enum<E>, C extends Con
 		return this.getConnections.apply(model);
 	}
 
+	/**
+	 * Obtains the {@link ConnectionModel} change event {@link Enum} instances.
+	 * 
+	 * @return {@link ConnectionModel} change event {@link Enum} instances.
+	 */
+	public E[] getConnectionChangeEvents() {
+		return this.connectionChangeEvents;
+	}
+
 }

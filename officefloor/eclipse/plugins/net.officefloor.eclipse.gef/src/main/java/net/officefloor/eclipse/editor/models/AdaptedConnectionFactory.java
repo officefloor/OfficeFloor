@@ -164,7 +164,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		/*
 		 * ===================== ModelActionContext =======================
 		 */
-		
+
 		@Override
 		public AdaptedConnection<C> getAdaptedModel() {
 			return this;

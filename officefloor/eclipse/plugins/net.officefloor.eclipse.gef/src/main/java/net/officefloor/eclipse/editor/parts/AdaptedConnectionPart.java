@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.gef.fx.anchors.IAnchor;
 import org.eclipse.gef.fx.nodes.Connection;
+import org.eclipse.gef.fx.nodes.OrthogonalRouter;
 import org.eclipse.gef.fx.nodes.PolyBezierInterpolator;
 import org.eclipse.gef.mvc.fx.parts.IBendableContentPart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
@@ -31,6 +32,11 @@ import net.officefloor.model.ConnectionModel;
 
 public class AdaptedConnectionPart<C extends ConnectionModel>
 		extends AbstractAdaptedPart<C, AdaptedConnection<C>, Connection> implements IBendableContentPart<Connection> {
+
+	/**
+	 * Capture {@link IVisualPart} parent on removing to enable handles to update.
+	 */
+	private IVisualPart<? extends Node> parent = null;
 
 	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
@@ -89,6 +95,7 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	protected Connection doCreateVisual() {
 		Connection connection = new Connection();
 		connection.setInterpolator(new PolyBezierInterpolator());
+		connection.setRouter(new OrthogonalRouter());
 		return connection;
 	}
 
@@ -102,21 +109,32 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	}
 
 	@Override
+	public IVisualPart<? extends Node> getParent() {
+		if (this.parent != null) {
+			return this.parent;
+		}
+		return super.getParent();
+	}
+
+	@Override
 	public void setContentBendPoints(List<BendPoint> bendPoints) {
 
 		// Obtain the start and end points
-		BendPoint start = bendPoints.get(0);
-		BendPoint end = bendPoints.get(bendPoints.size() - 1);
+		if (bendPoints.size() >= 2) {
+			BendPoint start = bendPoints.get(0);
+			BendPoint end = bendPoints.get(bendPoints.size() - 1);
 
-		// Remove connection if no longer connected
-		if ((!start.isAttached()) || (!end.isAttached())) {
+			// Remove connection if no longer connected
+			if ((!start.isAttached()) || (!end.isAttached())) {
 
-			// TODO REMOVE
-			System.out.println("TODO REMOVE removing connection " + this.getContent().getModel().getClass().getName());
+				// Capture parent (so considers still in model for updating handles)
+				this.parent = this.getParent();
 
-			// Detached, so remove the connection
-			this.getContent().remove();
+				// Detached, so remove the connection
+				this.getContent().remove();
+			}
 		}
+
 	}
 
 }

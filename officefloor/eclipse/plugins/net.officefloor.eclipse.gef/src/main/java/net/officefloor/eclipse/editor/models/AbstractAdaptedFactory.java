@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -295,6 +296,14 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		 */
 		public O getOperations() {
 			return this.operations;
+		}
+
+		/**
+		 * Triggers refreshing the content {@link Model} instances. This includes the
+		 * {@link ConnectionModel} instances.
+		 */
+		public void refreshContent() {
+			this.getFactory().getContentPartFactory().loadContentModels();
 		}
 
 		/**

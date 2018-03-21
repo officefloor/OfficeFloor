@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.editor.models;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -148,6 +149,25 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	@SuppressWarnings("unchecked")
 	public void validate() throws IllegalStateException {
 
+		// Ensure all the connection events are same enum
+		E firstEvent = null;
+		for (Class<? extends ConnectionModel> connectionClass : this.connections.keySet()) {
+			ModelToConnection<M, E, ? extends ConnectionModel> connector = this.connections.get(connectionClass);
+			E[] events = connector.getConnectionChangeEvents();
+			for (int i = 0; i < events.length; i++) {
+				E checkEvent = events[i];
+				if (firstEvent == null) {
+					firstEvent = checkEvent;
+				} else {
+					if (firstEvent.getDeclaringClass() != checkEvent.getDeclaringClass()) {
+						throw new IllegalStateException(
+								"Differing connection event enums for model " + this.getModelClass().getName() + " ["
+										+ firstEvent.name() + ", " + checkEvent.name() + "]");
+					}
+				}
+			}
+		}
+
 		// Construct the view (ensures all children groups are registered)
 		M model;
 		try {
@@ -247,6 +267,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		 */
 
 		@Override
+		@SuppressWarnings("unchecked")
 		protected void init() {
 
 			// Load the children groups
@@ -255,10 +276,27 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 				this.childrenGroups.add(childrenGroupFactory.createChildrenGroup(this));
 			}
 
-			// Load the connectors
+			// Load the connectors and events for changes
 			this.connectors = new HashMap<>(this.getFactory().connections.size());
+			List<E> connectionChangeEvents = new ArrayList<>();
 			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
 				this.connectors.put(connectionClass, new AdaptedConnector<>(this, connectionClass));
+
+				// Obtain the model to connector
+				ModelToConnection<M, E, ?> connector = this.getFactory().connections.get(connectionClass);
+				connectionChangeEvents.addAll(Arrays.asList(connector.getConnectionChangeEvents()));
+			}
+
+			// Handle change in connectors
+			if (connectionChangeEvents.size() > 0) {
+				E[] events = (E[]) Array.newInstance(connectionChangeEvents.get(0).getDeclaringClass(),
+						connectionChangeEvents.size());
+				for (int i = 0; i < events.length; i++) {
+					events[i] = connectionChangeEvents.get(i);
+				}
+				this.registerEventListener(connectionChangeEvents.toArray(events), (event) -> {
+					this.refreshContent();
+				});
 			}
 
 			// Determine if label
