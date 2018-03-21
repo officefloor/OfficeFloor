@@ -115,6 +115,20 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 			ctx.getModel().addOfficeFloorManagedObjectSourceInputDependency(
 					new OfficeFloorManagedObjectSourceInputDependencyModel("Added dependency", null));
 		}, DefaultImages.EDIT);
+		mos.action((ctx) -> {
+			if (ctx.getModel().getOfficeFloorManagedObjectSourceFlows().size() > 0) {
+				ctx.getModel().removeOfficeFloorManagedObjectSourceFlow(
+						ctx.getModel().getOfficeFloorManagedObjectSourceFlows().get(0));
+			}
+			if (ctx.getModel().getOfficeFloorManagedObjectSourceTeams().size() > 0) {
+				ctx.getModel().removeOfficeFloorManagedObjectSourceTeam(
+						ctx.getModel().getOfficeFloorManagedObjectSourceTeams().get(0));
+			}
+			if (ctx.getModel().getOfficeFloorManagedObjectSourceInputDependencies().size() > 0) {
+				ctx.getModel().removeOfficeFloorManagedObjectSourceInputDependency(
+						ctx.getModel().getOfficeFloorManagedObjectSourceInputDependencies().get(0));
+			}
+		}, DefaultImages.DELETE);
 		mos.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorManagedObjectSource(ctx.getModel())),
 				DefaultImages.DELETE);
 
