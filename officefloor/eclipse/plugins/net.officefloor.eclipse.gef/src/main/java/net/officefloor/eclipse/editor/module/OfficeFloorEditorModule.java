@@ -70,6 +70,7 @@ import com.google.inject.multibindings.MapBinder;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.behaviors.PaletteFocusBehavior;
+import net.officefloor.eclipse.editor.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreateAdaptedParentOnDragHandler;
 import net.officefloor.eclipse.editor.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
@@ -382,10 +383,13 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 
 	protected void bindAdaptedConnectorInContentViewerContext(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 
-		// bind dynamic anchor provider
+		// Bind dynamic anchor provider
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(DefaultAnchorProvider.class);
 
-		// normalize connected on drag
+		// Drag to create connection
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(CreateAdaptedConnectionOnDragHandler.class);
+
+		// Normalize connected on drag
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ConnectedSupport.class);
 		adapterMapBinder.addBinding(AdapterKey.role(SnapToGrid.SOURCE_SNAPPING_LOCATION_PROVIDER))
 				.to(TopLeftSnappingLocationProvider.class);

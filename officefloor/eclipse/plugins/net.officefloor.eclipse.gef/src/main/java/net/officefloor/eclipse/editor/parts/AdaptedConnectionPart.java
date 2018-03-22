@@ -26,9 +26,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
 import javafx.scene.Node;
+import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.models.ProxyAdaptedConnection;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
 
 public class AdaptedConnectionPart<C extends ConnectionModel>
 		extends AbstractAdaptedPart<C, AdaptedConnection<C>, Connection> implements IBendableContentPart<Connection> {
@@ -41,12 +44,30 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
 		SetMultimap<Object, String> anchorages = HashMultimap.create();
-		AdaptedConnector<?> source = this.getContent().getSource()
-				.getAdaptedConnector(this.getContent().getModel().getClass());
-		anchorages.put(source, SOURCE_ROLE);
-		AdaptedConnector<?> target = this.getContent().getTarget()
-				.getAdaptedConnector(this.getContent().getModel().getClass());
-		anchorages.put(target, TARGET_ROLE);
+
+		// Determine if proxy connection
+		if (this.getContent() instanceof ProxyAdaptedConnection) {
+			ProxyAdaptedConnection proxy = (ProxyAdaptedConnection) this.getContent();
+			anchorages.put(proxy.getSourceAdaptedConnector(), SOURCE_ROLE);
+			return anchorages; // never connected
+		}
+
+		// Load the source
+		AdaptedChild<? extends Model> sourceChild = this.getContent().getSource();
+		if (sourceChild != null) {
+			AdaptedConnector<?> sourceConnector = sourceChild
+					.getAdaptedConnector(this.getContent().getModel().getClass());
+			anchorages.put(sourceConnector, SOURCE_ROLE);
+		}
+
+		// Load the target
+		AdaptedChild<? extends Model> targetChild = this.getContent().getTarget();
+		if (targetChild != null) {
+			AdaptedConnector<?> target = targetChild.getAdaptedConnector(this.getContent().getModel().getClass());
+			anchorages.put(target, TARGET_ROLE);
+		}
+
+		// Return the anchorages
 		return anchorages;
 	}
 
@@ -119,7 +140,14 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	@Override
 	public void setContentBendPoints(List<BendPoint> bendPoints) {
 
-		// Obtain the start and end points
+		// Load the bend points to proxy (to create actual connection)
+		if (this.getContent() instanceof ProxyAdaptedConnection) {
+			ProxyAdaptedConnection proxy = (ProxyAdaptedConnection) this.getContent();
+			proxy.setBendPoints(bendPoints);
+			return; // connection
+		}
+
+		// Actual connection change, so determine if still connected
 		if (bendPoints.size() >= 2) {
 			BendPoint start = bendPoints.get(0);
 			BendPoint end = bendPoints.get(bendPoints.size() - 1);
@@ -134,7 +162,6 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 				this.getContent().remove();
 			}
 		}
-
 	}
 
 }

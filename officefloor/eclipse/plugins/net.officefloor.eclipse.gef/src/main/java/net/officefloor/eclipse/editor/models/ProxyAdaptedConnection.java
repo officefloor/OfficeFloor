@@ -17,6 +17,10 @@
  */
 package net.officefloor.eclipse.editor.models;
 
+import java.util.List;
+
+import org.eclipse.gef.mvc.fx.parts.IBendableContentPart.BendPoint;
+
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.model.ConnectionModel;
@@ -29,18 +33,54 @@ import net.officefloor.model.ConnectionModel;
 public class ProxyAdaptedConnection implements AdaptedConnection<ConnectionModel> {
 
 	/**
-	 * Source {@link AdaptedChild}.
+	 * Source {@link AdaptedConnector}.
 	 */
-	private AdaptedChild<?> source;
+	private final AdaptedConnector<?> sourceConnector;
+
+	/**
+	 * {@link BendPoint} instances.
+	 */
+	private List<BendPoint> bendPoints = null;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param source
-	 *            Source {@link AdaptedChild}.
+	 * @param sourceConnector
+	 *            Source {@link AdaptedConnector}.
 	 */
-	public ProxyAdaptedConnection(AdaptedChild<?> source) {
-		this.source = source;
+	public ProxyAdaptedConnection(AdaptedConnector<?> sourceConnector) {
+		this.sourceConnector = sourceConnector;
+	}
+
+	/**
+	 * Obtains the source {@link AdaptedConnector}.
+	 * 
+	 * @return Source {@link AdaptedConnector}.
+	 */
+	public AdaptedConnector<?> getSourceAdaptedConnector() {
+		return this.sourceConnector;
+	}
+
+	/**
+	 * Specifies the {@link BendPoint} instances.
+	 * 
+	 * @param bendPoints
+	 *            {@link BendPoint} instances.
+	 */
+	public void setBendPoints(List<BendPoint> bendPoints) {
+		this.bendPoints = bendPoints;
+	}
+
+	/**
+	 * Obtains the target {@link BendPoint}.
+	 * 
+	 * @return Target {@link BendPoint}.
+	 */
+	public BendPoint getTargetBendPoint() {
+		if (this.bendPoints.size() >= 2) {
+			return this.bendPoints.get(this.bendPoints.size() - 1);
+		}
+		return null;
 	}
 
 	/*
@@ -54,17 +94,17 @@ public class ProxyAdaptedConnection implements AdaptedConnection<ConnectionModel
 
 	@Override
 	public AdaptedChild<?> getSource() {
-		return this.source;
+		throw new IllegalStateException("Should not obtain source for " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public AdaptedChild<?> getTarget() {
-		return null;
+		throw new IllegalStateException("Should not obtain target for " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public void remove() {
-		// TODO Auto-generated method stub
+		throw new IllegalStateException("Should not remove " + this.getClass().getSimpleName());
 	}
 
 }
