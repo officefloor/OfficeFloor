@@ -52,6 +52,11 @@ import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
 public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implements IOnDragHandler {
 
 	/**
+	 * Source {@link AdaptedConnectorPart}.
+	 */
+	private AdaptedConnectorPart sourceConnector;
+
+	/**
 	 * {@link ProxyAdaptedConnection}.
 	 */
 	private ProxyAdaptedConnection connection;
@@ -131,6 +136,29 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 				.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
 	}
 
+	/**
+	 * Cleans up the drag.
+	 */
+	protected void cleanupDrag() {
+
+		// Remove the connection
+		restoreRefreshVisuals(this.connectionPart);
+		IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
+		DeletionPolicy deletionPolicy = contentRoot.getAdapter(DeletionPolicy.class);
+		init(deletionPolicy);
+		deletionPolicy.delete(this.connectionPart);
+		commit(deletionPolicy);
+
+		// Connector no longer active
+		this.sourceConnector.setActiveConnector(false);
+
+		// Clear drag details
+		this.sourceConnector = null;
+		this.connectionPart = null;
+		this.bendTargetPart = null;
+		this.dragPolicies = null;
+	}
+
 	/*
 	 * ==================== IOnDragHandler =========================
 	 */
@@ -139,8 +167,11 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 	public void startDrag(MouseEvent event) {
 
 		// Create the proxy connection
-		AdaptedConnectorPart connector = this.getAdaptedConnectorPart();
-		this.connection = new ProxyAdaptedConnection(connector.getContent());
+		this.sourceConnector = this.getAdaptedConnectorPart();
+		this.connection = new ProxyAdaptedConnection(sourceConnector.getContent());
+
+		// Register the connector as active
+		this.sourceConnector.setActiveConnector(true);
 
 		// Create using CreationPolicy from root part
 		CreationPolicy creationPolicy = getHost().getRoot().getAdapter(CreationPolicy.class);
@@ -167,7 +198,7 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 		}
 
 		// Find bend target part
-		this.bendTargetPart = findBendTargetPart(connectionPart, event.getTarget());
+		this.bendTargetPart = this.findBendTargetPart(this.connectionPart, event.getTarget());
 		if (this.bendTargetPart != null) {
 			this.dragPolicies = this.bendTargetPart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
 		}
@@ -178,7 +209,7 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 					event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
 					event.isStillSincePress(), event.getPickResult());
-			for (IOnDragHandler dragPolicy : dragPolicies.values()) {
+			for (IOnDragHandler dragPolicy : this.dragPolicies.values()) {
 				dragPolicy.startDrag(event);
 				dragPolicy.drag(dragEvent, new Dimension());
 			}
@@ -212,10 +243,8 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 			}
 		}
 
-		restoreRefreshVisuals(this.connectionPart);
-		this.connectionPart = null;
-		this.bendTargetPart = null;
-		this.dragPolicies = null;
+		// Clean up the drag
+		this.cleanupDrag();
 	}
 
 	@Override
@@ -231,36 +260,18 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 			}
 		}
 
-		// Capture the target anchor
-		for (IVisualPart<?> anchorage : this.connectionPart.getAnchoragesUnmodifiable().keySet()) {
-			AdaptedConnectorPart targetPart = (AdaptedConnectorPart) anchorage;
-			System.out.println(
-					"Anchorage: " + targetPart.getContent().getParentAdaptedChild().getModel().getClass().getName());
-		}
-
 		// Obtain the target
 		BendPoint targetBendPoint = this.connection.getTargetBendPoint();
 		AdaptedConnector<?> target = (AdaptedConnector<?>) targetBendPoint.getContentAnchorage();
 		if (target != null) {
 
-			// TODO continue from here to create the connection
+			// Have target so create the connection
 			AdaptedConnector<?> source = this.connection.getSourceAdaptedConnector();
-			System.out.println("TODO REMOVE create connection from "
-					+ source.getParentAdaptedChild().getModel().getClass().getName() + " to "
-					+ target.getParentAdaptedChild().getModel().getClass().getName());
+			source.getParentAdaptedChild().createConnection(target.getParentAdaptedChild());
 		}
 
-		// Remove the connection
-		restoreRefreshVisuals(this.connectionPart);
-		IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
-		DeletionPolicy deletionPolicy = contentRoot.getAdapter(DeletionPolicy.class);
-		init(deletionPolicy);
-		deletionPolicy.delete(this.connectionPart);
-		commit(deletionPolicy);
-
-		this.connectionPart = null;
-		this.bendTargetPart = null;
-		this.dragPolicies = null;
+		// Clearn up the drag
+		this.cleanupDrag();
 	}
 
 	@Override

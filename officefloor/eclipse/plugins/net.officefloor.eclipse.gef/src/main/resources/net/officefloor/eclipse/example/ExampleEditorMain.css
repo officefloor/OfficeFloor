@@ -1,8 +1,12 @@
-.OfficeFloorManagedObjectSourceModel {
-	-fx-background-color: #999;
-	
+.parent {
+	-fx-background-color: radial-gradient(radius 100%, #666, #ccc);
+	-fx-background-radius: 20px;
+	-fx-padding: 8px
 }
 
-.OfficeFloorManagedObjectSourceModel .dependencies {
-	-fx-padding: 10px;
+.child {
+	-fx-padding: 3px;
+}
+
+.connector {
 }

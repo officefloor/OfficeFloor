@@ -81,6 +81,24 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	List<AdaptedConnection<?>> getConnections();
 
 	/**
+	 * Indicates if this {@link AdaptedChild} can connect to the target
+	 * {@link AdaptedChild}.
+	 * 
+	 * @param target
+	 *            Target {@link AdaptedChild},
+	 * @return <code>true</code> if can be connected.
+	 */
+	<T extends Model> boolean canConnect(AdaptedChild<T> target);
+
+	/**
+	 * Creates the {@link ConnectionModel} within the {@link Model} structure.
+	 * 
+	 * @param target
+	 *            Target {@link AdaptedChild}.
+	 */
+	<T extends Model> void createConnection(AdaptedChild<T> target);
+
+	/**
 	 * Creates the visual {@link Pane}.
 	 * 
 	 * @param context

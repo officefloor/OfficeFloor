@@ -20,7 +20,7 @@ package net.officefloor.eclipse.example;
 import java.util.function.Supplier;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
-import org.eclipse.gef.geometry.planar.Ellipse;
+import org.eclipse.gef.geometry.planar.Polygon;
 
 import javafx.application.Application;
 import javafx.scene.layout.HBox;
@@ -75,13 +75,9 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 	protected void buildModels(AdaptedBuilderContext builder) {
 
 		// Create connector
-		Supplier<GeometryNode<Ellipse>> createConnector = () -> {
-			GeometryNode<Ellipse> node = new GeometryNode<>(new Ellipse(0, 0, 10, 10));
+		Supplier<GeometryNode<Polygon>> createConnector = () -> {
+			GeometryNode<Polygon> node = new GeometryNode<>(new Polygon(2, 3, 5, 3, 5, 1, 10, 4, 5, 7, 5, 5, 2, 5));
 			node.setFill(Color.BLACK);
-			node.setMinWidth(10);
-			node.setMinWidth(10);
-			node.setMinHeight(10);
-			node.setMaxHeight(10);
 			return node;
 		};
 
@@ -98,7 +94,7 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 							HBox dependenciesFlows = context.addNode(container, new HBox());
 							context.addNode(dependenciesFlows, context.childGroup("dependencies", new VBox()));
 							context.addNode(dependenciesFlows, context.childGroup("flows", new VBox()));
-							context.addNode(container, context.childGroup("teams", new HBox()));
+							context.addNode(container, context.childGroup("teams", new VBox()));
 							return container;
 						}, OfficeFloorEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE,
 						OfficeFloorEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE);
@@ -165,7 +161,7 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 						OfficeFloorManagedObjectSourceEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM)
 				.addChild(OfficeFloorManagedObjectSourceTeamModel.class, (model, context) -> {
 					HBox container = new HBox();
-					GeometryNode<Ellipse> anchor = context.addNode(container, createConnector.get());
+					GeometryNode<?> anchor = context.addNode(container, createConnector.get());
 					context.connector(anchor, OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class);
 					context.label(container);
 					return container;
@@ -188,7 +184,7 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				.parent(OfficeFloorTeamModel.class, (r) -> r.getOfficeFloorTeams(), (model, context) -> {
 					HBox container = new HBox();
 					context.label(container);
-					GeometryNode<Ellipse> anchor = context.addNode(container, createConnector.get());
+					GeometryNode<?> anchor = context.addNode(container, createConnector.get());
 					context.connector(anchor, OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class);
 					return container;
 				}, OfficeFloorEvent.ADD_OFFICE_FLOOR_TEAM, OfficeFloorEvent.REMOVE_OFFICE_FLOOR_TEAM);
@@ -215,10 +211,14 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				new OfficeFloorManagedObjectSourceFlowModel("flow", "net.example.Flow"));
 		OfficeFloorManagedObjectSourceTeamModel mosTeam = new OfficeFloorManagedObjectSourceTeamModel("Team");
 		mos.addOfficeFloorManagedObjectSourceTeam(mosTeam);
+		mos.addOfficeFloorManagedObjectSourceTeam(new OfficeFloorManagedObjectSourceTeamModel("Another"));
 
 		// Team
 		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", "net.example.TeamSource", 100, 300);
 		root.addOfficeFloorTeam(team);
+
+		// Another Team
+		root.addOfficeFloorTeam(new OfficeFloorTeamModel("Team", null, 200, 300));
 
 		// Connection
 		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(

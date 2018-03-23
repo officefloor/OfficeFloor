@@ -43,6 +43,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -326,6 +327,16 @@ public class CreateAdaptedParentOnDragHandler<M extends Model> extends AbstractH
 		@Override
 		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass) {
 			return this.parent.getAdaptedConnector(connectionClass);
+		}
+
+		@Override
+		public <T extends Model> boolean canConnect(AdaptedChild<T> target) {
+			return this.parent.canConnect(target);
+		}
+
+		@Override
+		public <T extends Model> void createConnection(AdaptedChild<T> target) {
+			this.parent.createConnection(target);
 		}
 
 		@Override

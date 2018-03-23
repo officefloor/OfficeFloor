@@ -86,7 +86,12 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	/**
 	 * {@link ModelToConnection} instances.
 	 */
-	private final Map<Class<? extends ConnectionModel>, ModelToConnection<M, E, ? extends ConnectionModel>> connections = new HashMap<>();
+	private final Map<Class<? extends ConnectionModel>, ModelToConnection<R, O, M, E, ? extends ConnectionModel>> connections = new HashMap<>();
+
+	/**
+	 * {@link Map} of {@link ConnectionKey} to {@link AdaptedConnectionFactory}.
+	 */
+	private final Map<ConnectionKey, AdaptedConnectionFactory<R, O, ?, ?, ?>> connectionFactories = new HashMap<>();
 
 	/**
 	 * Instantiate as {@link AdaptedChild}.
@@ -133,12 +138,13 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 */
 	@SuppressWarnings("unchecked")
 	public void loadModelToConnection(Class<? extends ConnectionModel> connectionClass,
-			ModelToConnection<?, ?, ?> modelToConnection) {
+			ModelToConnection<R, O, ?, ?, ?> modelToConnection) {
 		if (this.connections.containsKey(connectionClass)) {
 			throw new IllegalStateException("Connection " + connectionClass.getName() + " already configured for model "
 					+ this.getModelClass().getName());
 		}
-		this.connections.put(connectionClass, (ModelToConnection<M, E, ? extends ConnectionModel>) modelToConnection);
+		this.connections.put(connectionClass,
+				(ModelToConnection<R, O, M, E, ? extends ConnectionModel>) modelToConnection);
 	}
 
 	/*
@@ -152,7 +158,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		// Ensure all the connection events are same enum
 		E firstEvent = null;
 		for (Class<? extends ConnectionModel> connectionClass : this.connections.keySet()) {
-			ModelToConnection<M, E, ? extends ConnectionModel> connector = this.connections.get(connectionClass);
+			ModelToConnection<R, O, M, E, ? extends ConnectionModel> connector = this.connections.get(connectionClass);
 			E[] events = connector.getConnectionChangeEvents();
 			for (int i = 0; i < events.length; i++) {
 				E checkEvent = events[i];
@@ -166,6 +172,26 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 					}
 				}
 			}
+		}
+
+		// Ensure no ambiguity in source to target connections
+		for (Class<? extends ConnectionModel> connectionClass : this.connections.keySet()) {
+			ModelToConnection<R, O, M, E, ? extends ConnectionModel> connector = this.connections.get(connectionClass);
+			Class<?> sourceModelClass = connector.getAdaptedConnectionFactory().getSourceModelClass();
+			Class<?> targetModelClass = connector.getAdaptedConnectionFactory().getTargetModelClass();
+
+			// Determine if same models but multiple connections configured
+			ConnectionKey connectionKey = new ConnectionKey(sourceModelClass, targetModelClass);
+			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = this.connectionFactories.get(connectionKey);
+			if (connectionFactory != null) {
+				throw new IllegalStateException("Ambiguous connection between " + sourceModelClass.getName() + " and "
+						+ targetModelClass.getName() + " for connections " + connectionClass.getName() + " and "
+						+ connectionFactory.getModelClass().getName());
+			}
+
+			// Load the connection factory
+			connectionFactory = connector.getAdaptedConnectionFactory();
+			this.connectionFactories.put(connectionKey, connectionFactory);
 		}
 
 		// Construct the view (ensures all children groups are registered)
@@ -182,6 +208,64 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		AdaptedChildPart<M, AdaptedChild<M>> childPart = this.getInjector().getInstance(AdaptedChildPart.class);
 		childPart.setContent(adaptedModel);
 		childPart.doCreateVisual();
+	}
+
+	/**
+	 * Key to identify unique source/target relationships.
+	 */
+	private static class ConnectionKey {
+
+		/**
+		 * Source {@link Model} {@link Class}.
+		 */
+		private final Class<?> sourceModelClass;
+
+		/**
+		 * Target {@link Model} {@link Class}.
+		 */
+		private final Class<?> targetModelClass;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sourceModelClass
+		 *            Source {@link Model} {@link Class}.
+		 * @param targetModelClass
+		 *            Target {@link Model} {@link Class}.
+		 */
+		public ConnectionKey(Class<?> sourceModelClass, Class<?> targetModelClass) {
+			this.sourceModelClass = sourceModelClass;
+			this.targetModelClass = targetModelClass;
+		}
+
+		/*
+		 * ================= Object ===============================
+		 */
+
+		@Override
+		public int hashCode() {
+			return this.sourceModelClass.hashCode() + this.targetModelClass.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof ConnectionKey)) {
+				return false;
+			}
+			ConnectionKey that = (ConnectionKey) obj;
+
+			// Determine if same
+			if (this.sourceModelClass.equals(that.sourceModelClass)
+					&& (this.targetModelClass.equals(that.targetModelClass))) {
+				return true;
+			} else if (this.sourceModelClass.equals(that.targetModelClass)
+					&& (this.targetModelClass.equals(that.sourceModelClass))) {
+				return true;
+			} else {
+				// Not connecting the same model types
+				return false;
+			}
+		}
 	}
 
 	/*
@@ -232,8 +316,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	public final <C extends ConnectionModel> AdaptedConnectionBuilder<R, O, M, C, E> connectMany(
 			Class<C> connectionClass, Function<M, List<C>> getConnections, Function<C, M> getSource,
 			E... connectionChangeEvents) {
-		this.loadModelToConnection(connectionClass, new ModelToConnection<>(getConnections, connectionChangeEvents));
-		return new AdaptedConnectionFactory<>(connectionClass, getSource, this);
+		AdaptedConnectionFactory<R, O, M, C, E> adaptedConnectionFactory = new AdaptedConnectionFactory<>(
+				connectionClass, this.getModelClass(), getSource, this);
+		this.loadModelToConnection(connectionClass,
+				new ModelToConnection<>(getConnections, connectionChangeEvents, adaptedConnectionFactory));
+		return adaptedConnectionFactory;
 	}
 
 	/**
@@ -283,7 +370,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 				this.connectors.put(connectionClass, new AdaptedConnector<>(this, connectionClass));
 
 				// Obtain the model to connector
-				ModelToConnection<M, E, ?> connector = this.getFactory().connections.get(connectionClass);
+				ModelToConnection<R, O, M, E, ?> connector = this.getFactory().connections.get(connectionClass);
 				connectionChangeEvents.addAll(Arrays.asList(connector.getConnectionChangeEvents()));
 			}
 
@@ -363,8 +450,8 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			List<AdaptedConnection<?>> connections = new ArrayList<>();
 
 			// Load direct connections
-			for (ModelToConnection<M, ?, ? extends ConnectionModel> modelToConnection : this.getFactory().connections
-					.values()) {
+			for (ModelToConnection<R, O, M, ?, ? extends ConnectionModel> modelToConnection : this
+					.getFactory().connections.values()) {
 
 				// Obtain the connections
 				List<? extends ConnectionModel> connectionModels = modelToConnection.getConnections(this.getModel());
@@ -411,6 +498,25 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		@Override
+		public <T extends Model> boolean canConnect(AdaptedChild<T> target) {
+			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = this.getConnectionFactory(target);
+			return (connectionFactory != null);
+		}
+
+		@Override
+		public <T extends Model> void createConnection(AdaptedChild<T> target) {
+
+			// Ensure able to connect
+			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = this.getConnectionFactory(target);
+			if (connectionFactory == null) {
+				return; // no connection
+			}
+
+			// Create the connection
+			connectionFactory.createConnection(this.getModel(), target.getModel());
+		}
+
+		@Override
 		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass) {
 			AdaptedConnector<M> connector = this.connectors.get(connectionClass);
 			if (connector == null) {
@@ -424,6 +530,22 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		@SuppressWarnings("unchecked")
 		public Pane createVisual(AdaptedModelVisualFactoryContext context) {
 			return this.getFactory().viewFactory.createVisual((A) this, context);
+		}
+
+		/**
+		 * Obtains the {@link AdaptedConnectionFactory} for the {@link ConnectionModel}
+		 * to the {@link AdaptedChild}.
+		 * 
+		 * @param target
+		 *            Target {@link AdaptedChild}.
+		 * @return {@link AdaptedConnectionFactory} or <code>null</code> if no
+		 *         {@link ConnectionModel} to {@link AdaptedChild}.
+		 */
+		private AdaptedConnectionFactory<R, O, ?, ?, ?> getConnectionFactory(AdaptedChild<?> target) {
+			Class<?> sourceModelClass = this.getModel().getClass();
+			Class<?> targetModelClass = target.getModel().getClass();
+			ConnectionKey key = new ConnectionKey(sourceModelClass, targetModelClass);
+			return this.getFactory().connectionFactories.get(key);
 		}
 	}
 

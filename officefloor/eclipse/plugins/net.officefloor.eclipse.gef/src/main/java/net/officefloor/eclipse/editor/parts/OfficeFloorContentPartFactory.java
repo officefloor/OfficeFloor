@@ -31,16 +31,21 @@ import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedConnectionBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.models.AdaptedParentFactory;
+import net.officefloor.eclipse.editor.models.ChangeExecutor;
 import net.officefloor.eclipse.editor.models.ChildrenGroupFactory.ChildrenGroupImpl;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
+import net.officefloor.model.change.Change;
 
 public class OfficeFloorContentPartFactory<R extends Model, O>
 		implements IContentPartFactory, AdaptedRootBuilder<R, O>, AdaptedBuilderContext {
@@ -154,7 +159,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			this.loadContentModels();
 		});
 	}
-	
+
 	/**
 	 * Loads the content {@link Model} instances into the content {@link IViewer}.
 	 */
@@ -212,6 +217,52 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 		// As here, model is not configured
 		throw new IllegalStateException("Non-adapted model " + model.getClass().getName());
+	}
+
+	/**
+	 * Adds the {@link ConnectionModel} to the {@link Model} structure.
+	 * 
+	 * @param source
+	 *            Source {@link Model}.
+	 * @param target
+	 *            Target {@link Model}.
+	 * @param createConnection
+	 *            {@link ConnectionFactory}.
+	 */
+	public <S extends Model, T extends Model, C extends ConnectionModel> void addConnection(S source, T target,
+			ConnectionFactory<R, O, S, C, T> createConnection) {
+		createConnection.addConnection(source, target, new ModelActionContext<R, O, C, AdaptedConnection<C>>() {
+
+			@Override
+			public R getRootModel() {
+				return OfficeFloorContentPartFactory.this.rootModel;
+			}
+
+			@Override
+			public O getOperations() {
+				return OfficeFloorContentPartFactory.this.operations;
+			}
+
+			@Override
+			public C getModel() {
+				return null;
+			}
+
+			@Override
+			public AdaptedConnection<C> getAdaptedModel() {
+				return null;
+			}
+
+			@Override
+			public void execute(Change<?> change) {
+				this.getInjector().getInstance(ChangeExecutor.class).execute(change);
+			}
+
+			@Override
+			public Injector getInjector() {
+				return OfficeFloorContentPartFactory.this.injector;
+			}
+		});
 	}
 
 	/*

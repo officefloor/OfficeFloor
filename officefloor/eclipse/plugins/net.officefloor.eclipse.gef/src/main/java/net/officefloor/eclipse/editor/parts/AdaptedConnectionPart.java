@@ -142,9 +142,16 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 
 		// Load the bend points to proxy (to create actual connection)
 		if (this.getContent() instanceof ProxyAdaptedConnection) {
+
+			// Load bend points for proxy connection to create connection
 			ProxyAdaptedConnection proxy = (ProxyAdaptedConnection) this.getContent();
 			proxy.setBendPoints(bendPoints);
-			return; // connection
+
+			// Capture parent (so delete still considers in model)
+			this.parent = this.getParent();
+
+			// Return to create the connection
+			return;
 		}
 
 		// Actual connection change, so determine if still connected

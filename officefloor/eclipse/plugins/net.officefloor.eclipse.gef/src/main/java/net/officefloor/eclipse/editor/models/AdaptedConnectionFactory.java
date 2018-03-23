@@ -44,6 +44,11 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		implements AdaptedConnectionBuilder<R, O, S, C, E> {
 
 	/**
+	 * {@link Class} of the source {@link Model}.
+	 */
+	private final Class<S> sourceModelClass;
+
+	/**
 	 * {@link Function} to obtain the source {@link Model}.
 	 */
 	private final Function<C, S> getSource;
@@ -61,7 +66,12 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	/**
 	 * {@link ModelToConnection} for target {@link Model}.
 	 */
-	private ModelToConnection<?, ?, ?> targetConnector;
+	private ModelToConnection<R, O, ?, ?, ?> targetConnector;
+
+	/**
+	 * {@link ConnectionFactory}.
+	 */
+	private ConnectionFactory<R, O, ? extends Model, ? extends ConnectionModel, ? extends Model> createConnection;
 
 	/**
 	 * {@link ConnectionRemover}.
@@ -78,11 +88,63 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 * @param contentPartFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AdaptedConnectionFactory(Class<C> connectionClass, Function<C, S> getSource,
+	public AdaptedConnectionFactory(Class<C> connectionClass, Class<S> sourceModelClass, Function<C, S> getSource,
 			AdaptedChildFactory<R, O, ?, ?, ?> adaptedChildModelFactory) {
 		super(connectionClass, () -> new AdaptedConnectionImpl<>(), adaptedChildModelFactory);
+		this.sourceModelClass = sourceModelClass;
 		this.getSource = getSource;
 	}
+
+	/**
+	 * Obtains the source {@link Model} {@link Class}.
+	 * 
+	 * @return Source {@link Model} {@link Class}.
+	 */
+	public Class<?> getSourceModelClass() {
+		return this.sourceModelClass;
+	}
+
+	/**
+	 * Obtains the target {@link Model} {@link Class}.
+	 * 
+	 * @return Target {@link Model} {@link Class}.
+	 */
+	public Class<?> getTargetModelClass() {
+		return this.targetModelClass;
+	}
+
+	/**
+	 * Creates a {@link ConnectionModel} between the source {@link Model} and target
+	 * {@link Model}.
+	 * 
+	 * @param source
+	 *            Source {@link Model}.
+	 * @param target
+	 *            Target {@link Model}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void createConnection(Model source, Model target) {
+
+		// Determine if need to reverse source/target
+		if (this.sourceModelClass.equals(target.getClass())) {
+			Model swap = source;
+			source = target;
+			target = swap;
+		}
+		if ((!(this.sourceModelClass.equals(source.getClass())))
+				|| (!(this.targetModelClass.equals(target.getClass())))) {
+			throw new IllegalStateException("Models " + source.getClass().getName() + " and "
+					+ target.getClass().getName() + " does not match connection " + this.sourceModelClass.getName()
+					+ " source and " + this.targetModelClass.getName() + " target");
+		}
+
+		// Create the connection
+		this.getContentPartFactory().addConnection(source, target, (ConnectionFactory) this.createConnection);
+	}
+
+	/*
+	 * ===================== AbstractAdaptedFactory =====================
+	 */
 
 	@Override
 	public void init(Injector injector, Map<Class<?>, AbstractAdaptedFactory<R, O, ?, ?, ?>> models) {
@@ -98,7 +160,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 			throw new IllegalStateException("Target model " + this.targetModelClass.getName() + " of connection "
 					+ this.getModelClass().getName() + " must be an " + AdaptedChildFactory.class.getName());
 		}
-		AdaptedChildFactory<?, ?, ?, ?, ?> adaptedChildFactory = (AdaptedChildFactory<?, ?, ?, ?, ?>) factory;
+		AdaptedChildFactory<R, O, ?, ?, ?> adaptedChildFactory = (AdaptedChildFactory<R, O, ?, ?, ?>) factory;
 		adaptedChildFactory.loadModelToConnection(this.getModelClass(), this.targetConnector);
 	}
 
@@ -129,7 +191,8 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 			TE... targetChangeEvents) {
 		this.targetModelClass = targetModel;
 		this.getTarget = getTarget;
-		this.targetConnector = new ModelToConnection<>(getConnections, targetChangeEvents);
+		this.targetConnector = new ModelToConnection<R, O, T, TE, C>(getConnections, targetChangeEvents, this);
+		this.createConnection = createConnection;
 		this.removeConnection = removeConnection;
 	}
 

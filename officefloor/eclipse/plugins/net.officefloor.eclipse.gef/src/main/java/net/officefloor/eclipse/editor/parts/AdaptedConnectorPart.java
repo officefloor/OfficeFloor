@@ -26,7 +26,11 @@ import org.eclipse.gef.mvc.fx.parts.IContentPart;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.inject.Inject;
 
+import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.handlers.CreateAdaptedConnectionOnDragHandler;
+import net.officefloor.eclipse.editor.models.ActiveConnectionSourceModel;
 import net.officefloor.eclipse.editor.models.AdaptedConnector;
 
 /**
@@ -35,6 +39,25 @@ import net.officefloor.eclipse.editor.models.AdaptedConnector;
  * @author Daniel Sagenschneider
  */
 public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
+
+	@Inject
+	private ActiveConnectionSourceModel activeConnectionSource;
+
+	/**
+	 * Specifies this as the active {@link AdaptedConnectorPart} for the
+	 * {@link CreateAdaptedConnectionOnDragHandler}.
+	 */
+	public void setActiveConnector(boolean isActive) {
+		if (isActive) {
+			this.activeConnectionSource.setActiveAdaptedChild(this.getContent().getParentAdaptedChild());
+		} else {
+			this.activeConnectionSource.setActiveAdaptedChild(null);
+		}
+	}
+
+	/*
+	 * ================= IContentPart ====================
+	 */
 
 	@Override
 	public AdaptedConnector<?> getContent() {
@@ -47,6 +70,28 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 			throw new IllegalArgumentException("Only " + AdaptedConnector.class.getSimpleName() + " supported.");
 		}
 		super.setContent(content);
+
+		// Listen in on changes to determine if can be a connector
+		this.activeConnectionSource.getActiveAdaptedChild().addListener((change) -> {
+			AdaptedChild<?> activeChild = this.activeConnectionSource.getActiveAdaptedChild().get();
+
+			// Determine if clear active child
+			if (activeChild == null) {
+				this.getVisual().visibleProperty().set(true);
+				return;
+			}
+
+			// Keep this child visible
+			if (activeChild == this.getContent().getParentAdaptedChild()) {
+				return;
+			}
+
+			// Determine if can be connected to from the active child
+			boolean isAbleToConnect = activeChild.canConnect(this.getContent().getParentAdaptedChild());
+
+			// Display based on whether can connect
+			this.getVisual().visibleProperty().set(isAbleToConnect);
+		});
 	}
 
 	@Override

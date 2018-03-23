@@ -72,6 +72,7 @@ import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.behaviors.PaletteFocusBehavior;
 import net.officefloor.eclipse.editor.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.handlers.CreateAdaptedParentOnDragHandler;
+import net.officefloor.eclipse.editor.models.ActiveConnectionSourceModel;
 import net.officefloor.eclipse.editor.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
 import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
@@ -415,6 +416,10 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 		bindAdaptedConnectionInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
 				AdaptedConnectionPart.class, AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
+
+		// Bind listening for active adapted child in connection drag creation
+		ActiveConnectionSourceModel activeConnectionSource = new ActiveConnectionSourceModel();
+		binder().bind(ActiveConnectionSourceModel.class).toInstance(activeConnectionSource);
 
 		// Connection selection handles
 		bindCircleSegmentHandlePartAdapters(AdapterMaps.getAdapterMapBinder(binder(), CircleSegmentHandlePart.class));

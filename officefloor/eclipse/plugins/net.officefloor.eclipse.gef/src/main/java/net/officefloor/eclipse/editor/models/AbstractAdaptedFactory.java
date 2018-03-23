@@ -167,7 +167,7 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	 * 
 	 * @return {@link OfficeFloorContentPartFactory}.
 	 */
-	protected OfficeFloorContentPartFactory<?, ?> getContentPartFactory() {
+	protected OfficeFloorContentPartFactory<R, O> getContentPartFactory() {
 		return this.contentPartFactory;
 	}
 
