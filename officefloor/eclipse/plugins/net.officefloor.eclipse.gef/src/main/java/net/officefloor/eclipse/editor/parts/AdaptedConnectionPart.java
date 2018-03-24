@@ -31,7 +31,6 @@ import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.models.ProxyAdaptedConnection;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.Model;
 
 public class AdaptedConnectionPart<C extends ConnectionModel>
 		extends AbstractAdaptedPart<C, AdaptedConnection<C>, Connection> implements IBendableContentPart<Connection> {
@@ -40,6 +39,16 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	 * Capture {@link IVisualPart} parent on removing to enable handles to update.
 	 */
 	private IVisualPart<? extends Node> parent = null;
+
+	/**
+	 * Source {@link AdaptedChild}.
+	 */
+	private AdaptedConnector<?> sourceConnector;
+
+	/**
+	 * Target {@link AdaptedChild}.
+	 */
+	private AdaptedConnector<?> targetConnector;
 
 	@Override
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
@@ -53,18 +62,17 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 		}
 
 		// Load the source
-		AdaptedChild<? extends Model> sourceChild = this.getContent().getSource();
+		AdaptedChild<?> sourceChild = this.getContent().getSource();
 		if (sourceChild != null) {
-			AdaptedConnector<?> sourceConnector = sourceChild
-					.getAdaptedConnector(this.getContent().getModel().getClass());
-			anchorages.put(sourceConnector, SOURCE_ROLE);
+			this.sourceConnector = sourceChild.getAdaptedConnector(this.getContent().getModel().getClass());
+			anchorages.put(this.sourceConnector, SOURCE_ROLE);
 		}
 
 		// Load the target
-		AdaptedChild<? extends Model> targetChild = this.getContent().getTarget();
+		AdaptedChild<?> targetChild = this.getContent().getTarget();
 		if (targetChild != null) {
-			AdaptedConnector<?> target = targetChild.getAdaptedConnector(this.getContent().getModel().getClass());
-			anchorages.put(target, TARGET_ROLE);
+			this.targetConnector = targetChild.getAdaptedConnector(this.getContent().getModel().getClass());
+			anchorages.put(this.targetConnector, TARGET_ROLE);
 		}
 
 		// Return the anchorages
@@ -114,9 +122,18 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 
 	@Override
 	protected Connection doCreateVisual() {
+
+		// Create the connection
 		Connection connection = new Connection();
 		connection.setInterpolator(new PolyBezierInterpolator());
 		connection.setRouter(new OrthogonalRouter());
+
+		// Add the children group name for CSS
+		connection.getStyleClass().add("connection");
+		if (this.getContent().getModel() != null) {
+			connection.getStyleClass().add(this.getContent().getModel().getClass().getSimpleName());
+		}
+
 		return connection;
 	}
 
@@ -159,14 +176,24 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 			BendPoint start = bendPoints.get(0);
 			BendPoint end = bendPoints.get(bendPoints.size() - 1);
 
-			// Remove connection if no longer connected
-			if ((!start.isAttached()) || (!end.isAttached())) {
+			// Obtain the anchors
+			AdaptedConnector<?> startConnector = (AdaptedConnector<?>) start.getContentAnchorage();
+			AdaptedConnector<?> endConnector = (AdaptedConnector<?>) end.getContentAnchorage();
 
-				// Capture parent (so considers still in model for updating handles)
-				this.parent = this.getParent();
+			// Determine if no change to connector
+			if ((startConnector == this.sourceConnector) && (endConnector == this.targetConnector)) {
+				return; // no change to connector
+			}
 
-				// Detached, so remove the connection
-				this.getContent().remove();
+			// Capture parent (so considers still in model for updating handles)
+			this.parent = this.getParent();
+
+			// Detached, so remove the connection
+			this.getContent().remove();
+
+			// Determine if connected to new anchors (and connect if so)
+			if ((start.isAttached()) && (end.isAttached())) {
+				startConnector.getParentAdaptedChild().createConnection(endConnector.getParentAdaptedChild());
 			}
 		}
 	}

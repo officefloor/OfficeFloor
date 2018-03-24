@@ -506,6 +506,13 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		@Override
 		public <T extends Model> void createConnection(AdaptedChild<T> target) {
 
+			// Determine if connection already to target
+			for (AdaptedConnection<?> connection : this.getConnections()) {
+				if ((connection.getSource() == target) || (connection.getTarget() == target)) {
+					return; // already connected
+				}
+			}
+
 			// Ensure able to connect
 			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = this.getConnectionFactory(target);
 			if (connectionFactory == null) {

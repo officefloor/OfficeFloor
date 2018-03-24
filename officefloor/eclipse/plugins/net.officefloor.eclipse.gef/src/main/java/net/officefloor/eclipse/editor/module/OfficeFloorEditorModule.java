@@ -19,7 +19,6 @@ import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport;
 import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport.LoggingMode;
 import org.eclipse.gef.common.adapt.inject.AdapterMaps;
 import org.eclipse.gef.mvc.fx.MvcFxModule;
-import org.eclipse.gef.mvc.fx.behaviors.ConnectionClickableAreaBehavior;
 import org.eclipse.gef.mvc.fx.behaviors.ContentPartPool;
 import org.eclipse.gef.mvc.fx.behaviors.FocusBehavior;
 import org.eclipse.gef.mvc.fx.behaviors.HoverBehavior;
@@ -67,6 +66,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.multibindings.MapBinder;
 
+import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.behaviors.PaletteFocusBehavior;
@@ -77,7 +77,10 @@ import net.officefloor.eclipse.editor.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.parts.AdaptedConnectorPart;
 import net.officefloor.eclipse.editor.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.parts.OfficeFloorContentPartFactory;
+import net.officefloor.eclipse.editor.parts.OfficeFloorFocusFeedbackPartFactory;
+import net.officefloor.eclipse.editor.parts.OfficeFloorHoverFeedbackPartFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorHoverHandlePartFactory;
+import net.officefloor.eclipse.editor.parts.OfficeFloorSelectionFeedbackPartFactory;
 import net.officefloor.eclipse.editor.parts.OfficeFloorSelectionHandlePartFactory;
 import net.officefloor.eclipse.editor.parts.PaletteRootPart;
 import net.officefloor.eclipse.editor.policies.ContentRestrictedChangeViewportPolicy;
@@ -115,9 +118,13 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 	 * @param palette
 	 *            {@link IViewer} for the palette.
 	 */
-	public <R extends Model> void loadRootModel(R rootModel, Injector injector, IViewer content, IViewer palette) {
+	public <R extends Model> void loadRootModel(R rootModel, Injector injector, Scene scene, IViewer content,
+			IViewer palette) {
 		OfficeFloorContentPartFactory<?, ?> factory = injector.getInstance(OfficeFloorContentPartFactory.class);
 		factory.loadRootModel(rootModel, content, palette);
+
+		// Load the default styling
+		scene.getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
 	}
 
 	/*
@@ -129,6 +136,27 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		super.bindAbstractContentPartAdapters(adapterMapBinder);
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(FocusAndSelectOnClickHandler.class);
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(SelectFocusedOnTypeHandler.class);
+	}
+
+	@Override
+	protected void bindFocusFeedbackPartFactoryAsContentViewerAdapter(
+			MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
+		adapterMapBinder.addBinding(AdapterKey.role(FocusBehavior.FOCUS_FEEDBACK_PART_FACTORY))
+				.to(OfficeFloorFocusFeedbackPartFactory.class);
+	}
+
+	@Override
+	protected void bindSelectionFeedbackPartFactoryAsContentViewerAdapter(
+			MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
+		adapterMapBinder.addBinding(AdapterKey.role(SelectionBehavior.SELECTION_FEEDBACK_PART_FACTORY))
+				.to(OfficeFloorSelectionFeedbackPartFactory.class);
+	}
+
+	@Override
+	protected void bindHoverFeedbackPartFactoryAsContentViewerAdapter(
+			MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
+		adapterMapBinder.addBinding(AdapterKey.role(HoverBehavior.HOVER_FEEDBACK_PART_FACTORY))
+				.to(OfficeFloorHoverFeedbackPartFactory.class);
 	}
 
 	protected void bindCircleSegmentHandlePartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -146,7 +174,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 
 	protected void bindFocusFeedbackFactoryAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 		adapterMapBinder.addBinding(AdapterKey.role(FocusBehavior.FOCUS_FEEDBACK_PART_FACTORY))
-				.to(DefaultFocusFeedbackPartFactory.class);
+				.to(OfficeFloorFocusFeedbackPartFactory.class);
 	}
 
 	protected void bindFocusModelAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -191,9 +219,6 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 		// drag individual segments
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(BendOnSegmentDragHandler.class);
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
-
-		// Clickable area resizing
-		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ConnectionClickableAreaBehavior.class);
 	}
 
 	protected void bindAdaptedParentPartInPaletteViewerContext(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -205,7 +230,7 @@ public class OfficeFloorEditorModule extends MvcFxModule {
 
 	protected void bindHoverFeedbackFactoryAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 		adapterMapBinder.addBinding(AdapterKey.role(HoverBehavior.HOVER_FEEDBACK_PART_FACTORY))
-				.to(DefaultHoverFeedbackPartFactory.class);
+				.to(OfficeFloorHoverFeedbackPartFactory.class);
 	}
 
 	protected void bindHoverHandleFactoryAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {

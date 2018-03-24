@@ -82,9 +82,6 @@ public abstract class AbstractEditorApplication extends Application {
 		stage.setHeight(480);
 		stage.setTitle(this.getClass().getSimpleName());
 
-		// Provide CSS based on module
-		scene.getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
-
 		// Show
 		stage.show();
 
@@ -93,7 +90,7 @@ public abstract class AbstractEditorApplication extends Application {
 
 		// Load the root model
 		Model rootModel = this.createRootModel();
-		module.loadRootModel(rootModel, injector, content, palette);
+		module.loadRootModel(rootModel, injector, scene, content, palette);
 	}
 
 }

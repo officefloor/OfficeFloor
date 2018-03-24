@@ -1,0 +1,19 @@
+.parent {
+	-fx-background-color: radial-gradient(radius 100.0%, #666, #ccc);
+	-fx-background-radius: 20.0px;
+	-fx-border-radius: 20.0px;
+	-fx-padding: 8.0px;
+}
+
+.parent:hover {
+	-fx-effect: dropshadow(three-pass-box, black, 10.0, 0.0, 4.0, 4.0);
+}
+
+.selected {
+	-fx-border-color: black;
+	-fx-border-width: 2.0;
+}
+
+.child {
+	-fx-padding: 3.0px;
+}

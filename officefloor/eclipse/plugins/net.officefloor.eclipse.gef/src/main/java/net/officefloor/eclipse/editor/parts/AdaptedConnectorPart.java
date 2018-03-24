@@ -81,6 +81,11 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 				return;
 			}
 
+			// Ensure have content
+			if (this.getContent() == null) {
+				return;
+			}
+
 			// Keep this child visible
 			if (activeChild == this.getContent().getParentAdaptedChild()) {
 				return;

@@ -11,18 +11,18 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.parts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import javax.inject.Inject;
 
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
+import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import com.google.inject.Injector;
@@ -49,6 +49,24 @@ import net.officefloor.model.change.Change;
 
 public class OfficeFloorContentPartFactory<R extends Model, O>
 		implements IContentPartFactory, AdaptedRootBuilder<R, O>, AdaptedBuilderContext {
+
+	/**
+	 * Indicates if contains an {@link ConnectionModel}.
+	 * 
+	 * @param targets
+	 *            Target {@link IVisualPart} instances.
+	 * @return <code>true</code> if contains {@link ConnectionModel}.
+	 */
+	public static boolean isContainsConnection(List<? extends IVisualPart<? extends Node>> targets) {
+		for (IVisualPart<? extends Node> target : targets) {
+			if (target instanceof AdaptedConnectionPart) {
+				return true;
+			}
+		}
+
+		// As here, no connection
+		return false;
+	}
 
 	@Inject
 	private Injector injector;
@@ -173,15 +191,27 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		}
 
 		// Adapt the content models
-		Set<AdaptedModel<?>> adaptedContentModels = new HashSet<>();
+		List<AdaptedModel<?>> adaptedContentModels = new ArrayList<AdaptedModel<?>>();
+		List<AdaptedParent<?>> adaptedParents = new ArrayList<>();
 		for (Model model : contentModels) {
 			AdaptedParent<?> adaptedModel = (AdaptedParent<?>) this.createAdaptedModel(model);
 
-			// Add the adapted model
-			adaptedContentModels.add(adaptedModel);
+			// Add the adapted model (only once)
+			if (!adaptedContentModels.contains(adaptedModel)) {
+				adaptedContentModels.add(adaptedModel);
+				adaptedParents.add(adaptedModel);
+			}
+		}
 
-			// Load the adapted connections
-			adaptedContentModels.addAll(adaptedModel.getConnections());
+		// Load the adapted connections (aferwards so z-order in front)
+		for (AdaptedParent<?> adaptedParent : adaptedParents) {
+			for (AdaptedConnection<?> connection : adaptedParent.getConnections()) {
+
+				// Add the adapted conenction (only once)
+				if (!adaptedContentModels.contains(connection)) {
+					adaptedContentModels.add(connection);
+				}
+			}
 		}
 
 		// Load the adapted models
