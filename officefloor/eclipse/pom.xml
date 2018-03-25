@@ -19,26 +19,14 @@
 		<!-- Core eclipse functionality -->
 		<module>plugins/net.officefloor.eclipse.target</module>
 		<module>plugins/net.officefloor.eclipse.gef</module>
-<!--  
-		<module>plugins/net.officefloor.core</module>
-		<module>plugins/net.officefloor.ui</module>
-		<module>plugins/net.officefloor.ui.tests</module>
-		<module>features/net.officefloor.feature</module>
--->
+		<!-- <module>plugins/net.officefloor.core</module> <module>plugins/net.officefloor.ui</module> 
+			<module>plugins/net.officefloor.ui.tests</module> <module>features/net.officefloor.feature</module> -->
 		<!-- WoOF eclipse functionality -->
-<!--  
-		<module>plugins/net.officefloor.woof</module>
-		<module>features/net.officefloor.woof.feature</module>
--->
+		<!-- <module>plugins/net.officefloor.woof</module> <module>features/net.officefloor.woof.feature</module> -->
 		<!-- Extras eclipse functionality -->
-<!--  
-		<module>plugins/net.officefloor.extras</module>
-		<module>features/net.officefloor.extras.feature</module>
--->
+		<!-- <module>plugins/net.officefloor.extras</module> <module>features/net.officefloor.extras.feature</module> -->
 		<!-- Deploy to Update Site -->
-<!--  
-		<module>update.site</module>
--->
+		<!-- <module>update.site</module> -->
 	</modules>
 	<build>
 		<plugins>
@@ -91,8 +79,17 @@
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
-					<resolver>p2</resolver>
-					<pomDependencies>consider</pomDependencies>
+					<target>
+						<artifact>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>org.officefloor.eclipse.target</artifactId>
+							<version>${project.version}</version>
+							<classifier>OXYGEN</classifier>
+						</artifact>
+					</target>
+					<dependency-resolution>
+						<optionalDependencies>require</optionalDependencies>
+					</dependency-resolution>
 					<environments>
 						<environment>
 							<os>linux</os>
