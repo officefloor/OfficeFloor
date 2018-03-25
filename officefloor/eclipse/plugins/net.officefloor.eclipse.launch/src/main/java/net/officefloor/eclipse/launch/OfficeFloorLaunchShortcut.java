@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -106,6 +107,8 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 						uniqueConfigName);
 				launchConfigWorkingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
 						resource.getProject().getName());
+				launchConfigWorkingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
+						OfficeFloorMain.class.getName());
 				launchConfig = launchConfigWorkingCopy.doSave();
 			}
 

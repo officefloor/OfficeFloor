@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Eclipse OfficeFloor Launcher
+Bundle-SymbolicName: net.officefloor.eclipse.launch;singleton:=true
+Bundle-Version: 3.0.0
+Bundle-Vendor: OfficeFloor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Eclipse-BuddyPolicy: registered
+Eclipse-RegisterBuddy: net.officefloor.core
+Require-Bundle: net.officefloor.core,
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.launching,
+ org.eclipse.ui,
+ org.eclipse.debug.ui,
+ org.eclipse.jdt.debug.ui,
+ org.eclipse.e4.core.services
+Bundle-ClassPath: .
+Export-Package: net.officefloor.eclipse.launch

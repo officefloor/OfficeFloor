@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="4.2"?>
+<plugin
+>
+	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
+		<launchConfigurationType
+			delegate="net.officefloor.eclipse.launch.OfficeFloorLaunchConfigurationDelegate"
+			id="net.officefloor.eclipse.launch.configurationtype.officeFloor"
+			sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+			sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+			modes="run, debug" name="OfficeFloor">
+		</launchConfigurationType>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+		<launchConfigurationTypeImage
+			configTypeID="net.officefloor.eclipse.launch.configurationtype.officeFloor"
+			icon="icons/OfficeFloorLaunch.png" id="net.officefloor.eclipse.launch.icon.officeFloor">
+		</launchConfigurationTypeImage>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+		<launchConfigurationTabGroup
+			class="net.officefloor.eclipse.launch.OfficeFloorTabGroup" id="net.officefloor.eclipse.launch.tabgroup.officeFloor"
+			type="net.officefloor.eclipse.launch.configurationtype.officeFloor">
+		</launchConfigurationTabGroup>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchShortcuts">
+		<shortcut class="net.officefloor.eclipse.launch.OfficeFloorLaunchShortcut"
+			icon="icons/OfficeFloorLaunch.png" id="net.officefloor.eclipse.launch.shortcut.officeFloor"
+			label="OfficeFloor" modes="run,debug">
+			<configurationType
+				id="net.officefloor.eclipse.launch.configurationtype.officeFloor">
+			</configurationType>
+			<contextualLaunch>
+				<enablement>
+					<with variable="selection">
+						<count value="1" />
+					</with>
+				</enablement>
+			</contextualLaunch>
+		</shortcut>
+	</extension>
+</plugin>
