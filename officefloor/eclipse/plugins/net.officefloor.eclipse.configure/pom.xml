@@ -7,9 +7,9 @@
 		<relativePath>../../pom.xml</relativePath>
 		<version>3.0.0</version>
 	</parent>
-	<artifactId>net.officefloor.eclipse.launch</artifactId>
-	<name>Eclipse OfficeFloor Launcher</name>
-	<description>Launches OfficeFloor Application</description>
+	<artifactId>net.officefloor.eclipse.configure</artifactId>
+	<name>Eclipse OfficeFloor Configurer</name>
+	<description>Configures aspects of the OfficeFloor configuration</description>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
