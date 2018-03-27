@@ -22,7 +22,7 @@ import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 

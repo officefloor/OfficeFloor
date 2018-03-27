@@ -15,45 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.internal.models;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
+import org.eclipse.gef.geometry.planar.Point;
+
+import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.model.Model;
 
 /**
- * Child group.
+ * Adapted prototype for creating a new {@link AdaptedParent}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public interface AdaptedPrototype<M extends Model> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * Triggers creating a new {@link AdaptedParent} at the location.
 	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * @param location
+	 *            Location for the new {@link AdaptedParent}.
 	 */
-	String getChildrenGroupName();
-
-	/**
-	 * Obtains the parent {@link AdaptedChild}.
-	 * 
-	 * @return Parent {@link AdaptedChild}.
-	 */
-	AdaptedChild<M> getParent();
-
-	/**
-	 * Obtains the {@link AdaptedChild} instances.
-	 * 
-	 * @return {@link AdaptedChild} instances.
-	 */
-	ObservableList<AdaptedChild<?>> getChildren();
-
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
+	void newAdaptedParent(Point location);
 
 }

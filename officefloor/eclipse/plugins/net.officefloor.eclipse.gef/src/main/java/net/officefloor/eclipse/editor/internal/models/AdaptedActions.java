@@ -15,45 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.internal.models;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
+import java.util.List;
+
+import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.model.Model;
 
 /**
- * Child group.
+ * Adapted {@link ModelAction} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public class AdaptedActions<R extends Model, O, M extends Model> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
-	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * {@link AdaptedAction} instances.
 	 */
-	String getChildrenGroupName();
+	private final List<AdaptedAction<R, O, M>> actions;
 
 	/**
-	 * Obtains the parent {@link AdaptedChild}.
+	 * Instantiate.
 	 * 
-	 * @return Parent {@link AdaptedChild}.
+	 * @param actions
+	 *            {@link AdaptedAction} instances.
 	 */
-	AdaptedChild<M> getParent();
+	public AdaptedActions(List<AdaptedAction<R, O, M>> actions) {
+		this.actions = actions;
+	}
 
 	/**
-	 * Obtains the {@link AdaptedChild} instances.
+	 * Obtains the {@link AdaptedAction} instances.
 	 * 
-	 * @return {@link AdaptedChild} instances.
+	 * @return {@link AdaptedAction} instances.
 	 */
-	ObservableList<AdaptedChild<?>> getChildren();
-
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
+	public List<AdaptedAction<R, O, M>> getAdaptedActions() {
+		return this.actions;
+	}
 
 }

@@ -32,7 +32,6 @@ import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.DefaultImages;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
@@ -51,7 +50,7 @@ import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel.OfficeFloorTeamEvent;
 
 /**
- * Main for running {@link OfficeFloor} editor.
+ * Main for running example editor.
  * 
  * @author Daniel Sagenschneider
  */

@@ -15,45 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.configurer.example;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.Model;
+import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
+import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 
 /**
- * Child group.
+ * Main for running example configurer.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public class ExampleJavaFxMain extends AbstractConfigurerRunnable<ExampleModel> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * Main to run the configurer.
 	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * @param args
+	 *            Command line arguments.
 	 */
-	String getChildrenGroupName();
+	public static void main(String[] args) {
+		new ExampleJavaFxMain().run();
+	}
 
-	/**
-	 * Obtains the parent {@link AdaptedChild}.
-	 * 
-	 * @return Parent {@link AdaptedChild}.
+	/*
+	 * ================ AbstractConfigurerRunnable ================
 	 */
-	AdaptedChild<M> getParent();
 
-	/**
-	 * Obtains the {@link AdaptedChild} instances.
-	 * 
-	 * @return {@link AdaptedChild} instances.
-	 */
-	ObservableList<AdaptedChild<?>> getChildren();
+	@Override
+	protected void build(ConfigurationBuilder<ExampleModel> builder) {
+		builder.text("Text", (model, text) -> model.text = text);
+	}
 
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
+	@Override
+	protected ExampleModel createModel() {
+		return new ExampleModel();
+	}
 
 }

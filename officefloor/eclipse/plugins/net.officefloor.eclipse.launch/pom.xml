@@ -21,36 +21,4 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<!-- Ensure not including dependency jars provided by other Eclipse plugins. 
-					Including them causes ClassCastExceptions when adapting the OfficeFloorCompiler 
-					due to different Classes for different plugins. Running eclipse:eclipse can 
-					cause them to be included. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Ensure not including dependency jars provided by other other Eclipse plugins</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<fail
-									message="Should not include net.officefloor.core dependencies (e.g. officecompiler)">
-									<condition>
-										<resourcecontains resource="build.properties"
-											substring="officecompiler" />
-									</condition>
-								</fail>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

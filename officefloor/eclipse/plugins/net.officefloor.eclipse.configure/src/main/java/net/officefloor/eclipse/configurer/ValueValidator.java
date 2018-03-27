@@ -15,45 +15,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
-
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.Model;
+package net.officefloor.eclipse.configurer;
 
 /**
- * Child group.
+ * Validates the value.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public interface ValueValidator<V> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * Undertakes the validation.
 	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * @param context
+	 *            {@link ValueValidatorContext}.
+	 * @throws Exception
+	 *             If failure in validation. Message of {@link Exception} is used as
+	 *             error.
 	 */
-	String getChildrenGroupName();
+	void validate(ValueValidatorContext<V> context) throws Exception;
 
 	/**
-	 * Obtains the parent {@link AdaptedChild}.
-	 * 
-	 * @return Parent {@link AdaptedChild}.
+	 * Context for the {@link ValueValidator}.
 	 */
-	AdaptedChild<M> getParent();
+	public interface ValueValidatorContext<V> {
 
-	/**
-	 * Obtains the {@link AdaptedChild} instances.
-	 * 
-	 * @return {@link AdaptedChild} instances.
-	 */
-	ObservableList<AdaptedChild<?>> getChildren();
+		/**
+		 * Obtains the value.
+		 * 
+		 * @return Value.
+		 */
+		V getValue();
 
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
+		/**
+		 * Specifies an error.
+		 * 
+		 * @param message
+		 *            Message.
+		 */
+		void setError(String message);
+
+	}
 
 }

@@ -15,45 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.configurer;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.Model;
+import java.util.function.Function;
 
 /**
- * Child group.
- * 
+ * {@link Function} interface to load the value.
+ *
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public interface ValueLoader<M, V> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * Loads the value to the model.
 	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * @param model
+	 *            Model.
+	 * @param value
+	 *            Value.
 	 */
-	String getChildrenGroupName();
-
-	/**
-	 * Obtains the parent {@link AdaptedChild}.
-	 * 
-	 * @return Parent {@link AdaptedChild}.
-	 */
-	AdaptedChild<M> getParent();
-
-	/**
-	 * Obtains the {@link AdaptedChild} instances.
-	 * 
-	 * @return {@link AdaptedChild} instances.
-	 */
-	ObservableList<AdaptedChild<?>> getChildren();
-
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
-
+	void loadValue(M model, V value);
 }

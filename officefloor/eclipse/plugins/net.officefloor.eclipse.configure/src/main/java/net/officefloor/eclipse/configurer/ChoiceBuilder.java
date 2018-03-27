@@ -15,45 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
-
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.Model;
+package net.officefloor.eclipse.configurer;
 
 /**
- * Child group.
+ * Builder of choices.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public interface ChoiceBuilder<M, E extends Enum<E>> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * Configures the choice.
 	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * @param choiceEnum
+	 *            Choice {@link Enum}.
+	 * @param label
+	 *            Label for the choice.
+	 * @return {@link ConfigurationBuilder} to configure the choice.
 	 */
-	String getChildrenGroupName();
-
-	/**
-	 * Obtains the parent {@link AdaptedChild}.
-	 * 
-	 * @return Parent {@link AdaptedChild}.
-	 */
-	AdaptedChild<M> getParent();
-
-	/**
-	 * Obtains the {@link AdaptedChild} instances.
-	 * 
-	 * @return {@link AdaptedChild} instances.
-	 */
-	ObservableList<AdaptedChild<?>> getChildren();
-
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
+	ConfigurationBuilder<M> choice(E choiceEnum, String label);
 
 }

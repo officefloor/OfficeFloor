@@ -24,7 +24,7 @@ import org.eclipse.gef.geometry.planar.IGeometry;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.model.ConnectionModel;
 
 /**

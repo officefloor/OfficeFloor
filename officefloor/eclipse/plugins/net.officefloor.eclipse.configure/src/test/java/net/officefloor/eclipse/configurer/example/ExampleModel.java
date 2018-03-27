@@ -15,45 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.configurer.example;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.Model;
+import net.officefloor.compile.properties.PropertyList;
 
 /**
- * Child group.
+ * Example model to be configured.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public class ExampleModel {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
-	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * Text.
 	 */
-	String getChildrenGroupName();
+	public String text;
 
 	/**
-	 * Obtains the parent {@link AdaptedChild}.
-	 * 
-	 * @return Parent {@link AdaptedChild}.
+	 * Class name.
 	 */
-	AdaptedChild<M> getParent();
+	public String className;
 
 	/**
-	 * Obtains the {@link AdaptedChild} instances.
-	 * 
-	 * @return {@link AdaptedChild} instances.
+	 * Resource name.
 	 */
-	ObservableList<AdaptedChild<?>> getChildren();
+	public String resourceName;
 
 	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
+	 * {@link PropertyList}.
 	 */
-	E[] getEvents();
+	public PropertyList properties;
+
+	/**
+	 * Flag.
+	 */
+	public boolean flag;
 
 }

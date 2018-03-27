@@ -11,18 +11,13 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor;
 
-import org.eclipse.gef.common.adapt.AdapterKey;
-import org.eclipse.gef.mvc.fx.domain.IDomain;
-import org.eclipse.gef.mvc.fx.viewer.IViewer;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import net.officefloor.eclipse.editor.module.OfficeFloorEditorModule;
-import net.officefloor.eclipse.editor.views.ViewersComposite;
 import net.officefloor.model.Model;
 
 /**
@@ -48,14 +43,14 @@ public abstract class AbstractEditorApplication extends Application {
 
 	/**
 	 * <p>
-	 * Creates the {@link OfficeFloorEditorModule}.
+	 * Creates the {@link AdaptedEditorModule}.
 	 * <p>
-	 * Allows overriding the {@link OfficeFloorEditorModule}.
+	 * Allows overriding the {@link AdaptedEditorModule}.
 	 * 
-	 * @return {@link OfficeFloorEditorModule}.
+	 * @return {@link AdaptedEditorModule}.
 	 */
-	protected OfficeFloorEditorModule createModule() {
-		return new OfficeFloorEditorModule((context) -> this.buildModels(context));
+	protected AdaptedEditorModule createModule() {
+		return new AdaptedEditorModule((context) -> this.buildModels(context));
 	}
 
 	/*
@@ -66,16 +61,14 @@ public abstract class AbstractEditorApplication extends Application {
 	public void start(Stage stage) throws Exception {
 
 		// Create the module
-		OfficeFloorEditorModule module = this.createModule();
+		AdaptedEditorModule module = this.createModule();
 		Injector injector = Guice.createInjector(module);
 
-		// Obtain the viewers
-		IDomain domain = injector.getInstance(IDomain.class);
-		IViewer content = domain.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
-		IViewer palette = domain.getAdapter(AdapterKey.get(IViewer.class, OfficeFloorEditorModule.PALETTE_VIEWER_ROLE));
+		// Create the parent
+		Parent parent = module.createParent(injector);
 
 		// Setup visuals
-		Scene scene = new Scene(new ViewersComposite(content, palette).getComposite());
+		Scene scene = new Scene(parent);
 		stage.setScene(scene);
 		stage.setResizable(true);
 		stage.setWidth(640);
@@ -86,11 +79,11 @@ public abstract class AbstractEditorApplication extends Application {
 		stage.show();
 
 		// Activate the domain
-		domain.activate();
+		module.activateDomain();
 
 		// Load the root model
 		Model rootModel = this.createRootModel();
-		module.loadRootModel(rootModel, injector, scene, content, palette);
+		module.loadRootModel(rootModel, scene);
 	}
 
 }

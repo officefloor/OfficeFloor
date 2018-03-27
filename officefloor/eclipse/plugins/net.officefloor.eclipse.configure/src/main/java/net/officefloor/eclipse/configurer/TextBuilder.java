@@ -15,45 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.configurer;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.Model;
+import java.util.function.Function;
+
+import javafx.beans.value.ObservableStringValue;
 
 /**
- * Child group.
+ * Builder of a text property.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
+public interface TextBuilder<M> {
 
 	/**
-	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * Configures obtaining the initial value.
 	 * 
-	 * @return {@link ChildrenGroupImpl} name.
+	 * @param getInitialValue
+	 *            Obtains the initial value.
+	 * @return <code>this</code>.
 	 */
-	String getChildrenGroupName();
+	TextBuilder<M> init(Function<M, String> getInitialValue);
 
 	/**
-	 * Obtains the parent {@link AdaptedChild}.
+	 * Validates the text value.
 	 * 
-	 * @return Parent {@link AdaptedChild}.
+	 * @param validator
+	 *            {@link ValueValidator}.
+	 * @return <code>this</code>.
 	 */
-	AdaptedChild<M> getParent();
+	TextBuilder<M> validate(ValueValidator<String> validator);
 
 	/**
-	 * Obtains the {@link AdaptedChild} instances.
+	 * Obtains the {@link ObservableStringValue} to the value.
 	 * 
-	 * @return {@link AdaptedChild} instances.
+	 * @return {@link ObservableStringValue} to the value.
 	 */
-	ObservableList<AdaptedChild<?>> getChildren();
-
-	/**
-	 * Obtains the events.
-	 * 
-	 * @return Events.
-	 */
-	E[] getEvents();
+	ObservableStringValue getValue();
 
 }
