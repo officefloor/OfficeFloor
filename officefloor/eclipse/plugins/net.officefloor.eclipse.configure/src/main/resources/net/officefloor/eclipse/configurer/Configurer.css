@@ -1,0 +1,22 @@
+
+.configurer-container {	
+}
+
+.configurer-container-wide {
+	-fx-padding: 2em 0 0 0;
+	-fx-hgap: 10px;
+	-fx-vgap: 1.5em;
+}
+
+.configurer-container-narrow {
+	-fx-padding: 0.5em 0.5em 0 0.5em;
+}
+
+.configurer-container-narrow-item {
+	-fx-padding: 1.5em 0 0 0;
+}
+
+.error-tooltip {
+	-fx-background-color: #fffacd;
+	-fx-text-fill: black;
+}

@@ -15,42 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
-
-import java.util.function.Function;
-
-import javafx.beans.value.ObservableValue;
+package net.officefloor.eclipse.configurer.internal;
 
 /**
- * Builder of a text property.
+ * Context for the {@link ValueRenderer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TextBuilder<M> {
+public interface ValueRendererContext<M> {
 
 	/**
-	 * Configures obtaining the initial value.
+	 * Obtains the model.
 	 * 
-	 * @param getInitialValue
-	 *            Obtains the initial value.
-	 * @return <code>this</code>.
+	 * @return Model.
 	 */
-	TextBuilder<M> init(Function<M, String> getInitialValue);
+	M getModel();
 
 	/**
-	 * Validates the text value.
+	 * Specifies an error.
 	 * 
-	 * @param validator
-	 *            {@link ValueValidator}.
-	 * @return <code>this</code>.
+	 * @param message
+	 *            Message. <code>null</code> indicates no error.
 	 */
-	TextBuilder<M> validate(ValueValidator<String> validator);
+	void setError(String message);
 
 	/**
-	 * Obtains the {@link ObservableValue} to the value.
+	 * Specifies an error.
 	 * 
-	 * @return {@link ObservableValue} to the value.
+	 * @param error
+	 *            {@link Throwable}.
 	 */
-	ObservableValue<String> getValue();
+	void setError(Throwable error);
 
 }

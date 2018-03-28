@@ -17,10 +17,45 @@
  */
 package net.officefloor.eclipse.configurer.internal;
 
+import javafx.scene.Node;
+
 /**
- *
+ * <p>
+ * Renders the values.
+ * <p>
+ * Implementations must provide new instances of the {@link Node}, as there may
+ * be different layouts requiring multiple {@link Node} instances.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface ValueRenderer {
+public interface ValueRenderer<M> {
+
+	/**
+	 * Initialises the {@link ValueRenderer}.
+	 */
+	void init(ValueRendererContext<M> context);
+
+	/**
+	 * Creates a new label {@link Node}.
+	 * 
+	 * @return New label {@link Node}.
+	 */
+	Node createLabel();
+
+	/**
+	 * Creates a new input {@link Node}. {@link Node} responsible for capturing the
+	 * configuration via the UI.
+	 * 
+	 * @return New input {@link Node}.
+	 */
+	Node createInput();
+
+	/**
+	 * Loads the value to the model.
+	 * 
+	 * @param model
+	 *            Model to have value loaded onto it.
+	 */
+	void loadValue(M model);
 
 }

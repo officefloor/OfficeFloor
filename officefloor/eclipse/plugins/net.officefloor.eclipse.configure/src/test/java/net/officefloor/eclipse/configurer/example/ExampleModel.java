@@ -50,5 +50,4 @@ public class ExampleModel {
 	 * Flag.
 	 */
 	public boolean flag;
-
 }

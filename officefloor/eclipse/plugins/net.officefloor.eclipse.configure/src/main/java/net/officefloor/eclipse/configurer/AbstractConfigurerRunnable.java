@@ -52,7 +52,7 @@ public abstract class AbstractConfigurerRunnable<M> implements Runnable {
 	public void run() {
 
 		// Build the configuration
-		JavaFxConfigurationBuilder<M> configurer = new JavaFxConfigurationBuilder<>();
+		Configurer<M> configurer = new Configurer<>();
 		this.build(configurer);
 
 		// Load the model

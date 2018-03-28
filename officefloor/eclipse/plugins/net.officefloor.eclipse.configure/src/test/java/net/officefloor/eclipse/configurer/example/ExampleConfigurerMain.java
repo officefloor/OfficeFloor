@@ -19,13 +19,14 @@ package net.officefloor.eclipse.configurer.example;
 
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.TextBuilder;
 
 /**
  * Main for running example configurer.
  * 
  * @author Daniel Sagenschneider
  */
-public class ExampleJavaFxMain extends AbstractConfigurerRunnable<ExampleModel> {
+public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleModel> {
 
 	/**
 	 * Main to run the configurer.
@@ -34,7 +35,7 @@ public class ExampleJavaFxMain extends AbstractConfigurerRunnable<ExampleModel> 
 	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
-		new ExampleJavaFxMain().run();
+		new ExampleConfigurerMain().run();
 	}
 
 	/*
@@ -43,12 +44,23 @@ public class ExampleJavaFxMain extends AbstractConfigurerRunnable<ExampleModel> 
 
 	@Override
 	protected void build(ConfigurationBuilder<ExampleModel> builder) {
-		builder.text("Text", (model, text) -> model.text = text);
+
+		// Configure text
+		TextBuilder<ExampleModel> text = builder.text("Text", (model, value) -> model.text = value)
+				.init((model) -> model.text).validate((context) -> {
+					if (context.getValue().length() < 3) {
+						context.setError("Value too short");
+					}
+				});
+		text.getValue().addListener((event, oldValue, newValue) -> System.out.println("Text = " + newValue));
+
 	}
 
 	@Override
 	protected ExampleModel createModel() {
-		return new ExampleModel();
+		ExampleModel model = new ExampleModel();
+		model.text = "test";
+		return model;
 	}
 
 }
