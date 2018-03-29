@@ -17,46 +17,32 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import javafx.beans.property.ReadOnlyProperty;
-
 /**
- * Validates the value.
+ * Listener for errors in configuration.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueValidator<V> {
+public interface ErrorListener {
 
 	/**
-	 * Undertakes the validation.
+	 * Informed of error message.
 	 * 
-	 * @param context
-	 *            {@link ValueValidatorContext}.
-	 * @throws Exception
-	 *             If failure in validation. Message of {@link Exception} is used as
-	 *             error.
+	 * @param message
+	 *            Error message.
 	 */
-	void validate(ValueValidatorContext<V> context) throws Exception;
+	void error(String message);
 
 	/**
-	 * Context for the {@link ValueValidator}.
+	 * Informed of {@link Throwable}.
+	 * 
+	 * @param error
+	 *            {@link Throwable}.
 	 */
-	public interface ValueValidatorContext<V> {
+	void error(Throwable error);
 
-		/**
-		 * Obtains the value.
-		 * 
-		 * @return Value.
-		 */
-		ReadOnlyProperty<V> getValue();
-
-		/**
-		 * Specifies an error.
-		 * 
-		 * @param message
-		 *            Message.
-		 */
-		void setError(String message);
-
-	}
+	/**
+	 * Informed that valid.
+	 */
+	void valid();
 
 }

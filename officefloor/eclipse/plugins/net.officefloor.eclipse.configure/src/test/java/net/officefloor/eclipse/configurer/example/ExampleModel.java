@@ -42,6 +42,11 @@ public class ExampleModel {
 	public String resourceName;
 
 	/**
+	 * Choice value.
+	 */
+	public String choiceValue;
+
+	/**
 	 * {@link PropertyList}.
 	 */
 	public PropertyList properties;

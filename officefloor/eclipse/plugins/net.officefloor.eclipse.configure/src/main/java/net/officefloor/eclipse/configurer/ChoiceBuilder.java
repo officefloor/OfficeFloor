@@ -22,17 +22,15 @@ package net.officefloor.eclipse.configurer;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChoiceBuilder<M, E extends Enum<E>> {
+public interface ChoiceBuilder<M> extends Builder<M, Integer, ChoiceBuilder<M>> {
 
 	/**
 	 * Configures the choice.
 	 * 
-	 * @param choiceEnum
-	 *            Choice {@link Enum}.
 	 * @param label
 	 *            Label for the choice.
 	 * @return {@link ConfigurationBuilder} to configure the choice.
 	 */
-	ConfigurationBuilder<M> choice(E choiceEnum, String label);
+	ConfigurationBuilder<M> choice(String label);
 
 }

@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.configurer.example;
 
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
+import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 
@@ -46,13 +47,17 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 	protected void build(ConfigurationBuilder<ExampleModel> builder) {
 
 		// Configure text
-		TextBuilder<ExampleModel> text = builder.text("Text", (model, value) -> model.text = value)
-				.init((model) -> model.text).validate((context) -> {
-					if (context.getValue().length() < 3) {
-						context.setError("Value too short");
-					}
-				});
+		TextBuilder<ExampleModel> text = builder.text("Text").init((model) -> model.text).validate((context) -> {
+			if (context.getValue().getValue().length() < 3) {
+				context.setError("Value too short");
+			}
+		}).setValue((model, value) -> model.text = value);
 		text.getValue().addListener((event, oldValue, newValue) -> System.out.println("Text = " + newValue));
+
+		// Provide choices
+		ChoiceBuilder<ExampleModel> choices = builder.choices("choices");
+		choices.choice("one").text("Choice One").setValue((model, value) -> model.choiceValue = value);
+		choices.choice("two").text("Choice Two").setValue((model, value) -> model.choiceValue = value);
 
 	}
 

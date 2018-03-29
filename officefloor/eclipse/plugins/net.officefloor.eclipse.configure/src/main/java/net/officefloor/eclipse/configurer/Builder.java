@@ -17,46 +17,48 @@
  */
 package net.officefloor.eclipse.configurer;
 
+import java.util.function.Function;
+
 import javafx.beans.property.ReadOnlyProperty;
 
 /**
- * Validates the value.
+ * Generic builder.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueValidator<V> {
+public interface Builder<M, V, B extends Builder<M, V, B>> {
 
 	/**
-	 * Undertakes the validation.
+	 * Configures obtaining the initial value.
 	 * 
-	 * @param context
-	 *            {@link ValueValidatorContext}.
-	 * @throws Exception
-	 *             If failure in validation. Message of {@link Exception} is used as
-	 *             error.
+	 * @param getInitialValue
+	 *            Obtains the initial value.
+	 * @return <code>this</code>.
 	 */
-	void validate(ValueValidatorContext<V> context) throws Exception;
+	B init(Function<M, V> getInitialValue);
 
 	/**
-	 * Context for the {@link ValueValidator}.
+	 * Validates the text value.
+	 * 
+	 * @param validator
+	 *            {@link ValueValidator}.
+	 * @return <code>this</code>.
 	 */
-	public interface ValueValidatorContext<V> {
+	B validate(ValueValidator<V> validator);
 
-		/**
-		 * Obtains the value.
-		 * 
-		 * @return Value.
-		 */
-		ReadOnlyProperty<V> getValue();
+	/**
+	 * Specifies the {@link ValueLoader} to load the value to the model.
+	 * 
+	 * @param valueLoader
+	 *            {@link ValueLoader} to load the value to the model.
+	 */
+	B setValue(ValueLoader<M, V> valueLoader);
 
-		/**
-		 * Specifies an error.
-		 * 
-		 * @param message
-		 *            Message.
-		 */
-		void setError(String message);
-
-	}
+	/**
+	 * Obtains the {@link ReadOnlyProperty} to the value.
+	 * 
+	 * @return {@link ReadOnlyProperty} to the value.
+	 */
+	ReadOnlyProperty<V> getValue();
 
 }

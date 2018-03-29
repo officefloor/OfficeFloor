@@ -17,169 +17,39 @@
  */
 package net.officefloor.eclipse.configurer.internal.text;
 
-import java.util.function.Function;
-
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ObservableStringValue;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.Property;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import net.officefloor.eclipse.configurer.TextBuilder;
-import net.officefloor.eclipse.configurer.ValueLoader;
-import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
-import net.officefloor.eclipse.configurer.internal.ValueRenderer;
-import net.officefloor.eclipse.configurer.internal.ValueRendererContext;
+import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 
 /**
  * {@link TextBuilder} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TextBuilderImpl<M> implements TextBuilder<M>, ValueRenderer<M> {
-
-	/**
-	 * Label.
-	 */
-	private final String label;
-
-	/**
-	 * {@link ObservableStringValue}.
-	 */
-	private final ReadOnlyStringWrapper value = new ReadOnlyStringWrapper();
-
-	/**
-	 * {@link ValueLoader}.
-	 */
-	private final ValueLoader<M, String> textLoader;
-
-	/**
-	 * {@link ValueRendererContext}.
-	 */
-	private ValueRendererContext<M> context;
-
-	/**
-	 * {@link Function} to obtain the initial value from the model.
-	 */
-	private Function<M, String> getInitialValue = null;
-
-	/**
-	 * {@link ValueValidator}.
-	 */
-	private ValueValidator<String> validator = null;
-
-	/**
-	 * Tracks if an error occurred on validation.
-	 */
-	private boolean isError = false;
-
-	/**
-	 * {@link ValueValidatorContext}.
-	 */
-	private final ValueValidatorContext<String> validatorContext = new ValueValidatorContext<String>() {
-
-		@Override
-		public String getValue() {
-			return TextBuilderImpl.this.value.get();
-		}
-
-		@Override
-		public void setError(String message) {
-			TextBuilderImpl.this.isError = true;
-			TextBuilderImpl.this.context.setError(message);
-		}
-	};
+public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M>> implements TextBuilder<M> {
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param textLoader
-	 *            {@link ValueLoader}.
 	 */
-	public TextBuilderImpl(String label, ValueLoader<M, String> textLoader) {
-		this.label = label;
-		this.textLoader = textLoader;
-	}
-
-	/**
-	 * Undertakes validation.
-	 */
-	private void validate() {
-		// Reset to no error
-		this.isError = false;
-		try {
-			// Undertake validation
-			this.validator.validate(this.validatorContext);
-		} catch (Exception ex) {
-			// Flag error and notifty
-			this.isError = true;
-			this.context.setError(ex);
-		}
-		if (!this.isError) {
-			// No error in validate, so clear error
-			this.context.setError((String) null);
-		}
+	public TextBuilderImpl(String label) {
+		super(label);
 	}
 
 	/*
-	 * ================ TextBuilder ===================
+	 * ============= AbstractBuilder ==============
 	 */
 
 	@Override
-	public TextBuilder<M> init(Function<M, String> getInitialValue) {
-		this.getInitialValue = getInitialValue;
-		return this;
-	}
-
-	@Override
-	public TextBuilder<M> validate(ValueValidator<String> validator) {
-		this.validator = validator;
-
-		// Handle validation of changed value
-		this.value.addListener((event) -> this.validate());
-
-		// Return this
-		return this;
-	}
-
-	@Override
-	public ObservableValue<String> getValue() {
-		return this.value.getReadOnlyProperty();
-	}
-
-	/*
-	 * ================ ValueRenderer ==================
-	 */
-
-	@Override
-	public void init(ValueRendererContext<M> context) {
-		this.context = context;
-
-		// Load the initial value
-		if (this.getInitialValue != null) {
-			String initialValue = this.getInitialValue.apply(this.context.getModel());
-			this.value.set(initialValue);
-		}
-	}
-
-	@Override
-	public Node createLabel() {
-		return new Label(this.label);
-	}
-
-	@Override
-	public Node createInput() {
-		TextField text = new TextField(this.value.get());
-		this.value.bindBidirectional(text.textProperty());
+	protected Node createInput(Property<String> value) {
+		TextField text = new TextField(value.getValue());
+		text.textProperty().bindBidirectional(value);
+		text.getStyleClass().add("configurer-input-text");
 		return text;
-	}
-
-	@Override
-	public void loadValue(M model) {
-		this.textLoader.loadValue(model, this.value.get());
 	}
 
 }

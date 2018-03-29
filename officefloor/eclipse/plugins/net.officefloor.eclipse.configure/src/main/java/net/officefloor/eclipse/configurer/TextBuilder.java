@@ -17,40 +17,10 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import java.util.function.Function;
-
-import javafx.beans.value.ObservableValue;
-
 /**
  * Builder of a text property.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TextBuilder<M> {
-
-	/**
-	 * Configures obtaining the initial value.
-	 * 
-	 * @param getInitialValue
-	 *            Obtains the initial value.
-	 * @return <code>this</code>.
-	 */
-	TextBuilder<M> init(Function<M, String> getInitialValue);
-
-	/**
-	 * Validates the text value.
-	 * 
-	 * @param validator
-	 *            {@link ValueValidator}.
-	 * @return <code>this</code>.
-	 */
-	TextBuilder<M> validate(ValueValidator<String> validator);
-
-	/**
-	 * Obtains the {@link ObservableValue} to the value.
-	 * 
-	 * @return {@link ObservableValue} to the value.
-	 */
-	ObservableValue<String> getValue();
-
+public interface TextBuilder<M> extends Builder<M, String, TextBuilder<M>> {
 }

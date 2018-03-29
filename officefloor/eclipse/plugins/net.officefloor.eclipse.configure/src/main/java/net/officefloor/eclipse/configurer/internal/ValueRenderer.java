@@ -43,12 +43,26 @@ public interface ValueRenderer<M> {
 	Node createLabel();
 
 	/**
+	 * Creates a new error feedback {@link Node}.
+	 * 
+	 * @return Error feedback {@link Node}.
+	 */
+	Node createErrorFeedback();
+
+	/**
 	 * Creates a new input {@link Node}. {@link Node} responsible for capturing the
 	 * configuration via the UI.
 	 * 
 	 * @return New input {@link Node}.
 	 */
 	Node createInput();
+
+	/**
+	 * Obtains the error with value.
+	 * 
+	 * @return Error with value. <code>null</code> to indicate no error.
+	 */
+	Throwable getError();
 
 	/**
 	 * Loads the value to the model.

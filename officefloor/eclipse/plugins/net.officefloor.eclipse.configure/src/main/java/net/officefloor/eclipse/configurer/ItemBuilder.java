@@ -32,22 +32,18 @@ public interface ItemBuilder<M> {
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param textLoader
-	 *            {@link ValueLoader}.
 	 * @return {@link TextBuilder}.
 	 */
-	TextBuilder<M> text(String label, ValueLoader<M, String> textLoader);
+	TextBuilder<M> text(String label);
 
 	/**
 	 * Adds a {@link Class} property to be configured.
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param classLoader
-	 *            {@link ValueLoader}.
 	 * @return {@link ClassBuilder}.
 	 */
-	ClassBuilder<M> clazz(String label, ValueLoader<M, String> classLoader);
+	ClassBuilder<M> clazz(String label);
 
 	ObservableStringValue resource();
 

@@ -15,48 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
+package net.officefloor.eclipse.configurer.internal;
+
+import java.util.function.Supplier;
 
 import javafx.beans.property.ReadOnlyProperty;
 
 /**
- * Validates the value.
+ * {@link ValueRenderer} allowing for rending multiple values.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueValidator<V> {
+public interface ChoiceValueRenderer<V> {
 
 	/**
-	 * Undertakes the validation.
+	 * Obtains the array of {@link ValueRenderer} instances.
 	 * 
-	 * @param context
-	 *            {@link ValueValidatorContext}.
-	 * @throws Exception
-	 *             If failure in validation. Message of {@link Exception} is used as
-	 *             error.
+	 * @return Array of {@link ValueRenderer} instances.
 	 */
-	void validate(ValueValidatorContext<V> context) throws Exception;
+	Supplier<ValueRenderer<V>[]>[] getChoiceValueRenders();
 
 	/**
-	 * Context for the {@link ValueValidator}.
+	 * Obtains the index into choice {@link ValueRenderer} listing to display.
+	 * 
+	 * @return Index into choice {@link ValueRenderer} listing to display.
 	 */
-	public interface ValueValidatorContext<V> {
-
-		/**
-		 * Obtains the value.
-		 * 
-		 * @return Value.
-		 */
-		ReadOnlyProperty<V> getValue();
-
-		/**
-		 * Specifies an error.
-		 * 
-		 * @param message
-		 *            Message.
-		 */
-		void setError(String message);
-
-	}
+	ReadOnlyProperty<Integer> getChoiceIndex();
 
 }

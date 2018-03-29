@@ -32,19 +32,8 @@ public interface ValueRendererContext<M> {
 	M getModel();
 
 	/**
-	 * Specifies an error.
-	 * 
-	 * @param message
-	 *            Message. <code>null</code> indicates no error.
+	 * Triggered to refresh the error display.
 	 */
-	void setError(String message);
-
-	/**
-	 * Specifies an error.
-	 * 
-	 * @param error
-	 *            {@link Throwable}.
-	 */
-	void setError(Throwable error);
+	void refreshError();
 
 }

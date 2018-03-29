@@ -15,48 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
-
-import javafx.beans.property.ReadOnlyProperty;
+package net.officefloor.eclipse.configurer.internal;
 
 /**
- * Validates the value.
+ * Message only exception.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueValidator<V> {
+public class MessageOnlyException extends Exception {
 
 	/**
-	 * Undertakes the validation.
+	 * Instantiate.
 	 * 
-	 * @param context
-	 *            {@link ValueValidatorContext}.
-	 * @throws Exception
-	 *             If failure in validation. Message of {@link Exception} is used as
-	 *             error.
+	 * @param message
+	 *            Message.
 	 */
-	void validate(ValueValidatorContext<V> context) throws Exception;
-
-	/**
-	 * Context for the {@link ValueValidator}.
-	 */
-	public interface ValueValidatorContext<V> {
-
-		/**
-		 * Obtains the value.
-		 * 
-		 * @return Value.
-		 */
-		ReadOnlyProperty<V> getValue();
-
-		/**
-		 * Specifies an error.
-		 * 
-		 * @param message
-		 *            Message.
-		 */
-		void setError(String message);
-
+	public MessageOnlyException(String message) {
+		super(message);
 	}
 
 }

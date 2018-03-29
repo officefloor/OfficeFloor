@@ -18,7 +18,6 @@
 package net.officefloor.eclipse.configurer;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -37,11 +36,9 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 * 
 	 * @param label
 	 *            Label for the choices.
-	 * @param choiceEnumClass
-	 *            {@link Enum} {@link Class} for the different choices.
 	 * @return {@link ChoiceBuilder}.
 	 */
-	<E extends Enum<E>> ChoiceBuilder<M, E> choices(String label, Class<E> choiceEnumClass);
+	ChoiceBuilder<M> choices(String label);
 
 	/**
 	 * Configures a list of items.
@@ -50,22 +47,18 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 *            Label for the items.
 	 * @param itemClass
 	 *            {@link Class} of the item.
-	 * @param itemsLoader
-	 *            {@link ValueLoader} to load the {@link List} of items.
 	 * @return {@link ItemBuilder}.
 	 */
-	<I> ItemBuilder<I> list(String label, Class<I> itemClass, ValueLoader<M, List<I>> itemsLoader);
+	<I> ItemBuilder<I> list(String label, Class<I> itemClass);
 
 	/**
 	 * Configures {@link PropertyList}.
 	 * 
 	 * @param label
 	 *            Label for the {@link Properties}.
-	 * @param propertiesLoader
-	 *            {@link ValueLoader} to load the {@link PropertyList}.
 	 * @return {@link PropertiesBuilder}.
 	 */
-	PropertiesBuilder<M> properties(String label, ValueLoader<M, PropertyList> propertiesLoader);
+	PropertiesBuilder<M> properties(String label);
 
 	/**
 	 * Configures a mapping of name to name.
@@ -74,10 +67,8 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 *            Label for the mapping.
 	 * @param getMappedItems
 	 *            {@link Function} to extract the mapping from the model.
-	 * @param mapping
-	 *            {@link ValueLoader} to load the mapping.
 	 */
-	void map(String label, Function<M, List<String>> getMappedItems, ValueLoader<M, Map<String, String>> mapping);
+	void map(String label, Function<M, List<String>> getMappedItems);
 
 	/**
 	 * Configures a {@link Consumer} to apply the configured model.
