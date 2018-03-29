@@ -55,10 +55,12 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 		text.getValue().addListener((event, oldValue, newValue) -> System.out.println("Text = " + newValue));
 
 		// Provide choices
-		ChoiceBuilder<ExampleModel> choices = builder.choices("choices");
-		choices.choice("one").text("Choice One").setValue((model, value) -> model.choiceValue = value);
-		choices.choice("two").text("Choice Two").setValue((model, value) -> model.choiceValue = value);
+		ChoiceBuilder<ExampleModel> choices = builder.choices("Choices");
+		choices.choice("one").text("Choice One").setValue((model, value) -> model.choiceValue = "ONE: " + value);
+		choices.choice("two").text("Choice Two").setValue((model, value) -> model.choiceValue = "TWO: " + value);
 
+		// Provide flag
+		builder.flag("Flag");
 	}
 
 	@Override

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.internal.text;
+package net.officefloor.eclipse.configurer.internal.inputs;
 
 import javafx.beans.property.Property;
 import javafx.scene.Node;

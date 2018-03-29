@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javafx.beans.value.ObservableStringValue;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -59,6 +60,17 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 * @return {@link PropertiesBuilder}.
 	 */
 	PropertiesBuilder<M> properties(String label);
+
+	/**
+	 * Adds a {@link Class} property to be configured.
+	 * 
+	 * @param label
+	 *            Label.
+	 * @return {@link ClassBuilder}.
+	 */
+	ClassBuilder<M> clazz(String label);
+
+	ObservableStringValue resource();
 
 	/**
 	 * Configures a mapping of name to name.

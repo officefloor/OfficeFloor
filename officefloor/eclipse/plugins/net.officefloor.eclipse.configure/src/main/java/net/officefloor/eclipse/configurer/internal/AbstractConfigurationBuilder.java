@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
@@ -38,12 +37,14 @@ import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ErrorListener;
+import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ItemBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.configurer.internal.choice.ChoiceBuilderImpl;
-import net.officefloor.eclipse.configurer.internal.text.TextBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
 
 /**
  * Abstract {@link ConfigurationBuilder}.
@@ -219,9 +220,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public ObservableBooleanValue flag() {
-		// TODO Auto-generated method stub
-		return null;
+	public FlagBuilder<M> flag(String label) {
+		return this.registerBuilder(new FlagBuilderImpl<>(label));
 	}
 
 	@Override
