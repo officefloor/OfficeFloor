@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -153,12 +155,38 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 		// Hook in typing to start edit
 		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
-			
-			// Start editing (if not already editing)
-			if (table.getEditingCell() == null) {
-				if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
-					TablePosition focusedCellPosition = table.getFocusModel().getFocusedCell();
-					table.edit(focusedCellPosition.getRow(), focusedCellPosition.getTableColumn());
+
+			// Obtain the selected property
+			if (table.getSelectionModel().getSelectedCells().size() == 0) {
+				return;
+			}
+			TablePosition<Row, ?> selectedPosition = table.getSelectionModel().getSelectedCells().get(0);
+			Property<?> cellProperty = table.getItems().get(selectedPosition.getRow()).cells[selectedPosition
+					.getColumn()].getValue();
+
+			// Handle based on type
+			if (cellProperty instanceof BooleanProperty) {
+				BooleanProperty toggle = (BooleanProperty) cellProperty;
+
+				// Toggle value on space
+				switch (event.getCode()) {
+				case SPACE:
+				case ENTER:
+					toggle.setValue(!toggle.getValue());
+					break;
+				default:
+					break;
+				}
+
+			} else if (cellProperty instanceof StringProperty) {
+				// Start editing (if not already editing)
+				TablePosition<Row, ?> editingPosition = table.getEditingCell();
+				if (editingPosition == null) {
+					if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
+						TablePosition focusedCellPosition = table.getFocusModel().getFocusedCell();
+						table.edit(focusedCellPosition.getRow(), focusedCellPosition.getTableColumn());
+					}
+					return;
 				}
 			}
 		});
