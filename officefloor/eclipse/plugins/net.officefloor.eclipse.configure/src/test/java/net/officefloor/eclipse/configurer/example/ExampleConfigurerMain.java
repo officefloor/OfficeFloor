@@ -68,13 +68,19 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 		// Provide flag (editable)
 		builder.flag("Flag").init((model) -> model.flag).setValue((model, flag) -> model.flag = flag);
 
-		// Provide list of values
+		// Provide list of values (without ability to add further rows)
 		ListBuilder<ExampleModel, ExampleItem> list = builder.list("List", ExampleItem.class)
 				.init((model) -> model.items);
 		list.text("Label").init((model) -> model.text);
 		list.text("Text").init((model) -> model.text).setValue((item, value) -> item.text = value);
 		list.flag("Flag").init((model) -> model.flag);
 		list.flag("Flag").init((model) -> model.flag).setValue((item, value) -> item.flag = value);
+
+		// Provide list of values (able to add and delete rows)
+		ListBuilder<ExampleModel, ExampleItem> editableList = builder.list("List", ExampleItem.class)
+				.addItem(() -> new ExampleItem("New", true)).deleteItem();
+		editableList.text("Text").init((model) -> model.text);
+		editableList.flag("Flag").init((model) -> model.flag);
 	}
 
 	@Override

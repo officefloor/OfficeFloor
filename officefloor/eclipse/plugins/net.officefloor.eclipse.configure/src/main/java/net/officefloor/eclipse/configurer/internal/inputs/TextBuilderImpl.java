@@ -92,7 +92,57 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 		/**
 		 * {@link TextField} for editing.
 		 */
-		private TextField textField;
+		private TextField textField = null;
+
+		/**
+		 * Creates the {@link TextField}.
+		 */
+		private void createTextField() {
+			if (this.textField == null) {
+
+				// Lazy create the text field
+				this.textField = new TextField();
+				this.textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+
+				// Commit on lost focus
+				this.textField.focusedProperty().addListener((event, oldValue, newValue) -> {
+					if (!newValue) {
+						this.commitEdit(this.textField.getText());
+					}
+				});
+
+				// Commit on press enter
+				this.textField.setOnAction((event) -> {
+					this.commitEdit(this.textField.getText());
+
+					// Keep focus on the cell
+					this.requestFocus();
+				});
+
+				// Cancel edit on escape
+				this.textField.setOnKeyPressed((event) -> {
+					switch (event.getCode()) {
+					case ESCAPE:
+						// Cancel the editing
+						this.cancelEdit();
+						this.setGraphic(null);
+						break;
+					default:
+						// Allow typing
+						break;
+					}
+				});
+			}
+		}
+
+		/**
+		 * Obtain the value.
+		 * 
+		 * @return Value.
+		 */
+		private String getString() {
+			return this.getItem() == null ? "" : this.getItem().toString();
+		}
 
 		/*
 		 * ============ TableCell ================
@@ -100,54 +150,28 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 
 		@Override
 		public void startEdit() {
-			if (!this.isEmpty()) {
-				super.startEdit();
-				this.createTextField();
-				this.setText(null);
-				this.setGraphic(this.textField);
-				this.textField.selectAll();
-			}
-		}
+			super.startEdit();
 
-		@Override
-		public void cancelEdit() {
-			super.cancelEdit();
-			this.setText(this.getString());
-			this.setGraphic(null);
+			// Create the text field
+			this.createTextField();
+			this.textField.setText(this.getString());
+			this.setGraphic(this.textField);
+
+			// Take focus and have all content selected
+			this.textField.requestFocus();
+			this.textField.selectAll();
 		}
 
 		@Override
 		public void updateItem(String item, boolean empty) {
 			super.updateItem(item, empty);
-			if (empty) {
-				this.setText(null);
+
+			// Handle stop editing
+			if (!this.isEditing()) {
+				// Update the text for cell with new value
+				this.setText(this.getString());
 				this.setGraphic(null);
-			} else {
-				if (this.isEditing()) {
-					if (this.textField != null) {
-						this.textField.setText(getString());
-					}
-					this.setText(null);
-					this.setGraphic(this.textField);
-				} else {
-					this.setText(this.getString());
-					this.setGraphic(null);
-				}
 			}
-		}
-
-		private void createTextField() {
-			this.textField = new TextField(getString());
-			this.textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
-			this.textField.focusedProperty().addListener((event, oldValue, newValue) -> {
-				if (!newValue) {
-					commitEdit(this.textField.getText());
-				}
-			});
-		}
-
-		private String getString() {
-			return this.getItem() == null ? "" : this.getItem().toString();
 		}
 	}
 

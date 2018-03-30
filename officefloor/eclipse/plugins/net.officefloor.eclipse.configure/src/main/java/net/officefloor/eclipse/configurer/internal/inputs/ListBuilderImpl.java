@@ -21,13 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyEvent;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
@@ -35,6 +39,7 @@ import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.CellRenderer;
 import net.officefloor.eclipse.configurer.internal.ColumnRenderer;
 import net.officefloor.eclipse.configurer.internal.ValueRendererContext;
+import net.officefloor.eclipse.configurer.internal.resize.DragResizer;
 
 /**
  * {@link ListBuilder} implementation.
@@ -52,6 +57,16 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 	 * Items.
 	 */
 	private final SimpleListProperty<Row> rows = new SimpleListProperty<>();
+
+	/**
+	 * {@link Supplier} for new items (rows).
+	 */
+	private Supplier<I> itemFactory = null;
+
+	/**
+	 * Indicates whether can delete.
+	 */
+	private boolean isDelete = false;
 
 	/**
 	 * Instantiate.
@@ -87,6 +102,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		TableView<Row> table = new TableView<>(this.rows);
 		table.setEditable(true);
 		table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
+		table.setPlaceholder(new Label("No entries"));
 
 		// Load the columns to the table
 		TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size()];
@@ -112,7 +128,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 					Row row = table.getItems().get(event.getTablePosition().getRow());
 					Property cellValue = row.cells[columnIndex].getValue();
 					cellValue.setValue(event.getNewValue());
-					
+
 				});
 				column.getStyleClass().add("configurer-column-editable");
 
@@ -126,11 +142,48 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 		// Load the rows
 		List<I> items = value.getValue();
-		List<Row> rows = new ArrayList<>(items.size());
-		for (I item : items) {
-			rows.add(new Row(item));
+		List<Row> rows = new ArrayList<>(items == null ? 0 : items.size());
+		if (items != null) {
+			for (I item : items) {
+				rows.add(new Row(item));
+			}
 		}
 		table.setItems(FXCollections.observableArrayList(rows));
+
+		// Hook in typing to start edit
+		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
+
+			// Values to not trigger editing
+			switch (event.getCode()) {
+			case ENTER:
+			case TAB:
+				// Do not trigger edit
+				return;
+			default:
+				// Start editing (if not already editing)
+				if (table.getEditingCell() == null) {
+					TablePosition focusedCellPosition = table.getFocusModel().getFocusedCell();
+					table.edit(focusedCellPosition.getRow(), focusedCellPosition.getTableColumn());
+				}
+				break;
+			}
+		});
+
+		// Determine if fixed number of rows
+		double ROW_HEIGHT = 25;
+		double HEADER_HEIGHT = ROW_HEIGHT + 5;
+		if ((this.itemFactory == null) && (!this.isDelete)) {
+			// Fixed number of rows, so fix on number of rows
+			table.setFixedCellSize(ROW_HEIGHT);
+			table.prefHeightProperty()
+					.bind(Bindings.size(table.getItems()).multiply(table.getFixedCellSize()).add(HEADER_HEIGHT));
+
+		} else {
+			// Allow to adjust height (with reasonable size)
+			double requiredHeight = ((table.getItems().size() + 1) * ROW_HEIGHT) + HEADER_HEIGHT;
+			table.prefHeightProperty().set(Math.min(requiredHeight, 300));
+			DragResizer.makeResizable(table);
+		}
 
 		// Return the table
 		return table;
@@ -152,14 +205,14 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 	@Override
 	public ListBuilder<M, I> addItem(Supplier<I> itemFactory) {
-		// TODO Auto-generated method stub
-		return null;
+		this.itemFactory = itemFactory;
+		return this;
 	}
 
 	@Override
 	public ListBuilder<M, I> deleteItem() {
-		// TODO Auto-generated method stub
-		return null;
+		this.isDelete = true;
+		return this;
 	}
 
 	/**
