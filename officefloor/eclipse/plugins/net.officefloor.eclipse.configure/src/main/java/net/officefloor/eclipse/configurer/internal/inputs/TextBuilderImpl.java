@@ -21,6 +21,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
@@ -51,10 +52,24 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 
 	@Override
 	protected Node createInput(Property<String> value) {
-		TextField text = new TextField(value.getValue());
-		text.textProperty().bindBidirectional(value);
-		text.getStyleClass().add("configurer-input-text");
-		return text;
+
+		// Determine if can edit the value
+		if (this.isEditable()) {
+
+			// Provide editable text box
+			TextField text = new TextField(value.getValue());
+			text.textProperty().bindBidirectional(value);
+			text.getStyleClass().add("configurer-input-text");
+			return text;
+
+		} else {
+
+			// Provide label (can not edit)
+			Label label = new Label(value.getValue());
+			label.textProperty().bind(value);
+			label.getStyleClass().add("configurer-input-label");
+			return label;
+		}
 	}
 
 	@Override
@@ -65,6 +80,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 	@Override
 	protected <R> void configureTableColumn(TableColumn<R, String> column,
 			Callback<Integer, ObservableValue<String>> callback) {
+		column.getStyleClass().add("configurer-input-column-" + this.getLabel().replace(' ', '-').replace('\t', '-'));
 		column.setCellFactory((col) -> new EditingCell<>());
 	}
 

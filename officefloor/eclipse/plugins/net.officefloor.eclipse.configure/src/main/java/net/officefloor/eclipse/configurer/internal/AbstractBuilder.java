@@ -143,6 +143,15 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	}
 
 	/**
+	 * Obtains the label.
+	 * 
+	 * @return Label.
+	 */
+	protected String getLabel() {
+		return this.label == null ? "" : this.label;
+	}
+
+	/**
 	 * Obtains the model.
 	 * 
 	 * @return Model.
@@ -359,6 +368,11 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 		TableColumn<R, V> column = new TableColumn<>(this.label);
 		this.configureTableColumn(column, callback);
 		return column;
+	}
+
+	@Override
+	public boolean isEditable() {
+		return (this.valueLoader != null);
 	}
 
 	@Override

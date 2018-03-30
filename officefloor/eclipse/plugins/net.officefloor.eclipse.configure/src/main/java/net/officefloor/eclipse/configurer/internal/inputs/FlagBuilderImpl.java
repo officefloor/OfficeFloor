@@ -53,7 +53,12 @@ public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<
 	@Override
 	protected Node createInput(Property<Boolean> value) {
 		CheckBox checkBox = new CheckBox();
-		checkBox.selectedProperty().bindBidirectional(value);
+		if (this.isEditable()) {
+			checkBox.selectedProperty().bindBidirectional(value);
+		} else {
+			checkBox.setDisable(true);
+			checkBox.selectedProperty().bind(value);
+		}
 		checkBox.getStyleClass().add("configurer-input-checkbox");
 		return checkBox;
 	}

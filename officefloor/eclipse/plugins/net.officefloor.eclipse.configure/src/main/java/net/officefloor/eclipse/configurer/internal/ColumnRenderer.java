@@ -39,6 +39,13 @@ public interface ColumnRenderer<I, V> {
 	<R> TableColumn<R, V> createTableColumn(Callback<Integer, ObservableValue<V>> callback);
 
 	/**
+	 * Indicates if the column is editable.
+	 * 
+	 * @return <code>true</code> if column is editable.
+	 */
+	boolean isEditable();
+
+	/**
 	 * Creates the {@link ValueRenderer} for the cell.
 	 * 
 	 * @param context

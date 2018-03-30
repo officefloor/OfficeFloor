@@ -106,11 +106,21 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 				Property cellValue = row.getValue().cells[columnIndex].getValue();
 				return cellValue;
 			});
-			column.setOnEditCommit((event) -> {
-				Row row = table.getItems().get(event.getTablePosition().getRow());
-				Property cellValue = row.cells[columnIndex].getValue();
-				cellValue.setValue(event.getNewValue());
-			});
+			if (columnRenderer.isEditable()) {
+				// Column editable
+				column.setOnEditCommit((event) -> {
+					Row row = table.getItems().get(event.getTablePosition().getRow());
+					Property cellValue = row.cells[columnIndex].getValue();
+					cellValue.setValue(event.getNewValue());
+					
+				});
+				column.getStyleClass().add("configurer-column-editable");
+
+			} else {
+				// Column not editable
+				column.setEditable(false);
+				column.getStyleClass().add("configurer-column-read-only");
+			}
 		}
 		table.getColumns().setAll(columns);
 

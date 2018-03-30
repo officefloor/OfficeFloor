@@ -21,7 +21,6 @@ import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
-import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.example.ExampleModel.ExampleItem;
 
 /**
@@ -48,34 +47,39 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 	@Override
 	protected void build(ConfigurationBuilder<ExampleModel> builder) {
 
-		// Configure text
-		TextBuilder<ExampleModel> text = builder.text("Text").init((model) -> model.text).validate((context) -> {
+		// Configure text (non-editable)
+		builder.text("Label").init((model) -> model.text);
+
+		// Configure text (editable)
+		builder.text("Text").init((model) -> model.text).validate((context) -> {
 			if (context.getValue().getValue().length() < 3) {
 				context.setError("Value too short");
 			}
 		}).setValue((model, value) -> model.text = value);
-		text.getValue().addListener((event, oldValue, newValue) -> System.out.println("Text = " + newValue));
 
 		// Provide choices
 		ChoiceBuilder<ExampleModel> choices = builder.choices("Choices");
 		choices.choice("one").text("Choice One").setValue((model, value) -> model.choiceValue = "ONE: " + value);
 		choices.choice("two").text("Choice Two").setValue((model, value) -> model.choiceValue = "TWO: " + value);
 
-		// Provide flag
-		builder.flag("Flag");
+		// Provide flag (non-editable)
+		builder.flag("Flag").init((model) -> model.flag);
+
+		// Provide flag (editable)
+		builder.flag("Flag").init((model) -> model.flag).setValue((model, flag) -> model.flag = flag);
 
 		// Provide list of values
 		ListBuilder<ExampleModel, ExampleItem> list = builder.list("List", ExampleItem.class)
 				.init((model) -> model.items);
-		list.text("Text").init((model) -> model.text);
+		list.text("Label").init((model) -> model.text);
+		list.text("Text").init((model) -> model.text).setValue((item, value) -> item.text = value);
 		list.flag("Flag").init((model) -> model.flag);
+		list.flag("Flag").init((model) -> model.flag).setValue((item, value) -> item.flag = value);
 	}
 
 	@Override
 	protected ExampleModel createModel() {
-		ExampleModel model = new ExampleModel();
-		model.text = "test";
-		return model;
+		return new ExampleModel();
 	}
 
 }

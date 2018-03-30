@@ -150,7 +150,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		narrow.getStyleClass().add("configurer-container-narrow");
 
 		// Responsive view
-		final double RESPONSIVE_WIDTH = 400;
+		final double RESPONSIVE_WIDTH = 600;
 		InvalidationListener listener = (event) -> {
 			if (scroll.getWidth() < RESPONSIVE_WIDTH) {
 				// Avoid events if already narrow

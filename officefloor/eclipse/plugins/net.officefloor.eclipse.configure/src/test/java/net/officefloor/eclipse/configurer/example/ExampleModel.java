@@ -32,17 +32,22 @@ public class ExampleModel {
 	/**
 	 * Text.
 	 */
-	public String text;
+	public String text = "TEXT";
+
+	/**
+	 * Flag.
+	 */
+	public boolean flag = true;
 
 	/**
 	 * Class name.
 	 */
-	public String className;
+	public String className = Object.class.getName();
 
 	/**
 	 * Resource name.
 	 */
-	public String resourceName;
+	public String resourceName = "net/officefloor/example/Resource.txt";
 
 	/**
 	 * Choice value.
@@ -53,11 +58,6 @@ public class ExampleModel {
 	 * {@link PropertyList}.
 	 */
 	public PropertyList properties;
-
-	/**
-	 * Flag.
-	 */
-	public boolean flag;
 
 	/**
 	 * Items.
