@@ -17,23 +17,30 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import javafx.beans.property.ObjectProperty;
-import net.officefloor.compile.properties.PropertyList;
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
- * Builder for configuring a {@link PropertyList}.
+ * Builder of a list of models.
  * 
  * @author Daniel Sagenschneider
  */
-public interface PropertiesBuilder<M> extends Builder<M, PropertyList, PropertiesBuilder<M>> {
+public interface ListBuilder<M, I> extends ItemBuilder<I>, Builder<M, List<I>, ListBuilder<M, I>> {
 
 	/**
-	 * Configures listening on the required {@link PropertyList}.
+	 * Provides means to add an item to the list.
 	 * 
-	 * @param required
-	 *            Required {@link PropertyList}.
+	 * @param itemFactory
+	 *            {@link Supplier} for the new item.
 	 * @return <code>this</code>.
 	 */
-	PropertiesBuilder<M> required(ObjectProperty<PropertyList> required);
+	ListBuilder<M, I> addItem(Supplier<I> itemFactory);
+
+	/**
+	 * Allows for deleting an item from the list.
+	 * 
+	 * @return <code>this</code>.
+	 */
+	ListBuilder<M, I> deleteItem();
 
 }

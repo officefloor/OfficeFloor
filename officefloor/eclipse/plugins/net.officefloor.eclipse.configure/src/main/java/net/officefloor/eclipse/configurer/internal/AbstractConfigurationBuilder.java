@@ -38,12 +38,12 @@ import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
-import net.officefloor.eclipse.configurer.ItemBuilder;
+import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
-import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.ListBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
 
 /**
@@ -208,18 +208,6 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public ClassBuilder<M> clazz(String label) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ObservableStringValue resource() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public FlagBuilder<M> flag(String label) {
 		return this.registerBuilder(new FlagBuilderImpl<>(label));
 	}
@@ -230,9 +218,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public <I> ItemBuilder<I> list(String label, Class<I> itemClass) {
-		// TODO Auto-generated method stub
-		return null;
+	public <I> ListBuilder<M, I> list(String label, Class<I> itemType) {
+		return this.registerBuilder(new ListBuilderImpl<>(label));
 	}
 
 	@Override
@@ -248,9 +235,15 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public void validate(ValueValidator<M> validator) {
+	public ClassBuilder<M> clazz(String label) {
 		// TODO Auto-generated method stub
+		return null;
+	}
 
+	@Override
+	public ObservableStringValue resource() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -398,7 +391,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 								remainingRenderers[c] = choiceRenderers[c];
 							}
 							for (int s = 0; s < splitRenderers.length; s++) {
-								remainingRenderers[splitRenderers.length + s] = splitRenderers[s];
+								remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
 							}
 							this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, remainingRenderers);
 						}

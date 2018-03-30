@@ -17,6 +17,9 @@
  */
 package net.officefloor.eclipse.configurer.example;
 
+import java.util.Arrays;
+import java.util.List;
+
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -55,4 +58,44 @@ public class ExampleModel {
 	 * Flag.
 	 */
 	public boolean flag;
+
+	/**
+	 * Items.
+	 */
+	public List<ExampleItem> items = Arrays.asList(new ExampleItem("ITEM", true), new ExampleItem());
+
+	/**
+	 * Example item.
+	 */
+	public static class ExampleItem {
+
+		/**
+		 * Text.
+		 */
+		public String text;
+
+		/**
+		 * Flag.
+		 */
+		public boolean flag;
+
+		/**
+		 * Instantiate.
+		 */
+		public ExampleItem() {
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param text
+		 *            Text.
+		 * @param flag
+		 *            Flag.
+		 */
+		public ExampleItem(String text, boolean flag) {
+			this.text = text;
+			this.flag = flag;
+		}
+	}
 }

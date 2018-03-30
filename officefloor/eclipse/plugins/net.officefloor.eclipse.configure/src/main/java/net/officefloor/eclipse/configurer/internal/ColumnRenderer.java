@@ -15,25 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
+package net.officefloor.eclipse.configurer.internal;
 
-import javafx.beans.property.ObjectProperty;
-import net.officefloor.compile.properties.PropertyList;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.util.Callback;
 
 /**
- * Builder for configuring a {@link PropertyList}.
+ * Renderer for a {@link TableView} {@link TableColumn}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface PropertiesBuilder<M> extends Builder<M, PropertyList, PropertiesBuilder<M>> {
+public interface ColumnRenderer<I, V> {
 
 	/**
-	 * Configures listening on the required {@link PropertyList}.
+	 * Creates the {@link TableColumn}.
 	 * 
-	 * @param required
-	 *            Required {@link PropertyList}.
-	 * @return <code>this</code>.
+	 * @param callback
+	 *            {@link Callback}.
+	 * @return {@link TableColumn}.
 	 */
-	PropertiesBuilder<M> required(ObjectProperty<PropertyList> required);
+	<R> TableColumn<R, V> createTableColumn(Callback<Integer, ObservableValue<V>> callback);
+
+	/**
+	 * Creates the {@link ValueRenderer} for the cell.
+	 * 
+	 * @param context
+	 *            {@link ValueRendererContext}.
+	 * @return {@link ValueRenderer}.
+	 */
+	CellRenderer<I, V> createCellRenderer(ValueRendererContext<I> context);
 
 }

@@ -15,25 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
+package net.officefloor.eclipse.configurer.internal;
 
-import javafx.beans.property.ObjectProperty;
-import net.officefloor.compile.properties.PropertyList;
+import javafx.beans.property.Property;
+import javafx.scene.control.TableCell;
 
 /**
- * Builder for configuring a {@link PropertyList}.
+ * Renderer for the cell.
  * 
  * @author Daniel Sagenschneider
  */
-public interface PropertiesBuilder<M> extends Builder<M, PropertyList, PropertiesBuilder<M>> {
+public interface CellRenderer<I, V> {
 
 	/**
-	 * Configures listening on the required {@link PropertyList}.
+	 * Obtains the value for the {@link TableCell}.
 	 * 
-	 * @param required
-	 *            Required {@link PropertyList}.
-	 * @return <code>this</code>.
+	 * @return Value for the the {@link TableCell}.
 	 */
-	PropertiesBuilder<M> required(ObjectProperty<PropertyList> required);
+	Property<V> getValue();
 
 }

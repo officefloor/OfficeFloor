@@ -27,9 +27,12 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.configurer.ValueLoader;
@@ -42,7 +45,7 @@ import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
-		implements Builder<M, V, B>, ValueRenderer<M>, ValueValidatorContext<V> {
+		implements Builder<M, V, B>, ValueRenderer<M>, ValueValidatorContext<V>, ColumnRenderer<M, V> {
 
 	/**
 	 * Path to the error {@link Image}.
@@ -120,12 +123,41 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	protected abstract Node createInput(Property<V> value);
 
 	/**
+	 * Creates the {@link Property} for the {@link TableCell}.
+	 * 
+	 * @return {@link Property} for the {@link TableCell}.
+	 */
+	protected Property<V> createCellProperty() {
+		return new SimpleObjectProperty<>();
+	}
+
+	/**
+	 * Allow overriding to configure the {@link TableColumn}.
+	 * 
+	 * @param column
+	 *            {@link TableColumn}.
+	 * @param callback
+	 *            {@link Callback}.
+	 */
+	protected <R> void configureTableColumn(TableColumn<R, V> column, Callback<Integer, ObservableValue<V>> callback) {
+	}
+
+	/**
 	 * Obtains the model.
 	 * 
 	 * @return Model.
 	 */
 	protected M getModel() {
 		return this.model;
+	}
+
+	/**
+	 * Obtains the {@link ValueRendererContext}.
+	 * 
+	 * @return {@link ValueRendererContext}.
+	 */
+	protected ValueRendererContext<M> getValueRendererContext() {
+		return this.context;
 	}
 
 	/**
@@ -315,6 +347,63 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	public void loadValue(M model) {
 		if (this.valueLoader != null) {
 			this.valueLoader.loadValue(model, this.value.getValue());
+		}
+	}
+
+	/*
+	 * ============ ColumnRenderer =================
+	 */
+
+	@Override
+	public <R> TableColumn<R, V> createTableColumn(Callback<Integer, ObservableValue<V>> callback) {
+		TableColumn<R, V> column = new TableColumn<>(this.label);
+		this.configureTableColumn(column, callback);
+		return column;
+	}
+
+	@Override
+	public CellRenderer<M, V> createCellRenderer(ValueRendererContext<M> context) {
+		return new CellRendererImpl(context);
+	}
+
+	/**
+	 * {@link CellRenderer} implementation.
+	 */
+	private class CellRendererImpl implements CellRenderer<M, V> {
+
+		/**
+		 * {@link ObservableValue}.
+		 */
+		private final Property<V> value = AbstractBuilder.this.createCellProperty();
+
+		/**
+		 * {@link ValueRendererContext}.
+		 */
+		private final ValueRendererContext<M> context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context
+		 *            {@link ValueRendererContext}.
+		 */
+		private CellRendererImpl(ValueRendererContext<M> context) {
+			this.context = context;
+
+			// Load initial value
+			if (AbstractBuilder.this.getInitialValue != null) {
+				V value = AbstractBuilder.this.getInitialValue.apply(this.context.getModel());
+				this.value.setValue(value);
+			}
+		}
+
+		/*
+		 * ============ CellRenderer ====================
+		 */
+
+		@Override
+		public Property<V> getValue() {
+			return this.value;
 		}
 	}
 

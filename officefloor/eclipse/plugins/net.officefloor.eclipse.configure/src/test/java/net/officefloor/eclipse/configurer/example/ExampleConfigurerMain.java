@@ -20,7 +20,9 @@ package net.officefloor.eclipse.configurer.example;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
+import net.officefloor.eclipse.configurer.example.ExampleModel.ExampleItem;
 
 /**
  * Main for running example configurer.
@@ -61,6 +63,12 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 
 		// Provide flag
 		builder.flag("Flag");
+
+		// Provide list of values
+		ListBuilder<ExampleModel, ExampleItem> list = builder.list("List", ExampleItem.class)
+				.init((model) -> model.items);
+		list.text("Text").init((model) -> model.text);
+		list.flag("Flag").init((model) -> model.flag);
 	}
 
 	@Override

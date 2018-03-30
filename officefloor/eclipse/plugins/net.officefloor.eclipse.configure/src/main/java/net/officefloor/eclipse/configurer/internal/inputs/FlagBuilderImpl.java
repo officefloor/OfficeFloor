@@ -18,8 +18,13 @@
 package net.officefloor.eclipse.configurer.internal.inputs;
 
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
@@ -51,6 +56,17 @@ public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<
 		checkBox.selectedProperty().bindBidirectional(value);
 		checkBox.getStyleClass().add("configurer-input-checkbox");
 		return checkBox;
+	}
+
+	@Override
+	protected Property<Boolean> createCellProperty() {
+		return new SimpleBooleanProperty();
+	}
+
+	@Override
+	protected <R> void configureTableColumn(TableColumn<R, Boolean> column,
+			Callback<Integer, ObservableValue<Boolean>> callback) {
+		column.setCellFactory(CheckBoxTableCell.forTableColumn(callback));
 	}
 
 }

@@ -42,12 +42,4 @@ public interface ItemBuilder<M> {
 	 */
 	FlagBuilder<M> flag(String label);
 
-	/**
-	 * Validates the item.
-	 * 
-	 * @param validator
-	 *            {@link ValueValidator}.
-	 */
-	void validate(ValueValidator<M> validator);
-
 }

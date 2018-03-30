@@ -46,11 +46,11 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 * 
 	 * @param label
 	 *            Label for the items.
-	 * @param itemClass
-	 *            {@link Class} of the item.
-	 * @return {@link ItemBuilder}.
+	 * @param itemType
+	 *            Item type.
+	 * @return {@link ListBuilder}.
 	 */
-	<I> ItemBuilder<I> list(String label, Class<I> itemClass);
+	<I> ListBuilder<M, I> list(String label, Class<I> itemType);
 
 	/**
 	 * Configures {@link PropertyList}.
@@ -62,6 +62,16 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	PropertiesBuilder<M> properties(String label);
 
 	/**
+	 * Configures a mapping of name to name.
+	 * 
+	 * @param label
+	 *            Label for the mapping.
+	 * @param getMappedItems
+	 *            {@link Function} to extract the mapping from the model.
+	 */
+	void map(String label, Function<M, List<String>> getMappedItems);
+
+	/**
 	 * Adds a {@link Class} property to be configured.
 	 * 
 	 * @param label
@@ -71,16 +81,6 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	ClassBuilder<M> clazz(String label);
 
 	ObservableStringValue resource();
-
-	/**
-	 * Configures a mapping of name to name.
-	 * 
-	 * @param label
-	 *            Label for the mapping.
-	 * @param getMappedItems
-	 *            {@link Function} to extract the mapping from the model.
-	 */
-	void map(String label, Function<M, List<String>> getMappedItems);
 
 	/**
 	 * Configures a {@link Consumer} to apply the configured model.
