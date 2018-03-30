@@ -103,6 +103,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		table.setEditable(true);
 		table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
 		table.setPlaceholder(new Label("No entries"));
+		table.getSelectionModel().setCellSelectionEnabled(true);
 
 		// Load the columns to the table
 		TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size()];
@@ -152,20 +153,13 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 		// Hook in typing to start edit
 		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
-
-			// Values to not trigger editing
-			switch (event.getCode()) {
-			case ENTER:
-			case TAB:
-				// Do not trigger edit
-				return;
-			default:
-				// Start editing (if not already editing)
-				if (table.getEditingCell() == null) {
+			
+			// Start editing (if not already editing)
+			if (table.getEditingCell() == null) {
+				if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
 					TablePosition focusedCellPosition = table.getFocusModel().getFocusedCell();
 					table.edit(focusedCellPosition.getRow(), focusedCellPosition.getTableColumn());
 				}
-				break;
 			}
 		});
 

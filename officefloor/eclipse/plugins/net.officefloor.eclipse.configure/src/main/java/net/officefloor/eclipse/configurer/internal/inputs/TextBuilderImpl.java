@@ -24,6 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.TextBuilder;
@@ -81,7 +82,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 	protected <R> void configureTableColumn(TableColumn<R, String> column,
 			Callback<Integer, ObservableValue<String>> callback) {
 		column.getStyleClass().add("configurer-input-column-" + this.getLabel().replace(' ', '-').replace('\t', '-'));
-		column.setCellFactory((col) -> new EditingCell<>());
+		column.setCellFactory((col) -> new EditingCell<>(column));
 	}
 
 	/**
@@ -90,9 +91,24 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 	private static class EditingCell<R> extends TableCell<R, String> {
 
 		/**
+		 * {@link TableColumn}.
+		 */
+		private final TableColumn<R, String> column;
+
+		/**
 		 * {@link TextField} for editing.
 		 */
 		private TextField textField = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param column
+		 *            {@link TableColumn}.
+		 */
+		public EditingCell(TableColumn<R, String> column) {
+			this.column = column;
+		}
 
 		/**
 		 * Creates the {@link TextField}.
@@ -114,9 +130,6 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 				// Commit on press enter
 				this.textField.setOnAction((event) -> {
 					this.commitEdit(this.textField.getText());
-
-					// Keep focus on the cell
-					this.requestFocus();
 				});
 
 				// Cancel edit on escape
@@ -125,7 +138,6 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 					case ESCAPE:
 						// Cancel the editing
 						this.cancelEdit();
-						this.setGraphic(null);
 						break;
 					default:
 						// Allow typing
@@ -144,6 +156,19 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 			return this.getItem() == null ? "" : this.getItem().toString();
 		}
 
+		/**
+		 * Keeps this {@link TableCell} selected after edits.
+		 */
+		private void keepSelected() {
+			TableView<R> table = this.column.getTableView();
+			if (table != null) {
+				int row = this.getIndex();
+				if (!table.getSelectionModel().isSelected(row, this.column)) {
+					table.getSelectionModel().select(row, this.column);
+				}
+			}
+		}
+
 		/*
 		 * ============ TableCell ================
 		 */
@@ -157,21 +182,39 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 			this.textField.setText(this.getString());
 			this.setGraphic(this.textField);
 
-			// Take focus and have all content selected
+			// Place focus on text box
 			this.textField.requestFocus();
 			this.textField.selectAll();
 		}
 
 		@Override
-		public void updateItem(String item, boolean empty) {
+		public void cancelEdit() {
+			super.cancelEdit();
+
+			// Clear editing
+			this.setGraphic(null);
+
+			// Keep selection
+			this.keepSelected();
+		}
+
+		@Override
+		protected void updateItem(String item, boolean empty) {
 			super.updateItem(item, empty);
 
-			// Handle stop editing
-			if (!this.isEditing()) {
-				// Update the text for cell with new value
-				this.setText(this.getString());
-				this.setGraphic(null);
-			}
+			// Provide value for display
+			this.setText(item);
+		}
+
+		@Override
+		public void commitEdit(String newValue) {
+			super.commitEdit(newValue);
+
+			// Clear editing
+			this.setGraphic(null);
+
+			// Keep selection
+			this.keepSelected();
 		}
 	}
 
