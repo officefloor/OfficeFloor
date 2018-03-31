@@ -23,6 +23,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.FlagBuilder;
@@ -69,9 +70,20 @@ public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<
 	}
 
 	@Override
-	protected <R> void configureTableColumn(TableColumn<R, Boolean> column,
+	protected <R> void configureTableColumn(TableView<R> table, TableColumn<R, Boolean> column,
 			Callback<Integer, ObservableValue<Boolean>> callback) {
-		column.setCellFactory(CheckBoxTableCell.forTableColumn(callback));
+		column.setCellFactory((tc) -> new CheckBoxTableCell<R, Boolean>(callback, null) {
+
+			@Override
+			public void updateItem(Boolean item, boolean empty) {
+				super.updateItem(item, empty);
+
+				// Handle add row
+				if (ListBuilderImpl.isUpdateItemAddRow(this)) {
+					return;
+				}
+			}
+		});
 	}
 
 }

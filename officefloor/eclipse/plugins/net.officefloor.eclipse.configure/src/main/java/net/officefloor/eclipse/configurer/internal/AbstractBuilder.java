@@ -29,12 +29,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.Builder;
-import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ValueLoader;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
@@ -46,12 +47,6 @@ import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
  */
 public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 		implements Builder<M, V, B>, ValueRenderer<M>, ValueValidatorContext<V>, ColumnRenderer<M, V> {
-
-	/**
-	 * Path to the error {@link Image}.
-	 */
-	private static final String ERROR_IMAGE_PATH = "/" + Configurer.class.getPackage().getName().replace('.', '/')
-			+ "/error.png";
 
 	/**
 	 * Label.
@@ -134,12 +129,15 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	/**
 	 * Allow overriding to configure the {@link TableColumn}.
 	 * 
+	 * @param table
+	 *            {@link TableView} that will contain the {@link TableColumn}.
 	 * @param column
 	 *            {@link TableColumn}.
 	 * @param callback
 	 *            {@link Callback}.
 	 */
-	protected <R> void configureTableColumn(TableColumn<R, V> column, Callback<Integer, ObservableValue<V>> callback) {
+	protected <R> void configureTableColumn(TableView<R> table, TableColumn<R, V> column,
+			Callback<Integer, ObservableValue<V>> callback) {
 	}
 
 	/**
@@ -302,18 +300,19 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 		this.context = context;
 
 		// Determine if change in model
-		if (this.model != this.context.getModel()) {
+		M initModel = this.context.getModel();
+		if (this.model != initModel) {
 
 			// Re-initialise to model
-			this.model = this.context.getModel();
+			this.model = initModel;
 			if (this.getInitialValue != null) {
-				V initialValue = this.getInitialValue.apply(this.model);
+				V initialValue = this.getInitialValue.apply(this.getModel());
 				this.value.setValue(initialValue);
 			}
-
-			// Allow any further model initialising
-			this.init(this.getModel());
 		}
+
+		// Allow any further model initialising
+		this.init(this.getModel());
 	}
 
 	@Override
@@ -323,7 +322,7 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 
 	@Override
 	public Node createErrorFeedback() {
-		ImageView error = new ImageView(new Image(ERROR_IMAGE_PATH, 15, 15, true, true));
+		ImageView error = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
 		Tooltip errorTooltip = new Tooltip();
 		errorTooltip.getStyleClass().add("error-tooltip");
 		Tooltip.install(error, errorTooltip);
@@ -364,9 +363,9 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	 */
 
 	@Override
-	public <R> TableColumn<R, V> createTableColumn(Callback<Integer, ObservableValue<V>> callback) {
+	public <R> TableColumn<R, V> createTableColumn(TableView<R> table, Callback<Integer, ObservableValue<V>> callback) {
 		TableColumn<R, V> column = new TableColumn<>(this.label);
-		this.configureTableColumn(column, callback);
+		this.configureTableColumn(table, column, callback);
 		return column;
 	}
 
@@ -388,7 +387,7 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 		/**
 		 * {@link ObservableValue}.
 		 */
-		private final Property<V> value = AbstractBuilder.this.createCellProperty();
+		private final Property<V> value;
 
 		/**
 		 * {@link ValueRendererContext}.
@@ -405,7 +404,8 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 			this.context = context;
 
 			// Load initial value
-			if (AbstractBuilder.this.getInitialValue != null) {
+			this.value = AbstractBuilder.this.createCellProperty();
+			if ((AbstractBuilder.this.getInitialValue != null) && (this.context.getModel() != null)) {
 				V value = AbstractBuilder.this.getInitialValue.apply(this.context.getModel());
 				this.value.setValue(value);
 			}

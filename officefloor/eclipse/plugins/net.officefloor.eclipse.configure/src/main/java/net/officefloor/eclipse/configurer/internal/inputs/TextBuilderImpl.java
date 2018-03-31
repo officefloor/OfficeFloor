@@ -79,7 +79,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 	}
 
 	@Override
-	protected <R> void configureTableColumn(TableColumn<R, String> column,
+	protected <R> void configureTableColumn(TableView<R> table, TableColumn<R, String> column,
 			Callback<Integer, ObservableValue<String>> callback) {
 		column.getStyleClass().add("configurer-input-column-" + this.getLabel().replace(' ', '-').replace('\t', '-'));
 		column.setCellFactory((col) -> new EditingCell<>(column));
@@ -202,16 +202,19 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 		protected void updateItem(String item, boolean empty) {
 			super.updateItem(item, empty);
 
+			// Handle add row
+			if (ListBuilderImpl.isUpdateItemAddRow(this)) {
+				return;
+			}
+
 			// Provide value for display
+			this.setGraphic(null);
 			this.setText(item);
 		}
 
 		@Override
 		public void commitEdit(String newValue) {
 			super.commitEdit(newValue);
-
-			// Clear editing
-			this.setGraphic(null);
 
 			// Keep selection
 			this.keepSelected();

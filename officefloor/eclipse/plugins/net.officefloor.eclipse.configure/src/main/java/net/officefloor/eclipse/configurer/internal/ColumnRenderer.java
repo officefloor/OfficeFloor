@@ -31,12 +31,14 @@ public interface ColumnRenderer<I, V> {
 
 	/**
 	 * Creates the {@link TableColumn}.
-	 * 
+	 *
+	 * @param table
+	 *            {@link TableView} to contain the {@link TableColumn}.
 	 * @param callback
 	 *            {@link Callback}.
 	 * @return {@link TableColumn}.
 	 */
-	<R> TableColumn<R, V> createTableColumn(Callback<Integer, ObservableValue<V>> callback);
+	<R> TableColumn<R, V> createTableColumn(TableView<R> table, Callback<Integer, ObservableValue<V>> callback);
 
 	/**
 	 * Indicates if the column is editable.

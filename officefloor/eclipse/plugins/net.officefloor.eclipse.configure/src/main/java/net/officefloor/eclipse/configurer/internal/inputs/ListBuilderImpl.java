@@ -25,15 +25,22 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
@@ -49,6 +56,54 @@ import net.officefloor.eclipse.configurer.internal.resize.DragResizer;
  * @author Daniel Sagenschneider
  */
 public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuilder<M, I>> implements ListBuilder<M, I> {
+
+	/**
+	 * Indicates if add row (configuring {@link TableCell} for add row).
+	 * 
+	 * @param tableCell
+	 *            {@link TableCell}.
+	 * @return <code>true</code> if add row.
+	 */
+	public static <R> boolean isUpdateItemAddRow(TableCell<R, ?> tableCell) {
+
+		// Determine if the add row
+		TableRow<?> tableRow = tableCell.getTableRow();
+		if (tableRow != null) {
+			Object item = tableRow.getItem();
+			if (item != null) {
+				if (item instanceof ListBuilderImpl.AddRow) {
+					ListBuilderImpl<?, ?>.AddRow addRow = (ListBuilderImpl<?, ?>.AddRow) item;
+
+					// First column to contain add icon
+					int columnIndex = tableCell.getTableView().getColumns().indexOf(tableCell.getTableColumn());
+					switch (columnIndex) {
+					case 0:
+						tableCell
+								.setGraphic(new ImageView(new Image(DefaultImages.ADD_IMAGE_PATH, 15, 15, true, true)));
+						tableCell.alignmentProperty().set(Pos.CENTER_LEFT);
+
+						// Click anywhere on cell to add row
+						tableCell.setOnMouseClicked((event) -> addRow.addRow());
+						break;
+					default:
+						tableCell.setGraphic(null);
+						break;
+					}
+
+					// Add row
+					tableCell.setText(null);
+					return true;
+				}
+			}
+		}
+
+		// Clear the on click handling
+		tableCell.setOnMouseClicked((event) -> {
+		});
+
+		// As here not an add row
+		return false;
+	}
 
 	/**
 	 * {@link ColumnRenderer} instances.
@@ -108,13 +163,13 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		table.getSelectionModel().setCellSelectionEnabled(true);
 
 		// Load the columns to the table
-		TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size()];
-		for (int i = 0; i < columns.length; i++) {
+		TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size() + (this.isDelete ? 1 : 0)];
+		for (int i = 0; i < this.renderers.size(); i++) {
 			ColumnRenderer<I, ?> columnRenderer = this.renderers.get(i);
 
 			// Add the column
 			int columnIndex = i;
-			TableColumn<Row, ?> column = columnRenderer.createTableColumn((index) -> {
+			TableColumn<Row, ?> column = columnRenderer.createTableColumn(table, (index) -> {
 				Row row = table.getItems().get(index);
 				return (Property) row.cells[columnIndex].getValue();
 			});
@@ -141,6 +196,50 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 				column.getStyleClass().add("configurer-column-read-only");
 			}
 		}
+
+		// Determine if able to delete
+		if (this.isDelete) {
+
+			// Add column of delete buttons
+			TableColumn<Row, DeleteRow> column = new TableColumn<>();
+			column.setCellValueFactory((row) -> new SimpleObjectProperty<>(row.getValue().delete));
+			column.setCellFactory((tc) -> {
+				TableCell<Row, DeleteRow> cell = new TableCell<Row, DeleteRow>() {
+					@Override
+					protected void updateItem(DeleteRow item, boolean empty) {
+						super.updateItem(item, empty);
+
+						// Handle add row
+						if (isUpdateItemAddRow(this)) {
+							return;
+						}
+
+						// No text
+						this.setText(null);
+
+						// Determine if show delete button
+						if ((!this.isEmpty()) && (item != null)) {
+
+							// Click anywhere on cell to delete
+							this.setOnMouseClicked((event) -> item.deleteRow());
+
+							// Delete row icon
+							this.setGraphic(
+									new ImageView(new Image(DefaultImages.DELETE_IMAGE_PATH, 15, 15, true, true)));
+
+						} else {
+							// Row delete, so clear graphic
+							this.setGraphic(null);
+						}
+					}
+				};
+				cell.setAlignment(Pos.CENTER);
+				return cell;
+			});
+			columns[columns.length - 1] = column;
+		}
+
+		// Specify the columns
 		table.getColumns().setAll(columns);
 
 		// Load the rows
@@ -148,23 +247,84 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		List<Row> rows = new ArrayList<>(items == null ? 0 : items.size());
 		if (items != null) {
 			for (I item : items) {
-				rows.add(new Row(item));
+				rows.add(new Row(table, item));
 			}
 		}
+
+		// Determine if able to add rows
+		if (this.itemFactory != null) {
+			rows.add(new AddRow(table));
+		}
+
+		// Load rows to the table
 		table.setItems(FXCollections.observableArrayList(rows));
 
 		// Hook in typing to start edit
 		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
 
-			// Obtain the selected property
+			// Obtain the selected row
 			if (table.getSelectionModel().getSelectedCells().size() == 0) {
-				return;
+				return; // nothing selected
 			}
 			TablePosition<Row, ?> selectedPosition = table.getSelectionModel().getSelectedCells().get(0);
-			Property<?> cellProperty = table.getItems().get(selectedPosition.getRow()).cells[selectedPosition
-					.getColumn()].getValue();
+			Row row = table.getItems().get(selectedPosition.getRow());
 
-			// Handle based on type
+			// Determine if add row
+			if (row instanceof ListBuilderImpl.AddRow) {
+				AddRow addRow = (AddRow) row;
+
+				// Handle adding a new row
+				switch (event.getCode()) {
+				case ENTER:
+					// Add a row
+					addRow.addRow();
+					break;
+				default:
+					break;
+				}
+				return;
+			}
+
+			// Determine if delete row
+			if (this.isDelete) {
+
+				// Determine if delete row
+				switch (event.getCode()) {
+				case BACK_SPACE:
+				case DELETE:
+					if (row.delete != null) {
+						row.delete.deleteRow();
+					}
+					break;
+				default:
+					break;
+				}
+
+				// Determine if key press on delete column
+				int columnIndex = selectedPosition.getColumn();
+				if (columnIndex >= this.renderers.size()) {
+					// Delete column
+					switch (event.getCode()) {
+					case SPACE:
+					case ENTER:
+						if (row.delete != null) {
+							row.delete.deleteRow();
+						}
+						break;
+					default:
+						break;
+					}
+					return;
+				}
+			}
+
+			// Attempting now to edit (so ensure column is editable)
+			if (!selectedPosition.getTableColumn().isEditable()) {
+				return;
+			}
+
+			// Handle column based on type
+			Property<?> cellProperty = row.cells[selectedPosition.getColumn()].getValue();
 			if (cellProperty instanceof BooleanProperty) {
 				BooleanProperty toggle = (BooleanProperty) cellProperty;
 
@@ -192,7 +352,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		});
 
 		// Determine if fixed number of rows
-		double ROW_HEIGHT = 25;
+		double ROW_HEIGHT = 30;
 		double HEADER_HEIGHT = ROW_HEIGHT + 5;
 		if ((this.itemFactory == null) && (!this.isDelete)) {
 			// Fixed number of rows, so fix on number of rows
@@ -207,7 +367,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 			DragResizer.makeResizable(table);
 		}
 
-		// Return the table
+		// Return table
 		return table;
 	}
 
@@ -253,13 +413,22 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		private final CellRenderer<I, ?>[] cells;
 
 		/**
+		 * {@link DeleteRow}.
+		 */
+		private final DeleteRow delete;
+
+		/**
 		 * Instantiate.
 		 * 
+		 * @param table
+		 *            {@link TableView}.
 		 * @param item
 		 *            Item for the {@link Row}.
+		 * @param isAddRow
+		 *            <code>true</code> if the add row.
 		 */
 		@SuppressWarnings("unchecked")
-		public Row(I item) {
+		private Row(TableView<Row> table, I item) {
 			this.item = item;
 
 			// Create the properties for the row
@@ -267,6 +436,9 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 			for (int i = 0; i < this.cells.length; i++) {
 				this.cells[i] = ListBuilderImpl.this.renderers.get(i).createCellRenderer(this);
 			}
+
+			// Provide the delete (except for add row - null item)
+			this.delete = ((item != null) && ListBuilderImpl.this.isDelete) ? new DeleteRow(table, this) : null;
 		}
 
 		/*
@@ -282,6 +454,81 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		public void refreshError() {
 			// TODO Auto-generated method stub
 
+		}
+	}
+
+	/**
+	 * {@link Row} to add another {@link Row}.
+	 */
+	private class AddRow extends Row {
+
+		/**
+		 * {@link TableView}.
+		 */
+		private final TableView<Row> table;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param table
+		 *            {@link TableView}.
+		 */
+		public AddRow(TableView<Row> table) {
+			super(table, null);
+			this.table = table;
+		}
+
+		/**
+		 * Adds a {@link Row}.
+		 * 
+		 * @param table
+		 *            {@link TableView}.
+		 */
+		private void addRow() {
+
+			// Create the new row
+			I newItem = ListBuilderImpl.this.itemFactory.get();
+			Row newRow = new Row(table, newItem);
+
+			// Add the row (before the add row)
+			ObservableList<Row> items = table.getItems();
+			items.add(items.size() - 1, newRow);
+		}
+	}
+
+	/**
+	 * Object for deleting the {@link Row}.
+	 */
+	private class DeleteRow {
+
+		/**
+		 * {@link TableView} containing the {@link Row} instances.
+		 */
+		private final TableView<Row> table;
+
+		/**
+		 * Row to be deleted.
+		 */
+		private final Row row;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param table
+		 *            {@link TableView}.
+		 * @param row
+		 *            {@link Row}.
+		 */
+		public DeleteRow(TableView<Row> table, Row row) {
+			this.table = table;
+			this.row = row;
+		}
+
+		/**
+		 * Deletes the {@link Row}.
+		 */
+		public void deleteRow() {
+			this.table.getItems().remove(this.row);
 		}
 	}
 
