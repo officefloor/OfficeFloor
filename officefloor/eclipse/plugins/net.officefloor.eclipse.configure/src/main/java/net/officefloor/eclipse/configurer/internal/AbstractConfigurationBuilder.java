@@ -44,6 +44,7 @@ import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.ListBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.PropertiesBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
 
 /**
@@ -224,8 +225,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 
 	@Override
 	public PropertiesBuilder<M> properties(String label) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.registerBuilder(new PropertiesBuilderImpl<>(label));
 	}
 
 	@Override

@@ -86,7 +86,7 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	/**
 	 * {@link ObservableValue}.
 	 */
-	private final Property<V> value = new SimpleObjectProperty<>();
+	protected final Property<V> value = new SimpleObjectProperty<>();
 
 	/**
 	 * {@link ValueRendererContext}.

@@ -153,7 +153,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected Node createInput(Property<List<I>> value) {
+	public Node createInput(Property<List<I>> value) {
 
 		// Create the table
 		TableView<Row> table = new TableView<>(this.rows);
@@ -292,7 +292,8 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 				switch (event.getCode()) {
 				case BACK_SPACE:
 				case DELETE:
-					if (row.delete != null) {
+					// Delete if not editing and able to delete
+					if ((table.getEditingCell() == null) && (row.delete != null)) {
 						row.delete.deleteRow();
 					}
 					break;
@@ -488,10 +489,10 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 			// Create the new row
 			I newItem = ListBuilderImpl.this.itemFactory.get();
-			Row newRow = new Row(table, newItem);
+			Row newRow = new Row(this.table, newItem);
 
 			// Add the row (before the add row)
-			ObservableList<Row> items = table.getItems();
+			ObservableList<Row> items = this.table.getItems();
 			items.add(items.size() - 1, newRow);
 		}
 	}

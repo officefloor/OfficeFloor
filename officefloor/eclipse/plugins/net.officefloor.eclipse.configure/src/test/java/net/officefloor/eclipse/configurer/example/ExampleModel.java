@@ -20,6 +20,7 @@ package net.officefloor.eclipse.configurer.example;
 import java.util.Arrays;
 import java.util.List;
 
+import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -57,7 +58,7 @@ public class ExampleModel {
 	/**
 	 * {@link PropertyList}.
 	 */
-	public PropertyList properties;
+	public PropertyList properties = new PropertyListImpl("one", "first", "two", "second");
 
 	/**
 	 * Items.

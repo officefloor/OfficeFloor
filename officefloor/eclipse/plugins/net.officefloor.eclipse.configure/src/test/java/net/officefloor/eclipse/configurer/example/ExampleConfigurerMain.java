@@ -81,6 +81,9 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 				.addItem(() -> new ExampleItem("New", true)).deleteItem();
 		editableList.text("Text").init((model) -> model.text);
 		editableList.flag("Flag").init((model) -> model.flag);
+
+		// Provide properties
+		builder.properties("Properties").init((model) -> model.properties);
 	}
 
 	@Override

@@ -163,9 +163,10 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 			TableView<R> table = this.column.getTableView();
 			if (table != null) {
 				int row = this.getIndex();
-				if (!table.getSelectionModel().isSelected(row, this.column)) {
-					table.getSelectionModel().select(row, this.column);
-				}
+
+				// Keep focus on table and selected cell
+				this.getTableView().requestFocus();
+				table.getSelectionModel().select(row, this.column);
 			}
 		}
 
