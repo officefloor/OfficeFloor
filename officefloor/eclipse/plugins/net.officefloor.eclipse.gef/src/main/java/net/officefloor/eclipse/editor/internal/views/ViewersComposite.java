@@ -60,7 +60,7 @@ public class ViewersComposite {
 
 		// Obtain the content root
 		Parent contentRootNode = contentViewer.getCanvas();
-		final InfiniteCanvas paletteRootNode = ((InfiniteCanvasViewer) paletteViewer).getCanvas();
+		InfiniteCanvas paletteRootNode = ((InfiniteCanvasViewer) paletteViewer).getCanvas();
 
 		// Arrange viewers above each other
 		AnchorPane viewersPane = new AnchorPane();
@@ -133,9 +133,17 @@ public class ViewersComposite {
 		paletteRootNode.setShowGrid(false);
 		paletteRootNode.setHorizontalScrollBarPolicy(ScrollBarPolicy.NEVER);
 		paletteRootNode.setStyle(PaletteFocusBehavior.DEFAULT_STYLE);
+		if (!isCreateParents) {
+			paletteRootNode.setVisible(false);
+		}
 	}
 
-	public Parent getComposite() {
+	/**
+	 * Obtains the {@link Pane} containing the view.
+	 * 
+	 * @return {@link Pane} containing the view.
+	 */
+	public Pane getComposite() {
 		return composite;
 	}
 

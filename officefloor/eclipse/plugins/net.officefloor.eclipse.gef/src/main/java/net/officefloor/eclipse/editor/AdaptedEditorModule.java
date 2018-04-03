@@ -67,7 +67,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.multibindings.MapBinder;
 
-import javafx.scene.Parent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
@@ -130,13 +130,13 @@ public class AdaptedEditorModule extends MvcFxModule {
 	}
 
 	/**
-	 * Creates the {@link Parent}.
+	 * Creates the parent {@link Pane}.
 	 * 
 	 * @param injector
 	 *            {@link Injector} created with this {@link AdaptedEditorModule}.
-	 * @return {@link Parent}.
+	 * @return Parent {@link Pane}.
 	 */
-	public Parent createParent(Injector injector) {
+	public Pane createParent(Injector injector) {
 		this.injector = injector;
 
 		// Obtain the viewers
@@ -146,23 +146,18 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 		// Determine if can create any modules
 		OfficeFloorContentPartFactory<?, ?> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
-		Parent composite = new ViewersComposite(this.content, this.palette, factory.isCreateParent()).getComposite();
-
-		// Hide palette if no creation
-		if (!factory.isCreateParent()) {
-			this.palette.getCanvas().setVisible(false);
-		}
+		Pane composite = new ViewersComposite(this.content, this.palette, factory.isCreateParent()).getComposite();
 
 		// Return the composite
 		return composite;
 	}
 
 	/**
-	 * Convenience method to create the {@link Parent}.
+	 * Convenience method to create the parent {@link Pane}.
 	 * 
-	 * @return {@link Parent}.
+	 * @return Parent {@link Pane}.
 	 */
-	public Parent createParent() {
+	public Pane createParent() {
 
 		// Create the injector from this modeul
 		Injector injector = Guice.createInjector(this);

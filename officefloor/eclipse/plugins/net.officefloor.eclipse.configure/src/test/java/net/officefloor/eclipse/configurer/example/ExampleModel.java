@@ -18,7 +18,9 @@
 package net.officefloor.eclipse.configurer.example;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyList;
@@ -74,6 +76,18 @@ public class ExampleModel {
 	 * Targets.
 	 */
 	public List<String> targets = Arrays.asList("target", "another");
+
+	/**
+	 * Initial mappings.
+	 */
+	public Map<String, String> mapping = new HashMap<String, String>();
+
+	/**
+	 * Instantiate.
+	 */
+	public ExampleModel() {
+		this.mapping.put("one", "target");
+	}
 
 	/**
 	 * Example item.

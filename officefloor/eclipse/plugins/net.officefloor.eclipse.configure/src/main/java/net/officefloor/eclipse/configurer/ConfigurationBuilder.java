@@ -17,11 +17,11 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javafx.collections.ObservableList;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -71,7 +71,8 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 *            {@link Function} to extract the targets.
 	 * @return {@link MappingBuilder}.
 	 */
-	MappingBuilder<M> map(String label, Function<M, List<String>> getSources, Function<M, List<String>> getTargets);
+	MappingBuilder<M> map(String label, Function<M, ObservableList<String>> getSources,
+			Function<M, ObservableList<String>> getTargets);
 
 	/**
 	 * Adds a {@link Class} property to be configured.

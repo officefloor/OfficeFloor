@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
@@ -138,7 +139,13 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		parent.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
 
 		// Scroll both narrow and wide views
-		ScrollPane scroll = new ScrollPane();
+		ScrollPane scroll = new ScrollPane() {
+			@Override
+			public void requestFocus() {
+				// avoid stealing focus
+				// (work around for GEF drag/drop aborting on focus change)
+			}
+		};
 		scroll.prefWidthProperty().bind(parent.widthProperty());
 		scroll.prefHeightProperty().bind(parent.heightProperty());
 		scroll.setFitToWidth(true);
@@ -241,9 +248,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public MappingBuilder<M> map(String label, Function<M, List<String>> getSources,
-			Function<M, List<String>> getTargets) {
-		return this.registerBuilder(new MappingBuilderImpl<>(label));
+	public MappingBuilder<M> map(String label, Function<M, ObservableList<String>> getSources,
+			Function<M, ObservableList<String>> getTargets) {
+		return this.registerBuilder(new MappingBuilderImpl<>(label, getSources, getTargets));
 	}
 
 	@Override

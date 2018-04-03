@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.configurer.example;
 
+import javafx.collections.FXCollections;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
@@ -86,7 +87,8 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 		builder.properties("Properties").init((model) -> model.properties);
 
 		// Provide mapping
-		builder.map("Mapping", (model) -> model.sources, (model) -> model.targets);
+		builder.map("Mapping", (model) -> FXCollections.observableArrayList(model.sources),
+				(model) -> FXCollections.observableArrayList(model.targets)).init((model) -> model.mapping);
 	}
 
 	@Override
