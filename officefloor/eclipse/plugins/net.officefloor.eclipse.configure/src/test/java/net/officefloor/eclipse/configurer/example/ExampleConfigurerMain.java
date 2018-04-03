@@ -84,6 +84,9 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 
 		// Provide properties
 		builder.properties("Properties").init((model) -> model.properties);
+
+		// Provide mapping
+		builder.map("Mapping", (model) -> model.sources, (model) -> model.targets);
 	}
 
 	@Override

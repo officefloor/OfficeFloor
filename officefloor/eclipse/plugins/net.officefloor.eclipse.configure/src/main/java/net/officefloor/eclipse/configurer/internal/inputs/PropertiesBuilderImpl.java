@@ -28,6 +28,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
+import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueRenderer;
 
 /**
@@ -96,7 +97,7 @@ public class PropertiesBuilderImpl<M> extends AbstractBuilder<M, PropertyList, P
 	 */
 
 	@Override
-	protected Node createInput(javafx.beans.property.Property<PropertyList> value) {
+	protected ValueInput createInput(javafx.beans.property.Property<PropertyList> value) {
 
 		// Load the properties
 		List<PropertyItem> items = new ArrayList<>();

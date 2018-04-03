@@ -99,9 +99,9 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 	 */
 
 	@Override
-	public <CM extends Model, CE extends Enum<CE>> AdaptedChildBuilder<R, O, CM, CE> addChild(Class<CM> modelClass,
+	public <CM extends Model, CE extends Enum<CE>> AdaptedChildBuilder<R, O, CM, CE> addChild(CM modelPrototype,
 			AdaptedModelVisualFactory<CM, AdaptedChild<CM>> viewFactory) {
-		return new AdaptedChildFactory<>(modelClass, viewFactory, this.parentAdaptedModel);
+		return new AdaptedChildFactory<>(modelPrototype, viewFactory, this.parentAdaptedModel);
 	}
 
 	/**

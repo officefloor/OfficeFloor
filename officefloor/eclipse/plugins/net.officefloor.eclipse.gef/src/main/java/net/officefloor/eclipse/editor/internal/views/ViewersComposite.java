@@ -11,14 +11,13 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.views;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.gef.fx.nodes.InfiniteCanvas;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
@@ -26,109 +25,114 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
 
+/**
+ * Composite of the viewers.
+ *
+ * @author Daniel Sagenschneider
+ */
 public class ViewersComposite {
 
-	private static final double PALETTE_INDICATOR_WIDTH = 10d;
+	/**
+	 * Palette indicator width.
+	 */
+	private static final double PALETTE_INDICATOR_WIDTH = 10.0;
+
+	/**
+	 * Composite containing the palette and editor.
+	 */
 	private final HBox composite;
 
-	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer) {
-		// determine viewers' root nodes
+	/**
+	 * Instantiate.
+	 * 
+	 * @param contentViewer
+	 *            {@link IViewer} for the editor.
+	 * @param paletteViewer
+	 *            {@link IViewer} for the palette.
+	 * @param isCreateParents
+	 *            Flag indicate whether able to create {@link AdaptedParent}
+	 *            instances.
+	 */
+	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer, boolean isCreateParents) {
+
+		// Obtain the content root
 		Parent contentRootNode = contentViewer.getCanvas();
 		final InfiniteCanvas paletteRootNode = ((InfiniteCanvasViewer) paletteViewer).getCanvas();
 
-		// arrange viewers above each other
+		// Arrange viewers above each other
 		AnchorPane viewersPane = new AnchorPane();
 		viewersPane.getChildren().addAll(contentRootNode, paletteRootNode);
 
-		// create palette indicator
-		Pane paletteIndicator = new Pane();
-		paletteIndicator.setStyle("-fx-background-color: rgba(128,128,128,1);");
-		paletteIndicator.setMaxSize(PALETTE_INDICATOR_WIDTH, Double.MAX_VALUE);
-		paletteIndicator.setMinSize(PALETTE_INDICATOR_WIDTH, 0d);
+		// Create palette indicator
+		List<Pane> panes = new ArrayList<>(2);
+		if (isCreateParents) {
 
-		// show palette indicator next to the viewer area
-		composite = new HBox();
-		// XXX: Set transparent background for the composite HBox, because
-		// otherwise, the HBox will have a grey background.
-		composite.setStyle("-fx-background-color: transparent;");
-		composite.getChildren().addAll(paletteIndicator, viewersPane);
+			// Able to create parents, so provide palette
+			Pane paletteIndicator = new Pane();
+			paletteIndicator.setStyle("-fx-background-color: rgba(128,128,128,1);");
+			paletteIndicator.setMaxSize(PALETTE_INDICATOR_WIDTH, Double.MAX_VALUE);
+			paletteIndicator.setMinSize(PALETTE_INDICATOR_WIDTH, 0.0);
+			panes.add(paletteIndicator);
 
-		// ensure composite fills the whole space
-		composite.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		composite.setMinSize(0, 0);
-		composite.setFillHeight(true);
+			// Register listeners to show/hide palette
+			paletteIndicator.setOnMouseEntered((event) -> paletteRootNode.setVisible(true));
+			paletteRootNode.setOnMouseExited((event) -> paletteRootNode.setVisible(false));
 
-		// no spacing between viewers and palette indicator
-		composite.setSpacing(0d);
-
-		// ensure viewers fill the space
-		HBox.setHgrow(viewersPane, Priority.ALWAYS);
-		viewersPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		AnchorPane.setBottomAnchor(contentRootNode, 0d);
-		AnchorPane.setLeftAnchor(contentRootNode, 0d);
-		AnchorPane.setRightAnchor(contentRootNode, 0d);
-		AnchorPane.setTopAnchor(contentRootNode, 0d);
-		AnchorPane.setBottomAnchor(paletteRootNode, 0d);
-		AnchorPane.setLeftAnchor(paletteRootNode, 0d);
-		AnchorPane.setTopAnchor(paletteRootNode, 0d);
-
-		// disable grid layer for palette
-		paletteRootNode.setZoomGrid(false);
-		paletteRootNode.setShowGrid(false);
-
-		// disable horizontal scrollbar for palette
-		paletteRootNode.setHorizontalScrollBarPolicy(ScrollBarPolicy.NEVER);
-
-		// set palette background
-		paletteRootNode.setStyle(PaletteFocusBehavior.DEFAULT_STYLE);
-
-		// hide palette at first
-		paletteRootNode.setVisible(false);
-
-		// register listener to show/hide palette
-		paletteIndicator.setOnMouseEntered(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				paletteRootNode.setVisible(true);
-			}
-		});
-		paletteRootNode.setOnMouseExited(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				paletteRootNode.setVisible(false);
-			}
-		});
-
-		// register listeners to update the palette width
-		paletteRootNode.getContentGroup().layoutBoundsProperty().addListener(new ChangeListener<Bounds>() {
-			@Override
-			public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
+			// Register listeners to update the palette width
+			paletteRootNode.getContentGroup().layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
 				double scrollBarWidth = paletteRootNode.getVerticalScrollBar().isVisible()
-						? paletteRootNode.getVerticalScrollBar().getLayoutBounds().getWidth() : 0;
+						? paletteRootNode.getVerticalScrollBar().getLayoutBounds().getWidth()
+						: 0;
 				paletteRootNode.setPrefWidth(newValue.getWidth() + scrollBarWidth);
-			}
-		});
-		paletteRootNode.getVerticalScrollBar().visibleProperty().addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			});
+			paletteRootNode.getVerticalScrollBar().visibleProperty().addListener((observable, oldValue, newValue) -> {
 				double contentWidth = paletteRootNode.getContentGroup().getLayoutBounds().getWidth();
 				double scrollBarWidth = newValue ? paletteRootNode.getVerticalScrollBar().getLayoutBounds().getWidth()
 						: 0;
 				paletteRootNode.setPrefWidth(contentWidth + scrollBarWidth);
-			}
-		});
+			});
 
-		// hide palette when a palette element is pressed
-		paletteRootNode.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
+			// Hide palette when a palette element is pressed
+			paletteRootNode.addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
 				if (event.getTarget() != paletteRootNode) {
 					paletteRootNode.setVisible(false);
 				}
-			}
-		});
+			});
+		}
+		panes.add(viewersPane);
+
+		// Provide composite
+		this.composite = new HBox();
+		this.composite.setStyle("-fx-background-color: transparent;");
+		this.composite.getChildren().addAll(panes);
+
+		// Ensure composite fills the whole space
+		this.composite.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		this.composite.setMinSize(0, 0);
+		this.composite.setFillHeight(true);
+
+		// No spacing between viewers and palette indicator
+		this.composite.setSpacing(0.0);
+
+		// Ensure viewers fill the space
+		HBox.setHgrow(viewersPane, Priority.ALWAYS);
+		viewersPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		AnchorPane.setBottomAnchor(contentRootNode, 0.0);
+		AnchorPane.setLeftAnchor(contentRootNode, 0.0);
+		AnchorPane.setRightAnchor(contentRootNode, 0.0);
+		AnchorPane.setTopAnchor(contentRootNode, 0.0);
+		AnchorPane.setBottomAnchor(paletteRootNode, 0.0);
+		AnchorPane.setLeftAnchor(paletteRootNode, 0.0);
+		AnchorPane.setTopAnchor(paletteRootNode, 0.0);
+
+		// Configure palette
+		paletteRootNode.setZoomGrid(false);
+		paletteRootNode.setShowGrid(false);
+		paletteRootNode.setHorizontalScrollBarPolicy(ScrollBarPolicy.NEVER);
+		paletteRootNode.setStyle(PaletteFocusBehavior.DEFAULT_STYLE);
 	}
 
 	public Parent getComposite() {

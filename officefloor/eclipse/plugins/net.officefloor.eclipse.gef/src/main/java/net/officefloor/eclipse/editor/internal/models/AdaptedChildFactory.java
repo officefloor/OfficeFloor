@@ -58,6 +58,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		extends AbstractAdaptedFactory<R, O, M, E, A> implements AdaptedChildBuilder<R, O, M, E> {
 
 	/**
+	 * {@link Model} prototype.
+	 */
+	protected final M modelPrototype;
+
+	/**
 	 * {@link AdaptedModelVisualFactory}.
 	 */
 	private final AdaptedModelVisualFactory<M, A> viewFactory;
@@ -96,25 +101,27 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	/**
 	 * Instantiate as {@link AdaptedChild}.
 	 * 
-	 * @param modelClass
-	 *            {@link Model} {@link Class}.
+	 * @param modelPrototype
+	 *            {@link Model} prototype.
 	 * @param viewFactory
 	 *            {@link AdaptedModelVisualFactory}.
 	 * @param parentAdaptedModel
 	 *            Parent {@link AbstractAdaptedFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	public AdaptedChildFactory(Class<M> modelClass, AdaptedModelVisualFactory<M, A> viewFactory,
+	public AdaptedChildFactory(M modelPrototype, AdaptedModelVisualFactory<M, A> viewFactory,
 			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
-		super(modelClass, () -> (A) new AdaptedChildImpl<R, O, M, E, AdaptedChild<M>>(), parentAdaptedModel);
+		super((Class<M>) modelPrototype.getClass(), () -> (A) new AdaptedChildImpl<R, O, M, E, AdaptedChild<M>>(),
+				parentAdaptedModel);
+		this.modelPrototype = modelPrototype;
 		this.viewFactory = viewFactory;
 	}
 
 	/**
 	 * Allow {@link AdaptedParentBuilder} inheritance.
 	 * 
-	 * @param modelClass
-	 *            {@link Model} {@link Class}.
+	 * @param modelPrototype
+	 *            {@link Model} prototype.
 	 * @param newAdaptedModel
 	 *            {@link Supplier} for the {@link AdaptedModel}.
 	 * @param viewFactory
@@ -122,9 +129,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 * @param contentPartFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	protected AdaptedChildFactory(Class<M> modelClass, Supplier<A> newAdaptedModel,
+	@SuppressWarnings("unchecked")
+	protected AdaptedChildFactory(M modelPrototype, Supplier<A> newAdaptedModel,
 			AdaptedModelVisualFactory<M, A> viewFactory, OfficeFloorContentPartFactory<R, O> contentPartFactory) {
-		super(modelClass, newAdaptedModel, contentPartFactory);
+		super((Class<M>) modelPrototype.getClass(), newAdaptedModel, contentPartFactory);
+		this.modelPrototype = modelPrototype;
 		this.viewFactory = viewFactory;
 	}
 
@@ -195,14 +204,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		// Construct the view (ensures all children groups are registered)
-		M model;
-		try {
-			model = this.getModelClass().newInstance();
-		} catch (Exception ex) {
-			throw new IllegalStateException(
-					"Unable to instantiate with default constructor " + this.getModelClass().getName());
-		}
-		A adaptedModel = (A) this.getContentPartFactory().createAdaptedModel(model);
+		A adaptedModel = (A) this.getContentPartFactory().createAdaptedModel(this.modelPrototype);
 
 		// Create the visual (will ensure valid)
 		AdaptedChildPart<M, AdaptedChild<M>> childPart = this.getInjector().getInstance(AdaptedChildPart.class);

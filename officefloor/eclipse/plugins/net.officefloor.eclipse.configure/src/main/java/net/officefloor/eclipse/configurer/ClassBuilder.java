@@ -23,5 +23,4 @@ package net.officefloor.eclipse.configurer;
  * @author Daniel Sagenschneider
  */
 public interface ClassBuilder<M> {
-
 }

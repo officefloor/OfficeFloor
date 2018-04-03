@@ -33,6 +33,7 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
@@ -53,11 +54,6 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		extends AdaptedChildFactory<R, O, M, E, AdaptedParent<M>> implements AdaptedParentBuilder<R, O, M, E> {
 
 	/**
-	 * Prototype {@link Model}.
-	 */
-	private M prototype = null;
-
-	/**
 	 * {@link ParentModelProvider}.
 	 */
 	private ParentModelProvider<R, O, M> parentModelProvider = null;
@@ -70,23 +66,34 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	/**
 	 * Instantiate.
 	 * 
-	 * @param modelClass
-	 *            {@link Model} {@link Class}.
+	 * @param modelPrototype
+	 *            {@link Model} prototype.
 	 * @param contentFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AdaptedParentFactory(Class<M> modelClass, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
+	public AdaptedParentFactory(M modelPrototype, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
 			OfficeFloorContentPartFactory<R, O> contentFactory) {
-		super(modelClass, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
+		super(modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 	}
 
 	/**
-	 * Obtains the palette prototype {@link Model}.
+	 * Indicates whether can add a new {@link Model}.
 	 * 
-	 * @return Palette prototype {@link Model}.
+	 * @return <code>true</code> if can add a new {@link Model}.
 	 */
-	public M getPalettePrototype() {
-		return this.prototype;
+	public boolean isCreate() {
+		return this.parentModelProvider != null;
+	}
+
+	/**
+	 * Creates the {@link AdaptedModel} from this {@link AdaptedParent} prototype.
+	 * 
+	 * @param factory
+	 *            {@link OfficeFloorContentPartFactory}.
+	 * @return {@link AdaptedModel} for the prototype.
+	 */
+	public AdaptedModel<M> createPrototype(OfficeFloorContentPartFactory<R, O> factory) {
+		return factory.createAdaptedModel(this.modelPrototype);
 	}
 
 	/*
@@ -94,8 +101,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 */
 
 	@Override
-	public void create(M prototype, ParentModelProvider<R, O, M> parentModelProvider) {
-		this.prototype = prototype;
+	public void create(ParentModelProvider<R, O, M> parentModelProvider) {
 		this.parentModelProvider = parentModelProvider;
 	}
 

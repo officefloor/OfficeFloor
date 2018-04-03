@@ -56,14 +56,24 @@ public class ExampleModel {
 	public String choiceValue;
 
 	/**
+	 * Items.
+	 */
+	public List<ExampleItem> items = Arrays.asList(new ExampleItem("ITEM", true), new ExampleItem());
+
+	/**
 	 * {@link PropertyList}.
 	 */
 	public PropertyList properties = new PropertyListImpl("one", "first", "two", "second");
 
 	/**
-	 * Items.
+	 * Sources.
 	 */
-	public List<ExampleItem> items = Arrays.asList(new ExampleItem("ITEM", true), new ExampleItem());
+	public List<String> sources = Arrays.asList("one", "two", "three");
+
+	/**
+	 * Targets.
+	 */
+	public List<String> targets = Arrays.asList("target", "another");
 
 	/**
 	 * Example item.

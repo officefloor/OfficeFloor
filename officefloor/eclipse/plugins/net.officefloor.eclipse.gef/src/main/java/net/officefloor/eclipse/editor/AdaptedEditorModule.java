@@ -62,12 +62,12 @@ import org.eclipse.gef.mvc.fx.providers.ShapeBoundsProvider;
 import org.eclipse.gef.mvc.fx.providers.TopLeftSnappingLocationProvider;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.multibindings.MapBinder;
 
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
@@ -133,7 +133,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * Creates the {@link Parent}.
 	 * 
 	 * @param injector
-	 *            {@link Injector} crated with this {@link AdaptedEditorModule}.
+	 *            {@link Injector} created with this {@link AdaptedEditorModule}.
 	 * @return {@link Parent}.
 	 */
 	public Parent createParent(Injector injector) {
@@ -144,15 +144,31 @@ public class AdaptedEditorModule extends MvcFxModule {
 		this.content = this.domain.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
 		this.palette = this.domain.getAdapter(AdapterKey.get(IViewer.class, AdaptedEditorModule.PALETTE_VIEWER_ROLE));
 
-		// Return the composite parent
-		return new ViewersComposite(this.content, this.palette).getComposite();
+		// Determine if can create any modules
+		OfficeFloorContentPartFactory<?, ?> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
+		Parent composite = new ViewersComposite(this.content, this.palette, factory.isCreateParent()).getComposite();
+
+		// Hide palette if no creation
+		if (!factory.isCreateParent()) {
+			this.palette.getCanvas().setVisible(false);
+		}
+
+		// Return the composite
+		return composite;
 	}
 
 	/**
-	 * Activates the {@link IDomain}.
+	 * Convenience method to create the {@link Parent}.
+	 * 
+	 * @return {@link Parent}.
 	 */
-	public void activateDomain() {
-		this.domain.activate();
+	public Parent createParent() {
+
+		// Create the injector from this modeul
+		Injector injector = Guice.createInjector(this);
+
+		// Return the created parent
+		return this.createParent(injector);
 	}
 
 	/**
@@ -160,15 +176,16 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * 
 	 * @param rootModel
 	 *            Root {@link Model}.
-	 * @param scene
-	 *            {@link Scene}.
 	 */
-	public <R extends Model> void loadRootModel(R rootModel, Scene scene) {
+	public <R extends Model> void loadRootModel(R rootModel) {
 		OfficeFloorContentPartFactory<?, ?> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
 		factory.loadRootModel(rootModel, this.content, this.palette);
 
+		// Activate the domain
+		this.domain.activate();
+
 		// Load the default styling
-		scene.getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
+		this.content.getCanvas().getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
 	}
 
 	/*

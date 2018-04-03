@@ -30,12 +30,10 @@ public interface AdaptedParentBuilder<R extends Model, O, M extends Model, E ext
 	/**
 	 * Configures creating the {@link Model}.
 	 * 
-	 * @param prototype
-	 *            Prototype {@link Model} to use in palette.
 	 * @param provideNewParentModel
 	 *            {@link ParentModelProvider}.
 	 */
-	void create(M prototype, ParentModelProvider<R, O, M> provideNewParentModel);
+	void create(ParentModelProvider<R, O, M> provideNewParentModel);
 
 	/**
 	 * Configures an {@link ModelAction} for the parent {@link Model}.

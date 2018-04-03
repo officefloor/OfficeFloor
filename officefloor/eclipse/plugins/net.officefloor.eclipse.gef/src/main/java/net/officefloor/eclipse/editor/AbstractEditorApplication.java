@@ -11,9 +11,6 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -62,10 +59,9 @@ public abstract class AbstractEditorApplication extends Application {
 
 		// Create the module
 		AdaptedEditorModule module = this.createModule();
-		Injector injector = Guice.createInjector(module);
 
 		// Create the parent
-		Parent parent = module.createParent(injector);
+		Parent parent = module.createParent();
 
 		// Setup visuals
 		Scene scene = new Scene(parent);
@@ -75,15 +71,12 @@ public abstract class AbstractEditorApplication extends Application {
 		stage.setHeight(480);
 		stage.setTitle(this.getClass().getSimpleName());
 
-		// Show
-		stage.show();
-
-		// Activate the domain
-		module.activateDomain();
-
 		// Load the root model
 		Model rootModel = this.createRootModel();
-		module.loadRootModel(rootModel, scene);
+		module.loadRootModel(rootModel);
+		
+		// Show
+		stage.show();
 	}
 
 }

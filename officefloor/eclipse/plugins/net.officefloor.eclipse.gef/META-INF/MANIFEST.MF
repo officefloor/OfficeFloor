@@ -22,3 +22,4 @@ Import-Package: com.google.common.collect,
  com.google.inject.multibindings,
  com.google.inject.name,
  javax.inject
+Export-Package: net.officefloor.eclipse.editor

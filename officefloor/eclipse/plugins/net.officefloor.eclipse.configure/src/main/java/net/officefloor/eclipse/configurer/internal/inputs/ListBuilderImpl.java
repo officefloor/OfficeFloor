@@ -30,7 +30,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -47,6 +46,7 @@ import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.CellRenderer;
 import net.officefloor.eclipse.configurer.internal.ColumnRenderer;
+import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueRendererContext;
 import net.officefloor.eclipse.configurer.internal.resize.DragResizer;
 
@@ -153,7 +153,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Node createInput(Property<List<I>> value) {
+	public ValueInput createInput(Property<List<I>> value) {
 
 		// Create the table
 		TableView<Row> table = new TableView<>(this.rows);
@@ -369,7 +369,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		}
 
 		// Return table
-		return table;
+		return () -> table;
 	}
 
 	/*

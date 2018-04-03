@@ -15,30 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.configurer.internal;
 
-import net.officefloor.model.Model;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 
 /**
- * Builds the child group.
+ * Value input.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroupBuilder<R extends Model, O> {
+public interface ValueInput {
 
 	/**
-	 * Adds a child {@link Model}.
+	 * Obtains the {@link Node} for the input.
 	 * 
-	 * @param modelPrototype
-	 *            {@link Model} prototype to determine {@link Class} of the
-	 *            {@link Model} and used in visual validation.
-	 * @param viewFactory
-	 *            {@link AdaptedModelVisualFactory} to create the view for the
-	 *            {@link AdaptedChild}.
-	 * @return {@link AdaptedParentBuilder} to build the adapter over the
-	 *         {@link Model}.
+	 * @return {@link Node} for the input.
 	 */
-	<M extends Model, E extends Enum<E>> AdaptedChildBuilder<R, O, M, E> addChild(M modelPrototype,
-			AdaptedModelVisualFactory<M, AdaptedChild<M>> viewFactory);
+	Node getNode();
+
+	/**
+	 * <p>
+	 * Invoked once {@link Node} is connected to the {@link Scene}.
+	 * <p>
+	 * This allows {@link Scene} based activation of the {@link Node} (e.g.
+	 * configuring a style sheet).
+	 */
+	default void activate() {
+	}
 
 }

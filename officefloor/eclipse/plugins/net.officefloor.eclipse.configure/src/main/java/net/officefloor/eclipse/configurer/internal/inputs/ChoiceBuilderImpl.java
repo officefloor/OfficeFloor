@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.FlowPane;
@@ -32,6 +31,7 @@ import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractConfigurationBuilder;
 import net.officefloor.eclipse.configurer.internal.ChoiceValueRenderer;
+import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueRenderer;
 
 /**
@@ -91,7 +91,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceBuil
 	}
 
 	@Override
-	public Node createInput(Property<Integer> value) {
+	public ValueInput createInput(Property<Integer> value) {
 
 		// Display choices
 		FlowPane choicesVisual = new FlowPane();
@@ -122,7 +122,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceBuil
 		}
 
 		// Return the pane to contain choices
-		return choicesVisual;
+		return () -> choicesVisual;
 	}
 
 	/*

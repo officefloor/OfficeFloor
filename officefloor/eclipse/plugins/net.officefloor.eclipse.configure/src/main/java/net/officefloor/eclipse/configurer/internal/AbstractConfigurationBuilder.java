@@ -25,13 +25,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ObservableStringValue;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
@@ -39,11 +39,14 @@ import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
+import net.officefloor.eclipse.configurer.MappingBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
+import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.ListBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.MappingBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.PropertiesBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
 
@@ -150,23 +153,32 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		VBox narrow = new VBox();
 		narrow.getStyleClass().add("configurer-container-narrow");
 
+		// Stack wide and narrow (so can keep appropriate visible)
+		StackPane stack = new StackPane(wide, narrow);
+		scroll.setContent(stack);
+
 		// Responsive view
 		final double RESPONSIVE_WIDTH = 600;
 		InvalidationListener listener = (event) -> {
 			if (scroll.getWidth() < RESPONSIVE_WIDTH) {
 				// Avoid events if already narrow
-				if (scroll.getContent() != narrow) {
-					scroll.setContent(narrow);
+				if (wide.isVisible()) {
+					wide.setVisible(false);
+					narrow.setVisible(true);
 				}
 			} else {
 				// Again avoid events if already wide
-				if (scroll.getContent() != wide) {
-					scroll.setContent(wide);
+				if (narrow.isVisible()) {
+					wide.setVisible(true);
+					narrow.setVisible(false);
 				}
 			}
 		};
 		scroll.widthProperty().addListener(listener);
 		listener.invalidated(null); // set initial view
+
+		// Apply CSS (so Scene available to inputs)
+		parent.applyCss();
 
 		// Load the value render list
 		new ValueLister(wide, 1, narrow, this.getValueRenderers());
@@ -229,9 +241,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public void map(String label, Function<M, List<String>> getMappedItems) {
-		// TODO Auto-generated method stub
-
+	public MappingBuilder<M> map(String label, Function<M, List<String>> getSources,
+			Function<M, List<String>> getTargets) {
+		return this.registerBuilder(new MappingBuilderImpl<>(label));
 	}
 
 	@Override
@@ -241,7 +253,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public ObservableStringValue resource() {
+	public ResourceBuilder<M> resource(String label) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -300,121 +312,137 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 			this.wide = wide;
 			this.narrow = narrow;
 
-			// Render in the items
-			for (int i = 0; i < renderers.length; i++) {
-				ValueRenderer<M> renderer = renderers[i];
+			// Ensure activate the inputs
+			List<ValueInput> inputsToActivate = new ArrayList<>(renderers.length * 2);
+			try {
 
-				// Initialise the renderer
-				renderer.init(AbstractConfigurationBuilder.this);
+				// Render in the items
+				for (int i = 0; i < renderers.length; i++) {
+					ValueRenderer<M> renderer = renderers[i];
 
-				// ======== wide ==============
-				int column = 1; // initial spacing
+					// Initialise the renderer
+					renderer.init(AbstractConfigurationBuilder.this);
 
-				// Render the label
-				Node wideLabel = renderer.createLabel();
-				if (wideLabel != null) {
-					wide.add(wideLabel, column++, rowIndex);
-					GridPane.setHgrow(wideLabel, Priority.SOMETIMES);
-					this.registeredWideNodes.add(wideLabel);
-				}
+					// ======== wide ==============
+					int column = 1; // initial spacing
 
-				// Provide error feedback
-				Node wideError = renderer.createErrorFeedback();
-				if (wideError != null) {
-					wide.add(wideError, column++, rowIndex);
-					this.registeredWideNodes.add(wideError);
-				}
+					// Render the label
+					Node wideLabel = renderer.createLabel();
+					if (wideLabel != null) {
+						wide.add(wideLabel, column++, rowIndex);
+						GridPane.setHgrow(wideLabel, Priority.SOMETIMES);
+						this.registeredWideNodes.add(wideLabel);
+					}
 
-				// Render the input
-				Node wideInput = renderer.createInput();
-				if (wideInput != null) {
-					wide.add(wideInput, column++, rowIndex);
-					GridPane.setHgrow(wideInput, Priority.ALWAYS);
-					this.registeredWideNodes.add(wideInput);
-				}
+					// Provide error feedback
+					Node wideError = renderer.createErrorFeedback();
+					if (wideError != null) {
+						wide.add(wideError, column++, rowIndex);
+						this.registeredWideNodes.add(wideError);
+					}
 
-				// Provide some spacing at the end
-				Node wideSpacing = new Pane();
-				wide.add(wideSpacing, column++, rowIndex, 1, 1);
-				this.registeredWideNodes.add(wideSpacing);
+					// Render the input
+					ValueInput wideInput = renderer.createInput();
+					if (wideInput != null) {
+						Node wideInputNode = wideInput.getNode();
+						wide.add(wideInputNode, column++, rowIndex);
+						GridPane.setHgrow(wideInputNode, Priority.ALWAYS);
+						this.registeredWideNodes.add(wideInputNode);
+						inputsToActivate.add(wideInput);
+					}
 
-				// Increment row index for next value
-				rowIndex++;
+					// Provide some spacing at the end
+					Node wideSpacing = new Pane();
+					wide.add(wideSpacing, column++, rowIndex, 1, 1);
+					this.registeredWideNodes.add(wideSpacing);
 
-				// ======= narrow ==============
+					// Increment row index for next value
+					rowIndex++;
 
-				// Contain particular item
-				VBox narrowItem = new VBox();
-				narrowItem.getStyleClass().add("configurer-container-narrow-item");
-				narrow.getChildren().add(narrowItem);
-				this.registeredNarrowNodes.add(narrowItem);
+					// ======= narrow ==============
 
-				// Render the label with error
-				HBox labelAndError = new HBox();
-				narrowItem.getChildren().add(labelAndError);
-				Node narrowLabel = renderer.createLabel();
-				if (narrowLabel != null) {
-					labelAndError.getChildren().add(narrowLabel);
-				}
-				Node narrowError = renderer.createErrorFeedback();
-				if (narrowError != null) {
-					labelAndError.getChildren().add(narrowError);
-				}
+					// Contain particular item
+					VBox narrowItem = new VBox();
+					narrowItem.getStyleClass().add("configurer-container-narrow-item");
+					narrow.getChildren().add(narrowItem);
+					this.registeredNarrowNodes.add(narrowItem);
 
-				// Render the input
-				Node inputVisual = renderer.createInput();
-				if (inputVisual != null) {
-					narrowItem.getChildren().add(inputVisual);
-				}
+					// Render the label with error
+					HBox labelAndError = new HBox();
+					narrowItem.getChildren().add(labelAndError);
+					Node narrowLabel = renderer.createLabel();
+					if (narrowLabel != null) {
+						labelAndError.getChildren().add(narrowLabel);
+					}
+					Node narrowError = renderer.createErrorFeedback();
+					if (narrowError != null) {
+						labelAndError.getChildren().add(narrowError);
+					}
 
-				// Determine if choice value renderer
-				if (renderer instanceof ChoiceValueRenderer) {
-					ChoiceValueRenderer<M> choiceRenderer = (ChoiceValueRenderer<M>) renderer;
+					// Render the input
+					ValueInput narrowInput = renderer.createInput();
+					if (narrowInput != null) {
+						Node narrowInputNode = narrowInput.getNode();
+						narrowItem.getChildren().add(narrowInputNode);
+						inputsToActivate.add(narrowInput);
+					}
 
-					// Load choice
-					int splitRowIndex = rowIndex;
-					ValueRenderer<M>[] splitRenderers = Arrays.copyOfRange(renderers, i + 1, renderers.length);
-					Runnable loadChoice = () -> {
+					// Determine if choice value renderer
+					if (renderer instanceof ChoiceValueRenderer) {
+						ChoiceValueRenderer<M> choiceRenderer = (ChoiceValueRenderer<M>) renderer;
 
-						// Obtain the choice
-						Integer choice = choiceRenderer.getChoiceIndex().getValue();
-						if (choice == null) {
-							// No choice selected, so carry on with renderers
-							this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, splitRenderers);
+						// Load choice
+						int splitRowIndex = rowIndex;
+						ValueRenderer<M>[] splitRenderers = Arrays.copyOfRange(renderers, i + 1, renderers.length);
+						Runnable loadChoice = () -> {
 
-						} else {
-							// Have choice, so create concat list of remaining
-							ValueRenderer<M>[] choiceRenderers = choiceRenderer.getChoiceValueRenders()[choice].get();
-							ValueRenderer<M>[] remainingRenderers = new ValueRenderer[choiceRenderers.length
-									+ splitRenderers.length];
-							for (int c = 0; c < choiceRenderers.length; c++) {
-								remainingRenderers[c] = choiceRenderers[c];
+							// Obtain the choice
+							Integer choice = choiceRenderer.getChoiceIndex().getValue();
+							if (choice == null) {
+								// No choice selected, so carry on with renderers
+								this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, splitRenderers);
+
+							} else {
+								// Have choice, so create concat list of remaining
+								ValueRenderer<M>[] choiceRenderers = choiceRenderer.getChoiceValueRenders()[choice]
+										.get();
+								ValueRenderer<M>[] remainingRenderers = new ValueRenderer[choiceRenderers.length
+										+ splitRenderers.length];
+								for (int c = 0; c < choiceRenderers.length; c++) {
+									remainingRenderers[c] = choiceRenderers[c];
+								}
+								for (int s = 0; s < splitRenderers.length; s++) {
+									remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
+								}
+								this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, remainingRenderers);
 							}
-							for (int s = 0; s < splitRenderers.length; s++) {
-								remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
+						};
+
+						// Listen for changes in choice
+						choiceRenderer.getChoiceIndex().addListener((event) -> {
+
+							// Clear next listing (as change in choice)
+							if (this.nextLister != null) {
+								this.nextLister.removeControls();
+								this.nextLister = null;
 							}
-							this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, remainingRenderers);
-						}
-					};
 
-					// Listen for changes in choice
-					choiceRenderer.getChoiceIndex().addListener((event) -> {
+							// Load new choice
+							loadChoice.run();
+						});
 
-						// Clear next listing (as change in choice)
-						if (this.nextLister != null) {
-							this.nextLister.removeControls();
-							this.nextLister = null;
-						}
-
-						// Load new choice
+						// Load current choice
 						loadChoice.run();
-					});
 
-					// Load current choice
-					loadChoice.run();
+						// Stop loading renderers (as next listing will render)
+						return;
+					}
+				}
 
-					// Stop loading renderers (as next listing will render)
-					return;
+			} finally {
+				// Activate the inputs
+				for (ValueInput input : inputsToActivate) {
+					input.activate();
 				}
 			}
 		}

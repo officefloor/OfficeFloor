@@ -20,7 +20,6 @@ package net.officefloor.eclipse.configurer.internal.inputs;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -29,6 +28,7 @@ import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
+import net.officefloor.eclipse.configurer.internal.ValueInput;
 
 /**
  * {@link TextBuilder} implementation.
@@ -52,7 +52,7 @@ public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<
 	 */
 
 	@Override
-	protected Node createInput(Property<Boolean> value) {
+	protected ValueInput createInput(Property<Boolean> value) {
 		CheckBox checkBox = new CheckBox();
 		if (this.isEditable()) {
 			checkBox.selectedProperty().bindBidirectional(value);
@@ -61,7 +61,7 @@ public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<
 			checkBox.selectedProperty().bind(value);
 		}
 		checkBox.getStyleClass().add("configurer-input-checkbox");
-		return checkBox;
+		return () -> checkBox;
 	}
 
 	@Override

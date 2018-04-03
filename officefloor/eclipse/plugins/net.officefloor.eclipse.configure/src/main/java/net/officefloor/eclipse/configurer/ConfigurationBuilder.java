@@ -22,7 +22,6 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javafx.beans.value.ObservableStringValue;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -66,10 +65,13 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 * 
 	 * @param label
 	 *            Label for the mapping.
-	 * @param getMappedItems
-	 *            {@link Function} to extract the mapping from the model.
+	 * @param getSources
+	 *            {@link Function} to extract the sources.
+	 * @param getTargets
+	 *            {@link Function} to extract the targets.
+	 * @return {@link MappingBuilder}.
 	 */
-	void map(String label, Function<M, List<String>> getMappedItems);
+	MappingBuilder<M> map(String label, Function<M, List<String>> getSources, Function<M, List<String>> getTargets);
 
 	/**
 	 * Adds a {@link Class} property to be configured.
@@ -80,7 +82,14 @@ public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
 	 */
 	ClassBuilder<M> clazz(String label);
 
-	ObservableStringValue resource();
+	/**
+	 * Adds a resource property to be configured.
+	 * 
+	 * @param label
+	 *            Label.
+	 * @return {@link ResourceBuilder}.
+	 */
+	ResourceBuilder<M> resource(String label);
 
 	/**
 	 * Configures a {@link Consumer} to apply the configured model.

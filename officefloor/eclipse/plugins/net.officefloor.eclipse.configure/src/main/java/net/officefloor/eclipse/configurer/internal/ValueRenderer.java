@@ -50,12 +50,12 @@ public interface ValueRenderer<M> {
 	Node createErrorFeedback();
 
 	/**
-	 * Creates a new input {@link Node}. {@link Node} responsible for capturing the
-	 * configuration via the UI.
+	 * Creates a new input {@link ValueInput}. {@link ValueInput} responsible for
+	 * capturing the configuration via the UI.
 	 * 
-	 * @return New input {@link Node}.
+	 * @return New input {@link ValueInput}.
 	 */
-	Node createInput();
+	ValueInput createInput();
 
 	/**
 	 * Obtains the error with value.

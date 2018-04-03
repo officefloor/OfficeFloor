@@ -13,6 +13,7 @@ package net.officefloor.eclipse.editor.internal.parts;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +124,30 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	}
 
 	/**
+	 * Indicates if able to create an {@link AdaptedParent}.
+	 * 
+	 * @return <code>true</code> if able to create an {@link AdaptedParent}.
+	 */
+	@SuppressWarnings("unchecked")
+	public boolean isCreateParent() {
+
+		// Determine if can create a parent
+		for (AbstractAdaptedFactory<R, O, ?, ?, ?> adaptedFactory : this.models.values()) {
+			if (adaptedFactory instanceof AdaptedParentFactory) {
+				AdaptedParentFactory<R, O, ?, ?> parentFactory = (AdaptedParentFactory<R, O, ?, ?>) adaptedFactory;
+
+				// Determine if can create
+				if (parentFactory.isCreate()) {
+					return true; // able to create parent
+				}
+			}
+		}
+
+		// As here, no able to create a parent
+		return false;
+	}
+
+	/**
 	 * Loads the root {@link Model}.
 	 * 
 	 * @param rootModel
@@ -151,7 +176,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.models.values().forEach((model) -> model.validate());
 
 		// Load with dependencies injected
-		OfficeFloorContentPartFactory<?, ?> factory = injector.getInstance(OfficeFloorContentPartFactory.class);
+		OfficeFloorContentPartFactory<R, O> factory = injector.getInstance(OfficeFloorContentPartFactory.class);
 
 		// Load the palette models
 		List<AdaptedModel<?>> paletteModels = new LinkedList<>();
@@ -159,10 +184,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			if (adaptedFactory instanceof AdaptedParentFactory) {
 				AdaptedParentFactory<R, O, ?, ?> parentFactory = (AdaptedParentFactory<R, O, ?, ?>) adaptedFactory;
 
-				// Include if providing prototype
-				Model prototype = parentFactory.getPalettePrototype();
-				if (prototype != null) {
-					AdaptedModel<?> adaptedPrototype = factory.createAdaptedModel(prototype);
+				// Include if able to create
+				if (parentFactory.isCreate()) {
+					AdaptedModel<?> adaptedPrototype = parentFactory.createPrototype(factory);
 					paletteModels.add(adaptedPrototype);
 				}
 			}
@@ -187,7 +211,18 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		List<Model> contentModels = new LinkedList<>();
 		for (Function<R, List<? extends Model>> getParents : this.getParentFunctions) {
 			List<? extends Model> parents = getParents.apply(this.rootModel);
-			contentModels.addAll(parents);
+			if (parents != null) {
+				contentModels.addAll(parents);
+			}
+		}
+
+		// Clear any null models
+		Iterator<?> iterator = contentModels.iterator();
+		while (iterator.hasNext()) {
+			Object model = iterator.next();
+			if (model == null) {
+				iterator.remove();
+			}
 		}
 
 		// Adapt the content models
@@ -205,11 +240,19 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 		// Load the adapted connections (aferwards so z-order in front)
 		for (AdaptedParent<?> adaptedParent : adaptedParents) {
-			for (AdaptedConnection<?> connection : adaptedParent.getConnections()) {
+			List<AdaptedConnection<?>> connections = adaptedParent.getConnections();
+			if (connections != null) {
+				for (AdaptedConnection<?> connection : connections) {
 
-				// Add the adapted conenction (only once)
-				if (!adaptedContentModels.contains(connection)) {
-					adaptedContentModels.add(connection);
+					// Ignore null connections
+					if (connection == null) {
+						continue;
+					}
+
+					// Add the adapted conenction (only once)
+					if (!adaptedContentModels.contains(connection)) {
+						adaptedContentModels.add(connection);
+					}
 				}
 			}
 		}
@@ -315,10 +358,10 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(
-			Class<M> modelClass, Function<R, List<M>> getParents,
+			M modelPrototype, Function<R, List<M>> getParents,
 			AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory, RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
-		return new AdaptedParentFactory<R, O, M, E>(modelClass, viewFactory, this);
+		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this);
 	}
 
 	/*

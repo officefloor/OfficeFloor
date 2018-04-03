@@ -81,7 +81,18 @@ public interface AdaptedModelVisualFactoryContext {
 	 * @return Input {@link Node}.
 	 */
 	@SuppressWarnings("rawtypes")
-	<G extends IGeometry, N extends GeometryNode<G>, C extends ConnectionModel> N connector(N geometryNode,
-			Class... connectionModelClasses);
+	<G extends IGeometry, N extends GeometryNode<G>> N connector(N geometryNode, Class... connectionModelClasses);
+
+	/**
+	 * Configures the default {@link GeometryNode} as {@link AdaptedConnector}
+	 * {@link IAnchor}.
+	 * 
+	 * @param connectionClasses
+	 *            {@link ConnectionModel} {@link Class} instances that this
+	 *            connector satisfies.
+	 * @return Input {@link Node}.
+	 */
+	@SuppressWarnings("rawtypes")
+	Node connector(Class... connectionClasses);
 
 }

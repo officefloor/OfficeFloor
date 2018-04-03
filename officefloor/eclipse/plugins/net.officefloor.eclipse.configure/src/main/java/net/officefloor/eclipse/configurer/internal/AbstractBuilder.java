@@ -109,13 +109,13 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	}
 
 	/**
-	 * Creates the input {@link Node} for the {@link ObservableValue}.
+	 * Creates the input {@link ValueInput} for the {@link ObservableValue}.
 	 * 
 	 * @param value
 	 *            {@link ObservableValue} to be updated.
-	 * @return {@link Node} to configure the {@link ObservableValue}.
+	 * @return {@link ValueInput} to configure the {@link ObservableValue}.
 	 */
-	protected abstract Node createInput(Property<V> value);
+	protected abstract ValueInput createInput(Property<V> value);
 
 	/**
 	 * Creates the {@link Property} for the {@link TableCell}.
@@ -342,7 +342,7 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	}
 
 	@Override
-	public Node createInput() {
+	public ValueInput createInput() {
 		return this.createInput(this.value);
 	}
 

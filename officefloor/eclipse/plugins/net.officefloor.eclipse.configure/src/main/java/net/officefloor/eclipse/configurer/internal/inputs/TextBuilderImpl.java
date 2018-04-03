@@ -20,7 +20,6 @@ package net.officefloor.eclipse.configurer.internal.inputs;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -29,6 +28,7 @@ import javafx.scene.control.TextField;
 import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
+import net.officefloor.eclipse.configurer.internal.ValueInput;
 
 /**
  * {@link TextBuilder} implementation.
@@ -52,7 +52,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 	 */
 
 	@Override
-	protected Node createInput(Property<String> value) {
+	protected ValueInput createInput(Property<String> value) {
 
 		// Determine if can edit the value
 		if (this.isEditable()) {
@@ -61,7 +61,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 			TextField text = new TextField(value.getValue());
 			text.textProperty().bindBidirectional(value);
 			text.getStyleClass().add("configurer-input-text");
-			return text;
+			return () -> text;
 
 		} else {
 
@@ -69,7 +69,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 			Label label = new Label(value.getValue());
 			label.textProperty().bind(value);
 			label.getStyleClass().add("configurer-input-label");
-			return label;
+			return () -> label;
 		}
 	}
 

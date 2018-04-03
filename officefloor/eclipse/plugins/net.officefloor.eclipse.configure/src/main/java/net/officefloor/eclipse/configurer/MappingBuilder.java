@@ -15,30 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.configurer;
 
-import net.officefloor.model.Model;
+import java.util.Map;
 
 /**
- * Builds the child group.
+ * Mapping builder.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChildrenGroupBuilder<R extends Model, O> {
-
-	/**
-	 * Adds a child {@link Model}.
-	 * 
-	 * @param modelPrototype
-	 *            {@link Model} prototype to determine {@link Class} of the
-	 *            {@link Model} and used in visual validation.
-	 * @param viewFactory
-	 *            {@link AdaptedModelVisualFactory} to create the view for the
-	 *            {@link AdaptedChild}.
-	 * @return {@link AdaptedParentBuilder} to build the adapter over the
-	 *         {@link Model}.
-	 */
-	<M extends Model, E extends Enum<E>> AdaptedChildBuilder<R, O, M, E> addChild(M modelPrototype,
-			AdaptedModelVisualFactory<M, AdaptedChild<M>> viewFactory);
-
+public interface MappingBuilder<M> extends Builder<M, Map<String, String>, MappingBuilder<M>> {
 }

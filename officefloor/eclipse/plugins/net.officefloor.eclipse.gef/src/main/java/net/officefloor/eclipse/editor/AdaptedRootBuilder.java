@@ -32,8 +32,9 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	/**
 	 * Adds an {@link AdaptedParent}.
 	 * 
-	 * @param modelClass
-	 *            {@link Class} of the {@link Model}.
+	 * @param modelPrototype
+	 *            {@link Model} prototype used in view validation, creation
+	 *            prototype and to obtain the {@link Class} of the {@link Model}.
 	 * @param getParents
 	 *            {@link Function} to obtain the parent {@link Model} instances.
 	 * @param viewFactory
@@ -46,8 +47,8 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	 *         the {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
-	<M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(
-			Class<M> modelClass, Function<R, List<M>> getParents,
-			AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory, RE... changeParentEvents);
+	<M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(M modelPrototype,
+			Function<R, List<M>> getParents, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
+			RE... changeParentEvents);
 
 }

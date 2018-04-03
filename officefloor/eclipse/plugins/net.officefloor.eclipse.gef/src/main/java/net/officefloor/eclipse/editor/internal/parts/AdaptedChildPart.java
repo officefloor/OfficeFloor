@@ -18,14 +18,17 @@ import java.util.Map;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.geometry.planar.IGeometry;
+import org.eclipse.gef.geometry.planar.Polygon;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
@@ -152,8 +155,16 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	public Label label(Pane parent) {
+		// Ensure label is configured
+		ReadOnlyStringProperty labelProperty = this.getContent().getLabel();
+		if (labelProperty == null) {
+			throw new IllegalStateException(
+					"No label configured for visual for model " + this.getContent().getModel().getClass().getName());
+		}
+
+		// Configure the label
 		Label label = this.addNode(parent, new Label());
-		label.textProperty().bind(this.getContent().getLabel());
+		label.textProperty().bind(labelProperty);
 		return label;
 	}
 
@@ -188,15 +199,15 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final <G extends IGeometry, N extends GeometryNode<G>, C extends ConnectionModel> N connector(N geometryNode,
+	public final <G extends IGeometry, N extends GeometryNode<G>> N connector(N geometryNode,
 			Class... connectionClasses) {
 
 		// Register the geometry node
-		for (Class<? extends C> connectionClass : connectionClasses) {
+		for (Class<?> connectionClass : connectionClasses) {
 
 			// Obtain the adapted connector
 			AdaptedConnector<M> connector = (AdaptedConnector<M>) this.getContent()
-					.getAdaptedConnector(connectionClass);
+					.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass);
 			if (connector == null) {
 				throw new IllegalStateException("Connection " + connectionClass.getName()
 						+ " not configured to connect to model " + this.getContent().getModel().getClass().getName());
@@ -215,6 +226,18 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 		// Return geometry node
 		return geometryNode;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public Node connector(Class... connectionClasses) {
+
+		// Create the geometry node for the anchor
+		GeometryNode<Polygon> node = new GeometryNode<>(new Polygon(2, 3, 5, 3, 5, 1, 10, 4, 5, 7, 5, 5, 2, 5));
+		node.setFill(Color.BLACK);
+
+		// Return the connector
+		return this.connector(node, connectionClasses);
 	}
 
 	/**
