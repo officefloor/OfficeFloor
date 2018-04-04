@@ -2,18 +2,16 @@
 .configurer-container {	
 }
 
-.configurer-container-wide {
+.wide {
 	-fx-padding: 2.0em 0.0 0.0 0.0;
-	-fx-hgap: 10.0px;
+	-fx-hgap: 0.5em;
 	-fx-vgap: 1.5em;
 }
 
-.configurer-container-narrow {
-	-fx-padding: 0.5em 0.5em 0.0 0.5em;
-}
-
-.configurer-container-narrow-item {
+.narrow {
 	-fx-padding: 1.5em 0.0 0.0 0.0;
+	-fx-hgap: 0.5em;
+	-fx-vgap: 0.5em;
 }
 
 .error-tooltip {

@@ -48,6 +48,14 @@ public abstract class AbstractAdaptedPart<M extends Model, A extends AdaptedMode
 
 		// Initialise
 		if (content != null) {
+
+			// Update visual based on change
+			M model = this.getContent().getModel();
+			if (model != null) {
+				model.addPropertyChangeListener((event) -> this.refreshVisual());
+			}
+
+			// Initialise
 			this.init();
 		}
 	}

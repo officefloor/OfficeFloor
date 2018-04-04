@@ -26,14 +26,13 @@ import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
@@ -57,6 +56,16 @@ import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
  * @author Daniel Sagenschneider
  */
 public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>, ValueRendererContext<M> {
+
+	/**
+	 * CSS class applied to {@link GridPane} in wide view.
+	 */
+	public static final String CSS_CLASS_WIDE = "wide";
+
+	/**
+	 * CSS class applied to the {@link GridPane} in narrow view.
+	 */
+	public static final String CSS_CLASS_NARROW = "narrow";
 
 	/**
 	 * Listing of the {@link ValueRenderer} instances.
@@ -152,43 +161,34 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		scroll.getStyleClass().add("configurer-container");
 		parent.getChildren().add(scroll);
 
-		// Provide wide screen configuration
-		GridPane wide = new GridPane();
-		wide.getStyleClass().add("configurer-container-wide");
-
-		// Provide narrow screen configuration
-		VBox narrow = new VBox();
-		narrow.getStyleClass().add("configurer-container-narrow");
-
-		// Stack wide and narrow (so can keep appropriate visible)
-		StackPane stack = new StackPane(wide, narrow);
-		scroll.setContent(stack);
-
-		// Responsive view
-		final double RESPONSIVE_WIDTH = 600;
-		InvalidationListener listener = (event) -> {
-			if (scroll.getWidth() < RESPONSIVE_WIDTH) {
-				// Avoid events if already narrow
-				if (wide.isVisible()) {
-					wide.setVisible(false);
-					narrow.setVisible(true);
-				}
-			} else {
-				// Again avoid events if already wide
-				if (narrow.isVisible()) {
-					wide.setVisible(true);
-					narrow.setVisible(false);
-				}
-			}
-		};
-		scroll.widthProperty().addListener(listener);
-		listener.invalidated(null); // set initial view
+		// Provide grid to load configuration
+		GridPane grid = new GridPane();
+		scroll.setContent(grid);
 
 		// Apply CSS (so Scene available to inputs)
 		parent.applyCss();
 
 		// Load the value render list
-		new ValueLister(wide, 1, narrow, this.getValueRenderers());
+		ValueLister lister = new ValueLister(grid, this.getValueRenderers());
+		lister.organiseWide(1); // ensure initially organised
+
+		// Responsive view
+		final double RESPONSIVE_WIDTH = 800;
+		InvalidationListener listener = (event) -> {
+			if (scroll.getWidth() < RESPONSIVE_WIDTH) {
+				// Avoid events if already narrow
+				if (lister.isWideNotNarrow) {
+					lister.organiseNarrow(1);
+				}
+			} else {
+				// Again avoid events if already wide
+				if (!lister.isWideNotNarrow) {
+					lister.organiseWide(1);
+				}
+			}
+		};
+		scroll.widthProperty().addListener(listener);
+		listener.invalidated(null); // organise initial view
 	}
 
 	/**
@@ -277,24 +277,24 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	private class ValueLister {
 
 		/**
-		 * {@link GridPane} for wide view.
+		 * {@link GridPane}.
 		 */
-		private final GridPane wide;
+		private final GridPane grid;
 
 		/**
-		 * {@link VBox} for narrow view.
+		 * {@link Input} instances for this {@link ValueLister}.
 		 */
-		private final VBox narrow;
+		private final List<Input> inputs = new LinkedList<>();
 
 		/**
-		 * Registered {@link Node} instances to wide {@link GridPane}.
+		 * Indicates if organised for wide not narrow view.
 		 */
-		private final List<Node> registeredWideNodes = new LinkedList<>();
+		private boolean isWideNotNarrow = false;
 
 		/**
-		 * Registered {@link Node} instances to narrow {@link VBox}.
+		 * Row index for organising this list.
 		 */
-		private final List<Node> registeredNarrowNodes = new LinkedList<>();
+		private int rowIndex;
 
 		/**
 		 * Next {@link ValueLister}.
@@ -304,22 +304,19 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		/**
 		 * Instantiate.
 		 * 
-		 * @param wide
-		 *            Wide view {@link GridPane}.
+		 * @param grid
+		 *            {@link GridPane}.
 		 * @param rowIndex
 		 *            Row index within wide view {@link GridPane} to continue rendering
 		 *            inputs.
-		 * @param narrow
-		 *            Narrow view {@link GridPane}.
 		 * @param renderers
 		 *            {@link ValueRenderer} instances.
 		 */
 		@SuppressWarnings("unchecked")
-		public ValueLister(GridPane wide, int rowIndex, VBox narrow, ValueRenderer<M>[] renderers) {
-			this.wide = wide;
-			this.narrow = narrow;
+		public ValueLister(GridPane grid, ValueRenderer<M>[] renderers) {
+			this.grid = grid;
 
-			// Ensure activate the inputs
+			// Ensure activate the inputs (once added)
 			List<ValueInput> inputsToActivate = new ArrayList<>(renderers.length * 2);
 			try {
 
@@ -330,76 +327,37 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 					// Initialise the renderer
 					renderer.init(AbstractConfigurationBuilder.this);
 
-					// ======== wide ==============
-					int column = 1; // initial spacing
-
-					// Render the label
-					Node wideLabel = renderer.createLabel();
-					if (wideLabel != null) {
-						wide.add(wideLabel, column++, rowIndex);
-						GridPane.setHgrow(wideLabel, Priority.SOMETIMES);
-						this.registeredWideNodes.add(wideLabel);
+					// Add the label
+					Node label = renderer.createLabel();
+					if (label != null) {
+						grid.getChildren().add(label);
 					}
 
-					// Provide error feedback
-					Node wideError = renderer.createErrorFeedback();
-					if (wideError != null) {
-						wide.add(wideError, column++, rowIndex);
-						this.registeredWideNodes.add(wideError);
+					// Add the error feedback
+					Node error = renderer.createErrorFeedback();
+					if (error != null) {
+						grid.getChildren().add(error);
 					}
 
-					// Render the input
-					ValueInput wideInput = renderer.createInput();
-					if (wideInput != null) {
-						Node wideInputNode = wideInput.getNode();
-						wide.add(wideInputNode, column++, rowIndex);
-						GridPane.setHgrow(wideInputNode, Priority.ALWAYS);
-						this.registeredWideNodes.add(wideInputNode);
-						inputsToActivate.add(wideInput);
+					// Add the input
+					ValueInput valueInput = renderer.createInput();
+					Node valueInputNode = null;
+					if (valueInput != null) {
+						valueInputNode = valueInput.getNode();
+						grid.getChildren().add(valueInputNode);
+						inputsToActivate.add(valueInput);
 					}
 
-					// Provide some spacing at the end
-					Node wideSpacing = new Pane();
-					wide.add(wideSpacing, column++, rowIndex, 1, 1);
-					this.registeredWideNodes.add(wideSpacing);
-
-					// Increment row index for next value
-					rowIndex++;
-
-					// ======= narrow ==============
-
-					// Contain particular item
-					VBox narrowItem = new VBox();
-					narrowItem.getStyleClass().add("configurer-container-narrow-item");
-					narrow.getChildren().add(narrowItem);
-					this.registeredNarrowNodes.add(narrowItem);
-
-					// Render the label with error
-					HBox labelAndError = new HBox();
-					narrowItem.getChildren().add(labelAndError);
-					Node narrowLabel = renderer.createLabel();
-					if (narrowLabel != null) {
-						labelAndError.getChildren().add(narrowLabel);
-					}
-					Node narrowError = renderer.createErrorFeedback();
-					if (narrowError != null) {
-						labelAndError.getChildren().add(narrowError);
-					}
-
-					// Render the input
-					ValueInput narrowInput = renderer.createInput();
-					if (narrowInput != null) {
-						Node narrowInputNode = narrowInput.getNode();
-						narrowItem.getChildren().add(narrowInputNode);
-						inputsToActivate.add(narrowInput);
-					}
+					// Register the input
+					Input input = new Input(label, error, valueInputNode);
+					this.inputs.add(input);
+					grid.getChildren().add(input.spacing);
 
 					// Determine if choice value renderer
 					if (renderer instanceof ChoiceValueRenderer) {
 						ChoiceValueRenderer<M> choiceRenderer = (ChoiceValueRenderer<M>) renderer;
 
 						// Load choice
-						int splitRowIndex = rowIndex;
 						ValueRenderer<M>[] splitRenderers = Arrays.copyOfRange(renderers, i + 1, renderers.length);
 						Runnable loadChoice = () -> {
 
@@ -407,7 +365,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 							Integer choice = choiceRenderer.getChoiceIndex().getValue();
 							if (choice == null) {
 								// No choice selected, so carry on with renderers
-								this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, splitRenderers);
+								this.nextLister = new ValueLister(grid, splitRenderers);
 
 							} else {
 								// Have choice, so create concat list of remaining
@@ -421,7 +379,14 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 								for (int s = 0; s < splitRenderers.length; s++) {
 									remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
 								}
-								this.nextLister = new ValueLister(wide, splitRowIndex, narrowItem, remainingRenderers);
+								this.nextLister = new ValueLister(grid, remainingRenderers);
+							}
+
+							// Organise choice changes
+							if (this.isWideNotNarrow) {
+								this.organiseWide(this.rowIndex);
+							} else {
+								this.organiseNarrow(this.rowIndex);
 							}
 						};
 
@@ -455,11 +420,147 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		}
 
 		/**
+		 * Organises for wide view.
+		 * 
+		 * @param rowIndex
+		 *            Row index to start organising inputs.
+		 */
+		private void organiseWide(int rowIndex) {
+			this.rowIndex = rowIndex;
+
+			// Organise the inputs
+			for (Input input : this.inputs) {
+				if (input.label != null) {
+					GridPane.setConstraints(input.label, 1, rowIndex, 2, 1, HPos.LEFT, VPos.TOP, Priority.SOMETIMES,
+							Priority.ALWAYS);
+				}
+				if (input.errorFeedback != null) {
+					GridPane.setConstraints(input.errorFeedback, 3, rowIndex, 1, 1, HPos.LEFT, VPos.TOP,
+							Priority.SOMETIMES, Priority.ALWAYS);
+				}
+				if (input.input != null) {
+					GridPane.setConstraints(input.input, 4, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
+							Priority.ALWAYS);
+				}
+				GridPane.setConstraints(input.spacing, 5, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.NEVER,
+						Priority.NEVER);
+
+				// Increment for next row
+				rowIndex += 2;
+			}
+
+			// Ensure next lister is also organised
+			if (this.nextLister != null) {
+				this.nextLister.organiseWide(rowIndex);
+			}
+
+			// Indicate now wide view
+			this.grid.getStyleClass().remove(CSS_CLASS_NARROW);
+			this.grid.getStyleClass().add(CSS_CLASS_WIDE);
+			this.isWideNotNarrow = true;
+		}
+
+		/**
+		 * Organises for narrow view.
+		 * 
+		 * @param rowIndex
+		 *            Row index to start organising inputs.
+		 */
+		private void organiseNarrow(int rowIndex) {
+			this.rowIndex = rowIndex;
+
+			// Organise the inputs
+			for (Input input : this.inputs) {
+				if (input.label != null) {
+					GridPane.setConstraints(input.label, 1, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
+							Priority.ALWAYS);
+				}
+				if (input.errorFeedback != null) {
+					GridPane.setConstraints(input.errorFeedback, 2, rowIndex, 1, 1, HPos.LEFT, VPos.TOP,
+							Priority.ALWAYS, Priority.ALWAYS);
+				}
+				if (input.input != null) {
+					// Provide input on next row
+					rowIndex++;
+					GridPane.setConstraints(input.input, 1, rowIndex, 2, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
+							Priority.ALWAYS);
+				}
+
+				// Increment for next row
+				rowIndex++;
+				GridPane.setConstraints(input.spacing, 1, rowIndex, 2, 1, HPos.LEFT, VPos.TOP, Priority.NEVER,
+						Priority.ALWAYS);
+				rowIndex++;
+			}
+
+			// Ensure next lister is also organised
+			if (this.nextLister != null) {
+				this.nextLister.organiseNarrow(rowIndex);
+			}
+
+			// Indicate now narrow view
+			this.grid.getStyleClass().remove(CSS_CLASS_WIDE);
+			this.grid.getStyleClass().add(CSS_CLASS_NARROW);
+			this.isWideNotNarrow = false;
+		}
+
+		/**
 		 * Removes the controls from view.
 		 */
 		private void removeControls() {
-			this.wide.getChildren().removeAll(this.registeredWideNodes);
-			this.narrow.getChildren().removeAll(this.registeredNarrowNodes);
+			for (Input input : this.inputs) {
+				if (input.label != null) {
+					this.grid.getChildren().remove(input.label);
+				}
+				if (input.errorFeedback != null) {
+					this.grid.getChildren().remove(input.errorFeedback);
+				}
+				if (input.input != null) {
+					this.grid.getChildren().remove(input.input);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Input.
+	 */
+	private static class Input {
+
+		/**
+		 * Label for the input.
+		 */
+		private final Node label;
+
+		/**
+		 * Error feedback for the input.
+		 */
+		private final Node errorFeedback;
+
+		/**
+		 * {@link Node} to capture the input.
+		 */
+		private final Node input;
+
+		/**
+		 * Used for spacing.
+		 */
+		private final Pane spacing = new Pane();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param label
+		 *            Label for the input.
+		 * @param errorFeedback
+		 *            Error feedback for the input.
+		 * @param input
+		 *            {@link Node} to capture the input.
+		 */
+		private Input(Node label, Node errorFeedback, Node input) {
+			this.label = label;
+			this.errorFeedback = errorFeedback;
+			this.input = input;
 		}
 	}
 

@@ -176,7 +176,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.models.values().forEach((model) -> model.validate());
 
 		// Load with dependencies injected
-		OfficeFloorContentPartFactory<R, O> factory = injector.getInstance(OfficeFloorContentPartFactory.class);
+		OfficeFloorContentPartFactory<R, O> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
 
 		// Load the palette models
 		List<AdaptedModel<?>> paletteModels = new LinkedList<>();

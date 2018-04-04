@@ -120,19 +120,19 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 		});
 
 		// Create the parent
-		Pane parent = module.createParent();
+		Pane inputNode = module.createParent();
 
 		// Create the model
 		ObservableList<String> sources = this.getSources.apply(this.getModel());
 		ObservableList<String> targets = this.getTargets.apply(this.getModel());
-		MappingModel mapping = new MappingModel(parent, value, sources, targets);
+		MappingModel mapping = new MappingModel(inputNode, value, sources, targets);
 
 		// Return the input (allowing activation)
 		return new ValueInput() {
 
 			@Override
 			public Node getNode() {
-				return parent;
+				return inputNode;
 			}
 
 			@Override
@@ -211,6 +211,9 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 
 			// Load models
 			this.reloadModels(true);
+
+			// Update position of targets on resize
+			this.parent.widthProperty().addListener((event) -> this.reloadModels(false));
 		}
 
 		/**
@@ -285,6 +288,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 
 			// Create the new listing of targets
 			this.targetModels.clear();
+			final int widthX = (int) (this.parent.widthProperty().get() - 100);
 			nextY = 10;
 			for (String targetLabel : this.targets) {
 				TargetModel target = existingTargets.get(targetLabel);
@@ -296,7 +300,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 				this.targetModels.add(target);
 
 				// Position the target
-				target.setX(500);
+				target.setX(widthX);
 				target.setY(nextY);
 				nextY += ySeparation;
 			}
@@ -323,13 +327,13 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 					}
 				}
 			}
-
-			// Fire change to refresh view of model changes
-			this.firePropertyChange(ChangeEvent.CHANGED.name(), null, null);
 			
-			// Specify height based on items displayed
-			this.parent.setMaxHeight(maxHeight);
+			// Specify the height to display mappings
 			this.parent.setMinHeight(maxHeight);
+			this.parent.setMaxHeight(maxHeight);
+
+			// Notify editor of change in model
+			this.firePropertyChange(ChangeEvent.CHANGED.name(), null, null);
 		}
 	}
 

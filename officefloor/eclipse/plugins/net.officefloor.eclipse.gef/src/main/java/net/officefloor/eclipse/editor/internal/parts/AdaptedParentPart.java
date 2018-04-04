@@ -34,6 +34,8 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 
 	@Override
 	public void init() {
+		super.init();
+		
 		// Capture the initial location
 		M model = this.getContent().getModel();
 		this.contentTransform = new AffineTransform(1, 0, 0, 1, model.getX(), model.getY());
@@ -68,11 +70,22 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 		container.getStyleClass().add("parent");
 
 		// Specify the initial location
-		container.setLayoutX(this.getContent().getModel().getX());
-		container.setLayoutY(this.getContent().getModel().getY());
+		M model = this.getContent().getModel();
+		container.setLayoutX(model.getX());
+		container.setLayoutY(model.getY());
 
 		// Return the pane
 		return container;
+	}
+
+	@Override
+	protected void doRefreshVisual(Pane visual) {
+		super.doRefreshVisual(visual);
+
+		// Update the location (based on model)
+		M model = this.getContent().getModel();
+		visual.setLayoutX(model.getX());
+		visual.setLayoutY(model.getY());
 	}
 
 	@Override
