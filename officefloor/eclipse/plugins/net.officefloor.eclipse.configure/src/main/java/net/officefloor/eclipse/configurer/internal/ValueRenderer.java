@@ -28,26 +28,7 @@ import javafx.scene.Node;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueRenderer<M> {
-
-	/**
-	 * Initialises the {@link ValueRenderer}.
-	 */
-	void init(ValueRendererContext<M> context);
-
-	/**
-	 * Creates a new label {@link Node}.
-	 * 
-	 * @return New label {@link Node}.
-	 */
-	Node createLabel();
-
-	/**
-	 * Creates a new error feedback {@link Node}.
-	 * 
-	 * @return Error feedback {@link Node}.
-	 */
-	Node createErrorFeedback();
+public interface ValueRenderer<M, I extends ValueInput> {
 
 	/**
 	 * Creates a new input {@link ValueInput}. {@link ValueInput} responsible for
@@ -55,21 +36,35 @@ public interface ValueRenderer<M> {
 	 * 
 	 * @return New input {@link ValueInput}.
 	 */
-	ValueInput createInput();
+	I createInput();
+
+	/**
+	 * Creates a new label {@link Node}.
+	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
+	 * @return New label {@link Node}.
+	 */
+	Node createLabel(I valueInput);
+
+	/**
+	 * Creates a new error feedback {@link Node}.
+	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
+	 * @return Error feedback {@link Node}.
+	 */
+	Node createErrorFeedback(I valueInput);
 
 	/**
 	 * Obtains the error with value.
 	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
 	 * @return Error with value. <code>null</code> to indicate no error.
-	 */
-	Throwable getError();
-
-	/**
-	 * Loads the value to the model.
 	 * 
-	 * @param model
-	 *            Model to have value loaded onto it.
+	 * @see MessageOnlyException
 	 */
-	void loadValue(M model);
+	Throwable getError(I valueInput);
 
 }

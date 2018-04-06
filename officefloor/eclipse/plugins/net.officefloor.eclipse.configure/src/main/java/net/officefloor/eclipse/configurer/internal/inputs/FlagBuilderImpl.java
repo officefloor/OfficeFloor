@@ -29,13 +29,15 @@ import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
+import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 
 /**
  * {@link TextBuilder} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<M>> implements FlagBuilder<M> {
+public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, ValueInput, FlagBuilder<M>>
+		implements FlagBuilder<M> {
 
 	/**
 	 * Instantiate.
@@ -52,13 +54,13 @@ public class FlagBuilderImpl<M> extends AbstractBuilder<M, Boolean, FlagBuilder<
 	 */
 
 	@Override
-	protected ValueInput createInput(Property<Boolean> value) {
+	protected ValueInput createInput(ValueInputContext<M, Boolean> context) {
 		CheckBox checkBox = new CheckBox();
 		if (this.isEditable()) {
-			checkBox.selectedProperty().bindBidirectional(value);
+			checkBox.selectedProperty().bindBidirectional(context.getInputValue());
 		} else {
 			checkBox.setDisable(true);
-			checkBox.selectedProperty().bind(value);
+			checkBox.selectedProperty().bind(context.getInputValue());
 		}
 		checkBox.getStyleClass().add("configurer-input-checkbox");
 		return () -> checkBox;

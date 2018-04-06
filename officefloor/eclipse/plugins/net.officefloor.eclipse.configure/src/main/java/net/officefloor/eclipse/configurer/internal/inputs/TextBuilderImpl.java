@@ -29,13 +29,15 @@ import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
+import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 
 /**
  * {@link TextBuilder} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M>> implements TextBuilder<M> {
+public class TextBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, TextBuilder<M>>
+		implements TextBuilder<M> {
 
 	/**
 	 * Instantiate.
@@ -52,13 +54,16 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 	 */
 
 	@Override
-	protected ValueInput createInput(Property<String> value) {
+	protected ValueInput createInput(ValueInputContext<M, String> context) {
+
+		// Obtain the value
+		Property<String> value = context.getInputValue();
 
 		// Determine if can edit the value
 		if (this.isEditable()) {
 
 			// Provide editable text box
-			TextField text = new TextField(value.getValue());
+			TextField text = new TextField();
 			text.textProperty().bindBidirectional(value);
 			text.getStyleClass().add("configurer-input-text");
 			return () -> text;
@@ -66,7 +71,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, TextBuilder<M
 		} else {
 
 			// Provide label (can not edit)
-			Label label = new Label(value.getValue());
+			Label label = new Label();
 			label.textProperty().bind(value);
 			label.getStyleClass().add("configurer-input-label");
 			return () -> label;

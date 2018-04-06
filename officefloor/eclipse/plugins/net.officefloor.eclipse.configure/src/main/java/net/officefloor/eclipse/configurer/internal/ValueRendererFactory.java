@@ -15,41 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
-
-import java.util.function.Function;
+package net.officefloor.eclipse.configurer.internal;
 
 /**
- * Generic builder.
+ * Factory for the {@link ValueRenderer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Builder<M, V, B extends Builder<M, V, B>> {
+public interface ValueRendererFactory<M, I extends ValueInput> {
 
 	/**
-	 * Configures obtaining the initial value.
+	 * Creates the {@link ValueRenderer}.
 	 * 
-	 * @param getInitialValue
-	 *            Obtains the initial value.
-	 * @return <code>this</code>.
+	 * @param context
+	 *            {@link ValueRendererContext}.
 	 */
-	B init(Function<M, V> getInitialValue);
-
-	/**
-	 * Validates the text value.
-	 * 
-	 * @param validator
-	 *            {@link ValueValidator}.
-	 * @return <code>this</code>.
-	 */
-	B validate(ValueValidator<V> validator);
-
-	/**
-	 * Specifies the {@link ValueLoader} to load the value to the model.
-	 * 
-	 * @param valueLoader
-	 *            {@link ValueLoader} to load the value to the model.
-	 */
-	B setValue(ValueLoader<M, V> valueLoader);
+	ValueRenderer<M, I> createValueRenderer(ValueRendererContext<M> context);
 
 }

@@ -19,25 +19,30 @@ package net.officefloor.eclipse.configurer.internal.inputs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.Node;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
-import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
+import net.officefloor.eclipse.configurer.ValueLoader;
+import net.officefloor.eclipse.configurer.ValueValidator;
+import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueRenderer;
+import net.officefloor.eclipse.configurer.internal.ValueRendererContext;
+import net.officefloor.eclipse.configurer.internal.ValueRendererFactory;
 
 /**
  * {@link PropertiesBuilder} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class PropertiesBuilderImpl<M> extends AbstractBuilder<M, PropertyList, PropertiesBuilder<M>>
-		implements PropertiesBuilder<M>, ValueRenderer<M> {
+public class PropertiesBuilderImpl<M> implements PropertiesBuilder<M>, ValueRendererFactory<M, ValueInput> {
 
 	/**
 	 * {@link Property} item.
@@ -80,7 +85,6 @@ public class PropertiesBuilderImpl<M> extends AbstractBuilder<M, PropertyList, P
 	 *            Label.
 	 */
 	public PropertiesBuilderImpl(String label) {
-		super(label);
 		this.list = new ListBuilderImpl<>(label);
 
 		// Configure property
@@ -93,23 +97,6 @@ public class PropertiesBuilderImpl<M> extends AbstractBuilder<M, PropertyList, P
 	}
 
 	/*
-	 * ================== AbstractBuilder ======================
-	 */
-
-	@Override
-	protected ValueInput createInput(javafx.beans.property.Property<PropertyList> value) {
-
-		// Load the properties
-		List<PropertyItem> items = new ArrayList<>();
-		for (Property property : value.getValue()) {
-			items.add(new PropertyItem(property.getName(), property.getValue()));
-		}
-
-		// Return the created list of properties
-		return this.list.createInput(new SimpleObjectProperty<>(items));
-	}
-
-	/*
 	 * ================== PropertiesBuilder ======================
 	 */
 
@@ -119,23 +106,79 @@ public class PropertiesBuilderImpl<M> extends AbstractBuilder<M, PropertyList, P
 		return null;
 	}
 
+	@Override
+	public PropertiesBuilder<M> init(Function<M, PropertyList> getInitialValue) {
+		this.list.init((model) -> {
+
+			// Obtain the properties
+			PropertyList propertyList = getInitialValue.apply(model);
+
+			// Translate properties into property items
+			List<PropertyItem> items = new ArrayList<>();
+			for (Property property : propertyList) {
+				items.add(new PropertyItem(property.getName(), property.getValue()));
+			}
+
+			// Return the property items
+			return items;
+		});
+		return this;
+	}
+
+	@Override
+	public PropertiesBuilder<M> validate(ValueValidator<PropertyList> validator) {
+		this.list.validate((context) -> {
+
+			// Obtain the property items
+			List<PropertyItem> items = context.getValue().getValue();
+
+			// Translate to properties
+			PropertyList properties = OfficeFloorCompiler.newPropertyList();
+			for (PropertyItem item : items) {
+				properties.addProperty(item.name).setValue(item.value);
+			}
+			SimpleObjectProperty<PropertyList> propertiesProperty = new SimpleObjectProperty<>(properties);
+
+			// Validate the properties
+			validator.validate(new ValueValidatorContext<PropertyList>() {
+
+				@Override
+				public void setError(String message) {
+					context.setError(message);
+				}
+
+				@Override
+				public ReadOnlyProperty<PropertyList> getValue() {
+					return propertiesProperty;
+				}
+			});
+		});
+		return this;
+	}
+
+	@Override
+	public PropertiesBuilder<M> setValue(ValueLoader<M, PropertyList> valueLoader) {
+		this.list.setValue((model, items) -> {
+
+			// Translate to properties
+			PropertyList properties = OfficeFloorCompiler.newPropertyList();
+			for (PropertyItem item : items) {
+				properties.addProperty(item.name).setValue(item.value);
+			}
+
+			// Load the properties
+			valueLoader.loadValue(model, properties);
+		});
+		return this;
+	}
+
 	/*
-	 * =============== ValueRenderer ======================
+	 * ================= ValueRendererFactory =======================
 	 */
 
 	@Override
-	public Node createErrorFeedback() {
-		return this.list.createErrorFeedback();
-	}
-
-	@Override
-	public Throwable getError() {
-		return this.list.getError();
-	}
-
-	@Override
-	public void loadValue(M model) {
-		this.list.loadValue(model);
+	public ValueRenderer<M, ValueInput> createValueRenderer(ValueRendererContext<M> context) {
+		return this.list.createValueRenderer(context);
 	}
 
 }

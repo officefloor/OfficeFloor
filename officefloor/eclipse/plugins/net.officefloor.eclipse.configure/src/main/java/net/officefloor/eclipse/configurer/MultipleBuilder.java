@@ -15,31 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.internal;
+package net.officefloor.eclipse.configurer;
 
-import java.util.function.Supplier;
-
-import javafx.beans.property.ReadOnlyProperty;
+import java.util.List;
+import java.util.function.Function;
 
 /**
- * {@link ValueRenderer} allowing for rending multiple values.
+ * Builder of multiple models.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChoiceValueRenderer<V> {
+public interface MultipleBuilder<M, I> extends InputBuilder<I>, Builder<M, List<I>, MultipleBuilder<M, I>> {
 
 	/**
-	 * Obtains the array of {@link ValueRenderer} instances.
+	 * Configures obtaining the label for the particular item.
 	 * 
-	 * @return Array of {@link ValueRenderer} instances.
+	 * @param getItemLabel
+	 *            {@link Function} to obtain the label for a particular item.
 	 */
-	Supplier<ValueRenderer<V>[]>[] getChoiceValueRenders();
-
-	/**
-	 * Obtains the index into choice {@link ValueRenderer} listing to display.
-	 * 
-	 * @return Index into choice {@link ValueRenderer} listing to display.
-	 */
-	ReadOnlyProperty<Integer> getChoiceIndex();
+	void itemLabel(Function<I, String> getItemLabel);
 
 }

@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -45,28 +46,13 @@ import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
-		implements Builder<M, V, B>, ValueRenderer<M>, ValueValidatorContext<V>, ColumnRenderer<M, V> {
+public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Builder<M, V, B>>
+		implements Builder<M, V, B>, ValueRendererFactory<M, I>, ColumnRenderer<M, V> {
 
 	/**
 	 * Label.
 	 */
 	private final String label;
-
-	/**
-	 * Tracks if an error occurred on validation.
-	 */
-	private boolean isError = false;
-
-	/**
-	 * Current error with value.
-	 */
-	private Throwable error = null;
-
-	/**
-	 * Error.
-	 */
-	private final StringProperty errorMessage = new SimpleStringProperty();
 
 	/**
 	 * {@link ValueLoader}.
@@ -84,21 +70,6 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	private ValueValidator<V> validator = null;
 
 	/**
-	 * {@link ObservableValue}.
-	 */
-	protected final Property<V> value = new SimpleObjectProperty<>();
-
-	/**
-	 * {@link ValueRendererContext}.
-	 */
-	private ValueRendererContext<M> context;
-
-	/**
-	 * Model.
-	 */
-	private M model;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param label
@@ -111,11 +82,64 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	/**
 	 * Creates the input {@link ValueInput} for the {@link ObservableValue}.
 	 * 
-	 * @param value
-	 *            {@link ObservableValue} to be updated.
+	 * @param context
+	 *            {@link ValueInputContext}.
 	 * @return {@link ValueInput} to configure the {@link ObservableValue}.
 	 */
-	protected abstract ValueInput createInput(Property<V> value);
+	protected abstract I createInput(ValueInputContext<M, V> context);
+
+	/**
+	 * Creates the label {@link Node}.
+	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
+	 * @return Label {@link Node}.
+	 */
+	protected Node createLabel(I valueInput) {
+		return new Label(this.getLabel());
+	}
+
+	/**
+	 * Creates the error feedback {@link Node}.
+	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
+	 * @param errorMessage
+	 *            Error message.
+	 * @return Error feedback {@link Node}.
+	 */
+	protected Node createErrorFeedback(I valueInput, ReadOnlyStringProperty errorMessage) {
+		ImageView error = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
+		Tooltip errorTooltip = new Tooltip();
+		errorTooltip.getStyleClass().add("error-tooltip");
+		Tooltip.install(error, errorTooltip);
+		error.visibleProperty().set(false); // default hide
+		errorMessage.addListener((event) -> {
+			String errorText = errorMessage.get();
+			if ((errorText != null) && (errorText.length() > 0)) {
+				// Display the error
+				errorTooltip.setText(errorText);
+				error.visibleProperty().set(true);
+			} else {
+				// No error
+				error.visibleProperty().set(false);
+			}
+		});
+		return error;
+	}
+
+	/**
+	 * Obtains the error.
+	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
+	 * @param error
+	 *            {@link Throwable} error. May be <code>null</code> if no error.
+	 * @return {@link Throwable} error or <code>null</code> if no error.
+	 */
+	protected Throwable getError(I valueInput, Throwable error) {
+		return error;
+	}
 
 	/**
 	 * Creates the {@link Property} for the {@link TableCell}.
@@ -149,91 +173,6 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 		return this.label == null ? "" : this.label;
 	}
 
-	/**
-	 * Obtains the model.
-	 * 
-	 * @return Model.
-	 */
-	protected M getModel() {
-		return this.model;
-	}
-
-	/**
-	 * Obtains the {@link ValueRendererContext}.
-	 * 
-	 * @return {@link ValueRendererContext}.
-	 */
-	protected ValueRendererContext<M> getValueRendererContext() {
-		return this.context;
-	}
-
-	/**
-	 * Allow initialising from model.
-	 * 
-	 * @param model
-	 *            Model.
-	 */
-	protected void init(M model) {
-	}
-
-	/**
-	 * Undertakes validation.
-	 */
-	private void validate() {
-
-		// Capture the initial error (to see if change)
-		Throwable previousError = this.error;
-
-		// Reset error for the validate
-		this.isError = false;
-		this.error = null;
-		try {
-			// Undertake validation
-			this.validator.validate(this);
-		} catch (Exception ex) {
-			// Provide error message
-			String message = ex.getMessage();
-			if ((message == null) || (message.length() == 0)) {
-				// Provide message from exception
-				message = "Thrown exception " + ex.getClass().getName();
-			}
-			this.setError(message);
-
-			// Flag error and override with exception
-			this.isError = true;
-			this.error = ex;
-		}
-		if (!this.isError) {
-			// No error in validate, so clear error
-			this.setError(null);
-
-			// Determine if previously an error
-			if (previousError != null) {
-				this.context.refreshError();
-			}
-
-		} else {
-			if ((previousError instanceof MessageOnlyException) && (this.error instanceof MessageOnlyException)) {
-				// Determine if change in error message only
-				if (!previousError.getMessage().equals(this.error.getMessage())) {
-					// Change in message, so notify error
-					this.context.refreshError();
-				}
-
-			} else if ((previousError != null) && (this.error != null)) {
-				if (!previousError.equals(this.error)) {
-					// Change in exception, so notify error
-					this.context.refreshError();
-				}
-			} else if ((previousError == null) && (this.error == null)) {
-				// No error, so no change
-			} else {
-				// Change to have/clear error
-				this.context.refreshError();
-			}
-		}
-	}
-
 	/*
 	 * ============ Builder ===============
 	 */
@@ -249,13 +188,7 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	@SuppressWarnings("unchecked")
 	public B validate(ValueValidator<V> validator) {
 		this.validator = validator;
-		this.value.addListener((event) -> this.validate());
 		return (B) this;
-	}
-
-	@Override
-	public ReadOnlyProperty<V> getValue() {
-		return this.value;
 	}
 
 	@Override
@@ -266,96 +199,193 @@ public abstract class AbstractBuilder<M, V, B extends Builder<M, V, B>>
 	}
 
 	/*
-	 * ========== ValueValidatorContext =============
+	 * ============ ValueRendererFactory =================
 	 */
 
 	@Override
-	public void setError(String message) {
-
-		// Blank string considered no exception
-		if ((message != null) && (message.length() == 0)) {
-			message = null;
-		}
-
-		// Update the error feedback
-		this.isError = (message != null);
-		this.errorMessage.set(message);
-
-		// Provide message only exception
-		if (message == null) {
-			// No error
-			this.error = null;
-		} else {
-			// Load message only exception
-			this.error = new MessageOnlyException(message);
-		}
+	public ValueRenderer<M, I> createValueRenderer(ValueRendererContext<M> context) {
+		return new ValueRendererImpl(context);
 	}
 
-	/*
-	 * ============ ValueRenderer =================
+	/**
+	 * {@link ValueRenderer} implementation.
 	 */
+	private class ValueRendererImpl implements ValueRenderer<M, I>, ValueValidatorContext<V>, ValueInputContext<M, V> {
 
-	@Override
-	public void init(ValueRendererContext<M> context) {
-		this.context = context;
+		/**
+		 * {@link ObservableValue}.
+		 */
+		private final Property<V> value = new SimpleObjectProperty<>();
 
-		// Determine if change in model
-		M initModel = this.context.getModel();
-		if (this.model != initModel) {
+		/**
+		 * {@link ValueRendererContext}.
+		 */
+		private final ValueRendererContext<M> context;
 
-			// Re-initialise to model
-			this.model = initModel;
-			if (this.getInitialValue != null) {
-				V initialValue = this.getInitialValue.apply(this.getModel());
+		/**
+		 * Tracks if an error occurred on validation.
+		 */
+		private boolean isError = false;
+
+		/**
+		 * Current error with value.
+		 */
+		private Throwable error = null;
+
+		/**
+		 * Error.
+		 */
+		private final StringProperty errorMessage = new SimpleStringProperty();
+
+		/**
+		 * Initialises the {@link ValueRenderer}.
+		 */
+		private ValueRendererImpl(ValueRendererContext<M> context) {
+			this.context = context;
+
+			// Initialise to model
+			M model = this.context.getModel();
+			if (AbstractBuilder.this.getInitialValue != null) {
+				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
 				this.value.setValue(initialValue);
 			}
+
+			// Listen to change to run validation
+			this.value.addListener((event) -> this.validate());
 		}
 
-		// Allow any further model initialising
-		this.init(this.getModel());
-	}
+		/**
+		 * Undertakes validation.
+		 */
+		private void validate() {
 
-	@Override
-	public Node createLabel() {
-		return new Label(this.label);
-	}
-
-	@Override
-	public Node createErrorFeedback() {
-		ImageView error = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
-		Tooltip errorTooltip = new Tooltip();
-		errorTooltip.getStyleClass().add("error-tooltip");
-		Tooltip.install(error, errorTooltip);
-		error.visibleProperty().set(false); // default hide
-		this.errorMessage.addListener((event) -> {
-			String errorText = this.errorMessage.get();
-			if ((errorText != null) && (errorText.length() > 0)) {
-				// Display the error
-				errorTooltip.setText(errorText);
-				error.visibleProperty().set(true);
-			} else {
-				// No error
-				error.visibleProperty().set(false);
+			// Determine if validation
+			if (AbstractBuilder.this.validator == null) {
+				return; // no validation
 			}
-		});
-		return error;
-	}
 
-	@Override
-	public ValueInput createInput() {
-		return this.createInput(this.value);
-	}
+			// Capture the initial error (to see if change)
+			Throwable previousError = this.error;
 
-	@Override
-	public Throwable getError() {
-		return this.error;
-	}
+			// Reset error for the validate
+			this.isError = false;
+			this.error = null;
+			try {
+				// Undertake validation
+				AbstractBuilder.this.validator.validate(this);
+			} catch (Exception ex) {
+				// Provide error message
+				String message = ex.getMessage();
+				if ((message == null) || (message.length() == 0)) {
+					// Provide message from exception
+					message = "Thrown exception " + ex.getClass().getName();
+				}
+				this.setError(message);
 
-	@Override
-	public void loadValue(M model) {
-		if (this.valueLoader != null) {
-			this.valueLoader.loadValue(model, this.value.getValue());
+				// Flag error and override with exception
+				this.isError = true;
+				this.error = ex;
+			}
+			if (!this.isError) {
+				// No error in validate, so clear error
+				this.setError(null);
+
+				// Determine if previously an error
+				if (previousError != null) {
+					this.context.refreshError();
+				}
+
+			} else {
+				if ((previousError instanceof MessageOnlyException) && (this.error instanceof MessageOnlyException)) {
+					// Determine if change in error message only
+					if (!previousError.getMessage().equals(this.error.getMessage())) {
+						// Change in message, so notify error
+						this.context.refreshError();
+					}
+
+				} else if ((previousError != null) && (this.error != null)) {
+					if (!previousError.equals(this.error)) {
+						// Change in exception, so notify error
+						this.context.refreshError();
+					}
+				} else if ((previousError == null) && (this.error == null)) {
+					// No error, so no change
+				} else {
+					// Change to have/clear error
+					this.context.refreshError();
+				}
+			}
 		}
+
+		/*
+		 * ============ ValueInputContext ================
+		 */
+
+		@Override
+		public M getModel() {
+			return this.context.getModel();
+		}
+
+		@Override
+		public Property<V> getInputValue() {
+			return this.value;
+		}
+
+		/*
+		 * =============== ValueRenderer =================
+		 */
+
+		@Override
+		public I createInput() {
+			return AbstractBuilder.this.createInput(this);
+		}
+
+		@Override
+		public Node createLabel(I valueInput) {
+			return AbstractBuilder.this.createLabel(valueInput);
+		}
+
+		@Override
+		public Node createErrorFeedback(I valueInput) {
+			return AbstractBuilder.this.createErrorFeedback(valueInput, this.errorMessage);
+		}
+
+		@Override
+		public Throwable getError(I valueInput) {
+			return AbstractBuilder.this.getError(valueInput, this.error);
+		}
+
+		/*
+		 * ========== ValueValidatorContext =============
+		 */
+
+		@Override
+		public ReadOnlyProperty<V> getValue() {
+			return this.value;
+		}
+
+		@Override
+		public void setError(String message) {
+
+			// Blank string considered no exception
+			if ((message != null) && (message.length() == 0)) {
+				message = null;
+			}
+
+			// Update the error feedback
+			this.isError = (message != null);
+			this.errorMessage.set(message);
+
+			// Provide message only exception
+			if (message == null) {
+				// No error
+				this.error = null;
+			} else {
+				// Load message only exception
+				this.error = new MessageOnlyException(message);
+			}
+		}
+
 	}
 
 	/*

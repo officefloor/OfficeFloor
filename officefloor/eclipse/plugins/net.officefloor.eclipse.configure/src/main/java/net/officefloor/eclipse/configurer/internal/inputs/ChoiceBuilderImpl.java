@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.FlowPane;
@@ -30,28 +30,23 @@ import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractConfigurationBuilder;
-import net.officefloor.eclipse.configurer.internal.ChoiceValueRenderer;
+import net.officefloor.eclipse.configurer.internal.ChoiceValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
-import net.officefloor.eclipse.configurer.internal.ValueRenderer;
+import net.officefloor.eclipse.configurer.internal.ValueInputContext;
+import net.officefloor.eclipse.configurer.internal.ValueRendererFactory;
 
 /**
  * {@link ChoiceBuilder} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceBuilder<M>>
-		implements ChoiceBuilder<M>, ValueRenderer<M>, ChoiceValueRenderer<M> {
+public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValueInput<M>, ChoiceBuilder<M>>
+		implements ChoiceBuilder<M> {
 
 	/**
 	 * {@link ChoiceConfigurationBuilder} instances.
 	 */
 	private final List<ChoiceConfigurationBuilder> choices = new ArrayList<>();
-
-	/**
-	 * {@link Supplier} of the {@link ValueRenderer} instances for a particular
-	 * choice.
-	 */
-	private Supplier<ValueRenderer<M>[]>[] choiceFactories;
 
 	/**
 	 * Instantiate.
@@ -79,19 +74,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceBuil
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void init(M model) {
-
-		// Load the choices
-		this.choiceFactories = new Supplier[this.choices.size()];
-		for (int i = 0; i < this.choices.size(); i++) {
-			ChoiceConfigurationBuilder choice = this.choices.get(i);
-			this.choiceFactories[i] = () -> choice.getValueRenderers();
-		}
-	}
-
-	@Override
-	public ValueInput createInput(Property<Integer> value) {
+	public ChoiceValueInput<M> createInput(ValueInputContext<M, Integer> context) {
 
 		// Display choices
 		FlowPane choicesVisual = new FlowPane();
@@ -113,7 +96,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceBuil
 
 				// Only update listing if change to active
 				if (selection.isSelected() && !isActive[0]) {
-					value.setValue(choiceIndex);
+					context.getInputValue().setValue(choiceIndex);
 				}
 
 				// Capture whether active
@@ -122,21 +105,69 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceBuil
 		}
 
 		// Return the pane to contain choices
-		return () -> choicesVisual;
+		return new ChoiceValueInputImpl(choicesVisual, context);
 	}
 
-	/*
-	 * ================ ChoiceValueRenderer ===================
+	/**
+	 * {@link ChoiceValueInput} implementation.
 	 */
+	private class ChoiceValueInputImpl implements ChoiceValueInput<M> {
 
-	@Override
-	public Supplier<ValueRenderer<M>[]>[] getChoiceValueRenders() {
-		return this.choiceFactories;
-	}
+		/**
+		 * {@link FlowPane}.
+		 */
+		private final FlowPane choicesVisual;
 
-	@Override
-	public ReadOnlyProperty<Integer> getChoiceIndex() {
-		return this.getValue();
+		/**
+		 * {@link ValueInputContext}.
+		 */
+		private final ValueInputContext<M, Integer> context;
+
+		/**
+		 * {@link Supplier} of the {@link ValueRendererFactory} instances for a
+		 * particular choice.
+		 */
+		private final Supplier<ValueRendererFactory<M, ? extends ValueInput>[]>[] choiceFactories;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param choicesVisual
+		 *            {@link FlowPane}.
+		 * @param context
+		 *            {@link ValueInputContext}.
+		 */
+		@SuppressWarnings("unchecked")
+		private ChoiceValueInputImpl(FlowPane choicesVisual, ValueInputContext<M, Integer> context) {
+			this.choicesVisual = choicesVisual;
+			this.context = context;
+
+			// Load the choices
+			this.choiceFactories = new Supplier[ChoiceBuilderImpl.this.choices.size()];
+			for (int i = 0; i < ChoiceBuilderImpl.this.choices.size(); i++) {
+				ChoiceConfigurationBuilder choice = ChoiceBuilderImpl.this.choices.get(i);
+				this.choiceFactories[i] = () -> choice.getValueRendererFactories();
+			}
+		}
+
+		/*
+		 * ============== ChoiceValueInput =================
+		 */
+
+		@Override
+		public Node getNode() {
+			return this.choicesVisual;
+		}
+
+		@Override
+		public Supplier<ValueRendererFactory<M, ? extends ValueInput>[]>[] getChoiceValueRendererFactories() {
+			return this.choiceFactories;
+		}
+
+		@Override
+		public ReadOnlyProperty<Integer> getChoiceIndex() {
+			return this.context.getInputValue();
+		}
 	}
 
 	/**

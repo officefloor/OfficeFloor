@@ -22,6 +22,7 @@ import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
+import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.example.ExampleModel.ExampleItem;
 
 /**
@@ -89,6 +90,12 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 		// Provide mapping
 		builder.map("Mapping", (model) -> FXCollections.observableArrayList(model.sources),
 				(model) -> FXCollections.observableArrayList(model.targets)).init((model) -> model.mapping);
+
+		// Provide multiple
+		MultipleBuilder<ExampleModel, ExampleItem> multiple = builder.multiple("Multiple", ExampleItem.class)
+				.init((model) -> model.multiple).setValue((model, items) -> model.multiple = items);
+		multiple.itemLabel((item) -> item.text);
+		multiple.text("Label").init((item) -> item.text);
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.MappingBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
+import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
@@ -44,7 +45,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String>, MappingBuilder<M>>
+public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String>, ValueInput, MappingBuilder<M>>
 		implements MappingBuilder<M> {
 
 	/**
@@ -74,12 +75,9 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 		this.getTargets = getTargets;
 	}
 
-	/**
-	 * Create {@link Node} input with mapping.
-	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected ValueInput createInput(Property<Map<String, String>> value) {
+	protected ValueInput createInput(ValueInputContext<M, Map<String, String>> context) {
 
 		// Create editor configuration
 		AdaptedEditorModule module = new AdaptedEditorModule((builder) -> {
@@ -123,9 +121,9 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 		Pane inputNode = module.createParent();
 
 		// Create the model
-		ObservableList<String> sources = this.getSources.apply(this.getModel());
-		ObservableList<String> targets = this.getTargets.apply(this.getModel());
-		MappingModel mapping = new MappingModel(inputNode, value, sources, targets);
+		ObservableList<String> sources = this.getSources.apply(context.getModel());
+		ObservableList<String> targets = this.getTargets.apply(context.getModel());
+		MappingModel mapping = new MappingModel(inputNode, context.getInputValue(), sources, targets);
 
 		// Return the input (allowing activation)
 		return new ValueInput() {
@@ -286,9 +284,13 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 				existingTargets.put(target.label, target);
 			}
 
+			// Determine where to align targets
+			int widthX = (int) (this.parent.widthProperty().get() - 100);
+			widthX = Math.min(widthX, 500);
+			widthX = Math.max(widthX, 200);
+
 			// Create the new listing of targets
 			this.targetModels.clear();
-			final int widthX = (int) (this.parent.widthProperty().get() - 100);
 			nextY = 10;
 			for (String targetLabel : this.targets) {
 				TargetModel target = existingTargets.get(targetLabel);
@@ -303,6 +305,9 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 				target.setX(widthX);
 				target.setY(nextY);
 				nextY += ySeparation;
+
+				// Trigger relocate of model
+				target.firePropertyChange(ChangeEvent.CHANGED.name(), null, null);
 			}
 			maxHeight = Math.max(maxHeight, nextY);
 
@@ -327,7 +332,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 					}
 				}
 			}
-			
+
 			// Specify the height to display mappings
 			this.parent.setMinHeight(maxHeight);
 			this.parent.setMaxHeight(maxHeight);

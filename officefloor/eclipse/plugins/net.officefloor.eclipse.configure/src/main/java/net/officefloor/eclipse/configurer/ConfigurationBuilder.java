@@ -17,80 +17,14 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.function.Function;
-
-import javafx.collections.ObservableList;
-import net.officefloor.compile.properties.PropertyList;
 
 /**
  * Builds the configuration.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ConfigurationBuilder<M> extends ItemBuilder<M> {
-
-	/**
-	 * Builds choices in configuration.
-	 * 
-	 * @param label
-	 *            Label for the choices.
-	 * @return {@link ChoiceBuilder}.
-	 */
-	ChoiceBuilder<M> choices(String label);
-
-	/**
-	 * Configures a list of items.
-	 * 
-	 * @param label
-	 *            Label for the items.
-	 * @param itemType
-	 *            Item type.
-	 * @return {@link ListBuilder}.
-	 */
-	<I> ListBuilder<M, I> list(String label, Class<I> itemType);
-
-	/**
-	 * Configures {@link PropertyList}.
-	 * 
-	 * @param label
-	 *            Label for the {@link Properties}.
-	 * @return {@link PropertiesBuilder}.
-	 */
-	PropertiesBuilder<M> properties(String label);
-
-	/**
-	 * Configures a mapping of name to name.
-	 * 
-	 * @param label
-	 *            Label for the mapping.
-	 * @param getSources
-	 *            {@link Function} to extract the sources.
-	 * @param getTargets
-	 *            {@link Function} to extract the targets.
-	 * @return {@link MappingBuilder}.
-	 */
-	MappingBuilder<M> map(String label, Function<M, ObservableList<String>> getSources,
-			Function<M, ObservableList<String>> getTargets);
-
-	/**
-	 * Adds a {@link Class} property to be configured.
-	 * 
-	 * @param label
-	 *            Label.
-	 * @return {@link ClassBuilder}.
-	 */
-	ClassBuilder<M> clazz(String label);
-
-	/**
-	 * Adds a resource property to be configured.
-	 * 
-	 * @param label
-	 *            Label.
-	 * @return {@link ResourceBuilder}.
-	 */
-	ResourceBuilder<M> resource(String label);
+public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 
 	/**
 	 * Configures a {@link Consumer} to apply the configured model.

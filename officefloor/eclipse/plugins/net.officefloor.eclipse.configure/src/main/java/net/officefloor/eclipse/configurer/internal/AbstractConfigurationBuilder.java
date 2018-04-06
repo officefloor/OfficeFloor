@@ -40,6 +40,7 @@ import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.MappingBuilder;
+import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
@@ -47,6 +48,7 @@ import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.ListBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.MappingBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.MultipleBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.PropertiesBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
 
@@ -68,9 +70,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	public static final String CSS_CLASS_NARROW = "narrow";
 
 	/**
-	 * Listing of the {@link ValueRenderer} instances.
+	 * Listing of the {@link ValueRendererFactory} instances.
 	 */
-	private final List<ValueRenderer<M>> renderers = new ArrayList<>();
+	private final List<ValueRendererFactory<M, ? extends ValueInput>> rendererFactories = new ArrayList<>();
 
 	/**
 	 * {@link ErrorListener}.
@@ -99,13 +101,13 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	/**
-	 * Obtain the list of {@link ValueRenderer} instances.
+	 * Obtain the list of {@link ValueRendererFactory} instances.
 	 * 
-	 * @return {@link ValueRenderer} instances.
+	 * @return {@link ValueRendererFactory} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public ValueRenderer<M>[] getValueRenderers() {
-		return this.renderers.toArray(new ValueRenderer[this.renderers.size()]);
+	public ValueRendererFactory<M, ? extends ValueInput>[] getValueRendererFactories() {
+		return this.rendererFactories.toArray(new ValueRendererFactory[this.rendererFactories.size()]);
 	}
 
 	/**
@@ -117,32 +119,6 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	 *            Parent {@link Pane}.
 	 */
 	public void loadConfiguration(M model, Pane parent) {
-		this.model = model;
-
-		// Provide error listener
-		if (this.errorListener == null) {
-			// Provide default error listener
-			this.errorListener = new ErrorListener() {
-				@Override
-				public void valid() {
-					// TODO Auto-generated method stub
-					System.err.println("TODO IMPLEMENT errorListener.valid()");
-				}
-
-				@Override
-				public void error(Throwable error) {
-					// TODO Auto-generated method stub
-					System.err.println("TODO IMPLEMENT errorListener.error(...)");
-					error.printStackTrace();
-				}
-
-				@Override
-				public void error(String message) {
-					// TODO Auto-generated method stub
-					System.err.println("TODO IMPLEMENT errorListener.valid(" + message + ")");
-				}
-			};
-		}
 
 		// Load the default styling
 		parent.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
@@ -168,14 +144,63 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		// Apply CSS (so Scene available to inputs)
 		parent.applyCss();
 
+		// Load the configuration to grid
+		this.loadConfiguration(model, grid, this);
+	}
+
+	/**
+	 * Loads the configuration to the {@link GridPane}.
+	 * 
+	 * @param model
+	 *            Model.
+	 * @param parent
+	 *            {@link GridPane}.
+	 * @param parentConfigurationBuilder
+	 *            Parent {@link AbstractConfigurationBuilder}
+	 */
+	public void loadConfiguration(M model, GridPane parent,
+			AbstractConfigurationBuilder<?> parentConfigurationBuilder) {
+		this.model = model;
+
+		// Provide error listener
+		if (this.errorListener == null) {
+			this.errorListener = parentConfigurationBuilder.errorListener;
+		}
+		if (this.errorListener == null) {
+			// Provide default error listener
+			this.errorListener = new ErrorListener() {
+				@Override
+				public void valid() {
+					// TODO Auto-generated method stub
+					System.err.println("TODO IMPLEMENT errorListener.valid()");
+				}
+
+				@Override
+				public void error(Throwable error) {
+					// TODO Auto-generated method stub
+					System.err.println("TODO IMPLEMENT errorListener.error(...)");
+					error.printStackTrace();
+				}
+
+				@Override
+				public void error(String message) {
+					// TODO Auto-generated method stub
+					System.err.println("TODO IMPLEMENT errorListener.valid(" + message + ")");
+				}
+			};
+		}
+
+		// Apply CSS (so Scene available to inputs)
+		parent.applyCss();
+
 		// Load the value render list
-		ValueLister lister = new ValueLister(grid, this.getValueRenderers());
+		ValueLister lister = new ValueLister(parent, this.getValueRendererFactories());
 		lister.organiseWide(1); // ensure initially organised
 
 		// Responsive view
 		final double RESPONSIVE_WIDTH = 800;
 		InvalidationListener listener = (event) -> {
-			if (scroll.getWidth() < RESPONSIVE_WIDTH) {
+			if (parent.getWidth() < RESPONSIVE_WIDTH) {
 				// Avoid events if already narrow
 				if (lister.isWideNotNarrow) {
 					lister.organiseNarrow(1);
@@ -187,19 +212,19 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 				}
 			}
 		};
-		scroll.widthProperty().addListener(listener);
+		parent.widthProperty().addListener(listener);
 		listener.invalidated(null); // organise initial view
 	}
 
 	/**
-	 * Convenience method to register the {@link ValueRenderer}.
+	 * Convenience method to register the {@link ValueRendererFactory}.
 	 * 
 	 * @param builder
 	 *            Builder.
 	 * @return Input builder.
 	 */
-	private <B extends ValueRenderer<M>> B registerBuilder(B builder) {
-		this.renderers.add(builder);
+	private <B extends ValueRendererFactory<M, ? extends ValueInput>> B registerBuilder(B builder) {
+		this.rendererFactories.add(builder);
 		return builder;
 	}
 
@@ -240,6 +265,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	@Override
 	public <I> ListBuilder<M, I> list(String label, Class<I> itemType) {
 		return this.registerBuilder(new ListBuilderImpl<>(label));
+	}
+
+	@Override
+	public <I> MultipleBuilder<M, I> multiple(String label, Class<I> itemType) {
+		return this.registerBuilder(new MultipleBuilderImpl<>(label));
 	}
 
 	@Override
@@ -309,56 +339,59 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		 * @param rowIndex
 		 *            Row index within wide view {@link GridPane} to continue rendering
 		 *            inputs.
-		 * @param renderers
-		 *            {@link ValueRenderer} instances.
+		 * @param rendererFactories
+		 *            {@link ValueRendererFactory} instances.
 		 */
 		@SuppressWarnings("unchecked")
-		public ValueLister(GridPane grid, ValueRenderer<M>[] renderers) {
+		public ValueLister(GridPane grid, ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories) {
 			this.grid = grid;
 
 			// Ensure activate the inputs (once added)
-			List<ValueInput> inputsToActivate = new ArrayList<>(renderers.length * 2);
+			List<ValueInput> inputsToActivate = new ArrayList<>(rendererFactories.length * 2);
 			try {
 
 				// Render in the items
-				for (int i = 0; i < renderers.length; i++) {
-					ValueRenderer<M> renderer = renderers[i];
+				for (int i = 0; i < rendererFactories.length; i++) {
+					ValueRendererFactory<M, ? extends ValueInput> rendererFactory = rendererFactories[i];
 
-					// Initialise the renderer
-					renderer.init(AbstractConfigurationBuilder.this);
+					// Create the renderer
+					ValueRenderer<M, ValueInput> renderer = (ValueRenderer<M, ValueInput>) rendererFactory
+							.createValueRenderer(AbstractConfigurationBuilder.this);
 
-					// Add the label
-					Node label = renderer.createLabel();
+					// Obtain the value input
+					ValueInput valueInput = renderer.createInput();
+					inputsToActivate.add(valueInput);
+
+					// Add the input
+					Node valueInputNode = valueInput.getNode();
+					if (valueInputNode != null) {
+						grid.getChildren().add(valueInputNode);
+					}
+
+					// Add the label (if provided)
+					Node label = renderer.createLabel(valueInput);
 					if (label != null) {
 						grid.getChildren().add(label);
 					}
 
-					// Add the error feedback
-					Node error = renderer.createErrorFeedback();
+					// Add the error feedback (if provided)
+					Node error = renderer.createErrorFeedback(valueInput);
 					if (error != null) {
 						grid.getChildren().add(error);
 					}
 
-					// Add the input
-					ValueInput valueInput = renderer.createInput();
-					Node valueInputNode = null;
-					if (valueInput != null) {
-						valueInputNode = valueInput.getNode();
-						grid.getChildren().add(valueInputNode);
-						inputsToActivate.add(valueInput);
-					}
-
 					// Register the input
-					Input input = new Input(label, error, valueInputNode);
+					Input input = new Input(label, error, valueInputNode, renderer);
 					this.inputs.add(input);
 					grid.getChildren().add(input.spacing);
 
 					// Determine if choice value renderer
-					if (renderer instanceof ChoiceValueRenderer) {
-						ChoiceValueRenderer<M> choiceRenderer = (ChoiceValueRenderer<M>) renderer;
+					if (input instanceof ChoiceValueInput) {
+						ChoiceValueInput<M> choiceRenderer = (ChoiceValueInput<M>) input;
 
 						// Load choice
-						ValueRenderer<M>[] splitRenderers = Arrays.copyOfRange(renderers, i + 1, renderers.length);
+						ValueRendererFactory<M, ? extends ValueInput>[] splitRenderers = Arrays
+								.copyOfRange(rendererFactories, i + 1, rendererFactories.length);
 						Runnable loadChoice = () -> {
 
 							// Obtain the choice
@@ -369,9 +402,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 
 							} else {
 								// Have choice, so create concat list of remaining
-								ValueRenderer<M>[] choiceRenderers = choiceRenderer.getChoiceValueRenders()[choice]
-										.get();
-								ValueRenderer<M>[] remainingRenderers = new ValueRenderer[choiceRenderers.length
+								ValueRendererFactory<M, ? extends ValueInput>[] choiceRenderers = choiceRenderer
+										.getChoiceValueRendererFactories()[choice].get();
+								ValueRendererFactory<M, ? extends ValueInput>[] remainingRenderers = new ValueRendererFactory[choiceRenderers.length
 										+ splitRenderers.length];
 								for (int c = 0; c < choiceRenderers.length; c++) {
 									remainingRenderers[c] = choiceRenderers[c];
@@ -518,6 +551,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 				if (input.input != null) {
 					this.grid.getChildren().remove(input.input);
 				}
+				this.grid.getChildren().remove(input.spacing);
 			}
 		}
 	}
@@ -548,6 +582,13 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		private final Pane spacing = new Pane();
 
 		/**
+		 * {@link ValueRenderer}. As bindings are weak references, need strong reference
+		 * to {@link ValueRenderer} to keep bindings active.
+		 */
+		@SuppressWarnings("unused")
+		private final ValueRenderer<?, ?> renderer;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param label
@@ -556,11 +597,14 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 		 *            Error feedback for the input.
 		 * @param input
 		 *            {@link Node} to capture the input.
+		 * @param renderer
+		 *            {@link ValueRenderer}.
 		 */
-		private Input(Node label, Node errorFeedback, Node input) {
+		private Input(Node label, Node errorFeedback, Node input, ValueRenderer<?, ?> renderer) {
 			this.label = label;
 			this.errorFeedback = errorFeedback;
 			this.input = input;
+			this.renderer = renderer;
 		}
 	}
 

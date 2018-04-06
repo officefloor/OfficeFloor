@@ -47,6 +47,7 @@ import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.CellRenderer;
 import net.officefloor.eclipse.configurer.internal.ColumnRenderer;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
+import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 import net.officefloor.eclipse.configurer.internal.ValueRendererContext;
 import net.officefloor.eclipse.configurer.internal.resize.DragResizer;
 
@@ -55,7 +56,8 @@ import net.officefloor.eclipse.configurer.internal.resize.DragResizer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuilder<M, I>> implements ListBuilder<M, I> {
+public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInput, ListBuilder<M, I>>
+		implements ListBuilder<M, I> {
 
 	/**
 	 * Indicates if add row (configuring {@link TableCell} for add row).
@@ -153,7 +155,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ValueInput createInput(Property<List<I>> value) {
+	public ValueInput createInput(ValueInputContext<M, List<I>> context) {
 
 		// Create the table
 		TableView<Row> table = new TableView<>(this.rows);
@@ -243,7 +245,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ListBuild
 		table.getColumns().setAll(columns);
 
 		// Load the rows
-		List<I> items = value.getValue();
+		List<I> items = context.getInputValue().getValue();
 		List<Row> rows = new ArrayList<>(items == null ? 0 : items.size());
 		if (items != null) {
 			for (I item : items) {

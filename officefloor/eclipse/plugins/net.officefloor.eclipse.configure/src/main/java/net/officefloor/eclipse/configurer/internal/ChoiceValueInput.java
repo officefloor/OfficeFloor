@@ -15,41 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer;
+package net.officefloor.eclipse.configurer.internal;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
+
+import javafx.beans.property.ReadOnlyProperty;
 
 /**
- * Generic builder.
+ * {@link ValueInput} allowing for rendering choice of following
+ * {@link ValueInput} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Builder<M, V, B extends Builder<M, V, B>> {
+public interface ChoiceValueInput<M> extends ValueInput {
 
 	/**
-	 * Configures obtaining the initial value.
+	 * Obtains the array of {@link ValueRendererFactory} instances.
 	 * 
-	 * @param getInitialValue
-	 *            Obtains the initial value.
-	 * @return <code>this</code>.
+	 * @return Array of {@link ValueRendererFactory} instances.
 	 */
-	B init(Function<M, V> getInitialValue);
+	Supplier<ValueRendererFactory<M, ? extends ValueInput>[]>[] getChoiceValueRendererFactories();
 
 	/**
-	 * Validates the text value.
+	 * Obtains the index into choice {@link ValueRenderer} listing to display.
 	 * 
-	 * @param validator
-	 *            {@link ValueValidator}.
-	 * @return <code>this</code>.
+	 * @return Index into choice {@link ValueRenderer} listing to display.
 	 */
-	B validate(ValueValidator<V> validator);
-
-	/**
-	 * Specifies the {@link ValueLoader} to load the value to the model.
-	 * 
-	 * @param valueLoader
-	 *            {@link ValueLoader} to load the value to the model.
-	 */
-	B setValue(ValueLoader<M, V> valueLoader);
+	ReadOnlyProperty<Integer> getChoiceIndex();
 
 }

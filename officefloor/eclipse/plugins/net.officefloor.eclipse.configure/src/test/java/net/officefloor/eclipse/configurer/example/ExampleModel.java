@@ -60,7 +60,7 @@ public class ExampleModel {
 	/**
 	 * Items.
 	 */
-	public List<ExampleItem> items = Arrays.asList(new ExampleItem("ITEM", true), new ExampleItem());
+	public List<ExampleItem> items = Arrays.asList(new ExampleItem("ITEM", true), new ExampleItem("ANOTHER", false));
 
 	/**
 	 * {@link PropertyList}.
@@ -83,6 +83,11 @@ public class ExampleModel {
 	public Map<String, String> mapping = new HashMap<String, String>();
 
 	/**
+	 * Multiple.
+	 */
+	public List<ExampleItem> multiple = Arrays.asList(new ExampleItem("ONE", true), new ExampleItem("TWO", false));
+
+	/**
 	 * Instantiate.
 	 */
 	public ExampleModel() {
@@ -103,12 +108,6 @@ public class ExampleModel {
 		 * Flag.
 		 */
 		public boolean flag;
-
-		/**
-		 * Instantiate.
-		 */
-		public ExampleItem() {
-		}
 
 		/**
 		 * Instantiate.
