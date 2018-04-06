@@ -17,12 +17,12 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -47,7 +47,7 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	public void loadConfiguration(M model, Composite parent) {
 
 		// Create the FX Canvas
-		FXCanvasEx fxCanvas = new FXCanvasEx(parent, SWT.NONE) {
+		FXCanvas fxCanvas = new FXCanvas(parent, SWT.NONE) {
 			public Point computeSize(int wHint, int hHint, boolean changed) {
 				// Always the parent size
 				Rectangle bounds = parent.getClientArea();

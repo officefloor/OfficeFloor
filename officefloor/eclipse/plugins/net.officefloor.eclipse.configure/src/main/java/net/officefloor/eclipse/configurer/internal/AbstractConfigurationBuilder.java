@@ -386,8 +386,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 					grid.getChildren().add(input.spacing);
 
 					// Determine if choice value renderer
-					if (input instanceof ChoiceValueInput) {
-						ChoiceValueInput<M> choiceRenderer = (ChoiceValueInput<M>) input;
+					if (valueInput instanceof ChoiceValueInput) {
+						ChoiceValueInput<M> choiceRenderer = (ChoiceValueInput<M>) valueInput;
 
 						// Load choice
 						ValueRendererFactory<M, ? extends ValueInput>[] splitRenderers = Arrays
@@ -464,7 +464,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 			// Organise the inputs
 			for (Input input : this.inputs) {
 				if (input.label != null) {
-					GridPane.setConstraints(input.label, 1, rowIndex, 2, 1, HPos.LEFT, VPos.TOP, Priority.SOMETIMES,
+					GridPane.setConstraints(input.label, 1, rowIndex, 2, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
 							Priority.ALWAYS);
 				}
 				if (input.errorFeedback != null) {
