@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OfficeFloor GEF Editor
-Bundle-SymbolicName: net.officefloor.eclipse.gef
+Bundle-Name: OfficeFloor Editor
+Bundle-SymbolicName: net.officefloor.eclipse.editor
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -281,7 +281,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.gef</artifactId>
+				<artifactId>net.officefloor.eclipse.editor</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.editor.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
