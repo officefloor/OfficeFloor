@@ -281,6 +281,21 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.gef</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.configurer</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.configurer.test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
