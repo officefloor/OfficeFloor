@@ -24,9 +24,10 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+
+import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.Configurer;
 
 /**
  * Example configurer view.
@@ -43,8 +44,11 @@ public class ExampleConfigurerView {
 		IProject project = root.getProject("Test");
 		IJavaProject javaProject = JavaCore.create(project);
 
-		Label label = new Label(parent, SWT.NONE);
-		label.setText("Project " + javaProject.getRawClasspath());
-
+		// Create the configurer
+		Configurer<Object> configurer = new Configurer<>();
+		
+		// Provide configuration
+		ConfigurationBuilder<Object> builder = configurer;
+		builder.clazz("Class", javaProject);
 	}
 }

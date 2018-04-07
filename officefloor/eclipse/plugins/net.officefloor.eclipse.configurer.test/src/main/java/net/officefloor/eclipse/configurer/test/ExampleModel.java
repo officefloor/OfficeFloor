@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.example;
+package net.officefloor.eclipse.configurer.test;
 
 import java.io.PrintStream;
 import java.util.Arrays;

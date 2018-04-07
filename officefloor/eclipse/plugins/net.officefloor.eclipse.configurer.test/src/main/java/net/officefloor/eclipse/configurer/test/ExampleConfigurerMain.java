@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.example;
+package net.officefloor.eclipse.configurer.test;
 
 import javafx.collections.FXCollections;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
@@ -24,7 +24,7 @@ import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.ValueLoader;
-import net.officefloor.eclipse.configurer.example.ExampleModel.ExampleItem;
+import net.officefloor.eclipse.configurer.test.ExampleModel.ExampleItem;
 
 /**
  * Main for running example configurer.
