@@ -79,6 +79,9 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 	@SuppressWarnings("unchecked")
 	protected ValueInput createInput(ValueInputContext<M, Map<String, String>> context) {
 
+		// Update value with input
+		Runnable[] updater = new Runnable[1];
+
 		// Create editor configuration
 		AdaptedEditorModule module = new AdaptedEditorModule((builder) -> {
 			AdaptedRootBuilder<MappingModel, Object> root = builder.root(MappingModel.class, (model) -> this);
@@ -114,16 +117,48 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 
 						// Add new connection
 						new MappingConnection(s, t).connect();
-					}, (ctx) -> ctx.getModel().remove(), ChangeEvent.CHANGED);
+
+						// Update the mapping
+						updater[0].run();
+
+					}, (ctx) -> {
+						// Remove the connection
+						ctx.getModel().remove();
+						
+						// Update the mapping
+						updater[0].run();
+						
+					}, ChangeEvent.CHANGED);
 		});
 
 		// Create the parent
 		Pane inputNode = module.createParent();
 
+		// Property
+		Property<Map<String, String>> mapProperty = context.getInputValue();
+
 		// Create the model
 		ObservableList<String> sources = this.getSources.apply(context.getModel());
 		ObservableList<String> targets = this.getTargets.apply(context.getModel());
-		MappingModel mapping = new MappingModel(inputNode, context.getInputValue(), sources, targets);
+		MappingModel mapping = new MappingModel(inputNode, mapProperty, sources, targets);
+		
+		// Create the updater
+		updater[0] = () -> {
+			
+			// Obtain the mappings
+			Map<String, String> updated = new HashMap<>();
+			for (SourceModel source : mapping.sourceModels) {
+				if (source.connection != null) {
+					TargetModel target = source.connection.target;
+					if (target != null) {
+						updated.put(source.label, target.label);
+					}
+				}
+			}
+			
+			// Update the mappings
+			mapProperty.setValue(updated);
+		};
 
 		// Return the input (allowing activation)
 		return new ValueInput() {

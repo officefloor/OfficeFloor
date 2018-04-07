@@ -24,10 +24,10 @@ import java.util.function.Supplier;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -113,11 +113,6 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	private final List<ColumnRenderer<I, ?>> renderers = new ArrayList<>();
 
 	/**
-	 * Items.
-	 */
-	private final SimpleListProperty<Row> rows = new SimpleListProperty<>();
-
-	/**
 	 * {@link Supplier} for new items (rows).
 	 */
 	private Supplier<I> itemFactory = null;
@@ -157,15 +152,32 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ValueInput createInput(ValueInputContext<M, List<I>> context) {
 
+		// Obtain the items
+		final Property<List<I>> itemsProperty = context.getInputValue();
+
+		// Create the rows for the table
+		final ObservableList<Row> rows = FXCollections.observableArrayList();
+
+		// Update the items
+		Runnable loadRowsToItems = () -> {
+			List<I> updatedItems = new ArrayList<>(rows.size());
+			for (Row row : rows) {
+				if (row.item != null) {
+					updatedItems.add(row.item);
+				}
+			}
+			itemsProperty.setValue(updatedItems);
+		};
+
 		// Create the table
-		TableView<Row> table = new TableView<>(this.rows);
+		final TableView<Row> table = new TableView<>();
 		table.setEditable(true);
 		table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
 		table.setPlaceholder(new Label("No entries"));
 		table.getSelectionModel().setCellSelectionEnabled(true);
 
 		// Load the columns to the table
-		TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size() + (this.isDelete ? 1 : 0)];
+		final TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size() + (this.isDelete ? 1 : 0)];
 		for (int i = 0; i < this.renderers.size(); i++) {
 			ColumnRenderer<I, ?> columnRenderer = this.renderers.get(i);
 
@@ -185,10 +197,14 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			if (columnRenderer.isEditable()) {
 				// Column editable
 				column.setOnEditCommit((event) -> {
+
+					// Load the value into the cell
 					Row row = table.getItems().get(event.getTablePosition().getRow());
 					Property cellValue = row.cells[columnIndex].getValue();
 					cellValue.setValue(event.getNewValue());
 
+					// Update the items
+					loadRowsToItems.run();
 				});
 				column.getStyleClass().add("configurer-column-editable");
 
@@ -245,21 +261,20 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		table.getColumns().setAll(columns);
 
 		// Load the rows
-		List<I> items = context.getInputValue().getValue();
-		List<Row> rows = new ArrayList<>(items == null ? 0 : items.size());
+		List<I> items = itemsProperty.getValue();
 		if (items != null) {
 			for (I item : items) {
-				rows.add(new Row(table, item));
+				rows.add(new Row(table, loadRowsToItems, item));
 			}
 		}
 
 		// Determine if able to add rows
 		if (this.itemFactory != null) {
-			rows.add(new AddRow(table));
+			rows.add(new AddRow(table, loadRowsToItems));
 		}
 
 		// Load rows to the table
-		table.setItems(FXCollections.observableArrayList(rows));
+		table.setItems(rows);
 
 		// Hook in typing to start edit
 		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
@@ -368,6 +383,9 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			double requiredHeight = ((table.getItems().size() + 1) * ROW_HEIGHT) + HEADER_HEIGHT;
 			table.prefHeightProperty().set(Math.min(requiredHeight, 300));
 			DragResizer.makeResizable(table);
+
+			// Handle adding/removing rows
+			rows.addListener((Change<?> event) -> loadRowsToItems.run());
 		}
 
 		// Return table
@@ -416,6 +434,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		private final CellRenderer<I, ?>[] cells;
 
 		/**
+		 * {@link Runnable} to update model.
+		 */
+		protected final Runnable updater;
+
+		/**
 		 * {@link DeleteRow}.
 		 */
 		private final DeleteRow delete;
@@ -425,19 +448,25 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 * 
 		 * @param table
 		 *            {@link TableView}.
+		 * @param updater
+		 *            {@link Runnable} to update model.
 		 * @param item
 		 *            Item for the {@link Row}.
 		 * @param isAddRow
 		 *            <code>true</code> if the add row.
 		 */
 		@SuppressWarnings("unchecked")
-		private Row(TableView<Row> table, I item) {
+		private Row(TableView<Row> table, Runnable updater, I item) {
 			this.item = item;
+			this.updater = updater;
 
 			// Create the properties for the row
 			this.cells = new CellRenderer[ListBuilderImpl.this.renderers.size()];
 			for (int i = 0; i < this.cells.length; i++) {
 				this.cells[i] = ListBuilderImpl.this.renderers.get(i).createCellRenderer(this);
+
+				// Trigger updating
+				this.cells[i].getValue().addListener((event) -> this.updater.run());
 			}
 
 			// Provide the delete (except for add row - null item)
@@ -475,9 +504,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 * 
 		 * @param table
 		 *            {@link TableView}.
+		 * @param updater
+		 *            {@link Runnable} to update model.
 		 */
-		public AddRow(TableView<Row> table) {
-			super(table, null);
+		public AddRow(TableView<Row> table, Runnable updater) {
+			super(table, updater, null);
 			this.table = table;
 		}
 
@@ -491,7 +522,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 			// Create the new row
 			I newItem = ListBuilderImpl.this.itemFactory.get();
-			Row newRow = new Row(this.table, newItem);
+			Row newRow = new Row(this.table, this.updater, newItem);
 
 			// Add the row (before the add row)
 			ObservableList<Row> items = this.table.getItems();

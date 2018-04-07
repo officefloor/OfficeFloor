@@ -243,26 +243,31 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		private ValueRendererImpl(ValueRendererContext<M> context) {
 			this.context = context;
 
-			// Initialise to model
+			// Obtain the model
 			M model = this.context.getModel();
+
+			// Initialise to model
 			if (AbstractBuilder.this.getInitialValue != null) {
 				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
 				this.value.setValue(initialValue);
 			}
 
 			// Listen to change to run validation
-			this.value.addListener((event) -> this.validate());
+			if (AbstractBuilder.this.validator != null) {
+				this.value.addListener((event) -> this.validate());
+			}
+
+			// Always load value to model
+			if (AbstractBuilder.this.valueLoader != null) {
+				this.value.addListener(
+						(event) -> AbstractBuilder.this.valueLoader.loadValue(model, this.value.getValue()));
+			}
 		}
 
 		/**
 		 * Undertakes validation.
 		 */
 		private void validate() {
-
-			// Determine if validation
-			if (AbstractBuilder.this.validator == null) {
-				return; // no validation
-			}
 
 			// Capture the initial error (to see if change)
 			Throwable previousError = this.error;
@@ -433,11 +438,19 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		private CellRendererImpl(ValueRendererContext<M> context) {
 			this.context = context;
 
-			// Load initial value
+			// Obtain the cell value property
 			this.value = AbstractBuilder.this.createCellProperty();
+
+			// Load initial value
 			if ((AbstractBuilder.this.getInitialValue != null) && (this.context.getModel() != null)) {
 				V value = AbstractBuilder.this.getInitialValue.apply(this.context.getModel());
 				this.value.setValue(value);
+			}
+
+			// Always load value to model
+			if (AbstractBuilder.this.valueLoader != null) {
+				this.value.addListener((event) -> AbstractBuilder.this.valueLoader.loadValue(this.context.getModel(),
+						this.value.getValue()));
 			}
 		}
 

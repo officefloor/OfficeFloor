@@ -17,12 +17,14 @@
  */
 package net.officefloor.eclipse.configurer.example;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -121,5 +123,63 @@ public class ExampleModel {
 			this.text = text;
 			this.flag = flag;
 		}
+
+		public void write(PrintStream w) {
+			w.print("    { text=");
+			w.print(this.text);
+			w.print(", flag=");
+			w.print(this.flag);
+			w.println(" }");
+		}
 	}
+
+	public void write(PrintStream w) {
+
+		// Load the details
+		w.println("{ text=" + this.text);
+		w.println(", flag=" + this.flag);
+		w.println(", class=" + this.className);
+		w.println(", resource=" + this.resourceName);
+		w.println(", choice=" + this.choiceValue);
+		w.println(", list=[");
+		for (ExampleItem item : this.items) {
+			item.write(w);
+		}
+		w.println("], properties=[");
+		for (Property property : this.properties) {
+			w.print("    { name=");
+			w.print(property.getName());
+			w.print(", value=");
+			w.print(property.getValue());
+			w.println(" }");
+		}
+		w.print("], sources=[");
+		for (String source : this.sources) {
+			w.print(" ");
+			w.print(source);
+		}
+		w.println(" ]");
+		w.print(", targets=[");
+		for (String target : this.targets) {
+			w.print(" ");
+			w.print(target);
+		}
+		w.println(" ]");
+		w.print(", mapping={");
+		for (String key : this.mapping.keySet()) {
+			String value = this.mapping.get(key);
+			w.print(" ");
+			w.print(key);
+			w.print("=");
+			w.print(value);
+		}
+		w.println(" }");
+		w.print(", multiple=[");
+		for (ExampleItem item : this.multiple) {
+			item.write(w);
+		}
+		w.println("]");
+		w.println("}");
+	}
+
 }
