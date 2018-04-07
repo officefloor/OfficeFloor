@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -170,8 +172,8 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	}
 
 	@Override
-	public ClassBuilder<V> clazz(String label) {
-		return this.delegate.clazz(label);
+	public ClassBuilder<V> clazz(String label, IJavaProject javaProject) {
+		return this.delegate.clazz(label, javaProject);
 	}
 
 	@Override

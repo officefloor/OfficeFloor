@@ -22,5 +22,5 @@ package net.officefloor.eclipse.configurer;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ClassBuilder<M> {
+public interface ClassBuilder<M> extends Builder<M, String, ClassBuilder<M>> {
 }

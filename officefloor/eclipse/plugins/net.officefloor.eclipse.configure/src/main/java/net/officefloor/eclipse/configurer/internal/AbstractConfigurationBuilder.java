@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -45,6 +47,7 @@ import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
 import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.ClassBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.ListBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.MappingBuilderImpl;
@@ -284,9 +287,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public ClassBuilder<M> clazz(String label) {
-		// TODO Auto-generated method stub
-		return null;
+	public ClassBuilder<M> clazz(String label, IJavaProject javaProject) {
+		return this.registerBuilder(new ClassBuilderImpl<>(label, javaProject));
 	}
 
 	@Override
