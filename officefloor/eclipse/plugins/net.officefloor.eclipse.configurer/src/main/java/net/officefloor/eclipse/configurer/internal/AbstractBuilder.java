@@ -17,8 +17,12 @@
  */
 package net.officefloor.eclipse.configurer.internal;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -113,8 +117,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		Tooltip errorTooltip = new Tooltip();
 		errorTooltip.getStyleClass().add("error-tooltip");
 		Tooltip.install(error, errorTooltip);
-		error.visibleProperty().set(false); // default hide
-		errorMessage.addListener((event) -> {
+		InvalidationListener listener = (observableError) -> {
 			String errorText = errorMessage.get();
 			if ((errorText != null) && (errorText.length() > 0)) {
 				// Display the error
@@ -124,7 +127,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 				// No error
 				error.visibleProperty().set(false);
 			}
-		});
+		};
+		errorMessage.addListener(listener);
+		listener.invalidated(errorMessage); // Initialise
 		return error;
 	}
 
@@ -223,6 +228,11 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		private final ValueRendererContext<M> context;
 
 		/**
+		 * {@link ValueValidator} instances.
+		 */
+		private final List<ValueValidator<V>> validators = new ArrayList<>(1);
+
+		/**
 		 * Tracks if an error occurred on validation.
 		 */
 		private boolean isError = false;
@@ -254,8 +264,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 			// Listen to change to run validation
 			if (AbstractBuilder.this.validator != null) {
-				this.value.addListener((event) -> this.validate());
+				this.validators.add(AbstractBuilder.this.validator);
 			}
+			this.value.addListener((event) -> this.validate());
 
 			// Always load value to model
 			if (AbstractBuilder.this.valueLoader != null) {
@@ -277,7 +288,11 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			this.error = null;
 			try {
 				// Undertake validation
-				AbstractBuilder.this.validator.validate(this);
+				Iterator<ValueValidator<V>> iterator = this.validators.iterator();
+				while ((!this.isError) && (iterator.hasNext())) {
+					ValueValidator<V> validator = iterator.next();
+					validator.validate(this);
+				}
 			} catch (Exception ex) {
 				// Provide error message
 				String message = ex.getMessage();
@@ -336,6 +351,14 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			return this.value;
 		}
 
+		@Override
+		public void addValidator(ValueValidator<V> validator) {
+			this.validators.add(validator);
+
+			// Run validation immediately
+			this.validate();
+		}
+
 		/*
 		 * =============== ValueRenderer =================
 		 */
@@ -390,7 +413,6 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 				this.error = new MessageOnlyException(message);
 			}
 		}
-
 	}
 
 	/*

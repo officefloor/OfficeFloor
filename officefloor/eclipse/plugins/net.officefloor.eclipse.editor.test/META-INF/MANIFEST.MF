@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OfficeFloor Configurer Test
-Bundle-SymbolicName: net.officefloor.eclipse.configurer.test;singleton:=true
+Bundle-Name: OfficeFloor Editor Test
+Bundle-SymbolicName: net.officefloor.eclipse.editor.test;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
 Require-Bundle: net.officefloor.core;bundle-version="3.0.0",

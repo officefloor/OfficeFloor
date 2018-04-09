@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.configurer.internal;
 
 import javafx.beans.property.Property;
+import net.officefloor.eclipse.configurer.ValueValidator;
 
 /**
  * Context for the {@link ValueInput}.
@@ -39,5 +40,13 @@ public interface ValueInputContext<M, V> {
 	 * @return Value.
 	 */
 	Property<V> getInputValue();
+
+	/**
+	 * Adds an additional {@link ValueValidator}.
+	 * 
+	 * @param validator
+	 *            {@link ValueValidator}.
+	 */
+	void addValidator(ValueValidator<V> validator);
 
 }

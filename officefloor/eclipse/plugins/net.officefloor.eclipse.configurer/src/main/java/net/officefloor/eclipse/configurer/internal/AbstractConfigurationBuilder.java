@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.swt.widgets.Shell;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
@@ -287,8 +288,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public ClassBuilder<M> clazz(String label, IJavaProject javaProject) {
-		return this.registerBuilder(new ClassBuilderImpl<>(label, javaProject));
+	public ClassBuilder<M> clazz(String label, IJavaProject javaProject, Shell shell) {
+		return this.registerBuilder(new ClassBuilderImpl<>(label, javaProject, shell));
 	}
 
 	@Override

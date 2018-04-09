@@ -25,9 +25,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.model.Model;
 
 /**
  * Example configurer view.
@@ -44,11 +46,22 @@ public class ExampleConfigurerView {
 		IProject project = root.getProject("Test");
 		IJavaProject javaProject = JavaCore.create(project);
 
+		// Obtain the shell
+		Shell shell = parent.getShell();
+
 		// Create the configurer
-		Configurer<Object> configurer = new Configurer<>();
-		
+		Configurer<ExampleModel> configurer = new Configurer<>();
+
 		// Provide configuration
-		ConfigurationBuilder<Object> builder = configurer;
-		builder.clazz("Class", javaProject);
+		ConfigurationBuilder<ExampleModel> builder = configurer;
+		builder.text("test").init((model) -> model.text).setValue((model, value) -> model.text = value);
+		builder.flag("flag").init((model) -> model.flag).setValue((model, value) -> model.flag = value);
+		builder.clazz("Class", javaProject, shell).init((model) -> model.className);
+		builder.clazz("Model Class", javaProject, shell).init((model) -> model.modelClassName)
+				.setValue((model, value) -> model.modelClassName = value).superType(Model.class);
+		builder.clazz("Missing class", javaProject, shell).superType(ExampleConfigurerView.class);
+
+		// Load model to view
+		configurer.loadConfiguration(new ExampleModel(), parent);
 	}
 }

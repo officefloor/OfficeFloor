@@ -26,6 +26,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.model.Model;
 
 /**
  * Example model to be configured.
@@ -48,6 +49,11 @@ public class ExampleModel {
 	 * Class name.
 	 */
 	public String className = Object.class.getName();
+
+	/**
+	 * {@link Model} class name.
+	 */
+	public String modelClassName;
 
 	/**
 	 * Resource name.
@@ -139,6 +145,7 @@ public class ExampleModel {
 		w.println("{ text=" + this.text);
 		w.println(", flag=" + this.flag);
 		w.println(", class=" + this.className);
+		w.println(", model=" + this.modelClassName);
 		w.println(", resource=" + this.resourceName);
 		w.println(", choice=" + this.choiceValue);
 		w.println(", list=[");
