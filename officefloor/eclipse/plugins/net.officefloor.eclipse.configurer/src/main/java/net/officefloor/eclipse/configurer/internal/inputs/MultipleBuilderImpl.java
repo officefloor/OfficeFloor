@@ -178,8 +178,8 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	}
 
 	@Override
-	public ResourceBuilder<V> resource(String label) {
-		return this.delegate.resource(label);
+	public ResourceBuilder<V> resource(String label, IJavaProject javaProject, Shell shell) {
+		return this.delegate.resource(label, javaProject, shell);
 	}
 
 	@Override

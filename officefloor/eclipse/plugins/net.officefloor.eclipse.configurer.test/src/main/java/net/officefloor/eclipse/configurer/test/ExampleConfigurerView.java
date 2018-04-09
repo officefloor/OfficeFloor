@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.eclipse.configurer.ValueLoader;
 import net.officefloor.model.Model;
 
 /**
@@ -37,6 +38,20 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public class ExampleConfigurerView {
+
+	/**
+	 * Logs the {@link ExampleModel}.
+	 * 
+	 * @param loader
+	 *            {@link ValueLoader}.
+	 * @return {@link ValueLoader} with logging.
+	 */
+	private <V> ValueLoader<ExampleModel, V> log(ValueLoader<ExampleModel, V> loader) {
+		return (model, value) -> {
+			loader.loadValue(model, value);
+			model.write(System.out);
+		};
+	}
 
 	@Inject
 	public ExampleConfigurerView(Composite parent) throws Exception {
@@ -54,12 +69,16 @@ public class ExampleConfigurerView {
 
 		// Provide configuration
 		ConfigurationBuilder<ExampleModel> builder = configurer;
-		builder.text("test").init((model) -> model.text).setValue((model, value) -> model.text = value);
-		builder.flag("flag").init((model) -> model.flag).setValue((model, value) -> model.flag = value);
+
+		// Different class inputs
 		builder.clazz("Class", javaProject, shell).init((model) -> model.className);
 		builder.clazz("Model Class", javaProject, shell).init((model) -> model.modelClassName)
-				.setValue((model, value) -> model.modelClassName = value).superType(Model.class);
+				.setValue(this.log((model, value) -> model.modelClassName = value)).superType(Model.class);
 		builder.clazz("Missing class", javaProject, shell).superType(ExampleConfigurerView.class);
+
+		// Class path resource
+		builder.resource("Resource", javaProject, shell).init((model) -> model.resourceName)
+				.setValue((model, value) -> model.resourceName = value);
 
 		// Load model to view
 		configurer.loadConfiguration(new ExampleModel(), parent);

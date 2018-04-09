@@ -22,5 +22,5 @@ package net.officefloor.eclipse.configurer;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResourceBuilder<M> {
+public interface ResourceBuilder<M> extends Builder<M, String, ResourceBuilder<M>> {
 }

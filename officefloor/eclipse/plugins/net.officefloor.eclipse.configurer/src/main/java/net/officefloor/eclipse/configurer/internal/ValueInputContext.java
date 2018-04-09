@@ -42,7 +42,7 @@ public interface ValueInputContext<M, V> {
 	Property<V> getInputValue();
 
 	/**
-	 * Adds an additional {@link ValueValidator}.
+	 * Adds a {@link ValueValidator}.
 	 * 
 	 * @param validator
 	 *            {@link ValueValidator}.

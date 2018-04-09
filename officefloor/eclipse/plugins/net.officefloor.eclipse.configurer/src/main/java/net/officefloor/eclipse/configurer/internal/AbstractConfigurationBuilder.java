@@ -54,6 +54,7 @@ import net.officefloor.eclipse.configurer.internal.inputs.ListBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.MappingBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.MultipleBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.PropertiesBuilderImpl;
+import net.officefloor.eclipse.configurer.internal.inputs.ResourceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
 
 /**
@@ -293,9 +294,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M>,
 	}
 
 	@Override
-	public ResourceBuilder<M> resource(String label) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResourceBuilder<M> resource(String label, IJavaProject javaProject, Shell shell) {
+		return this.registerBuilder(new ResourceBuilderImpl<>(label, javaProject, shell));
 	}
 
 	@Override

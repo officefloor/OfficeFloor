@@ -105,8 +105,12 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	 * 
 	 * @param label
 	 *            Label.
+	 * @param javaProject
+	 *            {@link IJavaProject}.
+	 * @param shell
+	 *            {@link Shell}.
 	 * @return {@link ResourceBuilder}.
 	 */
-	ResourceBuilder<M> resource(String label);
+	ResourceBuilder<M> resource(String label, IJavaProject javaProject, Shell shell);
 
 }

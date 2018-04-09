@@ -17,9 +17,13 @@
  */
 package net.officefloor.eclipse.configurer.internal.inputs;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
@@ -31,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.beans.property.Property;
-import javafx.beans.property.StringProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -105,24 +108,43 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 		// Obtain the value
 		Property<String> value = context.getInputValue();
 
-		// Ensure that super type is on the class path
-		IType type = null;
+		// Ensure run validation for super type
 		if (this.superType != null) {
-			try {
-				type = this.javaProject.findType(this.superType);
-				if (type == null) {
-					context.addValidator(
-							(ctx) -> ctx.setError("Please add " + this.superType + " to the project's class path"));
-				}
-			} catch (JavaModelException ex) {
-				context.addValidator((ctx) -> {
-					throw ex;
-				});
-			}
-		}
-		final IType finalType = type;
+			context.addValidator((ctx) -> {
 
-		HBox pane = new HBox();
+				// Determine if have class name
+				String className = value.getValue();
+				if ((className == null) || (className.trim().length() == 0)) {
+					return; // no class provided
+				}
+
+				// Obtain the class type
+				IType type = ClassBuilderImpl.this.javaProject.findType(className);
+				if (type == null) {
+					ctx.setError("Class " + className + " not on project's class path");
+					return;
+				}
+
+				// Obtain the super type from the project
+				String superTypeClassName = ClassBuilderImpl.this.superType;
+				IType superType = ClassBuilderImpl.this.javaProject.findType(superTypeClassName);
+				if (superType == null) {
+					// Type not on project's class path
+					ctx.setError("Please add " + superTypeClassName + " to the project's class path");
+					return;
+				}
+
+				// Ensure child of super type
+				ITypeHierarchy typeHierarchy = type.newTypeHierarchy(new NullProgressMonitor());
+				List<IType> superTypes = Arrays.asList(typeHierarchy.getAllSupertypes(type));
+				boolean isSuperType = superTypes.stream().anyMatch(supertype -> {
+					return supertype.getFullyQualifiedName().equals(ClassBuilderImpl.this.superType);
+				});
+				if (!isSuperType) {
+					ctx.setError("Must be child of " + ClassBuilderImpl.this.superType);
+				}
+			});
+		}
 
 		// Provide editable text box
 		TextField text = new TextField();
@@ -130,30 +152,28 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 		text.getStyleClass().add("configurer-input-class");
 		text.setOnKeyPressed((event) -> {
 			if ((event.isControlDown()) && (event.getCode() == KeyCode.SPACE)) {
-				this.doClassSelection(finalType, value);
+				this.doClassSelection(value);
 			}
 		});
-		pane.getChildren().add(text);
 
 		// Provide button for suggestions
 		Button suggestion = new Button("...");
 		suggestion.getStyleClass().add("configurer-input-suggestion");
-		suggestion.setOnAction((event) -> this.doClassSelection(finalType, value));
-		pane.getChildren().add(suggestion);
+		suggestion.setOnAction((event) -> this.doClassSelection(value));
 
 		// Return value input
+		HBox pane = new HBox();
+		pane.getChildren().setAll(text, suggestion);
 		return () -> pane;
 	}
 
 	/**
 	 * Does the selection of a class.
 	 * 
-	 * @param superType
-	 *            Required super type for the selection.
 	 * @param text
-	 *            {@link StringProperty} for the text.
+	 *            {@link Property} for the text.
 	 */
-	private void doClassSelection(IType superType, Property<String> text) {
+	private void doClassSelection(Property<String> text) {
 		try {
 
 			// Obtain the text
@@ -161,12 +181,17 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 			textValue = (textValue == null) ? "" : textValue;
 
 			// Obtain the search scope
-			IJavaSearchScope scope;
-			if (superType != null) {
-				// Search for sub type class
-				scope = SearchEngine.createHierarchyScope(superType);
-			} else {
-				// Search for any class
+			IJavaSearchScope scope = null;
+			if (this.superType != null) {
+				// Obtain the super type from the project
+				IType superType = this.javaProject.findType(this.superType);
+				if (superType != null) {
+					// Search for sub type class
+					scope = SearchEngine.createStrictHierarchyScope(this.javaProject, superType, true, true, null);
+				}
+			}
+			if (scope == null) {
+				// No hierarchy, so search for any class
 				scope = SearchEngine.createJavaSearchScope(new IJavaProject[] { this.javaProject }, true);
 			}
 
