@@ -70,6 +70,16 @@ public class ExampleConfigurerView {
 		// Provide configuration
 		ConfigurationBuilder<ExampleModel> builder = configurer;
 
+		// Text with validation
+		builder.text("Text").init((m) -> m.text).setValue((m, value) -> m.text = value).validate((ctx) -> {
+			switch (ctx.getValue().getValue().length()) {
+			case 0:
+				throw new Exception("Test failure");
+			case 1:
+				ctx.setError("Text too short");
+			}
+		});
+
 		// Different class inputs
 		builder.clazz("Class", javaProject, shell).init((model) -> model.className);
 		builder.clazz("Model Class", javaProject, shell).init((model) -> model.modelClassName)

@@ -49,7 +49,7 @@ public class ExampleConfigurerDialog extends Application {
 		builder.text("Text").init((m) -> m.text).setValue((m, value) -> m.text = value).validate((ctx) -> {
 			switch (ctx.getValue().getValue().length()) {
 			case 0:
-				throw new Exception("TODO test exception");
+				throw new Exception("Test failure");
 			case 1:
 				ctx.setError("Text too short");
 			}

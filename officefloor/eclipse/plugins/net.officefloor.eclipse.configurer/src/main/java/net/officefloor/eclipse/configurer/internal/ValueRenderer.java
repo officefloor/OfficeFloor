@@ -39,13 +39,24 @@ public interface ValueRenderer<M, I extends ValueInput> {
 	I createInput();
 
 	/**
+	 * Obtains the label text.
+	 * 
+	 * @param valueInput
+	 *            {@link ValueInput}.
+	 * @return Label text.
+	 */
+	String getLabel(I valueInput);
+
+	/**
 	 * Creates a new label {@link Node}.
 	 * 
+	 * @param labelText
+	 *            Label text.
 	 * @param valueInput
 	 *            {@link ValueInput}.
 	 * @return New label {@link Node}.
 	 */
-	Node createLabel(I valueInput);
+	Node createLabel(String labelText, I valueInput);
 
 	/**
 	 * Creates a new error feedback {@link Node}.

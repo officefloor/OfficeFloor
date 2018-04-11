@@ -27,18 +27,22 @@ public interface ErrorListener {
 	/**
 	 * Informed of error message.
 	 * 
+	 * @param inputLabel
+	 *            Label for the input.
 	 * @param message
 	 *            Error message.
 	 */
-	void error(String message);
+	void error(String inputLabel, String message);
 
 	/**
 	 * Informed of {@link Throwable}.
 	 * 
+	 * @param inputLabel
+	 *            Label for the input.
 	 * @param error
 	 *            {@link Throwable}.
 	 */
-	void error(Throwable error);
+	void error(String inputLabel, Throwable error);
 
 	/**
 	 * Informed that valid.

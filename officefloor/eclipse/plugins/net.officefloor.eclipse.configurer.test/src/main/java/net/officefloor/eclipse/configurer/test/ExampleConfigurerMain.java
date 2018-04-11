@@ -83,8 +83,11 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 
 		// Configure text (editable)
 		builder.text("Text").init((model) -> model.text).validate((context) -> {
-			if (context.getValue().getValue().length() < 3) {
-				context.setError("Value too short");
+			switch (context.getValue().getValue().length()) {
+			case 0:
+				throw new Exception("Test failure");
+			case 1:
+				context.setError("Text too short");
 			}
 		}).setValue(this.log((model, value) -> model.text = value));
 

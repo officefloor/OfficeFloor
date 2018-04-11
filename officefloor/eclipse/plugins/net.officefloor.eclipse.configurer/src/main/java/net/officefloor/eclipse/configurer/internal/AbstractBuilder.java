@@ -95,11 +95,13 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the label {@link Node}.
 	 * 
+	 * @param labelText
+	 *            Label text.
 	 * @param valueInput
 	 *            {@link ValueInput}.
 	 * @return Label {@link Node}.
 	 */
-	protected Node createLabel(I valueInput) {
+	protected Node createLabel(String labelText, I valueInput) {
 		return new Label(this.getLabel());
 	}
 
@@ -369,8 +371,13 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		}
 
 		@Override
-		public Node createLabel(I valueInput) {
-			return AbstractBuilder.this.createLabel(valueInput);
+		public String getLabel(I valueInput) {
+			return AbstractBuilder.this.getLabel();
+		}
+
+		@Override
+		public Node createLabel(String labelText, I valueInput) {
+			return AbstractBuilder.this.createLabel(labelText, valueInput);
 		}
 
 		@Override

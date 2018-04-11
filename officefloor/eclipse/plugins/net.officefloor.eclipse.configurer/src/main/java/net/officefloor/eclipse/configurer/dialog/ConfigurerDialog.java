@@ -28,16 +28,20 @@ import org.eclipse.swt.widgets.Shell;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
@@ -76,8 +80,8 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 	public ConfigurerDialog(String title, String headerText) {
 		this.setTitle(title);
 		this.setHeaderText(headerText);
-		this.setResizable(true);
 		this.getDialogPane().setPrefSize(600, 400);
+		this.setResizable(true);
 
 		// Handle errors
 		this.configurer.setErrorListener(this);
@@ -179,23 +183,38 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 	 */
 
 	@Override
-	public void error(String message) {
-		Label error = new Label(message);
-		error.getStyleClass().add("configurer-error-header");
-		this.getDialogPane().setHeader(error);
+	public void error(String inputLabel, String message) {
+
+		// Error label
+		Label errorLabel = new Label("  " + (inputLabel == null ? "" : inputLabel + ": ") + message);
+		errorLabel.getStyleClass().add("configurer-error-header");
+
+		// Error image
+		ImageView errorImage = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
+		Tooltip errorTooltip = new Tooltip(message);
+		errorTooltip.getStyleClass().add("error-tooltip");
+		Tooltip.install(errorImage, errorTooltip);
+
+		// Header error panel
+		GridPane panel = new GridPane();
+		panel.getStyleClass().add("header-panel");
+		panel.add(errorImage, 0, 0);
+		panel.add(errorLabel, 1, 0);
+
+		// Configure the error
+		this.getDialogPane().setHeader(panel);
 		this.getDialogPane().setExpandableContent(null);
 		this.applyButton.setDisable(true);
 	}
 
 	@Override
-	public void error(Throwable error) {
-		this.error(error.getMessage());
+	public void error(String inputLabel, Throwable error) {
+		this.error(inputLabel, error.getMessage());
 
 		// Obtain the stack trace of error
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		error.printStackTrace(pw);
-		String exceptionText = sw.toString();
+		StringWriter buffer = new StringWriter();
+		error.printStackTrace(new PrintWriter(buffer));
+		String exceptionText = buffer.toString();
 
 		// Create text area for stack trace
 		TextArea textArea = new TextArea(exceptionText);
@@ -206,13 +225,12 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 		GridPane.setVgrow(textArea, Priority.ALWAYS);
 		GridPane.setHgrow(textArea, Priority.ALWAYS);
 
-		GridPane expContent = new GridPane();
-		expContent.setMaxWidth(Double.MAX_VALUE);
-		expContent.add(new Label("The exception stacktrace was:"), 0, 0);
-		expContent.add(textArea, 0, 1);
-
 		// Provide the stack trace
-		this.getDialogPane().setExpandableContent(expContent);
+		GridPane content = new GridPane();
+		content.setMaxWidth(Double.MAX_VALUE);
+		content.add(new Label("The exception stacktrace was:"), 0, 0);
+		content.add(textArea, 0, 1);
+		this.getDialogPane().setExpandableContent(content);
 	}
 
 	@Override

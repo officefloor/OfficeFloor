@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.configurer.internal;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -32,13 +34,18 @@ import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
@@ -83,12 +90,6 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * {@link ErrorListener}.
 	 */
 	private ErrorListener errorListener = null;
-
-	/**
-	 * Instantiate.
-	 */
-	public AbstractConfigurationBuilder() {
-	}
 
 	/**
 	 * Overrides the default {@link ErrorListener}.
@@ -158,42 +159,41 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * @param parentConfigurationBuilder
 	 *            Parent {@link AbstractConfigurationBuilder}
 	 */
+	@SuppressWarnings("unchecked")
 	public void loadConfiguration(M model, GridPane parent,
 			AbstractConfigurationBuilder<?> parentConfigurationBuilder) {
 
 		// Provide error listener
+		DefaultErrorListener<M> defaultErrorListener = null;
 		if (this.errorListener == null) {
 			this.errorListener = parentConfigurationBuilder.errorListener;
 		}
 		if (this.errorListener == null) {
 			// Provide default error listener
-			this.errorListener = new ErrorListener() {
-				@Override
-				public void valid() {
-					// TODO Auto-generated method stub
-					System.err.println("TODO IMPLEMENT errorListener.valid()");
-				}
-
-				@Override
-				public void error(Throwable error) {
-					// TODO Auto-generated method stub
-					System.err.println("TODO IMPLEMENT errorListener.error(...)");
-					error.printStackTrace();
-				}
-
-				@Override
-				public void error(String message) {
-					// TODO Auto-generated method stub
-					System.err.println("TODO IMPLEMENT errorListener.valid(" + message + ")");
-				}
-			};
+			defaultErrorListener = new DefaultErrorListener<>();
+			this.errorListener = defaultErrorListener;
 		}
 
 		// Apply CSS (so Scene available to inputs)
 		parent.applyCss();
 
+		// Create the listing of renderer factories
+		ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories;
+		ValueRendererFactory<M, ? extends ValueInput>[] configuredRendererFactories = this.getValueRendererFactories();
+		if (defaultErrorListener != null) {
+			// Include rendering the first error
+			rendererFactories = new ValueRendererFactory[configuredRendererFactories.length + 1];
+			rendererFactories[0] = defaultErrorListener;
+			for (int i = 0; i < configuredRendererFactories.length; i++) {
+				rendererFactories[i + 1] = configuredRendererFactories[i];
+			}
+		} else {
+			// Errors handled externally, so only configured factories
+			rendererFactories = configuredRendererFactories;
+		}
+
 		// Load the value render list
-		ValueLister<M> lister = new ValueLister<>(model, parent, this.errorListener, this.getValueRendererFactories());
+		ValueLister<M> lister = new ValueLister<>(model, parent, this.errorListener, rendererFactories);
 		lister.organiseWide(1); // ensure initially organised
 
 		// Responsive view
@@ -368,9 +368,16 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 					}
 
 					// Add the label (if provided)
-					Node label = renderer.createLabel(valueInput);
-					if (label != null) {
-						grid.getChildren().add(label);
+					String labelText = renderer.getLabel(valueInput);
+					Node label = null;
+					if ((labelText == null) || (labelText.trim().length() == 0)) {
+						labelText = null; // no label
+					} else {
+						// Create the label
+						label = renderer.createLabel(labelText, valueInput);
+						if (label != null) {
+							grid.getChildren().add(label);
+						}
 					}
 
 					// Add the error feedback (if provided)
@@ -380,8 +387,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 					}
 
 					// Register the input
-					Input<M, ? extends ValueInput> input = new Input<>(label, error, valueInputNode, valueInput,
-							renderer);
+					Input<M, ? extends ValueInput> input = new Input<>(labelText, label, error, valueInputNode,
+							valueInput, renderer);
 					this.inputs.add(input);
 					grid.getChildren().add(input.spacing);
 
@@ -572,19 +579,19 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		public void refreshError() {
 
 			// Search for first error
-			Throwable error = this.getFirstError();
+			InputError<M, ? extends ValueInput> errorInput = this.getFirstError();
 
 			// Determine if error
-			if (error == null) {
+			if (errorInput == null) {
 				this.errorListener.valid();
 				return; // no error
 			}
 
 			// Provide appropriate error
-			if (error instanceof MessageOnlyException) {
-				this.errorListener.error(error.getMessage());
+			if (errorInput.error instanceof MessageOnlyException) {
+				this.errorListener.error(errorInput.input.labelText, errorInput.error.getMessage());
 			} else {
-				this.errorListener.error(error);
+				this.errorListener.error(errorInput.input.labelText, errorInput.error);
 			}
 		}
 
@@ -594,7 +601,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 * @return First {@link ValueRenderer} error or <code>null</code>
 		 */
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		private Throwable getFirstError() {
+		private InputError<M, ? extends ValueInput> getFirstError() {
 
 			// Search through for the first error
 			for (Input input : this.inputs) {
@@ -602,7 +609,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 				// Determine if first error
 				Throwable error = input.renderer.getError(input.valueInput);
 				if (error != null) {
-					return error;
+					return new InputError<>(input, error);
 				}
 			}
 
@@ -615,6 +622,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * Input.
 	 */
 	private static class Input<M, I extends ValueInput> {
+
+		/**
+		 * Label text for the input.
+		 */
+		private final String labelText;
 
 		/**
 		 * Label for the input.
@@ -645,12 +657,13 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 * {@link ValueRenderer}. As bindings are weak references, need strong reference
 		 * to {@link ValueRenderer} to keep bindings active.
 		 */
-		@SuppressWarnings("unused")
 		private final ValueRenderer<M, I> renderer;
 
 		/**
 		 * Instantiate.
 		 * 
+		 * @param labelText
+		 *            Label text for the input.
 		 * @param label
 		 *            Label for the input.
 		 * @param errorFeedback
@@ -662,12 +675,157 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 * @param renderer
 		 *            {@link ValueRenderer}.
 		 */
-		private Input(Node label, Node errorFeedback, Node input, I valueInput, ValueRenderer<M, I> renderer) {
+		private Input(String labelText, Node label, Node errorFeedback, Node input, I valueInput,
+				ValueRenderer<M, I> renderer) {
+			this.labelText = labelText;
 			this.label = label;
 			this.errorFeedback = errorFeedback;
 			this.input = input;
 			this.valueInput = valueInput;
 			this.renderer = renderer;
+		}
+	}
+
+	/**
+	 * Input error.
+	 */
+	private static class InputError<M, I extends ValueInput> {
+
+		/**
+		 * {@link Input}.
+		 */
+		private final Input<M, I> input;
+
+		/**
+		 * {@link Throwable} error.
+		 */
+		private final Throwable error;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param input
+		 *            {@link Input}.
+		 * @param error
+		 *            {@link Throwable} error.
+		 */
+		private InputError(Input<M, I> input, Throwable error) {
+			this.input = input;
+			this.error = error;
+		}
+	}
+
+	/**
+	 * Default {@link ErrorListener}.
+	 */
+	private static class DefaultErrorListener<M> implements ErrorListener, ValueInput,
+			ValueRenderer<M, DefaultErrorListener<M>>, ValueRendererFactory<M, DefaultErrorListener<M>> {
+
+		/**
+		 * Error {@link ImageView};
+		 */
+		private final ImageView errorImage;
+
+		/**
+		 * Error {@link Tooltip}.
+		 */
+		private final Tooltip errorTooltip;
+
+		/**
+		 * Error {@link Label}.
+		 */
+		private final Label errorInput;
+
+		/**
+		 * Instantiate.
+		 */
+		private DefaultErrorListener() {
+			this.errorInput = new Label();
+			this.errorInput.setVisible(false);
+
+			// Provide the error image
+			this.errorImage = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
+			this.errorTooltip = new Tooltip();
+			errorTooltip.getStyleClass().add("error-tooltip");
+			Tooltip.install(this.errorImage, this.errorTooltip);
+			this.errorImage.setVisible(false);
+		}
+
+		/*
+		 * ============= ErrorListener ====================
+		 */
+
+		@Override
+		public void error(String inputLabel, String message) {
+			this.errorInput.setText((inputLabel == null ? "" : inputLabel + ": ") + message);
+			this.errorInput.setVisible(true);
+			this.errorTooltip.setText(message);
+			this.errorImage.setVisible(true);
+		}
+
+		@Override
+		public void error(String inputLabel, Throwable error) {
+			this.errorInput.setText((inputLabel == null ? "" : inputLabel + ": ") + error.getMessage());
+			this.errorInput.setVisible(true);
+
+			// Provide stack trace on tool tip
+			StringWriter buffer = new StringWriter();
+			error.printStackTrace(new PrintWriter(buffer));
+			this.errorTooltip.setText(buffer.toString());
+			this.errorImage.setVisible(true);
+		}
+
+		@Override
+		public void valid() {
+			this.errorInput.setVisible(false);
+			this.errorImage.setVisible(false);
+		}
+
+		/*
+		 * ============= ValueRendererFactory ===========
+		 */
+
+		@Override
+		public ValueRenderer<M, DefaultErrorListener<M>> createValueRenderer(ValueRendererContext<M> context) {
+			return this;
+		}
+
+		/*
+		 * ============= ValueInput =====================
+		 */
+
+		@Override
+		public Node getNode() {
+			return this.errorInput;
+		}
+
+		/*
+		 * ============= ValueRenderer =====================
+		 */
+
+		@Override
+		public DefaultErrorListener<M> createInput() {
+			return this;
+		}
+
+		@Override
+		public String getLabel(DefaultErrorListener<M> valueInput) {
+			return null;
+		}
+
+		@Override
+		public Node createLabel(String labelText, DefaultErrorListener<M> valueInput) {
+			return null;
+		}
+
+		@Override
+		public Node createErrorFeedback(DefaultErrorListener<M> valueInput) {
+			return this.errorImage;
+		}
+
+		@Override
+		public Throwable getError(DefaultErrorListener<M> valueInput) {
+			return null; // never error
 		}
 	}
 
