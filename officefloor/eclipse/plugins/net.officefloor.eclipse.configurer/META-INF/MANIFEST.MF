@@ -18,4 +18,5 @@ Require-Bundle: net.officefloor.core;bundle-version="3.0.0",
  org.slf4j.api,
  org.eclipse.ui.ide
 Import-Package: com.google.inject
-Export-Package: net.officefloor.eclipse.configurer
+Export-Package: net.officefloor.eclipse.configurer,
+ net.officefloor.eclipse.configurer.dialog

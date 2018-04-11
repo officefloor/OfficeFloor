@@ -22,12 +22,15 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.embed.swt.FXCanvas;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.configurer.internal.AbstractConfigurationBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.model.Model;
 
 /**
  * {@link OfficeFloor} configurer that uses JavaFx.
@@ -65,6 +68,25 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 
 		// Load the scene to the canvas
 		fxCanvas.setScene(scene);
+
+		// Load the configuration
+		this.loadConfiguration(model, pane);
+	}
+
+	/**
+	 * Loads the {@link ObjectProperty}.
+	 * 
+	 * @param model
+	 *            {@link Model}.
+	 * @param nodeProperty
+	 *            {@link ObjectProperty}.
+	 */
+	public void loadConfiguration(M model, ObjectProperty<Node> nodeProperty) {
+
+		// Create pane for configuration components
+		Pane pane = new Pane();
+		pane.getStyleClass().add("root");
+		nodeProperty.set(pane);
 
 		// Load the configuration
 		this.loadConfiguration(model, pane);

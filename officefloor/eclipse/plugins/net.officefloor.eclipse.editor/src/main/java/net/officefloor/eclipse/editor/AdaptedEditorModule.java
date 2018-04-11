@@ -120,6 +120,11 @@ public class AdaptedEditorModule extends MvcFxModule {
 	private IViewer palette;
 
 	/**
+	 * {@link OfficeFloorContentPartFactory}.
+	 */
+	private OfficeFloorContentPartFactory<?, ?> factory;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param adaptedBuilder
@@ -129,41 +134,84 @@ public class AdaptedEditorModule extends MvcFxModule {
 		this.adaptedBuilder = adaptedBuilder;
 	}
 
+	/*
+	 * ========== Convenience creation methods ==============
+	 */
+
 	/**
 	 * Creates the parent {@link Pane}.
-	 * 
-	 * @param injector
-	 *            {@link Injector} created with this {@link AdaptedEditorModule}.
-	 * @return Parent {@link Pane}.
-	 */
-	public Pane createParent(Injector injector) {
-		this.injector = injector;
-
-		// Obtain the viewers
-		this.domain = injector.getInstance(IDomain.class);
-		this.content = this.domain.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
-		this.palette = this.domain.getAdapter(AdapterKey.get(IViewer.class, AdaptedEditorModule.PALETTE_VIEWER_ROLE));
-
-		// Determine if can create any modules
-		OfficeFloorContentPartFactory<?, ?> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
-		Pane composite = new ViewersComposite(this.content, this.palette, factory.isCreateParent()).getComposite();
-
-		// Return the composite
-		return composite;
-	}
-
-	/**
-	 * Convenience method to create the parent {@link Pane}.
 	 * 
 	 * @return Parent {@link Pane}.
 	 */
 	public Pane createParent() {
 
-		// Create the injector from this modeul
-		Injector injector = Guice.createInjector(this);
+		// Lazy initialise
+		if (this.injector == null) {
 
-		// Return the created parent
-		return this.createParent(injector);
+			// Create the injector from this module
+			Injector injector = Guice.createInjector(this);
+
+			// Load the domain and viewers
+			IDomain domain = injector.getInstance(IDomain.class);
+			this.initialise(domain, injector);
+		}
+
+		// Return the composite
+		return new ViewersComposite(this.content, this.palette, this.factory.isCreateParent()).getComposite();
+	}
+
+	/**
+	 * Activates the {@link IDomain}.
+	 */
+	public void activateDomain(Model rootModel) {
+
+		// Load the root model
+		this.loadRootModel(rootModel);
+
+		// Activate domain
+		this.domain.activate();
+	}
+
+	/*
+	 * =========== EditorPart creation methods ================
+	 */
+
+	/**
+	 * Initialises.
+	 * 
+	 * @param domain
+	 *            {@link IDomain}.
+	 * @param injector
+	 *            {@link Injector}.
+	 */
+	public void initialise(IDomain domain, Injector injector) {
+		this.injector = injector;
+
+		// Load domain and views
+		this.domain = domain;
+		this.content = this.domain.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
+		this.palette = this.domain.getAdapter(AdapterKey.get(IViewer.class, AdaptedEditorModule.PALETTE_VIEWER_ROLE));
+
+		// Load the factory
+		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
+	}
+
+	/**
+	 * Obtains the content {@link IViewer}.
+	 * 
+	 * @return Content {@link IViewer}.
+	 */
+	public IViewer getContentViewer() {
+		return this.content;
+	}
+
+	/**
+	 * Obtains the palette {@link IViewer}.
+	 * 
+	 * @return Palette {@link IViewer}.
+	 */
+	public IViewer getPaletteViewer() {
+		return this.palette;
 	}
 
 	/**
@@ -172,15 +220,8 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * @param rootModel
 	 *            Root {@link Model}.
 	 */
-	public <R extends Model> void loadRootModel(R rootModel) {
-		OfficeFloorContentPartFactory<?, ?> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
-		factory.loadRootModel(rootModel, this.content, this.palette);
-
-		// Activate the domain
-		this.domain.activate();
-
-		// Load the default styling
-		this.content.getCanvas().getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
+	public void loadRootModel(Model rootModel) {
+		this.factory.loadRootModel(rootModel, this.content, this.palette);
 	}
 
 	/*

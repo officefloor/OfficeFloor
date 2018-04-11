@@ -32,6 +32,7 @@ import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
@@ -168,6 +169,10 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.rootModel = (R) rootModel;
 		this.operations = this.createOperations.apply(this.rootModel);
 		this.contentViewer = content;
+
+		// Load the default styling
+		this.contentViewer.getCanvas().getScene().getStylesheets()
+				.add(AdaptedEditorModule.class.getName().replace('.', '/') + ".css");
 
 		// Initialise all the models
 		this.models.values().forEach((model) -> model.init(this.injector, this.models));

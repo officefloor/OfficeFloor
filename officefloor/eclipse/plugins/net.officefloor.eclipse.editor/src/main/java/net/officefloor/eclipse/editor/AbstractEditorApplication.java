@@ -71,10 +71,10 @@ public abstract class AbstractEditorApplication extends Application {
 		stage.setHeight(480);
 		stage.setTitle(this.getClass().getSimpleName());
 
-		// Load the root model
+		// Activate the domain
 		Model rootModel = this.createRootModel();
-		module.loadRootModel(rootModel);
-		
+		module.activateDomain(rootModel);
+
 		// Show
 		stage.show();
 	}

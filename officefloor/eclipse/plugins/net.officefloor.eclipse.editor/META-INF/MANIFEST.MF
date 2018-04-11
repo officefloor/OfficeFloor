@@ -5,8 +5,6 @@ Bundle-SymbolicName: net.officefloor.eclipse.editor
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Eclipse-BuddyPolicy: registered
-Eclipse-RegisterBuddy: net.officefloor.core
 Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.core.commands,
  org.eclipse.gef.common,
