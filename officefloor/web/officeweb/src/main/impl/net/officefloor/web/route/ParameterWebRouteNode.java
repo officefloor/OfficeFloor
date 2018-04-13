@@ -75,7 +75,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 			char initialCharacter = node.getInitialCharacter();
 
 			// Add mapping of child
-			List<WebRouteNode> characterNodes = characterNodesMap.get(initialCharacters);
+			List<WebRouteNode> characterNodes = characterNodesMap.get(initialCharacter);
 			if (characterNodes == null) {
 				characterNodes = new LinkedList<>();
 				characterNodesMap.put(initialCharacter, characterNodes);

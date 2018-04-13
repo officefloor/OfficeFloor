@@ -36,7 +36,6 @@ import com.google.inject.util.Modules;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;

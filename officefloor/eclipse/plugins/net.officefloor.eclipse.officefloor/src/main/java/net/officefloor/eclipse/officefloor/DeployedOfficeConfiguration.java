@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.officefloor.OfficeFloorType;
+import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -30,7 +30,7 @@ import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.javaproject.JavaProjectOfficeFloorCompiler;
-import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
+import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -69,8 +69,8 @@ public class DeployedOfficeConfiguration {
 					// TODO provide loadSpecification(String)
 
 					// Update the specification
-					PropertyList specification = compiler.getOfficeFloorCompiler().getOfficeFloorLoader()
-							.loadSpecification(OfficeFloorModelOfficeFloorSource.class);
+					PropertyList specification = compiler.getOfficeFloorCompiler().getOfficeLoader()
+							.loadSpecification(OfficeModelOfficeSource.class);
 					specificationProperty.setValue(specification);
 				});
 
@@ -86,17 +86,17 @@ public class DeployedOfficeConfiguration {
 		builder.validate((ctx) -> {
 
 			// TODO provide loadOfficeFloorType(String)
-			
+
 			DeployedOfficeConfiguration model = ctx.getValue().getValue();
-			model.officeFloorType = compiler.getOfficeFloorCompiler().getOfficeFloorLoader()
-					.loadOfficeFloorType(OfficeFloorModelOfficeFloorSource.class, model.location, model.properties);
+			model.officeType = compiler.getOfficeFloorCompiler().getOfficeLoader()
+					.loadOfficeType(OfficeModelOfficeSource.class, model.location, model.properties);
 
 		});
 
 		// Apply change
 		builder.apply("Add", (model) -> {
 			context.execute(context.getOperations().addDeployedOffice(model.name, model.officeFloorSource,
-					model.location, model.properties, null));
+					model.location, model.properties, model.officeType));
 		});
 
 	}
@@ -122,8 +122,8 @@ public class DeployedOfficeConfiguration {
 	private PropertyList properties = OfficeFloorCompiler.newPropertyList();
 
 	/**
-	 * {@link OfficeFloorType}.
+	 * {@link OfficeType}.
 	 */
-	private OfficeFloorType officeFloorType;
+	private OfficeType officeType;
 
 }
