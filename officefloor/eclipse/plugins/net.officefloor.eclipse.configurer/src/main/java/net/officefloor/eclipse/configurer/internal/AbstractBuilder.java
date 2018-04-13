@@ -36,6 +36,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Callback;
+import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
@@ -251,8 +252,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			// Obtain the model
 			M model = this.context.getModel();
 
-			// Refresh on error change
+			// Refresh on error or value change
 			this.error.addListener((event) -> this.context.refreshError());
+			this.value.addListener((event) -> this.context.refreshError());
 
 			// Load value to model (so model consistent before validation)
 			if (AbstractBuilder.this.valueLoader != null) {
@@ -330,6 +332,11 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		@Override
 		public void refreshError() {
 			this.context.refreshError();
+		}
+
+		@Override
+		public Actioner getOptionalActioner() {
+			return this.context.getOptionalActioner();
 		}
 
 		@Override

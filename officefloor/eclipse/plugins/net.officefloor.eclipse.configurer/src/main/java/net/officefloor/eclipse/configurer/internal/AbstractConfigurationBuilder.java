@@ -30,24 +30,31 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Shell;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
@@ -97,6 +104,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	private final List<ValueRendererFactory<M, ? extends ValueInput>> rendererFactories = new ArrayList<>();
 
 	/**
+	 * Title.
+	 */
+	private String title = null;
+
+	/**
 	 * {@link ValueValidator}.
 	 */
 	private ValueValidator<M> validator = null;
@@ -126,16 +138,22 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * 
 	 * @param model
 	 *            Model.
-	 * @param configuartionNode
+	 * @param configurationNode
 	 *            Configuration {@link Pane}.
 	 * @param errorListener
 	 *            {@link ErrorListener}.
 	 * @return {@link Configuration}.
 	 */
-	protected Configuration loadConfiguration(M model, Pane configuartionNode, ErrorListener errorListener) {
+	protected Configuration loadConfiguration(M model, Pane configurationNode, ErrorListener errorListener) {
 
 		// Load the default styling
-		configuartionNode.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
+		configurationNode.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
+
+		// Create the actioner
+		Actioner actioner = null;
+		if (this.applier != null) {
+			actioner = new ActionerImpl<>(model, this.applierLabel, this.applier);
+		}
 
 		// Scroll both narrow and wide views
 		ScrollPane scroll = new ScrollPane() {
@@ -145,21 +163,48 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 				// (work around for GEF drag/drop aborting on focus change)
 			}
 		};
-		scroll.prefWidthProperty().bind(configuartionNode.widthProperty());
-		scroll.prefHeightProperty().bind(configuartionNode.heightProperty());
+		scroll.prefWidthProperty().bind(configurationNode.widthProperty());
+		scroll.prefHeightProperty().bind(configurationNode.heightProperty());
 		scroll.setFitToWidth(true);
 		scroll.getStyleClass().add("configurer-container");
-		configuartionNode.getChildren().add(scroll);
 
 		// Provide grid to load configuration
 		GridPane grid = new GridPane();
 		scroll.setContent(grid);
 
+		// Determine if provided an error listener
+		if (errorListener == null) {
+
+			// Provide wrappers for action and error listening
+			VBox wrapper = new VBox();
+			wrapper.getStyleClass().setAll("configurer", "dialog-pane");
+			wrapper.pseudoClassStateChanged(PseudoClass.getPseudoClass("header"), true);
+			configurationNode.getChildren().add(wrapper);
+
+			// Create the error listener
+			DefaultErrorListener<M> defaultErrorListener = new DefaultErrorListener<>(this.title, actioner, wrapper,
+					scroll);
+			errorListener = defaultErrorListener;
+
+			// Bind height of scroll (minus header)
+			scroll.prefHeightProperty().bind(Bindings.subtract(configurationNode.heightProperty(),
+					defaultErrorListener.header.heightProperty()));
+
+			// Load header and configuration
+			wrapper.getChildren().setAll(defaultErrorListener.header, scroll);
+
+		} else {
+			// Just configuration node (as error listening provided)
+			scroll.getStyleClass().setAll("configurer");
+			scroll.pseudoClassStateChanged(PseudoClass.getPseudoClass("no-header"), true);
+			configurationNode.getChildren().add(scroll);
+		}
+
 		// Apply CSS (so Scene available to inputs)
-		configuartionNode.applyCss();
+		configurationNode.applyCss();
 
 		// Load the configuration to grid
-		return this.recursiveLoadConfiguration(model, configuartionNode, grid, errorListener);
+		return this.recursiveLoadConfiguration(model, configurationNode, grid, actioner, errorListener);
 	}
 
 	/**
@@ -174,45 +219,15 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * @param parentConfigurationBuilder
 	 *            Parent {@link AbstractConfigurationBuilder}
 	 */
-	@SuppressWarnings("unchecked")
-	public Configuration recursiveLoadConfiguration(M model, Node configurationNode, GridPane grid,
+	public Configuration recursiveLoadConfiguration(M model, Node configurationNode, GridPane grid, Actioner actioner,
 			ErrorListener errorListener) {
-
-		// Create the actioner
-		Actioner actioner = null;
-		if (this.applier != null) {
-			actioner = new ActionerImpl<>(model, this.applierLabel, this.applier);
-		}
-
-		// Provide error listener
-		DefaultErrorListener<M> defaultErrorListener = null;
-		if (errorListener == null) {
-			// Provide default error listener
-			defaultErrorListener = new DefaultErrorListener<>(actioner);
-			errorListener = defaultErrorListener;
-		}
 
 		// Apply CSS (so Scene available to inputs)
 		grid.applyCss();
 
-		// Create the listing of renderer factories
-		ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories;
-		ValueRendererFactory<M, ? extends ValueInput>[] configuredRendererFactories = this.getValueRendererFactories();
-		if (defaultErrorListener != null) {
-			// Include rendering the first error
-			rendererFactories = new ValueRendererFactory[configuredRendererFactories.length + 1];
-			rendererFactories[0] = defaultErrorListener;
-			for (int i = 0; i < configuredRendererFactories.length; i++) {
-				rendererFactories[i + 1] = configuredRendererFactories[i];
-			}
-		} else {
-			// Errors handled externally, so only configured factories
-			rendererFactories = configuredRendererFactories;
-		}
-
 		// Load the value render list
-		ValueLister<M> lister = new ValueLister<>(model, this.validator, configurationNode, grid, errorListener,
-				actioner, rendererFactories, null);
+		ValueLister<M> lister = new ValueLister<>(model, this.validator, configurationNode, grid, this.title,
+				errorListener, actioner, this.getValueRendererFactories(), null);
 		lister.organiseWide(1); // ensure initially organised
 
 		// Responsive view
@@ -255,6 +270,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	/*
 	 * ================== ConfigurationBuilder ====================
 	 */
+
+	@Override
+	public void title(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public TextBuilder<M> text(String label) {
@@ -337,6 +357,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		private final Node configuartionNode;
 
 		/**
+		 * Title.
+		 */
+		private final String title;
+
+		/**
 		 * {@link GridPane}.
 		 */
 		private final GridPane grid;
@@ -392,6 +417,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 *            Configuration {@link Node}.
 		 * @param grid
 		 *            {@link GridPane}.
+		 * @param title
+		 *            Title.
 		 * @param errorListener
 		 *            {@link ErrorListener}.
 		 * @param actioner
@@ -406,7 +433,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 */
 		@SuppressWarnings("unchecked")
 		public ValueLister(M model, ValueValidator<M> modelValidator, Node configurationNode, GridPane grid,
-				ErrorListener errorListener, Actioner actioner,
+				String title, ErrorListener errorListener, Actioner actioner,
 				ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories, ValueLister<M> prevLister) {
 			this.model = model;
 			this.modelValidator = modelValidator;
@@ -414,6 +441,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			this.grid = grid;
 			this.errorListener = errorListener;
 			this.actioner = actioner;
+			this.title = title;
 			this.prevLister = prevLister;
 
 			// Ensure activate the inputs (once added)
@@ -477,7 +505,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 							if (choice == null) {
 								// No choice selected, so carry on with renderers
 								this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
-										grid, this.errorListener, this.actioner, splitRenderers, this);
+										grid, this.title, this.errorListener, this.actioner, splitRenderers, this);
 
 							} else {
 								// Have choice, so create concat list of remaining
@@ -492,7 +520,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 									remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
 								}
 								this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
-										grid, this.errorListener, this.actioner, remainingRenderers, this);
+										grid, this.title, this.errorListener, this.actioner, remainingRenderers, this);
 							}
 
 							// Organise choice changes
@@ -547,18 +575,18 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			// Organise the inputs
 			for (Input<M, ? extends ValueInput> input : this.inputs) {
 				if (input.label != null) {
-					GridPane.setConstraints(input.label, 1, rowIndex, 2, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS,
+					GridPane.setConstraints(input.label, 1, rowIndex, 1, 1, HPos.LEFT, VPos.CENTER, Priority.SOMETIMES,
 							Priority.ALWAYS);
 				}
 				if (input.errorFeedback != null) {
-					GridPane.setConstraints(input.errorFeedback, 3, rowIndex, 1, 1, HPos.CENTER, VPos.CENTER,
+					GridPane.setConstraints(input.errorFeedback, 2, rowIndex, 1, 1, HPos.CENTER, VPos.CENTER,
 							Priority.SOMETIMES, Priority.ALWAYS);
 				}
 				if (input.input != null) {
-					GridPane.setConstraints(input.input, 4, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
+					GridPane.setConstraints(input.input, 3, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
 							Priority.ALWAYS);
 				}
-				GridPane.setConstraints(input.spacing, 5, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.NEVER,
+				GridPane.setConstraints(input.spacing, 4, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.NEVER,
 						Priority.NEVER);
 
 				// Increment for next row
@@ -650,12 +678,17 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		}
 
 		@Override
+		public Actioner getOptionalActioner() {
+			return this.actioner;
+		}
+
+		@Override
 		public ErrorListener getErrorListener() {
 			return this.errorListener;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
+		@SuppressWarnings("unchecked")
 		public void refreshError() {
 
 			// Obtain the first value lister
@@ -741,6 +774,12 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		@Override
 		public Node getConfigurationNode() {
 			return this.configuartionNode;
+		}
+
+		@Override
+		public String getTitle() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 		@Override
@@ -908,59 +947,123 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	/**
 	 * Default {@link ErrorListener}.
 	 */
-	private static class DefaultErrorListener<M> implements ErrorListener, ValueInput,
-			ValueRenderer<M, DefaultErrorListener<M>>, ValueRendererFactory<M, DefaultErrorListener<M>> {
+	private static class DefaultErrorListener<M> implements ErrorListener {
 
 		/**
 		 * {@link Actioner}.
 		 */
-		private Actioner actioner = null;
+		private final Actioner actioner;
 
 		/**
-		 * {@link Button} to trigger {@link Actioner}.
+		 * Header.
 		 */
-		private Button actionButton = null;
+		private final StackPane header = new StackPane();
 
 		/**
-		 * Error {@link ImageView};
+		 * Valid header.
 		 */
-		private final ImageView errorImage;
+		private final HBox validHeader;
 
 		/**
-		 * Error {@link Tooltip}.
+		 * Error header.
 		 */
-		private final Tooltip errorTooltip;
+		private final HBox errorHeader;
 
 		/**
 		 * Error {@link Label}.
 		 */
-		private final Label errorInput;
+		private final Label errorLabel;
+
+		/**
+		 * Toggle for showing the stack trace.
+		 */
+		private final HBox stackTraceToggle = new HBox();
+
+		/**
+		 * Indicate if showing stack trace.
+		 */
+		private boolean isShowingStackTrace = false;
+
+		/**
+		 * Stack trace.
+		 */
+		private final TextArea stackTrace = new TextArea();
 
 		/**
 		 * Instantiate.
 		 * 
+		 * @param title
+		 *            Title.
 		 * @param actioner
 		 *            {@link Actioner}.
+		 * @param grid
+		 *            {@link GridPane}.
+		 * @param scroll
+		 *            {@link ScrollPane}.
 		 */
-		private DefaultErrorListener(Actioner actioner) {
+		private DefaultErrorListener(String title, Actioner actioner, VBox wrapper, ScrollPane scroll) {
 			this.actioner = actioner;
 
-			// Provide action button if configured
+			// Style the header
+			this.header.getStyleClass().setAll("header-panel", "button-bar", "configurer-header");
+
+			// Provide the error header
+			this.errorHeader = new HBox(10.0);
+			this.errorHeader.getStyleClass().setAll("error");
+			this.errorHeader.alignmentProperty().setValue(Pos.CENTER_LEFT);
+			this.header.getChildren().add(this.errorHeader);
+			this.errorHeader.setVisible(false);
+
+			// Provide the error header details
+			this.errorLabel = new Label();
+			this.errorHeader.getChildren().setAll(
+					new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true)), this.errorLabel);
+
+			// Provide the valid header
+			this.validHeader = new HBox(10.0);
+			this.validHeader.alignmentProperty().setValue(Pos.CENTER_LEFT);
+			this.header.getChildren().add(this.validHeader);
+			this.validHeader.setVisible(true);
+
+			// Provide valid header details
 			if (this.actioner != null) {
-				this.actionButton = new Button(this.actioner.getLabel());
-				this.actionButton.setOnAction((event) -> this.actioner.action());
+				Button actionButton = new Button(this.actioner.getLabel());
+				actionButton.pseudoClassStateChanged(PseudoClass.getPseudoClass("default"), true);
+				actionButton.setOnAction((event) -> this.actioner.action());
+				this.validHeader.getChildren().add(actionButton);
+			}
+			if (title != null) {
+				this.validHeader.getChildren().add(new Label(title));
 			}
 
-			// Provide the error label
-			this.errorInput = new Label();
-			this.errorInput.setVisible(false);
+			// Stack trace not editable and fills area
+			this.stackTrace.setEditable(false);
+			this.stackTrace.prefHeightProperty().bind(scroll.prefHeightProperty());
+			this.stackTrace.prefWidthProperty().bind(wrapper.widthProperty());
 
-			// Provide the error image
-			this.errorImage = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
-			this.errorTooltip = new Tooltip();
-			errorTooltip.getStyleClass().add("error-tooltip");
-			Tooltip.install(this.errorImage, this.errorTooltip);
-			this.errorImage.setVisible(false);
+			// Provide stack trace toggle
+			Hyperlink stackTraceToggle = new Hyperlink();
+			stackTraceToggle.setText("Show Stack Trace");
+			stackTraceToggle.getStyleClass().setAll("details-button", "more");
+			stackTraceToggle.setOnAction((event) -> {
+				if (this.isShowingStackTrace) {
+					// Hide stack trace
+					wrapper.getChildren().setAll(this.header, scroll);
+					stackTraceToggle.setText("Show Stack Trace");
+					stackTraceToggle.getStyleClass().setAll("details-button", "more");
+					this.isShowingStackTrace = false;
+				} else {
+					// Show stack trace
+					wrapper.getChildren().setAll(this.header, this.stackTrace);
+					stackTraceToggle.setText("Hide Stack Trace");
+					stackTraceToggle.getStyleClass().setAll("details-button", "less");
+					this.isShowingStackTrace = true;
+				}
+			});
+			this.stackTraceToggle.getChildren().add(stackTraceToggle);
+			this.stackTraceToggle.getStyleClass().setAll("container");
+			this.stackTraceToggle.alignmentProperty().setValue(Pos.CENTER_RIGHT);
+			this.header.getChildren().add(this.stackTraceToggle);
 		}
 
 		/*
@@ -969,88 +1072,36 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 		@Override
 		public void error(String inputLabel, String message) {
-			this.errorInput.setText((inputLabel == null ? "" : inputLabel + ": ") + message);
-			this.errorInput.setVisible(true);
-			this.errorTooltip.setText(message);
-			this.errorImage.setVisible(true);
+
+			// Display the error
+			this.errorLabel.setText((inputLabel == null ? "" : inputLabel + ": ") + message);
+			this.errorHeader.setVisible(true);
+
+			// No stack trace
+			this.stackTraceToggle.setVisible(false);
 
 			// Disallow applying
-			if (this.actionButton != null) {
-				this.actionButton.setVisible(false);
-			}
+			this.validHeader.setVisible(false);
 		}
 
 		@Override
 		public void error(String inputLabel, Throwable error) {
-			this.errorInput.setText((inputLabel == null ? "" : inputLabel + ": ") + error.getMessage());
-			this.errorInput.setVisible(true);
+
+			// Display the error
+			this.error(inputLabel, error.getMessage());
 
 			// Provide stack trace on tool tip
 			StringWriter buffer = new StringWriter();
 			error.printStackTrace(new PrintWriter(buffer));
-			this.errorTooltip.setText(buffer.toString());
-			this.errorImage.setVisible(true);
-
-			// Disallow applying
-			if (this.actionButton != null) {
-				this.actionButton.setVisible(false);
-			}
+			this.stackTrace.setText(buffer.toString());
+			this.stackTraceToggle.setVisible(true);
 		}
 
 		@Override
 		public void valid() {
-			this.errorInput.setVisible(false);
-			this.errorImage.setVisible(false);
-			if (this.actionButton != null) {
-				this.actionButton.setVisible(true);
-			}
-		}
-
-		/*
-		 * ============= ValueRendererFactory ===========
-		 */
-
-		@Override
-		public ValueRenderer<M, DefaultErrorListener<M>> createValueRenderer(ValueRendererContext<M> context) {
-			return this;
-		}
-
-		/*
-		 * ============= ValueInput =====================
-		 */
-
-		@Override
-		public Node getNode() {
-			return this.errorInput;
-		}
-
-		/*
-		 * ============= ValueRenderer =====================
-		 */
-
-		@Override
-		public DefaultErrorListener<M> createInput() {
-			return this;
-		}
-
-		@Override
-		public String getLabel(DefaultErrorListener<M> valueInput) {
-			return this.actioner != null ? this.actioner.getLabel() : null;
-		}
-
-		@Override
-		public Node createLabel(String labelText, DefaultErrorListener<M> valueInput) {
-			return this.actionButton;
-		}
-
-		@Override
-		public Node createErrorFeedback(DefaultErrorListener<M> valueInput) {
-			return this.errorImage;
-		}
-
-		@Override
-		public Throwable getError(DefaultErrorListener<M> valueInput) {
-			return null; // never error
+			this.errorHeader.setVisible(false);
+			this.validHeader.setVisible(true);
+			this.stackTraceToggle.setVisible(false);
 		}
 	}
 

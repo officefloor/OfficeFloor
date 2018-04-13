@@ -130,6 +130,11 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 	 */
 
 	@Override
+	public void title(String title) {
+		this.configurer.title(title);
+	}
+
+	@Override
 	public ChoiceBuilder<M> choices(String label) {
 		return this.configurer.choices(label);
 	}

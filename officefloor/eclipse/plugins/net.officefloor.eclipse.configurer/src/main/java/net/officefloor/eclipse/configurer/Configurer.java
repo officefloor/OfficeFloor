@@ -62,7 +62,6 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 
 		// Create pane for configuration components
 		Pane pane = new Pane();
-		pane.getStyleClass().add("root");
 
 		// Load scene into canvas (matching background colour)
 		org.eclipse.swt.graphics.Color background = parent.getBackground();
@@ -88,7 +87,6 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 
 		// Create pane for configuration components
 		Pane pane = new Pane();
-		pane.getStyleClass().add("root");
 		nodeProperty.setValue(pane);
 
 		// Load the configuration

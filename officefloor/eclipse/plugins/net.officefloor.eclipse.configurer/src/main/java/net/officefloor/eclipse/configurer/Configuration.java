@@ -35,6 +35,13 @@ public interface Configuration {
 	Node getConfigurationNode();
 
 	/**
+	 * Obtains the title.
+	 * 
+	 * @return Title.
+	 */
+	String getTitle();
+
+	/**
 	 * Indicates if the configuration is valid.
 	 * 
 	 * @return {@link ReadOnlyBooleanProperty} to indicate if the configuration is

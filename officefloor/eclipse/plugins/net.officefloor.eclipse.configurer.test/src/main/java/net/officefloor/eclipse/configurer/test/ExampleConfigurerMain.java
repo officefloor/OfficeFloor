@@ -77,6 +77,9 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 
 	@Override
 	protected void build(ConfigurationBuilder<ExampleModel> builder) {
+		
+		// Title
+		builder.title("Configuration");
 
 		// Configure text (non-editable)
 		builder.text("Label").init((model) -> model.text);

@@ -27,6 +27,14 @@ import java.util.function.Consumer;
 public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 
 	/**
+	 * Specifies the label for this configuration.
+	 * 
+	 * @param title
+	 *            Title for this configuration.
+	 */
+	void title(String title);
+
+	/**
 	 * Validates the model.
 	 * 
 	 * @param validator

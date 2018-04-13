@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.configurer.internal;
 
 import javafx.beans.property.Property;
+import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.ValueValidator;
 
@@ -54,6 +55,13 @@ public interface ValueInputContext<M, V> {
 	 * Refreshes the error.
 	 */
 	void refreshError();
+
+	/**
+	 * Obtains the {@link Actioner}.
+	 * 
+	 * @return {@link Actioner}.
+	 */
+	Actioner getOptionalActioner();
 
 	/**
 	 * Obtains the {@link ErrorListener}.

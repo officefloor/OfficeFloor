@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.configurer.internal;
 
+import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ErrorListener;
 
 /**
@@ -37,6 +38,14 @@ public interface ValueRendererContext<M> {
 	 * Triggered to refresh the error display.
 	 */
 	void refreshError();
+
+	/**
+	 * Obtains the {@link Actioner}.
+	 * 
+	 * @return {@link Actioner} or <code>null</code> if not able to apply
+	 *         configuration.
+	 */
+	Actioner getOptionalActioner();
 
 	/**
 	 * Obtains the {@link ErrorListener}.

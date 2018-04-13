@@ -39,6 +39,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
@@ -494,6 +495,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		@Override
 		public void refreshError() {
 			this.context.refreshError();
+		}
+
+		@Override
+		public Actioner getOptionalActioner() {
+			return this.context.getOptionalActioner();
 		}
 
 		@Override
