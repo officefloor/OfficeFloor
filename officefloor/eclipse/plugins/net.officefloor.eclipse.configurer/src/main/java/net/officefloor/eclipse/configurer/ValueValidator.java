@@ -27,6 +27,22 @@ import javafx.beans.property.ReadOnlyProperty;
 public interface ValueValidator<V> {
 
 	/**
+	 * Convenience {@link ValueValidator} for ensuring not an empty {@link String}.
+	 * 
+	 * @param errorMessage
+	 *            Error message if empty {@link String}.
+	 * @return {@link ValueValidator} to validate not an empty {@link String}.
+	 */
+	public static ValueValidator<String> notEmptyString(String errorMessage) {
+		return (context) -> {
+			String value = context.getValue().getValue();
+			if ((value == null) || (value.trim().length() == 0)) {
+				context.setError(errorMessage);
+			}
+		};
+	}
+
+	/**
 	 * Undertakes the validation.
 	 * 
 	 * @param context
@@ -56,7 +72,6 @@ public interface ValueValidator<V> {
 		 *            Message.
 		 */
 		void setError(String message);
-
 	}
 
 }

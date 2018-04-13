@@ -25,10 +25,7 @@ import java.util.function.Function;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -41,6 +38,7 @@ import javafx.scene.image.ImageView;
 import javafx.util.Callback;
 import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.DefaultImages;
+import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.ValueLoader;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
@@ -110,28 +108,28 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	 * 
 	 * @param valueInput
 	 *            {@link ValueInput}.
-	 * @param errorMessage
-	 *            Error message.
+	 * @param errorProperty
+	 *            Error {@link Property}.
 	 * @return Error feedback {@link Node}.
 	 */
-	protected Node createErrorFeedback(I valueInput, ReadOnlyStringProperty errorMessage) {
+	protected Node createErrorFeedback(I valueInput, Property<Throwable> errorProperty) {
 		ImageView error = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
 		Tooltip errorTooltip = new Tooltip();
 		errorTooltip.getStyleClass().add("error-tooltip");
 		Tooltip.install(error, errorTooltip);
 		InvalidationListener listener = (observableError) -> {
-			String errorText = errorMessage.get();
-			if ((errorText != null) && (errorText.length() > 0)) {
+			Throwable cause = errorProperty.getValue();
+			if (cause != null) {
 				// Display the error
-				errorTooltip.setText(errorText);
+				errorTooltip.setText(cause.getMessage());
 				error.visibleProperty().set(true);
 			} else {
 				// No error
 				error.visibleProperty().set(false);
 			}
 		};
-		errorMessage.addListener(listener);
-		listener.invalidated(errorMessage); // Initialise
+		errorProperty.addListener(listener);
+		listener.invalidated(errorProperty); // Initialise
 		return error;
 	}
 
@@ -144,8 +142,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	 *            {@link Throwable} error. May be <code>null</code> if no error.
 	 * @return {@link Throwable} error or <code>null</code> if no error.
 	 */
-	protected Throwable getError(I valueInput, Throwable error) {
-		return error;
+	protected Throwable getError(I valueInput, ReadOnlyProperty<Throwable> error) {
+		return error.getValue();
 	}
 
 	/**
@@ -240,14 +238,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		private boolean isError = false;
 
 		/**
-		 * Current error with value.
-		 */
-		private Throwable error = null;
-
-		/**
 		 * Error.
 		 */
-		private final StringProperty errorMessage = new SimpleStringProperty();
+		private final Property<Throwable> error = new SimpleObjectProperty<>();
 
 		/**
 		 * Initialises the {@link ValueRenderer}.
@@ -258,10 +251,13 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			// Obtain the model
 			M model = this.context.getModel();
 
-			// Initialise to model
-			if (AbstractBuilder.this.getInitialValue != null) {
-				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
-				this.value.setValue(initialValue);
+			// Refresh on error change
+			this.error.addListener((event) -> this.context.refreshError());
+
+			// Load value to model (so model consistent before validation)
+			if (AbstractBuilder.this.valueLoader != null) {
+				this.value.addListener(
+						(event) -> AbstractBuilder.this.valueLoader.loadValue(model, this.value.getValue()));
 			}
 
 			// Listen to change to run validation
@@ -270,10 +266,10 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			}
 			this.value.addListener((event) -> this.validate());
 
-			// Always load value to model
-			if (AbstractBuilder.this.valueLoader != null) {
-				this.value.addListener(
-						(event) -> AbstractBuilder.this.valueLoader.loadValue(model, this.value.getValue()));
+			// Initialise to model (triggering validation)
+			if (AbstractBuilder.this.getInitialValue != null) {
+				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
+				this.value.setValue(initialValue);
 			}
 		}
 
@@ -282,12 +278,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		 */
 		private void validate() {
 
-			// Capture the initial error (to see if change)
-			Throwable previousError = this.error;
-
-			// Reset error for the validate
+			// Track whether error in validation
 			this.isError = false;
-			this.error = null;
 			try {
 				// Undertake validation
 				Iterator<ValueValidator<V>> iterator = this.validators.iterator();
@@ -300,42 +292,16 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 				String message = ex.getMessage();
 				if ((message == null) || (message.length() == 0)) {
 					// Provide message from exception
-					message = "Thrown exception " + ex.getClass().getName();
+					ex = new Exception("Thrown exception " + ex.getClass().getName(), ex);
 				}
-				this.setError(message);
 
 				// Flag error and override with exception
 				this.isError = true;
-				this.error = ex;
+				this.error.setValue(ex);
 			}
 			if (!this.isError) {
 				// No error in validate, so clear error
 				this.setError(null);
-
-				// Determine if previously an error
-				if (previousError != null) {
-					this.context.refreshError();
-				}
-
-			} else {
-				if ((previousError instanceof MessageOnlyException) && (this.error instanceof MessageOnlyException)) {
-					// Determine if change in error message only
-					if (!previousError.getMessage().equals(this.error.getMessage())) {
-						// Change in message, so notify error
-						this.context.refreshError();
-					}
-
-				} else if ((previousError != null) && (this.error != null)) {
-					if (!previousError.equals(this.error)) {
-						// Change in exception, so notify error
-						this.context.refreshError();
-					}
-				} else if ((previousError == null) && (this.error == null)) {
-					// No error, so no change
-				} else {
-					// Change to have/clear error
-					this.context.refreshError();
-				}
 			}
 		}
 
@@ -361,6 +327,16 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			this.validate();
 		}
 
+		@Override
+		public void refreshError() {
+			this.context.refreshError();
+		}
+
+		@Override
+		public ErrorListener getErrorListener() {
+			return this.context.getErrorListener();
+		}
+
 		/*
 		 * =============== ValueRenderer =================
 		 */
@@ -382,7 +358,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 		@Override
 		public Node createErrorFeedback(I valueInput) {
-			return AbstractBuilder.this.createErrorFeedback(valueInput, this.errorMessage);
+			return AbstractBuilder.this.createErrorFeedback(valueInput, this.error);
 		}
 
 		@Override
@@ -409,16 +385,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 			// Update the error feedback
 			this.isError = (message != null);
-			this.errorMessage.set(message);
-
-			// Provide message only exception
-			if (message == null) {
-				// No error
-				this.error = null;
-			} else {
-				// Load message only exception
-				this.error = new MessageOnlyException(message);
-			}
+			this.error.setValue(this.isError ? new MessageOnlyException(message) : null);
 		}
 	}
 

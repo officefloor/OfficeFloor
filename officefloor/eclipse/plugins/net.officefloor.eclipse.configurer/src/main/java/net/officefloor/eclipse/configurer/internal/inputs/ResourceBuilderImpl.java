@@ -29,16 +29,17 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.beans.property.Property;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
+import net.officefloor.eclipse.configurer.internal.MessageOnlyException;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 
@@ -47,13 +48,9 @@ import net.officefloor.eclipse.configurer.internal.ValueInputContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ResourceBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, ResourceBuilder<M>>
+public class ResourceBuilderImpl<M>
+		extends AbstractBuilder<M, String, ResourceBuilderImpl.ResourceValueInput, ResourceBuilder<M>>
 		implements ResourceBuilder<M> {
-
-	/**
-	 * {@link Logger}
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ClassBuilderImpl.class);
 
 	/**
 	 * {@link IJavaProject}.
@@ -86,7 +83,7 @@ public class ResourceBuilderImpl<M> extends AbstractBuilder<M, String, ValueInpu
 	 */
 
 	@Override
-	protected ValueInput createInput(ValueInputContext<M, String> context) {
+	protected ResourceValueInput createInput(ValueInputContext<M, String> context) {
 
 		// Obtain the value
 		Property<String> value = context.getInputValue();
@@ -127,21 +124,27 @@ public class ResourceBuilderImpl<M> extends AbstractBuilder<M, String, ValueInpu
 		TextField text = new TextField();
 		text.textProperty().bindBidirectional(value);
 		text.getStyleClass().add("configurer-input-class");
-		text.setOnKeyPressed((event) -> {
-			if ((event.isControlDown()) && (event.getCode() == KeyCode.SPACE)) {
-				this.doResourceSelection(value);
-			}
-		});
+		HBox.setHgrow(text, Priority.ALWAYS);
 
 		// Provide button for suggestions
 		Button suggestion = new Button("...");
 		suggestion.getStyleClass().add("configurer-input-suggestion");
-		suggestion.setOnAction((event) -> this.doResourceSelection(value));
 
-		// Return value input
+		// Create the value input
 		HBox pane = new HBox();
 		pane.getChildren().setAll(text, suggestion);
-		return () -> pane;
+		ResourceValueInput valueInput = new ResourceValueInput(pane);
+
+		// Hook in handlers
+		text.setOnKeyPressed((event) -> {
+			if ((event.isControlDown()) && (event.getCode() == KeyCode.SPACE)) {
+				this.doResourceSelection(value, valueInput);
+			}
+		});
+		suggestion.setOnAction((event) -> this.doResourceSelection(value, valueInput));
+
+		// Return the value input
+		return valueInput;
 	}
 
 	/**
@@ -149,8 +152,10 @@ public class ResourceBuilderImpl<M> extends AbstractBuilder<M, String, ValueInpu
 	 * 
 	 * @param text
 	 *            {@link Property} for the text.
+	 * @param valueInput
+	 *            {@link ResourceValueInput}.
 	 */
-	private void doResourceSelection(Property<String> text) {
+	private void doResourceSelection(Property<String> text, ResourceValueInput valueInput) {
 		try {
 
 			// Strip filter down to just the simple name
@@ -184,11 +189,13 @@ public class ResourceBuilderImpl<M> extends AbstractBuilder<M, String, ValueInpu
 				text.setValue(filePath);
 			} else {
 				// Unknown type
-				LOGGER.error("Unknown type: " + selectedItem.getClass().getName());
+				valueInput.errorProperty.setValue(
+						new MessageOnlyException("Plugin Error: selected item is not of " + IFile.class.getName() + " ["
+								+ (selectedItem == null ? null : selectedItem.getClass().getName()) + "]"));
 			}
 
 		} catch (Exception ex) {
-			LOGGER.error("Failed to select a java type", ex);
+			valueInput.errorProperty.setValue(new Exception("Plugin Error: " + ex.getMessage(), ex));
 		}
 	}
 
@@ -252,6 +259,41 @@ public class ResourceBuilderImpl<M> extends AbstractBuilder<M, String, ValueInpu
 
 		// Return the location
 		return location;
+	}
+
+	/**
+	 * Resource {@link ValueInput}.
+	 */
+	public static class ResourceValueInput implements ValueInput {
+
+		/**
+		 * {@link ValueInput} {@link Node}.
+		 */
+		private final Node inputNode;
+
+		/**
+		 * Error {@link Property}.
+		 */
+		private Property<Throwable> errorProperty;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param inputNode
+		 *            {@link ValueInput} {@link Node}.
+		 */
+		private ResourceValueInput(Node inputNode) {
+			this.inputNode = inputNode;
+		}
+
+		/*
+		 * ============== ValueInput
+		 */
+
+		@Override
+		public Node getNode() {
+			return this.inputNode;
+		}
 	}
 
 }

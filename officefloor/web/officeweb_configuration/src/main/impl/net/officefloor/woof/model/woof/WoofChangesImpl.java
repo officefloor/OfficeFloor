@@ -2153,11 +2153,21 @@ public class WoofChangesImpl implements WoofChanges {
 		final String existingHttpSecurityName = security.getHttpSecurityName();
 		final String existingHttpSecuritySourceClassName = security.getHttpSecuritySourceClassName();
 		final long existingTimeout = security.getTimeout();
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(security.getProperties());
+		final List<PropertyModel> existingProperties = new ArrayList<>(security.getProperties());
+		final List<WoofSecurityContentTypeModel> existingContentTypes = new ArrayList<>(security.getContentTypes());
 
 		// Obtain the unique name
 		final String uniqueHttpSecurityName = getUniqueName(httpSecurityName, security, this.model.getWoofSecurities(),
 				(model) -> model.getHttpSecurityName());
+
+		// Create the listing of new content types
+		List<WoofSecurityContentTypeModel> newContentTypes = new ArrayList<>(
+				contentTypes == null ? 0 : contentTypes.length);
+		if (contentTypes != null) {
+			for (String contentType : contentTypes) {
+				newContentTypes.add(new WoofSecurityContentTypeModel(contentType));
+			}
+		}
 
 		// Create change to attributes and properties
 		Change<WoofSecurityModel> attributeChange = new AbstractChange<WoofSecurityModel>(security,
@@ -2168,6 +2178,14 @@ public class WoofChangesImpl implements WoofChanges {
 				security.setHttpSecurityName(uniqueHttpSecurityName);
 				security.setHttpSecuritySourceClassName(httpSecuritySourceClassName);
 				security.setTimeout(timeout);
+
+				// Refactor the content types
+				for (WoofSecurityContentTypeModel contentType : existingContentTypes) {
+					security.removeContentType(contentType);
+				}
+				for (WoofSecurityContentTypeModel contentType : newContentTypes) {
+					security.addContentType(contentType);
+				}
 
 				// Refactor the properties
 				security.getProperties().clear();
@@ -2187,6 +2205,14 @@ public class WoofChangesImpl implements WoofChanges {
 				security.setHttpSecurityName(existingHttpSecurityName);
 				security.setHttpSecuritySourceClassName(existingHttpSecuritySourceClassName);
 				security.setTimeout(existingTimeout);
+
+				// Revert the content types
+				for (WoofSecurityContentTypeModel contentType : newContentTypes) {
+					security.removeContentType(contentType);
+				}
+				for (WoofSecurityContentTypeModel contentType : existingContentTypes) {
+					security.addContentType(contentType);
+				}
 
 				// Revert the properties
 				security.getProperties().clear();

@@ -18,6 +18,8 @@
 package net.officefloor.compile.impl.adapt;
 
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -295,8 +297,10 @@ public class TypeAdapter implements InvocationHandler {
 					// Only provide exception for CompilerIssue.
 					// Therefore can adapt the exception with another.
 					Class<?> adaptedExceptionClass = translateClass(AdaptedException.class, implClassLoader);
+					StringWriter stackTrace = new StringWriter();
+					cause.printStackTrace(new PrintWriter(stackTrace));
 					constructor = adaptedExceptionClass.getConstructor(String.class, String.class);
-					return constructor.newInstance(cause.getMessage(), cause.getClass().getName());
+					return constructor.newInstance(cause.getMessage(), stackTrace.toString());
 				}
 			}
 		}

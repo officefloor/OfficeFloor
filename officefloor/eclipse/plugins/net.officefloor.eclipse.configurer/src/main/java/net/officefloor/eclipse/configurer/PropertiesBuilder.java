@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -28,12 +28,12 @@ import net.officefloor.compile.properties.PropertyList;
 public interface PropertiesBuilder<M> extends Builder<M, PropertyList, PropertiesBuilder<M>> {
 
 	/**
-	 * Configures listening on the required {@link PropertyList}.
+	 * Configures listening on the specification {@link PropertyList}.
 	 * 
-	 * @param required
-	 *            Required {@link PropertyList}.
+	 * @param specification
+	 *            Specification {@link PropertyList}.
 	 * @return <code>this</code>.
 	 */
-	PropertiesBuilder<M> required(ObjectProperty<PropertyList> required);
+	PropertiesBuilder<M> specification(Property<PropertyList> specification);
 
 }

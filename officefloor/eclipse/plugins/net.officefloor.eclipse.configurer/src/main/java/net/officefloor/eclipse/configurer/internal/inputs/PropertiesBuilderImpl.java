@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -101,9 +100,11 @@ public class PropertiesBuilderImpl<M> implements PropertiesBuilder<M>, ValueRend
 	 */
 
 	@Override
-	public PropertiesBuilder<M> required(ObjectProperty<PropertyList> required) {
-		// TODO Auto-generated method stub
-		return null;
+	public PropertiesBuilder<M> specification(javafx.beans.property.Property<PropertyList> specification) {
+
+		System.out.println("TODO (" + this.getClass().getName() + ") implement specification for PropertiesBuilder");
+
+		return this;
 	}
 
 	@Override

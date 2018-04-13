@@ -95,11 +95,6 @@ public class AdaptedEditorModule extends MvcFxModule {
 	public static final String PALETTE_VIEWER_ROLE = "paletteViewer";
 
 	/**
-	 * {@link AdaptedBuilder}.
-	 */
-	private final AdaptedBuilder adaptedBuilder;
-
-	/**
 	 * {@link Injector}.
 	 */
 	private Injector injector;
@@ -124,16 +119,6 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 */
 	private OfficeFloorContentPartFactory<?, ?> factory;
 
-	/**
-	 * Instantiate.
-	 * 
-	 * @param adaptedBuilder
-	 *            {@link AdaptedBuilder}.
-	 */
-	public AdaptedEditorModule(AdaptedBuilder adaptedBuilder) {
-		this.adaptedBuilder = adaptedBuilder;
-	}
-
 	/*
 	 * ========== Convenience creation methods ==============
 	 */
@@ -141,9 +126,11 @@ public class AdaptedEditorModule extends MvcFxModule {
 	/**
 	 * Creates the parent {@link Pane}.
 	 * 
+	 * @param adaptedBuilder
+	 *            {@link AdaptedBuilder}.
 	 * @return Parent {@link Pane}.
 	 */
-	public Pane createParent() {
+	public Pane createParent(AdaptedBuilder adaptedBuilder) {
 
 		// Lazy initialise
 		if (this.injector == null) {
@@ -153,7 +140,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 			// Load the domain and viewers
 			IDomain domain = injector.getInstance(IDomain.class);
-			this.initialise(domain, injector);
+			this.initialise(domain, injector, adaptedBuilder);
 		}
 
 		// Return the composite
@@ -183,8 +170,10 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 *            {@link IDomain}.
 	 * @param injector
 	 *            {@link Injector}.
+	 * @param adaptedBuilder
+	 *            {@link AdaptedBuilder}.
 	 */
-	public void initialise(IDomain domain, Injector injector) {
+	public void initialise(IDomain domain, Injector injector, AdaptedBuilder adaptedBuilder) {
 		this.injector = injector;
 
 		// Load domain and views
@@ -194,6 +183,9 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 		// Load the factory
 		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
+
+		// Configure the models
+		adaptedBuilder.build(this.factory);
 	}
 
 	/**
@@ -527,9 +519,8 @@ public class AdaptedEditorModule extends MvcFxModule {
 	protected void configure() {
 		super.configure();
 
-		// Bind the content part factory and initialise it
-		OfficeFloorContentPartFactory<?, ?> contentPartFactory = bindIContentPartFactory();
-		this.adaptedBuilder.build(contentPartFactory);
+		// Bind the content part factory
+		bindIContentPartFactory();
 
 		// Bind in the models
 		bindAdaptedParentInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedParentPart.class,

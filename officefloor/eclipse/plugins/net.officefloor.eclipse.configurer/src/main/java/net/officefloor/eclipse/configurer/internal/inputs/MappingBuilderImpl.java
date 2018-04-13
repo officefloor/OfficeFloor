@@ -83,7 +83,10 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 		Runnable[] updater = new Runnable[1];
 
 		// Create editor configuration
-		AdaptedEditorModule module = new AdaptedEditorModule((builder) -> {
+		AdaptedEditorModule module = new AdaptedEditorModule();
+
+		// Create the parent
+		Pane inputNode = module.createParent((builder) -> {
 			AdaptedRootBuilder<MappingModel, Object> root = builder.root(MappingModel.class, (model) -> this);
 
 			// Source
@@ -124,15 +127,12 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 					}, (ctx) -> {
 						// Remove the connection
 						ctx.getModel().remove();
-						
+
 						// Update the mapping
 						updater[0].run();
-						
+
 					}, ChangeEvent.CHANGED);
 		});
-
-		// Create the parent
-		Pane inputNode = module.createParent();
 
 		// Property
 		Property<Map<String, String>> mapProperty = context.getInputValue();
@@ -141,10 +141,10 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 		ObservableList<String> sources = this.getSources.apply(context.getModel());
 		ObservableList<String> targets = this.getTargets.apply(context.getModel());
 		MappingModel mapping = new MappingModel(inputNode, mapProperty, sources, targets);
-		
+
 		// Create the updater
 		updater[0] = () -> {
-			
+
 			// Obtain the mappings
 			Map<String, String> updated = new HashMap<>();
 			for (SourceModel source : mapping.sourceModels) {
@@ -155,7 +155,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 					}
 				}
 			}
-			
+
 			// Update the mappings
 			mapProperty.setValue(updated);
 		};
@@ -170,8 +170,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 
 			@Override
 			public void activate() {
-				// Load the root model
-				module.loadRootModel(mapping);
+				module.activateDomain(mapping);
 			}
 		};
 	}

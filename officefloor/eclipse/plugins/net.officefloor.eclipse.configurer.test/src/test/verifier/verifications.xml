@@ -1,0 +1,17 @@
+<verifications>
+	<files>
+		<!-- Ensure correct versions in Eclipse plugin -->
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.core;bundle-version="@{net.officefloor.core_version}"]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.eclipse.configurer;bundle-version="@{net.officefloor.eclipse.configurer_version}"]]></contains>
+		</file>
+	</files>
+</verifications>

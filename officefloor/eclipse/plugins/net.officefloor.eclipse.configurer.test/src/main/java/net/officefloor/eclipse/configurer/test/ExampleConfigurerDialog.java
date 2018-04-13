@@ -55,8 +55,14 @@ public class ExampleConfigurerDialog extends Application {
 			}
 		});
 
-		ExampleModel model = new ExampleModel();
-		dialog.configureModel(model);
+		builder.flag("Flag").init((m) -> m.flag).setValue((m, value) -> m.flag = value);
+
+		builder.apply("Change", (model) -> {
+			System.out.println("Applying model:");
+			model.write(System.out);
+		});
+
+		dialog.configureModel(new ExampleModel());
 	}
 
 }

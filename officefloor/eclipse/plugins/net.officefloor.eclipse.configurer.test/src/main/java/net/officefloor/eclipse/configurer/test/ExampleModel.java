@@ -38,7 +38,7 @@ public class ExampleModel {
 	/**
 	 * Text.
 	 */
-	public String text = "TEXT";
+	public String text = "T";
 
 	/**
 	 * Flag.

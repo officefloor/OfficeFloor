@@ -90,7 +90,13 @@ public class ExampleConfigurerView {
 		builder.resource("Resource", javaProject, shell).init((model) -> model.resourceName)
 				.setValue((model, value) -> model.resourceName = value);
 
+		// Provide ability to update
+		builder.apply("Update", (model) -> {
+			System.out.println("Applied model:");
+			model.write(System.out);
+		});
+
 		// Load model to view
-		configurer.loadConfiguration(new ExampleModel(), parent);
+		configurer.loadConfiguration(new ExampleModel(), parent, null);
 	}
 }

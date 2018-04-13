@@ -37,8 +37,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
+import net.officefloor.eclipse.configurer.Configuration;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.configurer.DefaultImages;
@@ -50,6 +52,7 @@ import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
+import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.model.Model;
 
 /**
@@ -57,7 +60,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuilder<M>, ErrorListener {
+public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuilder<M> {
 
 	/**
 	 * {@link Configurer}.
@@ -65,9 +68,9 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 	private final Configurer<M> configurer = new Configurer<>();
 
 	/**
-	 * Apply button.
+	 * Apply label.
 	 */
-	private final Node applyButton;
+	private String applyLabel;
 
 	/**
 	 * Instantiate.
@@ -82,15 +85,6 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 		this.setHeaderText(headerText);
 		this.getDialogPane().setPrefSize(600, 400);
 		this.setResizable(true);
-
-		// Handle errors
-		this.configurer.setErrorListener(this);
-
-		// Load the buttons
-		ButtonType applyButtonType = new ButtonType("Add", ButtonData.OK_DONE);
-		this.getDialogPane().getButtonTypes().setAll(applyButtonType,
-				new ButtonType("Cancel", ButtonData.CANCEL_CLOSE));
-		this.applyButton = this.getDialogPane().lookupButton(applyButtonType);
 	}
 
 	/**
@@ -104,10 +98,17 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 		// Provide handler for result
 		this.setResultConverter((buttonType) -> buttonType.getButtonData() == ButtonData.OK_DONE ? model : null);
 
-		// Configure the dialog
-		this.configurer.loadConfiguration(model, this.getDialogPane().contentProperty());
+		// Load the buttons
+		ButtonType applyButtonType = new ButtonType(this.applyLabel, ButtonData.OK_DONE);
+		this.getDialogPane().getButtonTypes().setAll(applyButtonType,
+				new ButtonType("Cancel", ButtonData.CANCEL_CLOSE));
+		Node applyButton = this.getDialogPane().lookupButton(applyButtonType);
 
-		// Handle expanding (need to clear content)
+		// Configure the dialog
+		Configuration configuration = this.configurer.loadConfiguration(model, this.getDialogPane().contentProperty(),
+				new DialogErrorListener(applyButton));
+
+		// Handle expanding (need to clear content to display correctly)
 		Node content = this.getDialogPane().getContent();
 		this.getDialogPane().expandedProperty().addListener((event) -> {
 			if (this.getDialogPane().expandedProperty().get()) {
@@ -119,8 +120,9 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 			}
 		});
 
-		// Configure the model
-		this.showAndWait().ifPresent(response -> System.out.println("TODO test " + response));
+		// Configure the model (with ability to apply configuration)
+		Actioner actioner = configuration.getActioner();
+		this.showAndWait().ifPresent(response -> actioner.action());
 	}
 
 	/*
@@ -174,69 +176,97 @@ public class ConfigurerDialog<M> extends Dialog<M> implements ConfigurationBuild
 	}
 
 	@Override
-	public void apply(Consumer<M> applier) {
-		this.configurer.apply(applier);
+	public void validate(ValueValidator<M> validator) {
+		this.configurer.validate(validator);
 	}
 
-	/*
-	 * ================ ErrorListener ===================
+	@Override
+	public void apply(String label, Consumer<M> applier) {
+		this.applyLabel = label;
+		this.configurer.apply(label, applier);
+	}
+
+	/**
+	 * Dialog {@link ErrorListener}.
 	 */
+	private class DialogErrorListener implements ErrorListener {
 
-	@Override
-	public void error(String inputLabel, String message) {
+		/**
+		 * Apply button {@link Node}.
+		 */
+		private final Node applyButton;
 
-		// Error label
-		Label errorLabel = new Label("  " + (inputLabel == null ? "" : inputLabel + ": ") + message);
-		errorLabel.getStyleClass().add("configurer-error-header");
+		/**
+		 * Instantiate.
+		 * 
+		 * @param applyButton
+		 *            Apply button {@link Node}.
+		 */
+		private DialogErrorListener(Node applyButton) {
+			this.applyButton = applyButton;
+		}
 
-		// Error image
-		ImageView errorImage = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
-		Tooltip errorTooltip = new Tooltip(message);
-		errorTooltip.getStyleClass().add("error-tooltip");
-		Tooltip.install(errorImage, errorTooltip);
+		/*
+		 * ================ ErrorListener ===================
+		 */
 
-		// Header error panel
-		GridPane panel = new GridPane();
-		panel.getStyleClass().add("header-panel");
-		panel.add(errorImage, 0, 0);
-		panel.add(errorLabel, 1, 0);
+		@Override
+		public void error(String inputLabel, String message) {
 
-		// Configure the error
-		this.getDialogPane().setHeader(panel);
-		this.getDialogPane().setExpandableContent(null);
-		this.applyButton.setDisable(true);
-	}
+			// Error label
+			Label errorLabel = new Label("  " + (inputLabel == null ? "" : inputLabel + ": ") + message);
+			errorLabel.getStyleClass().add("configurer-error-header");
 
-	@Override
-	public void error(String inputLabel, Throwable error) {
-		this.error(inputLabel, error.getMessage());
+			// Error image
+			ImageView errorImage = new ImageView(new Image(DefaultImages.ERROR_IMAGE_PATH, 15, 15, true, true));
+			Tooltip errorTooltip = new Tooltip(message);
+			errorTooltip.getStyleClass().add("error-tooltip");
+			Tooltip.install(errorImage, errorTooltip);
 
-		// Obtain the stack trace of error
-		StringWriter buffer = new StringWriter();
-		error.printStackTrace(new PrintWriter(buffer));
-		String exceptionText = buffer.toString();
+			// Header error panel
+			GridPane panel = new GridPane();
+			panel.getStyleClass().add("header-panel");
+			panel.add(errorImage, 0, 0);
+			panel.add(errorLabel, 1, 0);
 
-		// Create text area for stack trace
-		TextArea textArea = new TextArea(exceptionText);
-		textArea.setEditable(false);
-		textArea.setWrapText(true);
-		textArea.setMaxWidth(Double.MAX_VALUE);
-		textArea.setMaxHeight(Double.MAX_VALUE);
-		GridPane.setVgrow(textArea, Priority.ALWAYS);
-		GridPane.setHgrow(textArea, Priority.ALWAYS);
+			// Configure the error
+			ConfigurerDialog.this.getDialogPane().setHeader(panel);
+			ConfigurerDialog.this.getDialogPane().setExpandableContent(null);
+			this.applyButton.setDisable(true);
+		}
 
-		// Provide the stack trace
-		GridPane content = new GridPane();
-		content.setMaxWidth(Double.MAX_VALUE);
-		content.add(new Label("The exception stacktrace was:"), 0, 0);
-		content.add(textArea, 0, 1);
-		this.getDialogPane().setExpandableContent(content);
-	}
+		@Override
+		public void error(String inputLabel, Throwable error) {
+			this.error(inputLabel, error.getMessage());
 
-	@Override
-	public void valid() {
-		this.getDialogPane().setHeader(null);
-		this.applyButton.setDisable(false);
+			// Obtain the stack trace of error
+			StringWriter buffer = new StringWriter();
+			error.printStackTrace(new PrintWriter(buffer));
+			String exceptionText = buffer.toString();
+
+			// Create text area for stack trace
+			TextArea textArea = new TextArea(exceptionText);
+			textArea.setEditable(false);
+			textArea.setWrapText(true);
+			textArea.setMaxWidth(Double.MAX_VALUE);
+			textArea.setMaxHeight(Double.MAX_VALUE);
+			GridPane.setVgrow(textArea, Priority.ALWAYS);
+			GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+			// Provide the stack trace
+			GridPane content = new GridPane();
+			content.setMaxWidth(Double.MAX_VALUE);
+			content.add(new Label("The exception stacktrace was:"), 0, 0);
+			content.add(textArea, 0, 1);
+			ConfigurerDialog.this.getDialogPane().setExpandableContent(content);
+		}
+
+		@Override
+		public void valid() {
+			ConfigurerDialog.this.getDialogPane().setHeader(null);
+			ConfigurerDialog.this.getDialogPane().setExpandableContent(null);
+			this.applyButton.setDisable(false);
+		}
 	}
 
 }

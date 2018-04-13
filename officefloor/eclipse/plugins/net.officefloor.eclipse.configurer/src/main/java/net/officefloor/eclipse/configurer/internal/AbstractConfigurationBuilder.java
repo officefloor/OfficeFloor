@@ -30,10 +30,16 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Shell;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
@@ -42,8 +48,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
+import net.officefloor.eclipse.configurer.Configuration;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
@@ -54,6 +62,8 @@ import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
+import net.officefloor.eclipse.configurer.ValueValidator;
+import net.officefloor.eclipse.configurer.ValueValidator.ValueValidatorContext;
 import net.officefloor.eclipse.configurer.internal.inputs.ChoiceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.ClassBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.FlagBuilderImpl;
@@ -87,19 +97,19 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	private final List<ValueRendererFactory<M, ? extends ValueInput>> rendererFactories = new ArrayList<>();
 
 	/**
-	 * {@link ErrorListener}.
+	 * {@link ValueValidator}.
 	 */
-	private ErrorListener errorListener = null;
+	private ValueValidator<M> validator = null;
 
 	/**
-	 * Overrides the default {@link ErrorListener}.
-	 * 
-	 * @param errorListener
-	 *            {@link ErrorListener}.
+	 * Label for the apply {@link Actioner}.
 	 */
-	public void setErrorListener(ErrorListener errorListener) {
-		this.errorListener = errorListener;
-	}
+	private String applierLabel = null;
+
+	/**
+	 * {@link Consumer} to apply the model.
+	 */
+	private Consumer<M> applier = null;
 
 	/**
 	 * Obtain the list of {@link ValueRendererFactory} instances.
@@ -116,13 +126,16 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * 
 	 * @param model
 	 *            Model.
-	 * @param parent
-	 *            Parent {@link Pane}.
+	 * @param configuartionNode
+	 *            Configuration {@link Pane}.
+	 * @param errorListener
+	 *            {@link ErrorListener}.
+	 * @return {@link Configuration}.
 	 */
-	public void loadConfiguration(M model, Pane parent) {
+	protected Configuration loadConfiguration(M model, Pane configuartionNode, ErrorListener errorListener) {
 
 		// Load the default styling
-		parent.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
+		configuartionNode.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
 
 		// Scroll both narrow and wide views
 		ScrollPane scroll = new ScrollPane() {
@@ -132,21 +145,21 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 				// (work around for GEF drag/drop aborting on focus change)
 			}
 		};
-		scroll.prefWidthProperty().bind(parent.widthProperty());
-		scroll.prefHeightProperty().bind(parent.heightProperty());
+		scroll.prefWidthProperty().bind(configuartionNode.widthProperty());
+		scroll.prefHeightProperty().bind(configuartionNode.heightProperty());
 		scroll.setFitToWidth(true);
 		scroll.getStyleClass().add("configurer-container");
-		parent.getChildren().add(scroll);
+		configuartionNode.getChildren().add(scroll);
 
 		// Provide grid to load configuration
 		GridPane grid = new GridPane();
 		scroll.setContent(grid);
 
 		// Apply CSS (so Scene available to inputs)
-		parent.applyCss();
+		configuartionNode.applyCss();
 
 		// Load the configuration to grid
-		this.loadConfiguration(model, grid, this);
+		return this.recursiveLoadConfiguration(model, configuartionNode, grid, errorListener);
 	}
 
 	/**
@@ -154,28 +167,33 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * 
 	 * @param model
 	 *            Model.
-	 * @param parent
+	 * @param configuartionNode
+	 *            Configuration {@link Node}.
+	 * @param grid
 	 *            {@link GridPane}.
 	 * @param parentConfigurationBuilder
 	 *            Parent {@link AbstractConfigurationBuilder}
 	 */
 	@SuppressWarnings("unchecked")
-	public void loadConfiguration(M model, GridPane parent,
-			AbstractConfigurationBuilder<?> parentConfigurationBuilder) {
+	public Configuration recursiveLoadConfiguration(M model, Node configurationNode, GridPane grid,
+			ErrorListener errorListener) {
+
+		// Create the actioner
+		Actioner actioner = null;
+		if (this.applier != null) {
+			actioner = new ActionerImpl<>(model, this.applierLabel, this.applier);
+		}
 
 		// Provide error listener
 		DefaultErrorListener<M> defaultErrorListener = null;
-		if (this.errorListener == null) {
-			this.errorListener = parentConfigurationBuilder.errorListener;
-		}
-		if (this.errorListener == null) {
+		if (errorListener == null) {
 			// Provide default error listener
-			defaultErrorListener = new DefaultErrorListener<>();
-			this.errorListener = defaultErrorListener;
+			defaultErrorListener = new DefaultErrorListener<>(actioner);
+			errorListener = defaultErrorListener;
 		}
 
 		// Apply CSS (so Scene available to inputs)
-		parent.applyCss();
+		grid.applyCss();
 
 		// Create the listing of renderer factories
 		ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories;
@@ -193,13 +211,14 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		}
 
 		// Load the value render list
-		ValueLister<M> lister = new ValueLister<>(model, parent, this.errorListener, rendererFactories);
+		ValueLister<M> lister = new ValueLister<>(model, this.validator, configurationNode, grid, errorListener,
+				actioner, rendererFactories, null);
 		lister.organiseWide(1); // ensure initially organised
 
 		// Responsive view
 		final double RESPONSIVE_WIDTH = 800;
 		InvalidationListener listener = (event) -> {
-			if (parent.getWidth() < RESPONSIVE_WIDTH) {
+			if (grid.getWidth() < RESPONSIVE_WIDTH) {
 				// Avoid events if already narrow
 				if (lister.isWideNotNarrow) {
 					lister.organiseNarrow(1);
@@ -211,8 +230,14 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 				}
 			}
 		};
-		parent.widthProperty().addListener(listener);
+		grid.widthProperty().addListener(listener);
 		listener.invalidated(null); // organise initial view
+
+		// Ensure display potential error
+		lister.refreshError();
+
+		// Return the configuration
+		return lister;
 	}
 
 	/**
@@ -278,15 +303,23 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	}
 
 	@Override
-	public void apply(Consumer<M> applier) {
-		// TODO Auto-generated method stub
+	public void validate(ValueValidator<M> validator) {
+		this.validator = validator;
+	}
 
+	@Override
+	public void apply(String label, Consumer<M> applier) {
+		if ((label == null) || (label.trim().length() == 0)) {
+			label = "Apply"; // ensure have label
+		}
+		this.applierLabel = label;
+		this.applier = applier;
 	}
 
 	/**
 	 * Lists some of the {@link ValueRenderer} instances.
 	 */
-	private static class ValueLister<M> implements ValueRendererContext<M> {
+	private static class ValueLister<M> implements ValueRendererContext<M>, Configuration {
 
 		/**
 		 * Model.
@@ -294,14 +327,34 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		private final M model;
 
 		/**
+		 * {@link ValueValidator} for the model.
+		 */
+		private final ValueValidator<M> modelValidator;
+
+		/**
+		 * Configuration {@link Node}.
+		 */
+		private final Node configuartionNode;
+
+		/**
 		 * {@link GridPane}.
 		 */
 		private final GridPane grid;
 
 		/**
+		 * Indicates whether configuration is valid.
+		 */
+		private final BooleanProperty validProperty = new SimpleBooleanProperty(true);
+
+		/**
 		 * {@link ErrorListener}.
 		 */
 		private final ErrorListener errorListener;
+
+		/**
+		 * {@link Actioner}.
+		 */
+		private final Actioner actioner;
 
 		/**
 		 * {@link Input} instances for this {@link ValueLister}.
@@ -319,6 +372,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		private int rowIndex;
 
 		/**
+		 * Previous {@link ValueLister}.
+		 */
+		private final ValueLister<M> prevLister;
+
+		/**
 		 * Next {@link ValueLister}.
 		 */
 		private ValueLister<M> nextLister = null;
@@ -328,22 +386,35 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 * 
 		 * @param model
 		 *            Model.
+		 * @param modelValidator
+		 *            {@link ValueValidator} for the model. May be <code>null</code>.
+		 * @param configurationNode
+		 *            Configuration {@link Node}.
 		 * @param grid
 		 *            {@link GridPane}.
 		 * @param errorListener
 		 *            {@link ErrorListener}.
+		 * @param actioner
+		 *            {@link Actioner}.
 		 * @param rowIndex
 		 *            Row index within wide view {@link GridPane} to continue rendering
 		 *            inputs.
 		 * @param rendererFactories
 		 *            {@link ValueRendererFactory} instances.
+		 * @param prevLister
+		 *            Previous {@link ValueLister}.
 		 */
 		@SuppressWarnings("unchecked")
-		public ValueLister(M model, GridPane grid, ErrorListener errorListener,
-				ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories) {
+		public ValueLister(M model, ValueValidator<M> modelValidator, Node configurationNode, GridPane grid,
+				ErrorListener errorListener, Actioner actioner,
+				ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories, ValueLister<M> prevLister) {
 			this.model = model;
+			this.modelValidator = modelValidator;
+			this.configuartionNode = configurationNode;
 			this.grid = grid;
 			this.errorListener = errorListener;
+			this.actioner = actioner;
+			this.prevLister = prevLister;
 
 			// Ensure activate the inputs (once added)
 			List<ValueInput> inputsToActivate = new ArrayList<>(rendererFactories.length * 2);
@@ -405,8 +476,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 							Integer choice = choiceRenderer.getChoiceIndex().getValue();
 							if (choice == null) {
 								// No choice selected, so carry on with renderers
-								this.nextLister = new ValueLister<>(this.model, grid, this.errorListener,
-										splitRenderers);
+								this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
+										grid, this.errorListener, this.actioner, splitRenderers, this);
 
 							} else {
 								// Have choice, so create concat list of remaining
@@ -420,8 +491,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 								for (int s = 0; s < splitRenderers.length; s++) {
 									remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
 								}
-								this.nextLister = new ValueLister<>(this.model, grid, this.errorListener,
-										remainingRenderers);
+								this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
+										grid, this.errorListener, this.actioner, remainingRenderers, this);
 							}
 
 							// Organise choice changes
@@ -430,6 +501,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 							} else {
 								this.organiseNarrow(this.rowIndex);
 							}
+
+							// Refresh error (now different choice)
+							this.refreshError();
 						};
 
 						// Listen for changes in choice
@@ -576,10 +650,52 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		}
 
 		@Override
+		public ErrorListener getErrorListener() {
+			return this.errorListener;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
 		public void refreshError() {
 
+			// Obtain the first value lister
+			ValueLister<M> firstValueLister = this;
+			while (firstValueLister.prevLister != null) {
+				firstValueLister = firstValueLister.prevLister;
+			}
+
 			// Search for first error
-			InputError<M, ? extends ValueInput> errorInput = this.getFirstError();
+			InputError<M, ? extends ValueInput> errorInput = firstValueLister.getFirstError();
+
+			// If valid, undertake validation of model
+			if ((errorInput == null) && (this.modelValidator != null)) {
+				try {
+
+					// Validate the model
+					InputError<M, ? extends ValueInput>[] validateError = new InputError[] { null };
+					this.modelValidator.validate(new ValueValidatorContext<M>() {
+
+						@Override
+						public ReadOnlyProperty<M> getValue() {
+							return new SimpleObjectProperty<>(ValueLister.this.model);
+						}
+
+						@Override
+						public void setError(String message) {
+							validateError[0] = new InputError<>(null, new MessageOnlyException(message));
+						}
+
+					});
+					errorInput = validateError[0];
+
+				} catch (Exception ex) {
+					// Provide failure error
+					errorInput = new InputError<>(null, ex);
+				}
+			}
+
+			// Indicate if valid
+			this.validProperty.set(errorInput == null);
 
 			// Determine if error
 			if (errorInput == null) {
@@ -588,10 +704,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			}
 
 			// Provide appropriate error
+			String label = errorInput.input != null ? errorInput.input.labelText : null;
 			if (errorInput.error instanceof MessageOnlyException) {
-				this.errorListener.error(errorInput.input.labelText, errorInput.error.getMessage());
+				this.errorListener.error(label, errorInput.error.getMessage());
 			} else {
-				this.errorListener.error(errorInput.input.labelText, errorInput.error);
+				this.errorListener.error(label, errorInput.error);
 			}
 		}
 
@@ -615,6 +732,79 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 			// No error, so determine error in next list
 			return (this.nextLister != null) ? this.nextLister.getFirstError() : null;
+		}
+
+		/*
+		 * ============ Configuration =====================
+		 */
+
+		@Override
+		public Node getConfigurationNode() {
+			return this.configuartionNode;
+		}
+
+		@Override
+		public ReadOnlyBooleanProperty validProperty() {
+			return this.validProperty;
+		}
+
+		@Override
+		public Actioner getActioner() {
+			if (this.actioner == null) {
+				throw new IllegalStateException("No apply configuration for model " + this.model.getClass().getName());
+			}
+			return this.actioner;
+		}
+	}
+
+	/**
+	 * {@link Actioner} implementation.
+	 */
+	private static class ActionerImpl<M> implements Actioner {
+
+		/**
+		 * Model.
+		 */
+		private final M model;
+
+		/**
+		 * Label.
+		 */
+		private final String label;
+
+		/**
+		 * Applier.
+		 */
+		private final Consumer<M> applier;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param model
+		 *            Model.
+		 * @param label
+		 *            Label.
+		 * @param applier
+		 *            Applier.
+		 */
+		private ActionerImpl(M model, String label, Consumer<M> applier) {
+			this.model = model;
+			this.label = label;
+			this.applier = applier;
+		}
+
+		/*
+		 * ============== Actioner ===================
+		 */
+
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+
+		@Override
+		public void action() {
+			this.applier.accept(this.model);
 		}
 	}
 
@@ -722,6 +912,16 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			ValueRenderer<M, DefaultErrorListener<M>>, ValueRendererFactory<M, DefaultErrorListener<M>> {
 
 		/**
+		 * {@link Actioner}.
+		 */
+		private Actioner actioner = null;
+
+		/**
+		 * {@link Button} to trigger {@link Actioner}.
+		 */
+		private Button actionButton = null;
+
+		/**
 		 * Error {@link ImageView};
 		 */
 		private final ImageView errorImage;
@@ -738,8 +938,20 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 		/**
 		 * Instantiate.
+		 * 
+		 * @param actioner
+		 *            {@link Actioner}.
 		 */
-		private DefaultErrorListener() {
+		private DefaultErrorListener(Actioner actioner) {
+			this.actioner = actioner;
+
+			// Provide action button if configured
+			if (this.actioner != null) {
+				this.actionButton = new Button(this.actioner.getLabel());
+				this.actionButton.setOnAction((event) -> this.actioner.action());
+			}
+
+			// Provide the error label
 			this.errorInput = new Label();
 			this.errorInput.setVisible(false);
 
@@ -761,6 +973,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			this.errorInput.setVisible(true);
 			this.errorTooltip.setText(message);
 			this.errorImage.setVisible(true);
+
+			// Disallow applying
+			if (this.actionButton != null) {
+				this.actionButton.setVisible(false);
+			}
 		}
 
 		@Override
@@ -773,12 +990,20 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			error.printStackTrace(new PrintWriter(buffer));
 			this.errorTooltip.setText(buffer.toString());
 			this.errorImage.setVisible(true);
+
+			// Disallow applying
+			if (this.actionButton != null) {
+				this.actionButton.setVisible(false);
+			}
 		}
 
 		@Override
 		public void valid() {
 			this.errorInput.setVisible(false);
 			this.errorImage.setVisible(false);
+			if (this.actionButton != null) {
+				this.actionButton.setVisible(true);
+			}
 		}
 
 		/*
@@ -810,12 +1035,12 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 		@Override
 		public String getLabel(DefaultErrorListener<M> valueInput) {
-			return null;
+			return this.actioner != null ? this.actioner.getLabel() : null;
 		}
 
 		@Override
 		public Node createLabel(String labelText, DefaultErrorListener<M> valueInput) {
-			return null;
+			return this.actionButton;
 		}
 
 		@Override

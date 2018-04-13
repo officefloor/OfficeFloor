@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -40,6 +40,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import net.officefloor.eclipse.configurer.DefaultImages;
+import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.TextBuilder;
@@ -264,13 +265,13 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		List<I> items = itemsProperty.getValue();
 		if (items != null) {
 			for (I item : items) {
-				rows.add(new Row(table, loadRowsToItems, item));
+				rows.add(new Row(table, loadRowsToItems, item, context));
 			}
 		}
 
 		// Determine if able to add rows
 		if (this.itemFactory != null) {
-			rows.add(new AddRow(table, loadRowsToItems));
+			rows.add(new AddRow(table, loadRowsToItems, context));
 		}
 
 		// Load rows to the table
@@ -385,7 +386,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			DragResizer.makeResizable(table);
 
 			// Handle adding/removing rows
-			rows.addListener((Change<?> event) -> loadRowsToItems.run());
+			rows.addListener((Observable event) -> loadRowsToItems.run());
 		}
 
 		// Return table
@@ -444,6 +445,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		private final DeleteRow delete;
 
 		/**
+		 * {@link ValueInputContext}.
+		 */
+		protected final ValueInputContext<M, List<I>> context;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param table
@@ -454,11 +460,14 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 *            Item for the {@link Row}.
 		 * @param isAddRow
 		 *            <code>true</code> if the add row.
+		 * @param context
+		 *            {@link ValueInputContext}.
 		 */
 		@SuppressWarnings("unchecked")
-		private Row(TableView<Row> table, Runnable updater, I item) {
+		private Row(TableView<Row> table, Runnable updater, I item, ValueInputContext<M, List<I>> context) {
 			this.item = item;
 			this.updater = updater;
+			this.context = context;
 
 			// Create the properties for the row
 			this.cells = new CellRenderer[ListBuilderImpl.this.renderers.size()];
@@ -484,8 +493,12 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 		@Override
 		public void refreshError() {
-			// TODO Auto-generated method stub
+			this.context.refreshError();
+		}
 
+		@Override
+		public ErrorListener getErrorListener() {
+			return this.context.getErrorListener();
 		}
 	}
 
@@ -506,9 +519,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 *            {@link TableView}.
 		 * @param updater
 		 *            {@link Runnable} to update model.
+		 * @param context
+		 *            {@link ValueInputContext}.
 		 */
-		public AddRow(TableView<Row> table, Runnable updater) {
-			super(table, updater, null);
+		public AddRow(TableView<Row> table, Runnable updater, ValueInputContext<M, List<I>> context) {
+			super(table, updater, null, context);
 			this.table = table;
 		}
 
@@ -522,7 +537,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 			// Create the new row
 			I newItem = ListBuilderImpl.this.itemFactory.get();
-			Row newRow = new Row(this.table, this.updater, newItem);
+			Row newRow = new Row(this.table, this.updater, newItem, this.context);
 
 			// Add the row (before the add row)
 			ObservableList<Row> items = this.table.getItems();

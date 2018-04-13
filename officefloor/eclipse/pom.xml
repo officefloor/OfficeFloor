@@ -18,6 +18,7 @@
 	<modules>
 		<!-- Core eclipse functionality -->
 		<module>plugins/net.officefloor.eclipse.target</module>
+		<module>plugins/net.officefloor.eclipse.javaproject</module>
 		<module>plugins/net.officefloor.eclipse.editor</module>
 		<module>plugins/net.officefloor.eclipse.editor.test</module>
 		<module>plugins/net.officefloor.eclipse.configurer</module>
@@ -87,7 +88,7 @@
 					<target>
 						<artifact>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>org.officefloor.eclipse.target</artifactId>
+							<artifactId>net.officefloor.eclipse.target</artifactId>
 							<version>${project.version}</version>
 							<classifier>OXYGEN</classifier>
 						</artifact>
@@ -178,7 +179,7 @@
 			<repositories>
 				<repository>
 					<!-- Eclipse -->
-					<id>eclipse-neon</id>
+					<id>eclipse-oxygen</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/releases/oxygen</url>
 				</repository>

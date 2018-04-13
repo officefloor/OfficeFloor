@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -46,8 +47,9 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	 *            Model.
 	 * @param parent
 	 *            Parent {@link Composite}.
+	 * @return {@link Configuration}.
 	 */
-	public void loadConfiguration(M model, Composite parent) {
+	public Configuration loadConfiguration(M model, Composite parent, ErrorListener errorListener) {
 
 		// Create the FX Canvas
 		FXCanvas fxCanvas = new FXCanvas(parent, SWT.NONE) {
@@ -70,7 +72,7 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 		fxCanvas.setScene(scene);
 
 		// Load the configuration
-		this.loadConfiguration(model, pane);
+		return this.loadConfiguration(model, pane, errorListener);
 	}
 
 	/**
@@ -80,16 +82,17 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	 *            {@link Model}.
 	 * @param nodeProperty
 	 *            {@link ObjectProperty}.
+	 * @return {@link Configuration}.
 	 */
-	public void loadConfiguration(M model, ObjectProperty<Node> nodeProperty) {
+	public Configuration loadConfiguration(M model, Property<Node> nodeProperty, ErrorListener errorListener) {
 
 		// Create pane for configuration components
 		Pane pane = new Pane();
 		pane.getStyleClass().add("root");
-		nodeProperty.set(pane);
+		nodeProperty.setValue(pane);
 
 		// Load the configuration
-		this.loadConfiguration(model, pane);
+		return this.loadConfiguration(model, pane, errorListener);
 	}
 
 }

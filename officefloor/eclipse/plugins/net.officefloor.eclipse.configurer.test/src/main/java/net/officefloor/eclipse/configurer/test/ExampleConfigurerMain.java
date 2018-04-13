@@ -134,8 +134,33 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 		MultipleBuilder<ExampleModel, ExampleItem> multiple = builder.multiple("Multiple", ExampleItem.class)
 				.init((model) -> model.multiple).setValue(this.log((model, items) -> model.multiple = items));
 		multiple.itemLabel((item) -> item.text);
-		multiple.text("Label").init((item) -> item.text).setValue(this.logItem((item, value) -> item.text = value));
+		multiple.text("Label").init((item) -> item.text).setValue(this.logItem((item, value) -> item.text = value))
+				.validate((context) -> {
+					switch (context.getValue().getValue().length()) {
+					case 0:
+						throw new Exception("Test failure");
+					case 1:
+						context.setError("Text too short");
+					}
+				});
 		multiple.flag("Flag").init((item) -> item.flag).setValue(this.logItem((item, value) -> item.flag = value));
+
+		// Validate the model
+		builder.validate((context) -> {
+			ExampleModel model = context.getValue().getValue();
+			switch(model.properties.getPropertyNames().length) {
+			case 0:
+				throw new Exception("Model invalid");
+			case 1:
+				context.setError("Model requires more properties");
+			}
+		});
+		
+		// Allow applying configuration
+		builder.apply("Execute", (model) -> {
+			System.out.println("Applied model:");
+			model.write(System.out);
+		});
 	}
 
 	@Override

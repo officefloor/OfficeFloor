@@ -47,7 +47,7 @@ public abstract class AbstractEditorApplication extends Application {
 	 * @return {@link AdaptedEditorModule}.
 	 */
 	protected AdaptedEditorModule createModule() {
-		return new AdaptedEditorModule((context) -> this.buildModels(context));
+		return new AdaptedEditorModule();
 	}
 
 	/*
@@ -61,7 +61,7 @@ public abstract class AbstractEditorApplication extends Application {
 		AdaptedEditorModule module = this.createModule();
 
 		// Create the parent
-		Parent parent = module.createParent();
+		Parent parent = module.createParent((context) -> this.buildModels(context));
 
 		// Setup visuals
 		Scene scene = new Scene(parent);

@@ -112,7 +112,7 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 					tab.setContent(grid);
 
 					// Load the configuration
-					this.delegate.loadConfiguration(item, grid, this.delegate);
+					this.delegate.recursiveLoadConfiguration(item, null, grid, context.getErrorListener());
 				}
 
 				// Include the tab

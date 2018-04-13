@@ -10,10 +10,12 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>net.officefloor.eclipse.target</artifactId>
+	<name>Eclipse Target Platform</name>
+	<description>Configuration of the Eclipse Target Platform</description>
 	<packaging>pom</packaging>
 	<profiles>
 		<profile>
-			<id>gef-integration.target</id>
+			<id>OXYGEN.target</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -34,9 +36,9 @@
 									<artifacts>
 										<artifact>
 											<!-- note: the file name must be ${classifier}.target -->
-											<file>gef-integration.target</file>
+											<file>OXYGEN.target</file>
 											<type>target</type>
-											<classifier>gef-integration</classifier>
+											<classifier>OXYGEN</classifier>
 										</artifact>
 									</artifacts>
 								</configuration>

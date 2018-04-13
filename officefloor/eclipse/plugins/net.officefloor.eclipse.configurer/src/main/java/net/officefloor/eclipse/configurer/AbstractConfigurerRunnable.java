@@ -64,7 +64,7 @@ public abstract class AbstractConfigurerRunnable<M> implements Runnable {
 		shell.setLayout(new RowLayout());
 
 		// Load configuration to shell
-		configurer.loadConfiguration(model, shell);
+		configurer.loadConfiguration(model, shell, null);
 
 		// Run the display
 		shell.open();

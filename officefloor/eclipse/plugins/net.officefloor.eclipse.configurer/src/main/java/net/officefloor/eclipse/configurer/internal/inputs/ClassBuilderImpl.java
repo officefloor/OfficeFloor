@@ -31,16 +31,17 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.beans.property.Property;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
+import net.officefloor.eclipse.configurer.internal.MessageOnlyException;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 
@@ -49,13 +50,8 @@ import net.officefloor.eclipse.configurer.internal.ValueInputContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, ClassBuilder<M>>
+public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ClassBuilderImpl.ClassValueInput, ClassBuilder<M>>
 		implements ClassBuilder<M> {
-
-	/**
-	 * {@link Logger}
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ClassBuilderImpl.class);
 
 	/**
 	 * {@link IJavaProject}.
@@ -103,7 +99,7 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 	 */
 
 	@Override
-	protected ValueInput createInput(ValueInputContext<M, String> context) {
+	protected ClassValueInput createInput(ValueInputContext<M, String> context) {
 
 		// Obtain the value
 		Property<String> value = context.getInputValue();
@@ -150,21 +146,37 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 		TextField text = new TextField();
 		text.textProperty().bindBidirectional(value);
 		text.getStyleClass().add("configurer-input-class");
-		text.setOnKeyPressed((event) -> {
-			if ((event.isControlDown()) && (event.getCode() == KeyCode.SPACE)) {
-				this.doClassSelection(value);
-			}
-		});
+		HBox.setHgrow(text, Priority.ALWAYS);
 
 		// Provide button for suggestions
 		Button suggestion = new Button("...");
 		suggestion.getStyleClass().add("configurer-input-suggestion");
-		suggestion.setOnAction((event) -> this.doClassSelection(value));
 
-		// Return value input
+		// Create the value input
 		HBox pane = new HBox();
 		pane.getChildren().setAll(text, suggestion);
-		return () -> pane;
+		ClassValueInput valueInput = new ClassValueInput(pane);
+
+		// Hook in handlers
+		text.setOnKeyPressed((event) -> {
+			if ((event.isControlDown()) && (event.getCode() == KeyCode.SPACE)) {
+				this.doClassSelection(value, valueInput);
+			}
+		});
+		suggestion.setOnAction((event) -> this.doClassSelection(value, valueInput));
+
+		// Return the value input
+		return valueInput;
+	}
+
+	@Override
+	protected Node createErrorFeedback(ClassValueInput valueInput, Property<Throwable> errorProperty) {
+
+		// Hook in to error property for issues working with Java model
+		valueInput.errorProperty = errorProperty;
+
+		// Provide error feedback
+		return super.createErrorFeedback(valueInput, errorProperty);
 	}
 
 	/**
@@ -172,8 +184,10 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 	 * 
 	 * @param text
 	 *            {@link Property} for the text.
+	 * @param valueInput
+	 *            {@link ClassValueInput}.
 	 */
-	private void doClassSelection(Property<String> text) {
+	private void doClassSelection(Property<String> text, ClassValueInput valueInput) {
 		try {
 
 			// Obtain the text
@@ -214,11 +228,48 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, 
 
 			} else {
 				// Unknown type
-				LOGGER.warn("Selected item is not a java type: " + selectedItem);
+				valueInput.errorProperty.setValue(
+						new MessageOnlyException("Plugin Error: selected item is not of " + IType.class.getName() + " ["
+								+ (selectedItem == null ? null : selectedItem.getClass().getName()) + "]"));
 			}
 
 		} catch (Exception ex) {
-			LOGGER.error("Failed to select a java type", ex);
+			valueInput.errorProperty.setValue(new Exception("Plugin Error: " + ex.getMessage(), ex));
+		}
+	}
+
+	/**
+	 * {@link Class} {@link ValueInput}.
+	 */
+	public static class ClassValueInput implements ValueInput {
+
+		/**
+		 * {@link ValueInput} {@link Node}.
+		 */
+		private final Node inputNode;
+
+		/**
+		 * Error {@link Property}.
+		 */
+		private Property<Throwable> errorProperty;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param inputNode
+		 *            {@link ValueInput} {@link Node}.
+		 */
+		private ClassValueInput(Node inputNode) {
+			this.inputNode = inputNode;
+		}
+
+		/*
+		 * ============== ValueInput
+		 */
+
+		@Override
+		public Node getNode() {
+			return this.inputNode;
 		}
 	}
 

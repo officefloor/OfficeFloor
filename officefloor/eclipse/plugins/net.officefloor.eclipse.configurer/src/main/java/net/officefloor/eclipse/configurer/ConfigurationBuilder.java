@@ -27,11 +27,21 @@ import java.util.function.Consumer;
 public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 
 	/**
+	 * Validates the model.
+	 * 
+	 * @param validator
+	 *            {@link ValueValidator}.
+	 */
+	void validate(ValueValidator<M> validator);
+
+	/**
 	 * Configures a {@link Consumer} to apply the configured model.
 	 * 
+	 * @param label
+	 *            Label for the applying {@link Actioner}.
 	 * @param applier
 	 *            {@link Consumer} to apply the configured model.
 	 */
-	void apply(Consumer<M> applier);
+	void apply(String label, Consumer<M> applier);
 
 }

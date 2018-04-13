@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.configurer.internal;
 
+import net.officefloor.eclipse.configurer.ErrorListener;
+
 /**
  * Context for the {@link ValueRenderer}.
  * 
@@ -35,5 +37,12 @@ public interface ValueRendererContext<M> {
 	 * Triggered to refresh the error display.
 	 */
 	void refreshError();
+
+	/**
+	 * Obtains the {@link ErrorListener}.
+	 * 
+	 * @return {@link ErrorListener}.
+	 */
+	ErrorListener getErrorListener();
 
 }

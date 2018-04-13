@@ -12,10 +12,10 @@
 	<inceptionYear>2005</inceptionYear>
 	<licenses>
 		<license>
-			<name>GPL</name>
-			<url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+			<name>AGPL</name>
+			<url>http://www.gnu.org/licenses/agpl-3.0.en.html</url>
 			<distribution>repo</distribution>
-			<comments>GNU Public License</comments>
+			<comments>Affero General Public License</comments>
 		</license>
 	</licenses>
 	<issueManagement>
@@ -57,11 +57,7 @@
 		<module>server</module>
 		<module>web</module>
 		<module>eclipse</module>
-<!--  
-		<module>plugins</module>
-		<module>maven</module>
-		<module>tutorials</module>
--->
+		<!-- <module>plugins</module> <module>maven</module> <module>tutorials</module> -->
 	</modules>
 	<properties>
 		<current.year>2018</current.year>
@@ -183,12 +179,12 @@
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_configuration</artifactId>
 				<version>${project.version}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
 				<version>${project.version}</version>
-			</dependency>			
+			</dependency>
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
@@ -276,6 +272,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.javaproject</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -297,6 +298,16 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.configurer.test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.officefloor</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.launch</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -798,6 +809,23 @@
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>target-platform-configuration</artifactId>
 					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-compiler-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+						<extraClasspathElements>
+							<extraClasspathElement>
+								<groupId>com.oracle</groupId>
+								<artifactId>javafx</artifactId>
+								<version>8.0.0-SNAPSHOT</version>
+								<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+								<scope>system</scope>
+							</extraClasspathElement>
+						</extraClasspathElements>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>com.atlassian.maven.plugins</groupId>
