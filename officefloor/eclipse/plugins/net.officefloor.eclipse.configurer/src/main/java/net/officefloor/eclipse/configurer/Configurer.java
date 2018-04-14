@@ -49,7 +49,7 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	 *            Parent {@link Composite}.
 	 * @return {@link Configuration}.
 	 */
-	public Configuration loadConfiguration(M model, Composite parent, ErrorListener errorListener) {
+	public Configuration loadConfiguration(M model, Composite parent) {
 
 		// Create the FX Canvas
 		FXCanvas fxCanvas = new FXCanvas(parent, SWT.NONE) {
@@ -71,7 +71,7 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 		fxCanvas.setScene(scene);
 
 		// Load the configuration
-		return this.loadConfiguration(model, pane, errorListener);
+		return this.loadConfiguration(model, pane);
 	}
 
 	/**
@@ -83,14 +83,14 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	 *            {@link ObjectProperty}.
 	 * @return {@link Configuration}.
 	 */
-	public Configuration loadConfiguration(M model, Property<Node> nodeProperty, ErrorListener errorListener) {
+	public Configuration loadConfiguration(M model, Property<Node> nodeProperty) {
 
 		// Create pane for configuration components
 		Pane pane = new Pane();
 		nodeProperty.setValue(pane);
 
 		// Load the configuration
-		return this.loadConfiguration(model, pane, errorListener);
+		return this.loadConfiguration(model, pane);
 	}
 
 }

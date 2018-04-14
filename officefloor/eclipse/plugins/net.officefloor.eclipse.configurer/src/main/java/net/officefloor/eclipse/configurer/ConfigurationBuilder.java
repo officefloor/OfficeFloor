@@ -43,6 +43,14 @@ public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 	void validate(ValueValidator<M> validator);
 
 	/**
+	 * Specifies the {@link ErrorListener}.
+	 * 
+	 * @param errorListener
+	 *            {@link ErrorListener}.
+	 */
+	void error(ErrorListener errorListener);
+
+	/**
 	 * Configures a {@link Consumer} to apply the configured model.
 	 * 
 	 * @param label

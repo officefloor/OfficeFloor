@@ -17,52 +17,73 @@
  */
 package net.officefloor.eclipse.configurer.test;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+
+import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
 
 /**
- *
+ * Runs the example {@link ConfigurerDialog}.
+ * 
  * @author Daniel Sagenschneider
  */
-public class ExampleConfigurerDialog extends Application {
+public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 
 	/**
-	 * Instantiate.
+	 * Main to run the configurer.
 	 * 
 	 * @param args
 	 *            Command line arguments.
-	 * @throws Exception
-	 *             If fails to run.
 	 */
-	public static void main(String[] args) throws Exception {
-		launch(args);
+	public static void main(String[] args) {
+		new ExampleConfigurerDialog().run();
 	}
 
+	/*
+	 * ================ AbstractConfigurerRunnable ================
+	 */
+
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	protected void loadConfiguration(Shell shell) {
 
-		ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>("Example", "Test configuration");
+		// Provide button to open dialog
+		Button openDialog = new Button(shell, SWT.NONE);
+		openDialog.setText("Open Dialog");
+		openDialog.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				
+				// Create the dialog
+				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(shell);
 
-		ConfigurationBuilder<ExampleModel> builder = dialog;
-		builder.text("Text").init((m) -> m.text).setValue((m, value) -> m.text = value).validate((ctx) -> {
-			switch (ctx.getValue().getValue().length()) {
-			case 0:
-				throw new Exception("Test failure");
-			case 1:
-				ctx.setError("Text too short");
+				// Configure the dialog
+				ConfigurationBuilder<ExampleModel> builder = dialog;
+				builder.text("Text").init((m) -> m.text).setValue((m, value) -> m.text = value).validate((ctx) -> {
+					switch (ctx.getValue().getValue().length()) {
+					case 0:
+						throw new Exception("Test failure");
+					case 1:
+						ctx.setError("Text too short");
+					}
+				});
+
+				builder.flag("Flag").init((m) -> m.flag).setValue((m, value) -> m.flag = value);
+
+				builder.apply("Change", (model) -> {
+					System.out.println("Applying model:");
+					model.write(System.out);
+				});
+
+				// Show the dialog
+				dialog.open(new ExampleModel());
 			}
 		});
 
-		builder.flag("Flag").init((m) -> m.flag).setValue((m, value) -> m.flag = value);
-
-		builder.apply("Change", (model) -> {
-			System.out.println("Applying model:");
-			model.write(System.out);
-		});
-
-		dialog.configureModel(new ExampleModel());
 	}
 
 }

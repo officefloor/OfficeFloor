@@ -17,10 +17,13 @@
  */
 package net.officefloor.eclipse.configurer.test;
 
+import org.eclipse.swt.widgets.Shell;
+
 import javafx.collections.FXCollections;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.ValueLoader;
@@ -31,7 +34,7 @@ import net.officefloor.eclipse.configurer.test.ExampleModel.ExampleItem;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleModel> {
+public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 
 	/**
 	 * Main to run the configurer.
@@ -76,8 +79,12 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 	 */
 
 	@Override
-	protected void build(ConfigurationBuilder<ExampleModel> builder) {
-		
+	protected void loadConfiguration(Shell shell) {
+
+		// Create the configurer
+		Configurer<ExampleModel> configurer = new Configurer<>();
+		ConfigurationBuilder<ExampleModel> builder = configurer;
+
 		// Title
 		builder.title("Configuration");
 
@@ -151,24 +158,22 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable<ExampleMod
 		// Validate the model
 		builder.validate((context) -> {
 			ExampleModel model = context.getValue().getValue();
-			switch(model.properties.getPropertyNames().length) {
+			switch (model.properties.getPropertyNames().length) {
 			case 0:
 				throw new Exception("Model invalid");
 			case 1:
 				context.setError("Model requires more properties");
 			}
 		});
-		
+
 		// Allow applying configuration
 		builder.apply("Execute", (model) -> {
 			System.out.println("Applied model:");
 			model.write(System.out);
 		});
-	}
 
-	@Override
-	protected ExampleModel createModel() {
-		return new ExampleModel();
+		// Load the configuration
+		configurer.loadConfiguration(new ExampleModel(), shell);
 	}
 
 }

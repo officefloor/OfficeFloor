@@ -97,6 +97,6 @@ public class ExampleConfigurerView {
 		});
 
 		// Load model to view
-		configurer.loadConfiguration(new ExampleModel(), parent, null);
+		configurer.loadConfiguration(new ExampleModel(), parent);
 	}
 }

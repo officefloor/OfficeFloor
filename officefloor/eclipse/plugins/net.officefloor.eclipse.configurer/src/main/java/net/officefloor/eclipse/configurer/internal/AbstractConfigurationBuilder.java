@@ -114,6 +114,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	private ValueValidator<M> validator = null;
 
 	/**
+	 * {@link ErrorListener}.
+	 */
+	private ErrorListener errorListener = null;
+
+	/**
 	 * Label for the apply {@link Actioner}.
 	 */
 	private String applierLabel = null;
@@ -140,11 +145,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 *            Model.
 	 * @param configurationNode
 	 *            Configuration {@link Pane}.
-	 * @param errorListener
-	 *            {@link ErrorListener}.
 	 * @return {@link Configuration}.
 	 */
-	protected Configuration loadConfiguration(M model, Pane configurationNode, ErrorListener errorListener) {
+	protected Configuration loadConfiguration(M model, Pane configurationNode) {
 
 		// Load the default styling
 		configurationNode.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
@@ -173,6 +176,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		scroll.setContent(grid);
 
 		// Determine if provided an error listener
+		ErrorListener errorListener = this.errorListener;
 		if (errorListener == null) {
 
 			// Provide wrappers for action and error listening
@@ -325,6 +329,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	@Override
 	public void validate(ValueValidator<M> validator) {
 		this.validator = validator;
+	}
+
+	@Override
+	public void error(ErrorListener errorListener) {
+		this.errorListener = errorListener;
 	}
 
 	@Override
@@ -778,8 +787,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 		@Override
 		public String getTitle() {
-			// TODO Auto-generated method stub
-			return null;
+			return this.title;
 		}
 
 		@Override

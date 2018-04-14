@@ -27,22 +27,14 @@ import org.eclipse.swt.widgets.Shell;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractConfigurerRunnable<M> implements Runnable {
+public abstract class AbstractConfigurerRunnable implements Runnable {
 
 	/**
-	 * Builds the configuration.
+	 * Loads the configuration.
 	 * 
-	 * @param builder
-	 *            {@link ConfigurationBuilder}.
+	 * @return Configuration.
 	 */
-	protected abstract void build(ConfigurationBuilder<M> builder);
-
-	/**
-	 * Creates the model.
-	 * 
-	 * @return Model.
-	 */
-	protected abstract M createModel();
+	protected abstract void loadConfiguration(Shell shell);
 
 	/*
 	 * ==================== Runnable ==========================
@@ -51,20 +43,13 @@ public abstract class AbstractConfigurerRunnable<M> implements Runnable {
 	@Override
 	public void run() {
 
-		// Build the configuration
-		Configurer<M> configurer = new Configurer<>();
-		this.build(configurer);
-
-		// Load the model
-		M model = this.createModel();
-
 		// Create the SWT display with shell
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		shell.setLayout(new RowLayout());
 
 		// Load configuration to shell
-		configurer.loadConfiguration(model, shell, null);
+		this.loadConfiguration(shell);
 
 		// Run the display
 		shell.open();

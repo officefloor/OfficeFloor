@@ -129,11 +129,11 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 					
 					Shell shell = this.getEditorSite().getShell();
 
-					ConfigurerDialog<DeployedOfficeConfiguration> dialog = new ConfigurerDialog<>("Add",
-							"Add " + DeployedOfficeModel.class.getSimpleName());
-					DeployedOfficeConfiguration configuration = new DeployedOfficeConfiguration();
-					configuration.loadAddConfiguration(dialog, ctx, shell, this.getJavaProjectOfficeFloorCompiler());
-					dialog.configureModel(configuration);
+//					ConfigurerDialog<DeployedOfficeConfiguration> dialog = new ConfigurerDialog<>("Add",
+//							"Add " + DeployedOfficeModel.class.getSimpleName());
+//					DeployedOfficeConfiguration configuration = new DeployedOfficeConfiguration();
+//					configuration.loadAddConfiguration(dialog, ctx, shell, this.getJavaProjectOfficeFloorCompiler());
+//					dialog.configureModel(configuration);
 
 				} catch (Exception ex) {
 					
