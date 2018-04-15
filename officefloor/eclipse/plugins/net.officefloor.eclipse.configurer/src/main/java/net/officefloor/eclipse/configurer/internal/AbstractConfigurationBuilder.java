@@ -31,8 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -53,11 +52,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
+import net.officefloor.eclipse.configurer.CloseListener;
 import net.officefloor.eclipse.configurer.Configuration;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.DefaultImages;
@@ -86,7 +85,7 @@ import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> {
+public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> {
 
 	/**
 	 * CSS class applied to {@link GridPane} in wide view.
@@ -102,6 +101,16 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 * Listing of the {@link ValueRendererFactory} instances.
 	 */
 	private final List<ValueRendererFactory<M, ? extends ValueInput>> rendererFactories = new ArrayList<>();
+
+	/**
+	 * {@link IJavaProject}.
+	 */
+	private final IJavaProject javaProject;
+
+	/**
+	 * Parent {@link Shell} for dialogs.
+	 */
+	private final Shell parentShell;
 
 	/**
 	 * Title.
@@ -129,6 +138,52 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	private Consumer<M> applier = null;
 
 	/**
+	 * {@link CloseListener}.
+	 */
+	private CloseListener closeListener = null;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param javaProject
+	 *            {@link IJavaProject}. May be <code>null</code> if no class path
+	 *            items are configured.
+	 * @param parentShell
+	 *            Parent {@link Shell}. May be <code>null</code> if no dialog
+	 *            configuration required.
+	 */
+	public AbstractConfigurationBuilder(IJavaProject javaProject, Shell parentShell) {
+		this.javaProject = javaProject;
+		this.parentShell = parentShell;
+	}
+
+	/**
+	 * Obtains the {@link IJavaProject}.
+	 * 
+	 * @return {@link IJavaProject}.
+	 */
+	public IJavaProject getJavaProject() {
+		if (this.javaProject == null) {
+			throw new IllegalStateException("Not initialised against an " + IJavaProject.class.getSimpleName()
+					+ " but requiring class path configuration item");
+		}
+		return this.javaProject;
+	}
+
+	/**
+	 * Obtains the parent {@link Shell}.
+	 * 
+	 * @return Parent {@link Shell}.
+	 */
+	public Shell getParentShell() {
+		if (this.parentShell == null) {
+			throw new IllegalStateException("Not initialised against a parent " + Shell.class.getSimpleName()
+					+ " but requiring dialog based configuration");
+		}
+		return this.parentShell;
+	}
+
+	/**
 	 * Obtain the list of {@link ValueRendererFactory} instances.
 	 * 
 	 * @return {@link ValueRendererFactory} instances.
@@ -150,12 +205,17 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	protected Configuration loadConfiguration(M model, Pane configurationNode) {
 
 		// Load the default styling
-		configurationNode.getScene().getStylesheets().add(this.getClass().getName().replace('.', '/') + ".css");
+		configurationNode.getScene().getStylesheets()
+				.add(AbstractConfigurationBuilder.class.getPackage().getName().replace('.', '/') + "/Configurer.css");
+
+		// Create the dirty and valid properties
+		Property<Boolean> dirtyProperty = new SimpleBooleanProperty(false);
+		Property<Boolean> validProperty = new SimpleBooleanProperty(true);
 
 		// Create the actioner
 		Actioner actioner = null;
 		if (this.applier != null) {
-			actioner = new ActionerImpl<>(model, this.applierLabel, this.applier);
+			actioner = new ActionerImpl<>(model, this.applierLabel, this.applier, dirtyProperty, this.closeListener);
 		}
 
 		// Scroll both narrow and wide views
@@ -187,7 +247,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 			// Create the error listener
 			DefaultErrorListener<M> defaultErrorListener = new DefaultErrorListener<>(this.title, actioner, wrapper,
-					scroll);
+					scroll, this.closeListener, dirtyProperty);
 			errorListener = defaultErrorListener;
 
 			// Bind height of scroll (minus header)
@@ -208,7 +268,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		configurationNode.applyCss();
 
 		// Load the configuration to grid
-		return this.recursiveLoadConfiguration(model, configurationNode, grid, actioner, errorListener);
+		return this.recursiveLoadConfiguration(model, configurationNode, grid, actioner, dirtyProperty, validProperty,
+				errorListener);
 	}
 
 	/**
@@ -220,18 +281,24 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 *            Configuration {@link Node}.
 	 * @param grid
 	 *            {@link GridPane}.
-	 * @param parentConfigurationBuilder
-	 *            Parent {@link AbstractConfigurationBuilder}
+	 * @param actioner
+	 *            {@link Actioner}.
+	 * @param dirtyProperty
+	 *            Dirty {@link Property}.
+	 * @param validProperty
+	 *            Valid {@link Property}.
+	 * @param errorListener
+	 *            {@link ErrorListener}.
 	 */
 	public Configuration recursiveLoadConfiguration(M model, Node configurationNode, GridPane grid, Actioner actioner,
-			ErrorListener errorListener) {
+			Property<Boolean> dirtyProperty, Property<Boolean> validProperty, ErrorListener errorListener) {
 
 		// Apply CSS (so Scene available to inputs)
 		grid.applyCss();
 
 		// Load the value render list
 		ValueLister<M> lister = new ValueLister<>(model, this.validator, configurationNode, grid, this.title,
-				errorListener, actioner, this.getValueRendererFactories(), null);
+				dirtyProperty, validProperty, errorListener, actioner, this.getValueRendererFactories(), null);
 		lister.organiseWide(1); // ensure initially organised
 
 		// Responsive view
@@ -276,8 +343,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	 */
 
 	@Override
-	public void title(String title) {
+	public ConfigurationBuilder<M> title(String title) {
 		this.title = title;
+		return this;
 	}
 
 	@Override
@@ -292,7 +360,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 	@Override
 	public ChoiceBuilder<M> choices(String label) {
-		return this.registerBuilder(new ChoiceBuilderImpl<>(label));
+		return this.registerBuilder(new ChoiceBuilderImpl<>(label, this.javaProject, this.parentShell));
 	}
 
 	@Override
@@ -302,7 +370,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 	@Override
 	public <I> MultipleBuilder<M, I> multiple(String label, Class<I> itemType) {
-		return this.registerBuilder(new MultipleBuilderImpl<>(label));
+		return this.registerBuilder(new MultipleBuilderImpl<>(label, this.javaProject, this.parentShell));
 	}
 
 	@Override
@@ -317,13 +385,13 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	}
 
 	@Override
-	public ClassBuilder<M> clazz(String label, IJavaProject javaProject, Shell shell) {
-		return this.registerBuilder(new ClassBuilderImpl<>(label, javaProject, shell));
+	public ClassBuilder<M> clazz(String label) {
+		return this.registerBuilder(new ClassBuilderImpl<>(label, this.getJavaProject(), this.getParentShell()));
 	}
 
 	@Override
-	public ResourceBuilder<M> resource(String label, IJavaProject javaProject, Shell shell) {
-		return this.registerBuilder(new ResourceBuilderImpl<>(label, javaProject, shell));
+	public ResourceBuilder<M> resource(String label) {
+		return this.registerBuilder(new ResourceBuilderImpl<>(label, this.getJavaProject(), this.getParentShell()));
 	}
 
 	@Override
@@ -343,6 +411,11 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		}
 		this.applierLabel = label;
 		this.applier = applier;
+	}
+
+	@Override
+	public void close(CloseListener closeListener) {
+		this.closeListener = closeListener;
 	}
 
 	/**
@@ -376,9 +449,14 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		private final GridPane grid;
 
 		/**
+		 * Indicates whether configuration is dirty.
+		 */
+		private final Property<Boolean> dirtyProperty;
+
+		/**
 		 * Indicates whether configuration is valid.
 		 */
-		private final BooleanProperty validProperty = new SimpleBooleanProperty(true);
+		private final Property<Boolean> validProperty;
 
 		/**
 		 * {@link ErrorListener}.
@@ -428,6 +506,10 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 *            {@link GridPane}.
 		 * @param title
 		 *            Title.
+		 * @param dirtyProperty
+		 *            Dirty {@link Property}.
+		 * @param validProperty
+		 *            Valid {@link Property}.
 		 * @param errorListener
 		 *            {@link ErrorListener}.
 		 * @param actioner
@@ -442,12 +524,15 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 */
 		@SuppressWarnings("unchecked")
 		public ValueLister(M model, ValueValidator<M> modelValidator, Node configurationNode, GridPane grid,
-				String title, ErrorListener errorListener, Actioner actioner,
+				String title, Property<Boolean> dirtyProperty, Property<Boolean> validProperty,
+				ErrorListener errorListener, Actioner actioner,
 				ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories, ValueLister<M> prevLister) {
 			this.model = model;
 			this.modelValidator = modelValidator;
 			this.configuartionNode = configurationNode;
 			this.grid = grid;
+			this.dirtyProperty = dirtyProperty;
+			this.validProperty = validProperty;
 			this.errorListener = errorListener;
 			this.actioner = actioner;
 			this.title = title;
@@ -514,7 +599,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 							if (choice == null) {
 								// No choice selected, so carry on with renderers
 								this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
-										grid, this.title, this.errorListener, this.actioner, splitRenderers, this);
+										grid, this.title, this.dirtyProperty, this.validProperty, this.errorListener,
+										this.actioner, splitRenderers, this);
 
 							} else {
 								// Have choice, so create concat list of remaining
@@ -529,7 +615,8 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 									remainingRenderers[choiceRenderers.length + s] = splitRenderers[s];
 								}
 								this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
-										grid, this.title, this.errorListener, this.actioner, remainingRenderers, this);
+										grid, this.title, this.dirtyProperty, this.validProperty, this.errorListener,
+										this.actioner, remainingRenderers, this);
 							}
 
 							// Organise choice changes
@@ -737,7 +824,7 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			}
 
 			// Indicate if valid
-			this.validProperty.set(errorInput == null);
+			this.validProperty.setValue(errorInput == null);
 
 			// Determine if error
 			if (errorInput == null) {
@@ -791,7 +878,12 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		}
 
 		@Override
-		public ReadOnlyBooleanProperty validProperty() {
+		public Property<Boolean> dirtyProperty() {
+			return this.dirtyProperty;
+		}
+
+		@Override
+		public Property<Boolean> validProperty() {
 			return this.validProperty;
 		}
 
@@ -825,6 +917,16 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		private final Consumer<M> applier;
 
 		/**
+		 * Dirty {@link Property}.
+		 */
+		private final Property<Boolean> dirtyProperty;
+
+		/**
+		 * {@link CloseListener}.
+		 */
+		private final CloseListener closeListener;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param model
@@ -833,11 +935,18 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 *            Label.
 		 * @param applier
 		 *            Applier.
+		 * @param dirtyProperty
+		 *            Dirty {@link Property}.
+		 * @param closeListner
+		 *            {@link CloseListener}.
 		 */
-		private ActionerImpl(M model, String label, Consumer<M> applier) {
+		private ActionerImpl(M model, String label, Consumer<M> applier, Property<Boolean> dirtyProperty,
+				CloseListener closeListner) {
 			this.model = model;
 			this.label = label;
 			this.applier = applier;
+			this.dirtyProperty = dirtyProperty;
+			this.closeListener = closeListner;
 		}
 
 		/*
@@ -851,7 +960,17 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 		@Override
 		public void action() {
+
+			// Apply the model
 			this.applier.accept(this.model);
+
+			// No longer dirty
+			this.dirtyProperty.setValue(false);
+
+			// Notify that applied
+			if (this.closeListener != null) {
+				this.closeListener.applied();
+			}
 		}
 	}
 
@@ -958,14 +1077,9 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 	private static class DefaultErrorListener<M> implements ErrorListener {
 
 		/**
-		 * {@link Actioner}.
-		 */
-		private final Actioner actioner;
-
-		/**
 		 * Header.
 		 */
-		private final StackPane header = new StackPane();
+		private final GridPane header = new GridPane();
 
 		/**
 		 * Valid header.
@@ -1008,19 +1122,24 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 		 *            {@link GridPane}.
 		 * @param scroll
 		 *            {@link ScrollPane}.
+		 * @param closeListener
+		 *            {@link CloseListener}.
+		 * @param dirtyProperty
+		 *            Dirty {@link Property}.
 		 */
-		private DefaultErrorListener(String title, Actioner actioner, VBox wrapper, ScrollPane scroll) {
-			this.actioner = actioner;
+		private DefaultErrorListener(String title, Actioner actioner, VBox wrapper, ScrollPane scroll,
+				CloseListener closeListener, Property<Boolean> dirtyProperty) {
 
 			// Style the header
-			this.header.getStyleClass().setAll("header-panel", "button-bar", "configurer-header");
+			this.header.getStyleClass().setAll("header-panel", "dialog-pane", "button-bar", "configurer-header");
 
 			// Provide the error header
 			this.errorHeader = new HBox(10.0);
 			this.errorHeader.getStyleClass().setAll("error");
 			this.errorHeader.alignmentProperty().setValue(Pos.CENTER_LEFT);
-			this.header.getChildren().add(this.errorHeader);
 			this.errorHeader.setVisible(false);
+			GridPane.setHgrow(this.errorHeader, Priority.ALWAYS);
+			this.header.add(this.errorHeader, 0, 0);
 
 			// Provide the error header details
 			this.errorLabel = new Label();
@@ -1029,15 +1148,16 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 
 			// Provide the valid header
 			this.validHeader = new HBox(10.0);
+			this.validHeader.getStyleClass().setAll("valid");
 			this.validHeader.alignmentProperty().setValue(Pos.CENTER_LEFT);
-			this.header.getChildren().add(this.validHeader);
-			this.validHeader.setVisible(true);
+			GridPane.setHgrow(this.validHeader, Priority.ALWAYS);
+			this.header.add(this.validHeader, 0, 0);
 
 			// Provide valid header details
-			if (this.actioner != null) {
-				Button actionButton = new Button(this.actioner.getLabel());
+			if (actioner != null) {
+				Button actionButton = new Button(actioner.getLabel());
 				actionButton.pseudoClassStateChanged(PseudoClass.getPseudoClass("default"), true);
-				actionButton.setOnAction((event) -> this.actioner.action());
+				actionButton.setOnAction((event) -> actioner.action());
 				this.validHeader.getChildren().add(actionButton);
 			}
 			if (title != null) {
@@ -1071,7 +1191,29 @@ public class AbstractConfigurationBuilder<M> implements ConfigurationBuilder<M> 
 			this.stackTraceToggle.getChildren().add(stackTraceToggle);
 			this.stackTraceToggle.getStyleClass().setAll("container");
 			this.stackTraceToggle.alignmentProperty().setValue(Pos.CENTER_RIGHT);
-			this.header.getChildren().add(this.stackTraceToggle);
+
+			// Determine if cancel button
+			if (closeListener == null) {
+				// Just details (no cancel button)
+				this.header.add(this.stackTraceToggle, 1, 0);
+
+			} else {
+				// Provide cancel button
+				Button cancelButton = new Button("Cancel");
+				cancelButton.alignmentProperty().setValue(Pos.CENTER_RIGHT);
+				cancelButton.setOnAction((event) -> closeListener.cancelled());
+				cancelButton.setCancelButton(true);
+				cancelButton.visibleProperty().bind(dirtyProperty);
+
+				// Provide close button and details
+				HBox cancelHeader = new HBox(10.0);
+				cancelHeader.setPrefWidth(10.0);
+				cancelHeader.getStyleClass().setAll("button-bar", "cancel");
+				cancelHeader.alignmentProperty().setValue(Pos.CENTER_RIGHT);
+				cancelHeader.getChildren().setAll(this.stackTraceToggle, cancelButton);
+				GridPane.setHgrow(cancelHeader, Priority.ALWAYS);
+				this.header.add(cancelHeader, 1, 0);
+			}
 		}
 
 		/*

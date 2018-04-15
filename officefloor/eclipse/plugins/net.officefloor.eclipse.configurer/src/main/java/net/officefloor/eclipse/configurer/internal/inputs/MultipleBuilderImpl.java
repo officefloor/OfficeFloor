@@ -56,7 +56,7 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	/**
 	 * Delegate {@link AbstractConfigurationBuilder}.
 	 */
-	private final AbstractConfigurationBuilder<V> delegate = new AbstractConfigurationBuilder<>();
+	private final AbstractConfigurationBuilder<V> delegate;
 
 	/**
 	 * {@link Function} to obtain the label for the item. Default implementation
@@ -69,9 +69,17 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	 * 
 	 * @param label
 	 *            Label.
+	 * @param javaProject
+	 *            {@link IJavaProject}.
+	 * @param shell
+	 *            {@link Shell}.
 	 */
-	public MultipleBuilderImpl(String label) {
+	public MultipleBuilderImpl(String label, IJavaProject javaProject, Shell shell) {
 		super(label);
+
+		// Create the delegate configuration builder
+		this.delegate = new AbstractConfigurationBuilder<V>(javaProject, shell) {
+		};
 	}
 
 	/*
@@ -113,7 +121,7 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 
 					// Load the configuration
 					this.delegate.recursiveLoadConfiguration(item, null, grid, context.getOptionalActioner(),
-							context.getErrorListener());
+							context.dirtyProperty(), context.validProperty(), context.getErrorListener());
 				}
 
 				// Include the tab
@@ -174,13 +182,13 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	}
 
 	@Override
-	public ClassBuilder<V> clazz(String label, IJavaProject javaProject, Shell shell) {
-		return this.delegate.clazz(label, javaProject, shell);
+	public ClassBuilder<V> clazz(String label) {
+		return this.delegate.clazz(label);
 	}
 
 	@Override
-	public ResourceBuilder<V> resource(String label, IJavaProject javaProject, Shell shell) {
-		return this.delegate.resource(label, javaProject, shell);
+	public ResourceBuilder<V> resource(String label) {
+		return this.delegate.resource(label);
 	}
 
 	@Override

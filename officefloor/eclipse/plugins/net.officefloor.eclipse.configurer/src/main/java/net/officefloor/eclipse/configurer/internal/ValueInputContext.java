@@ -64,6 +64,20 @@ public interface ValueInputContext<M, V> {
 	Actioner getOptionalActioner();
 
 	/**
+	 * Obtains the dirty {@link Property}.
+	 * 
+	 * @return Dirty {@link Property}.
+	 */
+	Property<Boolean> dirtyProperty();
+
+	/**
+	 * Obtains the valid {@link Property}.
+	 * 
+	 * @return Valid {@link Property}.
+	 */
+	Property<Boolean> validProperty();
+
+	/**
 	 * Obtains the {@link ErrorListener}.
 	 * 
 	 * @return {@link ErrorListener}.

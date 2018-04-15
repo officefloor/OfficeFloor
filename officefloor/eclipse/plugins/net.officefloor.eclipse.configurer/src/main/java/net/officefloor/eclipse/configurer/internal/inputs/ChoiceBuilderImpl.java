@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.swt.widgets.Shell;
+
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
@@ -44,6 +47,16 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 		implements ChoiceBuilder<M> {
 
 	/**
+	 * {@link IJavaProject}.
+	 */
+	private final IJavaProject javaProject;
+
+	/**
+	 * Parent {@link Shell}.
+	 */
+	private final Shell parentShell;
+
+	/**
 	 * {@link ChoiceConfigurationBuilder} instances.
 	 */
 	private final List<ChoiceConfigurationBuilder> choices = new ArrayList<>();
@@ -53,9 +66,15 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 	 * 
 	 * @param label
 	 *            Label.
+	 * @param javaProject
+	 *            {@link IJavaProject}.
+	 * @param parentShell
+	 *            Parent {@link Shell}.
 	 */
-	public ChoiceBuilderImpl(String label) {
+	public ChoiceBuilderImpl(String label, IJavaProject javaProject, Shell parentShell) {
 		super(label);
+		this.javaProject = javaProject;
+		this.parentShell = parentShell;
 	}
 
 	/*
@@ -187,6 +206,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 		 *            Label.
 		 */
 		public ChoiceConfigurationBuilder(String label) {
+			super(ChoiceBuilderImpl.this.javaProject, ChoiceBuilderImpl.this.parentShell);
 			this.label = label;
 		}
 	}

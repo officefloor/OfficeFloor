@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.configurer.internal;
 
+import javafx.beans.property.Property;
 import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.ErrorListener;
 
@@ -46,6 +47,20 @@ public interface ValueRendererContext<M> {
 	 *         configuration.
 	 */
 	Actioner getOptionalActioner();
+
+	/**
+	 * Obtains the dirty {@link Property}.
+	 * 
+	 * @return Dirty {@link Property}.
+	 */
+	Property<Boolean> dirtyProperty();
+
+	/**
+	 * Obtains the valid {@link Property}.
+	 * 
+	 * @return Valid {@link Property}.
+	 */
+	Property<Boolean> validProperty();
 
 	/**
 	 * Obtains the {@link ErrorListener}.

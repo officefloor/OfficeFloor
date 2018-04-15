@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.officefloor;
+package net.officefloor.eclipse.section;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -34,27 +34,28 @@ import com.google.inject.Injector;
 import com.google.inject.util.Modules;
 
 import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
-import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
-import net.officefloor.model.officefloor.DeployedOfficeModel;
-import net.officefloor.model.officefloor.DeployedOfficeModel.DeployedOfficeEvent;
-import net.officefloor.model.officefloor.OfficeFloorChanges;
+import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeFloorModel.OfficeFloorEvent;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
+import net.officefloor.model.section.SectionChanges;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SectionModel.SectionEvent;
 
 /**
  * {@link OfficeFloorModel} editor.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorEditor extends AbstractFXEditor {
+public class SectionEditor extends AbstractFXEditor {
 
 	/**
 	 * {@link Injector}.
@@ -77,7 +78,7 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 	 * @param injector
 	 *            {@link Injector}.
 	 */
-	private OfficeFloorEditor(Injector injector) {
+	private SectionEditor(Injector injector) {
 		super(injector);
 		this.injector = injector;
 	}
@@ -88,7 +89,7 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 	 * @param module
 	 *            {@link AdaptedEditorModule}.
 	 */
-	private OfficeFloorEditor(AdaptedEditorModule module) {
+	private SectionEditor(AdaptedEditorModule module) {
 		this(Guice.createInjector(Modules.override(module).with(new MvcFxUiModule())));
 		this.module = module;
 	}
@@ -99,7 +100,7 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 	 * @param adaptedBuilder
 	 *            {@link AdaptedBuilder}.
 	 */
-	public OfficeFloorEditor() {
+	public SectionEditor() {
 		this(new AdaptedEditorModule());
 
 		// Initialise the module
@@ -114,27 +115,29 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 	protected AdaptedBuilder getAdaptedBuilder() {
 		return (context) -> {
 
-			AdaptedRootBuilder<OfficeFloorModel, OfficeFloorChanges> root = context.root(OfficeFloorModel.class,
-					(m) -> new OfficeFloorChangesImpl(m));
+			AdaptedRootBuilder<SectionModel, SectionChanges> root = context.root(SectionModel.class,
+					(m) -> new SectionChangesImpl(m));
 
-			// Configure the Deployed Office
-			AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, DeployedOfficeEvent> office = root
-					.parent(new DeployedOfficeModel("Office", null, null), (m) -> m.getDeployedOffices(), (m, ctx) -> {
-						VBox visual = new VBox();
-						ctx.label(visual);
-						return visual;
-					}, OfficeFloorEvent.ADD_DEPLOYED_OFFICE, OfficeFloorEvent.REMOVE_DEPLOYED_OFFICE);
-			office.create((ctx) -> {
+			AdaptedParentBuilder<SectionModel, SectionChanges, ExternalFlowModel, ExternalFlowEvent> externalFlow = root
+					.parent(new ExternalFlowModel("External Flow", null), (m) -> m.getExternalFlows(),
+							(parent, ctx) -> {
+								HBox container = new HBox();
+								ctx.label(container);
+								return container;
+							}, SectionEvent.ADD_EXTERNAL_FLOW, SectionEvent.REMOVE_EXTERNAL_FLOW);
+			externalFlow.label((m) -> m.getExternalFlowName(), ExternalFlowEvent.CHANGE_EXTERNAL_FLOW_NAME);
+			externalFlow.create((ctx) -> {
 				try {
 
 					// Obtain details for dialog
-					IJavaProject javaProject = this.getJavaProjectBridge().getJavaProject();
+					OfficeFloorJavaProjectBridge bridge = this.getJavaProjectBridge();
+					IJavaProject javaProject = bridge.getJavaProject();
 					Shell shell = this.getEditorSite().getShell();
 
 					// Create dialog to add Office
-					ConfigurerDialog<DeployedOfficeConfiguration> dialog = new ConfigurerDialog<>(javaProject, shell);
-					DeployedOfficeConfiguration configuration = new DeployedOfficeConfiguration();
-					configuration.loadAddConfiguration(dialog, ctx, this.getJavaProjectBridge());
+					ConfigurerDialog<ExternalFlowConfiguration> dialog = new ConfigurerDialog<>(javaProject, shell);
+					ExternalFlowConfiguration configuration = new ExternalFlowConfiguration();
+					configuration.loadAddConfiguration(dialog, ctx, bridge);
 					dialog.open(configuration);
 
 				} catch (Exception ex) {
@@ -144,7 +147,6 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 					ex.printStackTrace();
 				}
 			});
-			office.label((m) -> m.getDeployedOfficeName(), DeployedOfficeEvent.CHANGE_DEPLOYED_OFFICE_NAME);
 
 		};
 	}
@@ -209,7 +211,7 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 		super.activate();
 
 		// Load the module
-		this.module.loadRootModel(new OfficeFloorModel());
+		this.module.loadRootModel(new SectionModel());
 	}
 
 	@Override
@@ -227,14 +229,13 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 	}
 
 	@Override
-	public void doSaveAs() {
-		// TODO Auto-generated method stub
-
+	public boolean isSaveAsAllowed() {
+		return false;
 	}
 
 	@Override
-	public boolean isSaveAsAllowed() {
-		return true;
+	public void doSaveAs() {
+		// Not able to save as
 	}
 
 }

@@ -17,29 +17,15 @@
  */
 package net.officefloor.eclipse.configurer.dialog;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import javafx.collections.ObservableList;
-import net.officefloor.eclipse.configurer.ChoiceBuilder;
-import net.officefloor.eclipse.configurer.ClassBuilder;
+import net.officefloor.eclipse.configurer.CloseListener;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
-import net.officefloor.eclipse.configurer.ErrorListener;
-import net.officefloor.eclipse.configurer.FlagBuilder;
-import net.officefloor.eclipse.configurer.ListBuilder;
-import net.officefloor.eclipse.configurer.MappingBuilder;
-import net.officefloor.eclipse.configurer.MultipleBuilder;
-import net.officefloor.eclipse.configurer.PropertiesBuilder;
-import net.officefloor.eclipse.configurer.ResourceBuilder;
-import net.officefloor.eclipse.configurer.TextBuilder;
-import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.model.Model;
 
 /**
@@ -47,7 +33,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConfigurerDialog<M> implements ConfigurationBuilder<M> {
+public class ConfigurerDialog<M> extends Configurer<M> implements ConfigurationBuilder<M> {
 
 	/**
 	 * {@link Shell}.
@@ -55,17 +41,15 @@ public class ConfigurerDialog<M> implements ConfigurationBuilder<M> {
 	private final Shell parentShell;
 
 	/**
-	 * {@link Configurer}.
-	 */
-	private final Configurer<M> configurer = new Configurer<>();
-
-	/**
 	 * Instantiate.
 	 * 
+	 * @param javaProject
+	 *            {@link IJavaProject}.
 	 * @param parentShell
 	 *            {@link Shell}.
 	 */
-	public ConfigurerDialog(Shell parentShell) {
+	public ConfigurerDialog(IJavaProject javaProject, Shell parentShell) {
+		super(javaProject, parentShell);
 		this.parentShell = parentShell;
 	}
 
@@ -78,90 +62,35 @@ public class ConfigurerDialog<M> implements ConfigurationBuilder<M> {
 	public void open(M model) {
 
 		// Create dialog shell
-		Shell dialog = new Shell(this.parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		Shell dialog = new Shell(this.parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		dialog.setLayout(new RowLayout());
 
+		// Handle closing dialog
+		this.close(new CloseListener() {
+
+			@Override
+			public void cancelled() {
+				dialog.close();
+			}
+
+			@Override
+			public void applied() {
+				dialog.close();
+			}
+		});
+
 		// Load configuration
-		this.configurer.loadConfiguration(model, dialog);
+		this.loadConfiguration(model, dialog);
 
 		// Display dialog
 		dialog.pack();
 		dialog.open();
-		Display display = dialog.getDisplay();
+		Display display = this.parentShell.getDisplay();
 		while (!dialog.isDisposed()) {
-			if (!display.readAndDispatch())
+			if (!display.readAndDispatch()) {
 				display.sleep();
+			}
 		}
-	}
-
-	/*
-	 * =============== ConfigurationBuilder ====================
-	 */
-
-	@Override
-	public void title(String title) {
-		this.configurer.title(title);
-	}
-
-	@Override
-	public ChoiceBuilder<M> choices(String label) {
-		return this.configurer.choices(label);
-	}
-
-	@Override
-	public <I> ListBuilder<M, I> list(String label, Class<I> itemType) {
-		return this.configurer.list(label, itemType);
-	}
-
-	@Override
-	public <I> MultipleBuilder<M, I> multiple(String label, Class<I> itemType) {
-		return this.configurer.multiple(label, itemType);
-	}
-
-	@Override
-	public PropertiesBuilder<M> properties(String label) {
-		return this.configurer.properties(label);
-	}
-
-	@Override
-	public MappingBuilder<M> map(String label, Function<M, ObservableList<String>> getSources,
-			Function<M, ObservableList<String>> getTargets) {
-		return this.configurer.map(label, getSources, getTargets);
-	}
-
-	@Override
-	public ClassBuilder<M> clazz(String label, IJavaProject javaProject, Shell shell) {
-		return this.configurer.clazz(label, javaProject, shell);
-	}
-
-	@Override
-	public ResourceBuilder<M> resource(String label, IJavaProject javaProject, Shell shell) {
-		return this.configurer.resource(label, javaProject, shell);
-	}
-
-	@Override
-	public TextBuilder<M> text(String label) {
-		return this.configurer.text(label);
-	}
-
-	@Override
-	public FlagBuilder<M> flag(String label) {
-		return this.configurer.flag(label);
-	}
-
-	@Override
-	public void validate(ValueValidator<M> validator) {
-		this.configurer.validate(validator);
-	}
-
-	@Override
-	public void error(ErrorListener errorListener) {
-		this.configurer.error(errorListener);
-	}
-
-	@Override
-	public void apply(String label, Consumer<M> applier) {
-		this.configurer.apply(label, applier);
 	}
 
 }

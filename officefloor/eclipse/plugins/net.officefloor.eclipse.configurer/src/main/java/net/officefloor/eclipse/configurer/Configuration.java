@@ -17,7 +17,8 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 
 /**
@@ -42,12 +43,18 @@ public interface Configuration {
 	String getTitle();
 
 	/**
+	 * Indicates if configuration has been changed.
+	 * 
+	 * @return {@link Property} to indicate if the configuration has been changed.
+	 */
+	Property<Boolean> dirtyProperty();
+
+	/**
 	 * Indicates if the configuration is valid.
 	 * 
-	 * @return {@link ReadOnlyBooleanProperty} to indicate if the configuration is
-	 *         valid.
+	 * @return {@link ReadOnlyProperty} to indicate if the configuration is valid.
 	 */
-	ReadOnlyBooleanProperty validProperty();
+	Property<Boolean> validProperty();
 
 	/**
 	 * <p>

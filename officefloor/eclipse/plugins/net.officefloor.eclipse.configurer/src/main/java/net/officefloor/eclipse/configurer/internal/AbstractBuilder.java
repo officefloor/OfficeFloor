@@ -273,6 +273,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
 				this.value.setValue(initialValue);
 			}
+
+			// Track model becoming dirty
+			this.value.addListener((event) -> context.dirtyProperty().setValue(true));
 		}
 
 		/**
@@ -337,6 +340,16 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		@Override
 		public Actioner getOptionalActioner() {
 			return this.context.getOptionalActioner();
+		}
+
+		@Override
+		public Property<Boolean> dirtyProperty() {
+			return this.context.dirtyProperty();
+		}
+
+		@Override
+		public Property<Boolean> validProperty() {
+			return this.context.validProperty();
 		}
 
 		@Override

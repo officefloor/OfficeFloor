@@ -503,6 +503,16 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		}
 
 		@Override
+		public Property<Boolean> dirtyProperty() {
+			return this.context.dirtyProperty();
+		}
+
+		@Override
+		public Property<Boolean> validProperty() {
+			return this.context.validProperty();
+		}
+
+		@Override
 		public ErrorListener getErrorListener() {
 			return this.context.getErrorListener();
 		}

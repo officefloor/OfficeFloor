@@ -57,12 +57,14 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 		openDialog.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				
+
 				// Create the dialog
-				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(shell);
+				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(null, shell);
+				ConfigurationBuilder<ExampleModel> builder = dialog;
 
 				// Configure the dialog
-				ConfigurationBuilder<ExampleModel> builder = dialog;
+				builder.title("Example");
+
 				builder.text("Text").init((m) -> m.text).setValue((m, value) -> m.text = value).validate((ctx) -> {
 					switch (ctx.getValue().getValue().length()) {
 					case 0:
@@ -80,7 +82,9 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 				});
 
 				// Show the dialog
-				dialog.open(new ExampleModel());
+				ExampleModel model = new ExampleModel();
+				model.text = "test";
+				dialog.open(model);
 			}
 		});
 

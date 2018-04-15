@@ -20,9 +20,6 @@ package net.officefloor.eclipse.configurer;
 import java.util.Properties;
 import java.util.function.Function;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.swt.widgets.Shell;
-
 import javafx.collections.ObservableList;
 import net.officefloor.compile.properties.PropertyList;
 
@@ -92,25 +89,17 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
-	 * @param shell
-	 *            {@link Shell}.
 	 * @return {@link ClassBuilder}.
 	 */
-	ClassBuilder<M> clazz(String label, IJavaProject javaProject, Shell shell);
+	ClassBuilder<M> clazz(String label);
 
 	/**
 	 * Adds a resource property to be configured.
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
-	 * @param shell
-	 *            {@link Shell}.
 	 * @return {@link ResourceBuilder}.
 	 */
-	ResourceBuilder<M> resource(String label, IJavaProject javaProject, Shell shell);
+	ResourceBuilder<M> resource(String label);
 
 }

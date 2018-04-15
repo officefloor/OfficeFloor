@@ -31,8 +31,9 @@ public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 	 * 
 	 * @param title
 	 *            Title for this configuration.
+	 * @return <code>this</code>.
 	 */
-	void title(String title);
+	ConfigurationBuilder<M> title(String title);
 
 	/**
 	 * Validates the model.
@@ -59,5 +60,13 @@ public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 	 *            {@link Consumer} to apply the configured model.
 	 */
 	void apply(String label, Consumer<M> applier);
+
+	/**
+	 * Specifies the {@link CloseListener}.
+	 * 
+	 * @param closeListener
+	 *            {@link CloseListener}.
+	 */
+	void close(CloseListener closeListener);
 
 }

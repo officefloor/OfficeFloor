@@ -17,19 +17,18 @@
  */
 package net.officefloor.eclipse.officefloor;
 
-import org.eclipse.swt.widgets.Shell;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.ModelActionContext;
-import net.officefloor.eclipse.javaproject.JavaProjectOfficeFloorCompiler;
+import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
@@ -49,8 +48,8 @@ public class DeployedOfficeConfiguration {
 	 *            {@link ConfigurationBuilder}.
 	 */
 	public void loadAddConfiguration(ConfigurationBuilder<DeployedOfficeConfiguration> builder,
-			ModelActionContext<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, ?> context, Shell shell,
-			JavaProjectOfficeFloorCompiler compiler) {
+			ModelActionContext<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, ?> context,
+			OfficeFloorJavaProjectBridge compiler) {
 
 		// Configure the name
 		builder.text("Name").setValue((model, value) -> model.name = value)
@@ -58,9 +57,8 @@ public class DeployedOfficeConfiguration {
 
 		// Configure the OfficeFloor source
 		Property<PropertyList> specificationProperty = new SimpleObjectProperty<>();
-		builder.clazz("Source", compiler.getJavaProject(), shell)
-				.setValue((model, value) -> model.officeFloorSource = value).superType(OfficeFloorSource.class)
-				.validate((event) -> {
+		builder.clazz("Source").setValue((model, value) -> model.officeFloorSource = value)
+				.superType(OfficeSource.class).validate((event) -> {
 
 					// Undertake validation
 					ValueValidator.notEmptyString("Must specify " + OfficeFloorSource.class.getSimpleName())
@@ -75,8 +73,7 @@ public class DeployedOfficeConfiguration {
 				});
 
 		// Configure the location
-		builder.resource("Location", compiler.getJavaProject(), shell)
-				.setValue((model, value) -> model.location = value);
+		builder.resource("Location").setValue((model, value) -> model.location = value);
 
 		// Configure the properties
 		builder.properties("Properties").specification(specificationProperty)

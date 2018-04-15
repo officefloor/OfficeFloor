@@ -31,7 +31,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaProjectOfficeFloorCompiler {
+public class OfficeFloorJavaProjectBridge {
 
 	/**
 	 * {@link IJavaProject}.
@@ -54,7 +54,7 @@ public class JavaProjectOfficeFloorCompiler {
 	 * @param javaProject
 	 *            {@link IJavaProject}.
 	 */
-	public JavaProjectOfficeFloorCompiler(IJavaProject javaProject) {
+	public OfficeFloorJavaProjectBridge(IJavaProject javaProject) {
 		this.javaProject = javaProject;
 
 		/*

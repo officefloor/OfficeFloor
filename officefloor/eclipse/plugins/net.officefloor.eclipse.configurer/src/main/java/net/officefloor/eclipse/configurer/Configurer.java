@@ -17,11 +17,15 @@
  */
 package net.officefloor.eclipse.configurer;
 
+import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
+import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.embed.swt.FXCanvas;
@@ -29,6 +33,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import net.officefloor.eclipse.configurer.internal.AbstractConfigurationBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
@@ -39,6 +44,18 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public class Configurer<M> extends AbstractConfigurationBuilder<M> {
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param javaProject
+	 *            {@link IJavaProject}.
+	 * @param parentShell
+	 *            Parent {@link Shell}.
+	 */
+	public Configurer(IJavaProject javaProject, Shell parentShell) {
+		super(javaProject, parentShell);
+	}
 
 	/**
 	 * Loads the configuration to {@link Composite}.
@@ -52,7 +69,7 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	public Configuration loadConfiguration(M model, Composite parent) {
 
 		// Create the FX Canvas
-		FXCanvas fxCanvas = new FXCanvas(parent, SWT.NONE) {
+		FXCanvas fxCanvas = new FXCanvasEx(parent, SWT.NONE) {
 			public Point computeSize(int wHint, int hHint, boolean changed) {
 				// Always the parent size
 				Rectangle bounds = parent.getClientArea();
@@ -91,6 +108,16 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 
 		// Load the configuration
 		return this.loadConfiguration(model, pane);
+	}
+
+	/**
+	 * Initialise application.
+	 */
+	public static class InitApplication extends Application {
+
+		@Override
+		public void start(Stage primaryStage) throws Exception {
+		}
 	}
 
 }

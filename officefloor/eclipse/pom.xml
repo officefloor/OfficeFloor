@@ -23,6 +23,7 @@
 		<module>plugins/net.officefloor.eclipse.editor.test</module>
 		<module>plugins/net.officefloor.eclipse.configurer</module>
 		<module>plugins/net.officefloor.eclipse.configurer.test</module>
+		<module>plugins/net.officefloor.eclipse.section</module>
 		<module>plugins/net.officefloor.eclipse.officefloor</module>
 		<module>plugins/net.officefloor.eclipse.launch</module>
 		<!-- <module>plugins/net.officefloor.core</module> <module>plugins/net.officefloor.ui</module> 

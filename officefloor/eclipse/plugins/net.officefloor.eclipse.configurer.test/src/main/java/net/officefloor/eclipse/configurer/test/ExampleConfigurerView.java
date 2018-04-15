@@ -65,7 +65,7 @@ public class ExampleConfigurerView {
 		Shell shell = parent.getShell();
 
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>();
+		Configurer<ExampleModel> configurer = new Configurer<>(javaProject, shell);
 
 		// Provide configuration
 		ConfigurationBuilder<ExampleModel> builder = configurer;
@@ -81,13 +81,13 @@ public class ExampleConfigurerView {
 		});
 
 		// Different class inputs
-		builder.clazz("Class", javaProject, shell).init((model) -> model.className);
-		builder.clazz("Model Class", javaProject, shell).init((model) -> model.modelClassName)
+		builder.clazz("Class").init((model) -> model.className);
+		builder.clazz("Model Class").init((model) -> model.modelClassName)
 				.setValue(this.log((model, value) -> model.modelClassName = value)).superType(Model.class);
-		builder.clazz("Missing class", javaProject, shell).superType(ExampleConfigurerView.class);
+		builder.clazz("Missing class").superType(ExampleConfigurerView.class);
 
 		// Class path resource
-		builder.resource("Resource", javaProject, shell).init((model) -> model.resourceName)
+		builder.resource("Resource").init((model) -> model.resourceName)
 				.setValue((model, value) -> model.resourceName = value);
 
 		// Provide ability to update

@@ -82,7 +82,7 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 	protected void loadConfiguration(Shell shell) {
 
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>();
+		Configurer<ExampleModel> configurer = new Configurer<>(null, shell);
 		ConfigurationBuilder<ExampleModel> builder = configurer;
 
 		// Title
