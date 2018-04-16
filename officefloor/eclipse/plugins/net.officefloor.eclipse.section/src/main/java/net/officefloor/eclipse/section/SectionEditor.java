@@ -36,13 +36,18 @@ import com.google.inject.util.Modules;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
+import net.officefloor.eclipse.project.ProjectConfigurationContext;
+import net.officefloor.model.Model;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
+import net.officefloor.model.impl.section.SectionRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
@@ -66,6 +71,16 @@ public class SectionEditor extends AbstractFXEditor {
 	 * {@link AdaptedEditorModule}.
 	 */
 	private AdaptedEditorModule module;
+
+	/**
+	 * {@link WritableConfigurationItem}.
+	 */
+	private WritableConfigurationItem configurationItem;
+
+	/**
+	 * {@link Model} being edited.
+	 */
+	private SectionModel model;
 
 	/**
 	 * {@link OfficeFloorJavaProjectBridge}.
@@ -211,7 +226,7 @@ public class SectionEditor extends AbstractFXEditor {
 		super.activate();
 
 		// Load the module
-		this.module.loadRootModel(new SectionModel());
+		this.module.loadRootModel(this.model);
 	}
 
 	@Override
@@ -220,12 +235,40 @@ public class SectionEditor extends AbstractFXEditor {
 
 		// Input changed, so reset for new input
 		this.javaProjectOfficeFloorCompiler = null;
+
+		// Obtain the input configuration
+		IFileEditorInput fileInput = (IFileEditorInput) input;
+		IFile file = fileInput.getFile();
+		this.configurationItem = ProjectConfigurationContext.getWritableConfigurationItem(file, null);
+
+		// Load the model
+		try {
+			this.model = new SectionModel();
+			new SectionRepositoryImpl(new ModelRepositoryImpl()).retrieveSection(this.model, this.configurationItem);
+		} catch (Exception ex) {
+
+			// TODO provide feedback in editor of error
+			System.err.println("TODO handle exception (setInput)");
+			ex.printStackTrace();
+		}
 	}
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
 
+		try {
+			// Save the model
+			new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(this.model, this.configurationItem);
+			
+			// Flag saved (no longer dirty)
+			this.markNonDirty();
+
+		} catch (Exception ex) {
+
+			// TODO provide feedback in editor of error
+			System.err.println("TODO handle exception (doSave)");
+			ex.printStackTrace();
+		}
 	}
 
 	@Override

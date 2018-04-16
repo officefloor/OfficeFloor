@@ -20,8 +20,9 @@ package net.officefloor.eclipse.section;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.ModelActionContext;
+import net.officefloor.eclipse.editor.ParentModelProviderContext;
 import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
@@ -40,8 +41,11 @@ public class ExternalFlowConfiguration {
 	 *            {@link ConfigurationBuilder}.
 	 */
 	public void loadAddConfiguration(ConfigurationBuilder<ExternalFlowConfiguration> builder,
-			ModelActionContext<SectionModel, SectionChanges, ExternalFlowModel, ?> context,
+			ParentModelProviderContext<SectionModel, SectionChanges, ExternalFlowModel> context,
 			OfficeFloorJavaProjectBridge compiler) {
+
+		// Configure
+		builder.title("External Flow");
 
 		// Configure the name
 		builder.text("Name").setValue((model, value) -> model.name = value)
@@ -52,7 +56,15 @@ public class ExternalFlowConfiguration {
 
 		// Apply change
 		builder.apply("Add", (model) -> {
-			context.execute(context.getOperations().addExternalFlow(model.name, model.argumentType));
+
+			// Create the change
+			Change<ExternalFlowModel> change = context.getOperations().addExternalFlow(model.name, model.argumentType);
+
+			// Position the external flow
+			context.position(change.getTarget());
+
+			// Undertake the change
+			context.execute(change);
 		});
 	}
 
