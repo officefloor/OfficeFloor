@@ -33,6 +33,7 @@ import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
@@ -45,6 +46,7 @@ import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ModelActionContext;
+import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
@@ -115,6 +117,32 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private IViewer contentViewer;
 
 	/**
+	 * {@link IViewer} for the palette.
+	 */
+	private IViewer paletteViewer;
+
+	/**
+	 * {@link AdaptedErrorHandler}.
+	 */
+	private AdaptedErrorHandler errorHandler;
+
+	/**
+	 * Initialises.
+	 * 
+	 * @param content
+	 *            {@link IViewer} content.
+	 * @param palette
+	 *            {@link IViewer} palette.
+	 * @param errorHandler
+	 *            {@link AdaptedErrorHandler}.
+	 */
+	public void init(IViewer content, IViewer palette, AdaptedErrorHandler errorHandler) {
+		this.contentViewer = content;
+		this.paletteViewer = palette;
+		this.errorHandler = errorHandler;
+	}
+
+	/**
 	 * Registers the {@link AbstractAdaptedFactory}.
 	 * 
 	 * @param builder
@@ -153,13 +181,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * 
 	 * @param rootModel
 	 *            Root {@link Model}.
-	 * @param content
-	 *            {@link IViewer} for the content.
-	 * @param palette
-	 *            {@link IViewer} for the palette.
 	 */
 	@SuppressWarnings("unchecked")
-	public void loadRootModel(Model rootModel, IViewer content, IViewer palette) {
+	public void loadRootModel(Model rootModel) {
 
 		// Ensure correct root model
 		if (!this.rootModelClass.equals(rootModel.getClass())) {
@@ -168,7 +192,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		}
 		this.rootModel = (R) rootModel;
 		this.operations = this.createOperations.apply(this.rootModel);
-		this.contentViewer = content;
 
 		// Load the default styling
 		this.contentViewer.getCanvas().getScene().getStylesheets()
@@ -196,7 +219,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				}
 			}
 		}
-		palette.getContents().setAll(paletteModels);
+		this.paletteViewer.getContents().setAll(paletteModels);
 
 		// Initial load of content models
 		this.loadContentModels();
@@ -332,6 +355,13 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			}
 
 			@Override
+			public void overlay(OverlayVisualFactory overlayVisualFactory) {
+
+				// TODO implement unsupported
+				throw new UnsupportedOperationException("TODO implement overlay");
+			}
+
+			@Override
 			public void execute(Change<?> change) {
 				this.getInjector().getInstance(ChangeExecutor.class).execute(change);
 			}
@@ -355,6 +385,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.createOperations = (Function<R, O>) createOperations;
 		return (AdaptedRootBuilder<r, o>) this;
 	};
+
+	@Override
+	public AdaptedErrorHandler getErrorHandler() {
+		return this.errorHandler;
+	}
 
 	/*
 	 * ====================== AdaptedBuilderContext =======================

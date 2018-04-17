@@ -51,4 +51,11 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 			Function<R, List<M>> getParents, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
 			RE... changeParentEvents);
 
+	/**
+	 * Obtains the {@link AdaptedErrorHandler}.
+	 * 
+	 * @return {@link AdaptedErrorHandler}.
+	 */
+	AdaptedErrorHandler getErrorHandler();
+
 }

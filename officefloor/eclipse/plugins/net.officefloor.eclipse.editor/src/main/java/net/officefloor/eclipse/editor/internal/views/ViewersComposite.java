@@ -11,6 +11,8 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.views;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +20,25 @@ import org.eclipse.gef.fx.nodes.InfiniteCanvas;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
+import javafx.beans.binding.Bindings;
+import javafx.css.PseudoClass;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import net.officefloor.eclipse.editor.AdaptedEditorModule;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
 
@@ -33,7 +47,7 @@ import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
  *
  * @author Daniel Sagenschneider
  */
-public class ViewersComposite {
+public class ViewersComposite implements AdaptedErrorHandler {
 
 	/**
 	 * Palette indicator width.
@@ -41,9 +55,54 @@ public class ViewersComposite {
 	private static final double PALETTE_INDICATOR_WIDTH = 10.0;
 
 	/**
-	 * Composite containing the palette and editor.
+	 * {@link IViewer} for the content.
 	 */
-	private final HBox composite;
+	private IViewer contentViewer;
+
+	/**
+	 * {@link IViewer} for the palette.
+	 */
+	private IViewer paletteViewer;
+
+	/**
+	 * Composite for the view.
+	 */
+	private final VBox composite = new VBox();
+
+	/**
+	 * Header for the error.
+	 */
+	private final GridPane errorHeader = new GridPane();
+
+	/**
+	 * Label for the error.
+	 */
+	private final Label errorLabel = new Label();
+
+	/**
+	 * Dismisses the error.
+	 */
+	private final Hyperlink dismissError = new Hyperlink("dismiss");
+
+	/**
+	 * Editor containing the palette, editor and stack trace.
+	 */
+	private final HBox editor = new HBox();
+
+	/**
+	 * Toggle for showing the stack trace.
+	 */
+	private final Hyperlink stackTraceToggle = new Hyperlink();
+
+	/**
+	 * Indicate if showing stack trace.
+	 */
+	private boolean isShowingStackTrace = false;
+
+	/**
+	 * {@link TextArea} to display the stack trace.
+	 */
+	private final TextArea stackTrace = new TextArea();
 
 	/**
 	 * Instantiate.
@@ -52,11 +111,20 @@ public class ViewersComposite {
 	 *            {@link IViewer} for the editor.
 	 * @param paletteViewer
 	 *            {@link IViewer} for the palette.
+	 */
+	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer) {
+		this.contentViewer = contentViewer;
+		this.paletteViewer = paletteViewer;
+	}
+
+	/**
+	 * Initialises.
+	 * 
 	 * @param isCreateParents
 	 *            Flag indicate whether able to create {@link AdaptedParent}
 	 *            instances.
 	 */
-	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer, boolean isCreateParents) {
+	public void init(boolean isCreateParents) {
 
 		// Obtain the content root
 		Parent contentRootNode = contentViewer.getCanvas();
@@ -105,17 +173,16 @@ public class ViewersComposite {
 		panes.add(viewersPane);
 
 		// Provide composite
-		this.composite = new HBox();
-		this.composite.setStyle("-fx-background-color: transparent;");
-		this.composite.getChildren().addAll(panes);
+		this.editor.setStyle("-fx-background-color: transparent;");
+		this.editor.getChildren().addAll(panes);
 
 		// Ensure composite fills the whole space
-		this.composite.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		this.composite.setMinSize(0, 0);
-		this.composite.setFillHeight(true);
+		this.editor.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		this.editor.setMinSize(0, 0);
+		this.editor.setFillHeight(true);
 
 		// No spacing between viewers and palette indicator
-		this.composite.setSpacing(0.0);
+		this.editor.setSpacing(0.0);
 
 		// Ensure viewers fill the space
 		HBox.setHgrow(viewersPane, Priority.ALWAYS);
@@ -136,6 +203,62 @@ public class ViewersComposite {
 		if (!isCreateParents) {
 			paletteRootNode.setVisible(false);
 		}
+
+		// Configure the error details
+		HBox errorDetails = new HBox(10.0);
+		errorDetails.getStyleClass().setAll("header-panel");
+		final String errorImagePath = AdaptedEditorModule.class.getPackage().getName().replace('.', '/') + "/error.png";
+		final ImageView errorImage = new ImageView(new Image(errorImagePath, 15, 15, true, true));
+		this.errorLabel.alignmentProperty().setValue(Pos.CENTER_LEFT);
+		this.dismissError.getStyleClass().add("dismiss-error");
+		this.dismissError.setOnAction((event) -> this.showError((String) null));
+		errorDetails.getChildren().setAll(errorImage, this.errorLabel, this.dismissError);
+
+		// Provide stack trace toggle
+		this.stackTraceToggle.setText("Show Stack Trace");
+		this.stackTraceToggle.getStyleClass().setAll("details-button", "more");
+		this.stackTraceToggle.setVisible(this.isShowingStackTrace);
+		this.stackTraceToggle.setOnAction((event) -> {
+			if (this.isShowingStackTrace) {
+				// Hide stack trace
+				this.editor.getChildren().remove(this.stackTrace);
+				this.stackTraceToggle.setText("Show Stack Trace");
+				this.stackTraceToggle.getStyleClass().setAll("details-button", "more");
+				this.isShowingStackTrace = false;
+			} else {
+				// Show stack trace
+				if (!this.editor.getChildren().contains(this.stackTrace)) {
+					this.editor.getChildren().add(this.stackTrace);
+				}
+				this.stackTraceToggle.setText("Hide Stack Trace");
+				this.stackTraceToggle.getStyleClass().setAll("details-button", "less");
+				this.isShowingStackTrace = true;
+			}
+		});
+		HBox stackTraceToggleContainer = new HBox();
+		stackTraceToggleContainer.getChildren().add(this.stackTraceToggle);
+		stackTraceToggleContainer.getStyleClass().setAll("container");
+		stackTraceToggleContainer.alignmentProperty().setValue(Pos.CENTER_RIGHT);
+		HBox stackTraceToggleButtonBar = new HBox();
+		stackTraceToggleButtonBar.getStyleClass().setAll("header-panel", "button-bar");
+		stackTraceToggleButtonBar.getChildren().setAll(stackTraceToggleContainer);
+
+		// Configurer the error header
+		this.errorHeader.getStyleClass().setAll("dialog-pane", "error-header");
+		this.errorHeader.pseudoClassStateChanged(PseudoClass.getPseudoClass("header"), true);
+		this.errorHeader.add(errorDetails, 0, 0);
+		this.errorHeader.add(stackTraceToggleButtonBar, 1, 0);
+		GridPane.setHgrow(errorDetails, Priority.ALWAYS);
+		GridPane.setHgrow(stackTraceToggleButtonBar, Priority.SOMETIMES);
+
+		// Configure the stack trace
+		this.stackTrace.setEditable(false);
+		this.stackTrace.prefHeightProperty().bind(this.editor.heightProperty());
+		this.stackTrace.prefWidthProperty().bind(Bindings.divide(this.editor.widthProperty(), 2));
+
+		// Configure the composite (initially only error)
+		this.composite.getChildren().add(this.editor);
+		VBox.setVgrow(this.editor, Priority.ALWAYS);
 	}
 
 	/**
@@ -144,7 +267,100 @@ public class ViewersComposite {
 	 * @return {@link Pane} containing the view.
 	 */
 	public Pane getComposite() {
-		return composite;
+		return this.composite;
+	}
+
+	/*
+	 * ================= AdaptedErrorHandler ====================
+	 */
+
+	@Override
+	public void showError(String message) {
+		this.showError((message == null) || (message.trim().length() == 0) ? null : new MessageOnlyException(message));
+	}
+
+	@Override
+	public void showError(Throwable error) {
+
+		// Determine if error
+		String errorText = null;
+		String stackTraceText = null;
+		if (error != null) {
+
+			// Provide error text
+			errorText = error.getMessage();
+			if ((errorText == null) || (errorText.trim().length() == 0)) {
+				errorText = error.getClass().getSimpleName() + " thrown";
+			}
+
+			// Determine if stack trace
+			if (!(error instanceof MessageOnlyException)) {
+				StringWriter buffer = new StringWriter();
+				error.printStackTrace(new PrintWriter(buffer));
+				stackTraceText = buffer.toString();
+			}
+		}
+
+		// Handle error message
+		if (errorText == null) {
+			// No error message
+			this.composite.getChildren().remove(this.errorHeader);
+
+		} else {
+			// Show error message
+			this.errorLabel.setText(errorText);
+			this.dismissError.setVisited(false);
+			if (!this.composite.getChildren().contains(this.errorHeader)) {
+				this.composite.getChildren().add(0, this.errorHeader);
+			}
+		}
+
+		// Handle stack trace
+		if (stackTraceText == null) {
+			// No stack trace
+			this.stackTraceToggle.setVisible(false);
+
+		} else {
+			// Show stack trace
+			this.stackTrace.setText(stackTraceText);
+			this.stackTraceToggle.setVisible(true);
+		}
+	}
+
+	@Override
+	public boolean isError(UncertainOperation operation) {
+		try {
+
+			// Undertake operation
+			operation.run();
+
+			// No error
+			return false;
+
+		} catch (Throwable ex) {
+
+			// Show the error
+			this.showError(ex);
+
+			// An error
+			return true;
+		}
+	}
+
+	/**
+	 * Message only {@link Exception}.
+	 */
+	private static class MessageOnlyException extends Exception {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param message
+		 *            Message.
+		 */
+		public MessageOnlyException(String message) {
+			super(message);
+		}
 	}
 
 }

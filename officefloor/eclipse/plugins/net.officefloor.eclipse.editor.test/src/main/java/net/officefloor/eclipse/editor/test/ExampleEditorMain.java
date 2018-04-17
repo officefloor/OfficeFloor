@@ -18,11 +18,13 @@
 package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
+import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.DefaultImages;
@@ -71,6 +73,9 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		AdaptedRootBuilder<OfficeFloorModel, OfficeFloorChanges> root = builder.root(OfficeFloorModel.class,
 				(r) -> new OfficeFloorChangesImpl(r));
 
+		// Obtain the error handler
+		AdaptedErrorHandler errorHandler = root.getErrorHandler();
+
 		// Managed Object Source
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent> mos = root
 				.parent(new OfficeFloorManagedObjectSourceModel("Managed Object Source", null, null, null),
@@ -86,8 +91,18 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 						OfficeFloorEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE);
 		mos.label((m) -> m.getOfficeFloorManagedObjectSourceName(),
 				OfficeFloorManagedObjectSourceEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_NAME);
-		mos.create((p) -> p.getRootModel().addOfficeFloorManagedObjectSource(p
-				.position(new OfficeFloorManagedObjectSourceModel("Created Managed Object Source", null, null, null))));
+		mos.create((p) -> {
+			p.overlay((overlay) -> {
+				Button button = new Button("Create MOS");
+				button.setOnAction((event) -> {
+					overlay.close();
+					p.getRootModel().addOfficeFloorManagedObjectSource(
+							p.position(new OfficeFloorManagedObjectSourceModel("Created Managed Object Source", null,
+									null, null)));
+				});
+				overlay.getOverlayParent().getChildren().add(button);
+			});
+		});
 		mos.action((ctx) -> {
 			ctx.getModel().addOfficeFloorManagedObjectSourceFlow(
 					new OfficeFloorManagedObjectSourceFlowModel("Added Flow", null));
@@ -112,6 +127,12 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		}, DefaultImages.DELETE);
 		mos.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorManagedObjectSource(ctx.getModel())),
 				DefaultImages.DELETE);
+		mos.action((ctx) -> {
+			errorHandler.showError(new Exception("Example exception"));
+		}, DefaultImages.EDIT);
+		mos.action((ctx) -> {
+			errorHandler.showError("Example error message");
+		}, DefaultImages.DELETE);
 
 		// Managed Object Source Input Dependencies
 		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceInputDependencyModel, OfficeFloorManagedObjectSourceInputDependencyEvent> mosDependencies = mos

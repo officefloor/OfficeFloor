@@ -64,6 +64,14 @@ public interface ModelActionContext<R extends Model, O, M extends Model, A exten
 	A getAdaptedModel();
 
 	/**
+	 * Shows an overlay at the position of the action.
+	 * 
+	 * @param overlayVisualFactory
+	 *            {@link OverlayVisualFactory}.
+	 */
+	void overlay(OverlayVisualFactory overlayVisualFactory);
+
+	/**
 	 * Executes the {@link Change}.
 	 * 
 	 * @param change

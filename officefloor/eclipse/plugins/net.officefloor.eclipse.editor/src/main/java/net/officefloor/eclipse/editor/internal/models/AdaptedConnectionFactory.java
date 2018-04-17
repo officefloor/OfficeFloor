@@ -29,6 +29,7 @@ import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.ModelActionContext;
+import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -236,6 +237,12 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		@Override
 		public void execute(Change<?> change) {
 			this.getChangeExecutor().execute(change);
+		}
+
+		@Override
+		public void overlay(OverlayVisualFactory overlayVisualFactory) {
+			// TODO implement overlay
+			throw new UnsupportedOperationException("TODO implement overlay");
 		}
 	}
 

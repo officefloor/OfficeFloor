@@ -39,6 +39,7 @@ import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
+import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.ParentModelProvider;
 import net.officefloor.eclipse.editor.ParentModelProviderContext;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -237,6 +238,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 						}
 
 						@Override
+						public void overlay(OverlayVisualFactory overlayVisualFactory) {
+							AdaptedParentImpl.this.overlay(overlayVisualFactory);
+						}
+
+						@Override
 						public void execute(Change<?> change) {
 							AdaptedParentImpl.this.getChangeExecutor().execute(change);
 						}
@@ -270,9 +276,17 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		}
 
 		@Override
+		public void overlay(OverlayVisualFactory overlayVisualFactory) {
+
+			// TODO implement unsupported
+			throw new UnsupportedOperationException("TODO implement overlay");
+		}
+
+		@Override
 		public void execute(Change<?> change) {
 			this.getChangeExecutor().execute(change);
 		}
+
 	}
 
 	/**

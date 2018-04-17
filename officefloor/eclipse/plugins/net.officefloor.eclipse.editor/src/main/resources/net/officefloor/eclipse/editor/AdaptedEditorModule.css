@@ -1,3 +1,4 @@
+
 .parent {
 	-fx-background-color: radial-gradient(radius 100.0%, #666, #ccc);
 	-fx-background-radius: 20.0px;
@@ -16,4 +17,16 @@
 
 .child {
 	-fx-padding: 3.0px;
+}
+
+.error-header:header .dismiss-error {
+	-fx-padding: 0.03em 0 0 0; /* font size difference */
+}
+
+.error-header:header > .button-bar > .container {
+    -fx-padding: 0;
+}
+
+.error-header:header > .button-bar > .container > .details-button {
+	-fx-padding: 0;
 }

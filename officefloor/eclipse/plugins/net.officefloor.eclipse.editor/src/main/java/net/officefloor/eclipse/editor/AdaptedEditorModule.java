@@ -115,6 +115,11 @@ public class AdaptedEditorModule extends MvcFxModule {
 	private IViewer palette;
 
 	/**
+	 * {@link ViewersComposite}.
+	 */
+	private ViewersComposite viewersComposite;
+
+	/**
 	 * {@link OfficeFloorContentPartFactory}.
 	 */
 	private OfficeFloorContentPartFactory<?, ?> factory;
@@ -133,7 +138,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	public Pane createParent(AdaptedBuilder adaptedBuilder) {
 
 		// Lazy initialise
-		if (this.injector == null) {
+		if (this.viewersComposite == null) {
 
 			// Create the injector from this module
 			Injector injector = Guice.createInjector(this);
@@ -144,7 +149,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 		}
 
 		// Return the composite
-		return new ViewersComposite(this.content, this.palette, this.factory.isCreateParent()).getComposite();
+		return this.viewersComposite.getComposite();
 	}
 
 	/**
@@ -184,6 +189,10 @@ public class AdaptedEditorModule extends MvcFxModule {
 		// Load the factory
 		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
 
+		// Load the viewers composite
+		this.viewersComposite = new ViewersComposite(this.content, this.palette);
+		this.factory.init(this.content, this.palette, this.viewersComposite);
+
 		// Configure the models
 		adaptedBuilder.build(this.factory);
 	}
@@ -213,7 +222,12 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 *            Root {@link Model}.
 	 */
 	public void loadRootModel(Model rootModel) {
-		this.factory.loadRootModel(rootModel, this.content, this.palette);
+
+		// Configured so initialise the factory
+		this.viewersComposite.init(this.factory.isCreateParent());
+
+		// Load the root model
+		this.factory.loadRootModel(rootModel);
 	}
 
 	/*
