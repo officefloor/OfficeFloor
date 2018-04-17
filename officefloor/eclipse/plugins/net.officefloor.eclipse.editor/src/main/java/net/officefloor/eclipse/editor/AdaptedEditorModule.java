@@ -138,14 +138,19 @@ public class AdaptedEditorModule extends MvcFxModule {
 	public Pane createParent(AdaptedBuilder adaptedBuilder) {
 
 		// Lazy initialise
-		if (this.viewersComposite == null) {
+		if (this.domain == null) {
 
 			// Create the injector from this module
 			Injector injector = Guice.createInjector(this);
 
 			// Load the domain and viewers
 			IDomain domain = injector.getInstance(IDomain.class);
-			this.initialise(domain, injector, adaptedBuilder);
+			this.initialise(domain, injector);
+		}
+
+		// Lazy configure
+		if (this.factory == null) {
+			this.configure(adaptedBuilder);
 		}
 
 		// Return the composite
@@ -169,22 +174,35 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 */
 
 	/**
+	 * <p>
 	 * Initialises.
+	 * <p>
+	 * This may be called before JavaFx has been initialised.
 	 * 
 	 * @param domain
 	 *            {@link IDomain}.
 	 * @param injector
 	 *            {@link Injector}.
-	 * @param adaptedBuilder
-	 *            {@link AdaptedBuilder}.
 	 */
-	public void initialise(IDomain domain, Injector injector, AdaptedBuilder adaptedBuilder) {
+	public void initialise(IDomain domain, Injector injector) {
 		this.injector = injector;
 
 		// Load domain and views
 		this.domain = domain;
 		this.content = this.domain.getAdapter(AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
 		this.palette = this.domain.getAdapter(AdapterKey.get(IViewer.class, AdaptedEditorModule.PALETTE_VIEWER_ROLE));
+	}
+
+	/**
+	 * <p>
+	 * Configures.
+	 * <p>
+	 * This must be called after JavaFX has been initialised.
+	 * 
+	 * @param adaptedBuilder
+	 *            {@link AdaptedBuilder}.
+	 */
+	public void configure(AdaptedBuilder adaptedBuilder) {
 
 		// Load the factory
 		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
@@ -225,6 +243,9 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 		// Configured so initialise the factory
 		this.viewersComposite.init(this.factory.isCreateParent());
+
+		// Connect up scene
+		this.viewersComposite.getComposite().applyCss();
 
 		// Load the root model
 		this.factory.loadRootModel(rootModel);

@@ -40,6 +40,7 @@ import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
@@ -71,6 +72,11 @@ public class SectionEditor extends AbstractFXEditor {
 	 * {@link AdaptedEditorModule}.
 	 */
 	private AdaptedEditorModule module;
+
+	/**
+	 * {@link AdaptedErrorHandler}.
+	 */
+	private AdaptedErrorHandler errorHandler;
 
 	/**
 	 * {@link WritableConfigurationItem}.
@@ -118,8 +124,8 @@ public class SectionEditor extends AbstractFXEditor {
 	public SectionEditor() {
 		this(new AdaptedEditorModule());
 
-		// Initialise the module
-		this.module.initialise(this.getDomain(), this.injector, this.getAdaptedBuilder());
+		// Initialise
+		this.module.initialise(this.getDomain(), this.injector);
 	}
 
 	/**
@@ -133,6 +139,10 @@ public class SectionEditor extends AbstractFXEditor {
 			AdaptedRootBuilder<SectionModel, SectionChanges> root = context.root(SectionModel.class,
 					(m) -> new SectionChangesImpl(m));
 
+			// Obtain the error handler
+			this.errorHandler = root.getErrorHandler();
+
+			// External Flow
 			AdaptedParentBuilder<SectionModel, SectionChanges, ExternalFlowModel, ExternalFlowEvent> externalFlow = root
 					.parent(new ExternalFlowModel("External Flow", null), (m) -> m.getExternalFlows(),
 							(parent, ctx) -> {
@@ -142,25 +152,17 @@ public class SectionEditor extends AbstractFXEditor {
 							}, SectionEvent.ADD_EXTERNAL_FLOW, SectionEvent.REMOVE_EXTERNAL_FLOW);
 			externalFlow.label((m) -> m.getExternalFlowName(), ExternalFlowEvent.CHANGE_EXTERNAL_FLOW_NAME);
 			externalFlow.create((ctx) -> {
-				try {
 
-					// Obtain details for dialog
-					OfficeFloorJavaProjectBridge bridge = this.getJavaProjectBridge();
-					IJavaProject javaProject = bridge.getJavaProject();
-					Shell shell = this.getEditorSite().getShell();
+				// Obtain details for dialog
+				OfficeFloorJavaProjectBridge bridge = this.getJavaProjectBridge();
+				IJavaProject javaProject = bridge.getJavaProject();
+				Shell shell = this.getEditorSite().getShell();
 
-					// Create dialog to add Office
-					ConfigurerDialog<ExternalFlowConfiguration> dialog = new ConfigurerDialog<>(javaProject, shell);
-					ExternalFlowConfiguration configuration = new ExternalFlowConfiguration();
-					configuration.loadAddConfiguration(dialog, ctx, bridge);
-					dialog.open(configuration);
-
-				} catch (Exception ex) {
-
-					// TODO allow error to be shown
-					System.err.println("FAILED TO CREATE");
-					ex.printStackTrace();
-				}
+				// Create dialog to add Office
+				ConfigurerDialog<ExternalFlowConfiguration> dialog = new ConfigurerDialog<>(javaProject, shell);
+				ExternalFlowConfiguration configuration = new ExternalFlowConfiguration();
+				configuration.loadAddConfiguration(dialog, ctx, bridge);
+				dialog.open(configuration);
 			});
 
 		};
@@ -215,7 +217,7 @@ public class SectionEditor extends AbstractFXEditor {
 	protected void hookViewers() {
 
 		// Create the view
-		Pane view = this.module.createParent(null);
+		Pane view = this.module.createParent(this.getAdaptedBuilder());
 
 		// Create scene and populate canvas with view
 		this.getCanvas().setScene(new Scene(view));
@@ -223,10 +225,19 @@ public class SectionEditor extends AbstractFXEditor {
 
 	@Override
 	protected void activate() {
-		super.activate();
+
+		// Load the model
+		this.errorHandler.isError(() -> {
+			SectionModel section = new SectionModel();
+			new SectionRepositoryImpl(new ModelRepositoryImpl()).retrieveSection(section, this.configurationItem);
+			this.model = section;
+		});
 
 		// Load the module
 		this.module.loadRootModel(this.model);
+		
+		// Activate
+		super.activate();
 	}
 
 	@Override
@@ -240,35 +251,18 @@ public class SectionEditor extends AbstractFXEditor {
 		IFileEditorInput fileInput = (IFileEditorInput) input;
 		IFile file = fileInput.getFile();
 		this.configurationItem = ProjectConfigurationContext.getWritableConfigurationItem(file, null);
-
-		// Load the model
-		try {
-			this.model = new SectionModel();
-			new SectionRepositoryImpl(new ModelRepositoryImpl()).retrieveSection(this.model, this.configurationItem);
-		} catch (Exception ex) {
-
-			// TODO provide feedback in editor of error
-			System.err.println("TODO handle exception (setInput)");
-			ex.printStackTrace();
-		}
 	}
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+		this.errorHandler.isError(() -> {
 
-		try {
 			// Save the model
 			new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(this.model, this.configurationItem);
-			
+
 			// Flag saved (no longer dirty)
 			this.markNonDirty();
-
-		} catch (Exception ex) {
-
-			// TODO provide feedback in editor of error
-			System.err.println("TODO handle exception (doSave)");
-			ex.printStackTrace();
-		}
+		});
 	}
 
 	@Override

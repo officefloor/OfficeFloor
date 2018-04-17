@@ -103,7 +103,7 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 		this(new AdaptedEditorModule());
 
 		// Initialise the module
-		this.module.initialise(this.getDomain(), this.injector, this.getAdaptedBuilder());
+		this.module.initialise(this.getDomain(), this.injector);
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class OfficeFloorEditor extends AbstractFXEditor {
 	protected void hookViewers() {
 
 		// Create the view
-		Pane view = this.module.createParent(null);
+		Pane view = this.module.createParent(this.getAdaptedBuilder());
 
 		// Create scene and populate canvas with view
 		this.getCanvas().setScene(new Scene(view));

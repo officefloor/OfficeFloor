@@ -264,9 +264,6 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		// Configure the composite (initially only error)
 		this.composite.getChildren().add(editorWithStackTrace);
 		VBox.setVgrow(editorWithStackTrace, Priority.ALWAYS);
-
-		// Apply CSS to load scene into
-		this.composite.applyCss();
 	}
 
 	/**
