@@ -79,13 +79,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 *            {@link AdaptedModelVisualFactory}.
 	 * @param contentFactory
 	 *            {@link OfficeFloorContentPartFactory}.
-	 * @param errorHandler
-	 *            {@link AdaptedErrorHandler}.
 	 */
 	public AdaptedParentFactory(M modelPrototype, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
-			OfficeFloorContentPartFactory<R, O> contentFactory, AdaptedErrorHandler errorHandler) {
+			OfficeFloorContentPartFactory<R, O> contentFactory) {
 		super(modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
-		this.errorHandler = errorHandler;
+		this.errorHandler = contentFactory.getErrorHandler();
 	}
 
 	/**
@@ -251,7 +249,9 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 						@Override
 						public void overlay(OverlayVisualFactory overlayVisualFactory) {
-							AdaptedParentImpl.this.overlay(overlayVisualFactory);
+							// Use location of dropping new parent
+							AdaptedParentImpl.this.getParentFactory().getContentPartFactory().overlay(location,
+									overlayVisualFactory);
 						}
 
 						@Override
@@ -289,16 +289,19 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 		@Override
 		public void overlay(OverlayVisualFactory overlayVisualFactory) {
+			
+			// Obtain the location of this parent
+			Model model = this.getAdaptedModel().getModel();
+			Point location = new Point(model.getX(), model.getY());
 
-			// TODO implement unsupported
-			throw new UnsupportedOperationException("TODO implement overlay");
+			// Add the overlay
+			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
 		}
 
 		@Override
 		public void execute(Change<?> change) {
 			this.getChangeExecutor().execute(change);
 		}
-
 	}
 
 	/**

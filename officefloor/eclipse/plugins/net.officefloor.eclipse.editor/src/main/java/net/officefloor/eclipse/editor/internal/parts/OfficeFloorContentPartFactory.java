@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
@@ -37,6 +38,7 @@ import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
 import net.officefloor.eclipse.editor.internal.models.ChangeExecutor;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
@@ -90,6 +92,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * {@link Model}.
 	 */
 	private final List<Function<R, List<? extends Model>>> getParentFunctions = new LinkedList<>();
+
+	/**
+	 * Active {@link AdaptedOverlay} instances.
+	 */
+	private final List<AdaptedOverlay> overlays = new LinkedList<>();
 
 	/**
 	 * {@link AbstractAdaptedFactory} instances for the {@link Model} types.
@@ -266,6 +273,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			}
 		}
 
+		// Load the overlays (afterwards so z-order in front)
+		adaptedContentModels.addAll(this.overlays);
+
 		// Load the adapted connections (aferwards so z-order in front)
 		for (AdaptedParent<?> adaptedParent : adaptedParents) {
 			List<AdaptedConnection<?>> connections = adaptedParent.getConnections();
@@ -332,45 +342,64 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 */
 	public <S extends Model, T extends Model, C extends ConnectionModel> void addConnection(S source, T target,
 			ConnectionFactory<R, O, S, C, T> createConnection) {
-		createConnection.addConnection(source, target, new ModelActionContext<R, O, C, AdaptedConnection<C>>() {
+		this.errorHandler.isError(() -> createConnection.addConnection(source, target,
+				new ModelActionContext<R, O, C, AdaptedConnection<C>>() {
 
-			@Override
-			public R getRootModel() {
-				return OfficeFloorContentPartFactory.this.rootModel;
-			}
+					@Override
+					public R getRootModel() {
+						return OfficeFloorContentPartFactory.this.rootModel;
+					}
 
-			@Override
-			public O getOperations() {
-				return OfficeFloorContentPartFactory.this.operations;
-			}
+					@Override
+					public O getOperations() {
+						return OfficeFloorContentPartFactory.this.operations;
+					}
 
-			@Override
-			public C getModel() {
-				return null;
-			}
+					@Override
+					public C getModel() {
+						return null;
+					}
 
-			@Override
-			public AdaptedConnection<C> getAdaptedModel() {
-				return null;
-			}
+					@Override
+					public AdaptedConnection<C> getAdaptedModel() {
+						return null;
+					}
 
-			@Override
-			public void overlay(OverlayVisualFactory overlayVisualFactory) {
+					@Override
+					public void overlay(OverlayVisualFactory overlayVisualFactory) {
 
-				// TODO implement unsupported
-				throw new UnsupportedOperationException("TODO implement overlay");
-			}
+						// Obtain the location of the target
+						Point location = new Point(target.getX(), target.getY());
 
-			@Override
-			public void execute(Change<?> change) {
-				this.getInjector().getInstance(ChangeExecutor.class).execute(change);
-			}
+						// Add the overlay
+						OfficeFloorContentPartFactory.this.overlay(location, overlayVisualFactory);
+					}
 
-			@Override
-			public Injector getInjector() {
-				return OfficeFloorContentPartFactory.this.injector;
-			}
-		});
+					@Override
+					public void execute(Change<?> change) {
+						this.getInjector().getInstance(ChangeExecutor.class).execute(change);
+					}
+
+					@Override
+					public Injector getInjector() {
+						return OfficeFloorContentPartFactory.this.injector;
+					}
+				}));
+	}
+
+	/**
+	 * Removes the {@link AdaptedOverlay}.
+	 * 
+	 * @param overlay
+	 *            {@link AdaptedOverlay}.
+	 */
+	public void removeOverlay(AdaptedOverlay overlay) {
+
+		// Remove the overlay
+		this.overlays.remove(overlay);
+
+		// Update to stop display overlay
+		this.loadContentModels();
 	}
 
 	/*
@@ -386,13 +415,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		return (AdaptedRootBuilder<r, o>) this;
 	};
 
-	@Override
-	public AdaptedErrorHandler getErrorHandler() {
-		return this.errorHandler;
-	}
-
 	/*
-	 * ====================== AdaptedBuilderContext =======================
+	 * ======================= AdaptedRootBuilder =========================
 	 */
 
 	@Override
@@ -401,7 +425,22 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			M modelPrototype, Function<R, List<M>> getParents,
 			AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory, RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
-		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this, this.errorHandler);
+		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this);
+	}
+
+	@Override
+	public void overlay(Point location, OverlayVisualFactory overlayVisualFactory) {
+
+		// Add the overlay
+		this.overlays.add(new AdaptedOverlay(location, overlayVisualFactory, this));
+
+		// Reload the content
+		this.loadContentModels();
+	}
+
+	@Override
+	public AdaptedErrorHandler getErrorHandler() {
+		return this.errorHandler;
 	}
 
 	/*
@@ -423,6 +462,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			return this.injector.getInstance(AdaptedConnectionPart.class);
 		} else if (content instanceof AdaptedConnector) {
 			return this.injector.getInstance(AdaptedConnectorPart.class);
+		} else if (content instanceof AdaptedOverlay) {
+			return this.injector.getInstance(AdaptedOverlayPart.class);
 		}
 
 		// Unknown model

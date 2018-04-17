@@ -20,6 +20,8 @@ package net.officefloor.eclipse.editor;
 import java.util.List;
 import java.util.function.Function;
 
+import org.eclipse.gef.geometry.planar.Point;
+
 import net.officefloor.model.Model;
 
 /**
@@ -50,6 +52,16 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	<M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(M modelPrototype,
 			Function<R, List<M>> getParents, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
 			RE... changeParentEvents);
+
+	/**
+	 * Allows adding an overlay.
+	 * 
+	 * @param location
+	 *            Location of the overlay.
+	 * @param overlayVisualFactory
+	 *            {@link OverlayVisualFactory}.
+	 */
+	void overlay(Point location, OverlayVisualFactory overlayVisualFactory);
 
 	/**
 	 * Obtains the {@link AdaptedErrorHandler}.

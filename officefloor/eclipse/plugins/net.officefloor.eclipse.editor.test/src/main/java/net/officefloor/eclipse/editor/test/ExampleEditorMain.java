@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.editor.test;
 
+import org.eclipse.gef.geometry.planar.Point;
+
 import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -76,6 +78,10 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 
 		// Obtain the error handler
 		AdaptedErrorHandler errorHandler = root.getErrorHandler();
+
+		// Provide static overlay
+		root.overlay(new Point(10, 10),
+				(ctx) -> ctx.getOverlayParent().getChildren().add(new Label("Example editor for testing features")));
 
 		// Managed Object Source
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent> mos = root

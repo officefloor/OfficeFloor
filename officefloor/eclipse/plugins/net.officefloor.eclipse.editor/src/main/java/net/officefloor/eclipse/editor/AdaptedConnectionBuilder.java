@@ -90,8 +90,11 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 		 *            Source {@link Model}.
 		 * @param target
 		 *            Target {@link Model}.
+		 * @throws Exception
+		 *             If failure in adding the {@link ConnectionModel}.
 		 */
-		void addConnection(S source, T target, ModelActionContext<R, O, C, AdaptedConnection<C>> context);
+		void addConnection(S source, T target, ModelActionContext<R, O, C, AdaptedConnection<C>> context)
+				throws Exception;
 	}
 
 	/**
@@ -104,8 +107,10 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 		 * 
 		 * @param context
 		 *            {@link ModelActionContext}.
+		 * @throws Exception
+		 *             If failure in removing the {@link ConnectionModel}.
 		 */
-		void removeConnection(ModelActionContext<R, O, C, AdaptedConnection<C>> context);
+		void removeConnection(ModelActionContext<R, O, C, AdaptedConnection<C>> context) throws Exception;
 	}
 
 }

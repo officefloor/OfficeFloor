@@ -236,7 +236,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		// Create the geometry node for the anchor
 		final double X_LEFT = 0;
 		final double X_STEM = 5;
-		final double X_TIP = 8;
+		final double X_TIP = 9;
 		final double Y_TOP = 0;
 		final double Y_BOTTOM = 10;
 		final double Y_STEM_INSET = 2;

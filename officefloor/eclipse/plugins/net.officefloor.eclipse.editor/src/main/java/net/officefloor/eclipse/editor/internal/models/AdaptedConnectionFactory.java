@@ -23,11 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.eclipse.gef.geometry.planar.Point;
+
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -80,6 +83,11 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	private ConnectionRemover<R, O, C> removeConnection;
 
 	/**
+	 * {@link AdaptedErrorHandler}.
+	 */
+	private final AdaptedErrorHandler errorHandler;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param connectionClass
@@ -94,6 +102,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		super(connectionClass, () -> new AdaptedConnectionImpl<>(), adaptedChildModelFactory);
 		this.sourceModelClass = sourceModelClass;
 		this.getSource = getSource;
+		this.errorHandler = adaptedChildModelFactory.getContentPartFactory().getErrorHandler();
 	}
 
 	/**
@@ -222,7 +231,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 
 		@Override
 		public void remove() {
-			this.getFactory().removeConnection.removeConnection(this);
+			this.getFactory().errorHandler.isError(() -> this.getFactory().removeConnection.removeConnection(this));
 		}
 
 		/*
@@ -241,8 +250,13 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 
 		@Override
 		public void overlay(OverlayVisualFactory overlayVisualFactory) {
-			// TODO implement overlay
-			throw new UnsupportedOperationException("TODO implement overlay");
+
+			// Obtain the location of this target
+			Model model = this.getTarget().getModel();
+			Point location = new Point(model.getX(), model.getY());
+
+			// Add the overlay
+			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
 		}
 	}
 
