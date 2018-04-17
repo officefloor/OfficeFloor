@@ -33,6 +33,7 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -55,6 +56,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		extends AdaptedChildFactory<R, O, M, E, AdaptedParent<M>> implements AdaptedParentBuilder<R, O, M, E> {
 
 	/**
+	 * {@link AdaptedErrorHandler}.
+	 */
+	private final AdaptedErrorHandler errorHandler;
+
+	/**
 	 * {@link ParentModelProvider}.
 	 */
 	private ParentModelProvider<R, O, M> parentModelProvider = null;
@@ -69,12 +75,17 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 * 
 	 * @param modelPrototype
 	 *            {@link Model} prototype.
+	 * @param viewFactory
+	 *            {@link AdaptedModelVisualFactory}.
 	 * @param contentFactory
 	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param errorHandler
+	 *            {@link AdaptedErrorHandler}.
 	 */
 	public AdaptedParentFactory(M modelPrototype, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
-			OfficeFloorContentPartFactory<R, O> contentFactory) {
+			OfficeFloorContentPartFactory<R, O> contentFactory, AdaptedErrorHandler errorHandler) {
 		super(modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
+		this.errorHandler = errorHandler;
 	}
 
 	/**
@@ -162,7 +173,8 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 				// Load the model actions
 				List<AdaptedAction<R, O, M>> actions = new ArrayList<>(this.getParentFactory().modelToActions.size());
 				for (ModelToAction<R, O, M> action : this.getParentFactory().modelToActions) {
-					actions.add(new AdaptedAction<>(action.action, this, action.visualFactory));
+					actions.add(new AdaptedAction<>(action.action, this, action.visualFactory,
+							this.getParentFactory().errorHandler));
 				}
 				this.actions = new AdaptedActions<>(actions);
 			}
@@ -209,7 +221,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 		@Override
 		public void newAdaptedParent(Point location) {
-			this.getParentFactory().parentModelProvider
+			this.getParentFactory().errorHandler.isError(() -> this.getParentFactory().parentModelProvider
 					.provideNewParentModel(new ParentModelProviderContext<R, O, M>() {
 
 						@Override
@@ -263,7 +275,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 							model.setY(this.getY());
 							return model;
 						}
-					});
+					}));
 		}
 
 		/*

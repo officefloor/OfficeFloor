@@ -22,11 +22,13 @@ import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -85,9 +87,9 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	private final Hyperlink dismissError = new Hyperlink("dismiss");
 
 	/**
-	 * Editor containing the palette, editor and stack trace.
+	 * Editor with stack trace.
 	 */
-	private final HBox editor = new HBox();
+	private final SplitPane editorWithStackTrace = new SplitPane();
 
 	/**
 	 * Toggle for showing the stack trace.
@@ -134,6 +136,26 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		AnchorPane viewersPane = new AnchorPane();
 		viewersPane.getChildren().addAll(contentRootNode, paletteRootNode);
 
+		// Ensure viewers fill the space
+		HBox.setHgrow(viewersPane, Priority.ALWAYS);
+		viewersPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		AnchorPane.setBottomAnchor(contentRootNode, 0.0);
+		AnchorPane.setLeftAnchor(contentRootNode, 0.0);
+		AnchorPane.setRightAnchor(contentRootNode, 0.0);
+		AnchorPane.setTopAnchor(contentRootNode, 0.0);
+		AnchorPane.setBottomAnchor(paletteRootNode, 0.0);
+		AnchorPane.setLeftAnchor(paletteRootNode, 0.0);
+		AnchorPane.setTopAnchor(paletteRootNode, 0.0);
+
+		// Configure palette
+		paletteRootNode.setZoomGrid(false);
+		paletteRootNode.setShowGrid(false);
+		paletteRootNode.setHorizontalScrollBarPolicy(ScrollBarPolicy.NEVER);
+		paletteRootNode.setStyle(PaletteFocusBehavior.DEFAULT_STYLE);
+		if (!isCreateParents) {
+			paletteRootNode.setVisible(false);
+		}
+
 		// Create palette indicator
 		List<Pane> panes = new ArrayList<>(2);
 		if (isCreateParents) {
@@ -173,36 +195,19 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		panes.add(viewersPane);
 
 		// Provide composite
-		this.editor.setStyle("-fx-background-color: transparent;");
-		this.editor.getChildren().addAll(panes);
+		HBox editor = new HBox();
+		editor.setStyle("-fx-background-color: transparent;");
+		editor.getChildren().addAll(panes);
 
 		// Ensure composite fills the whole space
-		this.editor.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		this.editor.setMinSize(0, 0);
-		this.editor.setFillHeight(true);
+		editor.setMinSize(0, 0);
+		editor.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		editor.setFillHeight(true);
+		editor.setSpacing(0.0); // no spacing between palette and content
 
-		// No spacing between viewers and palette indicator
-		this.editor.setSpacing(0.0);
-
-		// Ensure viewers fill the space
-		HBox.setHgrow(viewersPane, Priority.ALWAYS);
-		viewersPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		AnchorPane.setBottomAnchor(contentRootNode, 0.0);
-		AnchorPane.setLeftAnchor(contentRootNode, 0.0);
-		AnchorPane.setRightAnchor(contentRootNode, 0.0);
-		AnchorPane.setTopAnchor(contentRootNode, 0.0);
-		AnchorPane.setBottomAnchor(paletteRootNode, 0.0);
-		AnchorPane.setLeftAnchor(paletteRootNode, 0.0);
-		AnchorPane.setTopAnchor(paletteRootNode, 0.0);
-
-		// Configure palette
-		paletteRootNode.setZoomGrid(false);
-		paletteRootNode.setShowGrid(false);
-		paletteRootNode.setHorizontalScrollBarPolicy(ScrollBarPolicy.NEVER);
-		paletteRootNode.setStyle(PaletteFocusBehavior.DEFAULT_STYLE);
-		if (!isCreateParents) {
-			paletteRootNode.setVisible(false);
-		}
+		// Load the editor into the split pane (allow viewing stack trace)
+		this.editorWithStackTrace.setOrientation(Orientation.HORIZONTAL);
+		this.editorWithStackTrace.getItems().add(editor);
 
 		// Configure the error details
 		HBox errorDetails = new HBox(10.0);
@@ -221,14 +226,14 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		this.stackTraceToggle.setOnAction((event) -> {
 			if (this.isShowingStackTrace) {
 				// Hide stack trace
-				this.editor.getChildren().remove(this.stackTrace);
+				this.editorWithStackTrace.getItems().remove(this.stackTrace);
 				this.stackTraceToggle.setText("Show Stack Trace");
 				this.stackTraceToggle.getStyleClass().setAll("details-button", "more");
 				this.isShowingStackTrace = false;
 			} else {
 				// Show stack trace
-				if (!this.editor.getChildren().contains(this.stackTrace)) {
-					this.editor.getChildren().add(this.stackTrace);
+				if (!this.editorWithStackTrace.getItems().contains(this.stackTrace)) {
+					this.editorWithStackTrace.getItems().add(this.stackTrace);
 				}
 				this.stackTraceToggle.setText("Hide Stack Trace");
 				this.stackTraceToggle.getStyleClass().setAll("details-button", "less");
@@ -253,12 +258,15 @@ public class ViewersComposite implements AdaptedErrorHandler {
 
 		// Configure the stack trace
 		this.stackTrace.setEditable(false);
-		this.stackTrace.prefHeightProperty().bind(this.editor.heightProperty());
-		this.stackTrace.prefWidthProperty().bind(Bindings.divide(this.editor.widthProperty(), 2));
+		this.stackTrace.prefHeightProperty().bind(editorWithStackTrace.heightProperty());
+		this.stackTrace.prefWidthProperty().bind(Bindings.divide(this.composite.widthProperty(), 2));
 
 		// Configure the composite (initially only error)
-		this.composite.getChildren().add(this.editor);
-		VBox.setVgrow(this.editor, Priority.ALWAYS);
+		this.composite.getChildren().add(editorWithStackTrace);
+		VBox.setVgrow(editorWithStackTrace, Priority.ALWAYS);
+
+		// Apply CSS to load scene into
+		this.composite.applyCss();
 	}
 
 	/**
@@ -319,6 +327,7 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		if (stackTraceText == null) {
 			// No stack trace
 			this.stackTraceToggle.setVisible(false);
+			this.editorWithStackTrace.getItems().remove(this.stackTrace);
 
 		} else {
 			// Show stack trace

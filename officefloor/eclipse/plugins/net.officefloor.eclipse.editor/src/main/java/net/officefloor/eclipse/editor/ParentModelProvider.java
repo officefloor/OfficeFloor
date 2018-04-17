@@ -31,7 +31,10 @@ public interface ParentModelProvider<R extends Model, O, M extends Model> {
 	 * 
 	 * @param context
 	 *            {@link ParentModelProviderContext}.
+	 * @throws Exception
+	 *             Possible {@link Exception} in creating the new
+	 *             {@link AdaptedParent}.
 	 */
-	void provideNewParentModel(ParentModelProviderContext<R, O, M> context);
+	void provideNewParentModel(ParentModelProviderContext<R, O, M> context) throws Exception;
 
 }

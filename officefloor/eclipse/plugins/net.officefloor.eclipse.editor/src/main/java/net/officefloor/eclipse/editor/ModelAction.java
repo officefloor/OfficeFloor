@@ -31,7 +31,9 @@ public interface ModelAction<R extends Model, O, M extends Model, A extends Adap
 	 * 
 	 * @param context
 	 *            {@link ModelActionContext}.
+	 * @throws Exception
+	 *             Possible {@link Exception} in executing {@link ModelAction}.
 	 */
-	void execute(ModelActionContext<R, O, M, A> context);
+	void execute(ModelActionContext<R, O, M, A> context) throws Exception;
 
 }

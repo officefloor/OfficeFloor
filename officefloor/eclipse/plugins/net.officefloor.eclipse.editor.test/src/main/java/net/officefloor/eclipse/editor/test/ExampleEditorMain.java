@@ -19,6 +19,7 @@ package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
@@ -124,15 +125,15 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				ctx.getModel().removeOfficeFloorManagedObjectSourceInputDependency(
 						ctx.getModel().getOfficeFloorManagedObjectSourceInputDependencies().get(0));
 			}
-		}, DefaultImages.DELETE);
+		}, (visual) -> new Label("clean"));
 		mos.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorManagedObjectSource(ctx.getModel())),
 				DefaultImages.DELETE);
 		mos.action((ctx) -> {
-			errorHandler.showError(new Exception("Example exception"));
-		}, DefaultImages.EDIT);
-		mos.action((ctx) -> {
 			errorHandler.showError("Example error message");
-		}, DefaultImages.DELETE);
+		}, (visual) -> new Label("Error Message"));
+		mos.action((ctx) -> {
+			throw new Exception("Show up in error details");
+		}, (visual) -> new Label("Exception"));
 
 		// Managed Object Source Input Dependencies
 		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceInputDependencyModel, OfficeFloorManagedObjectSourceInputDependencyEvent> mosDependencies = mos

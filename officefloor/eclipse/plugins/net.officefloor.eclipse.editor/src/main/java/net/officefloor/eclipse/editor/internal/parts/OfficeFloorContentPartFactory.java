@@ -401,7 +401,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			M modelPrototype, Function<R, List<M>> getParents,
 			AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory, RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
-		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this);
+		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this, this.errorHandler);
 	}
 
 	/*

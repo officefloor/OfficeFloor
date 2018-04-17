@@ -20,6 +20,7 @@ package net.officefloor.eclipse.editor.internal.models;
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
@@ -48,6 +49,11 @@ public class AdaptedAction<R extends Model, O, M extends Model> {
 	private final AdaptedActionVisualFactory visualFactory;
 
 	/**
+	 * {@link AdaptedErrorHandler}.
+	 */
+	private final AdaptedErrorHandler errorHandler;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param action
@@ -56,19 +62,23 @@ public class AdaptedAction<R extends Model, O, M extends Model> {
 	 *            {@link ModelActionContext}.
 	 * @param visualFactory
 	 *            {@link AdaptedActionVisualFactory}.
+	 * @param errorHandler
+	 *            {@link AdaptedErrorHandler}.
 	 */
 	public AdaptedAction(ModelAction<R, O, M, AdaptedParent<M>> action,
-			ModelActionContext<R, O, M, AdaptedParent<M>> actionContext, AdaptedActionVisualFactory visualFactory) {
+			ModelActionContext<R, O, M, AdaptedParent<M>> actionContext, AdaptedActionVisualFactory visualFactory,
+			AdaptedErrorHandler errorHandler) {
 		this.action = action;
 		this.actionContext = actionContext;
 		this.visualFactory = visualFactory;
+		this.errorHandler = errorHandler;
 	}
 
 	/**
 	 * Executes the {@link AdaptedAction}.
 	 */
 	public void execute() {
-		this.action.execute(this.actionContext);
+		this.errorHandler.isError(() -> this.action.execute(this.actionContext));
 	}
 
 	/**
