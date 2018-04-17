@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.geometry.planar.IGeometry;
+import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.geometry.planar.Polygon;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
@@ -233,7 +234,18 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	public Node connector(Class... connectionClasses) {
 
 		// Create the geometry node for the anchor
-		GeometryNode<Polygon> node = new GeometryNode<>(new Polygon(2, 3, 5, 3, 5, 1, 10, 4, 5, 7, 5, 5, 2, 5));
+		final double X_LEFT = 0;
+		final double X_STEM = 5;
+		final double X_TIP = 8;
+		final double Y_TOP = 0;
+		final double Y_BOTTOM = 10;
+		final double Y_STEM_INSET = 2;
+		final double Y_STEM_TOP = Y_TOP + Y_STEM_INSET;
+		final double Y_STEM_BOTTOM = Y_BOTTOM - Y_STEM_INSET;
+		final double Y_TIP = (Y_BOTTOM - Y_TOP) / 2;
+		GeometryNode<Polygon> node = new GeometryNode<>(new Polygon(new Point(X_LEFT, Y_STEM_TOP),
+				new Point(X_STEM, Y_STEM_TOP), new Point(X_STEM, Y_TOP), new Point(X_TIP, Y_TIP),
+				new Point(X_STEM, Y_BOTTOM), new Point(X_STEM, Y_STEM_BOTTOM), new Point(X_LEFT, Y_STEM_BOTTOM)));
 		node.setFill(Color.BLACK);
 
 		// Return the connector
