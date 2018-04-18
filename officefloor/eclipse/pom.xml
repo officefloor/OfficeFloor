@@ -17,8 +17,9 @@
 	</properties>
 	<modules>
 		<!-- Core eclipse functionality -->
+		<module>plugins/net.officefloor.core</module>
 		<module>plugins/net.officefloor.eclipse.target</module>
-		<module>plugins/net.officefloor.eclipse.javaproject</module>
+		<module>plugins/net.officefloor.eclipse.osgi</module>
 		<module>plugins/net.officefloor.eclipse.editor</module>
 		<module>plugins/net.officefloor.eclipse.editor.test</module>
 		<module>plugins/net.officefloor.eclipse.configurer</module>

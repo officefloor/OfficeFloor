@@ -49,6 +49,16 @@ public class AdaptedOverlay extends AbstractModel implements AdaptedModel<Adapte
 	private final OfficeFloorContentPartFactory<?, ?> contentPartFactory;
 
 	/**
+	 * Indicates if fixed width overlay.
+	 */
+	private boolean isFixedWidth = false;
+
+	/**
+	 * Indicates if fixed height overlay.
+	 */
+	private boolean isFixedHeight = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param location
@@ -77,6 +87,24 @@ public class AdaptedOverlay extends AbstractModel implements AdaptedModel<Adapte
 		return this.visualFactory;
 	}
 
+	/**
+	 * Indicates if fixed width.
+	 * 
+	 * @return <code>true</code> if fixed width.
+	 */
+	public boolean isFixedWidth() {
+		return this.isFixedWidth;
+	}
+
+	/**
+	 * Indicates if fixed height.
+	 * 
+	 * @return <code>true</code> if fixed height.
+	 */
+	public boolean isFixedHeight() {
+		return this.isFixedHeight;
+	}
+
 	/*
 	 * ============= OverlayVisualContext ==============
 	 */
@@ -84,6 +112,16 @@ public class AdaptedOverlay extends AbstractModel implements AdaptedModel<Adapte
 	@Override
 	public Pane getOverlayParent() {
 		return this.overlayParent;
+	}
+
+	@Override
+	public void setFixedWidth(boolean isFixedWith) {
+		this.isFixedWidth = isFixedWith;
+	}
+
+	@Override
+	public void setFixedHeight(boolean isFixedHeight) {
+		this.isFixedHeight = isFixedHeight;
 	}
 
 	@Override

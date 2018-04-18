@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Shell;
 
 import javafx.beans.InvalidationListener;
@@ -41,6 +40,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -79,6 +79,7 @@ import net.officefloor.eclipse.configurer.internal.inputs.MultipleBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.PropertiesBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.ResourceBuilderImpl;
 import net.officefloor.eclipse.configurer.internal.inputs.TextBuilderImpl;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * Abstract {@link ConfigurationBuilder}.
@@ -103,9 +104,9 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	private final List<ValueRendererFactory<M, ? extends ValueInput>> rendererFactories = new ArrayList<>();
 
 	/**
-	 * {@link IJavaProject}.
+	 * {@link OfficeFloorOsgiBridge}.
 	 */
-	private final IJavaProject javaProject;
+	private final OfficeFloorOsgiBridge osgiBridge;
 
 	/**
 	 * Parent {@link Shell} for dialogs.
@@ -145,29 +146,15 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	/**
 	 * Instantiate.
 	 * 
-	 * @param javaProject
-	 *            {@link IJavaProject}. May be <code>null</code> if no class path
-	 *            items are configured.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param parentShell
 	 *            Parent {@link Shell}. May be <code>null</code> if no dialog
-	 *            configuration required.
+	 *            configuration required by inputs.
 	 */
-	public AbstractConfigurationBuilder(IJavaProject javaProject, Shell parentShell) {
-		this.javaProject = javaProject;
+	public AbstractConfigurationBuilder(OfficeFloorOsgiBridge osgiBridge, Shell parentShell) {
+		this.osgiBridge = osgiBridge;
 		this.parentShell = parentShell;
-	}
-
-	/**
-	 * Obtains the {@link IJavaProject}.
-	 * 
-	 * @return {@link IJavaProject}.
-	 */
-	public IJavaProject getJavaProject() {
-		if (this.javaProject == null) {
-			throw new IllegalStateException("Not initialised against an " + IJavaProject.class.getSimpleName()
-					+ " but requiring class path configuration item");
-		}
-		return this.javaProject;
 	}
 
 	/**
@@ -205,8 +192,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	protected Configuration loadConfiguration(M model, Pane configurationNode) {
 
 		// Load the default styling
-		configurationNode.getScene().getStylesheets()
-				.add(AbstractConfigurationBuilder.class.getPackage().getName().replace('.', '/') + "/Configurer.css");
+		Scene scene = configurationNode.getScene();
+		if (scene != null) {
+			scene.getStylesheets().add(
+					AbstractConfigurationBuilder.class.getPackage().getName().replace('.', '/') + "/Configurer.css");
+		}
 
 		// Create the dirty and valid properties
 		Property<Boolean> dirtyProperty = new SimpleBooleanProperty(false);
@@ -360,7 +350,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 	@Override
 	public ChoiceBuilder<M> choices(String label) {
-		return this.registerBuilder(new ChoiceBuilderImpl<>(label, this.javaProject, this.parentShell));
+		return this.registerBuilder(new ChoiceBuilderImpl<>(label, this.osgiBridge, this.parentShell));
 	}
 
 	@Override
@@ -370,7 +360,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 	@Override
 	public <I> MultipleBuilder<M, I> multiple(String label, Class<I> itemType) {
-		return this.registerBuilder(new MultipleBuilderImpl<>(label, this.javaProject, this.parentShell));
+		return this.registerBuilder(new MultipleBuilderImpl<>(label, this.osgiBridge, this.parentShell));
 	}
 
 	@Override
@@ -386,12 +376,12 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 	@Override
 	public ClassBuilder<M> clazz(String label) {
-		return this.registerBuilder(new ClassBuilderImpl<>(label, this.getJavaProject(), this.getParentShell()));
+		return this.registerBuilder(new ClassBuilderImpl<>(label, this.osgiBridge, this.getParentShell()));
 	}
 
 	@Override
 	public ResourceBuilder<M> resource(String label) {
-		return this.registerBuilder(new ResourceBuilderImpl<>(label, this.getJavaProject(), this.getParentShell()));
+		return this.registerBuilder(new ResourceBuilderImpl<>(label, this.osgiBridge, this.getParentShell()));
 	}
 
 	@Override

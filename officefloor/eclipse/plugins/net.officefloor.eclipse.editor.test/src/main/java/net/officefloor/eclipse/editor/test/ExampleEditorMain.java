@@ -132,7 +132,9 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 						ctx.getModel().getOfficeFloorManagedObjectSourceInputDependencies().get(0));
 			}
 		}, (visual) -> new Label("clean"));
-		mos.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorManagedObjectSource(ctx.getModel())),
+		mos.action(
+				(ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().removeOfficeFloorManagedObjectSource(ctx.getModel())),
 				DefaultImages.DELETE);
 		mos.action((ctx) -> {
 			errorHandler.showError("Example error message");
@@ -186,10 +188,11 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				(s) -> s.getOfficeFloorTeam(), (c) -> c.getOfficeFloorManagedObjectSourceTeam(),
 				OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_TEAM).toMany(OfficeFloorTeamModel.class,
 						(t) -> t.getOfficeFloorManagedObjectSourceTeams(), (c) -> c.getOfficeFloorTeam(),
-						(s, t, ctx) -> ctx.execute(
+						(s, t, ctx) -> ctx.getChangeExecutor().execute(
 								ctx.getOperations().linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(s, t)),
-						(ctx) -> ctx.execute(ctx.getOperations()
-								.removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(ctx.getModel())),
+						(ctx) -> ctx.getChangeExecutor()
+								.execute(ctx.getOperations()
+										.removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(ctx.getModel())),
 						OfficeFloorTeamEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM,
 						OfficeFloorTeamEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM);
 
@@ -205,7 +208,7 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		team.label((m) -> m.getOfficeFloorTeamName(), OfficeFloorTeamEvent.CHANGE_OFFICE_FLOOR_TEAM_NAME);
 		team.create(
 				(p) -> p.getRootModel().addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", null))));
-		team.action((ctx) -> ctx.execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
+		team.action((ctx) -> ctx.getChangeExecutor().execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
 				DefaultImages.DELETE);
 	}
 

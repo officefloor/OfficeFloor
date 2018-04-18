@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.configurer.dialog;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Display;
@@ -26,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import net.officefloor.eclipse.configurer.CloseListener;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.Model;
 
 /**
@@ -43,13 +43,13 @@ public class ConfigurerDialog<M> extends Configurer<M> implements ConfigurationB
 	/**
 	 * Instantiate.
 	 * 
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param parentShell
 	 *            {@link Shell}.
 	 */
-	public ConfigurerDialog(IJavaProject javaProject, Shell parentShell) {
-		super(javaProject, parentShell);
+	public ConfigurerDialog(OfficeFloorOsgiBridge osgiBridge, Shell parentShell) {
+		super(osgiBridge, parentShell);
 		this.parentShell = parentShell;
 	}
 

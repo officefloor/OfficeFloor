@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OfficeFloor Common
+Bundle-SymbolicName: net.officefloor.eclipse.common
+Bundle-Version: 3.0.0
+Bundle-Vendor: OfficeFloor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: net.officefloor.core;bundle-version="3.0.0",
+ org.eclipse.ui.ide,
+ org.eclipse.fx.ui.workbench3
+Export-Package: net.officefloor.eclipse.common.javafx.resize

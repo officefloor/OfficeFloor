@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.editor.internal.models;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
 import org.eclipse.core.runtime.IAdaptable;
@@ -28,6 +26,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.gef.mvc.fx.domain.IDomain;
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
+import net.officefloor.eclipse.editor.AdaptedErrorHandler.UncertainOperation;
+import net.officefloor.eclipse.editor.ChangeExecutor;
+import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.change.Change;
 
 /**
@@ -35,56 +36,50 @@ import net.officefloor.model.change.Change;
  * 
  * @author Daniel Sagenschneider
  */
-public class ChangeExecutor {
-
-	@Inject
-	private IDomain domain;
+public class ChangeExecutorImpl implements ChangeExecutor {
 
 	/**
-	 * Obtains the {@link IDomain}.
-	 * 
-	 * @return {@link IDomain}.
+	 * {@link OfficeFloorContentPartFactory}.
 	 */
-	public IDomain getDomain() {
-		return this.domain;
+	private final OfficeFloorContentPartFactory<?, ?> contentPartFactory;
+
+	/**
+	 * {@link IDomain}.
+	 */
+	private final IDomain domain;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param contentPartFactory
+	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param domain
+	 *            {@link IDomain}.
+	 */
+	public ChangeExecutorImpl(OfficeFloorContentPartFactory<?, ?> contentPartFactory, IDomain domain) {
+		this.contentPartFactory = contentPartFactory;
+		this.domain = domain;
 	}
 
-	/**
-	 * Executes the {@link Change}.
-	 * 
-	 * @param change
-	 *            {@link Change}.
+	/*
+	 * =============== ChangeExecutor ====================
 	 */
+
+	@Override
 	public void execute(Change<?> change) {
-		try {
-			this.domain.execute(new ChangeTransactionalOperation(change), null);
-		} catch (ExecutionException ex) {
-			// TODO tidy up handling to report the error
-			System.err.print("FAILURE: executing change " + change.getChangeDescription() + " : ");
-			ex.printStackTrace();
-		}
+		this.contentPartFactory.getErrorHandler()
+				.isError(() -> this.domain.execute(new ChangeTransactionalOperation(change), null));
 	}
 
-	/**
-	 * Executes the {@link ITransactionalOperation}.
-	 * 
-	 * @param operation
-	 *            {@link ITransactionalOperation}.
-	 */
+	@Override
 	public void execute(ITransactionalOperation operation) {
-		try {
-			this.domain.execute(operation, null);
-		} catch (ExecutionException ex) {
-			// TODO tidy up handling to report the error
-			System.err.print("FAILURE: executing operation " + operation.getLabel() + " : ");
-			ex.printStackTrace();
-		}
+		this.contentPartFactory.getErrorHandler().isError(() -> this.domain.execute(operation, null));
 	}
 
 	/**
 	 * {@link ITransactionalOperation} for the change.
 	 */
-	private static class ChangeTransactionalOperation extends AbstractOperation implements ITransactionalOperation {
+	private class ChangeTransactionalOperation extends AbstractOperation implements ITransactionalOperation {
 
 		/**
 		 * {@link Change}.
@@ -100,6 +95,18 @@ public class ChangeExecutor {
 		private ChangeTransactionalOperation(Change<?> change) {
 			super(change.getChangeDescription());
 			this.change = change;
+		}
+
+		/**
+		 * Runs the {@link UncertainOperation}.
+		 * 
+		 * @param operation
+		 *            {@link UncertainOperation}.
+		 * @return Appropriate {@link IStatus} based on {@link UncertainOperation}.
+		 */
+		private IStatus runUncertain(UncertainOperation operation) {
+			ChangeExecutorImpl.this.contentPartFactory.getErrorHandler().isError(operation);
+			return Status.OK_STATUS;
 		}
 
 		/*
@@ -118,20 +125,17 @@ public class ChangeExecutor {
 
 		@Override
 		public IStatus execute(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-			this.change.apply();
-			return Status.OK_STATUS;
+			return this.runUncertain(() -> this.change.apply());
 		}
 
 		@Override
 		public IStatus undo(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-			this.change.revert();
-			return Status.OK_STATUS;
+			return this.runUncertain(() -> this.change.revert());
 		}
 
 		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-			this.change.apply();
-			return Status.OK_STATUS;
+			return this.runUncertain(() -> this.change.apply());
 		}
 	}
 

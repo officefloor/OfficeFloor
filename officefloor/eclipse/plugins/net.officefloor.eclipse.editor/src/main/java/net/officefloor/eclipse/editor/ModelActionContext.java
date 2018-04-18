@@ -20,7 +20,6 @@ package net.officefloor.eclipse.editor;
 import com.google.inject.Injector;
 
 import net.officefloor.model.Model;
-import net.officefloor.model.change.Change;
 
 /**
  * Context for the {@link ModelAction}.
@@ -72,12 +71,11 @@ public interface ModelActionContext<R extends Model, O, M extends Model, A exten
 	void overlay(OverlayVisualFactory overlayVisualFactory);
 
 	/**
-	 * Executes the {@link Change}.
+	 * Obtains the {@link ChangeExecutor}.
 	 * 
-	 * @param change
-	 *            {@link Change}.
+	 * @return {@link ChangeExecutor}.
 	 */
-	void execute(Change<?> change);
+	ChangeExecutor getChangeExecutor();
 
 	/**
 	 * Obtains the {@link Injector}.

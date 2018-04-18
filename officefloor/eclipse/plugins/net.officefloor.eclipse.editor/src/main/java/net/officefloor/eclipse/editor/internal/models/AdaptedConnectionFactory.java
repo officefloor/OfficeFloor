@@ -36,7 +36,6 @@ import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
-import net.officefloor.model.change.Change;
 
 /**
  * Factory for an {@link AdaptedConnection}.
@@ -241,11 +240,6 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		@Override
 		public AdaptedConnection<C> getAdaptedModel() {
 			return this;
-		}
-
-		@Override
-		public void execute(Change<?> change) {
-			this.getChangeExecutor().execute(change);
 		}
 
 		@Override

@@ -28,6 +28,7 @@ import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.MultipleBuilder;
 import net.officefloor.eclipse.configurer.ValueLoader;
 import net.officefloor.eclipse.configurer.test.ExampleModel.ExampleItem;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * Main for running example configurer.
@@ -82,7 +83,7 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 	protected void loadConfiguration(Shell shell) {
 
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>(null, shell);
+		Configurer<ExampleModel> configurer = new Configurer<>(OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
 		ConfigurationBuilder<ExampleModel> builder = configurer;
 
 		// Title
@@ -100,6 +101,14 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 				context.setError("Text too short");
 			}
 		}).setValue(this.log((model, value) -> model.text = value));
+
+		// Configure class
+		builder.clazz("Class").init((model) -> model.className)
+				.setValue(this.log((model, value) -> model.className = value));
+
+		// Configure resource
+		builder.resource("Resource").init((model) -> model.resourceName)
+				.setValue(this.log((model, value) -> model.resourceName = value));
 
 		// Provide choices
 		ChoiceBuilder<ExampleModel> choices = builder.choices("Choices");

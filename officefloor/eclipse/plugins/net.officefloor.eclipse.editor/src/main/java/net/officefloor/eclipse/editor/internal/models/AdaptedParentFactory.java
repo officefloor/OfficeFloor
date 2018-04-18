@@ -38,6 +38,7 @@ import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
+import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
@@ -45,7 +46,6 @@ import net.officefloor.eclipse.editor.ParentModelProvider;
 import net.officefloor.eclipse.editor.ParentModelProviderContext;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
-import net.officefloor.model.change.Change;
 
 /**
  * Factory for an {@link AdaptedParent}.
@@ -255,8 +255,8 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 						}
 
 						@Override
-						public void execute(Change<?> change) {
-							AdaptedParentImpl.this.getChangeExecutor().execute(change);
+						public ChangeExecutor getChangeExecutor() {
+							return AdaptedParentImpl.this.getChangeExecutor();
 						}
 
 						@Override
@@ -289,18 +289,13 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 		@Override
 		public void overlay(OverlayVisualFactory overlayVisualFactory) {
-			
+
 			// Obtain the location of this parent
 			Model model = this.getAdaptedModel().getModel();
 			Point location = new Point(model.getX(), model.getY());
 
 			// Add the overlay
 			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
-		}
-
-		@Override
-		public void execute(Change<?> change) {
-			this.getChangeExecutor().execute(change);
 		}
 	}
 

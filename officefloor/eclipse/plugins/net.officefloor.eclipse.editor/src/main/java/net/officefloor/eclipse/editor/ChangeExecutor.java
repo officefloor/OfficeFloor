@@ -17,50 +17,31 @@
  */
 package net.officefloor.eclipse.editor;
 
-import javafx.scene.layout.Pane;
+import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
+
+import net.officefloor.model.change.Change;
 
 /**
- * Context for an overlay.
+ * Executes {@link Change}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OverlayVisualContext {
+public interface ChangeExecutor {
 
 	/**
-	 * <p>
-	 * Obtains the parent {@link Pane} that loads as the overlay.
-	 * <p>
-	 * Content for the overlay to be added to this {@link Pane}.
+	 * Executes the {@link Change}.
 	 * 
-	 * @return Parent {@link Pane} to load in the overlay.
+	 * @param change
+	 *            {@link Change}.
 	 */
-	Pane getOverlayParent();
+	void execute(Change<?> change);
 
 	/**
-	 * <p>
-	 * Indicates whether the overlay is fixed width.
-	 * <p>
-	 * By default the overlay resizes.
+	 * Executes the {@link ITransactionalOperation}.
 	 * 
-	 * @param isFixedWith
-	 *            <code>true</code> for fixed width.
+	 * @param operation
+	 *            {@link ITransactionalOperation}.
 	 */
-	void setFixedWidth(boolean isFixedWith);
-
-	/**
-	 * <p>
-	 * Indicates whether the overlay is fixed height.
-	 * <p>
-	 * By default the overlay resizes.
-	 * 
-	 * @param isFixedHeight
-	 *            <code>true</code> for fixed height.
-	 */
-	void setFixedHeight(boolean isFixedHeight);
-
-	/**
-	 * Closes the overlay.
-	 */
-	void close();
+	void execute(ITransactionalOperation operation);
 
 }

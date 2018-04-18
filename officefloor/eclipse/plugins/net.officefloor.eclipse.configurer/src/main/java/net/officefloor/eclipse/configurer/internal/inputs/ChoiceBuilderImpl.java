@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Shell;
 
 import javafx.beans.property.ReadOnlyProperty;
@@ -37,6 +36,7 @@ import net.officefloor.eclipse.configurer.internal.ChoiceValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 import net.officefloor.eclipse.configurer.internal.ValueRendererFactory;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * {@link ChoiceBuilder} implementation.
@@ -47,9 +47,9 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 		implements ChoiceBuilder<M> {
 
 	/**
-	 * {@link IJavaProject}.
+	 * {@link OfficeFloorOsgiBridge}.
 	 */
-	private final IJavaProject javaProject;
+	private final OfficeFloorOsgiBridge osgiBridge;
 
 	/**
 	 * Parent {@link Shell}.
@@ -66,14 +66,14 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param parentShell
 	 *            Parent {@link Shell}.
 	 */
-	public ChoiceBuilderImpl(String label, IJavaProject javaProject, Shell parentShell) {
+	public ChoiceBuilderImpl(String label, OfficeFloorOsgiBridge osgiBridge, Shell parentShell) {
 		super(label);
-		this.javaProject = javaProject;
+		this.osgiBridge = osgiBridge;
 		this.parentShell = parentShell;
 	}
 
@@ -206,7 +206,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 		 *            Label.
 		 */
 		public ChoiceConfigurationBuilder(String label) {
-			super(ChoiceBuilderImpl.this.javaProject, ChoiceBuilderImpl.this.parentShell);
+			super(ChoiceBuilderImpl.this.osgiBridge, ChoiceBuilderImpl.this.parentShell);
 			this.label = label;
 		}
 	}

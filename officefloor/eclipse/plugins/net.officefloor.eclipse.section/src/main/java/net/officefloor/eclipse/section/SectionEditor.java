@@ -20,6 +20,7 @@ package net.officefloor.eclipse.section;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import org.eclipse.gef.mvc.fx.ui.MvcFxUiModule;
 import org.eclipse.gef.mvc.fx.ui.parts.AbstractFXEditor;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
@@ -37,15 +38,20 @@ import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
+import net.officefloor.eclipse.configurer.CloseListener;
+import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
-import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
-import net.officefloor.eclipse.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.editor.ChangeExecutor;
+import net.officefloor.eclipse.editor.DefaultImages;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
 import net.officefloor.model.Model;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.impl.section.SectionRepositoryImpl;
@@ -89,9 +95,9 @@ public class SectionEditor extends AbstractFXEditor {
 	private SectionModel model;
 
 	/**
-	 * {@link OfficeFloorJavaProjectBridge}.
+	 * {@link OfficeFloorOsgiBridge}.
 	 */
-	private OfficeFloorJavaProjectBridge javaProjectOfficeFloorCompiler;
+	private OfficeFloorOsgiBridge javaProjectOfficeFloorCompiler;
 
 	/**
 	 * Instantiate to capture {@link Injector}.
@@ -154,28 +160,78 @@ public class SectionEditor extends AbstractFXEditor {
 			externalFlow.create((ctx) -> {
 
 				// Obtain details for dialog
-				OfficeFloorJavaProjectBridge bridge = this.getJavaProjectBridge();
+				OfficeFloorOsgiBridge bridge = this.getJavaProjectBridge();
 				IJavaProject javaProject = bridge.getJavaProject();
 				Shell shell = this.getEditorSite().getShell();
 
-				// Create dialog to add Office
-				ConfigurerDialog<ExternalFlowConfiguration> dialog = new ConfigurerDialog<>(javaProject, shell);
-				ExternalFlowConfiguration configuration = new ExternalFlowConfiguration();
-				configuration.loadAddConfiguration(dialog, ctx, bridge);
-				dialog.open(configuration);
+				// Obtain details for executing change
+				SectionChanges changes = ctx.getOperations();
+				ChangeExecutor executor = ctx.getChangeExecutor();
+
+				// Create the overlay to add external flow
+				ctx.overlay((visual) -> {
+
+					// Prepare the parent
+					Pane parent = visual.getOverlayParent();
+					parent.setMinHeight(200);
+					parent.applyCss();
+
+					// Create the configurer
+					Configurer<ExternalFlowConfiguration> configurer = new Configurer<>(
+							new OfficeFloorOsgiBridge(javaProject), shell);
+					ExternalFlowConfiguration configuration = new ExternalFlowConfiguration();
+
+					// Load configuration
+					configuration.loadAddConfiguration(configurer, changes, new ChangeExecutor() {
+
+						@Override
+						public void execute(ITransactionalOperation operation) {
+							executor.execute(operation);
+						}
+
+						@Override
+						public void execute(Change<?> change) {
+
+							// Position the change
+							ctx.position((ExternalFlowModel) change.getTarget());
+
+							// Undertake the change
+							executor.execute(change);
+						}
+					}, bridge);
+
+					((ConfigurationBuilder<ExternalFlowConfiguration>) configurer).close(new CloseListener() {
+
+						@Override
+						public void cancelled() {
+							visual.close();
+						}
+
+						@Override
+						public void applied() {
+							visual.close();
+						}
+					});
+
+					// Show the configuration
+					configurer.loadConfiguration(configuration, parent);
+				});
 			});
+			externalFlow.action((ctx) -> {
+				ctx.getChangeExecutor().execute(ctx.getOperations().removeExternalFlow(ctx.getModel()));
+			}, DefaultImages.DELETE);
 
 		};
 	}
 
 	/**
-	 * Obtains the {@link OfficeFloorJavaProjectBridge}.
+	 * Obtains the {@link OfficeFloorOsgiBridge}.
 	 * 
-	 * @return {@link OfficeFloorJavaProjectBridge}.
+	 * @return {@link OfficeFloorOsgiBridge}.
 	 * @throws Exception
-	 *             If fails to obtain the {@link OfficeFloorJavaProjectBridge}.
+	 *             If fails to obtain the {@link OfficeFloorOsgiBridge}.
 	 */
-	protected OfficeFloorJavaProjectBridge getJavaProjectBridge() throws Exception {
+	protected OfficeFloorOsgiBridge getJavaProjectBridge() throws Exception {
 
 		// Determine if cached access to compiler
 		if (this.javaProjectOfficeFloorCompiler != null) {
@@ -198,7 +254,7 @@ public class SectionEditor extends AbstractFXEditor {
 		IJavaProject javaProject = JavaCore.create(project);
 
 		// Bridge java project to OfficeFloor compiler
-		this.javaProjectOfficeFloorCompiler = new OfficeFloorJavaProjectBridge(javaProject);
+		this.javaProjectOfficeFloorCompiler = new OfficeFloorOsgiBridge(javaProject);
 
 		// Obtain the OfficeFloor compiler
 		return this.javaProjectOfficeFloorCompiler;
@@ -235,7 +291,7 @@ public class SectionEditor extends AbstractFXEditor {
 
 		// Load the module
 		this.module.loadRootModel(this.model);
-		
+
 		// Activate
 		super.activate();
 	}

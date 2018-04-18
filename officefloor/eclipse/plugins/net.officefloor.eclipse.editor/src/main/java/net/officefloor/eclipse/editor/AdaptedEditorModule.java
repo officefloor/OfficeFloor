@@ -73,6 +73,7 @@ import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedParentOnDragHandler;
 import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel;
+import net.officefloor.eclipse.editor.internal.models.ChangeExecutorImpl;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectorPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
@@ -207,9 +208,10 @@ public class AdaptedEditorModule extends MvcFxModule {
 		// Load the factory
 		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
 
-		// Load the viewers composite
+		// Load the viewers and change executor
 		this.viewersComposite = new ViewersComposite(this.content, this.palette);
-		this.factory.init(this.content, this.palette, this.viewersComposite);
+		ChangeExecutor changeExecutor = new ChangeExecutorImpl(this.factory, this.domain);
+		this.factory.init(this.injector, this.content, this.palette, this.viewersComposite, changeExecutor);
 
 		// Configure the models
 		adaptedBuilder.build(this.factory);
@@ -372,11 +374,10 @@ public class AdaptedEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(HoverModel.class);
 	}
 
-	protected OfficeFloorContentPartFactory<?, ?> bindIContentPartFactory() {
+	protected void bindIContentPartFactory() {
 		OfficeFloorContentPartFactory<?, ?> contentPartFactory = new OfficeFloorContentPartFactory<>();
 		binder().bind(IContentPartFactory.class).toInstance(contentPartFactory);
 		binder().bind(OfficeFloorContentPartFactory.class).toInstance(contentPartFactory);
-		return contentPartFactory;
 	}
 
 	protected void bindIContentPartFactoryAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {

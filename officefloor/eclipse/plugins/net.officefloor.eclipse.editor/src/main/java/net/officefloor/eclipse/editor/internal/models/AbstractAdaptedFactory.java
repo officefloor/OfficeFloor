@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedModel;
+import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -321,7 +322,7 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		 * @return {@link ChangeExecutor}.
 		 */
 		public ChangeExecutor getChangeExecutor() {
-			return this.getInjector().getInstance(ChangeExecutor.class);
+			return this.factory.contentPartFactory.getChangeExecutor();
 		}
 
 		/**

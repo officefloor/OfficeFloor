@@ -17,18 +17,7 @@
  */
 package net.officefloor.eclipse.configurer.internal.inputs;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 
 import javafx.beans.property.Property;
 import javafx.scene.Node;
@@ -39,9 +28,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import net.officefloor.eclipse.configurer.ResourceBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
-import net.officefloor.eclipse.configurer.internal.MessageOnlyException;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * {@link ResourceBuilder} implementation.
@@ -53,9 +42,9 @@ public class ResourceBuilderImpl<M>
 		implements ResourceBuilder<M> {
 
 	/**
-	 * {@link IJavaProject}.
+	 * {@link OfficeFloorOsgiBridge}.
 	 */
-	private final IJavaProject javaProject;
+	private final OfficeFloorOsgiBridge osgiBridge;
 
 	/**
 	 * {@link Shell}.
@@ -67,14 +56,14 @@ public class ResourceBuilderImpl<M>
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param shell
 	 *            {@link Shell}.
 	 */
-	public ResourceBuilderImpl(String label, IJavaProject javaProject, Shell shell) {
+	public ResourceBuilderImpl(String label, OfficeFloorOsgiBridge osgiBridge, Shell shell) {
 		super(label);
-		this.javaProject = javaProject;
+		this.osgiBridge = osgiBridge;
 		this.shell = shell;
 	}
 
@@ -91,33 +80,17 @@ public class ResourceBuilderImpl<M>
 		// Add validation (to ensure resource existing in project)
 		context.addValidator((ctx) -> {
 
-			// Obtain the resource for the path
-			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-
-			// Obtains the path
-			String path = value.getValue();
-
-			// Determine if resource on the class path
-			IClasspathEntry[] classPath = this.javaProject.getResolvedClasspath(true);
-			for (IClasspathEntry entry : classPath) {
-
-				// Obtain the class path resource
-				IPath fullPath = entry.getPath().append(path);
-
-				// Obtain the resource
-				IResource resource = workspaceRoot.findMember(fullPath);
-				if (resource == null) {
-					continue;
-				}
-
-				// Determine if resource on class path
-				if (this.javaProject.isOnClasspath(resource)) {
-					return; // resource on class path
-				}
+			// Determine if have resource
+			String resourcePath = value.getValue();
+			if ((resourcePath == null) || (resourcePath.trim().length() == 0)) {
+				return; // no resource path provided
 			}
 
-			// As here, resource not on class path
-			ctx.setError("Resource not on project's class path");
+			// Determine if resource on the class path
+			if (!this.osgiBridge.isResourceOnClassPath(resourcePath)) {
+				ctx.setError("Resource not on project's class path");
+				return;
+			}
 		});
 
 		// Provide editable text box
@@ -147,6 +120,16 @@ public class ResourceBuilderImpl<M>
 		return valueInput;
 	}
 
+	@Override
+	protected Node createErrorFeedback(ResourceValueInput valueInput, Property<Throwable> errorProperty) {
+
+		// Hook in to error property for issues working with Java model
+		valueInput.errorProperty = errorProperty;
+
+		// Provide error feedback
+		return super.createErrorFeedback(valueInput, errorProperty);
+	}
+
 	/**
 	 * Does the selection of a resource.
 	 * 
@@ -158,107 +141,15 @@ public class ResourceBuilderImpl<M>
 	private void doResourceSelection(Property<String> text, ResourceValueInput valueInput) {
 		try {
 
-			// Strip filter down to just the simple name
-			String filter = text.getValue();
-			int index = filter.lastIndexOf('/');
-			if (index >= 0) {
-				filter = filter.substring(index + "/".length());
-			}
-			index = filter.indexOf('.');
-			if (index >= 0) {
-				filter = filter.substring(0, index);
-			}
-
-			// Obtain the selected file
-			FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(this.shell, false,
-					this.javaProject.getProject(), IResource.FILE);
-			dialog.setInitialPattern(filter);
-			dialog.setBlockOnOpen(true);
-			dialog.open();
-			Object[] results = dialog.getResult();
-			if ((results == null) || (results.length != 1)) {
-				return; // cancel
-			}
-
-			// Obtain the selected item
-			Object selectedItem = results[0];
-			if (selectedItem instanceof IFile) {
-				// Specify class path location for file
-				IFile file = (IFile) selectedItem;
-				String filePath = getClassPathLocation(file);
-				text.setValue(filePath);
-			} else {
-				// Unknown type
-				valueInput.errorProperty.setValue(
-						new MessageOnlyException("Plugin Error: selected item is not of " + IFile.class.getName() + " ["
-								+ (selectedItem == null ? null : selectedItem.getClass().getName()) + "]"));
+			// Select resource from class path
+			String resourcePath = this.osgiBridge.selectClassPathResource(text.getValue(), this.shell);
+			if (resourcePath != null) {
+				text.setValue(resourcePath);
 			}
 
 		} catch (Exception ex) {
 			valueInput.errorProperty.setValue(new Exception("Plugin Error: " + ex.getMessage(), ex));
 		}
-	}
-
-	/**
-	 * Obtains the class path location for the {@link IFile}.
-	 * 
-	 * @param file
-	 *            {@link IFile}.
-	 * @return Class path location for the {@link IFile}.
-	 */
-	public String getClassPathLocation(IFile file) {
-
-		// Obtain the resource for the path
-		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-		IResource pathResource = workspaceRoot.findMember(file.getFullPath());
-		IResource resource = pathResource;
-
-		// Obtain the java element
-		IJavaElement javaElement = null;
-		do {
-			// Ensure have the resource
-			if (resource == null) {
-				// Did not find java element for resource
-				return null;
-			}
-
-			// Obtain the java element from the resource
-			javaElement = JavaCore.create(resource);
-
-			// Obtain the parent resource
-			resource = resource.getParent();
-
-		} while (javaElement == null);
-
-		// Obtain the package fragment root for the java element
-		IPackageFragmentRoot fragmentRoot = null;
-		do {
-
-			// Determine if package fragment root
-			if (javaElement instanceof IPackageFragmentRoot) {
-				fragmentRoot = (IPackageFragmentRoot) javaElement;
-			}
-
-			// Obtain the parent java element
-			javaElement = javaElement.getParent();
-
-		} while ((fragmentRoot == null) && (javaElement != null));
-
-		// Determine if have fragment root
-		if (fragmentRoot == null) {
-			// Return path as is
-			return file.getFullPath().toString();
-		}
-
-		// Obtain the fragment root full path
-		String fragmentPath = fragmentRoot.getResource().getFullPath().toString() + "/";
-
-		// Obtain the class path location (by removing fragment root path)
-		String fullPath = file.getFullPath().toString();
-		String location = fullPath.substring(fragmentPath.length());
-
-		// Return the location
-		return location;
 	}
 
 	/**

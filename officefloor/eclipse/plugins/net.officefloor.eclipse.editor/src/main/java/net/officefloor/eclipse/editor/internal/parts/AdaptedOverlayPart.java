@@ -25,9 +25,10 @@ import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
+import javafx.geometry.Orientation;
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.common.javafx.resize.DragResizer;
 import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
-import net.officefloor.model.Model;
 
 /**
  * {@link IContentPart} for the {@link AdaptedOverlay}.
@@ -49,16 +50,26 @@ public class AdaptedOverlayPart extends AbstractAdaptedPart<AdaptedOverlay, Adap
 	@Override
 	protected Pane doCreateVisual() {
 
+		// Obtain the overlay
+		AdaptedOverlay overlay = this.getContent();
+
 		// Obtain the overlay parent
-		Pane overlayParent = this.getContent().getOverlayParent();
+		Pane overlayParent = overlay.getOverlayParent();
 
 		// Configure the overlay parent
-		this.getContent().getOverlayVisualFactory().loadOverlay(this.getContent());
+		overlay.getOverlayVisualFactory().loadOverlay(overlay);
 
 		// Specify location of overlay
-		Model overlay = this.getContent();
 		overlayParent.setLayoutX(overlay.getX());
 		overlayParent.setLayoutY(overlay.getY());
+
+		// Provide resizing
+		if (!overlay.isFixedWidth()) {
+			DragResizer.makeResizable(overlayParent, Orientation.HORIZONTAL);
+		}
+		if (!overlay.isFixedHeight()) {
+			DragResizer.makeResizable(overlayParent, Orientation.VERTICAL);
+		}
 
 		// Return the overlay parent
 		return overlayParent;

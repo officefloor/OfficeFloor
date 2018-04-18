@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * Runs the example {@link ConfigurerDialog}.
@@ -59,7 +60,8 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 			public void handleEvent(Event event) {
 
 				// Create the dialog
-				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(null, shell);
+				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(
+						OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
 				ConfigurationBuilder<ExampleModel> builder = dialog;
 
 				// Configure the dialog
@@ -87,7 +89,6 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 				dialog.open(model);
 			}
 		});
-
 	}
 
 }

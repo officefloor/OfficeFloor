@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.configurer.ValueLoader;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.Model;
 
 /**
@@ -57,15 +58,19 @@ public class ExampleConfigurerView {
 	public ExampleConfigurerView(Composite parent) throws Exception {
 
 		// Obtain the java project
+		final String PROJECT_NAME = "Test";
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject("Test");
+		IProject project = root.getProject(PROJECT_NAME);
+		if (project == null) {
+			throw new IllegalStateException("No project by name " + PROJECT_NAME + " in workspace");
+		}
 		IJavaProject javaProject = JavaCore.create(project);
 
 		// Obtain the shell
 		Shell shell = parent.getShell();
 
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>(javaProject, shell);
+		Configurer<ExampleModel> configurer = new Configurer<>(new OfficeFloorOsgiBridge(javaProject), shell);
 
 		// Provide configuration
 		ConfigurationBuilder<ExampleModel> builder = configurer;

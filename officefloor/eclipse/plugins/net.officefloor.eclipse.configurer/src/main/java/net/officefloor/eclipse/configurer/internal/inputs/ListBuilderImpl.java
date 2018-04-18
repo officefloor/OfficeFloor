@@ -29,6 +29,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -39,6 +40,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import net.officefloor.eclipse.common.javafx.resize.DragResizer;
 import net.officefloor.eclipse.configurer.Actioner;
 import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
@@ -51,7 +53,6 @@ import net.officefloor.eclipse.configurer.internal.ColumnRenderer;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 import net.officefloor.eclipse.configurer.internal.ValueRendererContext;
-import net.officefloor.eclipse.configurer.internal.resize.DragResizer;
 
 /**
  * {@link ListBuilder} implementation.
@@ -384,7 +385,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			// Allow to adjust height (with reasonable size)
 			double requiredHeight = ((table.getItems().size() + 1) * ROW_HEIGHT) + HEADER_HEIGHT;
 			table.prefHeightProperty().set(Math.min(requiredHeight, 300));
-			DragResizer.makeResizable(table);
+			DragResizer.makeResizable(table, Orientation.VERTICAL);
 
 			// Handle adding/removing rows
 			rows.addListener((Observable event) -> loadRowsToItems.run());

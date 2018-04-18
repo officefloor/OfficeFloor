@@ -18,7 +18,6 @@
 package net.officefloor.eclipse.configurer;
 
 import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -26,7 +25,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import javafx.application.Application;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Node;
@@ -35,6 +33,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import net.officefloor.eclipse.configurer.internal.AbstractConfigurationBuilder;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
 
@@ -48,13 +47,13 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param parentShell
 	 *            Parent {@link Shell}.
 	 */
-	public Configurer(IJavaProject javaProject, Shell parentShell) {
-		super(javaProject, parentShell);
+	public Configurer(OfficeFloorOsgiBridge osgiBridge, Shell parentShell) {
+		super(osgiBridge, parentShell);
 	}
 
 	/**
@@ -92,12 +91,13 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	}
 
 	/**
-	 * Loads the {@link ObjectProperty}.
+	 * Loads the configuration, loading the parent {@link Pane} into the
+	 * {@link Property}.
 	 * 
 	 * @param model
 	 *            {@link Model}.
 	 * @param nodeProperty
-	 *            {@link ObjectProperty}.
+	 *            {@link Property} to receive the parent {@link Pane}.
 	 * @return {@link Configuration}.
 	 */
 	public Configuration loadConfiguration(M model, Property<Node> nodeProperty) {
@@ -108,6 +108,19 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 
 		// Load the configuration
 		return this.loadConfiguration(model, pane);
+	}
+
+	/**
+	 * Loads the input {@link Pane} with the configuration.
+	 * 
+	 * @param model
+	 *            {@link Model}.
+	 * @param parent
+	 *            Parent {@link Pane} to contain the configuration.
+	 * @return {@link Configuration}.
+	 */
+	public Configuration loadConfiguration(M model, Pane parent) {
+		return super.loadConfiguration(model, parent);
 	}
 
 	/**

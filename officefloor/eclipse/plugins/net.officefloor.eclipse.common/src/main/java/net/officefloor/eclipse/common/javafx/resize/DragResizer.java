@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.internal.resize;
+package net.officefloor.eclipse.common.javafx.resize;
 
+import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
@@ -33,9 +34,11 @@ public class DragResizer {
 	 * 
 	 * @param region
 	 *            {@link Region}.
+	 * @param orientation
+	 *            Indicates whether resize horizontal or vertically.
 	 */
-	public static void makeResizable(Region region) {
-		final DragResizer resizer = new DragResizer(region);
+	public static void makeResizable(Region region, Orientation orientation) {
+		final DragResizer resizer = new DragResizer(region, orientation);
 		region.setOnMouseMoved((event) -> resizer.mouseOver(event));
 		region.setOnMousePressed((event) -> resizer.mousePressed(event));
 		region.setOnMouseDragged((event) -> resizer.mouseDragged(event));
@@ -53,6 +56,11 @@ public class DragResizer {
 	private final Region region;
 
 	/**
+	 * {@link Orientation}.
+	 */
+	private final Orientation orientation;
+
+	/**
 	 * Indicates currently dragging.
 	 */
 	private boolean dragging;
@@ -62,9 +70,12 @@ public class DragResizer {
 	 * 
 	 * @param region
 	 *            {@link Region} being resized.
+	 * @param orientation
+	 *            {@link Orientation}.
 	 */
-	private DragResizer(Region region) {
+	private DragResizer(Region region, Orientation orientation) {
 		this.region = region;
+		this.orientation = orientation;
 	}
 
 	/**
@@ -75,7 +86,13 @@ public class DragResizer {
 	 * @return <code>true</code> if in drag zone.
 	 */
 	protected boolean isInDraggableZone(MouseEvent event) {
-		return event.getY() > (region.getHeight() - RESIZE_MARGIN);
+		switch (this.orientation) {
+		case HORIZONTAL:
+			return event.getX() > (region.getWidth() - RESIZE_MARGIN);
+		default:
+			// VERTICAL
+			return event.getY() > (region.getHeight() - RESIZE_MARGIN);
+		}
 	}
 
 	/**
@@ -121,10 +138,25 @@ public class DragResizer {
 			return;
 		}
 
-		// Update pref height based on drag
-		this.region.setPrefHeight(event.getY());
+		// Update pref dimension based on drag
+		switch (this.orientation) {
+		case HORIZONTAL:
+			this.region.setPrefWidth(event.getX());
+			break;
+
+		default:
+			// VERTICAL
+			this.region.setPrefHeight(event.getY());
+			break;
+		}
 	}
 
+	/**
+	 * Handle mouse released.
+	 * 
+	 * @param event
+	 *            {@link MouseEvent}.
+	 */
 	protected void mouseReleased(MouseEvent event) {
 		this.dragging = false;
 		this.region.setCursor(Cursor.DEFAULT);

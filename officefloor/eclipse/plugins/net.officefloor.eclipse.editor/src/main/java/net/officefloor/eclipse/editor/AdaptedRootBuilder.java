@@ -70,4 +70,11 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	 */
 	AdaptedErrorHandler getErrorHandler();
 
+	/**
+	 * Obtains the {@link ChangeExecutor}.
+	 * 
+	 * @return {@link ChangeExecutor}.
+	 */
+	ChangeExecutor getChangeExecutor();
+
 }

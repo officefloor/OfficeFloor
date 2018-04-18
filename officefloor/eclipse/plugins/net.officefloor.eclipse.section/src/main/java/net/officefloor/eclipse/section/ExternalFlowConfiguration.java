@@ -17,12 +17,18 @@
  */
 package net.officefloor.eclipse.section;
 
+import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
+import org.eclipse.swt.widgets.Shell;
+
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.ParentModelProviderContext;
-import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
+import net.officefloor.eclipse.editor.ChangeExecutor;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
@@ -32,7 +38,39 @@ import net.officefloor.model.section.SectionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExternalFlowConfiguration {
+public class ExternalFlowConfiguration extends AbstractConfigurerRunnable {
+
+	/**
+	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 */
+	public static void main(String[] args) {
+		new ExternalFlowConfiguration().run();
+	}
+
+	/*
+	 * =============== AbstractConfigurerRunnable =============
+	 */
+
+	@Override
+	protected void loadConfiguration(Shell shell) {
+		Configurer<ExternalFlowConfiguration> configurer = new Configurer<>(null, shell);
+		this.loadAddConfiguration(configurer, new SectionChangesImpl(new SectionModel()), new ChangeExecutor() {
+
+			@Override
+			public void execute(ITransactionalOperation operation) {
+				throw new IllegalStateException("Should not execute operation");
+			}
+
+			@Override
+			public void execute(Change<?> change) {
+				change.apply();
+			}
+		}, OfficeFloorOsgiBridge.getClassLoaderInstance());
+
+	}
 
 	/**
 	 * Loads configuration for adding an {@link ExternalFlowModel}.
@@ -40,9 +78,8 @@ public class ExternalFlowConfiguration {
 	 * @param builder
 	 *            {@link ConfigurationBuilder}.
 	 */
-	public void loadAddConfiguration(ConfigurationBuilder<ExternalFlowConfiguration> builder,
-			ParentModelProviderContext<SectionModel, SectionChanges, ExternalFlowModel> context,
-			OfficeFloorJavaProjectBridge compiler) {
+	public void loadAddConfiguration(ConfigurationBuilder<ExternalFlowConfiguration> builder, SectionChanges changes,
+			ChangeExecutor executor, OfficeFloorOsgiBridge compiler) {
 
 		// Configure
 		builder.title("External Flow");
@@ -58,13 +95,10 @@ public class ExternalFlowConfiguration {
 		builder.apply("Add", (model) -> {
 
 			// Create the change
-			Change<ExternalFlowModel> change = context.getOperations().addExternalFlow(model.name, model.argumentType);
-
-			// Position the external flow
-			context.position(change.getTarget());
+			Change<ExternalFlowModel> change = changes.addExternalFlow(model.name, model.argumentType);
 
 			// Undertake the change
-			context.execute(change);
+			executor.execute(change);
 		});
 	}
 

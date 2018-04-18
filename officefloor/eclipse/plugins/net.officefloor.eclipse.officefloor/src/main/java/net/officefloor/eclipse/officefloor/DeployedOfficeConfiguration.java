@@ -28,7 +28,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.ModelActionContext;
-import net.officefloor.eclipse.javaproject.OfficeFloorJavaProjectBridge;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
@@ -49,7 +49,7 @@ public class DeployedOfficeConfiguration {
 	 */
 	public void loadAddConfiguration(ConfigurationBuilder<DeployedOfficeConfiguration> builder,
 			ModelActionContext<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, ?> context,
-			OfficeFloorJavaProjectBridge compiler) {
+			OfficeFloorOsgiBridge compiler) {
 
 		// Configure the name
 		builder.text("Name").setValue((model, value) -> model.name = value)
@@ -92,8 +92,8 @@ public class DeployedOfficeConfiguration {
 
 		// Apply change
 		builder.apply("Add", (model) -> {
-			context.execute(context.getOperations().addDeployedOffice(model.name, model.officeFloorSource,
-					model.location, model.properties, model.officeType));
+			context.getChangeExecutor().execute(context.getOperations().addDeployedOffice(model.name,
+					model.officeFloorSource, model.location, model.properties, model.officeType));
 		});
 
 	}

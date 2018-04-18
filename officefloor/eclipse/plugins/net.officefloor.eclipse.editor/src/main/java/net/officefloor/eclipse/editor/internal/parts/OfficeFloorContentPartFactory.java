@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
@@ -33,26 +33,26 @@ import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedConnectionBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
-import net.officefloor.eclipse.editor.AdaptedConnectionBuilder.ConnectionFactory;
-import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
-import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
-import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
-import net.officefloor.eclipse.editor.internal.models.ChangeExecutor;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
+import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
+import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
+import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
-import net.officefloor.model.change.Change;
 
+@Singleton
 public class OfficeFloorContentPartFactory<R extends Model, O>
 		implements IContentPartFactory, AdaptedRootBuilder<R, O>, AdaptedBuilderContext {
 
@@ -74,7 +74,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		return false;
 	}
 
-	@Inject
+	/**
+	 * {@link Injector}.
+	 */
 	private Injector injector;
 
 	/**
@@ -129,6 +131,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private IViewer paletteViewer;
 
 	/**
+	 * {@link ChangeExecutor}.
+	 */
+	private ChangeExecutor changeExecutor;
+
+	/**
 	 * {@link AdaptedErrorHandler}.
 	 */
 	private AdaptedErrorHandler errorHandler;
@@ -136,17 +143,24 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	/**
 	 * Initialises.
 	 * 
+	 * @param injector
+	 *            {@link Injector}.
 	 * @param content
 	 *            {@link IViewer} content.
 	 * @param palette
 	 *            {@link IViewer} palette.
 	 * @param errorHandler
 	 *            {@link AdaptedErrorHandler}.
+	 * @param changeExecutor
+	 *            {@link ChangeExecutor}.
 	 */
-	public void init(IViewer content, IViewer palette, AdaptedErrorHandler errorHandler) {
+	public void init(Injector injector, IViewer content, IViewer palette, AdaptedErrorHandler errorHandler,
+			ChangeExecutor changeExecutor) {
+		this.injector = injector;
 		this.contentViewer = content;
 		this.paletteViewer = palette;
 		this.errorHandler = errorHandler;
+		this.changeExecutor = changeExecutor;
 	}
 
 	/**
@@ -376,8 +390,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 					}
 
 					@Override
-					public void execute(Change<?> change) {
-						this.getInjector().getInstance(ChangeExecutor.class).execute(change);
+					public ChangeExecutor getChangeExecutor() {
+						return OfficeFloorContentPartFactory.this.changeExecutor;
 					}
 
 					@Override
@@ -440,7 +454,20 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 	@Override
 	public AdaptedErrorHandler getErrorHandler() {
+		if (this.errorHandler == null) {
+			throw new IllegalStateException(
+					AdaptedErrorHandler.class.getSimpleName() + " not initialised for " + this.getClass().getName());
+		}
 		return this.errorHandler;
+	}
+
+	@Override
+	public ChangeExecutor getChangeExecutor() {
+		if (this.changeExecutor == null) {
+			throw new IllegalStateException(
+					ChangeExecutor.class.getSimpleName() + " not initialised for " + this.getClass().getName());
+		}
+		return this.changeExecutor;
 	}
 
 	/*

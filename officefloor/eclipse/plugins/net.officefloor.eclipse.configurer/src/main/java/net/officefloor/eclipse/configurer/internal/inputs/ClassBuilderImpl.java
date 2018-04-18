@@ -17,20 +17,7 @@
  */
 package net.officefloor.eclipse.configurer.internal.inputs;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.SelectionDialog;
 
 import javafx.beans.property.Property;
 import javafx.scene.Node;
@@ -41,9 +28,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
-import net.officefloor.eclipse.configurer.internal.MessageOnlyException;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * {@link ClassBuilder} implementation.
@@ -54,9 +41,9 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ClassBuilder
 		implements ClassBuilder<M> {
 
 	/**
-	 * {@link IJavaProject}.
+	 * {@link OfficeFloorOsgiBridge}.
 	 */
-	private final IJavaProject javaProject;
+	private final OfficeFloorOsgiBridge osgiBridge;
 
 	/**
 	 * {@link Shell}.
@@ -73,14 +60,14 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ClassBuilder
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param shell
 	 *            {@link Shell}.
 	 */
-	public ClassBuilderImpl(String label, IJavaProject javaProject, Shell shell) {
+	public ClassBuilderImpl(String label, OfficeFloorOsgiBridge osgiBridge, Shell shell) {
 		super(label);
-		this.javaProject = javaProject;
+		this.osgiBridge = osgiBridge;
 		this.shell = shell;
 	}
 
@@ -105,42 +92,26 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ClassBuilder
 		Property<String> value = context.getInputValue();
 
 		// Ensure run validation for super type
-		if (this.superType != null) {
-			context.addValidator((ctx) -> {
+		context.addValidator((ctx) -> {
 
-				// Determine if have class name
-				String className = value.getValue();
-				if ((className == null) || (className.trim().length() == 0)) {
-					return; // no class provided
-				}
+			// Determine if have class name
+			String className = value.getValue();
+			if ((className == null) || (className.trim().length() == 0)) {
+				return; // no class provided
+			}
 
-				// Obtain the class type
-				IType type = ClassBuilderImpl.this.javaProject.findType(className);
-				if (type == null) {
-					ctx.setError("Class " + className + " not on project's class path");
-					return;
-				}
+			// Ensure class on class path
+			if (!this.osgiBridge.isClassOnClassPath(className)) {
+				ctx.setError("Class " + className + " not on project's class path");
+				return;
+			}
 
-				// Obtain the super type from the project
-				String superTypeClassName = ClassBuilderImpl.this.superType;
-				IType superType = ClassBuilderImpl.this.javaProject.findType(superTypeClassName);
-				if (superType == null) {
-					// Type not on project's class path
-					ctx.setError("Please add " + superTypeClassName + " to the project's class path");
-					return;
-				}
-
-				// Ensure child of super type
-				ITypeHierarchy typeHierarchy = type.newTypeHierarchy(new NullProgressMonitor());
-				List<IType> superTypes = Arrays.asList(typeHierarchy.getAllSupertypes(type));
-				boolean isSuperType = superTypes.stream().anyMatch(supertype -> {
-					return supertype.getFullyQualifiedName().equals(ClassBuilderImpl.this.superType);
-				});
-				if (!isSuperType) {
-					ctx.setError("Must be child of " + ClassBuilderImpl.this.superType);
-				}
-			});
-		}
+			// Ensure super type (if super type specified)
+			if ((this.superType != null) && (!this.osgiBridge.isSuperType(className, this.superType))) {
+				ctx.setError("Must be child of " + this.superType);
+				return;
+			}
+		});
 
 		// Provide editable text box
 		TextField text = new TextField();
@@ -190,47 +161,10 @@ public class ClassBuilderImpl<M> extends AbstractBuilder<M, String, ClassBuilder
 	private void doClassSelection(Property<String> text, ClassValueInput valueInput) {
 		try {
 
-			// Obtain the text
-			String textValue = text.getValue();
-			textValue = (textValue == null) ? "" : textValue;
-
-			// Obtain the search scope
-			IJavaSearchScope scope = null;
-			if (this.superType != null) {
-				// Obtain the super type from the project
-				IType superType = this.javaProject.findType(this.superType);
-				if (superType != null) {
-					// Search for sub type class
-					scope = SearchEngine.createStrictHierarchyScope(this.javaProject, superType, true, true, null);
-				}
-			}
-			if (scope == null) {
-				// No hierarchy, so search for any class
-				scope = SearchEngine.createJavaSearchScope(new IJavaProject[] { this.javaProject }, true);
-			}
-
-			// Search for any class
-			SelectionDialog dialog = JavaUI.createTypeDialog(this.shell, new ProgressMonitorDialog(this.shell), scope,
-					IJavaElementSearchConstants.CONSIDER_CLASSES, false, textValue);
-			dialog.setBlockOnOpen(true);
-			dialog.open();
-			Object[] results = dialog.getResult();
-			if ((results == null) || (results.length != 1)) {
-				return; // cancel
-			}
-
-			// Obtain the selected item
-			Object selectedItem = results[0];
-			if (selectedItem instanceof IType) {
-				// Set text to the type
-				textValue = ((IType) selectedItem).getFullyQualifiedName();
-				text.setValue(textValue);
-
-			} else {
-				// Unknown type
-				valueInput.errorProperty.setValue(
-						new MessageOnlyException("Plugin Error: selected item is not of " + IType.class.getName() + " ["
-								+ (selectedItem == null ? null : selectedItem.getClass().getName()) + "]"));
+			// Select the class
+			String className = this.osgiBridge.selectClass(text.getValue(), this.shell, this.superType);
+			if (className != null) {
+				text.setValue(className);
 			}
 
 		} catch (Exception ex) {

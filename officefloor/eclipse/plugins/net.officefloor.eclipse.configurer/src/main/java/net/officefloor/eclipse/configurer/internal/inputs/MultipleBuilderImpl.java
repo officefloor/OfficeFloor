@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Shell;
 
 import javafx.collections.ObservableList;
@@ -44,6 +43,7 @@ import net.officefloor.eclipse.configurer.internal.AbstractBuilder;
 import net.officefloor.eclipse.configurer.internal.AbstractConfigurationBuilder;
 import net.officefloor.eclipse.configurer.internal.ValueInput;
 import net.officefloor.eclipse.configurer.internal.ValueInputContext;
+import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 
 /**
  * {@link MultipleBuilder} implementation.
@@ -69,16 +69,16 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	 * 
 	 * @param label
 	 *            Label.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
 	 * @param shell
 	 *            {@link Shell}.
 	 */
-	public MultipleBuilderImpl(String label, IJavaProject javaProject, Shell shell) {
+	public MultipleBuilderImpl(String label, OfficeFloorOsgiBridge osgiBridge, Shell shell) {
 		super(label);
 
 		// Create the delegate configuration builder
-		this.delegate = new AbstractConfigurationBuilder<V>(javaProject, shell) {
+		this.delegate = new AbstractConfigurationBuilder<V>(osgiBridge, shell) {
 		};
 	}
 
