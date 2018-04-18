@@ -43,6 +43,18 @@ public abstract class AbstractConfigurerRunnable implements Runnable {
 	@Override
 	public void run() {
 
+		// Turn off GTK3 until Java 9 available
+		if (!"0".equals(System.getenv("SWT_GTK3"))) {
+			System.err.println(
+					"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			System.err.println();
+			System.err.println(
+					" WARNING: running JavaFx with possible binding to GTK3.  Set environment SWT_GTK3=0 to avoid problem (particularly if segmentation fault running)");
+			System.err.println();
+			System.err.println(
+					"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		}
+
 		// Create the SWT display with shell
 		Display display = new Display();
 		Shell shell = new Shell(display);

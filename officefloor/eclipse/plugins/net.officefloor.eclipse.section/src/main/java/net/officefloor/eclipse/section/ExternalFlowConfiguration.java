@@ -56,7 +56,8 @@ public class ExternalFlowConfiguration extends AbstractConfigurerRunnable {
 
 	@Override
 	protected void loadConfiguration(Shell shell) {
-		Configurer<ExternalFlowConfiguration> configurer = new Configurer<>(null, shell);
+		Configurer<ExternalFlowConfiguration> configurer = new Configurer<>(
+				OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
 		this.loadAddConfiguration(configurer, new SectionChangesImpl(new SectionModel()), new ChangeExecutor() {
 
 			@Override
@@ -68,8 +69,8 @@ public class ExternalFlowConfiguration extends AbstractConfigurerRunnable {
 			public void execute(Change<?> change) {
 				change.apply();
 			}
-		}, OfficeFloorOsgiBridge.getClassLoaderInstance());
-
+		});
+		configurer.loadConfiguration(this, shell);
 	}
 
 	/**
@@ -79,7 +80,7 @@ public class ExternalFlowConfiguration extends AbstractConfigurerRunnable {
 	 *            {@link ConfigurationBuilder}.
 	 */
 	public void loadAddConfiguration(ConfigurationBuilder<ExternalFlowConfiguration> builder, SectionChanges changes,
-			ChangeExecutor executor, OfficeFloorOsgiBridge compiler) {
+			ChangeExecutor executor) {
 
 		// Configure
 		builder.title("External Flow");

@@ -97,7 +97,7 @@ public class SectionEditor extends AbstractFXEditor {
 	/**
 	 * {@link OfficeFloorOsgiBridge}.
 	 */
-	private OfficeFloorOsgiBridge javaProjectOfficeFloorCompiler;
+	private OfficeFloorOsgiBridge osgiBridge;
 
 	/**
 	 * Instantiate to capture {@link Injector}.
@@ -160,8 +160,7 @@ public class SectionEditor extends AbstractFXEditor {
 			externalFlow.create((ctx) -> {
 
 				// Obtain details for dialog
-				OfficeFloorOsgiBridge bridge = this.getJavaProjectBridge();
-				IJavaProject javaProject = bridge.getJavaProject();
+				OfficeFloorOsgiBridge bridge = this.getOsgiBridge();
 				Shell shell = this.getEditorSite().getShell();
 
 				// Obtain details for executing change
@@ -173,12 +172,11 @@ public class SectionEditor extends AbstractFXEditor {
 
 					// Prepare the parent
 					Pane parent = visual.getOverlayParent();
-					parent.setMinHeight(200);
+					parent.setPrefHeight(200);
 					parent.applyCss();
 
 					// Create the configurer
-					Configurer<ExternalFlowConfiguration> configurer = new Configurer<>(
-							new OfficeFloorOsgiBridge(javaProject), shell);
+					Configurer<ExternalFlowConfiguration> configurer = new Configurer<>(bridge, shell);
 					ExternalFlowConfiguration configuration = new ExternalFlowConfiguration();
 
 					// Load configuration
@@ -198,7 +196,7 @@ public class SectionEditor extends AbstractFXEditor {
 							// Undertake the change
 							executor.execute(change);
 						}
-					}, bridge);
+					});
 
 					((ConfigurationBuilder<ExternalFlowConfiguration>) configurer).close(new CloseListener() {
 
@@ -231,11 +229,11 @@ public class SectionEditor extends AbstractFXEditor {
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeFloorOsgiBridge}.
 	 */
-	protected OfficeFloorOsgiBridge getJavaProjectBridge() throws Exception {
+	protected OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
 
 		// Determine if cached access to compiler
-		if (this.javaProjectOfficeFloorCompiler != null) {
-			return this.javaProjectOfficeFloorCompiler;
+		if (this.osgiBridge != null) {
+			return this.osgiBridge;
 		}
 
 		// Obtain the file input
@@ -254,10 +252,10 @@ public class SectionEditor extends AbstractFXEditor {
 		IJavaProject javaProject = JavaCore.create(project);
 
 		// Bridge java project to OfficeFloor compiler
-		this.javaProjectOfficeFloorCompiler = new OfficeFloorOsgiBridge(javaProject);
+		this.osgiBridge = new OfficeFloorOsgiBridge(javaProject);
 
 		// Obtain the OfficeFloor compiler
-		return this.javaProjectOfficeFloorCompiler;
+		return this.osgiBridge;
 	}
 
 	/*
@@ -301,7 +299,7 @@ public class SectionEditor extends AbstractFXEditor {
 		super.setInput(input);
 
 		// Input changed, so reset for new input
-		this.javaProjectOfficeFloorCompiler = null;
+		this.osgiBridge = null;
 
 		// Obtain the input configuration
 		IFileEditorInput fileInput = (IFileEditorInput) input;
