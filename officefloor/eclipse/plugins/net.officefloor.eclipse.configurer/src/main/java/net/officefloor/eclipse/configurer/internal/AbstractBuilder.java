@@ -19,6 +19,7 @@ package net.officefloor.eclipse.configurer.internal;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -68,9 +69,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	private Function<M, V> getInitialValue = null;
 
 	/**
-	 * {@link ValueValidator}.
+	 * {@link ValueValidator} instances.
 	 */
-	private ValueValidator<V> validator = null;
+	private List<ValueValidator<V>> validators = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -193,7 +194,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	@Override
 	@SuppressWarnings("unchecked")
 	public B validate(ValueValidator<V> validator) {
-		this.validator = validator;
+		this.validators.add(validator);
 		return (B) this;
 	}
 
@@ -263,16 +264,18 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			}
 
 			// Listen to change to run validation
-			if (AbstractBuilder.this.validator != null) {
-				this.validators.add(AbstractBuilder.this.validator);
-			}
+			this.validators.addAll(AbstractBuilder.this.validators);
 			this.value.addListener((event) -> this.validate());
 
 			// Initialise to model (triggering validation)
 			if (AbstractBuilder.this.getInitialValue != null) {
+				// Load the initialised value
 				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
 				this.value.setValue(initialValue);
 			}
+
+			// Undertake validation (for initial value)
+			this.validate();
 
 			// Track model becoming dirty
 			this.value.addListener((event) -> context.dirtyProperty().setValue(true));

@@ -34,6 +34,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.geometry.HPos;
@@ -200,7 +201,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 		// Create the dirty and valid properties
 		Property<Boolean> dirtyProperty = new SimpleBooleanProperty(false);
-		Property<Boolean> validProperty = new SimpleBooleanProperty(true);
+		SimpleBooleanProperty validProperty = new SimpleBooleanProperty(true);
 
 		// Create the actioner
 		Actioner actioner = null;
@@ -227,6 +228,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 		// Determine if provided an error listener
 		ErrorListener errorListener = this.errorListener;
+		DefaultErrorListener<M> defaultErrorListener = null;
 		if (errorListener == null) {
 
 			// Provide wrappers for action and error listening
@@ -236,8 +238,8 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			configurationNode.getChildren().add(wrapper);
 
 			// Create the error listener
-			DefaultErrorListener<M> defaultErrorListener = new DefaultErrorListener<>(this.title, actioner, wrapper,
-					scroll, this.closeListener, dirtyProperty);
+			defaultErrorListener = new DefaultErrorListener<>(this.title, actioner, wrapper, scroll, this.closeListener,
+					dirtyProperty, validProperty);
 			errorListener = defaultErrorListener;
 
 			// Bind height of scroll (minus header)
@@ -258,8 +260,16 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		configurationNode.applyCss();
 
 		// Load the configuration to grid
-		return this.recursiveLoadConfiguration(model, configurationNode, grid, actioner, dirtyProperty, validProperty,
-				errorListener);
+		Configuration configuration = this.recursiveLoadConfiguration(model, configurationNode, grid, actioner,
+				dirtyProperty, validProperty, errorListener);
+
+		// Setup to display heading (with apply button disabled)
+		if (defaultErrorListener != null) {
+			defaultErrorListener.valid();
+		}
+
+		// Return the configuration
+		return configuration;
 	}
 
 	/**
@@ -1116,9 +1126,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 *            {@link CloseListener}.
 		 * @param dirtyProperty
 		 *            Dirty {@link Property}.
+		 * @param validProperty
+		 *            Valid {@link Property}.
 		 */
 		private DefaultErrorListener(String title, Actioner actioner, VBox wrapper, ScrollPane scroll,
-				CloseListener closeListener, Property<Boolean> dirtyProperty) {
+				CloseListener closeListener, Property<Boolean> dirtyProperty, ObservableBooleanValue validProperty) {
 
 			// Style the header
 			this.header.getStyleClass().setAll("header-panel", "dialog-pane", "button-bar", "configurer-header");
@@ -1148,6 +1160,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 				Button actionButton = new Button(actioner.getLabel());
 				actionButton.pseudoClassStateChanged(PseudoClass.getPseudoClass("default"), true);
 				actionButton.setOnAction((event) -> actioner.action());
+				actionButton.disableProperty().bind(Bindings.not(validProperty));
 				this.validHeader.getChildren().add(actionButton);
 			}
 			if (title != null) {

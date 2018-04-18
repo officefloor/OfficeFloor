@@ -93,14 +93,7 @@ public class ExternalFlowConfiguration extends AbstractConfigurerRunnable {
 		builder.clazz("Argument").setValue((model, value) -> model.argumentType = value);
 
 		// Apply change
-		builder.apply("Add", (model) -> {
-
-			// Create the change
-			Change<ExternalFlowModel> change = changes.addExternalFlow(model.name, model.argumentType);
-
-			// Undertake the change
-			executor.execute(change);
-		});
+		builder.apply("Add", (model) -> executor.execute(changes.addExternalFlow(model.name, model.argumentType)));
 	}
 
 	/**
