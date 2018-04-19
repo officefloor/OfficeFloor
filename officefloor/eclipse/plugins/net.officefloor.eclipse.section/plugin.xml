@@ -5,7 +5,7 @@
 		point="org.eclipse.ui.editors">
 		<editor
         class="net.officefloor.eclipse.section.SectionEditor"
-        contributorClass="net.officefloor.eclipse.section.AdaptedEditorActionBarContributor"
+        contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
         default="true"
         extensions="section"
         id="net.officefloor.editor.section"

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.section;
+package net.officefloor.eclipse.ide.editor;
 
 import org.eclipse.gef.mvc.fx.ui.parts.FXEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -30,7 +30,7 @@ import net.officefloor.eclipse.editor.AdaptedEditorModule;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedEditorActionBarContributor extends FXEditorActionBarContributor {
+public class IdeEditorActionBarContributor extends FXEditorActionBarContributor {
 
 	@Override
 	public void setActiveEditor(IEditorPart activeEditor) {
@@ -39,6 +39,10 @@ public class AdaptedEditorActionBarContributor extends FXEditorActionBarContribu
 		// Provide save action
 		this.getActionBars().setGlobalActionHandler(ActionFactory.SAVE.getId(),
 				ActionFactory.SAVE.create(activeEditor.getSite().getWorkbenchWindow()));
+
+		// Provide save as action
+		this.getActionBars().setGlobalActionHandler(ActionFactory.SAVE_AS.getId(),
+				ActionFactory.SAVE_AS.create(activeEditor.getSite().getWorkbenchWindow()));
 	}
 
 }

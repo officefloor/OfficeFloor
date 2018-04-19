@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OfficeFloor Eclipse IDE
+Bundle-SymbolicName: net.officefloor.eclipse.ide
+Bundle-Version: 3.0.0
+Bundle-Vendor: OfficeFloor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: net.officefloor.core;bundle-version="3.0.0",
+ net.officefloor.eclipse.osgi;bundle-version="3.0.0",
+ net.officefloor.eclipse.editor;bundle-version="3.0.0",
+ net.officefloor.eclipse.configurer;bundle-version="3.0.0",
+ org.eclipse.core.resources;bundle-version="3.12.0",
+ org.eclipse.core.runtime;bundle-version="3.13.0",
+ org.eclipse.jdt.core;bundle-version="3.13.102",
+ org.eclipse.ui.ide;bundle-version="3.13.1",
+ org.eclipse.fx.ui.workbench3;bundle-version="3.0.0",
+ com.google.inject;bundle-version="3.0.0",
+ org.eclipse.gef.common;bundle-version="5.0.0",
+ org.eclipse.gef.mvc.fx;bundle-version="5.0.2",
+ org.eclipse.gef.mvc.fx.ui;bundle-version="5.0.2"
+Export-Package: net.officefloor.eclipse.ide.editor
