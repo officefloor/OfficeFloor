@@ -278,6 +278,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.osgi</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -304,6 +309,16 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.configurer.test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.ide</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.section</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

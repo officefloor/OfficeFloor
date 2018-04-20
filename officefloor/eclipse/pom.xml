@@ -19,11 +19,13 @@
 		<!-- Core eclipse functionality -->
 		<module>plugins/net.officefloor.core</module>
 		<module>plugins/net.officefloor.eclipse.target</module>
+		<module>plugins/net.officefloor.eclipse.common</module>
 		<module>plugins/net.officefloor.eclipse.osgi</module>
 		<module>plugins/net.officefloor.eclipse.editor</module>
 		<module>plugins/net.officefloor.eclipse.editor.test</module>
 		<module>plugins/net.officefloor.eclipse.configurer</module>
 		<module>plugins/net.officefloor.eclipse.configurer.test</module>
+		<module>plugins/net.officefloor.eclipse.ide</module>
 		<module>plugins/net.officefloor.eclipse.section</module>
 		<module>plugins/net.officefloor.eclipse.officefloor</module>
 		<module>plugins/net.officefloor.eclipse.launch</module>
