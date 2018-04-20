@@ -106,15 +106,9 @@ public class ExternalFlowItem extends
 	@Override
 	protected void loadCommonConfiguration(ConfigurationBuilder<ExternalFlowItem> builder,
 			ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
-
-		// Configure
 		builder.title("External Flow");
-
-		// Configure the name
 		builder.text("Name").init((model) -> model.name).setValue((model, value) -> model.name = value)
 				.validate(ValueValidator.notEmptyString("Must specify name"));
-
-		// Configure optional argument type
 		builder.clazz("Argument").init((model) -> model.argumentType)
 				.setValue((model, value) -> model.argumentType = value);
 	}

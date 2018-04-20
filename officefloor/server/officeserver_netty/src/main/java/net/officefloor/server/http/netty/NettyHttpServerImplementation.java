@@ -170,10 +170,13 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		switch (versionName) {
 		case "HTTP/1.0":
 			version = HttpVersion.HTTP_1_0;
+			break;
 		case "HTTP/1.1":
 			version = HttpVersion.HTTP_1_1;
+			break;
 		default:
 			version = new HttpVersion(versionName);
+			break;
 		}
 
 		// Obtain the request headers
@@ -262,7 +265,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 			}
 
 			// Load the cookies
-			if (httpCookie != null) {
+			while (httpCookie != null) {
 				headers.add("set-cookie", httpCookie.toResponseHeaderValue());
 				httpCookie = httpCookie.next;
 			}
@@ -283,7 +286,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 				this.isIncludeStackTrace, responseWriter, bufferPool);
 
 		// Service the request
-		NettyHttpServerImplementation.this.serviceInput.service(connection, connection.getServiceFlowCallback());
+		this.serviceInput.service(connection, connection.getServiceFlowCallback());
 	}
 
 }

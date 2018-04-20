@@ -78,6 +78,7 @@
 		<compiler-version>3.6.0</compiler-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
 		<netty-version>4.1.14.Final</netty-version>
+		<rapidoid-version>5.5.4</rapidoid-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -142,6 +143,11 @@
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_netty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_rapidoid</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Web -->
@@ -470,6 +476,11 @@
 				<version>${netty-version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.rapidoid</groupId>
+				<artifactId>rapidoid-web</artifactId>
+				<version>5.5.4</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.openejb</groupId>
 				<artifactId>openejb-core</artifactId>
 				<version>3.1.4</version>
@@ -583,7 +594,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.8.5</version>
+				<version>2.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>

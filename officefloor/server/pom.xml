@@ -16,6 +16,7 @@
 		<module>officeserver</module>
 		<module>officeserver_default</module>
 		<module>officeserver_netty</module>
+		<module>officeserver_rapidoid</module>
 	</modules>
 	<dependencies>
 		<dependency>
