@@ -52,6 +52,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
@@ -188,7 +189,7 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 			ServerBuilder httpsBuilder = initialBuilder.get().port(httpsPort);
 			SSLContext sslContext = this.context.getSslContext();
 			if (sslContext != null) {
-				httpsBuilder = httpsBuilder.tlsContext(sslContext);
+				httpsBuilder = httpsBuilder.tlsContext(sslContext).tls(true);
 			}
 			this.httpsServer = httpsBuilder.build().start();
 		}
@@ -227,7 +228,8 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 		};
 
 		// Supply the request URI
-		Supplier<String> requestUriSupplier = () -> data.uri.str(buf);
+		String uri = data.uri.str(buf);
+		Supplier<String> requestUriSupplier = () -> uri;
 
 		// Obtain the version
 		HttpVersion version;
@@ -247,31 +249,41 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 		// Obtain the request headers
 		NonMaterialisedHttpHeaders requestHeaders = new NonMaterialisedHttpHeaders() {
 
+			private boolean isParsedHeaders = false;
+
 			@Override
 			public Iterator<NonMaterialisedHttpHeader> iterator() {
+
+				// Ensure parse out the header information
+				if (!this.isParsedHeaders) {
+					HTTP_PARSER.parseHeadersIntoKV(buf, data.headers, data.headersKV.reset(), null, data);
+					this.isParsedHeaders = true;
+				}
+
+				// Create the iterator over the headers
 				return new Iterator<NonMaterialisedHttpHeader>() {
 
 					private int nextHeader = 0;
 
 					@Override
 					public boolean hasNext() {
-						return data.headers.count > this.nextHeader;
+						return data.headersKV.count > this.nextHeader;
 					}
 
 					@Override
 					public NonMaterialisedHttpHeader next() {
-						BufRange nextHeader = data.headers.get(this.nextHeader++);
+						BufRange nextName = data.headersKV.keys[this.nextHeader];
+						BufRange nextValue = data.headersKV.values[this.nextHeader++];
 						return new NonMaterialisedHttpHeader() {
 
 							@Override
 							public CharSequence getName() {
-								return nextHeader.str(buf);
+								return nextName.str(buf);
 							}
 
 							@Override
 							public HttpHeader materialiseHttpHeader() {
-								return new SerialisableHttpHeader(nextHeader.str(buf),
-										"TODO implement obtaining value");
+								return new SerialisableHttpHeader(nextName.str(buf), nextValue.str(buf));
 							}
 						};
 					}
@@ -280,7 +292,7 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 
 			@Override
 			public int length() {
-				return data.headers.count;
+				return data.headersKV.count;
 			}
 		};
 
@@ -307,9 +319,9 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 
 			// Write the response status line
 			ctx.write(responseVersion.getName());
-			ctx.write(" ");
+			ctx.write(SPACE_);
 			ctx.write(String.valueOf(status.getStatusCode()));
-			ctx.write(" ");
+			ctx.write(SPACE_);
 			ctx.write(status.getStatusMessage());
 			ctx.write(CR_LF);
 
@@ -329,6 +341,7 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 				ctx.write(": ");
 				ctx.write(httpHeader.getValue());
 				ctx.write(CR_LF);
+				httpHeader = httpHeader.next;
 			}
 
 			// Load the cookies
@@ -344,16 +357,51 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 			// Write the entity
 			while (content != null) {
 				if (content.pooledBuffer != null) {
+					// Write the pooled buffer
+					content.pooledBuffer.flip();
 					ctx.write(content.pooledBuffer);
+
 				} else if (content.unpooledByteBuffer != null) {
+					// Write the unpooled buffer
 					ctx.write(content.unpooledByteBuffer);
+
 				} else if (content.fileBuffer != null) {
-					// ctx.write(content.fileBuffer.file);
+					// Write the file content
+					// Not change position to allow re-use of file channel
+					FileBuffer fileBuffer = content.fileBuffer;
+					StreamBuffer<ByteBuffer> transfer = this.bufferPool.getPooledStreamBuffer();
+					try {
+						long position = fileBuffer.position;
+						long bytesToTransfer = fileBuffer.count;
+						if (bytesToTransfer < 0) {
+							bytesToTransfer = fileBuffer.file.size();
+						}
+						while (bytesToTransfer > 0) {
+							int bytesRead = fileBuffer.file.read(transfer.pooledBuffer, position);
+							long bytesToWrite = Math.min(bytesToTransfer, bytesRead);
+							transfer.pooledBuffer.flip();
+							ctx.write(transfer.pooledBuffer);
+							bytesToTransfer -= bytesToWrite;
+						}
+						if (fileBuffer.callback != null) {
+							fileBuffer.callback.complete(fileBuffer.file, true);
+						}
+
+					} catch (Exception ex) {
+						// Send failure
+						ctx.restart();
+						ctx.write(HTTP_500);
+
+					} finally {
+						// Ensure buffer released
+						transfer.release();
+					}
 				}
 				content = content.next;
 			}
 
 			// Determine if keep alive
+			ctx.send();
 			ctx.closeIf(!data.isKeepAlive.value);
 		};
 

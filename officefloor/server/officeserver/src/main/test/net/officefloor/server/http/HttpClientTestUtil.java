@@ -27,6 +27,7 @@ import org.apache.http.ProtocolException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -47,6 +48,22 @@ import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
  * @author Daniel Sagenschneider
  */
 public class HttpClientTestUtil {
+
+	/**
+	 * {@link System} property configured to <code>true</code> to not time out
+	 * {@link HttpClient} instances. This is useful for debugging server handling of
+	 * requests.
+	 */
+	public static final String PROPERTY_NO_TIMEOUT = "http.client.debug.no.timeout";
+
+	/**
+	 * Indicates whether to timeout the {@link HttpClient}.
+	 * 
+	 * @return <code>true</code> to allow timing out the {@link HttpClient}.
+	 */
+	private static boolean isTimeoutClient() {
+		return !("true".equalsIgnoreCase(System.getProperty(PROPERTY_NO_TIMEOUT)));
+	}
 
 	/**
 	 * Obtains the {@link HttpEntity} content.
@@ -98,19 +115,22 @@ public class HttpClientTestUtil {
 	 * 
 	 * @param isSecure
 	 *            Indicate if require secure connection.
+	 * @param timeout
+	 *            Timeout in milliseconds. Non-positive number indicates no timeout
+	 *            (useful for debugging).
 	 * @return {@link CloseableHttpClient}.
 	 */
 	public static CloseableHttpClient createHttpClient(boolean isSecure) {
 
-		// Provide timeout of requests
-		final int timeout = 1000; // 1 second
+		// Create the HTTP client
+		HttpClientBuilder builder = HttpClientBuilder.create();
+
+		// Provide timeout of requests (1 sec or no timeout)
+		final int timeout = isTimeoutClient() ? 1000 : 0;
 		RequestConfig.Builder requestTimeout = RequestConfig.custom();
 		requestTimeout.setSocketTimeout(timeout);
 		requestTimeout.setConnectTimeout(timeout);
 		requestTimeout.setConnectionRequestTimeout(timeout);
-
-		// Create the HTTP client
-		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setDefaultRequestConfig(requestTimeout.build());
 
 		// Configure to be secure client

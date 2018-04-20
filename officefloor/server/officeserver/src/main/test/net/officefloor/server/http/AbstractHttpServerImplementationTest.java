@@ -106,8 +106,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Test {@link Exception} to be thrown for testing handling
-	 * {@link Escalation}.
+	 * Test {@link Exception} to be thrown for testing handling {@link Escalation}.
 	 */
 	private static final Exception TEST_EXCEPTION = new Exception("Test Failure");
 
@@ -122,8 +121,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * <p>
 	 * Starts a raw implementation of the underlying HTTP server. This allows
-	 * performance comparisons of adding in {@link OfficeFloor} servicing
-	 * overheads.
+	 * performance comparisons of adding in {@link OfficeFloor} servicing overheads.
 	 * <p>
 	 * The raw implementation is to return &quote;hello world&quot; in UTF-8
 	 * encoding for the response entity.
@@ -147,11 +145,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	protected abstract void stopRawHttpServer(M momento) throws Exception;
 
 	/**
-	 * Obtains the server response {@link HttpHeader} instances in the order
-	 * they are sent from the server.
+	 * Obtains the server response {@link HttpHeader} instances in the order they
+	 * are sent from the server.
 	 * 
-	 * @return Server response {@link HttpHeader} instances in the order they
-	 *         are sent from the server.
+	 * @return Server response {@link HttpHeader} instances in the order they are
+	 *         sent from the server.
 	 */
 	protected abstract HttpHeader[] getServerResponseHeaderValues();
 
@@ -528,8 +526,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Ensure does not decode characters (allows for routing to work correctly
-	 * and not find query string / fragment incorrectly).
+	 * Ensure does not decode characters (allows for routing to work correctly and
+	 * not find query string / fragment incorrectly).
 	 */
 	public void testNotDecodeRequestUrl() throws Exception {
 		this.startHttpServer(EncodedUrlServicer.class);
