@@ -22,42 +22,60 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import net.officefloor.model.change.Change;
 
 /**
- * Executes {@link Change}.
+ * Listens to {@link Change} instances being executed.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChangeExecutor {
+public interface ChangeListener {
 
 	/**
-	 * Executes the {@link Change}.
-	 * 
-	 * @param change
-	 *            {@link Change}.
-	 */
-	void execute(Change<?> change);
-
-	/**
-	 * Executes the {@link ITransactionalOperation}.
+	 * Notified before the {@link ITransactionalOperation} is registered for
+	 * execution.
 	 * 
 	 * @param operation
 	 *            {@link ITransactionalOperation}.
 	 */
-	void execute(ITransactionalOperation operation);
+	void beforeTransactionOperation(ITransactionalOperation operation);
 
 	/**
-	 * Adds a {@link ChangeListener}.
+	 * Notified after the {@link ITransactionalOperation} is registered for
+	 * execution.
 	 * 
-	 * @param changeListener
-	 *            {@link ChangeListener}.
+	 * @param operation
+	 *            {@link ITransactionalOperation}.
 	 */
-	void addChangeListener(ChangeListener changeListener);
+	void afterTransactionOperation(ITransactionalOperation operation);
 
 	/**
-	 * Removes the {@link ChangeListener}.
+	 * Notified pre-applying the {@link Change}.
 	 * 
-	 * @param changeListener
-	 *            {@link ChangeListener}.
+	 * @param change
+	 *            {@link Change}.
 	 */
-	void removeChangeListener(ChangeListener changeListener);
+	void preApply(Change<?> change);
+
+	/**
+	 * Notified post-applying the {@link Change}.
+	 * 
+	 * @param change
+	 *            {@link Change}.
+	 */
+	void postApply(Change<?> change);
+
+	/**
+	 * Notified pre-reverting the {@link Change}.
+	 * 
+	 * @param change
+	 *            {@link Change}.
+	 */
+	void preRevert(Change<?> change);
+
+	/**
+	 * Notified post-reverting the {@link Change}.
+	 * 
+	 * @param change
+	 *            {@link Change}.
+	 */
+	void postRevert(Change<?> change);
 
 }

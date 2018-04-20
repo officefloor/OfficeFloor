@@ -17,10 +17,15 @@
  */
 package net.officefloor.eclipse.section;
 
+import java.util.function.Consumer;
+
+import org.eclipse.ui.IWorkbench;
+
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem;
+import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.impl.section.SectionRepositoryImpl;
@@ -34,6 +39,28 @@ import net.officefloor.model.section.SectionModel.SectionEvent;
  * @author Daniel Sagenschneider
  */
 public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent, SectionChanges> {
+
+	/**
+	 * Test editor.
+	 */
+	public static void main(String[] args) {
+		SectionEditor.launch("<section />");
+	}
+
+	/**
+	 * Convenience method to launch {@link AbstractParentConfigurableItem} outside
+	 * {@link IWorkbench}.
+	 * 
+	 * @param configurableItem
+	 *            {@link AbstractParentConfigurableItem}.
+	 * @param prototypeDecorator
+	 *            Optional prototype decorator.
+	 */
+	public static <M extends Model, E extends Enum<E>, I> void launchConfigurer(
+			AbstractParentConfigurableItem<SectionModel, SectionEvent, SectionChanges, M, E, I> configurableItem,
+			Consumer<M> prototypeDecorator) {
+		configurableItem.main(new SectionModel(), SectionEditor.class, prototypeDecorator);
+	}
 
 	/**
 	 * Default instantiate.

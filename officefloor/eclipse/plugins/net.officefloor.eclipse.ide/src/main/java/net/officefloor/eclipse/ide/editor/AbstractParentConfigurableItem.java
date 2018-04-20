@@ -37,6 +37,7 @@ import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
+import net.officefloor.eclipse.editor.ChangeListener;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.ide.ConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
@@ -448,7 +449,7 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 	 *             If fails to launch.
 	 */
 	public void main(R rootModel, Class<? extends AbstractIdeEditor<R, RE, O>> ideEditorClass,
-			Consumer<M> decoratePrototype) throws Exception {
+			Consumer<M> decoratePrototype) {
 		AbstractIdeEditor.launchOutsideWorkbench(() -> {
 			AbstractIdeEditor<R, RE, O> ideEditor = ideEditorClass.newInstance();
 			this.init(new MainConfigurableContext(ideEditor.createOperations(rootModel), decoratePrototype));
@@ -616,6 +617,18 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 		public void execute(ITransactionalOperation operation) {
 			throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support executing "
 					+ ITransactionalOperation.class.getSimpleName());
+		}
+
+		@Override
+		public void addChangeListener(ChangeListener changeListener) {
+			throw new UnsupportedOperationException(
+					MainConfigurableContext.class.getName() + " does not support " + ChangeListener.class.getName());
+		}
+
+		@Override
+		public void removeChangeListener(ChangeListener changeListener) {
+			throw new UnsupportedOperationException(
+					MainConfigurableContext.class.getName() + " does not support " + ChangeListener.class.getName());
 		}
 	}
 

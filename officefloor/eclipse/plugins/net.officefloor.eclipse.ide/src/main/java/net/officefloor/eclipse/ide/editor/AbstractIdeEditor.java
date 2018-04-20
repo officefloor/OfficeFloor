@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.ide.editor;
 
+import java.io.ByteArrayInputStream;
+import java.io.Reader;
 import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
@@ -36,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 
 import com.google.inject.AbstractModule;
@@ -49,11 +52,13 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
-import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.ChangeAdapter;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem.ConfigurableContext;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
@@ -82,15 +87,15 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Logic to launch outside the {@link IWorkbench}.
 	 */
-	public static interface OutsideWorkbenchLauncher<E extends Throwable> {
+	public static interface OutsideWorkbenchLauncher {
 
 		/**
 		 * Launches outside the {@link IWorkbench}.
 		 * 
-		 * @throws E
+		 * @throws Throwable
 		 *             If failure in launching.
 		 */
-		void launch() throws E;
+		void launch() throws Throwable;
 	}
 
 	/**
@@ -100,11 +105,16 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * @param launcher
 	 *            {@link OutsideWorkbenchLauncher}.
 	 */
-	public synchronized static <E extends Throwable> void launchOutsideWorkbench(OutsideWorkbenchLauncher<E> launcher)
-			throws E {
+	public synchronized static void launchOutsideWorkbench(OutsideWorkbenchLauncher launcher) {
 		isOutsideWorkbench = true;
 		try {
 			launcher.launch();
+		} catch (Throwable ex) {
+			if (ex instanceof RuntimeException) {
+				throw (RuntimeException) ex;
+			} else {
+				throw new RuntimeException(ex);
+			}
 		} finally {
 			isOutsideWorkbench = false;
 		}
@@ -124,6 +134,93 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		public FXCanvas createCanvas(Composite parent, int style) {
 			return new FXCanvasEx(parent, style);
 		}
+	}
+
+	/**
+	 * Convenience method to launch the {@link AbstractIdeEditor} implementation
+	 * outside the {@link IWorkbench}.
+	 * 
+	 * @param configuration
+	 *            Configuration of {@link ConfigurationItem} to launch the
+	 *            {@link AbstractIdeEditor}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void launch(String configuration) {
+
+		// Determine the launch class
+		StackTraceElement[] cause = Thread.currentThread().getStackTrace();
+		boolean isFoundThisMethod = false;
+		String launchClassName = null;
+		FOUND_LAUNCHER: for (StackTraceElement se : cause) {
+			String className = se.getClassName();
+			String methodName = se.getMethodName();
+			if (isFoundThisMethod) {
+				launchClassName = className;
+				break FOUND_LAUNCHER;
+			} else if (AbstractIdeEditor.class.getName().equals(className) && "launch".equals(methodName)) {
+				isFoundThisMethod = true;
+			}
+		}
+
+		// Ensure have the launch class
+		if (launchClassName == null) {
+			throw new RuntimeException("Unable to determine " + AbstractIdeEditor.class.getName() + " implementation");
+		}
+
+		// Attempt to lauch IDE editor outside workbench
+		final String finalLaunchClassName = launchClassName;
+		launchOutsideWorkbench(() -> {
+
+			// Instantiate the editor
+			Class launchClass = Class.forName(finalLaunchClassName, false,
+					Thread.currentThread().getContextClassLoader());
+			Object instance = launchClass.newInstance();
+			AbstractIdeEditor editor = (AbstractIdeEditor) instance;
+
+			// Load configuration to run outside workbench
+			editor.osgiBridge = OfficeFloorOsgiBridge.getClassLoaderInstance();
+			editor.configurationItem = MemoryConfigurationContext.createWritableConfigurationItem("TEST");
+			editor.configurationItem.setConfiguration(new ByteArrayInputStream(configuration.getBytes()));
+
+			// Display the editor
+			AbstractConfigurerRunnable runnable = new AbstractConfigurerRunnable() {
+
+				@Override
+				protected void loadConfiguration(Shell shell) {
+					editor.parentShell = shell;
+					editor.createPartControl(shell);
+
+					// Register logging of changes to the model
+					editor.rootBuilder.getChangeExecutor().addChangeListener(new ChangeAdapter() {
+
+						@Override
+						public void postApply(Change<?> change) {
+
+							// Save model (with changes applied)
+							editor.doSave(null);
+
+							// Log changed configuration for tracking
+							try {
+								System.out.println();
+								System.out.println();
+								System.out.println(
+										"============== Change " + change.getChangeDescription() + "==============");
+								Reader reader = editor.configurationItem.getReader();
+								for (int character = reader.read(); character != -1; character = reader.read()) {
+									System.out.write(character);
+								}
+								System.out.println();
+								System.out.println();
+							} catch (Exception ex) {
+								System.err.println("Failed to log configuration: ");
+								ex.printStackTrace();
+							}
+						}
+					});
+				}
+			};
+			runnable.run();
+		});
 	}
 
 	/**
@@ -147,11 +244,6 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	private Function<R, O> createOperations;
 
 	/**
-	 * {@link AdaptedErrorHandler}.
-	 */
-	private AdaptedErrorHandler errorHandler;
-
-	/**
 	 * Current {@link IFile} being edited.
 	 */
 	private IFile configurationFile;
@@ -160,6 +252,16 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * {@link WritableConfigurationItem}.
 	 */
 	private WritableConfigurationItem configurationItem;
+
+	/**
+	 * Parent {@link Shell}.
+	 */
+	private Shell parentShell;
+
+	/**
+	 * {@link AdaptedRootBuilder}.
+	 */
+	private AdaptedRootBuilder<R, O> rootBuilder;
 
 	/**
 	 * {@link Model} being edited.
@@ -185,17 +287,6 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	private AbstractIdeEditor(Injector injector) {
 		super(injector);
 		this.injector = injector;
-	}
-
-	/**
-	 * Creates the operations for the root {@link Model}.
-	 * 
-	 * @param model
-	 *            Root {@link Model}.
-	 * @return Operations.
-	 */
-	public O createOperations(R model) {
-		return this.createOperations.apply(model);
 	}
 
 	/**
@@ -225,17 +316,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		this.adaptedBuilder = (context) -> {
 
 			// Create the root model
-			AdaptedRootBuilder<R, O> root = context.root(rootModelType, (model) -> {
+			this.rootBuilder = context.root(rootModelType, (model) -> {
 				// Keep track of operations (for configurable context)
 				this.operations = this.createOperations(model);
 				return this.operations;
 			});
-
-			// Obtain the error handler
-			this.errorHandler = root.getErrorHandler();
-
-			// Obtain the change executor
-			ChangeExecutor changeExecutor = root.getChangeExecutor();
 
 			// Configure rest of editor
 			for (AbstractParentConfigurableItem<R, RE, O, ?, ?, ?> parent : this.getParents()) {
@@ -245,7 +330,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 					@Override
 					public AdaptedRootBuilder<R, O> getRootBuilder() {
-						return root;
+						return AbstractIdeEditor.this.rootBuilder;
 					}
 
 					@Override
@@ -255,7 +340,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 					@Override
 					public Shell getParentShell() {
-						return AbstractIdeEditor.this.getEditorSite().getShell();
+						return AbstractIdeEditor.this.parentShell;
 					}
 
 					@Override
@@ -265,7 +350,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 					@Override
 					public ChangeExecutor getChangeExecutor() {
-						return changeExecutor;
+						return AbstractIdeEditor.this.rootBuilder.getChangeExecutor();
 					}
 				});
 
@@ -323,6 +408,17 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 *             {@link WritableConfigurationItem}.
 	 */
 	protected abstract void saveRootModel(R model, WritableConfigurationItem configurationItem) throws Exception;
+
+	/**
+	 * Creates the operations for the root {@link Model}.
+	 * 
+	 * @param model
+	 *            Root {@link Model}.
+	 * @return Operations.
+	 */
+	public O createOperations(R model) {
+		return this.createOperations.apply(model);
+	}
 
 	/**
 	 * Obtains the {@link OfficeFloorOsgiBridge}.
@@ -383,7 +479,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	protected void activate() {
 
 		// Load the model
-		this.errorHandler.isError(() -> {
+		this.rootBuilder.getErrorHandler().isError(() -> {
 			this.model = this.loadRootModel(this.configurationItem);
 		});
 
@@ -408,8 +504,16 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	@Override
+	protected void setSite(IWorkbenchPartSite site) {
+		super.setSite(site);
+
+		// Keep track of the parent shell
+		this.parentShell = site.getShell();
+	}
+
+	@Override
 	public void doSave(IProgressMonitor monitor) {
-		this.errorHandler.isError(() -> {
+		this.rootBuilder.getErrorHandler().isError(() -> {
 
 			// Save the model
 			this.saveRootModel(this.model, this.configurationItem);

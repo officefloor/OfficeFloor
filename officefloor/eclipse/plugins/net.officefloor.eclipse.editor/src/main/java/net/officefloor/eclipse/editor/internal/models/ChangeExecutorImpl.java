@@ -17,6 +17,9 @@
  */
 package net.officefloor.eclipse.editor.internal.models;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
 import org.eclipse.core.runtime.IAdaptable;
@@ -28,6 +31,7 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
 import net.officefloor.eclipse.editor.AdaptedErrorHandler.UncertainOperation;
 import net.officefloor.eclipse.editor.ChangeExecutor;
+import net.officefloor.eclipse.editor.ChangeListener;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.change.Change;
 
@@ -47,6 +51,11 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 	 * {@link IDomain}.
 	 */
 	private final IDomain domain;
+
+	/**
+	 * Registered {@link ChangeListener} instances.
+	 */
+	private final List<ChangeListener> changeListeners = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -73,7 +82,33 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 
 	@Override
 	public void execute(ITransactionalOperation operation) {
-		this.contentPartFactory.getErrorHandler().isError(() -> this.domain.execute(operation, null));
+		this.contentPartFactory.getErrorHandler().isError(() -> {
+
+			// Notify before transaction operation
+			for (ChangeListener listener : this.changeListeners) {
+				listener.beforeTransactionOperation(operation);
+			}
+
+			// Execute operation
+			this.domain.execute(operation, null);
+
+			// Notify after transaction operation
+			for (ChangeListener listener : this.changeListeners) {
+				listener.afterTransactionOperation(operation);
+			}
+		});
+	}
+
+	@Override
+	public void addChangeListener(ChangeListener changeListener) {
+		if (!this.changeListeners.contains(changeListener)) {
+			this.changeListeners.add(changeListener);
+		}
+	}
+
+	@Override
+	public void removeChangeListener(ChangeListener changeListener) {
+		this.changeListeners.remove(changeListener);
 	}
 
 	/**
@@ -109,6 +144,52 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 			return Status.OK_STATUS;
 		}
 
+		/**
+		 * Applies the {@link Change}.
+		 * 
+		 * @return {@link IStatus}.
+		 */
+		private IStatus apply() {
+			return this.runUncertain(() -> {
+
+				// Notify pre-apply
+				for (ChangeListener listener : ChangeExecutorImpl.this.changeListeners) {
+					listener.preApply(this.change);
+				}
+
+				// Apply change
+				this.change.apply();
+
+				// Notify post-apply
+				for (ChangeListener listener : ChangeExecutorImpl.this.changeListeners) {
+					listener.postApply(this.change);
+				}
+			});
+		}
+
+		/**
+		 * Reverts the {@link Change}.
+		 * 
+		 * @return {@link IStatus}.
+		 */
+		private IStatus revert() {
+			return this.runUncertain(() -> {
+
+				// Notify pre-revert
+				for (ChangeListener listener : ChangeExecutorImpl.this.changeListeners) {
+					listener.preRevert(this.change);
+				}
+
+				// Revert change
+				this.change.revert();
+
+				// Notify post-revert
+				for (ChangeListener listener : ChangeExecutorImpl.this.changeListeners) {
+					listener.postRevert(this.change);
+				}
+			});
+		}
+
 		/*
 		 * =============== ITransactionalOperation =====================
 		 */
@@ -125,17 +206,17 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 
 		@Override
 		public IStatus execute(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-			return this.runUncertain(() -> this.change.apply());
+			return this.apply();
 		}
 
 		@Override
 		public IStatus undo(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-			return this.runUncertain(() -> this.change.revert());
+			return this.revert();
 		}
 
 		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-			return this.runUncertain(() -> this.change.apply());
+			return this.apply();
 		}
 	}
 

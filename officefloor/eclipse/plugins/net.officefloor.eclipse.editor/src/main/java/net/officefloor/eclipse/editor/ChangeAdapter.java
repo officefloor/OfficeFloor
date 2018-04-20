@@ -22,42 +22,34 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import net.officefloor.model.change.Change;
 
 /**
- * Executes {@link Change}.
+ * Provides default implementation of methods for {@link ChangeListener}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChangeExecutor {
+public class ChangeAdapter implements ChangeListener {
 
-	/**
-	 * Executes the {@link Change}.
-	 * 
-	 * @param change
-	 *            {@link Change}.
-	 */
-	void execute(Change<?> change);
+	@Override
+	public void beforeTransactionOperation(ITransactionalOperation operation) {
+	}
 
-	/**
-	 * Executes the {@link ITransactionalOperation}.
-	 * 
-	 * @param operation
-	 *            {@link ITransactionalOperation}.
-	 */
-	void execute(ITransactionalOperation operation);
+	@Override
+	public void afterTransactionOperation(ITransactionalOperation operation) {
+	}
 
-	/**
-	 * Adds a {@link ChangeListener}.
-	 * 
-	 * @param changeListener
-	 *            {@link ChangeListener}.
-	 */
-	void addChangeListener(ChangeListener changeListener);
+	@Override
+	public void preApply(Change<?> change) {
+	}
 
-	/**
-	 * Removes the {@link ChangeListener}.
-	 * 
-	 * @param changeListener
-	 *            {@link ChangeListener}.
-	 */
-	void removeChangeListener(ChangeListener changeListener);
+	@Override
+	public void postApply(Change<?> change) {
+	}
+
+	@Override
+	public void preRevert(Change<?> change) {
+	}
+
+	@Override
+	public void postRevert(Change<?> change) {
+	}
 
 }

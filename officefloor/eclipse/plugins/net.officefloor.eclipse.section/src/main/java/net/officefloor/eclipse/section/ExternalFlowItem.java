@@ -43,9 +43,8 @@ public class ExternalFlowItem extends
 	/**
 	 * Test configuration.
 	 */
-	public static void main(String[] args) throws Exception {
-		new ExternalFlowItem().main(new SectionModel(), SectionEditor.class,
-				(flow) -> flow.setArgumentType(String.class.getName()));
+	public static void main(String[] args) {
+		SectionEditor.launchConfigurer(new ExternalFlowItem(), (flow) -> flow.setArgumentType(String.class.getName()));
 	}
 
 	/**

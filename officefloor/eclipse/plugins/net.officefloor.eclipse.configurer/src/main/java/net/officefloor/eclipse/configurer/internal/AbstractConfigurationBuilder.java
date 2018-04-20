@@ -976,6 +976,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 				this.applier.accept(this.model);
 			} catch (Throwable ex) {
 				this.errorListener.error(null, ex);
+				return; // failed to apply, so do not carry on to close
 			}
 
 			// No longer dirty
