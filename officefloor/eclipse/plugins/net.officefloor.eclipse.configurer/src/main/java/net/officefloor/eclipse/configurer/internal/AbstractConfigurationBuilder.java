@@ -204,7 +204,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		SimpleBooleanProperty validProperty = new SimpleBooleanProperty(true);
 
 		// Create the actioner
-		Actioner actioner = null;
+		ActionerImpl<M> actioner = null;
 		if (this.applier != null) {
 			actioner = new ActionerImpl<>(model, this.applierLabel, this.applier, dirtyProperty, this.closeListener);
 		}
@@ -254,6 +254,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			scroll.getStyleClass().setAll("configurer");
 			scroll.pseudoClassStateChanged(PseudoClass.getPseudoClass("no-header"), true);
 			configurationNode.getChildren().add(scroll);
+		}
+
+		// Allow action to notify of apply error
+		if (actioner != null) {
+			actioner.errorListener = errorListener;
 		}
 
 		// Apply CSS (so Scene available to inputs)
@@ -927,6 +932,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		private final CloseListener closeListener;
 
 		/**
+		 * {@link ErrorListener}.
+		 */
+		private ErrorListener errorListener;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param model
@@ -961,8 +971,12 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		@Override
 		public void action() {
 
-			// Apply the model
-			this.applier.accept(this.model);
+			// Apply the model (handle potential failure in applying)
+			try {
+				this.applier.accept(this.model);
+			} catch (Throwable ex) {
+				this.errorListener.error(null, ex);
+			}
 
 			// No longer dirty
 			this.dirtyProperty.setValue(false);

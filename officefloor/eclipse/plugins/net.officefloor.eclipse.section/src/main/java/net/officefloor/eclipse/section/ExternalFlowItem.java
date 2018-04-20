@@ -19,21 +19,13 @@ package net.officefloor.eclipse.section;
 
 import java.util.List;
 
-import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
-import org.eclipse.swt.widgets.Shell;
-
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-import net.officefloor.eclipse.configurer.Configurer;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
-import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
-import net.officefloor.model.change.Change;
-import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
 import net.officefloor.model.section.SectionChanges;
@@ -50,58 +42,10 @@ public class ExternalFlowItem extends
 
 	/**
 	 * Test configuration.
-	 * 
-	 * @param args
-	 *            Command line arguments.
 	 */
-	public static void main(String[] args) {
-		new ExternalFlowItem().run();
-	}
-
-	/*
-	 * =============== AbstractConfigurerRunnable =============
-	 */
-
-	@Override
-	protected void loadConfiguration(Shell shell) {
-		Configurer<ExternalFlowItem> configurer = new Configurer<>(OfficeFloorOsgiBridge.getClassLoaderInstance(),
-				shell);
-		this.loadAddConfiguration(configurer, new SectionChangesImpl(new SectionModel()), new ChangeExecutor() {
-
-			@Override
-			public void execute(ITransactionalOperation operation) {
-				throw new IllegalStateException("Should not execute operation");
-			}
-
-			@Override
-			public void execute(Change<?> change) {
-				change.apply();
-			}
-		});
-		configurer.loadConfiguration(this, shell);
-	}
-
-	/**
-	 * Loads configuration for adding an {@link ExternalFlowModel}.
-	 * 
-	 * @param builder
-	 *            {@link ConfigurationBuilder}.
-	 */
-	public void loadAddConfiguration(ConfigurationBuilder<ExternalFlowItem> builder, SectionChanges changes,
-			ChangeExecutor executor) {
-
-		// Configure
-		builder.title("External Flow");
-
-		// Configure the name
-		builder.text("Name").setValue((model, value) -> model.name = value)
-				.validate(ValueValidator.notEmptyString("Must specify name"));
-
-		// Configure optional argument type
-		builder.clazz("Argument").setValue((model, value) -> model.argumentType = value);
-
-		// Apply change
-		builder.apply("Add", (model) -> executor.execute(changes.addExternalFlow(model.name, model.argumentType)));
+	public static void main(String[] args) throws Exception {
+		new ExternalFlowItem().main(new SectionModel(), SectionEditor.class,
+				(flow) -> flow.setArgumentType(String.class.getName()));
 	}
 
 	/**
@@ -168,11 +112,12 @@ public class ExternalFlowItem extends
 		builder.title("External Flow");
 
 		// Configure the name
-		builder.text("Name").setValue((model, value) -> model.name = value)
+		builder.text("Name").init((model) -> model.name).setValue((model, value) -> model.name = value)
 				.validate(ValueValidator.notEmptyString("Must specify name"));
 
 		// Configure optional argument type
-		builder.clazz("Argument").setValue((model, value) -> model.argumentType = value);
+		builder.clazz("Argument").init((model) -> model.argumentType)
+				.setValue((model, value) -> model.argumentType = value);
 	}
 
 	@Override
@@ -193,7 +138,7 @@ public class ExternalFlowItem extends
 
 	@Override
 	protected void deleteModel(ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
-		context.getOperations().removeExternalFlow(context.getModel());
+		context.execute(context.getOperations().removeExternalFlow(context.getModel()));
 	}
 
 }

@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -58,7 +58,7 @@ public abstract class AbstractConfigurerRunnable implements Runnable {
 		// Create the SWT display with shell
 		Display display = new Display();
 		Shell shell = new Shell(display);
-		shell.setLayout(new RowLayout());
+		shell.setLayout(new FillLayout());
 
 		// Load configuration to shell
 		this.loadConfiguration(shell);

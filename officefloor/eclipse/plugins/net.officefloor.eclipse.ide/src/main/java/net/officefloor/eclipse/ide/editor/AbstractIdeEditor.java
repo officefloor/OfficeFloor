@@ -24,20 +24,27 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
+import org.eclipse.gef.fx.swt.canvas.IFXCanvasFactory;
 import org.eclipse.gef.mvc.fx.ui.MvcFxUiModule;
 import org.eclipse.gef.mvc.fx.ui.parts.AbstractFXEditor;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
@@ -68,6 +75,58 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor {
 
 	/**
+	 * Indicates if running outside the {@link IWorkbench}.
+	 */
+	private static boolean isOutsideWorkbench = false;
+
+	/**
+	 * Logic to launch outside the {@link IWorkbench}.
+	 */
+	public static interface OutsideWorkbenchLauncher<E extends Throwable> {
+
+		/**
+		 * Launches outside the {@link IWorkbench}.
+		 * 
+		 * @throws E
+		 *             If failure in launching.
+		 */
+		void launch() throws E;
+	}
+
+	/**
+	 * Enables running the {@link AbstractIdeEditor} outside of the
+	 * {@link IWorkbench}.
+	 * 
+	 * @param launcher
+	 *            {@link OutsideWorkbenchLauncher}.
+	 */
+	public synchronized static <E extends Throwable> void launchOutsideWorkbench(OutsideWorkbenchLauncher<E> launcher)
+			throws E {
+		isOutsideWorkbench = true;
+		try {
+			launcher.launch();
+		} finally {
+			isOutsideWorkbench = false;
+		}
+	}
+
+	/**
+	 * {@link Module} for running outside the {@link IWorkbench}.
+	 */
+	private static class OutsideWorkbenchModule extends AbstractModule implements IFXCanvasFactory {
+
+		@Override
+		protected void configure() {
+			this.bind(IFXCanvasFactory.class).toInstance(this);
+		}
+
+		@Override
+		public FXCanvas createCanvas(Composite parent, int style) {
+			return new FXCanvasEx(parent, style);
+		}
+	}
+
+	/**
 	 * {@link Injector}.
 	 */
 	private final Injector injector;
@@ -81,6 +140,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * {@link AdaptedBuilder}.
 	 */
 	private AdaptedBuilder adaptedBuilder;
+
+	/**
+	 * {@link Function} to create the operations from the root {@link Model}.
+	 */
+	private Function<R, O> createOperations;
 
 	/**
 	 * {@link AdaptedErrorHandler}.
@@ -124,6 +188,17 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
+	 * Creates the operations for the root {@link Model}.
+	 * 
+	 * @param model
+	 *            Root {@link Model}.
+	 * @return Operations.
+	 */
+	public O createOperations(R model) {
+		return this.createOperations.apply(model);
+	}
+
+	/**
 	 * <p>
 	 * Instantiate to capture {@link AdaptedEditorModule}.
 	 * <p>
@@ -138,8 +213,10 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 *            {@link Model}.
 	 */
 	protected AbstractIdeEditor(AdaptedEditorModule module, Class<R> rootModelType, Function<R, O> createOperations) {
-		this(Guice.createInjector(Modules.override(module).with(new MvcFxUiModule())));
+		this(Guice.createInjector(isOutsideWorkbench ? Modules.override(module).with(new OutsideWorkbenchModule())
+				: Modules.override(module).with(new MvcFxUiModule())));
 		this.module = module;
+		this.createOperations = createOperations;
 
 		// Initialise
 		this.module.initialise(this.getDomain(), this.injector);
@@ -150,7 +227,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			// Create the root model
 			AdaptedRootBuilder<R, O> root = context.root(rootModelType, (model) -> {
 				// Keep track of operations (for configurable context)
-				this.operations = createOperations.apply(model);
+				this.operations = this.createOperations(model);
 				return this.operations;
 			});
 
