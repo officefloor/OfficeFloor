@@ -278,7 +278,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		List<AdaptedModel<?>> adaptedContentModels = new ArrayList<AdaptedModel<?>>();
 		List<AdaptedParent<?>> adaptedParents = new ArrayList<>();
 		for (Model model : contentModels) {
-			AdaptedParent<?> adaptedModel = (AdaptedParent<?>) this.createAdaptedModel(model);
+
+			// Create the adapted parent (which has no parent adapted model)
+			AdaptedParent<?> adaptedModel = (AdaptedParent<?>) this.createAdaptedModel(model, null);
 
 			// Add the adapted model (only once)
 			if (!adaptedContentModels.contains(adaptedModel)) {
@@ -318,10 +320,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * 
 	 * @param model
 	 *            {@link Model}.
+	 * @param parentAdaptedModel
+	 *            Parent {@link AdaptedModel}.
 	 * @return {@link AbstractAdaptedFactory} for the {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <M extends Model> AdaptedModel<M> createAdaptedModel(M model) {
+	public <M extends Model> AdaptedModel<M> createAdaptedModel(M model, AdaptedModel<?> parentAdaptedModel) {
 
 		// Determine if already and adapted model
 		AdaptedModel<M> adapted = (AdaptedModel<M>) this.modelToAdaption.get(model);
@@ -335,7 +339,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		if (builder != null) {
 
 			// Create and register the adapted model
-			adapted = builder.newAdaptedModel(this.rootModel, this.operations, model);
+			adapted = builder.newAdaptedModel(this.rootModel, this.operations, parentAdaptedModel, model);
 			this.modelToAdaption.put(model, adapted);
 			return adapted;
 		}
@@ -371,6 +375,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 					@Override
 					public C getModel() {
+						return null;
+					}
+
+					@Override
+					public AdaptedModel<C> getAdaptedModel() {
 						return null;
 					}
 

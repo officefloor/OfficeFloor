@@ -31,6 +31,7 @@ import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -219,13 +220,13 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		@Override
 		public AdaptedChild<?> getSource() {
 			Model source = this.getFactory().getSource.apply(this.getModel());
-			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(source);
+			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(source, null);
 		}
 
 		@Override
 		public AdaptedChild<?> getTarget() {
 			Model target = this.getFactory().getTarget.apply(this.getModel());
-			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(target);
+			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(target, null);
 		}
 
 		@Override
@@ -236,6 +237,11 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		/*
 		 * ===================== ModelActionContext =======================
 		 */
+
+		@Override
+		public AdaptedModel<C> getAdaptedModel() {
+			return this;
+		}
 
 		@Override
 		public void overlay(OverlayVisualFactory overlayVisualFactory) {

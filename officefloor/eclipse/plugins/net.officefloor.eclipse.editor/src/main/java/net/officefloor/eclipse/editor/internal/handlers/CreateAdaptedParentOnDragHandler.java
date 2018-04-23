@@ -46,6 +46,7 @@ import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.ChildrenGroup;
@@ -310,6 +311,11 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		@Override
 		public M getModel() {
 			return this.parent.getModel();
+		}
+
+		@Override
+		public AdaptedModel<?> getParent() {
+			return this.parent.getParent();
 		}
 
 		@Override

@@ -101,7 +101,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 * @return {@link AdaptedModel} for the prototype.
 	 */
 	public AdaptedModel<M> createPrototype(OfficeFloorContentPartFactory<R, O> factory) {
-		return factory.createAdaptedModel(this.modelPrototype);
+		return factory.createAdaptedModel(this.modelPrototype, null);
 	}
 
 	/*
@@ -151,8 +151,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 * {@link AdaptedParent} implementation.
 	 */
 	public static class AdaptedParentImpl<R extends Model, O, M extends Model, E extends Enum<E>>
-			extends AdaptedChildImpl<R, O, M, E, AdaptedParent<M>>
-			implements AdaptedParent<M>, AdaptedPrototype<M> {
+			extends AdaptedChildImpl<R, O, M, E, AdaptedParent<M>> implements AdaptedParent<M>, AdaptedPrototype<M> {
 
 		/**
 		 * {@link AdaptedActions}.
@@ -233,6 +232,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 						@Override
 						public M getModel() {
 							return AdaptedParentImpl.this.getModel();
+						}
+
+						@Override
+						public AdaptedModel<M> getAdaptedModel() {
+							return AdaptedParentImpl.this.getAdaptedModel();
 						}
 
 						@Override

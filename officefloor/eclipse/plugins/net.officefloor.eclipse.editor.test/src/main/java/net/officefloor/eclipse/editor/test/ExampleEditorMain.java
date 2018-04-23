@@ -28,6 +28,7 @@ import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.DefaultImages;
@@ -165,6 +166,14 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				.addChild(new OfficeFloorManagedObjectSourceFlowModel("Prototype", null), (model, context) -> {
 					HBox container = new HBox();
 					context.label(container);
+					context.addNode(container, new Button("log")).setOnAction((event) -> context.action((ctx) -> {
+						AdaptedModel<?> adapted = ctx.getAdaptedModel();
+						while (adapted != null) {
+							System.out.print(adapted.getModel().getClass().getSimpleName() + " ");
+							adapted = adapted.getParent();
+						}
+						System.out.println();
+					}));
 					return container;
 				});
 		mosFlows.label((m) -> m.getOfficeFloorManagedObjectSourceFlowName(),

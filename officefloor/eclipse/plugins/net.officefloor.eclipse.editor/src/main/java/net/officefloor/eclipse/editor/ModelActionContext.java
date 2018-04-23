@@ -53,6 +53,16 @@ public interface ModelActionContext<R extends Model, O, M extends Model> {
 	M getModel();
 
 	/**
+	 * <p>
+	 * Obtains the {@link AdaptedModel}.
+	 * <p>
+	 * Will only be <code>null</code> if action is to create a {@link Model}.
+	 * 
+	 * @return {@link AdaptedModel} or <code>null</code>.
+	 */
+	AdaptedModel<M> getAdaptedModel();
+
+	/**
 	 * Shows an overlay at the position of the action.
 	 * 
 	 * @param overlayVisualFactory

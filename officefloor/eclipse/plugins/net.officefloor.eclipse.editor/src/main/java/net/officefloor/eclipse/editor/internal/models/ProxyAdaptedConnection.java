@@ -24,6 +24,7 @@ import org.eclipse.gef.mvc.fx.parts.IBendableContentPart.BendPoint;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -92,6 +93,11 @@ public class ProxyAdaptedConnection<R extends Model, O> implements AdaptedConnec
 	@Override
 	public ConnectionModel getModel() {
 		return null;
+	}
+
+	@Override
+	public AdaptedModel<?> getParent() {
+		return null; // No parent for connections
 	}
 
 	@Override

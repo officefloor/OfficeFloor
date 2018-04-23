@@ -140,6 +140,11 @@ public class AdaptedOverlay extends AbstractModel implements AdaptedModel<Adapte
 	}
 
 	@Override
+	public AdaptedModel<?> getParent() {
+		return null; // no parent to overlay
+	}
+
+	@Override
 	public AdaptedErrorHandler getErrorHandler() {
 		return this.contentPartFactory.getErrorHandler();
 	}

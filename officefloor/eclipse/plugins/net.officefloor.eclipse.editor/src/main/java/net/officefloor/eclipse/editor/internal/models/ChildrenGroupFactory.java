@@ -144,7 +144,7 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 				List<AdaptedChild<?>> adaptedChildren = new ArrayList<>(children.size());
 				for (Model child : children) {
 					AdaptedChild<?> adaptedChild = (AdaptedChild<?>) this.factory.parentAdaptedModel
-							.getAdaptedModel(child);
+							.getAdaptedModel(child, this.parent);
 					adaptedChildren.add(adaptedChild);
 				}
 				this.children.setAll(adaptedChildren);

@@ -202,10 +202,12 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	 * 
 	 * @param model
 	 *            {@link Model}.
+	 * @param parentAdaptedModel
+	 *            Parent {@link AdaptedModel}.
 	 * @return {@link AdaptedModel}.
 	 */
-	public <m extends Model> AdaptedModel<m> getAdaptedModel(m model) {
-		return this.contentPartFactory.createAdaptedModel(model);
+	public <m extends Model> AdaptedModel<m> getAdaptedModel(m model, AdaptedModel<?> parentAdaptedModel) {
+		return this.contentPartFactory.createAdaptedModel(model, parentAdaptedModel);
 	}
 
 	/**
@@ -215,17 +217,20 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	 *            Root {@link Model}.
 	 * @param operations
 	 *            Operations.
+	 * @param parentAdaptedModel
+	 *            Parent {@link AdaptedModel}.
 	 * @param model
 	 *            {@link Model}.
 	 * @return {@link AbstractAdaptedFactory} for the {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
-	public final A newAdaptedModel(R rootModel, O operations, M model) {
+	public final A newAdaptedModel(R rootModel, O operations, AdaptedModel<?> parentAdaptedModel, M model) {
 		A adapted = this.newAdaptedModel.get();
 		AbstractAdaptedModel<R, O, M, E, A, ?> abstractAdapted = (AbstractAdaptedModel<R, O, M, E, A, ?>) adapted;
 		abstractAdapted.factory = this;
 		abstractAdapted.rootModel = rootModel;
 		abstractAdapted.operations = operations;
+		abstractAdapted.parentAdaptedModel = parentAdaptedModel;
 		abstractAdapted.model = model;
 		abstractAdapted.init();
 		return adapted;
@@ -254,6 +259,11 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		private O operations;
 
 		/**
+		 * Parent {@link AdaptedModel}.
+		 */
+		private AdaptedModel<?> parentAdaptedModel;
+
+		/**
 		 * {@link Model},
 		 */
 		private M model;
@@ -270,6 +280,11 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		@Override
 		public M getModel() {
 			return this.model;
+		}
+
+		@Override
+		public AdaptedModel<?> getParent() {
+			return this.parentAdaptedModel;
 		}
 
 		@Override

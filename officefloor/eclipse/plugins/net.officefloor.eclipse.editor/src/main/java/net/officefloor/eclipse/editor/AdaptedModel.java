@@ -34,6 +34,14 @@ public interface AdaptedModel<M extends Model> {
 	M getModel();
 
 	/**
+	 * Obtains the parent {@link AdaptedModel}.
+	 * 
+	 * @return Parent {@link AdaptedModel} or <code>null</code> if
+	 *         {@link AdaptedParent}.
+	 */
+	AdaptedModel<?> getParent();
+
+	/**
 	 * Obtains the {@link AdaptedErrorHandler}.
 	 * 
 	 * @return {@link AdaptedErrorHandler}.

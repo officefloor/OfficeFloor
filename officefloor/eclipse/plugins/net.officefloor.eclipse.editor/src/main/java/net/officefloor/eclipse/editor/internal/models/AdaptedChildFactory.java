@@ -209,7 +209,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		// Construct the view (ensures all children groups are registered)
-		A adaptedModel = (A) this.getContentPartFactory().createAdaptedModel(this.modelPrototype);
+		A adaptedModel = (A) this.getContentPartFactory().createAdaptedModel(this.modelPrototype, null);
 
 		// Create the visual (will ensure valid)
 		AdaptedChildPart<M, AdaptedChild<M>> childPart = this.getInjector().getInstance(AdaptedChildPart.class);
@@ -469,7 +469,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 
 					// Adapt the connection
 					AdaptedConnection<?> adaptedConnection = (AdaptedConnection<?>) this.getFactory()
-							.getContentPartFactory().createAdaptedModel(connectionModel);
+							.getContentPartFactory().createAdaptedModel(connectionModel, null);
 					connections.add(adaptedConnection);
 				}
 			}
@@ -565,6 +565,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		/*
 		 * ================= ModelActionContext ======================
 		 */
+
+		@Override
+		public AdaptedModel<M> getAdaptedModel() {
+			return this;
+		}
 
 		@Override
 		public void overlay(OverlayVisualFactory overlayVisualFactory) {
