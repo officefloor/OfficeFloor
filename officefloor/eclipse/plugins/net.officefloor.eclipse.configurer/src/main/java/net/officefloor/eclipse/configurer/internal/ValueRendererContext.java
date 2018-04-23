@@ -19,6 +19,7 @@ package net.officefloor.eclipse.configurer.internal;
 
 import javafx.beans.property.Property;
 import net.officefloor.eclipse.configurer.Actioner;
+import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.ErrorListener;
 
 /**
@@ -34,6 +35,14 @@ public interface ValueRendererContext<M> {
 	 * @return Model.
 	 */
 	M getModel();
+
+	/**
+	 * Triggers reloading the value for the provided {@link Builder}.
+	 * 
+	 * @param builder
+	 *            {@link Builder} to identify the value to reload from the model.
+	 */
+	void reload(Builder<?, ?, ?> builder);
 
 	/**
 	 * Triggered to refresh the error display.

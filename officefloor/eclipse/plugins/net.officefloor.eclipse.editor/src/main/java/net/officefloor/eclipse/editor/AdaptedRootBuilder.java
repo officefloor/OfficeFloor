@@ -50,8 +50,7 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	 */
 	@SuppressWarnings("unchecked")
 	<M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(M modelPrototype,
-			Function<R, List<M>> getParents, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
-			RE... changeParentEvents);
+			Function<R, List<M>> getParents, AdaptedModelVisualFactory<M> viewFactory, RE... changeParentEvents);
 
 	/**
 	 * Allows adding an overlay.

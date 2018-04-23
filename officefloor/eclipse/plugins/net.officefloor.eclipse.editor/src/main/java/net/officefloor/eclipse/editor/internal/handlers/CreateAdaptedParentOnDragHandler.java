@@ -45,16 +45,19 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.ChildrenGroup;
+import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.AdaptedPrototype;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
-public class CreateAdaptedParentOnDragHandler<M extends Model> extends AbstractHandler implements IOnDragHandler {
+public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Model> extends AbstractHandler
+		implements IOnDragHandler {
 
 	/**
 	 * {@link AdaptedPrototype}.
@@ -103,24 +106,25 @@ public class CreateAdaptedParentOnDragHandler<M extends Model> extends AbstractH
 	 *            {@link MouseEvent} at completion of drag.
 	 */
 	protected void completeDrag(boolean isCreateAdaptedParent, MouseEvent event) {
+		this.prototypePart.getErrorHandler().isError(() -> {
+			// Obtain location to create parent
+			Point location = this.getLocation(event);
 
-		// Obtain location to create parent
-		Point location = this.getLocation(event);
+			// Delete the proxy
+			this.restoreRefreshVisuals(this.prototypePart);
+			IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
+			DeletionPolicy deletionPolicy = contentRoot.getAdapter(DeletionPolicy.class);
+			init(deletionPolicy);
+			deletionPolicy.delete(this.prototypePart);
+			commit(deletionPolicy);
 
-		// Delete the proxy
-		this.restoreRefreshVisuals(this.prototypePart);
-		IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
-		DeletionPolicy deletionPolicy = contentRoot.getAdapter(DeletionPolicy.class);
-		init(deletionPolicy);
-		deletionPolicy.delete(this.prototypePart);
-		commit(deletionPolicy);
+			// Determine if create adapted parent
+			if (isCreateAdaptedParent) {
 
-		// Determine if create adapted parent
-		if (isCreateAdaptedParent) {
-
-			// Create the parent at the location
-			this.prototype.newAdaptedParent(location);
-		}
+				// Create the parent at the location
+				this.prototype.newAdaptedParent(location);
+			}
+		});
 
 		// Clear state
 		this.prototype = null;
@@ -150,36 +154,39 @@ public class CreateAdaptedParentOnDragHandler<M extends Model> extends AbstractH
 			throw new IllegalStateException(AdaptedParent.class.getSimpleName() + " does not adapt to "
 					+ AdaptedPrototype.class.getSimpleName() + " for model " + parent.getModel().getClass().getName());
 		}
-		ProxyCreateAdaptedParent proxy = new ProxyCreateAdaptedParent(parent, this.prototype);
+		parentPart.getErrorHandler().isError(() -> {
+			ProxyCreateAdaptedParent proxy = new ProxyCreateAdaptedParent(parent, this.prototype);
 
-		// Create part for proxy to visual parent in drag
-		IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
-		CreationPolicy creationPolicy = contentRoot.getAdapter(CreationPolicy.class);
-		init(creationPolicy);
-		this.prototypePart = (AdaptedParentPart<M>) creationPolicy.create(proxy, contentRoot, HashMultimap.create());
-		commit(creationPolicy);
+			// Create part for proxy to visual parent in drag
+			IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
+			CreationPolicy creationPolicy = contentRoot.getAdapter(CreationPolicy.class);
+			init(creationPolicy);
+			this.prototypePart = (AdaptedParentPart<M>) creationPolicy.create(proxy, contentRoot,
+					HashMultimap.create());
+			commit(creationPolicy);
 
-		// Disable refresh
-		this.storeAndDisableRefreshVisuals(this.prototypePart);
+			// Disable refresh
+			this.storeAndDisableRefreshVisuals(this.prototypePart);
 
-		// Deselect all but the new part
-		List<IContentPart<? extends Node>> deselected = new ArrayList<>(
-				this.getContentViewer().getAdapter(SelectionModel.class).getSelectionUnmodifiable());
-		deselected.remove(this.prototypePart);
-		DeselectOperation deselectOperation = new DeselectOperation(this.getContentViewer(), deselected);
-		try {
-			this.getHost().getRoot().getViewer().getDomain().execute(deselectOperation, new NullProgressMonitor());
-		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
-		}
-
-		// Trigger drag start policies
-		this.dragPolicies = this.prototypePart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
-		if (this.dragPolicies != null) {
-			for (IOnDragHandler dragPolicy : this.dragPolicies.values()) {
-				dragPolicy.startDrag(event);
+			// Deselect all but the new part
+			List<IContentPart<? extends Node>> deselected = new ArrayList<>(
+					this.getContentViewer().getAdapter(SelectionModel.class).getSelectionUnmodifiable());
+			deselected.remove(this.prototypePart);
+			DeselectOperation deselectOperation = new DeselectOperation(this.getContentViewer(), deselected);
+			try {
+				this.getHost().getRoot().getViewer().getDomain().execute(deselectOperation, new NullProgressMonitor());
+			} catch (ExecutionException e) {
+				throw new RuntimeException(e);
 			}
-		}
+
+			// Trigger drag start policies
+			this.dragPolicies = this.prototypePart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
+			if (this.dragPolicies != null) {
+				for (IOnDragHandler dragPolicy : this.dragPolicies.values()) {
+					dragPolicy.startDrag(event);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -340,8 +347,18 @@ public class CreateAdaptedParentOnDragHandler<M extends Model> extends AbstractH
 		}
 
 		@Override
-		public Pane createVisual(AdaptedModelVisualFactoryContext context) {
+		public Pane createVisual(AdaptedModelVisualFactoryContext<M> context) {
 			return this.parent.createVisual(context);
+		}
+
+		@Override
+		public <r extends Model, o> void action(ModelAction<r, o, M> action) {
+			this.parent.action(action);
+		}
+
+		@Override
+		public AdaptedErrorHandler getErrorHandler() {
+			return this.parent.getErrorHandler();
 		}
 	}
 

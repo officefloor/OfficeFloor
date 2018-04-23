@@ -50,17 +50,21 @@ import com.google.inject.util.Modules;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
+import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeAdapter;
 import net.officefloor.eclipse.editor.ChangeExecutor;
-import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem.ConfigurableContext;
+import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
+import net.officefloor.eclipse.ide.editor.AbstractChildConfigurableItem.ConfigurableContext;
+import net.officefloor.eclipse.ide.editor.AbstractChildConfigurableItem.IdeChildrenGroup;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
 import net.officefloor.model.Model;
@@ -204,7 +208,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 								System.out.println();
 								System.out.println();
 								System.out.println(
-										"============== Change " + change.getChangeDescription() + "==============");
+										"============== Change '" + change.getChangeDescription() + "' ==============");
 								Reader reader = editor.configurationItem.getReader();
 								for (int character = reader.read(); character != -1; character = reader.read()) {
 									System.out.write(character);
@@ -322,45 +326,83 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				return this.operations;
 			});
 
-			// Configure rest of editor
-			for (AbstractParentConfigurableItem<R, RE, O, ?, ?, ?> parent : this.getParents()) {
+			// Create the configurable context
+			ConfigurableContext<R, O> configurableContext = new ConfigurableContext<R, O>() {
+
+				@Override
+				public AdaptedRootBuilder<R, O> getRootBuilder() {
+					return AbstractIdeEditor.this.rootBuilder;
+				}
+
+				@Override
+				public OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
+					return AbstractIdeEditor.this.getOsgiBridge();
+				}
+
+				@Override
+				public Shell getParentShell() {
+					return AbstractIdeEditor.this.parentShell;
+				}
+
+				@Override
+				public O getOperations() {
+					return AbstractIdeEditor.this.operations;
+				}
+
+				@Override
+				public ChangeExecutor getChangeExecutor() {
+					return AbstractIdeEditor.this.rootBuilder.getChangeExecutor();
+				}
+			};
+
+			// Configure the editor
+			for (AbstractParentConfigurableItem parent : this.getParents()) {
 
 				// Initialise the parent
-				parent.init(new ConfigurableContext<R, O>() {
-
-					@Override
-					public AdaptedRootBuilder<R, O> getRootBuilder() {
-						return AbstractIdeEditor.this.rootBuilder;
-					}
-
-					@Override
-					public OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
-						return AbstractIdeEditor.this.getOsgiBridge();
-					}
-
-					@Override
-					public Shell getParentShell() {
-						return AbstractIdeEditor.this.parentShell;
-					}
-
-					@Override
-					public O getOperations() {
-						return AbstractIdeEditor.this.operations;
-					}
-
-					@Override
-					public ChangeExecutor getChangeExecutor() {
-						return AbstractIdeEditor.this.rootBuilder.getChangeExecutor();
-					}
-				});
+				parent.init(configurableContext);
 
 				// Create the adapted parent
-				AdaptedParentBuilder<R, O, ?, ?> parentBuilder = parent.createAdaptedParent();
+				AdaptedParentBuilder parentBuilder = parent.createAdaptedParent();
 
-				// Consider creating children of parent
-
+				// Load the children
+				loadChildren(parent, parentBuilder, configurableContext);
 			}
 		};
+	}
+
+	/**
+	 * Loads the children and thier children recursively.
+	 * 
+	 * @param parent
+	 *            Parent {@link AbstractChildConfigurableItem}.
+	 * @param parentBuilder
+	 *            Parent {@link AdaptedChildBuilder}.
+	 * @param configurableContext
+	 *            {@link ConfigurableContext}.
+	 */
+	private static void loadChildren(AbstractChildConfigurableItem parent, AdaptedChildBuilder parentBuilder,
+			ConfigurableContext configurableContext) {
+
+		// Create the children groups
+		for (IdeChildrenGroup ideChildrenGroup : parent.getChildrenGroups()) {
+
+			// Add the children group
+			ChildrenGroupBuilder childrenGroup = parentBuilder.children(ideChildrenGroup.getChildrenGroupName(),
+					ideChildrenGroup, ideChildrenGroup.changeEvents());
+
+			// Create the children
+			for (AbstractChildConfigurableItem child : ideChildrenGroup.getChildren()) {
+
+				// Initialise the child
+				child.init(configurableContext);
+
+				// Build the child
+				AdaptedChildBuilder childBuilder = child.createChild(childrenGroup);
+
+				// Load the grand children
+				loadChildren(child, childBuilder, configurableContext);
+			}
+		}
 	}
 
 	/**

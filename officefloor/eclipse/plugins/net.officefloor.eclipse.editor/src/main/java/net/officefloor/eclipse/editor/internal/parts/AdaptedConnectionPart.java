@@ -31,8 +31,9 @@ import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ProxyAdaptedConnection;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
 
-public class AdaptedConnectionPart<C extends ConnectionModel>
+public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel>
 		extends AbstractAdaptedPart<C, AdaptedConnection<C>, Connection> implements IBendableContentPart<Connection> {
 
 	/**
@@ -51,12 +52,13 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	private AdaptedConnector<?> targetConnector;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
 		SetMultimap<Object, String> anchorages = HashMultimap.create();
 
 		// Determine if proxy connection
 		if (this.getContent() instanceof ProxyAdaptedConnection) {
-			ProxyAdaptedConnection proxy = (ProxyAdaptedConnection) this.getContent();
+			ProxyAdaptedConnection<R, O> proxy = (ProxyAdaptedConnection<R, O>) this.getContent();
 			anchorages.put(proxy.getSourceAdaptedConnector(), SOURCE_ROLE);
 			return anchorages; // never connected
 		}
@@ -155,13 +157,14 @@ public class AdaptedConnectionPart<C extends ConnectionModel>
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setContentBendPoints(List<BendPoint> bendPoints) {
 
 		// Load the bend points to proxy (to create actual connection)
 		if (this.getContent() instanceof ProxyAdaptedConnection) {
 
 			// Load bend points for proxy connection to create connection
-			ProxyAdaptedConnection proxy = (ProxyAdaptedConnection) this.getContent();
+			ProxyAdaptedConnection<R, O> proxy = (ProxyAdaptedConnection<R, O>) this.getContent();
 			proxy.setBendPoints(bendPoints);
 
 			// Capture parent (so delete still considers in model)

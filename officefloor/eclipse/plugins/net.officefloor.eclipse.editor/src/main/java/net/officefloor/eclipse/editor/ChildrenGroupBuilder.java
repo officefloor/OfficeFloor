@@ -39,6 +39,6 @@ public interface ChildrenGroupBuilder<R extends Model, O> {
 	 *         {@link Model}.
 	 */
 	<M extends Model, E extends Enum<E>> AdaptedChildBuilder<R, O, M, E> addChild(M modelPrototype,
-			AdaptedModelVisualFactory<M, AdaptedChild<M>> viewFactory);
+			AdaptedModelVisualFactory<M> viewFactory);
 
 }

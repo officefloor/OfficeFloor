@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.configurer.internal;
 
 import javafx.scene.Node;
+import net.officefloor.eclipse.configurer.Builder;
 
 /**
  * <p>
@@ -66,6 +67,15 @@ public interface ValueRenderer<M, I extends ValueInput> {
 	 * @return Error feedback {@link Node}.
 	 */
 	Node createErrorFeedback(I valueInput);
+
+	/**
+	 * Triggers to reload the value if matches the {@link Builder}.
+	 * 
+	 * @param builder
+	 *            {@link Builder} identifying the value to be reloaded from the
+	 *            model.
+	 */
+	void reloadIf(Builder<?, ?, ?> builder);
 
 	/**
 	 * Obtains the error with value.

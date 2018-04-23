@@ -105,6 +105,21 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 *            {@link AdaptedModelVisualFactoryContext}.
 	 * @return Visual {@link Pane}.
 	 */
-	Pane createVisual(AdaptedModelVisualFactoryContext context);
+	Pane createVisual(AdaptedModelVisualFactoryContext<M> context);
+
+	/**
+	 * Undertakes the {@link ModelAction}.
+	 * 
+	 * @param action
+	 *            {@link ModelAction}.
+	 */
+	<R extends Model, O> void action(ModelAction<R, O, M> action);
+
+	/**
+	 * Obtains the {@link AdaptedErrorHandler}.
+	 * 
+	 * @return {@link AdaptedErrorHandler}.
+	 */
+	AdaptedErrorHandler getErrorHandler();
 
 }

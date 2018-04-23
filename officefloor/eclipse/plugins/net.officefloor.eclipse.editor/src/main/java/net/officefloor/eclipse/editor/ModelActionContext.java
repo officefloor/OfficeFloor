@@ -26,7 +26,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ModelActionContext<R extends Model, O, M extends Model, A extends AdaptedModel<M>> {
+public interface ModelActionContext<R extends Model, O, M extends Model> {
 
 	/**
 	 * Obtains the root {@link Model}.
@@ -53,16 +53,6 @@ public interface ModelActionContext<R extends Model, O, M extends Model, A exten
 	M getModel();
 
 	/**
-	 * <p>
-	 * Obtains the {@link AdaptedModel}.
-	 * <p>
-	 * Will only be <code>null</code> if action is to create a {@link Model}.
-	 * 
-	 * @return {@link AdaptedModel} or <code>null</code>.
-	 */
-	A getAdaptedModel();
-
-	/**
 	 * Shows an overlay at the position of the action.
 	 * 
 	 * @param overlayVisualFactory
@@ -83,5 +73,14 @@ public interface ModelActionContext<R extends Model, O, M extends Model, A exten
 	 * @return {@link Injector}.
 	 */
 	Injector getInjector();
+
+	/**
+	 * Convenience method to position the {@link Model}.
+	 * 
+	 * @param model
+	 *            {@link Model} to be positioned.
+	 * @return Input {@link Model}.
+	 */
+	M position(M model);
 
 }

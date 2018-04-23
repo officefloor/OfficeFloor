@@ -21,7 +21,6 @@ import java.util.List;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
@@ -33,7 +32,7 @@ import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
 
 /**
- * Configuration for {@link DeployedOffice}.
+ * Configuration for {@link ExternalFlowModel}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,7 +47,7 @@ public class ExternalFlowItem extends
 	}
 
 	/**
-	 * Name of the {@link DeployedOffice}.
+	 * Name.
 	 */
 	private String name;
 
@@ -72,12 +71,12 @@ public class ExternalFlowItem extends
 	}
 
 	@Override
-	protected SectionEvent[] rootChangeEvents() {
+	protected SectionEvent[] parentChangeEvents() {
 		return new SectionEvent[] { SectionEvent.ADD_EXTERNAL_FLOW, SectionEvent.REMOVE_EXTERNAL_FLOW };
 	}
 
 	@Override
-	protected Pane createVisual(ExternalFlowModel model, AdaptedModelVisualFactoryContext context) {
+	protected Pane createVisual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		return container;
@@ -132,6 +131,10 @@ public class ExternalFlowItem extends
 	@Override
 	protected void deleteModel(ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
 		context.execute(context.getOperations().removeExternalFlow(context.getModel()));
+	}
+
+	@Override
+	protected void loadChildren(List<IdeChildrenGroup> children) {
 	}
 
 }

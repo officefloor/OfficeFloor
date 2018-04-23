@@ -42,6 +42,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import net.officefloor.eclipse.common.javafx.resize.DragResizer;
 import net.officefloor.eclipse.configurer.Actioner;
+import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.DefaultImages;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.FlagBuilder;
@@ -179,6 +180,9 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		table.setPlaceholder(new Label("No entries"));
 		table.getSelectionModel().setCellSelectionEnabled(true);
 
+		// Link rows for table
+		table.setItems(rows);
+
 		// Load the columns to the table
 		final TableColumn<Row, ?>[] columns = new TableColumn[this.renderers.size() + (this.isDelete ? 1 : 0)];
 		for (int i = 0; i < this.renderers.size(); i++) {
@@ -262,22 +266,6 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 		// Specify the columns
 		table.getColumns().setAll(columns);
-
-		// Load the rows
-		List<I> items = itemsProperty.getValue();
-		if (items != null) {
-			for (I item : items) {
-				rows.add(new Row(table, loadRowsToItems, item, context));
-			}
-		}
-
-		// Determine if able to add rows
-		if (this.itemFactory != null) {
-			rows.add(new AddRow(table, loadRowsToItems, context));
-		}
-
-		// Load rows to the table
-		table.setItems(rows);
 
 		// Hook in typing to start edit
 		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
@@ -371,6 +359,31 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 				}
 			}
 		});
+
+		// Load the rows
+		Runnable loadRows = () -> {
+			List<I> items = itemsProperty.getValue();
+			List<Row> updatedRows = new ArrayList<>();
+			if (items != null) {
+				for (I item : items) {
+					updatedRows.add(new Row(table, loadRowsToItems, item, context));
+				}
+			}
+
+			// Determine if able to add rows
+			if (this.itemFactory != null) {
+				updatedRows.add(new AddRow(table, loadRowsToItems, context));
+			}
+
+			// Load rows to the table
+			rows.setAll(updatedRows);
+		};
+
+		// Handle change in rows
+		itemsProperty.addListener((event) -> loadRows.run());
+
+		// Load initial rows
+		loadRows.run();
 
 		// Determine if fixed number of rows
 		double ROW_HEIGHT = 30;
@@ -491,6 +504,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		@Override
 		public I getModel() {
 			return this.item;
+		}
+
+		@Override
+		public void reload(Builder<?, ?, ?> builder) {
+			this.context.reload(builder);
 		}
 
 		@Override

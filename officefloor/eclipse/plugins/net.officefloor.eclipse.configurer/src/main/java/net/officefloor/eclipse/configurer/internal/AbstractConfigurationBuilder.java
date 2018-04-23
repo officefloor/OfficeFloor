@@ -55,6 +55,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.Actioner;
+import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ClassBuilder;
 import net.officefloor.eclipse.configurer.CloseListener;
@@ -789,6 +790,30 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		}
 
 		@Override
+		public void reload(Builder<?, ?, ?> builder) {
+
+			// Obtain the first value lister
+			ValueLister<M> firstValueLister = this;
+			while (firstValueLister.prevLister != null) {
+				firstValueLister = firstValueLister.prevLister;
+			}
+
+			// Search for the builder
+			ValueLister<M> lister = firstValueLister;
+			while (lister != null) {
+				for (Input<M, ?> input : lister.inputs) {
+					input.renderer.reloadIf(builder);
+				}
+				lister = lister.nextLister;
+			}
+		}
+
+		/**
+		 * Ensure do not recursively refresh the error.
+		 */
+		private boolean isRefreshingError = false;
+
+		@Override
 		@SuppressWarnings("unchecked")
 		public void refreshError() {
 
@@ -798,51 +823,68 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 				firstValueLister = firstValueLister.prevLister;
 			}
 
-			// Search for first error
-			InputError<M, ? extends ValueInput> errorInput = firstValueLister.getFirstError();
+			// Ensure not recursively refresh error
+			if (firstValueLister.isRefreshingError) {
+				return;
+			}
 
-			// If valid, undertake validation of model
-			if ((errorInput == null) && (this.modelValidator != null)) {
-				try {
+			// Refresh the error
+			firstValueLister.isRefreshingError = true;
+			try {
 
-					// Validate the model
-					InputError<M, ? extends ValueInput>[] validateError = new InputError[] { null };
-					this.modelValidator.validate(new ValueValidatorContext<M>() {
+				// Search for first error
+				InputError<M, ? extends ValueInput> errorInput = firstValueLister.getFirstError();
 
-						@Override
-						public ReadOnlyProperty<M> getValue() {
-							return new SimpleObjectProperty<>(ValueLister.this.model);
-						}
+				// If valid, undertake validation of model
+				if ((errorInput == null) && (this.modelValidator != null)) {
+					try {
 
-						@Override
-						public void setError(String message) {
-							validateError[0] = new InputError<>(null, new MessageOnlyException(message));
-						}
+						// Validate the model
+						InputError<M, ? extends ValueInput>[] validateError = new InputError[] { null };
+						this.modelValidator.validate(new ValueValidatorContext<M>() {
 
-					});
-					errorInput = validateError[0];
+							@Override
+							public ReadOnlyProperty<M> getValue() {
+								return new SimpleObjectProperty<>(ValueLister.this.model);
+							}
 
-				} catch (Exception ex) {
-					// Provide failure error
-					errorInput = new InputError<>(null, ex);
+							@Override
+							public void setError(String message) {
+								validateError[0] = new InputError<>(null, new MessageOnlyException(message));
+							}
+
+							@Override
+							public void reload(Builder<?, ?, ?> builder) {
+								ValueLister.this.reload(builder);
+							}
+						});
+						errorInput = validateError[0];
+
+					} catch (Throwable ex) {
+						// Provide failure error
+						errorInput = new InputError<>(null, ex);
+					}
 				}
-			}
 
-			// Indicate if valid
-			this.validProperty.setValue(errorInput == null);
+				// Indicate if valid
+				this.validProperty.setValue(errorInput == null);
 
-			// Determine if error
-			if (errorInput == null) {
-				this.errorListener.valid();
-				return; // no error
-			}
+				// Determine if error
+				if (errorInput == null) {
+					this.errorListener.valid();
+					return; // no error
+				}
 
-			// Provide appropriate error
-			String label = errorInput.input != null ? errorInput.input.labelText : null;
-			if (errorInput.error instanceof MessageOnlyException) {
-				this.errorListener.error(label, errorInput.error.getMessage());
-			} else {
-				this.errorListener.error(label, errorInput.error);
+				// Provide appropriate error
+				String label = errorInput.input != null ? errorInput.input.labelText : null;
+				if (errorInput.error instanceof MessageOnlyException) {
+					this.errorListener.error(label, errorInput.error.getMessage());
+				} else {
+					this.errorListener.error(label, errorInput.error);
+				}
+
+			} finally {
+				firstValueLister.isRefreshingError = false;
 			}
 		}
 

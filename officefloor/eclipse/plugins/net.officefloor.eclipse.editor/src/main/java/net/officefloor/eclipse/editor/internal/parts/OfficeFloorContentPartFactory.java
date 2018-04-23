@@ -356,8 +356,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 */
 	public <S extends Model, T extends Model, C extends ConnectionModel> void addConnection(S source, T target,
 			ConnectionFactory<R, O, S, C, T> createConnection) {
-		this.errorHandler.isError(() -> createConnection.addConnection(source, target,
-				new ModelActionContext<R, O, C, AdaptedConnection<C>>() {
+		this.errorHandler
+				.isError(() -> createConnection.addConnection(source, target, new ModelActionContext<R, O, C>() {
 
 					@Override
 					public R getRootModel() {
@@ -371,11 +371,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 					@Override
 					public C getModel() {
-						return null;
-					}
-
-					@Override
-					public AdaptedConnection<C> getAdaptedModel() {
 						return null;
 					}
 
@@ -397,6 +392,17 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 					@Override
 					public Injector getInjector() {
 						return OfficeFloorContentPartFactory.this.injector;
+					}
+
+					@Override
+					public C position(C model) {
+
+						// Position the model
+						model.setX(target.getX());
+						model.setY(target.getY());
+
+						// Return the model
+						return model;
 					}
 				}));
 	}
@@ -436,8 +442,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(
-			M modelPrototype, Function<R, List<M>> getParents,
-			AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory, RE... changeParentEvents) {
+			M modelPrototype, Function<R, List<M>> getParents, AdaptedModelVisualFactory<M> viewFactory,
+			RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
 		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this);
 	}

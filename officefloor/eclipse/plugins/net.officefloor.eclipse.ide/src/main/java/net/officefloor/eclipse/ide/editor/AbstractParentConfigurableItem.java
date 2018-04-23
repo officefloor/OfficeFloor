@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.ide.editor;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
@@ -29,11 +28,9 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.configurer.CloseListener;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.Configurer;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
@@ -50,116 +47,7 @@ import net.officefloor.model.change.Change;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractParentConfigurableItem<R extends Model, RE extends Enum<RE>, O, M extends Model, E extends Enum<E>, I>
-		extends AbstractConfigurerRunnable implements ConfigurableItem<I> {
-
-	/**
-	 * {@link ConfigurableContext}.
-	 */
-	private ConfigurableContext<R, O> context;
-
-	/**
-	 * Context for the configurable parent.
-	 */
-	public static interface ConfigurableContext<R extends Model, O> {
-
-		/**
-		 * Obtains the {@link AdaptedRootBuilder}.
-		 * 
-		 * @return {@link AdaptedRootBuilder}.
-		 */
-		AdaptedRootBuilder<R, O> getRootBuilder();
-
-		/**
-		 * Obtains the {@link OfficeFloorOsgiBridge}.
-		 * 
-		 * @return {@link OfficeFloorOsgiBridge}.
-		 * @throws Exception
-		 *             If fails to obtain the {@link OfficeFloorOsgiBridge}.
-		 */
-		OfficeFloorOsgiBridge getOsgiBridge() throws Exception;
-
-		/**
-		 * Obtains the parent {@link Shell}.
-		 * 
-		 * @return Parent {@link Shell}.
-		 */
-		Shell getParentShell();
-
-		/**
-		 * Obtains the operations.
-		 * 
-		 * @return Operations.
-		 */
-		O getOperations();
-
-		/**
-		 * Obtains the {@link ChangeExecutor}.
-		 * 
-		 * @return {@link ChangeExecutor}.
-		 */
-		ChangeExecutor getChangeExecutor();
-	}
-
-	/**
-	 * Initialise with {@link ConfigurableContext}.
-	 * 
-	 * @param context
-	 *            {@link ConfigurableContext}.
-	 */
-	public void init(ConfigurableContext<R, O> context) {
-		this.context = context;
-	}
-
-	/**
-	 * Creates the prototype for the item.
-	 * 
-	 * @return Prototype. May be <code>null</code> if not able to create the item.
-	 */
-	protected abstract M createPrototype();
-
-	/**
-	 * Obtains the {@link Model} instances from the parent {@link Model}.
-	 * 
-	 * @param parentModel
-	 *            Parent {@link Model}.
-	 * @return {@link List} of {@link Model} instances.
-	 */
-	protected abstract List<M> getModels(R parentModel);
-
-	/**
-	 * Creates the visual for the {@link Model}.
-	 * 
-	 * @param model
-	 *            {@link Model}.
-	 * @param context
-	 *            {@link AdaptedModelVisualFactoryContext}.
-	 * @return {@link Pane} for the visual.
-	 */
-	protected abstract Pane createVisual(M model, AdaptedModelVisualFactoryContext context);
-
-	/**
-	 * Obtains the change events regarding adding/removing the {@link Model} from
-	 * the root {@link Model}.
-	 * 
-	 * @return Root change events.
-	 */
-	protected abstract RE[] rootChangeEvents();
-
-	/**
-	 * Obtains the change events specific to the {@link Model}.
-	 * 
-	 * @return Change events.
-	 */
-	protected abstract E[] changeEvents();
-
-	/**
-	 * Obtains the label for the {@link Model}.
-	 * 
-	 * @param model
-	 *            {@link Model}.
-	 * @return Label for the model.
-	 */
-	protected abstract String getLabel(M model);
+		extends AbstractChildConfigurableItem<R, O, R, RE, M, E> implements ConfigurableItem<I> {
 
 	/**
 	 * Creates an item from the {@link Model}.
@@ -241,16 +129,6 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 	protected abstract void deleteModel(ConfigurableModelContext<O, M> context);
 
 	/**
-	 * Further adapt the {@link AdaptedParentBuilder}.
-	 * 
-	 * @param parent
-	 *            {@link AdaptedParentBuilder}.
-	 */
-	protected void furtherAdaptParent(AdaptedParentBuilder<R, O, M, E> parent) {
-		// Default implementation of nothing further
-	}
-
-	/**
 	 * Creates the {@link AdaptedParentBuilder}.
 	 * 
 	 * @return {@link AdaptedParentBuilder}.
@@ -261,9 +139,9 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 		M prototype = this.createPrototype();
 
 		// Configure the parent
-		AdaptedParentBuilder<R, O, M, E> parent = this.context.getRootBuilder().parent(prototype,
-				(root) -> this.getModels(root), (adapted, ctx) -> this.createVisual(adapted.getModel(), ctx),
-				this.rootChangeEvents());
+		AdaptedParentBuilder<R, O, M, E> parent = this.getConfigurableContext().getRootBuilder().parent(prototype,
+				(root) -> this.getModels(root), (model, ctx) -> this.createVisual(model, ctx),
+				this.parentChangeEvents());
 		parent.label((model) -> this.getLabel(model), this.changeEvents());
 
 		// Determine if can create parent
@@ -271,8 +149,8 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 			parent.create((ctx) -> {
 
 				// Obtain details for dialog
-				OfficeFloorOsgiBridge bridge = this.context.getOsgiBridge();
-				Shell shell = this.context.getParentShell();
+				OfficeFloorOsgiBridge bridge = this.getConfigurableContext().getOsgiBridge();
+				Shell shell = this.getConfigurableContext().getParentShell();
 
 				// Obtain details for executing change
 				O operations = ctx.getOperations();
@@ -341,8 +219,8 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 		parent.action((ctx) -> {
 
 			// Obtain details for dialog
-			OfficeFloorOsgiBridge bridge = this.context.getOsgiBridge();
-			Shell shell = this.context.getParentShell();
+			OfficeFloorOsgiBridge bridge = this.getConfigurableContext().getOsgiBridge();
+			Shell shell = this.getConfigurableContext().getParentShell();
 
 			// Obtain details for executing change
 			O operations = ctx.getOperations();
@@ -403,7 +281,7 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 		}, DefaultImages.EDIT);
 
 		// Further adapt (so delete action is last action)
-		this.furtherAdaptParent(parent);
+		this.furtherAdapt(parent);
 
 		// Allow deleting
 		parent.action((ctx) -> {
@@ -461,11 +339,11 @@ public abstract class AbstractParentConfigurableItem<R extends Model, RE extends
 	protected void loadConfiguration(Shell shell) {
 
 		// Ensure have context
-		if ((this.context == null)
-				|| (!(this.context instanceof AbstractParentConfigurableItem.MainConfigurableContext))) {
+		ConfigurableContext<R, O> context = this.getConfigurableContext();
+		if ((context == null) || (!(context instanceof AbstractParentConfigurableItem.MainConfigurableContext))) {
 			throw new IllegalStateException("Must start main through instance main method");
 		}
-		MainConfigurableContext mainContext = (MainConfigurableContext) this.context;
+		MainConfigurableContext mainContext = (MainConfigurableContext) context;
 
 		// Associate the parent shell
 		mainContext.parentShell = shell;

@@ -48,7 +48,7 @@ public class DeployedOfficeConfiguration {
 	 *            {@link ConfigurationBuilder}.
 	 */
 	public void loadAddConfiguration(ConfigurationBuilder<DeployedOfficeConfiguration> builder,
-			ModelActionContext<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, ?> context,
+			ModelActionContext<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel> context,
 			OfficeFloorOsgiBridge compiler) {
 
 		// Configure the name

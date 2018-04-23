@@ -24,7 +24,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ModelAction<R extends Model, O, M extends Model, A extends AdaptedModel<M>> {
+public interface ModelAction<R extends Model, O, M extends Model> {
 
 	/**
 	 * Executes the action.
@@ -34,6 +34,6 @@ public interface ModelAction<R extends Model, O, M extends Model, A extends Adap
 	 * @throws Exception
 	 *             Possible {@link Exception} in executing {@link ModelAction}.
 	 */
-	void execute(ModelActionContext<R, O, M, A> context) throws Exception;
+	void execute(ModelActionContext<R, O, M> context) throws Exception;
 
 }

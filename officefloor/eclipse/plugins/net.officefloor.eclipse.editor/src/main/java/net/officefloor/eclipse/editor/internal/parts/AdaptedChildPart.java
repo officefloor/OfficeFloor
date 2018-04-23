@@ -31,15 +31,17 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
+import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane>
-		implements AdaptedModelVisualFactoryContext {
+		implements AdaptedModelVisualFactoryContext<M> {
 
 	/**
 	 * {@link ChildrenGroupVisual} instances for the {@link ChildrenGroupImpl}
@@ -73,6 +75,15 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	 */
 	public GeometryNode<?> getAdaptedConnectorNode(AdaptedConnector<?> connector) {
 		return this.adaptedConnectorVisuals.get(connector).node;
+	}
+
+	/**
+	 * Obtains the {@link AdaptedErrorHandler}.
+	 * 
+	 * @return {@link AdaptedErrorHandler}.
+	 */
+	public AdaptedErrorHandler getErrorHandler() {
+		return this.getContent().getErrorHandler();
 	}
 
 	/*
@@ -250,6 +261,11 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 		// Return the connector
 		return this.connector(node, connectionClasses);
+	}
+
+	@Override
+	public <R extends Model, O> void action(ModelAction<R, O, M> action) {
+		this.getContent().action(action);
 	}
 
 	/**

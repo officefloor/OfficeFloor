@@ -33,4 +33,11 @@ public interface AdaptedModel<M extends Model> {
 	 */
 	M getModel();
 
+	/**
+	 * Obtains the {@link AdaptedErrorHandler}.
+	 * 
+	 * @return {@link AdaptedErrorHandler}.
+	 */
+	AdaptedErrorHandler getErrorHandler();
+
 }

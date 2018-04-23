@@ -100,14 +100,15 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 
 	@Override
 	public <CM extends Model, CE extends Enum<CE>> AdaptedChildBuilder<R, O, CM, CE> addChild(CM modelPrototype,
-			AdaptedModelVisualFactory<CM, AdaptedChild<CM>> viewFactory) {
+			AdaptedModelVisualFactory<CM> viewFactory) {
 		return new AdaptedChildFactory<>(modelPrototype, viewFactory, this.parentAdaptedModel);
 	}
 
 	/**
 	 * Children group.
 	 */
-	public static class ChildrenGroupImpl<M extends Model, E extends Enum<E>> implements ChildrenGroup<M, E> {
+	public static class ChildrenGroupImpl<R extends Model, O, M extends Model, E extends Enum<E>>
+			implements ChildrenGroup<M, E> {
 
 		/**
 		 * Parent {@link AdaptedChild}.

@@ -48,8 +48,10 @@ import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ProxyAdaptedConnection;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectorPart;
+import net.officefloor.model.Model;
 
-public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implements IOnDragHandler {
+public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends AbstractHandler
+		implements IOnDragHandler {
 
 	/**
 	 * Source {@link AdaptedConnectorPart}.
@@ -59,12 +61,12 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 	/**
 	 * {@link ProxyAdaptedConnection}.
 	 */
-	private ProxyAdaptedConnection connection;
+	private ProxyAdaptedConnection<R, O> connection;
 
 	/**
 	 * {@link AdaptedConnectionPart} for the new {@link ProxyAdaptedConnection}.
 	 */
-	private AdaptedConnectionPart<?> connectionPart;
+	private AdaptedConnectionPart<R, O, ?> connectionPart;
 
 	/**
 	 * Target {@link BendPoint} for dragging the {@link ProxyAdaptedConnection}.
@@ -111,7 +113,7 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 	 *            {@link EventTarget}.
 	 * @return Target {@link CircleSegmentHandlePart}.
 	 */
-	protected CircleSegmentHandlePart findBendTargetPart(AdaptedConnectionPart<?> connectionPart,
+	protected CircleSegmentHandlePart findBendTargetPart(AdaptedConnectionPart<R, O, ?> connectionPart,
 			EventTarget eventTarget) {
 		// Find last segment handle part
 		Multiset<IVisualPart<? extends Node>> anchoreds = connectionPart.getAnchoredsUnmodifiable();
@@ -164,11 +166,12 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void startDrag(MouseEvent event) {
 
 		// Create the proxy connection
 		this.sourceConnector = this.getAdaptedConnectorPart();
-		this.connection = new ProxyAdaptedConnection(sourceConnector.getContent());
+		this.connection = new ProxyAdaptedConnection<>(sourceConnector.getContent());
 
 		// Register the connector as active
 		this.sourceConnector.setActiveConnector(true);
@@ -176,8 +179,8 @@ public class CreateAdaptedConnectionOnDragHandler extends AbstractHandler implem
 		// Create using CreationPolicy from root part
 		CreationPolicy creationPolicy = getHost().getRoot().getAdapter(CreationPolicy.class);
 		init(creationPolicy);
-		this.connectionPart = (AdaptedConnectionPart<?>) creationPolicy.create(this.connection, getHost().getRoot(),
-				HashMultimap.<IContentPart<? extends Node>, String>create());
+		this.connectionPart = (AdaptedConnectionPart<R, O, ?>) creationPolicy.create(this.connection,
+				getHost().getRoot(), HashMultimap.<IContentPart<? extends Node>, String>create());
 		commit(creationPolicy);
 
 		// Disable refresh visuals for the connection

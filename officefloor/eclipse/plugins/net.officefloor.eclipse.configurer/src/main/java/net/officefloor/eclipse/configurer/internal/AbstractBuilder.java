@@ -253,6 +253,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			// Obtain the model
 			M model = this.context.getModel();
 
+			// Initialise to model
+			this.loadValue();
+
 			// Refresh on error or value change
 			this.error.addListener((event) -> this.context.refreshError());
 			this.value.addListener((event) -> this.context.refreshError());
@@ -263,22 +266,23 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 						(event) -> AbstractBuilder.this.valueLoader.loadValue(model, this.value.getValue()));
 			}
 
-			// Listen to change to run validation
+			// Undertake validation (after loading value to model)
 			this.validators.addAll(AbstractBuilder.this.validators);
 			this.value.addListener((event) -> this.validate());
-
-			// Initialise to model (triggering validation)
-			if (AbstractBuilder.this.getInitialValue != null) {
-				// Load the initialised value
-				V initialValue = AbstractBuilder.this.getInitialValue.apply(model);
-				this.value.setValue(initialValue);
-			}
-
-			// Undertake validation (for initial value)
-			this.validate();
+			this.validate(); // validate initial value
 
 			// Track model becoming dirty
 			this.value.addListener((event) -> context.dirtyProperty().setValue(true));
+		}
+
+		/**
+		 * Loads the value.
+		 */
+		private void loadValue() {
+			if (AbstractBuilder.this.getInitialValue != null) {
+				V initialValue = AbstractBuilder.this.getInitialValue.apply(this.context.getModel());
+				this.value.setValue(initialValue);
+			}
 		}
 
 		/**
@@ -295,7 +299,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 					ValueValidator<V> validator = iterator.next();
 					validator.validate(this);
 				}
-			} catch (Exception ex) {
+			} catch (Throwable ex) {
 				// Provide error message
 				String message = ex.getMessage();
 				if ((message == null) || (message.length() == 0)) {
@@ -409,6 +413,19 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			// Update the error feedback
 			this.isError = (message != null);
 			this.error.setValue(this.isError ? new MessageOnlyException(message) : null);
+		}
+
+		@Override
+		public void reload(Builder<?, ?, ?> builder) {
+			this.context.reload(builder);
+		}
+
+		@Override
+		public void reloadIf(Builder<?, ?, ?> builder) {
+			if (AbstractBuilder.this == builder) {
+				// Require reloading this value
+				this.loadValue();
+			}
 		}
 	}
 

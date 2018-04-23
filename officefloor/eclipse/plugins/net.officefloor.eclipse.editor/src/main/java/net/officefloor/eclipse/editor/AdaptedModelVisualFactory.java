@@ -25,7 +25,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedModelVisualFactory<M extends Model, A extends AdaptedModel<M>> {
+public interface AdaptedModelVisualFactory<M extends Model> {
 
 	/**
 	 * Creates the visual {@link Pane}.
@@ -36,6 +36,6 @@ public interface AdaptedModelVisualFactory<M extends Model, A extends AdaptedMod
 	 *            {@link AdaptedModelVisualFactoryContext}.
 	 * @return {@link Pane}.
 	 */
-	Pane createVisual(A adaptedModel, AdaptedModelVisualFactoryContext context);
+	Pane createVisual(M model, AdaptedModelVisualFactoryContext<M> context);
 
 }

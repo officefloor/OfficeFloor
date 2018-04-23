@@ -19,6 +19,7 @@ package net.officefloor.eclipse.configurer.internal;
 
 import javafx.beans.property.Property;
 import net.officefloor.eclipse.configurer.Actioner;
+import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.ErrorListener;
 import net.officefloor.eclipse.configurer.ValueValidator;
 
@@ -50,6 +51,14 @@ public interface ValueInputContext<M, V> {
 	 *            {@link ValueValidator}.
 	 */
 	void addValidator(ValueValidator<V> validator);
+
+	/**
+	 * Triggers reload of the value from the model for the {@link Builder}.
+	 * 
+	 * @param builder
+	 *            {@link Builder} to identify the value from the model to reload.
+	 */
+	void reload(Builder<?, ?, ?> builder);
 
 	/**
 	 * Refreshes the error.

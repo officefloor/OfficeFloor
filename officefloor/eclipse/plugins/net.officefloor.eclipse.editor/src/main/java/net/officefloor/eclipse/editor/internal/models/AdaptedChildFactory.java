@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.eclipse.gef.geometry.planar.Point;
+
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.StringProperty;
@@ -41,6 +43,9 @@ import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
+import net.officefloor.eclipse.editor.ModelAction;
+import net.officefloor.eclipse.editor.ModelActionContext;
+import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -65,7 +70,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	/**
 	 * {@link AdaptedModelVisualFactory}.
 	 */
-	private final AdaptedModelVisualFactory<M, A> viewFactory;
+	private final AdaptedModelVisualFactory<M> viewFactory;
 
 	/**
 	 * {@link Function} to get the label from the {@link Model}.
@@ -109,7 +114,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 *            Parent {@link AbstractAdaptedFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	public AdaptedChildFactory(M modelPrototype, AdaptedModelVisualFactory<M, A> viewFactory,
+	public AdaptedChildFactory(M modelPrototype, AdaptedModelVisualFactory<M> viewFactory,
 			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
 		super((Class<M>) modelPrototype.getClass(), () -> (A) new AdaptedChildImpl<R, O, M, E, AdaptedChild<M>>(),
 				parentAdaptedModel);
@@ -131,7 +136,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 */
 	@SuppressWarnings("unchecked")
 	protected AdaptedChildFactory(M modelPrototype, Supplier<A> newAdaptedModel,
-			AdaptedModelVisualFactory<M, A> viewFactory, OfficeFloorContentPartFactory<R, O> contentPartFactory) {
+			AdaptedModelVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentPartFactory) {
 		super((Class<M>) modelPrototype.getClass(), newAdaptedModel, contentPartFactory);
 		this.modelPrototype = modelPrototype;
 		this.viewFactory = viewFactory;
@@ -329,7 +334,8 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 * {@link AdaptedChild} implementation.
 	 */
 	protected static class AdaptedChildImpl<R extends Model, O, M extends Model, E extends Enum<E>, A extends AdaptedChild<M>>
-			extends AbstractAdaptedModel<R, O, M, E, A, AdaptedChildFactory<R, O, M, E, A>> implements AdaptedChild<M> {
+			extends AbstractAdaptedModel<R, O, M, E, A, AdaptedChildFactory<R, O, M, E, A>>
+			implements AdaptedChild<M>, ModelActionContext<R, O, M> {
 
 		/**
 		 * Label for the {@link Model}.
@@ -536,9 +542,8 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public Pane createVisual(AdaptedModelVisualFactoryContext context) {
-			return this.getFactory().viewFactory.createVisual((A) this, context);
+		public Pane createVisual(AdaptedModelVisualFactoryContext<M> context) {
+			return this.getFactory().viewFactory.createVisual(this.getModel(), context);
 		}
 
 		/**
@@ -555,6 +560,29 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			Class<?> targetModelClass = target.getModel().getClass();
 			ConnectionKey key = new ConnectionKey(sourceModelClass, targetModelClass);
 			return this.getFactory().connectionFactories.get(key);
+		}
+
+		/*
+		 * ================= ModelActionContext ======================
+		 */
+
+		@Override
+		public void overlay(OverlayVisualFactory overlayVisualFactory) {
+
+			// Obtain the location of this parent
+			Model model = this.getModel();
+			Point location = new Point(model.getX(), model.getY());
+
+			// Add the overlay
+			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <r extends Model, o> void action(ModelAction<r, o, M> action) {
+			this.getErrorHandler().isError(() -> {
+				action.execute((ModelActionContext<r, o, M>) this);
+			});
 		}
 	}
 

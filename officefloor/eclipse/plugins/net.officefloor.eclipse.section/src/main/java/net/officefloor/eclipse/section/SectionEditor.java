@@ -76,7 +76,7 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	@Override
 	@SuppressWarnings("unchecked")
 	protected AbstractParentConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>[] getParents() {
-		return new AbstractParentConfigurableItem[] { new ExternalFlowItem() };
+		return new AbstractParentConfigurableItem[] { new FunctionNamespaceItem(), new ExternalFlowItem() };
 	}
 
 	@Override

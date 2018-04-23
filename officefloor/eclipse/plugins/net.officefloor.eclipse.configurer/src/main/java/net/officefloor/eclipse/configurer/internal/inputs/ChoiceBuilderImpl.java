@@ -98,6 +98,9 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 		// Display choices
 		FlowPane choicesVisual = new FlowPane();
 
+		// Obtain the initial value
+		Integer initialValue = context.getInputValue().getValue();
+
 		// Load the choices
 		ToggleGroup selections = new ToggleGroup();
 		for (int i = 0; i < this.choices.size(); i++) {
@@ -107,6 +110,11 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 			RadioButton selection = new RadioButton(choice.label);
 			selection.setToggleGroup(selections);
 			choicesVisual.getChildren().add(selection);
+
+			// Determine if initial selection
+			if ((initialValue != null) && (initialValue.equals(i))) {
+				selection.setSelected(true);
+			}
 
 			// Handle selecting the choice
 			int choiceIndex = i;

@@ -210,7 +210,7 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 */
 	public static class AdaptedConnectionImpl<R extends Model, O, S extends Model, C extends ConnectionModel, E extends Enum<E>>
 			extends AbstractAdaptedModel<R, O, C, E, AdaptedConnection<C>, AdaptedConnectionFactory<R, O, S, C, E>>
-			implements AdaptedConnection<C>, ModelActionContext<R, O, C, AdaptedConnection<C>> {
+			implements AdaptedConnection<C>, ModelActionContext<R, O, C> {
 
 		@Override
 		protected void init() {
@@ -236,11 +236,6 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		/*
 		 * ===================== ModelActionContext =======================
 		 */
-
-		@Override
-		public AdaptedConnection<C> getAdaptedModel() {
-			return this;
-		}
 
 		@Override
 		public void overlay(OverlayVisualFactory overlayVisualFactory) {

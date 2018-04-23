@@ -72,6 +72,18 @@ public interface ValueValidator<V> {
 		 *            Message.
 		 */
 		void setError(String message);
+
+		/**
+		 * <p>
+		 * Triggers reloading the value from the model for the particular
+		 * {@link Builder}.
+		 * <p>
+		 * This allows validation to update the model and reload values from the model.
+		 * 
+		 * @param builder
+		 *            {@link Builder} to identify the value to reload.
+		 */
+		void reload(Builder<?, ?, ?> builder);
 	}
 
 }

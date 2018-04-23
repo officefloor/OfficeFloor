@@ -32,13 +32,14 @@ import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
+import net.officefloor.model.Model;
 
 /**
  * {@link IContentPart} for the {@link ChildrenGroupImpl}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ChildrenGroupPart extends AbstractContentPart<Pane> {
+public class ChildrenGroupPart<R extends Model, O> extends AbstractContentPart<Pane> {
 
 	/**
 	 * {@link ListChangeListener} to refresh the children.

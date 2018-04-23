@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import com.google.inject.Injector;
 
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -271,6 +272,11 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 			return this.model;
 		}
 
+		@Override
+		public AdaptedErrorHandler getErrorHandler() {
+			return this.getFactory().getContentPartFactory().getErrorHandler();
+		}
+
 		/**
 		 * Obtains the {@link AbstractAdaptedFactory}.
 		 * 
@@ -323,6 +329,23 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 		 */
 		public ChangeExecutor getChangeExecutor() {
 			return this.factory.contentPartFactory.getChangeExecutor();
+		}
+
+		/**
+		 * Positions the model.
+		 * 
+		 * @param model
+		 *            {@link Model}.
+		 * @return Input {@link Model}.
+		 */
+		public M position(M model) {
+
+			// Obtain the parent
+			model.setX(this.model.getX());
+			model.setY(this.model.getY());
+
+			// Return the model
+			return model;
 		}
 
 		/**

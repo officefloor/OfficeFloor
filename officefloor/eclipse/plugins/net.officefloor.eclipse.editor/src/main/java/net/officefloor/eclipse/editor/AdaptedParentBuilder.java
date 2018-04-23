@@ -30,10 +30,10 @@ public interface AdaptedParentBuilder<R extends Model, O, M extends Model, E ext
 	/**
 	 * Configures creating the {@link Model}.
 	 * 
-	 * @param provideNewParentModel
+	 * @param provideParentAction
 	 *            {@link ParentModelProvider}.
 	 */
-	void create(ParentModelProvider<R, O, M> provideNewParentModel);
+	void create(ModelAction<R, O, M> provideParentAction);
 
 	/**
 	 * Configures an {@link ModelAction} for the parent {@link Model}.
@@ -43,6 +43,6 @@ public interface AdaptedParentBuilder<R extends Model, O, M extends Model, E ext
 	 * @param visualFactory
 	 *            {@link AdaptedActionVisualFactory}.
 	 */
-	void action(ModelAction<R, O, M, AdaptedParent<M>> action, AdaptedActionVisualFactory visualFactory);
+	void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory);
 
 }

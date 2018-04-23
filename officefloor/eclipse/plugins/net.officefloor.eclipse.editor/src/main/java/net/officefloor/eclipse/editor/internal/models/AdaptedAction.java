@@ -21,7 +21,6 @@ import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
-import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.model.Model;
@@ -36,12 +35,12 @@ public class AdaptedAction<R extends Model, O, M extends Model> {
 	/**
 	 * {@link ModelAction}.
 	 */
-	private final ModelAction<R, O, M, AdaptedParent<M>> action;
+	private final ModelAction<R, O, M> action;
 
 	/**
 	 * {@link ModelActionContext}.
 	 */
-	private final ModelActionContext<R, O, M, AdaptedParent<M>> actionContext;
+	private final ModelActionContext<R, O, M> actionContext;
 
 	/**
 	 * {@link AdaptedActionVisualFactory}.
@@ -65,9 +64,8 @@ public class AdaptedAction<R extends Model, O, M extends Model> {
 	 * @param errorHandler
 	 *            {@link AdaptedErrorHandler}.
 	 */
-	public AdaptedAction(ModelAction<R, O, M, AdaptedParent<M>> action,
-			ModelActionContext<R, O, M, AdaptedParent<M>> actionContext, AdaptedActionVisualFactory visualFactory,
-			AdaptedErrorHandler errorHandler) {
+	public AdaptedAction(ModelAction<R, O, M> action, ModelActionContext<R, O, M> actionContext,
+			AdaptedActionVisualFactory visualFactory, AdaptedErrorHandler errorHandler) {
 		this.action = action;
 		this.actionContext = actionContext;
 		this.visualFactory = visualFactory;

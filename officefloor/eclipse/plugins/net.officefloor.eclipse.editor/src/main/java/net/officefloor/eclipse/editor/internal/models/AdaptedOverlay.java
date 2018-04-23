@@ -20,6 +20,7 @@ package net.officefloor.eclipse.editor.internal.models;
 import org.eclipse.gef.geometry.planar.Point;
 
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.OverlayVisualContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
@@ -136,6 +137,11 @@ public class AdaptedOverlay extends AbstractModel implements AdaptedModel<Adapte
 	@Override
 	public AdaptedOverlay getModel() {
 		return this;
+	}
+
+	@Override
+	public AdaptedErrorHandler getErrorHandler() {
+		return this.contentPartFactory.getErrorHandler();
 	}
 
 }

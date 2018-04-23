@@ -25,7 +25,6 @@ import javax.net.ssl.SSLContext;
 
 import org.rapidoid.buffer.Buf;
 import org.rapidoid.config.Conf;
-import org.rapidoid.data.BufRange;
 import org.rapidoid.http.AbstractHttpServer;
 import org.rapidoid.http.HttpStatus;
 import org.rapidoid.http.impl.lowlevel.HttpIO;
@@ -218,14 +217,14 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 		HttpServerLocation serverLocation = this.context.getHttpServerLocation();
 
 		// Supply the method
-		Supplier<HttpMethod> methodSupplier = () -> {
-			if (data.isGet.value) {
-				return HttpMethod.GET;
-			} else {
-				String verb = data.verb.str(buf);
-				return HttpMethod.getHttpMethod(verb);
-			}
-		};
+		HttpMethod httpMethod;
+		if (data.isGet.value) {
+			httpMethod = HttpMethod.GET;
+		} else {
+			String verb = data.verb.str(buf);
+			httpMethod = HttpMethod.getHttpMethod(verb);
+		}
+		Supplier<HttpMethod> methodSupplier = () -> httpMethod;
 
 		// Supply the request URI
 		String uri = data.uri.str(buf);
@@ -246,44 +245,42 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 			break;
 		}
 
-		// Obtain the request headers
+		// Obtain the headers
+		final int NAME_INDEX = 0;
+		final int VALUE_INDEX = 1;
+		HTTP_PARSER.parseHeadersIntoKV(buf, data.headers, data.headersKV.reset(), null, data);
+		String[][] headers = new String[data.headersKV.count][2];
+		for (int i = 0; i < data.headersKV.count; i++) {
+			headers[i][NAME_INDEX] = data.headersKV.keys[i].str(buf);
+			headers[i][VALUE_INDEX] = data.headersKV.values[i].str(buf);
+		}
 		NonMaterialisedHttpHeaders requestHeaders = new NonMaterialisedHttpHeaders() {
-
-			private boolean isParsedHeaders = false;
 
 			@Override
 			public Iterator<NonMaterialisedHttpHeader> iterator() {
-
-				// Ensure parse out the header information
-				if (!this.isParsedHeaders) {
-					HTTP_PARSER.parseHeadersIntoKV(buf, data.headers, data.headersKV.reset(), null, data);
-					this.isParsedHeaders = true;
-				}
-
-				// Create the iterator over the headers
 				return new Iterator<NonMaterialisedHttpHeader>() {
 
 					private int nextHeader = 0;
 
 					@Override
 					public boolean hasNext() {
-						return data.headersKV.count > this.nextHeader;
+						return this.nextHeader < headers.length;
 					}
 
 					@Override
 					public NonMaterialisedHttpHeader next() {
-						BufRange nextName = data.headersKV.keys[this.nextHeader];
-						BufRange nextValue = data.headersKV.values[this.nextHeader++];
+						String name = headers[this.nextHeader][NAME_INDEX];
+						String value = headers[this.nextHeader++][VALUE_INDEX];
 						return new NonMaterialisedHttpHeader() {
 
 							@Override
 							public CharSequence getName() {
-								return nextName.str(buf);
+								return name;
 							}
 
 							@Override
 							public HttpHeader materialiseHttpHeader() {
-								return new SerialisableHttpHeader(nextName.str(buf), nextValue.str(buf));
+								return new SerialisableHttpHeader(name, value);
 							}
 						};
 					}
@@ -292,23 +289,25 @@ public class RapidoidHttpServerImplementation extends AbstractHttpServer
 
 			@Override
 			public int length() {
-				return data.headersKV.count;
+				return headers.length;
 			}
 		};
 
 		// Obtain the request entity content
 		ByteSequence requestEntity = ByteSequence.EMPTY;
 		if (data.body.length > 0) {
+			int bodyStart = data.body.start;
+			int bodyLength = data.body.length;
 			requestEntity = new ByteSequence() {
 
 				@Override
 				public byte byteAt(int index) {
-					return buf.get(data.body.start + index);
+					return buf.get(bodyStart + index);
 				}
 
 				@Override
 				public int length() {
-					return data.body.length;
+					return bodyLength;
 				}
 			};
 		}

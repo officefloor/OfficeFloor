@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.osgi;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -152,10 +154,18 @@ public class OfficeFloorOsgiBridge {
 		if (this.classLoader == null) {
 
 			// Obtain the class path for the project
-			IClasspathEntry[] entries = this.javaProject.getResolvedClasspath(true);
-			URL[] urls = new URL[entries.length];
-			for (int i = 0; i < entries.length; i++) {
-				urls[i] = entries[i].getPath().toFile().toURI().toURL();
+			String[] classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(this.javaProject);
+			URL[] urls = new URL[classPathEntries.length];
+			for (int i = 0; i < classPathEntries.length; i++) {
+				String path = classPathEntries[i];
+				File file = new File(path);
+				if (file.exists()) {
+					if (file.isDirectory()) {
+						urls[i] = new URL("file", null, path + "/");
+					} else {
+						urls[i] = new URL("file", null, path);
+					}
+				}
 			}
 
 			// Create the class loader
@@ -164,6 +174,22 @@ public class OfficeFloorOsgiBridge {
 
 		// Return the class loader
 		return this.classLoader;
+	}
+
+	/**
+	 * Loads the {@link Class}.
+	 * 
+	 * @param className
+	 *            Name of the {@link Class}.
+	 * @param superType
+	 *            Super type of the {@link Class}.
+	 * @return {@link Class}.
+	 * @throws Exception
+	 *             If {@link Class} not found or fails to load the {@link Class}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Class<? extends T> loadClass(String className, Class<T> superType) throws Exception {
+		return (Class<? extends T>) this.getClassLoader().loadClass(className);
 	}
 
 	/**

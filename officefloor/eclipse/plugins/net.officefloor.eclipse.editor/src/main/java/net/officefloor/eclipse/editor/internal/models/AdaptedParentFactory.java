@@ -42,8 +42,6 @@ import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
-import net.officefloor.eclipse.editor.ParentModelProvider;
-import net.officefloor.eclipse.editor.ParentModelProviderContext;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
@@ -61,9 +59,9 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	private final AdaptedErrorHandler errorHandler;
 
 	/**
-	 * {@link ParentModelProvider}.
+	 * {@link ModelAction} to provide the parent.
 	 */
-	private ParentModelProvider<R, O, M> parentModelProvider = null;
+	private ModelAction<R, O, M> parentModelProvider = null;
 
 	/**
 	 * {@link ModelToAction} instances.
@@ -80,7 +78,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 * @param contentFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AdaptedParentFactory(M modelPrototype, AdaptedModelVisualFactory<M, AdaptedParent<M>> viewFactory,
+	public AdaptedParentFactory(M modelPrototype, AdaptedModelVisualFactory<M> viewFactory,
 			OfficeFloorContentPartFactory<R, O> contentFactory) {
 		super(modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 		this.errorHandler = contentFactory.getErrorHandler();
@@ -111,12 +109,12 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 */
 
 	@Override
-	public void create(ParentModelProvider<R, O, M> parentModelProvider) {
+	public void create(ModelAction<R, O, M> parentModelProvider) {
 		this.parentModelProvider = parentModelProvider;
 	}
 
 	@Override
-	public void action(ModelAction<R, O, M, AdaptedParent<M>> action, AdaptedActionVisualFactory visualFactory) {
+	public void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
 		this.modelToActions.add(new ModelToAction<>(action, visualFactory));
 	}
 
@@ -128,7 +126,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		/**
 		 * {@link ModelAction}.
 		 */
-		private final ModelAction<R, O, M, AdaptedParent<M>> action;
+		private final ModelAction<R, O, M> action;
 
 		/**
 		 * {@link AdaptedActionVisualFactory}.
@@ -143,7 +141,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		 * @param visualFactory
 		 *            {@link AdaptedActionVisualFactory}.
 		 */
-		private ModelToAction(ModelAction<R, O, M, AdaptedParent<M>> action, AdaptedActionVisualFactory visualFactory) {
+		private ModelToAction(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
 			this.action = action;
 			this.visualFactory = visualFactory;
 		}
@@ -154,7 +152,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 */
 	public static class AdaptedParentImpl<R extends Model, O, M extends Model, E extends Enum<E>>
 			extends AdaptedChildImpl<R, O, M, E, AdaptedParent<M>>
-			implements AdaptedParent<M>, AdaptedPrototype<M>, ModelActionContext<R, O, M, AdaptedParent<M>> {
+			implements AdaptedParent<M>, AdaptedPrototype<M> {
 
 		/**
 		 * {@link AdaptedActions}.
@@ -219,8 +217,8 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 		@Override
 		public void newAdaptedParent(Point location) {
-			this.getParentFactory().errorHandler.isError(() -> this.getParentFactory().parentModelProvider
-					.provideNewParentModel(new ParentModelProviderContext<R, O, M>() {
+			this.getParentFactory().errorHandler.isError(
+					() -> this.getParentFactory().parentModelProvider.execute(new ModelActionContext<R, O, M>() {
 
 						@Override
 						public R getRootModel() {
@@ -235,11 +233,6 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 						@Override
 						public M getModel() {
 							return AdaptedParentImpl.this.getModel();
-						}
-
-						@Override
-						public AdaptedParent<M> getAdaptedModel() {
-							return AdaptedParentImpl.this;
 						}
 
 						@Override
@@ -260,42 +253,12 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 						}
 
 						@Override
-						public int getX() {
-							return (int) location.x;
-						}
-
-						@Override
-						public int getY() {
-							return (int) location.y;
-						}
-
-						@Override
 						public M position(M model) {
-							model.setX(this.getX());
-							model.setY(this.getY());
+							model.setX((int) location.x);
+							model.setY((int) location.y);
 							return model;
 						}
 					}));
-		}
-
-		/*
-		 * ================= ModelActionContext ================
-		 */
-
-		@Override
-		public AdaptedParent<M> getAdaptedModel() {
-			return this;
-		}
-
-		@Override
-		public void overlay(OverlayVisualFactory overlayVisualFactory) {
-
-			// Obtain the location of this parent
-			Model model = this.getAdaptedModel().getModel();
-			Point location = new Point(model.getX(), model.getY());
-
-			// Add the overlay
-			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
 		}
 	}
 

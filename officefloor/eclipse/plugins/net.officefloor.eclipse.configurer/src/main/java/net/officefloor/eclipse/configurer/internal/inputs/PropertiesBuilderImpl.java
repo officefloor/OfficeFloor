@@ -26,6 +26,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.configurer.Builder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.PropertiesBuilder;
 import net.officefloor.eclipse.configurer.ValueLoader;
@@ -116,8 +117,10 @@ public class PropertiesBuilderImpl<M> implements PropertiesBuilder<M>, ValueRend
 
 			// Translate properties into property items
 			List<PropertyItem> items = new ArrayList<>();
-			for (Property property : propertyList) {
-				items.add(new PropertyItem(property.getName(), property.getValue()));
+			if (propertyList != null) {
+				for (Property property : propertyList) {
+					items.add(new PropertyItem(property.getName(), property.getValue()));
+				}
 			}
 
 			// Return the property items
@@ -151,6 +154,11 @@ public class PropertiesBuilderImpl<M> implements PropertiesBuilder<M>, ValueRend
 				@Override
 				public ReadOnlyProperty<PropertyList> getValue() {
 					return propertiesProperty;
+				}
+
+				@Override
+				public void reload(Builder<?, ?, ?> builder) {
+					context.reload(builder);
 				}
 			});
 		});

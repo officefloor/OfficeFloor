@@ -26,13 +26,14 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
 
 /**
  * Context for the {@link AdaptedModelVisualFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedModelVisualFactoryContext {
+public interface AdaptedModelVisualFactoryContext<M extends Model> {
 
 	/**
 	 * Convenience method to add the {@link AdaptedModel} {@link Label} to the
@@ -94,5 +95,16 @@ public interface AdaptedModelVisualFactoryContext {
 	 */
 	@SuppressWarnings("rawtypes")
 	Node connector(Class... connectionClasses);
+
+	/**
+	 * <p>
+	 * Allows {@link ModelAction} instances to be actioned via visual.
+	 * <p>
+	 * This allows custom visuals (e.g. button) tor trigger an action.
+	 * 
+	 * @param action
+	 *            {@link ModelAction} to be actioned.
+	 */
+	<R extends Model, O> void action(ModelAction<R, O, M> action);
 
 }
