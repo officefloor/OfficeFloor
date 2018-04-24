@@ -38,6 +38,7 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionNamespaceModel.FunctionNamespaceEvent;
 import net.officefloor.model.section.ManagedFunctionModel;
@@ -304,6 +305,10 @@ public class FunctionNamespaceItem extends
 	@Override
 	protected void children(List<IdeChildrenGroup> children) {
 		children.add(new IdeChildrenGroup(new ManagedFunctionItem()));
+	}
+
+	@Override
+	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
 	}
 
 }

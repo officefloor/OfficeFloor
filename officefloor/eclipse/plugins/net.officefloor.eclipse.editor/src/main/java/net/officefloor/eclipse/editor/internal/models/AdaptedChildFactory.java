@@ -249,6 +249,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 
 		@Override
 		public int hashCode() {
+			// Hash key matches regardless of source/target order
 			return this.sourceModelClass.hashCode() + this.targetModelClass.hashCode();
 		}
 

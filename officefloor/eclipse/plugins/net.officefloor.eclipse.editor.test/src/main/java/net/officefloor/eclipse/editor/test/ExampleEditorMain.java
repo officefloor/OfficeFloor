@@ -33,9 +33,14 @@ import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel.DeployedOfficeInputEvent;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeModel.DeployedOfficeEvent;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel.OfficeFloorManagedObjectSourceFlowEvent;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel.OfficeFloorManagedObjectSourceInputDependencyEvent;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -182,10 +187,19 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 						}
 						System.out.println();
 					}, DefaultImages.ADD));
+					context.addNode(container,
+							context.connector(OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class));
 					return container;
 				});
 		mosFlows.label((m) -> m.getOfficeFloorManagedObjectSourceFlowName(),
 				OfficeFloorManagedObjectSourceFlowEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW_NAME);
+		mosFlows.connectOne(OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+				(s) -> s.getDeployedOfficeInput(), (c) -> c.getOfficeFloorManagedObjectSoruceFlow(),
+				OfficeFloorManagedObjectSourceFlowEvent.CHANGE_DEPLOYED_OFFICE_INPUT)
+				.toMany(DeployedOfficeInputModel.class, (t) -> t.getOfficeFloorManagedObjectSourceFlows(),
+						(c) -> c.getDeployedOfficeInput(),
+						DeployedOfficeInputEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW,
+						DeployedOfficeInputEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW);
 
 		// Managed Object Source Teams
 		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceTeamModel, OfficeFloorManagedObjectSourceTeamEvent> mosTeams = mos
@@ -203,15 +217,14 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM_NAME);
 		mosTeams.connectOne(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
 				(s) -> s.getOfficeFloorTeam(), (c) -> c.getOfficeFloorManagedObjectSourceTeam(),
-				OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_TEAM).toMany(OfficeFloorTeamModel.class,
-						(t) -> t.getOfficeFloorManagedObjectSourceTeams(), (c) -> c.getOfficeFloorTeam(),
-						(s, t, ctx) -> ctx.getChangeExecutor().execute(
-								ctx.getOperations().linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(s, t)),
-						(ctx) -> ctx.getChangeExecutor()
-								.execute(ctx.getOperations()
-										.removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(ctx.getModel())),
-						OfficeFloorTeamEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM,
-						OfficeFloorTeamEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM);
+				OfficeFloorManagedObjectSourceTeamEvent.CHANGE_OFFICE_FLOOR_TEAM)
+				.toMany(OfficeFloorTeamModel.class, (t) -> t.getOfficeFloorManagedObjectSourceTeams(),
+						(c) -> c.getOfficeFloorTeam(), OfficeFloorTeamEvent.ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM,
+						OfficeFloorTeamEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM)
+				.create((s, t, ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(s, t)))
+				.delete((ctx) -> ctx.getChangeExecutor().execute(
+						ctx.getOperations().removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(ctx.getModel())));
 
 		// Team
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorTeamModel, OfficeFloorTeamEvent> team = root
@@ -227,6 +240,31 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				(p) -> p.getRootModel().addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", null))));
 		team.action((ctx) -> ctx.getChangeExecutor().execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
 				DefaultImages.DELETE);
+
+		// Offices
+		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, DeployedOfficeEvent> office = root
+				.parent(new DeployedOfficeModel("Office", null, null), (r) -> r.getDeployedOffices(),
+						(model, context) -> {
+							VBox container = new VBox();
+							context.label(container);
+							context.addNode(container, context.childGroup("inputs", new VBox()));
+							return container;
+						}, OfficeFloorEvent.ADD_DEPLOYED_OFFICE, OfficeFloorEvent.REMOVE_DEPLOYED_OFFICE);
+		office.label((m) -> m.getDeployedOfficeName(), DeployedOfficeEvent.CHANGE_DEPLOYED_OFFICE_NAME);
+
+		// Office Input
+		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeInputModel, DeployedOfficeInputEvent> officeInput = office
+				.children("inputs", (m) -> m.getDeployedOfficeInputs(), DeployedOfficeEvent.ADD_DEPLOYED_OFFICE_INPUT,
+						DeployedOfficeEvent.REMOVE_DEPLOYED_OFFICE_INPUT)
+				.addChild(new DeployedOfficeInputModel(), (model, context) -> {
+					HBox container = new HBox();
+					context.addNode(container,
+							context.connector(OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class));
+					context.label(container);
+					return container;
+				});
+		officeInput.label((m) -> m.getSectionName() + "." + m.getSectionInputName(),
+				DeployedOfficeInputEvent.CHANGE_SECTION_NAME, DeployedOfficeInputEvent.CHANGE_SECTION_INPUT_NAME);
 	}
 
 	@Override
@@ -241,8 +279,9 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		root.addOfficeFloorManagedObjectSource(mos);
 		mos.addOfficeFloorManagedObjectSourceInputDependency(
 				new OfficeFloorManagedObjectSourceInputDependencyModel("dependency", "net.example.Dependency"));
-		mos.addOfficeFloorManagedObjectSourceFlow(
-				new OfficeFloorManagedObjectSourceFlowModel("flow", "net.example.Flow"));
+		OfficeFloorManagedObjectSourceFlowModel mosFlow = new OfficeFloorManagedObjectSourceFlowModel("flow",
+				"net.example.Flow");
+		mos.addOfficeFloorManagedObjectSourceFlow(mosFlow);
 		OfficeFloorManagedObjectSourceTeamModel mosTeam = new OfficeFloorManagedObjectSourceTeamModel("Team");
 		mos.addOfficeFloorManagedObjectSourceTeam(mosTeam);
 		mos.addOfficeFloorManagedObjectSourceTeam(new OfficeFloorManagedObjectSourceTeamModel("Another"));
@@ -254,10 +293,23 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		// Another Team
 		root.addOfficeFloorTeam(new OfficeFloorTeamModel("Team", null, 100, 150));
 
-		// Connection
+		// Connect team
 		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(
 				team.getOfficeFloorTeamName(), mosTeam, team);
 		mosTeamToTeam.connect();
+
+		// Office
+		DeployedOfficeModel office = new DeployedOfficeModel("Office", "net.example.OfficeSource", "location", 500,
+				100);
+		root.addDeployedOffice(office);
+		DeployedOfficeInputModel officeInput = new DeployedOfficeInputModel("Section", "Input", null);
+		office.addDeployedOfficeInput(officeInput);
+
+		// Connect flow
+		OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel mosFlowToInput = new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel(
+				office.getDeployedOfficeName(), officeInput.getSectionName(), officeInput.getSectionInputName(),
+				mosFlow, officeInput);
+		mosFlowToInput.connect();
 
 		// Return the OfficeFloor model
 		return root;

@@ -19,13 +19,16 @@ package net.officefloor.eclipse.section;
 
 import java.util.List;
 
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionModel.FunctionEvent;
+import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
@@ -77,7 +80,9 @@ public class FunctionItem extends
 	@Override
 	protected Pane visual(FunctionModel model, AdaptedModelVisualFactoryContext<FunctionModel> context) {
 		VBox container = new VBox();
-		context.label(container);
+		HBox heading = context.addNode(container, new HBox());
+		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class));
+		context.label(heading);
 		return container;
 	}
 
@@ -102,6 +107,10 @@ public class FunctionItem extends
 
 	@Override
 	protected void children(List<IdeChildrenGroup> childGroups) {
+	}
+
+	@Override
+	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
 	}
 
 }

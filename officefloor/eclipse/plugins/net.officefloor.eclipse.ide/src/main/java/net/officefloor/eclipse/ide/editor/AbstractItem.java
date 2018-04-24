@@ -32,12 +32,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -185,7 +187,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 *            Parent {@link Model}.
 		 * @return Extract {@link Model} instances.
 		 */
-		public List<M> extract(P parentModel) {
+		List<M> extract(P parentModel) {
 			return this.extractor.apply(parentModel);
 		}
 
@@ -194,7 +196,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * 
 		 * @return Extract change events.
 		 */
-		public PE[] getExtractChangeEvents() {
+		PE[] getExtractChangeEvents() {
 			return this.extractChangeEvents;
 		}
 	}
@@ -254,7 +256,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 *            {@link Model}.
 		 * @return Label for the {@link Model}.
 		 */
-		public String getLabel(M model) {
+		String getLabel(M model) {
 			return this.labeller.apply(model);
 		}
 
@@ -263,7 +265,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * 
 		 * @return Change events for the label.
 		 */
-		public E[] getLabelChangeEvents() {
+		E[] getLabelChangeEvents() {
 			return this.labelChangeEvents;
 		}
 	}
@@ -278,10 +280,10 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Further adapt the {@link AdaptedChildBuilder}.
 	 * 
-	 * @param parent
+	 * @param builder
 	 *            {@link AdaptedChildBuilder}.
 	 */
-	protected void furtherAdapt(AdaptedChildBuilder<R, O, M, E> parent) {
+	protected void furtherAdapt(AdaptedChildBuilder<R, O, M, E> builder) {
 		// Default implementation of nothing further
 	}
 
@@ -296,8 +298,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		private final String name;
 
 		/**
-		 * {@link AbstractItem} instances for the
-		 * {@link ChildrenGroup}.
+		 * {@link AbstractItem} instances for the {@link ChildrenGroup}.
 		 */
 		private final AbstractItem<R, O, M, E, ?, ?>[] children;
 
@@ -318,7 +319,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * 
 		 * @return Name of the {@link ChildrenGroup}.
 		 */
-		public String getChildrenGroupName() {
+		String getChildrenGroupName() {
 			return this.name;
 		}
 
@@ -348,7 +349,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * @return Change events.
 		 */
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public Enum<?>[] changeEvents() {
+		Enum<?>[] changeEvents() {
 			if (this.children.length == 1) {
 				// Just the one child, so return from child
 				return this.children[0].extract().getExtractChangeEvents();
@@ -363,22 +364,19 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		}
 
 		/**
-		 * Obtains the {@link AbstractItem} instances for the
-		 * {@link ChildrenGroup}.
+		 * Obtains the {@link AbstractItem} instances for the {@link ChildrenGroup}.
 		 * 
-		 * @return {@link AbstractItem} instances for the
-		 *         {@link ChildrenGroup}.
+		 * @return {@link AbstractItem} instances for the {@link ChildrenGroup}.
 		 */
-		public AbstractItem<R, O, M, E, ?, ?>[] getChildren() {
+		AbstractItem<R, O, M, E, ?, ?>[] getChildren() {
 			return this.children;
 		}
-
 	}
 
 	/**
-	 * Obtains the {@link AbstractItem} instances.
+	 * Obtains the {@link IdeChildrenGroup} instances.
 	 * 
-	 * @return {@link AbstractItem} instances.
+	 * @return {@link IdeChildrenGroup} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	public IdeChildrenGroup[] getChildrenGroups() {
@@ -394,6 +392,270 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 *            {@link IdeChildrenGroup} instances.
 	 */
 	protected abstract void children(List<IdeChildrenGroup> childGroups);
+
+	/**
+	 * IDE {@link AdaptedConnectionBuilder}.
+	 */
+	public class IdeConnection<C extends ConnectionModel> {
+
+		/**
+		 * {@link Class} of the {@link ConnectionModel}.
+		 */
+		private final Class<C> connectionClass;
+
+		/**
+		 * Source to many {@link ConnectionModel} instances.
+		 */
+		private Function<M, List<C>> sourceToMany = null;
+
+		/**
+		 * Source to one {@link ConnectionModel} instances.
+		 */
+		private Function<M, C> sourceToOne = null;
+
+		/**
+		 * {@link ConnectionModel} to source instance.
+		 */
+		private Function<C, M> connToSource;
+
+		/**
+		 * Source change events.
+		 */
+		private E[] sourceChangeEvents;
+
+		/**
+		 * Target.
+		 */
+		private IdeConnectionTarget<C, ? extends Model, ? extends Enum<?>> target;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param connectionClass
+		 *            {@link Class} of the {@link ConnectionModel}.
+		 */
+		public IdeConnection(Class<C> connectionClass) {
+			this.connectionClass = connectionClass;
+		}
+
+		/**
+		 * Connect to many targets.
+		 * 
+		 * @param sourceToMany
+		 *            Obtains the multiple {@link ConnectionModel} instances from the
+		 *            source.
+		 * @param connToSource
+		 *            Obtains the source from a particular {@link ConnectionModel}.
+		 * @param sourceChangeEvents
+		 *            Source change events.
+		 * @return <code>this</code>.
+		 */
+		@SafeVarargs
+		public final IdeConnection<C> connectMany(Function<M, List<C>> sourceToMany, Function<C, M> connToSource,
+				E... sourceChangeEvents) {
+			this.sourceToMany = sourceToMany;
+			this.connToSource = connToSource;
+			this.sourceChangeEvents = sourceChangeEvents;
+			return this;
+		}
+
+		/**
+		 * Connect to one target.
+		 * 
+		 * @param sourceToOne
+		 *            Obtains the single {@link ConnectionModel} from the source.
+		 * @param connToSource
+		 *            Obtains the source from the {@link ConnectionModel}.
+		 * @param sourceChangeEvents
+		 *            Source change events.
+		 * @return <code>this</code>.
+		 */
+		@SafeVarargs
+		public final IdeConnection<C> connectOne(Function<M, C> sourceToOne, Function<C, M> connToSource,
+				E... sourceChangeEvents) {
+			this.sourceToOne = sourceToOne;
+			this.connToSource = connToSource;
+			this.sourceChangeEvents = sourceChangeEvents;
+			return this;
+		}
+
+		/**
+		 * Connects the target.
+		 * 
+		 * @param targetClass
+		 *            Target {@link Class}.
+		 * @return {@link IdeConnectionTarget}.
+		 */
+		@SuppressWarnings("unchecked")
+		public <T extends Model, TE extends Enum<TE>> IdeConnectionTarget<C, T, TE> to(Class<T> targetClass) {
+			this.target = new IdeConnectionTarget<>(this, targetClass);
+			return (IdeConnectionTarget<C, T, TE>) this.target;
+		}
+
+		/**
+		 * Loads the connection to the {@link AdaptedChildBuilder}.
+		 * 
+		 * @param builder
+		 *            {@link AdaptedChildBuilder} to be configured with the
+		 *            {@link ConnectionModel}.
+		 */
+		void loadConnection(AdaptedChildBuilder<R, O, M, E> builder) {
+
+			// Initiate the connection
+			AdaptedConnectionBuilder<R, O, M, C, E> connection;
+			if (this.sourceToMany != null) {
+				connection = builder.connectMany(this.connectionClass, this.sourceToMany, this.connToSource,
+						this.sourceChangeEvents);
+			} else if (this.sourceToOne != null) {
+				connection = builder.connectOne(this.connectionClass, this.sourceToOne, this.connToSource,
+						this.sourceChangeEvents);
+			} else {
+				throw new IllegalStateException(
+						"Must specify connection details for connection " + this.connectionClass.getName());
+			}
+
+			// Complete connection
+			if (this.target != null) {
+				this.target.loadConnection(this.connectionClass, connection);
+			} else {
+				throw new IllegalStateException(
+						"Must specify connection target for connection " + this.connectionClass.getName());
+			}
+		}
+	}
+
+	/**
+	 * IDE target {@link AdaptedConnectionBuilder}.
+	 */
+	public class IdeConnectionTarget<C extends ConnectionModel, T extends Model, TE extends Enum<TE>> {
+
+		/**
+		 * {@link IdeConnection}.
+		 */
+		private final IdeConnection<C> ideConnection;
+
+		/**
+		 * Target {@link Class}.
+		 */
+		private Class<T> targetClass;
+
+		/**
+		 * Target to many {@link ConnectionModel} instances.
+		 */
+		private Function<T, List<C>> targetToMany = null;
+
+		/**
+		 * Target to one {@link ConnectionModel} instances.
+		 */
+		private Function<T, C> targetToOne = null;
+
+		/**
+		 * {@link ConnectionModel} to source instance.
+		 */
+		private Function<C, T> connToTarget;
+
+		/**
+		 * Target change events.
+		 */
+		private TE[] targetChangeEvents;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param ideConnection
+		 *            {@link IdeConnection}.
+		 * @param targetClass
+		 *            Target {@link Class}.
+		 */
+		private IdeConnectionTarget(IdeConnection<C> ideConnection, Class<T> targetClass) {
+			this.targetClass = targetClass;
+			this.ideConnection = ideConnection;
+		}
+
+		/**
+		 * Connect to many sources.
+		 * 
+		 * @param targetToMany
+		 *            Obtains the multiple {@link ConnectionModel} instances from the
+		 *            target.
+		 * @param connToTarget
+		 *            Obtains the target from a particular {@link ConnectionModel}.
+		 * @param targetChangeEvents
+		 *            Target change events.
+		 * @return <code>this</code>.
+		 */
+		@SafeVarargs
+		@SuppressWarnings("unchecked")
+		public final IdeConnection<C> many(Function<T, List<C>> targetToMany, Function<C, T> connToTarget,
+				Enum<?>... targetChangeEvents) {
+			this.targetToMany = targetToMany;
+			this.connToTarget = connToTarget;
+			this.targetChangeEvents = (TE[]) targetChangeEvents;
+			return this.ideConnection;
+		}
+
+		/**
+		 * Connect to one target.
+		 * 
+		 * @param targetToOne
+		 *            Obtains the single {@link ConnectionModel} from the target.
+		 * @param connToTarget
+		 *            Obtains the target from the {@link ConnectionModel}.
+		 * @param targetChangeEvents
+		 *            Target change events.
+		 * @return <code>this</code>.
+		 */
+		@SafeVarargs
+		@SuppressWarnings("unchecked")
+		public final IdeConnection<C> one(Function<T, C> targetToOne, Function<C, T> connToTarget,
+				Enum<?>... targetChangeEvents) {
+			this.targetToOne = targetToOne;
+			this.connToTarget = connToTarget;
+			this.targetChangeEvents = (TE[]) targetChangeEvents;
+			return this.ideConnection;
+		}
+
+		/**
+		 * Loads the target connection details to the {@link AdaptedConnectionBuilder}.
+		 * 
+		 * @param connectionClass
+		 *            {@link ConnectionModel} {@link Class}.
+		 * @param connection
+		 *            {@link AdaptedConnectionBuilder}.
+		 */
+		private void loadConnection(Class<C> connectionClass, AdaptedConnectionBuilder<R, O, M, C, E> connection) {
+
+			// Complete the connection
+			if (this.targetToMany != null) {
+				connection.toMany(this.targetClass, this.targetToMany, this.connToTarget, this.targetChangeEvents);
+			} else if (this.targetToOne != null) {
+				connection.toOne(this.targetClass, this.targetToOne, this.connToTarget, this.targetChangeEvents);
+			} else {
+				throw new IllegalStateException(
+						"Must specify connection target details for connection " + connectionClass.getName());
+			}
+		}
+	}
+
+	/**
+	 * Obtains the {@link IdeConnection} instances.
+	 * 
+	 * @return {@link IdeConnection} instances.
+	 */
+	@SuppressWarnings("unchecked")
+	public IdeConnection<? extends ConnectionModel>[] getConnections() {
+		List<IdeConnection<? extends ConnectionModel>> connections = new LinkedList<>();
+		this.connections(connections);
+		return connections.toArray(new AbstractItem.IdeConnection[connections.size()]);
+	}
+
+	/**
+	 * Loads the {@link IdeConnection} instances.
+	 * 
+	 * @param childGroups
+	 *            {@link IdeConnection} instances.
+	 */
+	protected abstract void connections(List<IdeConnection<? extends ConnectionModel>> connections);
 
 	/**
 	 * Creates the {@link AdaptedChildBuilder}.

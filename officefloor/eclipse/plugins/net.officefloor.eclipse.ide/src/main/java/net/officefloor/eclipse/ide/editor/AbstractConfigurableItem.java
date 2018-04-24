@@ -227,7 +227,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 
 					// Prepare the parent
 					Pane overlay = visual.getOverlayParent();
-					overlay.setMinHeight(200);
+					overlay.setPrefWidth(500);
+					overlay.setPrefHeight(400);
 					overlay.applyCss();
 
 					// Create the configurer

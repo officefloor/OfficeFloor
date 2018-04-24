@@ -69,6 +69,7 @@ import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -398,6 +399,12 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	private static void loadChildren(AbstractItem parent, AdaptedChildBuilder parentBuilder,
 			ConfigurableContext configurableContext) {
 
+		// Load the connections
+		for (AbstractItem<?, ?, ?, ?, ?, ?>.IdeConnection<? extends ConnectionModel> connection : parent
+				.getConnections()) {
+			connection.loadConnection(parentBuilder);
+		}
+
 		// Create the children groups
 		for (IdeChildrenGroup ideChildrenGroup : parent.getChildrenGroups()) {
 
@@ -414,7 +421,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				// Build the child
 				AdaptedChildBuilder childBuilder = child.createChild(childrenGroup);
 
-				// Load the grand children
+				// Load the grand children (and connections)
 				loadChildren(child, childBuilder, configurableContext);
 			}
 		}

@@ -41,18 +41,14 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 	 * @param getTarget
 	 *            {@link Function} to extract the target {@link Model} from the
 	 *            {@link ConnectionModel}.
-	 * @param createConnection
-	 *            {@link ConnectionFactory}.
-	 * @param removeConnection
-	 *            {@link Function} to remove the {@link ConnectionModel}.
 	 * @param targetChangeEvents
 	 *            {@link Enum} events on the target {@link Model} indicating change
 	 *            in {@link ConnectionModel}.
+	 * @return <code>this</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	<T extends Model, TE extends Enum<TE>> void toOne(Class<T> targetModel, Function<T, C> getConnection,
-			Function<C, T> getTarget, ConnectionFactory<R, O, S, C, T> createConnection,
-			ConnectionRemover<R, O, C> removeConnection, TE... targetChangeEvents);
+	<T extends Model, TE extends Enum<TE>> AdaptedConnectionManagementBuilder<R, O, S, C, T> toOne(Class<T> targetModel,
+			Function<T, C> getConnection, Function<C, T> getTarget, TE... targetChangeEvents);
 
 	/**
 	 * Provides linking to the target {@link ConnectionModel}.
@@ -65,51 +61,14 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 	 * @param getTarget
 	 *            {@link Function} to extract the target {@link Model} from the
 	 *            {@link ConnectionModel}.
-	 * @param createConnection
-	 *            {@link ConnectionFactory}.
-	 * @param removeConnection
-	 *            {@link Function} to remove the {@link ConnectionModel}.
 	 * @param targetChangeEvents
 	 *            {@link Enum} events on the target {@link Model} indicating change
 	 *            in {@link ConnectionModel}.
+	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	<T extends Model, TE extends Enum<TE>> void toMany(Class<T> targetModel, Function<T, List<C>> getConnections,
-			Function<C, T> getTarget, ConnectionFactory<R, O, S, C, T> createConnection,
-			ConnectionRemover<R, O, C> removeConnection, TE... targetChangeEvents);
-
-	/**
-	 * {@link Function} interface to create a {@link ConnectionModel}.
-	 */
-	public static interface ConnectionFactory<R extends Model, O, S extends Model, C extends ConnectionModel, T extends Model> {
-
-		/**
-		 * Adds a {@link ConnectionModel}.
-		 * 
-		 * @param source
-		 *            Source {@link Model}.
-		 * @param target
-		 *            Target {@link Model}.
-		 * @throws Exception
-		 *             If failure in adding the {@link ConnectionModel}.
-		 */
-		void addConnection(S source, T target, ModelActionContext<R, O, C> context) throws Exception;
-	}
-
-	/**
-	 * {@link Function} interface to remove a {@link ConnectionModel}.
-	 */
-	public static interface ConnectionRemover<R extends Model, O, C extends ConnectionModel> {
-
-		/**
-		 * Removes the {@link ConnectionModel}.
-		 * 
-		 * @param context
-		 *            {@link ModelActionContext}.
-		 * @throws Exception
-		 *             If failure in removing the {@link ConnectionModel}.
-		 */
-		void removeConnection(ModelActionContext<R, O, C> context) throws Exception;
-	}
+	<T extends Model, TE extends Enum<TE>> AdaptedConnectionManagementBuilder<R, O, S, C, T> toMany(
+			Class<T> targetModel, Function<T, List<C>> getConnections, Function<C, T> getTarget,
+			TE... targetChangeEvents);
 
 }

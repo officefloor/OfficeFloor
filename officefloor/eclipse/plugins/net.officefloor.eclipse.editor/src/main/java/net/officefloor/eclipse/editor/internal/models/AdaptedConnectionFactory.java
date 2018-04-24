@@ -28,6 +28,7 @@ import com.google.inject.Injector;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.ModelActionContext;
@@ -43,7 +44,7 @@ import net.officefloor.model.Model;
  */
 public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C extends ConnectionModel, E extends Enum<E>>
 		extends AbstractAdaptedFactory<R, O, C, E, AdaptedConnection<C>>
-		implements AdaptedConnectionBuilder<R, O, S, C, E> {
+		implements AdaptedConnectionBuilder<R, O, S, C, E>, AdaptedConnectionManagementBuilder<R, O, S, C, Model> {
 
 	/**
 	 * {@link Class} of the source {@link Model}.
@@ -178,30 +179,45 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 
 	@Override
 	@SafeVarargs
-	public final <T extends Model, TE extends Enum<TE>> void toOne(Class<T> targetModel, Function<T, C> getConnection,
-			Function<C, T> getTarget, ConnectionFactory<R, O, S, C, T> createConnection,
-			ConnectionRemover<R, O, C> removeConnection, TE... targetChangeEvents) {
-		this.toMany(targetModel, (model) -> {
+	public final <T extends Model, TE extends Enum<TE>> AdaptedConnectionManagementBuilder<R, O, S, C, T> toOne(
+			Class<T> targetModel, Function<T, C> getConnection, Function<C, T> getTarget, TE... targetChangeEvents) {
+		return this.toMany(targetModel, (model) -> {
 			C connection = getConnection.apply(model);
 			if (connection == null) {
 				return Collections.emptyList();
 			} else {
 				return Arrays.asList(connection);
 			}
-		}, getTarget, createConnection, removeConnection, targetChangeEvents);
+		}, getTarget, targetChangeEvents);
 	}
 
 	@Override
 	@SafeVarargs
-	public final <T extends Model, TE extends Enum<TE>> void toMany(Class<T> targetModel,
-			Function<T, List<C>> getConnections, Function<C, T> getTarget,
-			ConnectionFactory<R, O, S, C, T> createConnection, ConnectionRemover<R, O, C> removeConnection,
+	@SuppressWarnings("unchecked")
+	public final <T extends Model, TE extends Enum<TE>> AdaptedConnectionManagementBuilder<R, O, S, C, T> toMany(
+			Class<T> targetModel, Function<T, List<C>> getConnections, Function<C, T> getTarget,
 			TE... targetChangeEvents) {
 		this.targetModelClass = targetModel;
 		this.getTarget = getTarget;
 		this.targetConnector = new ModelToConnection<R, O, T, TE, C>(getConnections, targetChangeEvents, this);
+		return (AdaptedConnectionManagementBuilder<R, O, S, C, T>) this;
+	}
+
+	/*
+	 * ================= AdaptedConnectionManagementBuilder ===============
+	 */
+
+	@Override
+	public AdaptedConnectionManagementBuilder<R, O, S, C, Model> create(
+			ConnectionFactory<R, O, S, C, Model> createConnection) {
 		this.createConnection = createConnection;
+		return this;
+	}
+
+	@Override
+	public AdaptedConnectionManagementBuilder<R, O, S, C, Model> delete(ConnectionRemover<R, O, C> removeConnection) {
 		this.removeConnection = removeConnection;
+		return this;
 	}
 
 	/**

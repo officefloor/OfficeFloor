@@ -24,6 +24,7 @@ import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
 import net.officefloor.model.section.SectionChanges;
@@ -115,6 +116,10 @@ public class ExternalFlowItem extends
 
 	@Override
 	protected void children(List<IdeChildrenGroup> children) {
+	}
+
+	@Override
+	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
 	}
 
 }

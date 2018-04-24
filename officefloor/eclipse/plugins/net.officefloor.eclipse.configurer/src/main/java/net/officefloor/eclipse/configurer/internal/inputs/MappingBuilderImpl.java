@@ -109,7 +109,8 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 
 			// Connection
 			source.connectOne(MappingConnection.class, (s) -> s.connection, (c) -> c.source, ChangeEvent.CHANGED)
-					.toOne(TargetModel.class, (t) -> t.connection, (c) -> c.target, (s, t, ctx) -> {
+					.toOne(TargetModel.class, (t) -> t.connection, (c) -> c.target, ChangeEvent.CHANGED)
+					.create((s, t, ctx) -> {
 						// Remove existing connections
 						if (s.connection != null) {
 							s.connection.remove();
@@ -124,14 +125,13 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 						// Update the mapping
 						updater[0].run();
 
-					}, (ctx) -> {
+					}).delete((ctx) -> {
 						// Remove the connection
 						ctx.getModel().remove();
 
 						// Update the mapping
 						updater[0].run();
-
-					}, ChangeEvent.CHANGED);
+					});
 		});
 
 		// Property

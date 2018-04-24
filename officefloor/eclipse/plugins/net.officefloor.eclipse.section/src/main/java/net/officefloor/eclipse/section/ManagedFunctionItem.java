@@ -27,10 +27,14 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
+import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.section.FunctionModel;
+import net.officefloor.model.section.FunctionModel.FunctionEvent;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionNamespaceModel.FunctionNamespaceEvent;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionModel.ManagedFunctionEvent;
+import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 
@@ -86,6 +90,7 @@ public class ManagedFunctionItem extends
 			ctx.getChangeExecutor().execute(this.getConfigurableContext().getOperations().addFunction(functionName,
 					managedFunction, managedFunctionType));
 		}, DefaultImages.ADD));
+		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class));
 		context.addNode(container, context.childGroup(ManagedFunctionObjectItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
@@ -99,6 +104,15 @@ public class ManagedFunctionItem extends
 	@Override
 	protected void children(List<IdeChildrenGroup> children) {
 		children.add(new IdeChildrenGroup(new ManagedFunctionObjectItem()));
+	}
+
+	@Override
+	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
+		connections.add(new IdeConnection<>(ManagedFunctionToFunctionModel.class)
+				.connectMany((source) -> source.getFunctions(), (conn) -> conn.getManagedFunction(),
+						ManagedFunctionEvent.ADD_FUNCTION, ManagedFunctionEvent.REMOVE_FUNCTION)
+				.to(FunctionModel.class).one((target) -> target.getManagedFunction(), (conn) -> conn.getFunction(),
+						FunctionEvent.CHANGE_MANAGED_FUNCTION));
 	}
 
 }

@@ -23,6 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionModel.ManagedFunctionEvent;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
@@ -65,6 +66,10 @@ public class ManagedFunctionObjectItem extends
 
 	@Override
 	protected void children(List<IdeChildrenGroup> childGroups) {
+	}
+
+	@Override
+	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
 	}
 
 }
