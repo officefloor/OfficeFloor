@@ -45,7 +45,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractChildConfigurableItem<R extends Model, O, P extends Model, PE extends Enum<PE>, M extends Model, E extends Enum<E>>
+public abstract class AbstractItem<R extends Model, O, P extends Model, PE extends Enum<PE>, M extends Model, E extends Enum<E>>
 		extends AbstractConfigurerRunnable {
 
 	/**
@@ -143,18 +143,69 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 	/**
 	 * Creates the prototype for the item.
 	 * 
-	 * @return Prototype. May be <code>null</code> if not able to create the item.
+	 * @return Prototype.
 	 */
-	protected abstract M createPrototype();
+	protected abstract M prototype();
 
 	/**
-	 * Obtains the {@link Model} instances from the parent {@link Model}.
-	 * 
-	 * @param parentModel
-	 *            Parent {@link Model}.
-	 * @return {@link List} of {@link Model} instances.
+	 * Extracts the {@link Model} instances.
 	 */
-	protected abstract List<M> getModels(P parentModel);
+	public class IdeExtractor {
+
+		/**
+		 * {@link Function} to extract the {@link Model} instances from the parent
+		 * {@link Model}.
+		 */
+		private final Function<P, List<M>> extractor;
+
+		/**
+		 * Extract change events.
+		 */
+		private final PE[] extractChangeEvents;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param extractor
+		 *            {@link Function} to extract the {@link Model} instances from the
+		 *            parent {@link Model}.
+		 * @param extractChangeEvents
+		 *            Extract change events.
+		 */
+		@SafeVarargs
+		public IdeExtractor(Function<P, List<M>> extractor, PE... extractChangeEvents) {
+			this.extractor = extractor;
+			this.extractChangeEvents = extractChangeEvents;
+		}
+
+		/**
+		 * Extracts the {@link Model} instances from the parent {@link Model}.
+		 * 
+		 * @param parentModel
+		 *            Parent {@link Model}.
+		 * @return Extract {@link Model} instances.
+		 */
+		public List<M> extract(P parentModel) {
+			return this.extractor.apply(parentModel);
+		}
+
+		/**
+		 * Obtains the extract change events.
+		 * 
+		 * @return Extract change events.
+		 */
+		public PE[] getExtractChangeEvents() {
+			return this.extractChangeEvents;
+		}
+	}
+
+	/**
+	 * Obtains the {@link IdeExtractor} to extract {@link Model} instances from the
+	 * parent {@link Model}.
+	 * 
+	 * @return {@link IdeExtractor}.
+	 */
+	protected abstract IdeExtractor extract();
 
 	/**
 	 * Creates the visual for the {@link Model}.
@@ -165,31 +216,64 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 	 *            {@link AdaptedModelVisualFactoryContext}.
 	 * @return {@link Pane} for the visual.
 	 */
-	protected abstract Pane createVisual(M model, AdaptedModelVisualFactoryContext<M> context);
+	protected abstract Pane visual(M model, AdaptedModelVisualFactoryContext<M> context);
 
 	/**
-	 * Obtains the change events regarding adding/removing the {@link Model} from
-	 * the parent {@link Model}.
-	 * 
-	 * @return Parent change events.
+	 * Labels the configuration item.
 	 */
-	protected abstract PE[] parentChangeEvents();
+	public class IdeLabeller {
+
+		/**
+		 * {@link Function} to extract the label from the {@link Model}.
+		 */
+		private final Function<M, String> labeller;
+
+		/**
+		 * Label change events.
+		 */
+		private final E[] labelChangeEvents;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param labeller
+		 *            {@link Function} to extract the label from the {@link Model}.
+		 * @param labelChangeEvents
+		 *            Label change events.
+		 */
+		@SafeVarargs
+		public IdeLabeller(Function<M, String> labeller, E... labelChangeEvents) {
+			this.labeller = labeller;
+			this.labelChangeEvents = labelChangeEvents;
+		}
+
+		/**
+		 * Obtains the label from the {@link Model}.
+		 * 
+		 * @param model
+		 *            {@link Model}.
+		 * @return Label for the {@link Model}.
+		 */
+		public String getLabel(M model) {
+			return this.labeller.apply(model);
+		}
+
+		/**
+		 * Obtains the change events for the label.
+		 * 
+		 * @return Change events for the label.
+		 */
+		public E[] getLabelChangeEvents() {
+			return this.labelChangeEvents;
+		}
+	}
 
 	/**
-	 * Obtains the label for the {@link Model}.
+	 * Obtains the {@link IdeLabeller} for the {@link Model}.
 	 * 
-	 * @param model
-	 *            {@link Model}.
-	 * @return Label for the model.
+	 * @return {@link IdeLabeller}.
 	 */
-	protected abstract String getLabel(M model);
-
-	/**
-	 * Obtains the change events specific to the {@link Model}.
-	 * 
-	 * @return Change events.
-	 */
-	protected abstract E[] changeEvents();
+	protected abstract IdeLabeller label();
 
 	/**
 	 * Further adapt the {@link AdaptedChildBuilder}.
@@ -212,21 +296,21 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 		private final String name;
 
 		/**
-		 * {@link AbstractChildConfigurableItem} instances for the
+		 * {@link AbstractItem} instances for the
 		 * {@link ChildrenGroup}.
 		 */
-		private final AbstractChildConfigurableItem<R, O, M, E, ?, ?>[] children;
+		private final AbstractItem<R, O, M, E, ?, ?>[] children;
 
 		/**
-		 * Instantiate for a single {@link AbstractChildConfigurableItem}.
+		 * Instantiate for a single {@link AbstractItem}.
 		 * 
 		 * @param child
-		 *            {@link AbstractChildConfigurableItem}.
+		 *            {@link AbstractItem}.
 		 */
 		@SuppressWarnings("unchecked")
-		public IdeChildrenGroup(AbstractChildConfigurableItem<R, O, M, E, ?, ?> child) {
+		public IdeChildrenGroup(AbstractItem<R, O, M, E, ?, ?> child) {
 			this.name = child.getClass().getSimpleName();
-			this.children = new AbstractChildConfigurableItem[] { child };
+			this.children = new AbstractItem[] { child };
 		}
 
 		/**
@@ -247,12 +331,12 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 		public List<? extends Model> apply(M parent) {
 			if (this.children.length == 1) {
 				// Just the one child, so return from child
-				return this.children[0].getModels(parent);
+				return this.children[0].extract().extract(parent);
 			} else {
 				// Include all children together
 				List<? extends Model> children = new LinkedList<>();
-				for (AbstractChildConfigurableItem child : this.children) {
-					children.addAll(child.getModels(parent));
+				for (AbstractItem child : this.children) {
+					children.addAll(child.extract().extract(parent));
 				}
 				return children;
 			}
@@ -267,40 +351,40 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 		public Enum<?>[] changeEvents() {
 			if (this.children.length == 1) {
 				// Just the one child, so return from child
-				return this.children[0].changeEvents();
+				return this.children[0].extract().getExtractChangeEvents();
 			} else {
 				// Include all children together
 				List children = new LinkedList<>();
-				for (AbstractChildConfigurableItem child : this.children) {
-					children.addAll(Arrays.asList(child.changeEvents()));
+				for (AbstractItem child : this.children) {
+					children.addAll(Arrays.asList(child.extract().getExtractChangeEvents()));
 				}
 				return (Enum<?>[]) children.toArray(new Enum[children.size()]);
 			}
 		}
 
 		/**
-		 * Obtains the {@link AbstractChildConfigurableItem} instances for the
+		 * Obtains the {@link AbstractItem} instances for the
 		 * {@link ChildrenGroup}.
 		 * 
-		 * @return {@link AbstractChildConfigurableItem} instances for the
+		 * @return {@link AbstractItem} instances for the
 		 *         {@link ChildrenGroup}.
 		 */
-		public AbstractChildConfigurableItem<R, O, M, E, ?, ?>[] getChildren() {
+		public AbstractItem<R, O, M, E, ?, ?>[] getChildren() {
 			return this.children;
 		}
 
 	}
 
 	/**
-	 * Obtains the {@link AbstractChildConfigurableItem} instances.
+	 * Obtains the {@link AbstractItem} instances.
 	 * 
-	 * @return {@link AbstractChildConfigurableItem} instances.
+	 * @return {@link AbstractItem} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	public IdeChildrenGroup[] getChildrenGroups() {
 		List<IdeChildrenGroup> children = new LinkedList<>();
-		this.loadChildren(children);
-		return children.toArray(new AbstractChildConfigurableItem.IdeChildrenGroup[children.size()]);
+		this.children(children);
+		return children.toArray(new AbstractItem.IdeChildrenGroup[children.size()]);
 	}
 
 	/**
@@ -309,7 +393,7 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 	 * @param childGroups
 	 *            {@link IdeChildrenGroup} instances.
 	 */
-	protected abstract void loadChildren(List<IdeChildrenGroup> childGroups);
+	protected abstract void children(List<IdeChildrenGroup> childGroups);
 
 	/**
 	 * Creates the {@link AdaptedChildBuilder}.
@@ -321,9 +405,14 @@ public abstract class AbstractChildConfigurableItem<R extends Model, O, P extend
 	public AdaptedChildBuilder<R, O, M, E> createChild(ChildrenGroupBuilder<R, O> childrenGroup) {
 
 		// Add the child
-		AdaptedChildBuilder<R, O, M, E> child = childrenGroup.addChild(this.createPrototype(),
-				(model, ctx) -> this.createVisual(model, ctx));
-		child.label((model) -> this.getLabel(model), this.changeEvents());
+		AdaptedChildBuilder<R, O, M, E> child = childrenGroup.addChild(this.prototype(),
+				(model, ctx) -> this.visual(model, ctx));
+
+		// Determine if configured with label
+		IdeLabeller labeller = this.label();
+		if (labeller != null) {
+			child.label((model) -> labeller.getLabel(model), labeller.getLabelChangeEvents());
+		}
 
 		// Further adapt the child
 		this.furtherAdapt(child);

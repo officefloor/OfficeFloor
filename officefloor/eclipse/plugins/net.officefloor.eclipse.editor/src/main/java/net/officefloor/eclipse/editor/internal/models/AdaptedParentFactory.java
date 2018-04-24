@@ -247,8 +247,8 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 						@Override
 						public void overlay(OverlayVisualFactory overlayVisualFactory) {
 							// Use location of dropping new parent
-							AdaptedParentImpl.this.getParentFactory().getContentPartFactory().overlay(location,
-									overlayVisualFactory);
+							AdaptedParentImpl.this.getParentFactory().getContentPartFactory().overlay(location.x,
+									location.y, overlayVisualFactory);
 						}
 
 						@Override

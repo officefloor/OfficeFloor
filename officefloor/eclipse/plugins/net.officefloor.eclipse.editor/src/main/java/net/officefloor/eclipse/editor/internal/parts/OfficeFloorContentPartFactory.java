@@ -390,7 +390,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 						Point location = new Point(target.getX(), target.getY());
 
 						// Add the overlay
-						OfficeFloorContentPartFactory.this.overlay(location, overlayVisualFactory);
+						OfficeFloorContentPartFactory.this.overlay(location.x, location.y, overlayVisualFactory);
 					}
 
 					@Override
@@ -458,10 +458,10 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	}
 
 	@Override
-	public void overlay(Point location, OverlayVisualFactory overlayVisualFactory) {
+	public void overlay(double x, double y, OverlayVisualFactory overlayVisualFactory) {
 
 		// Add the overlay
-		this.overlays.add(new AdaptedOverlay(location, overlayVisualFactory, this));
+		this.overlays.add(new AdaptedOverlay(new Point(x, y), overlayVisualFactory, this));
 
 		// Reload the content
 		this.loadContentModels();

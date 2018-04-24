@@ -36,7 +36,7 @@ import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
-import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem;
+import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionNamespaceModel.FunctionNamespaceEvent;
@@ -53,7 +53,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
  * @author Daniel Sagenschneider
  */
 public class FunctionNamespaceItem extends
-		AbstractParentConfigurableItem<SectionModel, SectionEvent, SectionChanges, FunctionNamespaceModel, FunctionNamespaceEvent, FunctionNamespaceItem> {
+		AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, FunctionNamespaceModel, FunctionNamespaceEvent, FunctionNamespaceItem> {
 
 	/**
 	 * Test configuration.
@@ -65,6 +65,26 @@ public class FunctionNamespaceItem extends
 					FunctionNamespaceItem.class.getName()));
 			model.addManagedFunction(new ManagedFunctionModel("main"));
 		});
+	}
+
+	/**
+	 * Loads the {@link FunctionNamespaceType} for the
+	 * {@link FunctionNamespaceItem}.
+	 * 
+	 * @param item
+	 *            {@link FunctionNamespaceItem}.
+	 * @param osgiBridge
+	 *            {@link OfficeFloorOsgiBridge}.
+	 * @return {@link FunctionNamespaceType}.
+	 * @throws Exception
+	 *             If fails to load the {@link FunctionNamespaceType}.
+	 */
+	public static FunctionNamespaceType loadFunctionNamespaceType(FunctionNamespaceItem item,
+			OfficeFloorOsgiBridge osgiBridge) throws Exception {
+		ManagedFunctionLoader loader = osgiBridge.getOfficeFloorCompiler().getManagedFunctionLoader();
+		Class<? extends ManagedFunctionSource> sourceClass = osgiBridge.loadClass(item.sourceClassName,
+				ManagedFunctionSource.class);
+		return loader.loadManagedFunctionType(sourceClass, item.properties);
 	}
 
 	/**
@@ -133,17 +153,18 @@ public class FunctionNamespaceItem extends
 	 */
 
 	@Override
-	protected FunctionNamespaceModel createPrototype() {
+	protected FunctionNamespaceModel prototype() {
 		return new FunctionNamespaceModel("Functions", null);
 	}
 
 	@Override
-	protected List<FunctionNamespaceModel> getModels(SectionModel parentModel) {
-		return parentModel.getFunctionNamespaces();
+	protected IdeExtractor extract() {
+		return new IdeExtractor((parent) -> parent.getFunctionNamespaces(), SectionEvent.ADD_FUNCTION_NAMESPACE,
+				SectionEvent.REMOVE_FUNCTION_NAMESPACE);
 	}
 
 	@Override
-	protected Pane createVisual(FunctionNamespaceModel model,
+	protected Pane visual(FunctionNamespaceModel model,
 			AdaptedModelVisualFactoryContext<FunctionNamespaceModel> context) {
 		VBox container = new VBox();
 		context.label(container);
@@ -152,22 +173,13 @@ public class FunctionNamespaceItem extends
 	}
 
 	@Override
-	protected SectionEvent[] parentChangeEvents() {
-		return new SectionEvent[] { SectionEvent.ADD_FUNCTION_NAMESPACE, SectionEvent.REMOVE_FUNCTION_NAMESPACE };
+	protected IdeLabeller label() {
+		return new IdeLabeller((model) -> model.getFunctionNamespaceName(),
+				FunctionNamespaceEvent.CHANGE_FUNCTION_NAMESPACE_NAME);
 	}
 
 	@Override
-	protected FunctionNamespaceEvent[] changeEvents() {
-		return new FunctionNamespaceEvent[] { FunctionNamespaceEvent.CHANGE_FUNCTION_NAMESPACE_NAME };
-	}
-
-	@Override
-	protected String getLabel(FunctionNamespaceModel model) {
-		return model.getFunctionNamespaceName();
-	}
-
-	@Override
-	protected FunctionNamespaceItem createItem(FunctionNamespaceModel model) {
+	protected FunctionNamespaceItem item(FunctionNamespaceModel model) {
 		FunctionNamespaceItem item = new FunctionNamespaceItem();
 		if (model != null) {
 			item.name = model.getFunctionNamespaceName();
@@ -185,123 +197,112 @@ public class FunctionNamespaceItem extends
 	}
 
 	@Override
-	protected void loadCommonConfiguration(ConfigurationBuilder<FunctionNamespaceItem> builder,
-			ConfigurableModelContext<SectionChanges, FunctionNamespaceModel> context) {
-		builder.title("Functions");
-		builder.text("Name").init((item) -> item.name).validate(ValueValidator.notEmptyString("Must specify name"))
-				.setValue((item, value) -> item.name = value);
-		ChoiceBuilder<FunctionNamespaceItem> choices = builder.choices("").init((item) -> item.choice)
-				.setValue((item, value) -> {
-					if (value == CHOICE_CLASS) {
-						item.sourceClassName = ClassManagedFunctionSource.class.getName();
+	public IdeConfigurer configure() {
+		return new IdeConfigurer().addAndRefactor((builder, context) -> {
+			builder.title("Functions");
+			builder.text("Name").init((item) -> item.name).validate(ValueValidator.notEmptyString("Must specify name"))
+					.setValue((item, value) -> item.name = value);
+			ChoiceBuilder<FunctionNamespaceItem> choices = builder.choices("").init((item) -> item.choice)
+					.setValue((item, value) -> {
+						if (value == CHOICE_CLASS) {
+							item.sourceClassName = ClassManagedFunctionSource.class.getName();
+						}
+					});
+
+			// Choice: class
+			ConfigurationBuilder<FunctionNamespaceItem> classBuilder = choices.choice("Class");
+			classBuilder.clazz("Class")
+					.init((item) -> item.properties
+							.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).getValue())
+					.setValue((item, value) -> item.properties
+							.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).setValue(value));
+
+			// Choice: source
+			ConfigurationBuilder<FunctionNamespaceItem> sourceBuilder = choices.choice("Source");
+			sourceBuilder.clazz("Source").init((item) -> item.sourceClassName).superType(ManagedFunctionSource.class)
+					.validate(ValueValidator.notEmptyString("Must specify source"))
+					.setValue((item, value) -> item.sourceClassName = value);
+			sourceBuilder.properties("Properties").init((item) -> item.properties)
+					.setValue((item, value) -> item.properties = value);
+
+			// Function names
+			ListBuilder<FunctionNamespaceItem, FunctionName> functionsBuilder = builder
+					.list("Functions", FunctionName.class).init((item) -> item.functionNames);
+			functionsBuilder.text("Function").init((item) -> item.name);
+			functionsBuilder.flag("Include").init((item) -> item.isUsed).setValue((item, value) -> item.isUsed = value);
+
+			// Validate (ensure loads type)
+			builder.validate((ctx) -> {
+				OfficeFloorOsgiBridge osgiBridge = this.getConfigurableContext().getOsgiBridge();
+
+				// Validate the type
+				FunctionNamespaceItem item = ctx.getValue().getValue();
+				item.functionNamespaceType = loadFunctionNamespaceType(item, osgiBridge);
+
+				// Load the managed functions (keeping track of existing)
+				Map<String, FunctionName> existingNames = new HashMap<>();
+				for (FunctionName function : item.functionNames) {
+					existingNames.put(function.name, function);
+				}
+				item.functionNames = new ArrayList<>();
+				for (ManagedFunctionType<?, ?> managedFunctionType : item.functionNamespaceType
+						.getManagedFunctionTypes()) {
+					String functionName = managedFunctionType.getFunctionName();
+					FunctionName function = existingNames.get(functionName);
+					if (function == null) {
+						function = new FunctionName(functionName);
 					}
-				});
-
-		// Choice: class
-		ConfigurationBuilder<FunctionNamespaceItem> classBuilder = choices.choice("Class");
-		classBuilder.clazz("Class")
-				.init((item) -> item.properties.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
-						.getValue())
-				.setValue((item, value) -> item.properties
-						.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).setValue(value));
-
-		// Choice: source
-		ConfigurationBuilder<FunctionNamespaceItem> sourceBuilder = choices.choice("Source");
-		sourceBuilder.clazz("Source").init((item) -> item.sourceClassName).superType(ManagedFunctionSource.class)
-				.validate(ValueValidator.notEmptyString("Must specify source"))
-				.setValue((item, value) -> item.sourceClassName = value);
-		sourceBuilder.properties("Properties").init((item) -> item.properties)
-				.setValue((item, value) -> item.properties = value);
-
-		// Function names
-		ListBuilder<FunctionNamespaceItem, FunctionName> functionsBuilder = builder
-				.list("Functions", FunctionName.class).init((item) -> item.functionNames);
-		functionsBuilder.text("Function").init((item) -> item.name);
-		functionsBuilder.flag("Include").init((item) -> item.isUsed).setValue((item, value) -> item.isUsed = value);
-
-		// Validate (ensure loads type)
-		builder.validate((ctx) -> {
-			OfficeFloorOsgiBridge osgiBridge = this.getConfigurableContext().getOsgiBridge();
-
-			// Validate the type
-			FunctionNamespaceItem item = ctx.getValue().getValue();
-			ManagedFunctionLoader loader = osgiBridge.getOfficeFloorCompiler().getManagedFunctionLoader();
-			Class<? extends ManagedFunctionSource> sourceClass = osgiBridge.loadClass(item.sourceClassName,
-					ManagedFunctionSource.class);
-			item.functionNamespaceType = loader.loadManagedFunctionType(sourceClass, item.properties);
-
-			// Load the managed functions (keeping track of existing)
-			Map<String, FunctionName> existingNames = new HashMap<>();
-			for (FunctionName function : item.functionNames) {
-				existingNames.put(function.name, function);
-			}
-			item.functionNames = new ArrayList<>();
-			for (ManagedFunctionType<?, ?> managedFunctionType : item.functionNamespaceType.getManagedFunctionTypes()) {
-				String functionName = managedFunctionType.getFunctionName();
-				FunctionName function = existingNames.get(functionName);
-				if (function == null) {
-					function = new FunctionName(functionName);
+					item.functionNames.add(function);
 				}
-				item.functionNames.add(function);
-			}
-			ctx.reload(functionsBuilder);
+				ctx.reload(functionsBuilder);
+			});
+
+		}).add((builder, context) -> {
+			builder.apply("Add", (item) -> {
+
+				// Create listing of function names
+				List<String> functions = new ArrayList<>(item.functionNames.size());
+				for (FunctionName functionName : item.functionNames) {
+					if (functionName.isUsed) {
+						functions.add(functionName.name);
+					}
+				}
+
+				// Add
+				context.execute(context.getOperations().addFunctionNamespace(item.name, item.sourceClassName,
+						item.properties, item.functionNamespaceType, functions.toArray(new String[functions.size()])));
+			});
+
+		}).refactor((builder, context) -> {
+			builder.apply("Refactor", (item) -> {
+
+				// Create listing of function names
+				List<String> functions = new ArrayList<>(item.functionNames.size());
+				for (FunctionName functionName : item.functionNames) {
+					if (functionName.isUsed) {
+						functions.add(functionName.name);
+					}
+				}
+
+				Map<String, String> managedFunctionNameMapping = new HashMap<>();
+				Map<String, Map<String, String>> managedFunctionToObjectNameMapping = new HashMap<>();
+				Map<String, Map<String, String>> functionToFlowNameMapping = new HashMap<>();
+				Map<String, Map<String, String>> functionToEscalationTypeMapping = new HashMap<>();
+
+				// Refactor
+				context.execute(context.getOperations().refactorFunctionNamespace(context.getModel(), item.name,
+						item.sourceClassName, item.properties, item.functionNamespaceType, managedFunctionNameMapping,
+						managedFunctionToObjectNameMapping, functionToFlowNameMapping, functionToEscalationTypeMapping,
+						functions.toArray(new String[functions.size()])));
+			});
+
+		}).delete((context) -> {
+			context.execute(context.getOperations().removeFunctionNamespace(context.getModel()));
 		});
 	}
 
 	@Override
-	protected void loadAddConfiguration(ConfigurationBuilder<FunctionNamespaceItem> builder,
-			ConfigurableModelContext<SectionChanges, FunctionNamespaceModel> context) {
-		builder.apply("Add", (item) -> {
-
-			// Create listing of function names
-			List<String> functions = new ArrayList<>(item.functionNames.size());
-			for (FunctionName functionName : item.functionNames) {
-				if (functionName.isUsed) {
-					functions.add(functionName.name);
-				}
-			}
-
-			// Add
-			context.execute(context.getOperations().addFunctionNamespace(item.name, item.sourceClassName,
-					item.properties, item.functionNamespaceType, functions.toArray(new String[functions.size()])));
-		});
-	}
-
-	@Override
-	protected void loadRefactorConfiguration(ConfigurationBuilder<FunctionNamespaceItem> builder,
-			ConfigurableModelContext<SectionChanges, FunctionNamespaceModel> context) {
-
-		// Apply refactoring
-		builder.apply("Refactor", (item) -> {
-
-			// Create listing of function names
-			List<String> functions = new ArrayList<>(item.functionNames.size());
-			for (FunctionName functionName : item.functionNames) {
-				if (functionName.isUsed) {
-					functions.add(functionName.name);
-				}
-			}
-
-			Map<String, String> managedFunctionNameMapping = new HashMap<>();
-			Map<String, Map<String, String>> managedFunctionToObjectNameMapping = new HashMap<>();
-			Map<String, Map<String, String>> functionToFlowNameMapping = new HashMap<>();
-			Map<String, Map<String, String>> functionToEscalationTypeMapping = new HashMap<>();
-
-			// Refactor
-			context.execute(context.getOperations().refactorFunctionNamespace(context.getModel(), item.name,
-					item.sourceClassName, item.properties, item.functionNamespaceType, managedFunctionNameMapping,
-					managedFunctionToObjectNameMapping, functionToFlowNameMapping, functionToEscalationTypeMapping,
-					functions.toArray(new String[functions.size()])));
-		});
-	}
-
-	@Override
-	protected void deleteModel(ConfigurableModelContext<SectionChanges, FunctionNamespaceModel> context) {
-		context.execute(context.getOperations().removeFunctionNamespace(context.getModel()));
-	}
-
-	@Override
-	protected void loadChildren(List<IdeChildrenGroup> children) {
+	protected void children(List<IdeChildrenGroup> children) {
 		children.add(new IdeChildrenGroup(new ManagedFunctionItem()));
 	}
 

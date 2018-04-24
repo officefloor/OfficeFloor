@@ -19,13 +19,14 @@ package net.officefloor.eclipse.section;
 
 import java.util.List;
 
-import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
-import net.officefloor.eclipse.ide.editor.AbstractChildConfigurableItem;
+import net.officefloor.eclipse.editor.DefaultImages;
+import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionNamespaceModel.FunctionNamespaceEvent;
 import net.officefloor.model.section.ManagedFunctionModel;
@@ -39,61 +40,64 @@ import net.officefloor.model.section.SectionModel;
  * @author Daniel Sagenschneider
  */
 public class ManagedFunctionItem extends
-		AbstractChildConfigurableItem<SectionModel, SectionChanges, FunctionNamespaceModel, FunctionNamespaceEvent, ManagedFunctionModel, ManagedFunctionEvent> {
+		AbstractItem<SectionModel, SectionChanges, FunctionNamespaceModel, FunctionNamespaceEvent, ManagedFunctionModel, ManagedFunctionEvent> {
 
 	@Override
-	protected ManagedFunctionModel createPrototype() {
+	protected ManagedFunctionModel prototype() {
 		return new ManagedFunctionModel();
 	}
 
 	@Override
-	protected List<ManagedFunctionModel> getModels(FunctionNamespaceModel parentModel) {
-		return parentModel.getManagedFunctions();
+	protected IdeExtractor extract() {
+		return new IdeExtractor((parent) -> parent.getManagedFunctions(), FunctionNamespaceEvent.ADD_MANAGED_FUNCTION,
+				FunctionNamespaceEvent.REMOVE_MANAGED_FUNCTION);
 	}
 
 	@Override
-	protected Pane createVisual(ManagedFunctionModel model,
-			AdaptedModelVisualFactoryContext<ManagedFunctionModel> context) {
+	protected Pane visual(ManagedFunctionModel model, AdaptedModelVisualFactoryContext<ManagedFunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.label(heading);
-		context.addNode(heading, new Button("A")).setOnAction((event) -> {
-			context.action((ctx) -> {
+		context.addNode(heading, context.action((ctx) -> {
 
-				// Obtain the details
-				ManagedFunctionModel managedFunction = ctx.getModel();
-				String functionName = managedFunction.getManagedFunctionName();
+			// Obtain the details
+			ManagedFunctionModel managedFunction = ctx.getModel();
+			String functionName = managedFunction.getManagedFunctionName();
 
-				// Obtain the managed function type
-				ManagedFunctionType<?, ?> managedFunctionType = null;
+			// Obtain the parent to load type
+			FunctionNamespaceModel functionNamespace = (FunctionNamespaceModel) ctx.getAdaptedModel().getParent()
+					.getModel();
+			FunctionNamespaceItem functionNamespaceItem = new FunctionNamespaceItem().item(functionNamespace);
+			FunctionNamespaceType functionNamespaceType = FunctionNamespaceItem
+					.loadFunctionNamespaceType(functionNamespaceItem, this.getConfigurableContext().getOsgiBridge());
 
-				// Add the function
-				ctx.getChangeExecutor().execute(this.getConfigurableContext().getOperations().addFunction(functionName,
-						managedFunction, managedFunctionType));
-			});
-		});
+			// Obtain the particular managed function type
+			ManagedFunctionType<?, ?> managedFunctionType = null;
+			for (ManagedFunctionType<?, ?> type : functionNamespaceType.getManagedFunctionTypes()) {
+				if (functionName.equals(type.getFunctionName())) {
+					managedFunctionType = type;
+				}
+			}
+			if (managedFunctionType == null) {
+				throw new RuntimeException("Configuration out of sync");
+			}
+
+			// Add the function
+			ctx.getChangeExecutor().execute(this.getConfigurableContext().getOperations().addFunction(functionName,
+					managedFunction, managedFunctionType));
+		}, DefaultImages.ADD));
 		context.addNode(container, context.childGroup(ManagedFunctionObjectItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
 
 	@Override
-	protected FunctionNamespaceEvent[] parentChangeEvents() {
-		return new FunctionNamespaceEvent[] { FunctionNamespaceEvent.ADD_MANAGED_FUNCTION,
-				FunctionNamespaceEvent.REMOVE_MANAGED_FUNCTION };
+	protected IdeLabeller label() {
+		return new IdeLabeller((model) -> model.getManagedFunctionName(),
+				ManagedFunctionEvent.CHANGE_MANAGED_FUNCTION_NAME);
 	}
 
 	@Override
-	protected String getLabel(ManagedFunctionModel model) {
-		return model.getManagedFunctionName();
-	}
-
-	@Override
-	protected ManagedFunctionEvent[] changeEvents() {
-		return new ManagedFunctionEvent[] { ManagedFunctionEvent.CHANGE_MANAGED_FUNCTION_NAME };
-	}
-
-	@Override
-	protected void loadChildren(List<IdeChildrenGroup> children) {
+	protected void children(List<IdeChildrenGroup> children) {
 		children.add(new IdeChildrenGroup(new ManagedFunctionObjectItem()));
 	}
 

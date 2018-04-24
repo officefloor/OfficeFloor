@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.eclipse.gef.geometry.planar.Point;
-
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.StringProperty;
@@ -576,10 +574,9 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 
 			// Obtain the location of this parent
 			Model model = this.getModel();
-			Point location = new Point(model.getX(), model.getY());
 
 			// Add the overlay
-			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
+			this.getFactory().getContentPartFactory().overlay(model.getX(), model.getY(), overlayVisualFactory);
 		}
 
 		@Override

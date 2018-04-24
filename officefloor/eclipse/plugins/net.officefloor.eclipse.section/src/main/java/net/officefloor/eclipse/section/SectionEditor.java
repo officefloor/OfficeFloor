@@ -24,7 +24,7 @@ import org.eclipse.ui.IWorkbench;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
-import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem;
+import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
@@ -48,16 +48,16 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	/**
-	 * Convenience method to launch {@link AbstractParentConfigurableItem} outside
+	 * Convenience method to launch {@link AbstractConfigurableItem} outside
 	 * {@link IWorkbench}.
 	 * 
 	 * @param configurableItem
-	 *            {@link AbstractParentConfigurableItem}.
+	 *            {@link AbstractConfigurableItem}.
 	 * @param prototypeDecorator
 	 *            Optional prototype decorator.
 	 */
 	public static <M extends Model, E extends Enum<E>, I> void launchConfigurer(
-			AbstractParentConfigurableItem<SectionModel, SectionEvent, SectionChanges, M, E, I> configurableItem,
+			AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, M, E, I> configurableItem,
 			Consumer<M> prototypeDecorator) {
 		configurableItem.main(new SectionModel(), SectionEditor.class, prototypeDecorator);
 	}
@@ -75,8 +75,9 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected AbstractParentConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>[] getParents() {
-		return new AbstractParentConfigurableItem[] { new FunctionNamespaceItem(), new ExternalFlowItem() };
+	protected AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>[] getParents() {
+		return new AbstractConfigurableItem[] { new FunctionNamespaceItem(), new FunctionItem(),
+				new ExternalFlowItem() };
 	}
 
 	@Override

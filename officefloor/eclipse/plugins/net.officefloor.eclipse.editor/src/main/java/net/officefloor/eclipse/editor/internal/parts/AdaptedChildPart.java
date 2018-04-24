@@ -30,10 +30,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
+import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
@@ -41,7 +44,7 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane>
-		implements AdaptedModelVisualFactoryContext<M> {
+		implements AdaptedModelVisualFactoryContext<M>, AdaptedActionVisualFactoryContext {
 
 	/**
 	 * {@link ChildrenGroupVisual} instances for the {@link ChildrenGroupImpl}
@@ -264,8 +267,21 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	}
 
 	@Override
+	public Node createImageWithHover(Class<?> resourceClass, String imageFilePath, String hoverImageFilePath) {
+		return DefaultImages.createImageWithHover(resourceClass, imageFilePath, hoverImageFilePath);
+	}
+
+	@Override
 	public <R extends Model, O> void action(ModelAction<R, O, M> action) {
 		this.getContent().action(action);
+	}
+
+	@Override
+	public <R extends Model, O> Node action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
+		Node node = visualFactory.createVisual(this);
+		node.setOnMouseClicked((event) -> this.action(action));
+		node.getStyleClass().add("action");
+		return node;
 	}
 
 	/**

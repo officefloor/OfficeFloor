@@ -23,6 +23,7 @@ import org.eclipse.gef.geometry.planar.IGeometry;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
 import net.officefloor.model.ConnectionModel;
@@ -97,6 +98,20 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	Node connector(Class... connectionClasses);
 
 	/**
+	 * Convenience method to create a {@link Node} with {@link Image} and hover
+	 * {@link Image}. Typically this is to create button for the action.
+	 * 
+	 * @param resourceClass
+	 *            {@link Class} within the class path containing the images.
+	 * @param imageFilePath
+	 *            Path to the {@link Image}.
+	 * @param hoverImageFilePath
+	 *            Path to the hover {@link Image}.
+	 * @return {@link Node} for the {@link Image} with hover.
+	 */
+	Node createImageWithHover(Class<?> resourceClass, String imageFilePath, String hoverImageFilePath);
+
+	/**
 	 * <p>
 	 * Allows {@link ModelAction} instances to be actioned via visual.
 	 * <p>
@@ -106,5 +121,17 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	 *            {@link ModelAction} to be actioned.
 	 */
 	<R extends Model, O> void action(ModelAction<R, O, M> action);
+
+	/**
+	 * Convenience method to add a {@link ModelAction} to be actioned via
+	 * {@link AdaptedActionVisualFactory}.
+	 * 
+	 * @param action
+	 *            {@link ModelAction} to be actioned.
+	 * @param visualFactory
+	 *            {@link AdaptedActionVisualFactory}.
+	 * @return {@link Node} to trigger the {@link ModelAction}.
+	 */
+	<R extends Model, O> Node action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory);
 
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
-import net.officefloor.eclipse.ide.editor.AbstractChildConfigurableItem;
+import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionModel.ManagedFunctionEvent;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
@@ -36,20 +36,21 @@ import net.officefloor.model.section.SectionModel;
  * @author Daniel Sagenschneider
  */
 public class ManagedFunctionObjectItem extends
-		AbstractChildConfigurableItem<SectionModel, SectionChanges, ManagedFunctionModel, ManagedFunctionEvent, ManagedFunctionObjectModel, ManagedFunctionObjectEvent> {
+		AbstractItem<SectionModel, SectionChanges, ManagedFunctionModel, ManagedFunctionEvent, ManagedFunctionObjectModel, ManagedFunctionObjectEvent> {
 
 	@Override
-	protected ManagedFunctionObjectModel createPrototype() {
+	protected ManagedFunctionObjectModel prototype() {
 		return new ManagedFunctionObjectModel();
 	}
 
 	@Override
-	protected List<ManagedFunctionObjectModel> getModels(ManagedFunctionModel parentModel) {
-		return parentModel.getManagedFunctionObjects();
+	protected IdeExtractor extract() {
+		return new IdeExtractor((parent) -> parent.getManagedFunctionObjects(),
+				ManagedFunctionEvent.ADD_MANAGED_FUNCTION_OBJECT, ManagedFunctionEvent.REMOVE_MANAGED_FUNCTION_OBJECT);
 	}
 
 	@Override
-	protected Pane createVisual(ManagedFunctionObjectModel model,
+	protected Pane visual(ManagedFunctionObjectModel model,
 			AdaptedModelVisualFactoryContext<ManagedFunctionObjectModel> context) {
 		HBox container = new HBox();
 		context.addNode(container, context.connector());
@@ -58,24 +59,12 @@ public class ManagedFunctionObjectItem extends
 	}
 
 	@Override
-	protected ManagedFunctionEvent[] parentChangeEvents() {
-		return new ManagedFunctionEvent[] { ManagedFunctionEvent.ADD_MANAGED_FUNCTION_OBJECT,
-				ManagedFunctionEvent.REMOVE_MANAGED_FUNCTION_OBJECT };
+	protected IdeLabeller label() {
+		return new IdeLabeller((model) -> model.getObjectName(), ManagedFunctionObjectEvent.CHANGE_OBJECT_NAME);
 	}
 
 	@Override
-	protected String getLabel(ManagedFunctionObjectModel model) {
-		return model.getObjectName();
-	}
-
-	@Override
-	protected ManagedFunctionObjectEvent[] changeEvents() {
-		return new ManagedFunctionObjectEvent[] { ManagedFunctionObjectEvent.CHANGE_OBJECT_NAME };
-	}
-
-	@Override
-	protected void loadChildren(
-			List<AbstractChildConfigurableItem<SectionModel, SectionChanges, ManagedFunctionModel, ManagedFunctionEvent, ManagedFunctionObjectModel, ManagedFunctionObjectEvent>.IdeChildrenGroup> childGroups) {
+	protected void children(List<IdeChildrenGroup> childGroups) {
 	}
 
 }

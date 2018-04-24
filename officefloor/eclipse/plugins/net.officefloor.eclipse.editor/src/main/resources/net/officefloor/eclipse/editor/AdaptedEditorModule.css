@@ -10,6 +10,20 @@
 	-fx-effect: dropshadow(three-pass-box, black, 10.0, 0.0, 4.0, 4.0);
 }
 
+.parent > .label {
+	-fx-cursor: move;
+	-fx-font-weight: bold;
+}
+
+.parent .action .image-view {
+	-fx-scale-x: 0.5;
+	-fx-scale-y: 0.5;
+}
+
+.action .image-view {
+	-fx-cursor: hand;
+}
+
 .selected {
 	-fx-border-color: black;
 	-fx-border-width: 2.0;
@@ -17,6 +31,10 @@
 
 .child {
 	-fx-padding: 3.0px;
+}
+
+.connector {
+	-fx-cursor: crosshair;
 }
 
 .error-header:header .dismiss-error {

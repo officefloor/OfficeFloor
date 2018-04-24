@@ -17,13 +17,12 @@
  */
 package net.officefloor.eclipse.editor.test;
 
-import org.eclipse.gef.geometry.planar.Point;
-
 import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
@@ -81,8 +80,17 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 		AdaptedErrorHandler errorHandler = root.getErrorHandler();
 
 		// Provide static overlay
-		root.overlay(new Point(10, 10),
+		root.overlay(10, 10,
 				(ctx) -> ctx.getOverlayParent().getChildren().add(new Label("Example editor for testing features")));
+
+		// Provide log of structure
+		root.overlay(10, 50, (ctx) -> {
+			Button log = new Button("log");
+			log.setOnAction((event) -> {
+				root.getErrorHandler().isError(() -> StructureLogger.logFull(log, System.out));
+			});
+			ctx.getOverlayParent().getChildren().add(log);
+		});
 
 		// Managed Object Source
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent> mos = root
@@ -166,14 +174,14 @@ public class ExampleEditorMain extends AbstractEditorApplication {
 				.addChild(new OfficeFloorManagedObjectSourceFlowModel("Prototype", null), (model, context) -> {
 					HBox container = new HBox();
 					context.label(container);
-					context.addNode(container, new Button("log")).setOnAction((event) -> context.action((ctx) -> {
+					context.addNode(container, context.action((ctx) -> {
 						AdaptedModel<?> adapted = ctx.getAdaptedModel();
 						while (adapted != null) {
 							System.out.print(adapted.getModel().getClass().getSimpleName() + " ");
 							adapted = adapted.getParent();
 						}
 						System.out.println();
-					}));
+					}, DefaultImages.ADD));
 					return container;
 				});
 		mosFlows.label((m) -> m.getOfficeFloorManagedObjectSourceFlowName(),

@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.eclipse.gef.geometry.planar.Point;
-
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedChild;
@@ -248,10 +246,9 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 
 			// Obtain the location of this target
 			Model model = this.getTarget().getModel();
-			Point location = new Point(model.getX(), model.getY());
 
 			// Add the overlay
-			this.getFactory().getContentPartFactory().overlay(location, overlayVisualFactory);
+			this.getFactory().getContentPartFactory().overlay(model.getX(), model.getY(), overlayVisualFactory);
 		}
 	}
 

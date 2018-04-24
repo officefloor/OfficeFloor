@@ -11,11 +11,9 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.parts;
 
-import java.net.URL;
 import java.util.Set;
 
 import org.eclipse.gef.common.collections.SetMultimapChangeListener;
-import org.eclipse.gef.fx.nodes.HoverOverlayImageView;
 import org.eclipse.gef.mvc.fx.handlers.AbstractHandler;
 import org.eclipse.gef.mvc.fx.handlers.IOnClickHandler;
 import org.eclipse.gef.mvc.fx.parts.AbstractHandlePart;
@@ -23,10 +21,10 @@ import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.editor.internal.models.AdaptedAction;
 import net.officefloor.model.Model;
 
@@ -150,28 +148,9 @@ public class AdaptedActionHandlePart<R extends Model, O, M extends Model> extend
 
 	@Override
 	public Node createImageWithHover(Class<?> resourceClass, String imageFilePath, String hoverImageFilePath) {
-
-		// Obtain the overlay image
-		URL overlayImageResource = resourceClass.getResource(hoverImageFilePath);
-		if (overlayImageResource == null) {
-			throw new IllegalStateException(
-					"Cannot find resource " + hoverImageFilePath + " from resource class " + resourceClass.getName());
-		}
-		Image overlayImage = new Image(overlayImageResource.toExternalForm());
-
-		// Obtain the base image
-		URL baseImageResource = resourceClass.getResource(imageFilePath);
-		if (baseImageResource == null) {
-			throw new IllegalStateException(
-					"Cannot find resource " + imageFilePath + " from resource class " + resourceClass.getName());
-		}
-		Image baseImage = new Image(baseImageResource.toExternalForm());
-
-		// Create the hover overlay image
-		HoverOverlayImageView blendImageView = new HoverOverlayImageView();
-		blendImageView.baseImageProperty().set(baseImage);
-		blendImageView.overlayImageProperty().set(overlayImage);
-		return blendImageView;
+		Node node = DefaultImages.createImageWithHover(resourceClass, imageFilePath, hoverImageFilePath);
+		node.getStyleClass().add("action");
+		return node;
 	}
 
 }

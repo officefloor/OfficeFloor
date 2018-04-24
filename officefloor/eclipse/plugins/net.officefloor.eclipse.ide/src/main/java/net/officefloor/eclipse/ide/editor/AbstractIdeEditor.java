@@ -49,11 +49,13 @@ import com.google.inject.util.Modules;
 
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
-import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedBuilder;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
@@ -63,8 +65,8 @@ import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeAdapter;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
-import net.officefloor.eclipse.ide.editor.AbstractChildConfigurableItem.ConfigurableContext;
-import net.officefloor.eclipse.ide.editor.AbstractChildConfigurableItem.IdeChildrenGroup;
+import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
+import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
 import net.officefloor.model.Model;
@@ -171,7 +173,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			throw new RuntimeException("Unable to determine " + AbstractIdeEditor.class.getName() + " implementation");
 		}
 
-		// Attempt to lauch IDE editor outside workbench
+		// Attempt to launch IDE editor outside workbench
 		final String finalLaunchClassName = launchClassName;
 		launchOutsideWorkbench(() -> {
 
@@ -193,6 +195,17 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				protected void loadConfiguration(Shell shell) {
 					editor.parentShell = shell;
 					editor.createPartControl(shell);
+
+					// Indicate editor and provide details of structure for CSS
+					editor.rootBuilder.overlay(10, 10, (ctx) -> {
+						ctx.getOverlayParent().getChildren().add(new Label(editor.getClass().getSimpleName()));
+					});
+					editor.rootBuilder.overlay(10, 50, (ctx) -> {
+						Button log = new Button("log");
+						log.setOnAction((event) -> editor.rootBuilder.getErrorHandler()
+								.isError(() -> StructureLogger.logFull(log, System.out)));
+						ctx.getOverlayParent().getChildren().add(log);
+					});
 
 					// Register logging of changes to the model
 					editor.rootBuilder.getChangeExecutor().addChangeListener(new ChangeAdapter() {
@@ -307,6 +320,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 *            {@link Function} to create the operations from the root
 	 *            {@link Model}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected AbstractIdeEditor(AdaptedEditorModule module, Class<R> rootModelType, Function<R, O> createOperations) {
 		this(Guice.createInjector(isOutsideWorkbench ? Modules.override(module).with(new OutsideWorkbenchModule())
 				: Modules.override(module).with(new MvcFxUiModule())));
@@ -356,7 +370,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			};
 
 			// Configure the editor
-			for (AbstractParentConfigurableItem parent : this.getParents()) {
+			for (AbstractConfigurableItem parent : this.getParents()) {
 
 				// Initialise the parent
 				parent.init(configurableContext);
@@ -374,13 +388,14 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * Loads the children and thier children recursively.
 	 * 
 	 * @param parent
-	 *            Parent {@link AbstractChildConfigurableItem}.
+	 *            Parent {@link AbstractItem}.
 	 * @param parentBuilder
 	 *            Parent {@link AdaptedChildBuilder}.
 	 * @param configurableContext
 	 *            {@link ConfigurableContext}.
 	 */
-	private static void loadChildren(AbstractChildConfigurableItem parent, AdaptedChildBuilder parentBuilder,
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static void loadChildren(AbstractItem parent, AdaptedChildBuilder parentBuilder,
 			ConfigurableContext configurableContext) {
 
 		// Create the children groups
@@ -391,7 +406,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 					ideChildrenGroup, ideChildrenGroup.changeEvents());
 
 			// Create the children
-			for (AbstractChildConfigurableItem child : ideChildrenGroup.getChildren()) {
+			for (AbstractItem child : ideChildrenGroup.getChildren()) {
 
 				// Initialise the child
 				child.init(configurableContext);
@@ -419,11 +434,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
-	 * Obtains the {@link AbstractParentConfigurableItem} instances.
+	 * Obtains the {@link AbstractConfigurableItem} instances.
 	 * 
-	 * @return {@link AbstractParentConfigurableItem} instances.
+	 * @return {@link AbstractConfigurableItem} instances.
 	 */
-	protected abstract AbstractParentConfigurableItem<R, RE, O, ?, ?, ?>[] getParents();
+	protected abstract AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents();
 
 	/**
 	 * Creates the root {@link Model} from the {@link ConfigurationItem}.

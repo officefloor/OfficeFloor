@@ -21,10 +21,9 @@ import java.util.List;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
-import net.officefloor.eclipse.ide.editor.AbstractParentConfigurableItem;
+import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
 import net.officefloor.model.section.SectionChanges;
@@ -37,7 +36,7 @@ import net.officefloor.model.section.SectionModel.SectionEvent;
  * @author Daniel Sagenschneider
  */
 public class ExternalFlowItem extends
-		AbstractParentConfigurableItem<SectionModel, SectionEvent, SectionChanges, ExternalFlowModel, ExternalFlowEvent, ExternalFlowItem> {
+		AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, ExternalFlowModel, ExternalFlowEvent, ExternalFlowItem> {
 
 	/**
 	 * Test configuration.
@@ -61,39 +60,30 @@ public class ExternalFlowItem extends
 	 */
 
 	@Override
-	protected ExternalFlowModel createPrototype() {
+	protected ExternalFlowModel prototype() {
 		return new ExternalFlowModel("External Flow", null);
 	}
 
 	@Override
-	protected List<ExternalFlowModel> getModels(SectionModel parentModel) {
-		return parentModel.getExternalFlows();
+	protected IdeExtractor extract() {
+		return new IdeExtractor((parent) -> parent.getExternalFlows(), SectionEvent.ADD_EXTERNAL_FLOW,
+				SectionEvent.REMOVE_EXTERNAL_FLOW);
 	}
 
 	@Override
-	protected SectionEvent[] parentChangeEvents() {
-		return new SectionEvent[] { SectionEvent.ADD_EXTERNAL_FLOW, SectionEvent.REMOVE_EXTERNAL_FLOW };
-	}
-
-	@Override
-	protected Pane createVisual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
+	protected Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		return container;
 	}
 
 	@Override
-	protected ExternalFlowEvent[] changeEvents() {
-		return new ExternalFlowEvent[] { ExternalFlowEvent.CHANGE_EXTERNAL_FLOW_NAME };
+	protected IdeLabeller label() {
+		return new IdeLabeller((model) -> model.getExternalFlowName(), ExternalFlowEvent.CHANGE_EXTERNAL_FLOW_NAME);
 	}
 
 	@Override
-	protected String getLabel(ExternalFlowModel model) {
-		return model.getExternalFlowName();
-	}
-
-	@Override
-	protected ExternalFlowItem createItem(ExternalFlowModel model) {
+	protected ExternalFlowItem item(ExternalFlowModel model) {
 		ExternalFlowItem item = new ExternalFlowItem();
 		if (model != null) {
 			item.name = model.getExternalFlowName();
@@ -103,38 +93,28 @@ public class ExternalFlowItem extends
 	}
 
 	@Override
-	protected void loadCommonConfiguration(ConfigurationBuilder<ExternalFlowItem> builder,
-			ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
-		builder.title("External Flow");
-		builder.text("Name").init((model) -> model.name).setValue((model, value) -> model.name = value)
-				.validate(ValueValidator.notEmptyString("Must specify name"));
-		builder.clazz("Argument").init((model) -> model.argumentType)
-				.setValue((model, value) -> model.argumentType = value);
-	}
-
-	@Override
-	protected void loadAddConfiguration(ConfigurationBuilder<ExternalFlowItem> builder,
-			ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
-		builder.apply("Add",
-				(item) -> context.execute(context.getOperations().addExternalFlow(item.name, item.argumentType)));
-	}
-
-	@Override
-	protected void loadRefactorConfiguration(ConfigurationBuilder<ExternalFlowItem> builder,
-			ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
-		builder.apply("Refactor", (item) -> {
-			// TODO implement refactor of external flow
-			throw new UnsupportedOperationException("TODO renameExternalFlow to be refactorExternalFlow");
+	public IdeConfigurer configure() {
+		return new IdeConfigurer().addAndRefactor((builder, context) -> {
+			builder.title("External Flow");
+			builder.text("Name").init((model) -> model.name).setValue((model, value) -> model.name = value)
+					.validate(ValueValidator.notEmptyString("Must specify name"));
+			builder.clazz("Argument").init((model) -> model.argumentType)
+					.setValue((model, value) -> model.argumentType = value);
+		}).add((builder, context) -> {
+			builder.apply("Add",
+					(item) -> context.execute(context.getOperations().addExternalFlow(item.name, item.argumentType)));
+		}).refactor((builder, context) -> {
+			builder.apply("Refactor", (item) -> {
+				// TODO implement refactor of external flow
+				throw new UnsupportedOperationException("TODO renameExternalFlow to be refactorExternalFlow");
+			});
+		}).delete((context) -> {
+			context.execute(context.getOperations().removeExternalFlow(context.getModel()));
 		});
 	}
 
 	@Override
-	protected void deleteModel(ConfigurableModelContext<SectionChanges, ExternalFlowModel> context) {
-		context.execute(context.getOperations().removeExternalFlow(context.getModel()));
-	}
-
-	@Override
-	protected void loadChildren(List<IdeChildrenGroup> children) {
+	protected void children(List<IdeChildrenGroup> children) {
 	}
 
 }

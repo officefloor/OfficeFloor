@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.ide;
 
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-
 /**
  * Configurable Item.
  * 
