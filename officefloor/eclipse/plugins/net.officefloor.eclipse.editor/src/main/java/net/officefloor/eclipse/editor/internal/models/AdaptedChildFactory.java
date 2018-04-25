@@ -644,14 +644,24 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			// Determine the source target order
 			M sourceModel = this.getModel();
 			T targetModel = target.getModel();
-			if (connectionFactory.getSourceModelClass() == connectionFactory.getTargetModelClass()) {
+			boolean isSwap = false;
+			if (connectionFactory.getSourceModelClass().equals(connectionFactory.getTargetModelClass())) {
 				// Connecting to same type, so order based on role
 				if (AdaptedConnectorRole.TARGET.equals(sourceRole)) {
 					// This is target, so swap
-					M swap = sourceModel;
-					sourceModel = (M) targetModel;
-					targetModel = (T) swap;
+					isSwap = true;
 				}
+			} else {
+				// Ensure order matches source / target
+				if (sourceModel.getClass().equals(connectionFactory.getTargetModelClass())) {
+					// This is target, so swap
+					isSwap = true;
+				}
+			}
+			if (isSwap) {
+				M swap = sourceModel;
+				sourceModel = (M) targetModel;
+				targetModel = (T) swap;
 			}
 
 			// Create the connection
