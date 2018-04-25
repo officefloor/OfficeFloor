@@ -17,16 +17,14 @@
  */
 package net.officefloor.eclipse.section;
 
-import java.util.List;
-
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
+import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
@@ -74,6 +72,7 @@ public class ExternalFlowItem extends
 	@Override
 	protected Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
+		context.addNode(container, context.connector(FunctionToNextExternalFlowModel.class).getNode());
 		context.label(container);
 		return container;
 	}
@@ -112,14 +111,6 @@ public class ExternalFlowItem extends
 		}).delete((context) -> {
 			context.execute(context.getOperations().removeExternalFlow(context.getModel()));
 		});
-	}
-
-	@Override
-	protected void children(List<IdeChildrenGroup> children) {
-	}
-
-	@Override
-	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
 	}
 
 }

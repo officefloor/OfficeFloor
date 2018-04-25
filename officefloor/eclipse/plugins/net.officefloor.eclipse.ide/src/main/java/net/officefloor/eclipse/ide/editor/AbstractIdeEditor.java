@@ -400,7 +400,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			ConfigurableContext configurableContext) {
 
 		// Load the connections
-		for (AbstractItem<?, ?, ?, ?, ?, ?>.IdeConnection<? extends ConnectionModel> connection : parent
+		for (AbstractItem<?, ?, ?, ?, ?, ?>.IdeConnectionTarget<? extends ConnectionModel, ?, ?> connection : parent
 				.getConnections()) {
 			connection.loadConnection(parentBuilder);
 		}

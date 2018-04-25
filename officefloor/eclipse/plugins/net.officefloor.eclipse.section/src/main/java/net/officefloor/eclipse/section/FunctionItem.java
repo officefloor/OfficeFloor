@@ -26,8 +26,12 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionModel.FunctionEvent;
+import net.officefloor.model.section.FunctionToNextExternalFlowModel;
+import net.officefloor.model.section.FunctionToNextFunctionModel;
 import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
@@ -81,8 +85,11 @@ public class FunctionItem extends
 	protected Pane visual(FunctionModel model, AdaptedModelVisualFactoryContext<FunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
-		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class));
+		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class)
+				.target(FunctionToNextFunctionModel.class).getNode());
 		context.label(heading);
+		context.addNode(heading, context.connector(FunctionToNextExternalFlowModel.class)
+				.source(FunctionToNextFunctionModel.class).getNode());
 		return container;
 	}
 
@@ -110,7 +117,31 @@ public class FunctionItem extends
 	}
 
 	@Override
-	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
+
+		// External flow
+		connections.add(new IdeConnection<>(FunctionToNextExternalFlowModel.class)
+				.connectOne((s) -> s.getNextExternalFlow(), (c) -> c.getPreviousFunction(),
+						FunctionEvent.CHANGE_NEXT_EXTERNAL_FLOW)
+				.to(ExternalFlowModel.class)
+				.many((t) -> t.getPreviousFunctions(), (c) -> c.getNextExternalFlow(),
+						ExternalFlowEvent.ADD_PREVIOUS_FUNCTION, ExternalFlowEvent.REMOVE_PREVIOUS_FUNCTION)
+				.create((s, t, ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().linkFunctionToNextExternalFlow(s, t)))
+				.delete((ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().removeFunctionToNextExternalFlow(ctx.getModel()))));
+
+		// Next function
+		connections.add(new IdeConnection<>(FunctionToNextFunctionModel.class)
+				.connectOne((s) -> s.getNextFunction(), (c) -> c.getPreviousFunction(),
+						FunctionEvent.CHANGE_NEXT_FUNCTION)
+				.to(FunctionModel.class)
+				.many((t) -> t.getPreviousFunctions(), (c) -> c.getNextFunction(), FunctionEvent.ADD_PREVIOUS_FUNCTION,
+						FunctionEvent.REMOVE_PREVIOUS_FUNCTION)
+				.create((s, t, ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().linkFunctionToNextFunction(s, t)))
+				.delete((ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().removeFunctionToNextFunction(ctx.getModel()))));
 	}
 
 }

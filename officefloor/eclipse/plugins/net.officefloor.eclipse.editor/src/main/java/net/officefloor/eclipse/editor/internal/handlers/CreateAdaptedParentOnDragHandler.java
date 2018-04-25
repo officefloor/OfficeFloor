@@ -46,10 +46,12 @@ import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParent;
+import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.internal.models.AdaptedPrototype;
@@ -338,18 +340,19 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
-		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass) {
-			return this.parent.getAdaptedConnector(connectionClass);
+		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass,
+				AdaptedConnectorRole type) {
+			return this.parent.getAdaptedConnector(connectionClass, type);
 		}
 
 		@Override
-		public <T extends Model> boolean canConnect(AdaptedChild<T> target) {
-			return this.parent.canConnect(target);
+		public <T extends Model> AdaptedPotentialConnection getPotentialConnection(AdaptedChild<T> target) {
+			return this.parent.getPotentialConnection(target);
 		}
 
 		@Override
-		public <T extends Model> void createConnection(AdaptedChild<T> target) {
-			this.parent.createConnection(target);
+		public <T extends Model> void createConnection(AdaptedChild<T> target, AdaptedConnectorRole sourceRole) {
+			this.parent.createConnection(target, sourceRole);
 		}
 
 		@Override

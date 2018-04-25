@@ -94,7 +94,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 					.parent(new SourceModel("Source"), (mapping) -> mapping.sourceModels, (mapping, ctx) -> {
 						HBox pane = new HBox();
 						ctx.label(pane);
-						ctx.addNode(pane, ctx.connector(MappingConnection.class));
+						ctx.addNode(pane, ctx.connector(MappingConnection.class).getNode());
 						return pane;
 					}, ChangeEvent.CHANGED);
 			source.label((s) -> s.label);
@@ -102,7 +102,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 			// Target
 			root.parent(new TargetModel("Target"), (mapping) -> mapping.targetModels, (mapping, ctx) -> {
 				HBox pane = new HBox();
-				ctx.addNode(pane, ctx.connector(MappingConnection.class));
+				ctx.addNode(pane, ctx.connector(MappingConnection.class).getNode());
 				ctx.label(pane);
 				return pane;
 			}, ChangeEvent.CHANGED).label((t) -> t.label);

@@ -55,8 +55,10 @@ public interface AdaptedConnector<M extends Model> {
 	 * 
 	 * @param associatedAdaptedConnectors
 	 *            Associated {@link AdaptedConnector} instances.
+	 * @param associatedRole
+	 *            {@link AdaptedConnectorRole}.
 	 */
-	void setAssociatedAdaptedConnectors(List<AdaptedConnector<M>> associatedAdaptedConnectors);
+	void setAssociation(List<AdaptedConnector<M>> associatedAdaptedConnectors, AdaptedConnectorRole associatedRole);
 
 	/**
 	 * Indicates if able to create an {@link AdaptedConnection} from the association
@@ -65,5 +67,13 @@ public interface AdaptedConnector<M extends Model> {
 	 * @return <code>true</code> if able to create {@link AdaptedConnection}.
 	 */
 	boolean isAssociationCreateConnection();
+
+	/**
+	 * Obtains the role of this {@link AdaptedConnector}.
+	 * 
+	 * @return {@link AdaptedConnectorRole}. May be <code>null</code> to indicate
+	 *         fills all roles.
+	 */
+	AdaptedConnectorRole getAssociationRole();
 
 }

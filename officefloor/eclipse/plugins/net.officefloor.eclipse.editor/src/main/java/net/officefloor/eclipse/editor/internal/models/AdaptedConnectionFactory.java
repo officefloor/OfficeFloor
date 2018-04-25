@@ -31,6 +31,7 @@ import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
+import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -44,7 +45,8 @@ import net.officefloor.model.Model;
  */
 public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C extends ConnectionModel, E extends Enum<E>>
 		extends AbstractAdaptedFactory<R, O, C, E, AdaptedConnection<C>>
-		implements AdaptedConnectionBuilder<R, O, S, C, E>, AdaptedConnectionManagementBuilder<R, O, S, C, Model> {
+		implements AdaptedConnectionBuilder<R, O, S, C, E>, AdaptedConnectionManagementBuilder<R, O, S, C, Model>,
+		AdaptedPotentialConnection {
 
 	/**
 	 * {@link Class} of the source {@link Model}.
@@ -105,33 +107,6 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	}
 
 	/**
-	 * Obtains the source {@link Model} {@link Class}.
-	 * 
-	 * @return Source {@link Model} {@link Class}.
-	 */
-	public Class<?> getSourceModelClass() {
-		return this.sourceModelClass;
-	}
-
-	/**
-	 * Obtains the target {@link Model} {@link Class}.
-	 * 
-	 * @return Target {@link Model} {@link Class}.
-	 */
-	public Class<?> getTargetModelClass() {
-		return this.targetModelClass;
-	}
-
-	/**
-	 * Indicates whether can create the {@link ConnectionModel}.
-	 * 
-	 * @return <code>true</code> if able to create the {@link ConnectionModel}.
-	 */
-	public boolean canCreateConnection() {
-		return (this.createConnection != null);
-	}
-
-	/**
 	 * Creates a {@link ConnectionModel} between the source {@link Model} and target
 	 * {@link Model}.
 	 * 
@@ -144,11 +119,6 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	public void createConnection(Model source, Model target) {
 
 		// Determine if need to reverse source/target
-		if (this.sourceModelClass.equals(target.getClass())) {
-			Model swap = source;
-			source = target;
-			target = swap;
-		}
 		if ((!(this.sourceModelClass.equals(source.getClass())))
 				|| (!(this.targetModelClass.equals(target.getClass())))) {
 			throw new IllegalStateException("Models " + source.getClass().getName() + " and "
@@ -158,6 +128,25 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 
 		// Create the connection
 		this.getContentPartFactory().addConnection(source, target, (ConnectionFactory) this.createConnection);
+	}
+
+	/*
+	 * ================= AdaptedPotentialConnection ====================
+	 */
+
+	@Override
+	public Class<?> getSourceModelClass() {
+		return this.sourceModelClass;
+	}
+
+	@Override
+	public Class<?> getTargetModelClass() {
+		return this.targetModelClass;
+	}
+
+	@Override
+	public boolean canCreateConnection() {
+		return (this.createConnection != null);
 	}
 
 	/*

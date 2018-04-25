@@ -21,37 +21,93 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 
 /**
- * Indicates an active {@link AdaptedConnectorImpl} source for dragging creation of
- * an {@link AdaptedConnection}.
+ * Indicates an active {@link AdaptedConnector} for dragging creation of an
+ * {@link AdaptedConnection}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ActiveConnectionSourceModel {
 
 	/**
-	 * Active {@link AdaptedChild}.
+	 * Active {@link ActiveConnectionSource}.
 	 */
-	private final ReadOnlyObjectWrapper<AdaptedChild<?>> activeAdaptedChild = new ReadOnlyObjectWrapper<>(null);
+	private final ReadOnlyObjectWrapper<ActiveConnectionSource> activeSource = new ReadOnlyObjectWrapper<>(null);
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param activeAdaptedChild
 	 *            Active {@link AdaptedChild}.
+	 * @param role
+	 *            {@link AdaptedConnectorRole}.
 	 */
-	public void setActiveAdaptedChild(AdaptedChild<?> activeAdaptedChild) {
-		this.activeAdaptedChild.set(activeAdaptedChild);
+	public void setActiveSource(AdaptedChild<?> activeAdaptedChild, AdaptedConnectorRole role) {
+		if (activeAdaptedChild == null) {
+			this.activeSource.set(null);
+		} else {
+			this.activeSource.set(new ActiveConnectionSource(activeAdaptedChild, role));
+		}
 	}
 
 	/**
-	 * Allows listening for the active {@link AdaptedChild}.
+	 * Allows listening for the active {@link ActiveConnectionSource}.
 	 * 
 	 * @return {@link ReadOnlyObjectProperty} to listen for changes to the active
-	 *         {@link AdaptedChild}.
+	 *         {@link ActiveConnectionSource}.
 	 */
-	public ReadOnlyObjectProperty<AdaptedChild<?>> getActiveAdaptedChild() {
-		return this.activeAdaptedChild.getReadOnlyProperty();
+	public ReadOnlyObjectProperty<ActiveConnectionSource> activeSource() {
+		return this.activeSource.getReadOnlyProperty();
 	}
+
+	/**
+	 * Active connection source.
+	 */
+	public static class ActiveConnectionSource {
+
+		/**
+		 * Source {@link AdaptedChild}.
+		 */
+		private final AdaptedChild<?> child;
+
+		/**
+		 * Role of source {@link AdaptedChild}.
+		 */
+		private final AdaptedConnectorRole role;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param child
+		 *            Source {@link AdaptedChild}.
+		 * @param role
+		 *            Role of source {@link AdaptedChild}.
+		 */
+		private ActiveConnectionSource(AdaptedChild<?> child, AdaptedConnectorRole role) {
+			this.child = child;
+			this.role = role;
+		}
+
+		/**
+		 * Obtains the source {@link AdaptedChild}.
+		 * 
+		 * @return Source {@link AdaptedChild}.
+		 */
+		public AdaptedChild<?> getSource() {
+			return this.child;
+		}
+
+		/**
+		 * Obtains the role of the source {@link AdaptedChild}.
+		 * 
+		 * @return {@link AdaptedConnectorRole}. May be <code>null</code> if fulfills
+		 *         any {@link AdaptedConnectorRole}.
+		 */
+		public AdaptedConnectorRole getRole() {
+			return this.role;
+		}
+	}
+
 }

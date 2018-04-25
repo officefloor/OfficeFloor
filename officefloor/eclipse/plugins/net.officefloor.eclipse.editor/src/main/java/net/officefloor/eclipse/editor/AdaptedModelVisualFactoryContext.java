@@ -25,7 +25,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -72,7 +71,44 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	<P extends Pane> P childGroup(String childGroupName, P parent);
 
 	/**
-	 * Specifies the {@link GeometryNode} as {@link AdaptedConnectorImpl}
+	 * Connector.
+	 */
+	public static interface Connector {
+
+		/**
+		 * Obtains the {@link Node} for the {@link Connector}.
+		 * 
+		 * @return {@link Node} for the {@link Connector}.
+		 */
+		Node getNode();
+
+		/**
+		 * Qualifies as source {@link Connector} for {@link ConnectionModel} connecting
+		 * itself.
+		 * 
+		 * @param sourceConnectionModelClasses
+		 *            Source {@link ConnectionModel} {@link Class} instances for self
+		 *            connecting.
+		 * @return Source {@link Connector}.
+		 */
+		@SuppressWarnings("rawtypes")
+		Connector source(Class... sourceConnectionModelClasses);
+
+		/**
+		 * Qualifies as target {@link Connector} for {@link ConnectionModel} connecting
+		 * itself.
+		 * 
+		 * @param targetConnectionModelClasses
+		 *            Target {@link ConnectionModel} {@link Class} instances for self
+		 *            connecting.
+		 * @return Target {@link Connector}.
+		 */
+		@SuppressWarnings("rawtypes")
+		Connector target(Class... targetConnectionModelClasses);
+	}
+
+	/**
+	 * Specifies the {@link GeometryNode} as {@link AdaptedConnector}
 	 * {@link IAnchor}.
 	 * 
 	 * @param geometryNode
@@ -80,22 +116,23 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	 * @param connectionModelClasses
 	 *            {@link ConnectionModel} {@link Class} instances that this
 	 *            connector satisfies.
-	 * @return Input {@link Node}.
+	 * @return {@link Connector}.
 	 */
 	@SuppressWarnings("rawtypes")
-	<G extends IGeometry, N extends GeometryNode<G>> N connector(N geometryNode, Class... connectionModelClasses);
+	<G extends IGeometry, N extends GeometryNode<G>> Connector connector(N geometryNode,
+			Class... connectionModelClasses);
 
 	/**
-	 * Configures the default {@link GeometryNode} as {@link AdaptedConnectorImpl}
+	 * Configures the default {@link GeometryNode} as {@link AdaptedConnector}
 	 * {@link IAnchor}.
 	 * 
 	 * @param connectionClasses
 	 *            {@link ConnectionModel} {@link Class} instances that this
 	 *            connector satisfies.
-	 * @return Input {@link Node}.
+	 * @return {@link Connector}.
 	 */
 	@SuppressWarnings("rawtypes")
-	Node connector(Class... connectionClasses);
+	Connector connector(Class... connectionClasses);
 
 	/**
 	 * Convenience method to create a {@link Node} with {@link Image} and hover

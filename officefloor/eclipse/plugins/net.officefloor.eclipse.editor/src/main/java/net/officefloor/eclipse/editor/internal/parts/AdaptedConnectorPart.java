@@ -28,10 +28,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 
-import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnectorRole;
+import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel;
+import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel.ActiveConnectionSource;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 
 /**
@@ -50,9 +52,10 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 	 */
 	public void setActiveConnector(boolean isActive) {
 		if (isActive) {
-			this.activeConnectionSource.setActiveAdaptedChild(this.getContent().getParentAdaptedChild());
+			this.activeConnectionSource.setActiveSource(this.getContent().getParentAdaptedChild(),
+					this.getContent().getAssociationRole());
 		} else {
-			this.activeConnectionSource.setActiveAdaptedChild(null);
+			this.activeConnectionSource.setActiveSource(null, null);
 		}
 	}
 
@@ -73,11 +76,11 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 		super.setContent(content);
 
 		// Listen in on changes to determine if can be a connector
-		this.activeConnectionSource.getActiveAdaptedChild().addListener((change) -> {
-			AdaptedChild<?> activeChild = this.activeConnectionSource.getActiveAdaptedChild().get();
+		this.activeConnectionSource.activeSource().addListener((change) -> {
+			ActiveConnectionSource activeSource = this.activeConnectionSource.activeSource().get();
 
-			// Determine if clear active child
-			if (activeChild == null) {
+			// Determine if clear active source
+			if (activeSource == null) {
 				this.getVisual().visibleProperty().set(true);
 				return;
 			}
@@ -88,12 +91,27 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 			}
 
 			// Keep this child visible
-			if (activeChild == this.getContent().getParentAdaptedChild()) {
+			if (activeSource.getSource() == this.getContent().getParentAdaptedChild()) {
 				return;
 			}
 
 			// Determine if can be connected to from the active child
-			boolean isAbleToConnect = activeChild.canConnect(this.getContent().getParentAdaptedChild());
+			boolean isAbleToConnect = false;
+			AdaptedPotentialConnection potentialConnection = activeSource.getSource()
+					.getPotentialConnection(this.getContent().getParentAdaptedChild());
+			if ((potentialConnection != null) && (potentialConnection.canCreateConnection())) {
+				isAbleToConnect = true;
+
+				// Determine if connection to same type
+				AdaptedConnectorRole activeRole = activeSource.getRole();
+				if ((potentialConnection.getSourceModelClass() == potentialConnection.getTargetModelClass())
+						&& (activeRole != null)) {
+					// Connection to same type (so determine if same role)
+					if (activeRole.equals(this.getContent().getAssociationRole())) {
+						isAbleToConnect = false;
+					}
+				}
+			}
 
 			// Display based on whether can connect
 			this.getVisual().visibleProperty().set(isAbleToConnect);

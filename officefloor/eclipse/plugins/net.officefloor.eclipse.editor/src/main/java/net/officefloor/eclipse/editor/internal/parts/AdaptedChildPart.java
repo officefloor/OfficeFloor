@@ -34,6 +34,7 @@ import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
@@ -215,45 +216,117 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final <G extends IGeometry, N extends GeometryNode<G>> N connector(N geometryNode,
+	public final <G extends IGeometry, N extends GeometryNode<G>> Connector connector(N geometryNode,
 			Class... connectionClasses) {
+		return new Connector() {
 
-		// Create the assocation listing
-		List<AdaptedConnector<M>> assocations = new ArrayList<>(connectionClasses.length);
+			// Indicates if initialised
+			private boolean isInitialised = false;
 
-		// Register the geometry node
-		for (Class<?> connectionClass : connectionClasses) {
+			// Role of connector (when connecting to self)
+			private AdaptedConnectorRole role = null;
 
-			// Obtain the adapted connector
-			AdaptedConnector<M> connector = this.getContent()
-					.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass);
-			if (connector == null) {
-				throw new IllegalStateException("Connection " + connectionClass.getName()
-						+ " not configured to connect to model " + this.getContent().getModel().getClass().getName());
+			// Role specific connection classes
+			private Class<?>[] roleConnectionClasses = null;
+
+			@Override
+			public Connector source(Class... sourceConnectionClass) {
+				if (this.isInitialised) {
+					throw new IllegalStateException("Connector already initialised for model "
+							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+				}
+				if (this.role != null) {
+					throw new IllegalStateException("Connector already initialised to target for model "
+							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+				}
+				this.role = AdaptedConnectorRole.SOURCE;
+				this.roleConnectionClasses = sourceConnectionClass;
+				return this;
 			}
 
-			// Obtain the visual
-			AdaptedConnectorVisual visual = this.adaptedConnectorVisuals.get(connector);
-			if (visual.node != null) {
-				throw new IllegalStateException("Connection " + connectionClass.getName()
-						+ " configured more than once for model " + this.getContent().getModel().getClass().getName());
+			@Override
+			public Connector target(Class... targetConnectionClass) {
+				if (this.isInitialised) {
+					throw new IllegalStateException("Connector already initialised for model "
+							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+				}
+				if (this.role != null) {
+					throw new IllegalStateException("Connector already initialised to source for model "
+							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+				}
+				this.role = AdaptedConnectorRole.TARGET;
+				this.roleConnectionClasses = targetConnectionClass;
+				return this;
 			}
 
-			// Load the connector visual
-			visual.node = geometryNode;
+			@Override
+			public Node getNode() {
 
-			// Associate the connectors
-			assocations.add(connector);
-			connector.setAssociatedAdaptedConnectors(assocations);
-		}
+				// Determine if already initialised
+				if (this.isInitialised) {
+					return geometryNode;
+				}
 
-		// Return geometry node
-		return geometryNode;
+				// Create the assocation listing
+				List<AdaptedConnector<M>> assocations = new ArrayList<>(connectionClasses.length);
+
+				// Register the non-typed connections
+				this.loadConnectors(connectionClasses, null, assocations);
+
+				// Provide the type specific connections
+				if (this.roleConnectionClasses != null) {
+					this.loadConnectors(this.roleConnectionClasses, this.role, assocations);
+				}
+
+				// Return geometry node
+				return geometryNode;
+			}
+
+			/**
+			 * Loads the connector.
+			 * 
+			 * @param connectionClasses
+			 *            {@link ConnectionModel} {@link Class} instances.
+			 * @param role
+			 *            {@link AdaptedConnectorRole}.
+			 * @param assocations
+			 *            Associations list for {@link AdaptedConnector}.
+			 */
+			private void loadConnectors(Class<?>[] connectionClasses, AdaptedConnectorRole role,
+					List<AdaptedConnector<M>> assocations) {
+				for (Class<?> connectionClass : connectionClasses) {
+
+					// Obtain the adapted connector
+					AdaptedConnector<M> connector = AdaptedChildPart.this.getContent()
+							.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass, role);
+					if (connector == null) {
+						throw new IllegalStateException(
+								"Connection " + connectionClass.getName() + " not configured to connect to model "
+										+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+					}
+
+					// Obtain the visual
+					AdaptedConnectorVisual visual = AdaptedChildPart.this.adaptedConnectorVisuals.get(connector);
+					if (visual.node != null) {
+						throw new IllegalStateException(
+								"Connection " + connectionClass.getName() + " configured more than once for model "
+										+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+					}
+
+					// Load the connector visual
+					visual.node = geometryNode;
+
+					// Associate the connectors
+					assocations.add(connector);
+					connector.setAssociation(assocations, this.role);
+				}
+			}
+		};
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public Node connector(Class... connectionClasses) {
+	public Connector connector(Class... connectionClasses) {
 
 		// Create the geometry node for the anchor
 		final double X_LEFT = 0;

@@ -36,10 +36,12 @@ import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
+import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
 import net.officefloor.eclipse.editor.ModelAction;
@@ -149,10 +151,26 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 * @param modelToConnection
 	 *            {@link ModelToConnection}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadModelToConnection(Class<? extends ConnectionModel> connectionClass,
 			ModelToConnection<R, O, ?, ?, ?> modelToConnection) {
-		if (this.connections.containsKey(connectionClass)) {
+
+		// Obtain the possible existing connection
+		ModelToConnection<R, O, M, E, ?> existing = this.connections.get(connectionClass);
+		if (existing != null) {
+
+			// Determine if linking to self
+			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = modelToConnection.getAdaptedConnectionFactory();
+			if ((!(existing instanceof ModelToSelfConnection))
+					&& (connectionFactory.getSourceModelClass() == connectionFactory.getTargetModelClass())) {
+
+				// Overwrite with model to self connection
+				this.connections.put(connectionClass,
+						new ModelToSelfConnection<>(existing, (ModelToConnection) modelToConnection));
+				return;
+			}
+
+			// Configured connection twice
 			throw new IllegalStateException("Connection " + connectionClass.getName() + " already configured for model "
 					+ this.getModelClass().getName());
 		}
@@ -353,9 +371,67 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		private List<ChildrenGroup<M, ?>> childrenGroups;
 
 		/**
-		 * {@link AdaptedConnector} instances by {@link ConnectionModel} {@link Class}.
+		 * {@link AdaptedConnector} instances by {@link ConnectorKey}.
 		 */
-		private Map<Class<? extends ConnectionModel>, AdaptedConnector<M>> connectors;
+		private Map<ConnectorKey, AdaptedConnector<M>> connectors;
+
+		/**
+		 * Key to identify an {@link AdapatedConnector}.
+		 */
+		private static class ConnectorKey {
+
+			/**
+			 * {@link ConnectionModel} {@link Class}.
+			 */
+			private final Class<? extends ConnectionModel> connectionClass;
+
+			/**
+			 * {@link AdaptedConnectorRole}. May be <code>null</code>.
+			 */
+			private final AdaptedConnectorRole type;
+
+			/**
+			 * Instantiate.
+			 * 
+			 * @param connectionClass
+			 *            {@link ConnectionModel} {@link Class}.
+			 * @param type
+			 *            {@link AdaptedConnectorRole}. May be <code>null</code>.
+			 */
+			private ConnectorKey(Class<? extends ConnectionModel> connectionClass, AdaptedConnectorRole type) {
+				this.connectionClass = connectionClass;
+				this.type = type;
+			}
+
+			/*
+			 * ============= Object ================
+			 */
+
+			@Override
+			public int hashCode() {
+				return this.connectionClass.hashCode();
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (!(obj instanceof ConnectorKey)) {
+					return false;
+				}
+				ConnectorKey that = (ConnectorKey) obj;
+
+				// Ensure same connector class
+				if (!(this.connectionClass.equals(that.connectionClass))) {
+					return false;
+				}
+
+				// Ensure match on type
+				if ((this.type == null) || (that.type == null)) {
+					return true;
+				} else {
+					return this.type.equals(that.type);
+				}
+			}
+		}
 
 		/*
 		 * =================== AdaptedChild =====================
@@ -378,8 +454,23 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 				// Obtain the model to connector
 				ModelToConnection<R, O, M, E, ?> connector = this.getFactory().connections.get(connectionClass);
 
-				// Register the adapted connector
-				this.connectors.put(connectionClass, new AdaptedConnectorImpl<>(this, connectionClass, connector));
+				// Determine if connecting to self
+				if (connector instanceof ModelToSelfConnection) {
+					ModelToSelfConnection<R, O, M, E, ?> selfConnector = (ModelToSelfConnection<R, O, M, E, ?>) connector;
+
+					// Register the source and target connector
+					this.connectors.put(new ConnectorKey(connectionClass, AdaptedConnectorRole.SOURCE),
+							new AdaptedConnectorImpl<>(this, connectionClass, AdaptedConnectorRole.SOURCE,
+									selfConnector.getSourceToConnection()));
+					this.connectors.put(new ConnectorKey(connectionClass, AdaptedConnectorRole.TARGET),
+							new AdaptedConnectorImpl<>(this, connectionClass, AdaptedConnectorRole.TARGET,
+									selfConnector.getTargetToConnection()));
+
+				} else {
+					// Register the adapted connector (for source/target)
+					this.connectors.put(new ConnectorKey(connectionClass, null),
+							new AdaptedConnectorImpl<>(this, connectionClass, null, connector));
+				}
 
 				// Register the connection change events
 				connectionChangeEvents.addAll(Arrays.asList(connector.getConnectionChangeEvents()));
@@ -509,18 +600,35 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		@Override
-		public <T extends Model> boolean canConnect(AdaptedChild<T> target) {
-			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = this.getConnectionFactory(target);
-			return (connectionFactory != null);
+		public <T extends Model> AdaptedPotentialConnection getPotentialConnection(AdaptedChild<T> target) {
+			return this.getConnectionFactory(target);
 		}
 
 		@Override
-		public <T extends Model> void createConnection(AdaptedChild<T> target) {
+		@SuppressWarnings("unchecked")
+		public <T extends Model> void createConnection(AdaptedChild<T> target, AdaptedConnectorRole sourceRole) {
 
 			// Determine if connection already to target
 			for (AdaptedConnection<?> connection : this.getConnections()) {
-				if ((connection.getSource() == target) || (connection.getTarget() == target)) {
-					return; // already connected
+				if (sourceRole == null) {
+					// No particular role, so match any connection
+					if ((connection.getSource() == target) || (connection.getTarget() == target)) {
+						return; // already connected
+					}
+				} else {
+					// Match based on role
+					switch (sourceRole) {
+					case SOURCE:
+						if (connection.getTarget() == target) {
+							return; // already connected as source
+						}
+						break;
+					case TARGET:
+						if (connection.getSource() == target) {
+							return; // already connected as target
+						}
+						break;
+					}
 				}
 			}
 
@@ -533,13 +641,27 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 				return; // not able to create the connection
 			}
 
+			// Determine the source target order
+			M sourceModel = this.getModel();
+			T targetModel = target.getModel();
+			if (connectionFactory.getSourceModelClass() == connectionFactory.getTargetModelClass()) {
+				// Connecting to same type, so order based on role
+				if (AdaptedConnectorRole.TARGET.equals(sourceRole)) {
+					// This is target, so swap
+					M swap = sourceModel;
+					sourceModel = (M) targetModel;
+					targetModel = (T) swap;
+				}
+			}
+
 			// Create the connection
-			connectionFactory.createConnection(this.getModel(), target.getModel());
+			connectionFactory.createConnection(sourceModel, targetModel);
 		}
 
 		@Override
-		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass) {
-			AdaptedConnector<M> connector = this.connectors.get(connectionClass);
+		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass,
+				AdaptedConnectorRole type) {
+			AdaptedConnector<M> connector = this.connectors.get(new ConnectorKey(connectionClass, type));
 			if (connector == null) {
 				throw new IllegalStateException("No connector for connection " + connectionClass.getName()
 						+ " from model " + this.getModel().getClass().getName());

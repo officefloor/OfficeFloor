@@ -276,7 +276,8 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 
 			// Have target so create the connection
 			AdaptedConnector<?> source = this.connection.getSourceAdaptedConnector();
-			source.getParentAdaptedChild().createConnection(target.getParentAdaptedChild());
+			source.getParentAdaptedChild().createConnection(target.getParentAdaptedChild(),
+					this.sourceConnector.getContent().getAssociationRole());
 		}
 
 		// Clearn up the drag

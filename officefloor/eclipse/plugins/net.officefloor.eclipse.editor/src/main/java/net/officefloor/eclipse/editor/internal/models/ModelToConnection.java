@@ -31,18 +31,18 @@ public class ModelToConnection<R extends Model, O, M extends Model, E extends En
 	/**
 	 * Obtains the {@link ConnectionModel} instances.
 	 */
-	private final Function<M, List<C>> getConnections;
+	protected final Function<M, List<C>> getConnections;
 
 	/**
 	 * {@link Enum} events to indicate change in {@link ConnectionModel} instances.
 	 */
-	private final E[] connectionChangeEvents;
+	protected final E[] connectionChangeEvents;
 
 	/**
 	 * {@link AdaptedConnectionFactory} to create the {@link ConnectionModel} for
 	 * the {@link Model}.
 	 */
-	private final AdaptedConnectionFactory<R, O, ?, ?, ?> adaptedConnectionFactory;
+	protected final AdaptedConnectionFactory<R, O, ?, ?, ?> adaptedConnectionFactory;
 
 	/**
 	 * Instantiate.

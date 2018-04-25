@@ -68,9 +68,12 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 * 
 	 * @param connectionClass
 	 *            {@link ConnectionModel} {@link Class}.
+	 * @param type
+	 *            {@link AdaptedConnectorRole}.
 	 * @return {@link AdaptedConnectorImpl}.
 	 */
-	AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass);
+	AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass,
+			AdaptedConnectorRole type);
 
 	/**
 	 * Obtains the {@link AdaptedConnection} instances of this {@link AdaptedChild}
@@ -81,22 +84,25 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	List<AdaptedConnection<?>> getConnections();
 
 	/**
-	 * Indicates if this {@link AdaptedChild} can connect to the target
-	 * {@link AdaptedChild}.
+	 * Obtains the {@link AdaptedPotentialConnection} to the target.
 	 * 
 	 * @param target
 	 *            Target {@link AdaptedChild},
-	 * @return <code>true</code> if can be connected.
+	 * @return {@link AdaptedPotentialConnection} to the target or <code>null</code>
+	 *         if no means to connect to target.
 	 */
-	<T extends Model> boolean canConnect(AdaptedChild<T> target);
+	<T extends Model> AdaptedPotentialConnection getPotentialConnection(AdaptedChild<T> target);
 
 	/**
 	 * Creates the {@link ConnectionModel} within the {@link Model} structure.
 	 * 
 	 * @param target
 	 *            Target {@link AdaptedChild}.
+	 * @param sourceRole
+	 *            {@link AdaptedConnectorRole} of the this source
+	 *            {@link AdaptedChild}.
 	 */
-	<T extends Model> void createConnection(AdaptedChild<T> target);
+	<T extends Model> void createConnection(AdaptedChild<T> target, AdaptedConnectorRole sourceRole);
 
 	/**
 	 * Creates the visual {@link Pane}.

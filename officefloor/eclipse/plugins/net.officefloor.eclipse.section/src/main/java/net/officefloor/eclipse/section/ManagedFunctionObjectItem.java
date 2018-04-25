@@ -54,8 +54,8 @@ public class ManagedFunctionObjectItem extends
 	protected Pane visual(ManagedFunctionObjectModel model,
 			AdaptedModelVisualFactoryContext<ManagedFunctionObjectModel> context) {
 		HBox container = new HBox();
-		context.addNode(container, context.connector());
 		context.label(container);
+		context.addNode(container, context.connector().getNode());
 		return container;
 	}
 
@@ -65,11 +65,7 @@ public class ManagedFunctionObjectItem extends
 	}
 
 	@Override
-	protected void children(List<IdeChildrenGroup> childGroups) {
-	}
-
-	@Override
-	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 	}
 
 }

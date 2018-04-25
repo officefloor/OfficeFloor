@@ -33,11 +33,14 @@ import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
+import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionRemover;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -391,7 +394,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @param childGroups
 	 *            {@link IdeChildrenGroup} instances.
 	 */
-	protected abstract void children(List<IdeChildrenGroup> childGroups);
+	protected void children(List<IdeChildrenGroup> childGroups) {
+		// No children by default
+	}
 
 	/**
 	 * IDE {@link AdaptedConnectionBuilder}.
@@ -492,36 +497,6 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 			return (IdeConnectionTarget<C, T, TE>) this.target;
 		}
 
-		/**
-		 * Loads the connection to the {@link AdaptedChildBuilder}.
-		 * 
-		 * @param builder
-		 *            {@link AdaptedChildBuilder} to be configured with the
-		 *            {@link ConnectionModel}.
-		 */
-		void loadConnection(AdaptedChildBuilder<R, O, M, E> builder) {
-
-			// Initiate the connection
-			AdaptedConnectionBuilder<R, O, M, C, E> connection;
-			if (this.sourceToMany != null) {
-				connection = builder.connectMany(this.connectionClass, this.sourceToMany, this.connToSource,
-						this.sourceChangeEvents);
-			} else if (this.sourceToOne != null) {
-				connection = builder.connectOne(this.connectionClass, this.sourceToOne, this.connToSource,
-						this.sourceChangeEvents);
-			} else {
-				throw new IllegalStateException(
-						"Must specify connection details for connection " + this.connectionClass.getName());
-			}
-
-			// Complete connection
-			if (this.target != null) {
-				this.target.loadConnection(this.connectionClass, connection);
-			} else {
-				throw new IllegalStateException(
-						"Must specify connection target for connection " + this.connectionClass.getName());
-			}
-		}
 	}
 
 	/**
@@ -560,7 +535,17 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		private TE[] targetChangeEvents;
 
 		/**
-		 * Instantiate.
+		 * {@link ConnectionFactory} to create the {@link ConnectionModel}.
+		 */
+		private ConnectionFactory<R, O, M, C, T> createConnection = null;
+
+		/**
+		 * {@link ConnectionRemover} to remove the {@link ConnectionModel}.
+		 */
+		private ConnectionRemover<R, O, C> deleteConnection = null;
+
+		/**
+		 * Instantiate from only the {@link IdeConnection}.
 		 * 
 		 * @param ideConnection
 		 *            {@link IdeConnection}.
@@ -586,12 +571,12 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 */
 		@SafeVarargs
 		@SuppressWarnings("unchecked")
-		public final IdeConnection<C> many(Function<T, List<C>> targetToMany, Function<C, T> connToTarget,
+		public final IdeConnectionTarget<C, T, TE> many(Function<T, List<C>> targetToMany, Function<C, T> connToTarget,
 				Enum<?>... targetChangeEvents) {
 			this.targetToMany = targetToMany;
 			this.connToTarget = connToTarget;
 			this.targetChangeEvents = (TE[]) targetChangeEvents;
-			return this.ideConnection;
+			return this;
 		}
 
 		/**
@@ -607,32 +592,79 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 */
 		@SafeVarargs
 		@SuppressWarnings("unchecked")
-		public final IdeConnection<C> one(Function<T, C> targetToOne, Function<C, T> connToTarget,
+		public final IdeConnectionTarget<C, T, TE> one(Function<T, C> targetToOne, Function<C, T> connToTarget,
 				Enum<?>... targetChangeEvents) {
 			this.targetToOne = targetToOne;
 			this.connToTarget = connToTarget;
 			this.targetChangeEvents = (TE[]) targetChangeEvents;
-			return this.ideConnection;
+			return this;
 		}
 
 		/**
-		 * Loads the target connection details to the {@link AdaptedConnectionBuilder}.
+		 * Configures creating the {@link ConnectionModel}.
 		 * 
-		 * @param connectionClass
-		 *            {@link ConnectionModel} {@link Class}.
-		 * @param connection
-		 *            {@link AdaptedConnectionBuilder}.
+		 * @param createConnetion
+		 *            {@link ConnectionFactory} to create the {@link ConnectionModel}.
+		 * @return <code>this</code>.
 		 */
-		private void loadConnection(Class<C> connectionClass, AdaptedConnectionBuilder<R, O, M, C, E> connection) {
+		public final IdeConnectionTarget<C, T, TE> create(ConnectionFactory<R, O, M, C, T> createConnetion) {
+			this.createConnection = createConnetion;
+			return this;
+		}
+
+		/**
+		 * Configures deleting the {@link ConnectionModel}.
+		 * 
+		 * @param deleteConnection
+		 *            {@link ConnectionRemover} to delete the {@link ConnectionModel}.
+		 * @return <code>this</code>.
+		 */
+		public final IdeConnectionTarget<C, T, TE> delete(ConnectionRemover<R, O, C> deleteConnection) {
+			this.deleteConnection = deleteConnection;
+			return this;
+		}
+
+		/**
+		 * Loads the connection to the {@link AdaptedChildBuilder}.
+		 * 
+		 * @param builder
+		 *            {@link AdaptedChildBuilder} to be configured with the
+		 *            {@link ConnectionModel}.
+		 */
+		void loadConnection(AdaptedChildBuilder<R, O, M, E> builder) {
+
+			// Initiate the connection
+			AdaptedConnectionBuilder<R, O, M, C, E> connection;
+			if (this.ideConnection.sourceToMany != null) {
+				connection = builder.connectMany(this.ideConnection.connectionClass, this.ideConnection.sourceToMany,
+						this.ideConnection.connToSource, this.ideConnection.sourceChangeEvents);
+			} else if (this.ideConnection.sourceToOne != null) {
+				connection = builder.connectOne(this.ideConnection.connectionClass, this.ideConnection.sourceToOne,
+						this.ideConnection.connToSource, this.ideConnection.sourceChangeEvents);
+			} else {
+				throw new IllegalStateException("Must specify connection details for connection "
+						+ this.ideConnection.connectionClass.getName());
+			}
 
 			// Complete the connection
+			AdaptedConnectionManagementBuilder<R, O, M, C, T> management;
 			if (this.targetToMany != null) {
-				connection.toMany(this.targetClass, this.targetToMany, this.connToTarget, this.targetChangeEvents);
+				management = connection.toMany(this.targetClass, this.targetToMany, this.connToTarget,
+						this.targetChangeEvents);
 			} else if (this.targetToOne != null) {
-				connection.toOne(this.targetClass, this.targetToOne, this.connToTarget, this.targetChangeEvents);
+				management = connection.toOne(this.targetClass, this.targetToOne, this.connToTarget,
+						this.targetChangeEvents);
 			} else {
-				throw new IllegalStateException(
-						"Must specify connection target details for connection " + connectionClass.getName());
+				throw new IllegalStateException("Must specify connection target details for connection "
+						+ this.ideConnection.connectionClass.getName());
+			}
+
+			// Load the create / delete for connection
+			if (this.createConnection != null) {
+				management.create(this.createConnection);
+			}
+			if (this.deleteConnection != null) {
+				management.delete(this.deleteConnection);
 			}
 		}
 	}
@@ -643,19 +675,22 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @return {@link IdeConnection} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public IdeConnection<? extends ConnectionModel>[] getConnections() {
-		List<IdeConnection<? extends ConnectionModel>> connections = new LinkedList<>();
+	public IdeConnectionTarget<? extends ConnectionModel, ?, ?>[] getConnections() {
+		List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections = new LinkedList<>();
 		this.connections(connections);
-		return connections.toArray(new AbstractItem.IdeConnection[connections.size()]);
+		return connections.toArray(new AbstractItem.IdeConnectionTarget[connections.size()]);
 	}
 
 	/**
-	 * Loads the {@link IdeConnection} instances.
+	 * Loads the {@link IdeConnectionTarget} instances (created from
+	 * {@link IdeConnection} instances).
 	 * 
 	 * @param childGroups
 	 *            {@link IdeConnection} instances.
 	 */
-	protected abstract void connections(List<IdeConnection<? extends ConnectionModel>> connections);
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
+		// No connections by default
+	}
 
 	/**
 	 * Creates the {@link AdaptedChildBuilder}.

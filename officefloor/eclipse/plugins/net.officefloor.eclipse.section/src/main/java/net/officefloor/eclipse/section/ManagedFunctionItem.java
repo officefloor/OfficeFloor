@@ -90,7 +90,7 @@ public class ManagedFunctionItem extends
 			ctx.getChangeExecutor().execute(this.getConfigurableContext().getOperations().addFunction(functionName,
 					managedFunction, managedFunctionType));
 		}, DefaultImages.ADD));
-		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class));
+		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class).getNode());
 		context.addNode(container, context.childGroup(ManagedFunctionObjectItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
@@ -107,7 +107,7 @@ public class ManagedFunctionItem extends
 	}
 
 	@Override
-	protected void connections(List<IdeConnection<? extends ConnectionModel>> connections) {
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 		connections.add(new IdeConnection<>(ManagedFunctionToFunctionModel.class)
 				.connectMany((source) -> source.getFunctions(), (conn) -> conn.getManagedFunction(),
 						ManagedFunctionEvent.ADD_FUNCTION, ManagedFunctionEvent.REMOVE_FUNCTION)
