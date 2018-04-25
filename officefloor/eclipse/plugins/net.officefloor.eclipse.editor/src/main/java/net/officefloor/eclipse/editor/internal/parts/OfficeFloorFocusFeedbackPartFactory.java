@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.editor.internal.parts;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,14 +38,8 @@ public class OfficeFloorFocusFeedbackPartFactory extends DefaultFocusFeedbackPar
 	@Override
 	public List<IFeedbackPart<? extends Node>> createFeedbackParts(List<? extends IVisualPart<? extends Node>> targets,
 			Map<Object, Object> contextMap) {
-
-		// Determine if contains connection
-		if (OfficeFloorContentPartFactory.isContainsConnection(targets)) {
-			return super.createFeedbackParts(targets, contextMap);
-		}
-
-		// Otherwise no feedback
-		return Collections.emptyList();
+		return OfficeFloorContentPartFactory.createFeedbackParts(targets,
+				(parts) -> super.createFeedbackParts(parts, contextMap));
 	}
 
 }

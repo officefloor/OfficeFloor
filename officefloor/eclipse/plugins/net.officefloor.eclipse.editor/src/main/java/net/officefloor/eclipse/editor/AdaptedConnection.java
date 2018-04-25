@@ -41,6 +41,13 @@ public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedMod
 	AdaptedChild<?> getTarget();
 
 	/**
+	 * Indicates whether able to remove the {@link ConnectionModel}.
+	 * 
+	 * @return <code>true</code> if able to remove the {@link ConnectionModel}.
+	 */
+	boolean canRemove();
+
+	/**
 	 * Removes the {@link ConnectionModel}.
 	 */
 	void remove();

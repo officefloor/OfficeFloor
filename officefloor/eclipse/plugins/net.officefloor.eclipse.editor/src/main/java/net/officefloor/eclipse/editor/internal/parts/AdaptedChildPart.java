@@ -33,12 +33,13 @@ import javafx.scene.paint.Color;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.editor.ModelAction;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -125,7 +126,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 			this.childrenGroupVisuals.put(childrenGroup, new ChildrenGroupVisual());
 		}
 
-		// Load the adapated connector visuals
+		// Load the adapted connector visuals
 		this.adaptedConnectorVisuals = new HashMap<>();
 		for (AdaptedConnector<M> adaptedConnector : this.getContent().getAdaptedConnectors()) {
 			this.adaptedConnectorVisuals.put(adaptedConnector, new AdaptedConnectorVisual());
@@ -217,11 +218,14 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	public final <G extends IGeometry, N extends GeometryNode<G>> N connector(N geometryNode,
 			Class... connectionClasses) {
 
+		// Create the assocation listing
+		List<AdaptedConnector<M>> assocations = new ArrayList<>(connectionClasses.length);
+
 		// Register the geometry node
 		for (Class<?> connectionClass : connectionClasses) {
 
 			// Obtain the adapted connector
-			AdaptedConnector<M> connector = (AdaptedConnector<M>) this.getContent()
+			AdaptedConnector<M> connector = this.getContent()
 					.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass);
 			if (connector == null) {
 				throw new IllegalStateException("Connection " + connectionClass.getName()
@@ -235,8 +239,12 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 						+ " configured more than once for model " + this.getContent().getModel().getClass().getName());
 			}
 
-			// Load the connector
+			// Load the connector visual
 			visual.node = geometryNode;
+
+			// Associate the connectors
+			assocations.add(connector);
+			connector.setAssociatedAdaptedConnectors(assocations);
 		}
 
 		// Return geometry node
@@ -296,12 +304,12 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	}
 
 	/**
-	 * {@link AdaptedConnector} visual.
+	 * {@link AdaptedConnectorImpl} visual.
 	 */
 	private static class AdaptedConnectorVisual {
 
 		/**
-		 * {@link GeometryNode} for the {@link AdaptedConnector}.
+		 * {@link GeometryNode} for the {@link AdaptedConnectorImpl}.
 		 */
 		private GeometryNode<?> node = null;
 	}

@@ -22,7 +22,7 @@ import java.util.List;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -57,18 +57,18 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	List<ChildrenGroup<M, ?>> getChildrenGroups();
 
 	/**
-	 * Obtains the {@link AdaptedConnector} instances.
+	 * Obtains the {@link AdaptedConnectorImpl} instances.
 	 * 
-	 * @return {@link AdaptedConnector} instances.
+	 * @return {@link AdaptedConnectorImpl} instances.
 	 */
 	List<AdaptedConnector<M>> getAdaptedConnectors();
 
 	/**
-	 * Obtains the {@link AdaptedConnector}.
+	 * Obtains the {@link AdaptedConnectorImpl}.
 	 * 
 	 * @param connectionClass
 	 *            {@link ConnectionModel} {@link Class}.
-	 * @return {@link AdaptedConnector}.
+	 * @return {@link AdaptedConnectorImpl}.
 	 */
 	AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass);
 

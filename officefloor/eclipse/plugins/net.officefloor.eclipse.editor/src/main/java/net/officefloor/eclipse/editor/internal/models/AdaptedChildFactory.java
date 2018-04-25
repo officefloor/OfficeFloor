@@ -35,6 +35,7 @@ import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
@@ -374,10 +375,13 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			this.connectors = new HashMap<>(this.getFactory().connections.size());
 			List<E> connectionChangeEvents = new ArrayList<>();
 			for (Class<? extends ConnectionModel> connectionClass : this.getFactory().connections.keySet()) {
-				this.connectors.put(connectionClass, new AdaptedConnector<>(this, connectionClass));
-
 				// Obtain the model to connector
 				ModelToConnection<R, O, M, E, ?> connector = this.getFactory().connections.get(connectionClass);
+
+				// Register the adapted connector
+				this.connectors.put(connectionClass, new AdaptedConnectorImpl<>(this, connectionClass, connector));
+
+				// Register the connection change events
 				connectionChangeEvents.addAll(Arrays.asList(connector.getConnectionChangeEvents()));
 			}
 
@@ -524,6 +528,9 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			AdaptedConnectionFactory<R, O, ?, ?, ?> connectionFactory = this.getConnectionFactory(target);
 			if (connectionFactory == null) {
 				return; // no connection
+			}
+			if (!connectionFactory.canCreateConnection()) {
+				return; // not able to create the connection
 			}
 
 			// Create the connection

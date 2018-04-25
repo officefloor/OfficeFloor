@@ -23,7 +23,7 @@ import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 
 /**
- * Indicates an active {@link AdaptedConnector} source for dragging creation of
+ * Indicates an active {@link AdaptedConnectorImpl} source for dragging creation of
  * an {@link AdaptedConnection}.
  * 
  * @author Daniel Sagenschneider

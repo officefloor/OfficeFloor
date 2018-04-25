@@ -44,7 +44,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ProxyAdaptedConnection;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectorPart;
@@ -169,9 +169,15 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	@SuppressWarnings("unchecked")
 	public void startDrag(MouseEvent event) {
 
+		// Determine if able to create a connection
+		AdaptedConnectorPart sourceConnectorPart = this.getAdaptedConnectorPart();
+		if (!sourceConnectorPart.getContent().isAssociationCreateConnection()) {
+			return;
+		}
+
 		// Create the proxy connection
-		this.sourceConnector = this.getAdaptedConnectorPart();
-		this.connection = new ProxyAdaptedConnection<>(sourceConnector.getContent());
+		this.sourceConnector = sourceConnectorPart;
+		this.connection = new ProxyAdaptedConnection<>(this.sourceConnector.getContent());
 
 		// Register the connector as active
 		this.sourceConnector.setActiveConnector(true);

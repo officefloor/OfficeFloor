@@ -23,6 +23,7 @@ import org.eclipse.gef.mvc.fx.parts.IBendableContentPart.BendPoint;
 
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.model.ConnectionModel;
@@ -113,6 +114,11 @@ public class ProxyAdaptedConnection<R extends Model, O> implements AdaptedConnec
 	@Override
 	public AdaptedChild<?> getTarget() {
 		throw new IllegalStateException("Should not obtain target for " + this.getClass().getSimpleName());
+	}
+
+	@Override
+	public boolean canRemove() {
+		return true; // as creating, visually appear able to delete
 	}
 
 	@Override

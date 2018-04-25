@@ -28,7 +28,7 @@ import com.google.common.collect.SetMultimap;
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ProxyAdaptedConnection;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -136,6 +136,10 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 			connection.getStyleClass().add(this.getContent().getModel().getClass().getSimpleName());
 		}
 
+		// Determine if able to delete the connection
+		connection.getStyleClass().add(this.getContent().canRemove() ? "connection-delete" : "connection-not-delete");
+
+		// Return the connection
 		return connection;
 	}
 

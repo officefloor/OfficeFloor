@@ -25,7 +25,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -72,7 +72,7 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	<P extends Pane> P childGroup(String childGroupName, P parent);
 
 	/**
-	 * Specifies the {@link GeometryNode} as {@link AdaptedConnector}
+	 * Specifies the {@link GeometryNode} as {@link AdaptedConnectorImpl}
 	 * {@link IAnchor}.
 	 * 
 	 * @param geometryNode
@@ -86,7 +86,7 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	<G extends IGeometry, N extends GeometryNode<G>> N connector(N geometryNode, Class... connectionModelClasses);
 
 	/**
-	 * Configures the default {@link GeometryNode} as {@link AdaptedConnector}
+	 * Configures the default {@link GeometryNode} as {@link AdaptedConnectorImpl}
 	 * {@link IAnchor}.
 	 * 
 	 * @param connectionClasses

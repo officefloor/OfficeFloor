@@ -29,12 +29,13 @@ import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 
 /**
- * {@link IContentPart} for the {@link AdaptedConnector}.
+ * {@link IContentPart} for the {@link AdaptedConnectorImpl}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -66,8 +67,8 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 
 	@Override
 	public void setContent(Object content) {
-		if (content != null && !(content instanceof AdaptedConnector)) {
-			throw new IllegalArgumentException("Only " + AdaptedConnector.class.getSimpleName() + " supported.");
+		if (content != null && !(content instanceof AdaptedConnectorImpl)) {
+			throw new IllegalArgumentException("Only " + AdaptedConnectorImpl.class.getSimpleName() + " supported.");
 		}
 		super.setContent(content);
 
@@ -121,6 +122,10 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 		// Add the children group name for CSS
 		node.getStyleClass().add("connector");
 		node.getStyleClass().add(this.getContent().getConnectionModelClass().getSimpleName());
+
+		// Determine if able to create connection from connector node
+		node.getStyleClass()
+				.add(this.getContent().isAssociationCreateConnection() ? "connector-create" : "connector-not-create");
 
 		// Return the visual
 		return node;

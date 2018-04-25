@@ -11,12 +11,15 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.parts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.geometry.planar.BezierCurve;
 import org.eclipse.gef.mvc.fx.parts.AbstractHandlePart;
+import org.eclipse.gef.mvc.fx.parts.CircleSegmentHandlePart;
 import org.eclipse.gef.mvc.fx.parts.DefaultSelectionHandlePartFactory;
 import org.eclipse.gef.mvc.fx.parts.IHandlePart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
@@ -41,6 +44,36 @@ public class OfficeFloorSelectionHandlePartFactory extends DefaultSelectionHandl
 
 		// Fall back to default implementation
 		return super.createSingleSelectionHandlePartsForRectangularOutline(target, contextMap, segmentsProvider);
+	}
+
+	@Override
+	protected List<IHandlePart<? extends Node>> createSingleSelectionHandlePartsForCurve(
+			IVisualPart<? extends Node> target, Map<Object, Object> contextMap,
+			Provider<BezierCurve[]> segmentsProvider) {
+
+		// Determine if can remove connection
+		if (target instanceof AdaptedConnectionPart) {
+			AdaptedConnectionPart<?, ?, ?> connectionPart = (AdaptedConnectionPart<?, ?, ?>) target;
+			if (!connectionPart.getContent().canRemove()) {
+				// Not able to remove connection, so don't show handles
+				return Collections.emptyList();
+			}
+		}
+
+		// Fall back to default implementation
+		List<IHandlePart<? extends Node>> allHandleParts = super.createSingleSelectionHandlePartsForCurve(target,
+				contextMap, segmentsProvider);
+
+		// Include only the circle handle parts (for moving the connection)
+		List<IHandlePart<? extends Node>> circleHandleParts = new ArrayList<>(2);
+		for (IHandlePart<? extends Node> handlePart : allHandleParts) {
+			if (handlePart instanceof CircleSegmentHandlePart) {
+				circleHandleParts.add(handlePart);
+			}
+		}
+
+		// Return only the circle handle parts
+		return circleHandleParts;
 	}
 
 	/**

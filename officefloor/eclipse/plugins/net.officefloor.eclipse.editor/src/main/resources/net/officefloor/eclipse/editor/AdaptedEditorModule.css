@@ -17,6 +17,7 @@
 
 .parent HBox {
 	-fx-spacing: 0.5em;
+	-fx-padding: 0.0 0.0 0.0 1.0em;
 }
 
 .parent .action .image-view {
@@ -37,18 +38,30 @@
 	-fx-padding: 3.0px;
 }
 
-.connector {
+.connector-create {
 	-fx-cursor: crosshair;
 }
 
+.connector-not-create {
+	-fx-fill: #444;
+	-fx-stroke: #444;
+	-fx-opacity: 0.6;
+}
+
+.connection-not-delete {
+	-fx-stroke: #CCC;
+	-fx-fill: #CCC;
+	-fx-opacity: 0.6;
+}
+
 .error-header:header .dismiss-error {
-	-fx-padding: 0.03em 0 0 0; /* font size difference */
+	-fx-padding: 0.03em 0.0 0.0 0.0; /* font size difference */
 }
 
 .error-header:header > .button-bar > .container {
-    -fx-padding: 0;
+    -fx-padding: 0.0;
 }
 
 .error-header:header > .button-bar > .container > .details-button {
-	-fx-padding: 0;
+	-fx-padding: 0.0;
 }

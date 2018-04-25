@@ -12,6 +12,7 @@
 package net.officefloor.eclipse.editor.internal.parts;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,6 +25,7 @@ import javax.inject.Singleton;
 import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
+import org.eclipse.gef.mvc.fx.parts.IFeedbackPart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
@@ -45,7 +47,7 @@ import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
@@ -61,17 +63,37 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * 
 	 * @param targets
 	 *            Target {@link IVisualPart} instances.
-	 * @return <code>true</code> if contains {@link ConnectionModel}.
+	 * @param createFeedbackParts
+	 *            {@link Function} to create the {@link IFeedbackPart} instances
+	 *            from the filtered list of targets.
+	 * @return Filtered targets.
 	 */
-	public static boolean isContainsConnection(List<? extends IVisualPart<? extends Node>> targets) {
-		for (IVisualPart<? extends Node> target : targets) {
+	public static List<IFeedbackPart<? extends Node>> createFeedbackParts(
+			List<? extends IVisualPart<? extends Node>> targets,
+			Function<List<IVisualPart<? extends Node>>, List<IFeedbackPart<? extends Node>>> createFeedbackParts) {
+
+		// Filter out connections that can not be removed
+		List<IVisualPart<? extends Node>> filteredTargets = new ArrayList<>(targets.size());
+		NEXT_TARGET: for (IVisualPart<? extends Node> target : targets) {
+
+			// Determine if filter out the target from selection
 			if (target instanceof AdaptedConnectionPart) {
-				return true;
+				AdaptedConnectionPart<?, ?, ?> connectionPart = (AdaptedConnectionPart<?, ?, ?>) target;
+				if (!connectionPart.getContent().canRemove()) {
+					continue NEXT_TARGET;
+				}
+				
+			} else {
+				// Always filter out feedback on other items
+				continue NEXT_TARGET;
 			}
+
+			// Include the target
+			filteredTargets.add(target);
 		}
 
-		// As here, no connection
-		return false;
+		// Return the feedback parts
+		return filteredTargets.size() == 0 ? Collections.emptyList() : createFeedbackParts.apply(filteredTargets);
 	}
 
 	/**
@@ -502,7 +524,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			return this.injector.getInstance(AdaptedChildPart.class);
 		} else if (content instanceof AdaptedConnection) {
 			return this.injector.getInstance(AdaptedConnectionPart.class);
-		} else if (content instanceof AdaptedConnector) {
+		} else if (content instanceof AdaptedConnectorImpl) {
 			return this.injector.getInstance(AdaptedConnectorPart.class);
 		} else if (content instanceof AdaptedOverlay) {
 			return this.injector.getInstance(AdaptedOverlayPart.class);

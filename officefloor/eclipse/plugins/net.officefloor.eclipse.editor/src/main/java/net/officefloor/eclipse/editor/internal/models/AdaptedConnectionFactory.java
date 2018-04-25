@@ -123,6 +123,15 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	}
 
 	/**
+	 * Indicates whether can create the {@link ConnectionModel}.
+	 * 
+	 * @return <code>true</code> if able to create the {@link ConnectionModel}.
+	 */
+	public boolean canCreateConnection() {
+		return (this.createConnection != null);
+	}
+
+	/**
 	 * Creates a {@link ConnectionModel} between the source {@link Model} and target
 	 * {@link Model}.
 	 * 
@@ -244,8 +253,15 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		}
 
 		@Override
+		public boolean canRemove() {
+			return (this.getFactory().removeConnection != null);
+		}
+
+		@Override
 		public void remove() {
-			this.getFactory().errorHandler.isError(() -> this.getFactory().removeConnection.removeConnection(this));
+			if (this.canRemove()) {
+				this.getFactory().errorHandler.isError(() -> this.getFactory().removeConnection.removeConnection(this));
+			}
 		}
 
 		/*
