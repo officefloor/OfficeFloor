@@ -25,6 +25,11 @@
 	-fx-scale-y: 0.5;
 }
 
+.child HBox {
+	-fx-spacing: 0.5em;
+	-fx-padding: 0.0 0.0 0.0 1.0em;
+}
+
 .action .image-view {
 	-fx-cursor: hand;
 }
@@ -48,10 +53,14 @@
 	-fx-opacity: 0.6;
 }
 
-.connection-not-delete {
-	-fx-stroke: #CCC;
-	-fx-fill: #CCC;
-	-fx-opacity: 0.6;
+.connection Path {
+	-fx-stroke-width: 1.5;
+}
+
+.connection-not-delete Path {
+	-fx-stroke: #888;
+	-fx-stroke-dash-array: 6 6;
+	-fx-opacity: 0.8;
 }
 
 .error-header:header .dismiss-error {
