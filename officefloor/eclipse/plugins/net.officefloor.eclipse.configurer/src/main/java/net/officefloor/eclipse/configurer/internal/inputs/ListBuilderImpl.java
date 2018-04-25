@@ -361,22 +361,37 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		});
 
 		// Load the rows
+		boolean isUpdatingRows[] = new boolean[] { false };
 		Runnable loadRows = () -> {
-			List<I> items = itemsProperty.getValue();
-			List<Row> updatedRows = new ArrayList<>();
-			if (items != null) {
-				for (I item : items) {
-					updatedRows.add(new Row(table, loadRowsToItems, item, context));
+
+			// Ensure only update once
+			if (isUpdatingRows[0]) {
+				return;
+			}
+
+			// Load the rows
+			isUpdatingRows[0] = true;
+			try {
+				// Load the rows
+				List<I> items = itemsProperty.getValue();
+				List<Row> updatedRows = new ArrayList<>();
+				if (items != null) {
+					for (I item : items) {
+						updatedRows.add(new Row(table, loadRowsToItems, item, context));
+					}
 				}
-			}
 
-			// Determine if able to add rows
-			if (this.itemFactory != null) {
-				updatedRows.add(new AddRow(table, loadRowsToItems, context));
-			}
+				// Determine if able to add rows
+				if (this.itemFactory != null) {
+					updatedRows.add(new AddRow(table, loadRowsToItems, context));
+				}
 
-			// Load rows to the table
-			rows.setAll(updatedRows);
+				// Load rows to the table
+				rows.setAll(updatedRows);
+				
+			} finally {
+				isUpdatingRows[0] = false;
+			}
 		};
 
 		// Handle change in rows

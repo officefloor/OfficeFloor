@@ -1256,28 +1256,18 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			this.stackTraceToggle.getChildren().add(stackTraceToggle);
 			this.stackTraceToggle.getStyleClass().setAll("container");
 			this.stackTraceToggle.alignmentProperty().setValue(Pos.CENTER_RIGHT);
+			GridPane.setHgrow(this.stackTraceToggle, Priority.SOMETIMES);
+			this.header.add(this.stackTraceToggle, 1, 0);
 
-			// Determine if cancel button
-			if (closeListener == null) {
-				// Just details (no cancel button)
-				this.header.add(this.stackTraceToggle, 1, 0);
-
-			} else {
+			// Determine if cancel
+			if (closeListener != null) {
 				// Provide cancel button
 				Button cancelButton = new Button("Cancel");
 				cancelButton.alignmentProperty().setValue(Pos.CENTER_RIGHT);
 				cancelButton.setOnAction((event) -> closeListener.cancelled());
 				cancelButton.setCancelButton(true);
-				cancelButton.visibleProperty().bind(dirtyProperty);
-
-				// Provide close button and details
-				HBox cancelHeader = new HBox(10.0);
-				cancelHeader.setPrefWidth(10.0);
-				cancelHeader.getStyleClass().setAll("button-bar", "cancel");
-				cancelHeader.alignmentProperty().setValue(Pos.CENTER_RIGHT);
-				cancelHeader.getChildren().setAll(this.stackTraceToggle, cancelButton);
-				GridPane.setHgrow(cancelHeader, Priority.ALWAYS);
-				this.header.add(cancelHeader, 1, 0);
+				GridPane.setHgrow(cancelButton, Priority.ALWAYS);
+				this.header.add(cancelButton, 2, 0);
 			}
 		}
 

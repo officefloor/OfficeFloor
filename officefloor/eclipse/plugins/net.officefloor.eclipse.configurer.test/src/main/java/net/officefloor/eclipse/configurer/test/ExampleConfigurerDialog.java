@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.configurer.test;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -53,6 +54,7 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 	protected void loadConfiguration(Shell shell) {
 
 		// Provide button to open dialog
+		shell.setLayout(new RowLayout());
 		Button openDialog = new Button(shell, SWT.NONE);
 		openDialog.setText("Open Dialog");
 		openDialog.addListener(SWT.Selection, new Listener() {
