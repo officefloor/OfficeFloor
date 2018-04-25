@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.section;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.eclipse.ui.IWorkbench;
@@ -32,6 +33,7 @@ import net.officefloor.model.impl.section.SectionRepositoryImpl;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
+import net.officefloor.model.section.SectionRepository;
 
 /**
  * {@link SectionModel} editor.
@@ -46,6 +48,11 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	public static void main(String[] args) {
 		SectionEditor.launch("<section />");
 	}
+
+	/**
+	 * {@link SectionRepository}.
+	 */
+	private static final SectionRepository SECTION_REPOSITORY = new SectionRepositoryImpl(new ModelRepositoryImpl());
 
 	/**
 	 * Convenience method to launch {@link AbstractConfigurableItem} outside
@@ -74,22 +81,24 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
-	protected AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>[] getParents() {
-		return new AbstractConfigurableItem[] { new FunctionNamespaceItem(), new FunctionItem(),
-				new ExternalFlowItem() };
+	protected void loadParents(
+			List<AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>> parents) {
+		parents.add(new FunctionNamespaceItem());
+		parents.add(new FunctionItem());
+		parents.add(new SubSectionItem());
+		parents.add(new ExternalFlowItem());
 	}
 
 	@Override
 	protected SectionModel loadRootModel(ConfigurationItem configurationItem) throws Exception {
 		SectionModel section = new SectionModel();
-		new SectionRepositoryImpl(new ModelRepositoryImpl()).retrieveSection(section, configurationItem);
+		SECTION_REPOSITORY.retrieveSection(section, configurationItem);
 		return section;
 	}
 
 	@Override
 	protected void saveRootModel(SectionModel model, WritableConfigurationItem configurationItem) throws Exception {
-		new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(model, configurationItem);
+		SECTION_REPOSITORY.storeSection(model, configurationItem);
 	}
 
 }

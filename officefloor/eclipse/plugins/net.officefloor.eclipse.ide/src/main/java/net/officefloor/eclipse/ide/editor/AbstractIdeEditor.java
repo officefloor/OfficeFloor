@@ -19,6 +19,8 @@ package net.officefloor.eclipse.ide.editor;
 
 import java.io.ByteArrayInputStream;
 import java.io.Reader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
@@ -445,7 +447,21 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * 
 	 * @return {@link AbstractConfigurableItem} instances.
 	 */
-	protected abstract AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents();
+	@SuppressWarnings("unchecked")
+	protected AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents() {
+		List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = new LinkedList<>();
+		this.loadParents(parents);
+		return parents.toArray(new AbstractConfigurableItem[parents.size()]);
+	}
+
+	/**
+	 * Loads the {@link AbstractConfigurableItem} instances.
+	 * 
+	 * @param parents
+	 *            {@link List} to be populated with the
+	 *            {@link AbstractConfigurableItem} instances.
+	 */
+	protected abstract void loadParents(List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents);
 
 	/**
 	 * Creates the root {@link Model} from the {@link ConfigurationItem}.

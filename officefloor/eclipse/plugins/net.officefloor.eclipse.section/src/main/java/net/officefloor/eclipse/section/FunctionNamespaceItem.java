@@ -281,9 +281,7 @@ public class FunctionNamespaceItem extends
 				}
 			});
 
-		}).add((builder, context) ->
-
-		{
+		}).add((builder, context) -> {
 			builder.apply("Add", (item) -> {
 
 				// Create listing of function names
@@ -310,6 +308,7 @@ public class FunctionNamespaceItem extends
 					}
 				}
 
+				// TODO implement mapping configuration
 				Map<String, String> managedFunctionNameMapping = new HashMap<>();
 				Map<String, Map<String, String>> managedFunctionToObjectNameMapping = new HashMap<>();
 				Map<String, Map<String, String>> functionToFlowNameMapping = new HashMap<>();
