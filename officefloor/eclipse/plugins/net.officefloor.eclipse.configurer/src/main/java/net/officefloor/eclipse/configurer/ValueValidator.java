@@ -24,7 +24,37 @@ import javafx.beans.property.ReadOnlyProperty;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueValidator<V> {
+public interface ValueValidator<M, V> {
+
+	/**
+	 * Convenience {@link ValueValidator} for ensuring not <code>null</code>.
+	 * 
+	 * @param errorMessage
+	 *            Error message if <code>null</code>.
+	 * @return {@link ValueValidator} to validate not <code>null</code>.
+	 */
+	public static <M, V> ValueValidator<M, V> notNull(String errorMessage) {
+		return (context) -> {
+			Object value = context.getValue().getValue();
+			notNull(value, errorMessage, context);
+		};
+	}
+
+	/**
+	 * Convenience method to provide error if value is <code>null</code>.
+	 * 
+	 * @param value
+	 *            Value to check for <code>null</code>.
+	 * @param errorMessage
+	 *            Error message if empty string.
+	 * @param context
+	 *            {@link ValueValidatorContext}.
+	 */
+	public static void notNull(Object value, String errorMessage, ValueValidatorContext<?, ?> context) {
+		if (value == null) {
+			context.setError(errorMessage);
+		}
+	}
 
 	/**
 	 * Convenience {@link ValueValidator} for ensuring not an empty {@link String}.
@@ -33,13 +63,27 @@ public interface ValueValidator<V> {
 	 *            Error message if empty {@link String}.
 	 * @return {@link ValueValidator} to validate not an empty {@link String}.
 	 */
-	public static ValueValidator<String> notEmptyString(String errorMessage) {
+	public static <M> ValueValidator<M, String> notEmptyString(String errorMessage) {
 		return (context) -> {
 			String value = context.getValue().getValue();
-			if ((value == null) || (value.trim().length() == 0)) {
-				context.setError(errorMessage);
-			}
+			notEmptyString(value, errorMessage, context);
 		};
+	}
+
+	/**
+	 * Convenience method to provide error if value is empty string.
+	 * 
+	 * @param value
+	 *            Value to check for empty string.
+	 * @param errorMessage
+	 *            Error message if empty string.
+	 * @param context
+	 *            {@link ValueValidatorContext}.
+	 */
+	public static void notEmptyString(String value, String errorMessage, ValueValidatorContext<?, ?> context) {
+		if ((value == null) || (value.trim().length() == 0)) {
+			context.setError(errorMessage);
+		}
 	}
 
 	/**
@@ -51,12 +95,19 @@ public interface ValueValidator<V> {
 	 *             If failure in validation. Message of {@link Exception} is used as
 	 *             error.
 	 */
-	void validate(ValueValidatorContext<V> context) throws Exception;
+	void validate(ValueValidatorContext<M, V> context) throws Exception;
 
 	/**
 	 * Context for the {@link ValueValidator}.
 	 */
-	public interface ValueValidatorContext<V> {
+	public interface ValueValidatorContext<M, V> {
+
+		/**
+		 * Obtains the model.
+		 * 
+		 * @return Model.
+		 */
+		M getModel();
 
 		/**
 		 * Obtains the value.

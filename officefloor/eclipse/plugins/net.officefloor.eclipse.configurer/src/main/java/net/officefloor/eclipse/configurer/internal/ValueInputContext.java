@@ -50,7 +50,7 @@ public interface ValueInputContext<M, V> {
 	 * @param validator
 	 *            {@link ValueValidator}.
 	 */
-	void addValidator(ValueValidator<V> validator);
+	void addValidator(ValueValidator<M, V> validator);
 
 	/**
 	 * Triggers reload of the value from the model for the {@link Builder}.

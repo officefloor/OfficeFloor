@@ -71,7 +71,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * {@link ValueValidator} instances.
 	 */
-	private List<ValueValidator<V>> validators = new LinkedList<>();
+	private List<ValueValidator<M, V>> validators = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -193,7 +193,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public B validate(ValueValidator<V> validator) {
+	public B validate(ValueValidator<M, V> validator) {
 		this.validators.add(validator);
 		return (B) this;
 	}
@@ -217,7 +217,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * {@link ValueRenderer} implementation.
 	 */
-	private class ValueRendererImpl implements ValueRenderer<M, I>, ValueValidatorContext<V>, ValueInputContext<M, V> {
+	private class ValueRendererImpl
+			implements ValueRenderer<M, I>, ValueValidatorContext<M, V>, ValueInputContext<M, V> {
 
 		/**
 		 * {@link ObservableValue}.
@@ -232,7 +233,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		/**
 		 * {@link ValueValidator} instances.
 		 */
-		private final List<ValueValidator<V>> validators = new ArrayList<>(1);
+		private final List<ValueValidator<M, V>> validators = new ArrayList<>(1);
 
 		/**
 		 * Tracks if an error occurred on validation.
@@ -294,9 +295,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			this.isError = false;
 			try {
 				// Undertake validation
-				Iterator<ValueValidator<V>> iterator = this.validators.iterator();
+				Iterator<ValueValidator<M, V>> iterator = this.validators.iterator();
 				while ((!this.isError) && (iterator.hasNext())) {
-					ValueValidator<V> validator = iterator.next();
+					ValueValidator<M, V> validator = iterator.next();
 					validator.validate(this);
 				}
 			} catch (Throwable ex) {
@@ -332,7 +333,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		}
 
 		@Override
-		public void addValidator(ValueValidator<V> validator) {
+		public void addValidator(ValueValidator<M, V> validator) {
 			this.validators.add(validator);
 
 			// Run validation immediately

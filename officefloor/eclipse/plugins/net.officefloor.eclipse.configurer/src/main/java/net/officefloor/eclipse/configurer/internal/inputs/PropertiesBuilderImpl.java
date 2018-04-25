@@ -130,7 +130,7 @@ public class PropertiesBuilderImpl<M> implements PropertiesBuilder<M>, ValueRend
 	}
 
 	@Override
-	public PropertiesBuilder<M> validate(ValueValidator<PropertyList> validator) {
+	public PropertiesBuilder<M> validate(ValueValidator<M, PropertyList> validator) {
 		this.list.validate((context) -> {
 
 			// Obtain the property items
@@ -144,7 +144,12 @@ public class PropertiesBuilderImpl<M> implements PropertiesBuilder<M>, ValueRend
 			SimpleObjectProperty<PropertyList> propertiesProperty = new SimpleObjectProperty<>(properties);
 
 			// Validate the properties
-			validator.validate(new ValueValidatorContext<PropertyList>() {
+			validator.validate(new ValueValidatorContext<M, PropertyList>() {
+
+				@Override
+				public M getModel() {
+					return context.getModel();
+				}
 
 				@Override
 				public void setError(String message) {

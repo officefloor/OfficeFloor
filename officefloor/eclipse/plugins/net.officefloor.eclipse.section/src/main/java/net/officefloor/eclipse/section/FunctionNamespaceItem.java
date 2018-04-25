@@ -19,8 +19,10 @@ package net.officefloor.eclipse.section;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -136,16 +138,19 @@ public class FunctionNamespaceItem extends
 		/**
 		 * Indicates if function is used.
 		 */
-		private boolean isUsed = true;
+		private boolean isUsed = false;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param name
 		 *            Name of the function.
+		 * @param isUsed
+		 *            Indicates if used.
 		 */
-		private FunctionName(String name) {
+		private FunctionName(String name, boolean isUsed) {
 			this.name = name;
+			this.isUsed = isUsed;
 		}
 	}
 
@@ -190,8 +195,15 @@ public class FunctionNamespaceItem extends
 			}
 			item.properties = this.translateToPropertyList(model.getProperties(), (property) -> property.getName(),
 					(property) -> property.getValue());
+
+			// Load the functions (keep previous selected)
+			Set<String> existingFunctions = new HashSet<>();
+			for (ManagedFunctionModel managedFunction : model.getManagedFunctions()) {
+				existingFunctions.add(managedFunction.getManagedFunctionName());
+			}
 			for (ManagedFunctionModel function : model.getManagedFunctions()) {
-				item.functionNames.add(new FunctionName(function.getManagedFunctionName()));
+				String functionName = function.getManagedFunctionName();
+				item.functionNames.add(new FunctionName(functionName, existingFunctions.contains(functionName)));
 			}
 		}
 		return item;
@@ -204,7 +216,7 @@ public class FunctionNamespaceItem extends
 			builder.text("Name").init((item) -> item.name).validate(ValueValidator.notEmptyString("Must specify name"))
 					.setValue((item, value) -> item.name = value);
 			ChoiceBuilder<FunctionNamespaceItem> choices = builder.choices("").init((item) -> item.choice)
-					.setValue((item, value) -> {
+					.validate(ValueValidator.notNull("Must select")).setValue((item, value) -> {
 						if (value == CHOICE_CLASS) {
 							item.sourceClassName = ClassManagedFunctionSource.class.getName();
 						}
@@ -215,7 +227,12 @@ public class FunctionNamespaceItem extends
 			classBuilder.clazz("Class")
 					.init((item) -> item.properties
 							.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).getValue())
-					.setValue((item, value) -> item.properties
+					.validate((ctx) -> {
+						FunctionNamespaceItem item = ctx.getModel();
+						String className = item.properties
+								.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).getValue();
+						ValueValidator.notEmptyString(className, "Must specify class", ctx);
+					}).setValue((item, value) -> item.properties
 							.getOrAddProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).setValue(value));
 
 			// Choice: source
@@ -237,7 +254,9 @@ public class FunctionNamespaceItem extends
 				OfficeFloorOsgiBridge osgiBridge = this.getConfigurableContext().getOsgiBridge();
 
 				// Validate the type
-				FunctionNamespaceItem item = ctx.getValue().getValue();
+				FunctionNamespaceItem item = ctx.getModel();
+
+				// Attempt to load the function name space type
 				item.functionNamespaceType = loadFunctionNamespaceType(item, osgiBridge);
 
 				// Load the managed functions (keeping track of existing)
@@ -251,14 +270,21 @@ public class FunctionNamespaceItem extends
 					String functionName = managedFunctionType.getFunctionName();
 					FunctionName function = existingNames.get(functionName);
 					if (function == null) {
-						function = new FunctionName(functionName);
+						function = new FunctionName(functionName, false);
 					}
 					item.functionNames.add(function);
 				}
 				ctx.reload(functionsBuilder);
+
+				// Ensure at least one function is selected
+				if (!item.functionNames.stream().anyMatch((functionName) -> functionName.isUsed)) {
+					ctx.setError("Must select at least one function");
+				}
 			});
 
-		}).add((builder, context) -> {
+		}).add((builder, context) ->
+
+		{
 			builder.apply("Add", (item) -> {
 
 				// Create listing of function names

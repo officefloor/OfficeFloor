@@ -123,7 +123,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	/**
 	 * {@link ValueValidator}.
 	 */
-	private ValueValidator<M> validator = null;
+	private ValueValidator<M, M> validator = null;
 
 	/**
 	 * {@link ErrorListener}.
@@ -401,7 +401,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	}
 
 	@Override
-	public void validate(ValueValidator<M> validator) {
+	public void validate(ValueValidator<M, M> validator) {
 		this.validator = validator;
 	}
 
@@ -437,7 +437,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		/**
 		 * {@link ValueValidator} for the model.
 		 */
-		private final ValueValidator<M> modelValidator;
+		private final ValueValidator<M, M> modelValidator;
 
 		/**
 		 * Configuration {@link Node}.
@@ -529,7 +529,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 *            Previous {@link ValueLister}.
 		 */
 		@SuppressWarnings("unchecked")
-		public ValueLister(M model, ValueValidator<M> modelValidator, Node configurationNode, GridPane grid,
+		public ValueLister(M model, ValueValidator<M, M> modelValidator, Node configurationNode, GridPane grid,
 				String title, Property<Boolean> dirtyProperty, Property<Boolean> validProperty,
 				ErrorListener errorListener, Actioner actioner,
 				ValueRendererFactory<M, ? extends ValueInput>[] rendererFactories, ValueLister<M> prevLister) {
@@ -841,7 +841,12 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 						// Validate the model
 						InputError<M, ? extends ValueInput>[] validateError = new InputError[] { null };
-						this.modelValidator.validate(new ValueValidatorContext<M>() {
+						this.modelValidator.validate(new ValueValidatorContext<M, M>() {
+
+							@Override
+							public M getModel() {
+								return ValueLister.this.model;
+							}
 
 							@Override
 							public ReadOnlyProperty<M> getValue() {
@@ -1297,8 +1302,14 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		@Override
 		public void error(String inputLabel, Throwable error) {
 
+			// Obtain the error message
+			String message = error.getMessage();
+			if ((message == null) || (message.trim().length() == 0)) {
+				message = error.getClass().getName();
+			}
+
 			// Display the error
-			this.error(inputLabel, error.getMessage());
+			this.error(inputLabel, message);
 
 			// Provide stack trace on tool tip
 			StringWriter buffer = new StringWriter();

@@ -348,7 +348,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 					});
 
 					// Show the configuration
-					I item = this.item(null);
+					I item = this.item(ctx.getModel());
 					configurer.loadConfiguration(item, overlay);
 				});
 
