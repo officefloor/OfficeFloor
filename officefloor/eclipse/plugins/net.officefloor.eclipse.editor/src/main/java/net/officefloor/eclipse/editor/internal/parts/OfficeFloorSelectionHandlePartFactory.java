@@ -23,6 +23,7 @@ import org.eclipse.gef.mvc.fx.parts.CircleSegmentHandlePart;
 import org.eclipse.gef.mvc.fx.parts.DefaultSelectionHandlePartFactory;
 import org.eclipse.gef.mvc.fx.parts.IHandlePart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
+import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import com.google.inject.Provider;
 
@@ -136,6 +137,14 @@ public class OfficeFloorSelectionHandlePartFactory extends DefaultSelectionHandl
 			// Nothing to update
 		}
 
+		@Override
+		protected void unregisterFromVisualPartMap(IViewer viewer, Node visual) {
+			// AdaptedConnectorPart registered multiple times to same node (so handle)
+			Map<Node, IVisualPart<? extends Node>> registry = viewer.getVisualPartMap();
+			if (registry.get(visual) == this) {
+				registry.remove(visual);
+			}
+		}
 	}
 
 }

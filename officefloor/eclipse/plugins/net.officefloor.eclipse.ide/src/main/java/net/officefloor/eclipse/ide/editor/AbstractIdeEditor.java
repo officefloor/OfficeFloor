@@ -18,7 +18,11 @@
 package net.officefloor.eclipse.ide.editor;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -149,6 +153,30 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * Convenience method to launch the {@link AbstractIdeEditor} implementation
 	 * outside the {@link IWorkbench}.
 	 * 
+	 * @param configurationFile
+	 *            {@link File} containing the configuration.
+	 */
+	public static void launch(File configurationFile) {
+
+		// Read in the file contents
+		StringWriter configuration = new StringWriter();
+		try (Reader reader = new FileReader(configurationFile)) {
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				configuration.write(character);
+			}
+		} catch (IOException ex) {
+			System.err.println("Failed to load configuration from file " + configurationFile.getAbsolutePath());
+			ex.printStackTrace();
+		}
+
+		// Launch the editor
+		launch(configuration.toString());
+	}
+
+	/**
+	 * Convenience method to launch the {@link AbstractIdeEditor} implementation
+	 * outside the {@link IWorkbench}.
+	 * 
 	 * @param configuration
 	 *            Configuration of {@link ConfigurationItem} to launch the
 	 *            {@link AbstractIdeEditor}.
@@ -163,7 +191,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		FOUND_LAUNCHER: for (StackTraceElement se : cause) {
 			String className = se.getClassName();
 			String methodName = se.getMethodName();
-			if (isFoundThisMethod) {
+			if ((isFoundThisMethod) && (!className.equals(AbstractIdeEditor.class.getName()))) {
 				launchClassName = className;
 				break FOUND_LAUNCHER;
 			} else if (AbstractIdeEditor.class.getName().equals(className) && "launch".equals(methodName)) {
@@ -372,6 +400,9 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				}
 			};
 
+			// Allow initialising of editor
+			this.init(configurableContext);
+
 			// Configure the editor
 			for (AbstractConfigurableItem parent : this.getParents()) {
 
@@ -443,12 +474,21 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
+	 * Allows overriding to initialise the {@link AbstractIdeEditor}.
+	 * 
+	 * @param context
+	 *            {@link ConfigurableContext}.
+	 */
+	protected void init(ConfigurableContext<R, O> context) {
+	}
+
+	/**
 	 * Obtains the {@link AbstractConfigurableItem} instances.
 	 * 
 	 * @return {@link AbstractConfigurableItem} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	protected AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents() {
+	protected final AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents() {
 		List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = new LinkedList<>();
 		this.loadParents(parents);
 		return parents.toArray(new AbstractConfigurableItem[parents.size()]);
@@ -507,7 +547,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeFloorOsgiBridge}.
 	 */
-	protected OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
+	protected final OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
 
 		// Determine if cached access to compiler
 		if (this.osgiBridge != null) {
@@ -541,12 +581,12 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 */
 
 	@Override
-	public IViewer getContentViewer() {
+	public final IViewer getContentViewer() {
 		return this.module.getContentViewer();
 	}
 
 	@Override
-	protected void hookViewers() {
+	protected final void hookViewers() {
 
 		// Create the view
 		Pane view = this.module.createParent(this.adaptedBuilder);
@@ -556,7 +596,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	@Override
-	protected void activate() {
+	protected final void activate() {
 
 		// Load the model
 		this.rootBuilder.getErrorHandler().isError(() -> {
@@ -571,7 +611,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	@Override
-	protected void setInput(IEditorInput input) {
+	protected final void setInput(IEditorInput input) {
 		super.setInput(input);
 
 		// Input changed, so reset for new input
@@ -584,7 +624,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	@Override
-	protected void setSite(IWorkbenchPartSite site) {
+	protected final void setSite(IWorkbenchPartSite site) {
 		super.setSite(site);
 
 		// Keep track of the parent shell
@@ -592,7 +632,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	@Override
-	public void doSave(IProgressMonitor monitor) {
+	public final void doSave(IProgressMonitor monitor) {
 		this.rootBuilder.getErrorHandler().isError(() -> {
 
 			// Save the model

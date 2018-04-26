@@ -190,7 +190,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	 * 
 	 * @return {@link AdaptedParentBuilder}.
 	 */
-	public AdaptedParentBuilder<R, O, M, E> createAdaptedParent() {
+	public final AdaptedParentBuilder<R, O, M, E> createAdaptedParent() {
 
 		// Create the prototype
 		M prototype = this.prototype();

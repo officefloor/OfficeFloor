@@ -107,7 +107,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @param context
 	 *            {@link ConfigurableContext}.
 	 */
-	public void init(ConfigurableContext<R, O> context) {
+	public final void init(ConfigurableContext<R, O> context) {
 		this.context = context;
 	}
 
@@ -116,7 +116,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * 
 	 * @return {@link ConfigurableContext}.
 	 */
-	public ConfigurableContext<R, O> getConfigurableContext() {
+	public final ConfigurableContext<R, O> getConfigurableContext() {
 		return this.context;
 	}
 
@@ -132,7 +132,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 *            {@link Function} to extract the value from the property item.
 	 * @return {@link PropertyList}.
 	 */
-	protected <PI> PropertyList translateToPropertyList(List<PI> properties, Function<PI, String> getName,
+	protected final <PI> PropertyList translateToPropertyList(List<PI> properties, Function<PI, String> getName,
 			Function<PI, String> getValue) {
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
 		if (properties != null) {
@@ -318,6 +318,20 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		}
 
 		/**
+		 * Instantiate for multiple {@link AbstractItem} instances.
+		 * 
+		 * @param groupName
+		 *            Name of the group.
+		 * @param children
+		 *            {@link AbstractItem} instances.
+		 */
+		@SafeVarargs
+		public IdeChildrenGroup(String groupName, AbstractItem<R, O, M, E, ?, ?>... children) {
+			this.name = groupName;
+			this.children = children;
+		}
+
+		/**
 		 * Obtains the name of the {@link ChildrenGroup}.
 		 * 
 		 * @return Name of the {@link ChildrenGroup}.
@@ -382,7 +396,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @return {@link IdeChildrenGroup} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public IdeChildrenGroup[] getChildrenGroups() {
+	public final IdeChildrenGroup[] getChildrenGroups() {
 		List<IdeChildrenGroup> children = new LinkedList<>();
 		this.children(children);
 		return children.toArray(new AbstractItem.IdeChildrenGroup[children.size()]);
@@ -675,7 +689,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @return {@link IdeConnection} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public IdeConnectionTarget<? extends ConnectionModel, ?, ?>[] getConnections() {
+	public final IdeConnectionTarget<? extends ConnectionModel, ?, ?>[] getConnections() {
 		List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections = new LinkedList<>();
 		this.connections(connections);
 		return connections.toArray(new AbstractItem.IdeConnectionTarget[connections.size()]);
@@ -699,7 +713,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 *            {@link ChildrenGroupBuilder}.
 	 * @return Child {@link AdaptedChildBuilder}.
 	 */
-	public AdaptedChildBuilder<R, O, M, E> createChild(ChildrenGroupBuilder<R, O> childrenGroup) {
+	public final AdaptedChildBuilder<R, O, M, E> createChild(ChildrenGroupBuilder<R, O> childrenGroup) {
 
 		// Add the child
 		AdaptedChildBuilder<R, O, M, E> child = childrenGroup.addChild(this.prototype(),

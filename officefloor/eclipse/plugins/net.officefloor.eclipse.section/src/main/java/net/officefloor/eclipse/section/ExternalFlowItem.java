@@ -23,11 +23,14 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
+import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
 import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 
 /**
  * Configuration for {@link ExternalFlowModel}.
@@ -72,7 +75,10 @@ public class ExternalFlowItem extends
 	@Override
 	protected Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
-		context.addNode(container, context.connector(FunctionToNextExternalFlowModel.class).getNode());
+		context.addNode(container,
+				context.connector(FunctionToNextExternalFlowModel.class, FunctionFlowToExternalFlowModel.class,
+						FunctionEscalationToExternalFlowModel.class, SubSectionOutputToExternalFlowModel.class)
+						.getNode());
 		context.label(container);
 		return container;
 	}

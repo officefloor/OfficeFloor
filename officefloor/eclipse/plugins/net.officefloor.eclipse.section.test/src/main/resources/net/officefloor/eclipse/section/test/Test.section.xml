@@ -1,0 +1,72 @@
+<section>
+  <external-managed-objects>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <managed-object-pools>
+  </managed-object-pools>
+  <external-flows>
+    <external-flow name="External Flow" argument-type="" x="800" y="350"/>
+  </external-flows>
+  <function-namespaces>
+    <function-namespace name="Functions" source="net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource" x="115" y="130">
+      <properties>
+        <property name="class.name" value="net.officefloor.eclipse.section.test.MockFunctions"/>
+      </properties>
+      <managed-function name="functionFour">
+      </managed-function>
+      <managed-function name="functionOne">
+      </managed-function>
+      <managed-function name="functionThree">
+      </managed-function>
+      <managed-function name="functionTwo">
+        <managed-function-object name="net.officefloor.eclipse.section.test.MockObject" key="" object-type="net.officefloor.eclipse.section.test.MockObject" parameter="false">
+        </managed-function-object>
+      </managed-function>
+    </function-namespace>
+  </function-namespaces>
+  <functions>
+    <function name="functionFour" public="false" function-namespace="Functions" managed-function="functionFour" return-type="" x="609" y="400">
+      <function-escalation escalation-type="java.io.IOException">
+        <function name="functionTwo"/>
+      </function-escalation>
+      <function-escalation escalation-type="java.sql.SQLException">
+      </function-escalation>
+      <function-escalation escalation-type="java.lang.RuntimeException">
+        <external-flow name="External Flow"/>
+      </function-escalation>
+    </function>
+    <function name="functionOne" public="false" function-namespace="Functions" managed-function="functionOne" return-type="" x="474" y="84">
+      <next-function name="functionThree"/>
+    </function>
+    <function name="functionThree" public="false" function-namespace="Functions" managed-function="functionThree" return-type="java.lang.String" x="606" y="168">
+      <function-flow name="outputOne" key="" argument-type="">
+        <external-flow name="External Flow" spawn-thread-state="false"/>
+      </function-flow>
+      <function-flow name="outputTwo" key="" argument-type="java.lang.String">
+        <function name="functionTwo" spawn-thread-state="false"/>
+      </function-flow>
+    </function>
+    <function name="functionTwo" public="false" function-namespace="Functions" managed-function="functionTwo" return-type="" x="609" y="310">
+      <next-external-flow name="External Flow"/>
+    </function>
+  </functions>
+  <sub-sections>
+    <sub-section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.section.test.MockSection" x="794" y="137">
+      <properties>
+      </properties>
+      <input name="inputOne" parameter-type="" public="false" public-name=""/>
+      <input name="inputThree" parameter-type="" public="false" public-name=""/>
+      <input name="inputTwo" parameter-type="" public="false" public-name=""/>
+      <output name="outputOne" argument-type="" escalation-only="false">
+      </output>
+      <output name="outputTwo" argument-type="java.lang.String" escalation-only="false">
+        <external-flow name="External Flow"/>
+      </output>
+      <object name="net.officefloor.eclipse.section.test.MockObject" object-type="net.officefloor.eclipse.section.test.MockObject">
+      </object>
+    </sub-section>
+  </sub-sections>
+</section>

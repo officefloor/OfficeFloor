@@ -19,15 +19,19 @@ package net.officefloor.eclipse.editor.internal.parts;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.mvc.fx.parts.AbstractContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
+import org.eclipse.gef.mvc.fx.parts.IVisualPart;
+import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 
+import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
@@ -151,6 +155,15 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 
 	@Override
 	protected void doRefreshVisual(GeometryNode<?> visual) {
+	}
+
+	@Override
+	protected void unregisterFromVisualPartMap(IViewer viewer, GeometryNode<?> visual) {
+		// AdaptedConnectorPart registered multiple times to same node (so handle)
+		Map<Node, IVisualPart<? extends Node>> registry = viewer.getVisualPartMap();
+		if (registry.get(visual) == this) {
+			registry.remove(visual);
+		}
 	}
 
 }

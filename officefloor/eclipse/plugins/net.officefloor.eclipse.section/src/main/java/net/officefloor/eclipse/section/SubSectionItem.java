@@ -17,6 +17,9 @@
  */
 package net.officefloor.eclipse.section;
 
+import java.util.List;
+
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -123,6 +126,11 @@ public class SubSectionItem extends
 	protected Pane visual(SubSectionModel model, AdaptedModelVisualFactoryContext<SubSectionModel> context) {
 		VBox container = new VBox();
 		context.label(container);
+		HBox children = context.addNode(container, new HBox());
+		VBox inputs = context.addNode(children, new VBox());
+		context.childGroup(SubSectionInputItem.class.getSimpleName(), inputs);
+		VBox outputs = context.addNode(children, new VBox());
+		context.childGroup(SubSectionOutputItem.class.getSimpleName(), outputs);
 		return container;
 	}
 
@@ -145,6 +153,12 @@ public class SubSectionItem extends
 			}
 		}
 		return item;
+	}
+
+	@Override
+	protected void children(List<IdeChildrenGroup> childGroups) {
+		childGroups.add(new IdeChildrenGroup(new SubSectionInputItem()));
+		childGroups.add(new IdeChildrenGroup(new SubSectionOutputItem()));
 	}
 
 	@Override
@@ -192,6 +206,15 @@ public class SubSectionItem extends
 				context.execute(context.getOperations().addSubSection(item.name, item.sourceClassName, item.location,
 						item.properties, item.sectionType));
 			});
+
+		}).refactor((builder, context) -> {
+			builder.apply("Refactor", (item) -> {
+				// TODO implement refactoring sub section
+				throw new UnsupportedOperationException("TODO implement refactoring SubSection");
+			});
+
+		}).delete((context) -> {
+			context.execute(context.getOperations().removeSubSection(context.getModel()));
 		});
 	}
 

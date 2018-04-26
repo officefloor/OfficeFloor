@@ -28,14 +28,20 @@ import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
+import net.officefloor.model.section.FunctionEscalationToFunctionModel;
+import net.officefloor.model.section.FunctionFlowToFunctionModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionModel.FunctionEvent;
 import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.FunctionToNextFunctionModel;
+import net.officefloor.model.section.FunctionToNextSubSectionInputModel;
 import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionInputModel.SubSectionInputEvent;
+import net.officefloor.model.section.SubSectionOutputToFunctionModel;
 
 /**
  * Configuration for the {@link FunctionModel}.
@@ -85,11 +91,15 @@ public class FunctionItem extends
 	protected Pane visual(FunctionModel model, AdaptedModelVisualFactoryContext<FunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
-		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class)
-				.target(FunctionToNextFunctionModel.class).getNode());
+		context.addNode(heading,
+				context.connector(ManagedFunctionToFunctionModel.class, SubSectionOutputToFunctionModel.class,
+						FunctionFlowToFunctionModel.class, FunctionEscalationToFunctionModel.class)
+						.target(FunctionToNextFunctionModel.class).getNode());
 		context.label(heading);
-		context.addNode(heading, context.connector(FunctionToNextExternalFlowModel.class)
-				.source(FunctionToNextFunctionModel.class).getNode());
+		context.addNode(heading,
+				context.connector(FunctionToNextExternalFlowModel.class, FunctionToNextSubSectionInputModel.class)
+						.source(FunctionToNextFunctionModel.class).getNode());
+		context.addNode(container, context.childGroup("outputs", new VBox()));
 		return container;
 	}
 
@@ -114,6 +124,7 @@ public class FunctionItem extends
 
 	@Override
 	protected void children(List<IdeChildrenGroup> childGroups) {
+		childGroups.add(new IdeChildrenGroup("outputs", new FunctionFlowItem(), new FunctionEscalationItem()));
 	}
 
 	@Override
@@ -142,6 +153,18 @@ public class FunctionItem extends
 						.execute(ctx.getOperations().linkFunctionToNextFunction(s, t)))
 				.delete((ctx) -> ctx.getChangeExecutor()
 						.execute(ctx.getOperations().removeFunctionToNextFunction(ctx.getModel()))));
+
+		// Sub Section Input
+		connections.add(new IdeConnection<>(FunctionToNextSubSectionInputModel.class)
+				.connectOne((s) -> s.getNextSubSectionInput(), (c) -> c.getPreviousFunction(),
+						FunctionEvent.CHANGE_NEXT_SUB_SECTION_INPUT)
+				.to(SubSectionInputModel.class)
+				.many((t) -> t.getPreviousFunctions(), (c) -> c.getNextSubSectionInput(),
+						SubSectionInputEvent.ADD_PREVIOUS_FUNCTION, SubSectionInputEvent.REMOVE_PREVIOUS_FUNCTION)
+				.create((s, t, ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().linkFunctionToNextSubSectionInput(s, t)))
+				.delete((ctx) -> ctx.getChangeExecutor()
+						.execute(ctx.getOperations().removeFunctionToNextSubSectionInput(ctx.getModel()))));
 	}
 
 }

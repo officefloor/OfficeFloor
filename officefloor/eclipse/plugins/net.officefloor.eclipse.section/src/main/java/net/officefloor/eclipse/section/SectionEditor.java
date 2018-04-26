@@ -22,9 +22,11 @@ import java.util.function.Consumer;
 
 import org.eclipse.ui.IWorkbench;
 
+import javafx.scene.control.Label;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -45,7 +47,7 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	/**
 	 * Test editor.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		SectionEditor.launch("<section />");
 	}
 
@@ -79,6 +81,18 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	/*
 	 * =============== AbstractIdeEditor ======================
 	 */
+
+	@Override
+	protected void init(ConfigurableContext<SectionModel, SectionChanges> context) {
+		context.getRootBuilder().overlay(10, 400, (overlay) -> {
+			overlay.getOverlayParent().getChildren()
+					.add(new Label("WARNING: The " + this.getClass().getSimpleName() + " is only to prove concepts.\n"
+							+ "It should NEVER be used for application developement.\n\n"
+							+ "The purpose of this editor is to prove the raw OfficeFloor model.\n"
+							+ "Much of the functionality is not complete for this editor (or likely very buggy).\n"
+							+ "For application development please use WoOF."));
+		});
+	}
 
 	@Override
 	protected void loadParents(
