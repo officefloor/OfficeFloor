@@ -171,4 +171,15 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	 */
 	<R extends Model, O> Node action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory);
 
+	/**
+	 * <p>
+	 * Indicates if palette prototype.
+	 * <p>
+	 * This allows for visual to not show actions or connectors that would be
+	 * confusing (and error) if used from the palette.
+	 * 
+	 * @return <code>true</code> if the palette prototype.
+	 */
+	boolean isPalettePrototype();
+
 }

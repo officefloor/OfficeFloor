@@ -382,6 +382,11 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		return node;
 	}
 
+	@Override
+	public boolean isPalettePrototype() {
+		return this.isPalettePrototype;
+	}
+
 	/**
 	 * {@link ChildrenGroupImpl} visual.
 	 */
