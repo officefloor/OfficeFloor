@@ -62,6 +62,11 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	@Override
 	public Pane doCreateVisual() {
 
+		// Flag as palette prototype (if one)
+		if (this.getContent().isPalettePrototype()) {
+			this.isPalettePrototype = true;
+		}
+
 		// Obtain the visual
 		Pane container = super.doCreateVisual();
 

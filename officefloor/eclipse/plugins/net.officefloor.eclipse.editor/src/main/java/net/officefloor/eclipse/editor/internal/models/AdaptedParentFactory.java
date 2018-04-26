@@ -100,8 +100,12 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 *            {@link OfficeFloorContentPartFactory}.
 	 * @return {@link AdaptedModel} for the prototype.
 	 */
+	@SuppressWarnings("unchecked")
 	public AdaptedModel<M> createPrototype(OfficeFloorContentPartFactory<R, O> factory) {
-		return factory.createAdaptedModel(this.modelPrototype, null);
+		AdaptedParentImpl<R, O, M, E> prototype = (AdaptedParentImpl<R, O, M, E>) factory
+				.createAdaptedModel(this.modelPrototype, null);
+		prototype.isPalettePrototype = true;
+		return prototype;
 	}
 
 	/*
@@ -154,6 +158,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 			extends AdaptedChildImpl<R, O, M, E, AdaptedParent<M>> implements AdaptedParent<M>, AdaptedPrototype<M> {
 
 		/**
+		 * Default not palette prototype.
+		 */
+		private boolean isPalettePrototype = false;
+
+		/**
 		 * {@link AdaptedActions}.
 		 */
 		private AdaptedActions<R, O, M> actions = null;
@@ -187,6 +196,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		/*
 		 * ================== AdaptedParent ===================
 		 */
+
+		@Override
+		public boolean isPalettePrototype() {
+			return this.isPalettePrototype;
+		}
 
 		@Override
 		@SuppressWarnings("unchecked")

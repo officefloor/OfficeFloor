@@ -21,4 +21,5 @@ Require-Bundle: com.google.inject,
  net.officefloor.eclipse.osgi;bundle-version="3.0.0",
  net.officefloor.eclipse.configurer;bundle-version="3.0.0",
  net.officefloor.eclipse.ide;bundle-version="3.0.0",
- net.officefloor.eclipse.section;bundle-version="3.0.0"
+ net.officefloor.eclipse.section;bundle-version="3.0.0",
+ org.junit

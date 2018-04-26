@@ -82,7 +82,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				if (!connectionPart.getContent().canRemove()) {
 					continue NEXT_TARGET;
 				}
-				
+
 			} else {
 				// Always filter out feedback on other items
 				continue NEXT_TARGET;
@@ -126,6 +126,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * {@link AbstractAdaptedFactory} instances for the {@link Model} types.
 	 */
 	private final Map<Class<?>, AbstractAdaptedFactory<R, O, ?, ?, ?>> models = new HashMap<>();
+
+	/**
+	 * {@link AbstractAdaptedFactory} instances maintaining the order they were
+	 * registered.
+	 */
+	private final List<AbstractAdaptedFactory<R, O, ?, ?, ?>> orderedModels = new LinkedList<>();
 
 	/**
 	 * Mapping of {@link Model} to its {@link AdaptedModel}.
@@ -193,6 +199,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 */
 	public <M extends Model, E extends Enum<E>> void registerModel(AbstractAdaptedFactory<R, O, M, E, ?> builder) {
 		this.models.put(builder.getModelClass(), builder);
+		this.orderedModels.add(builder);
 	}
 
 	/**
@@ -251,7 +258,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 		// Load the palette models
 		List<AdaptedModel<?>> paletteModels = new LinkedList<>();
-		for (AbstractAdaptedFactory<R, O, ?, ?, ?> adaptedFactory : this.models.values()) {
+		for (AbstractAdaptedFactory<R, O, ?, ?, ?> adaptedFactory : this.orderedModels) {
 			if (adaptedFactory instanceof AdaptedParentFactory) {
 				AdaptedParentFactory<R, O, ?, ?> parentFactory = (AdaptedParentFactory<R, O, ?, ?>) adaptedFactory;
 

@@ -15,41 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.section.test;
 
-import net.officefloor.model.Model;
+import org.junit.Test;
+
+import net.officefloor.eclipse.section.SectionEditor;
 
 /**
- * Builder for the {@link AdaptedParent}.
+ * Test the {@link SectionEditor}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
+public class SectionEditorTest {
 
-	/**
-	 * Indicates if the palette prototype.
-	 * 
-	 * @return <code>true</code> if the palette prototype.
-	 */
-	boolean isPalettePrototype();
-
-	/**
-	 * Obtains the adapter.
-	 * 
-	 * @param classKey
-	 *            {@link Class} key.
-	 * @return Adapter or <code>null</code> if no adapter available.
-	 */
-	<T> T getAdapter(Class<T> classKey);
-
-	/**
-	 * Changes the location of the {@link Model}.
-	 * 
-	 * @param x
-	 *            X.
-	 * @param y
-	 *            Y.
-	 */
-	void changeLocation(int x, int y);
+	@Test
+	public void required() {
+	}
 
 }

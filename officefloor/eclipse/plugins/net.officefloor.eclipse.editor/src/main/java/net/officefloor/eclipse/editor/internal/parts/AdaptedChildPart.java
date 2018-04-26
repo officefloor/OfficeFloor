@@ -49,6 +49,11 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		implements AdaptedModelVisualFactoryContext<M>, AdaptedActionVisualFactoryContext {
 
 	/**
+	 * Indicates whether a Palette prototype.
+	 */
+	protected boolean isPalettePrototype = false;
+
+	/**
 	 * {@link ChildrenGroupVisual} instances for the {@link ChildrenGroupImpl}
 	 * instances.
 	 */
@@ -278,6 +283,11 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 					this.loadConnectors(this.roleConnectionClasses, this.role, assocations);
 				}
 
+				// Provide blank node if palette prototype
+				if (AdaptedChildPart.this.isPalettePrototype) {
+					return new Pane();
+				}
+
 				// Return geometry node
 				return geometryNode;
 			}
@@ -359,6 +369,13 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	public <R extends Model, O> Node action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
+
+		// Provide blank node if palette prototype
+		if (AdaptedChildPart.this.isPalettePrototype) {
+			return new Pane();
+		}
+
+		// Provide action
 		Node node = visualFactory.createVisual(this);
 		node.setOnMouseClicked((event) -> this.action(action));
 		node.getStyleClass().add("action");

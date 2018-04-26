@@ -321,6 +321,11 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
+		public boolean isPalettePrototype() {
+			return this.parent.isPalettePrototype();
+		}
+
+		@Override
 		public void changeLocation(int x, int y) {
 		}
 
