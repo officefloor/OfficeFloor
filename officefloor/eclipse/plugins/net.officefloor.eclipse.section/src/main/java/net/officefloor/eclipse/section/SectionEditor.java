@@ -101,6 +101,9 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 		parents.add(new FunctionItem());
 		parents.add(new SubSectionItem());
 		parents.add(new ExternalFlowItem());
+		parents.add(new ManagedObjectSourceItem());
+		parents.add(new ManagedObjectItem());
+		parents.add(new ExternalManagedObjectItem());
 	}
 
 	@Override

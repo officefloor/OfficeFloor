@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.section.test;
 
 import net.officefloor.eclipse.section.SectionEditor;
+import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
  * Mock object for testing the {@link SectionEditor}.
@@ -25,6 +26,9 @@ import net.officefloor.eclipse.section.SectionEditor;
  * @author Daniel Sagenschneider
  */
 public class MockObject {
+	
+	@Dependency
+	private Object dependency;
 
 	private String value = "mock";
 

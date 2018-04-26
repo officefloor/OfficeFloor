@@ -1,9 +1,27 @@
 <section>
   <external-managed-objects>
+    <external-managed-object name="External Object" object-type="" x="858" y="559"/>
   </external-managed-objects>
   <managed-object-sources>
+    <managed-object-source name="Managed Object Source" source="net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource" object-type="net.officefloor.eclipse.section.test.MockObject" timeout="0" x="150" y="600">
+      <properties>
+        <property name="class.name" value="net.officefloor.eclipse.section.test.MockObject"/>
+      </properties>
+    </managed-object-source>
   </managed-object-sources>
   <managed-objects>
+    <managed-object name="Managed Object One" scope="THREAD" x="400" y="550">
+      <managed-object-source name="Managed Object Source"/>
+      <dependency name="dependency" object-type="java.lang.Object">
+        <managed-object name="Managed Object Two"/>
+      </dependency>
+    </managed-object>
+    <managed-object name="Managed Object Two" scope="THREAD" x="600" y="570">
+      <managed-object-source name="Managed Object Source"/>
+      <dependency name="dependency" object-type="java.lang.Object">
+        <external-managed-object name="External Object"/>
+      </dependency>
+    </managed-object>
   </managed-objects>
   <managed-object-pools>
   </managed-object-pools>
@@ -23,6 +41,10 @@
       </managed-function>
       <managed-function name="functionTwo">
         <managed-function-object name="net.officefloor.eclipse.section.test.MockObject" key="" object-type="net.officefloor.eclipse.section.test.MockObject" parameter="false">
+          <managed-object name="Managed Object One"/>
+        </managed-function-object>
+        <managed-function-object name="java.lang.String" key="" object-type="java.lang.String" parameter="false">
+          <external-managed-object name="External Object"/>
         </managed-function-object>
       </managed-function>
     </function-namespace>

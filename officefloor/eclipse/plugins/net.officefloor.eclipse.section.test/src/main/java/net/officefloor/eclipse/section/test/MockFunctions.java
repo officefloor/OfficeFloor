@@ -41,7 +41,7 @@ public class MockFunctions {
 	public void functionOne() {
 	}
 
-	public void functionTwo(MockObject object) {
+	public void functionTwo(MockObject object, String parameter) {
 		object.setValue("functionTwo");
 	}
 
