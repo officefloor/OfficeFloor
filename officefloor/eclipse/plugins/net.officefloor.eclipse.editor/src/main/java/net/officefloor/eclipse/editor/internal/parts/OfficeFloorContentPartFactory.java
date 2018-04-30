@@ -11,6 +11,7 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.parts;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +32,9 @@ import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import com.google.inject.Injector;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
@@ -155,9 +159,19 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private IViewer contentViewer;
 
 	/**
+	 * Style rules for the content {@link IViewer}.
+	 */
+	private Property<String> contentStyle;
+
+	/**
 	 * {@link IViewer} for the palette.
 	 */
 	private IViewer paletteViewer;
+
+	/**
+	 * Style rules for the palette {@link IViewer}.
+	 */
+	private Property<String> paletteStyle;
 
 	/**
 	 * {@link ChangeExecutor}.
@@ -196,6 +210,32 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.errorHandler = errorHandler;
 		this.changeExecutor = changeExecutor;
 		this.styleRegistry = styleRegistry;
+
+		// Register styling for palette
+		this.paletteViewer.getCanvas().getStyleClass().add("palette");
+		this.paletteStyle = new SimpleStringProperty(null);
+		ReadOnlyProperty<URL> paletteUrl = this.styleRegistry.registerStyle("_palette_", this.paletteStyle);
+		paletteUrl.addListener((event, oldValue, newValue) -> {
+			if (oldValue != null) {
+				this.paletteViewer.getCanvas().getStylesheets().remove(oldValue.toExternalForm());
+			}
+			if (newValue != null) {
+				this.paletteViewer.getCanvas().getStylesheets().add(newValue.toExternalForm());
+			}
+		});
+
+		// Register styling for content
+		this.contentViewer.getCanvas().getStyleClass().add("content");
+		this.contentStyle = new SimpleStringProperty(null);
+		ReadOnlyProperty<URL> contentUrl = this.styleRegistry.registerStyle("_content_", this.contentStyle);
+		contentUrl.addListener((event, oldValue, newValue) -> {
+			if (oldValue != null) {
+				this.contentViewer.getCanvas().getStylesheets().remove(oldValue.toExternalForm());
+			}
+			if (newValue != null) {
+				this.contentViewer.getCanvas().getStylesheets().add(newValue.toExternalForm());
+			}
+		});
 	}
 
 	/**
@@ -511,6 +551,16 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 		// Reload the content
 		this.loadContentModels();
+	}
+
+	@Override
+	public Property<String> paletteStyle() {
+		return this.paletteStyle;
+	}
+
+	@Override
+	public Property<String> contentStyle() {
+		return this.contentStyle;
 	}
 
 	@Override

@@ -74,14 +74,14 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 
 	/**
 	 * <p>
-	 * Obtains the {@link Property} to the stylesheet rules for the
+	 * Obtains the {@link Property} to the style sheet rules for the
 	 * {@link AdaptedChild}.
 	 * <p>
-	 * Note: this is <strong>NOT</strong> the stylesheet {@link URL}. This is the
-	 * stylesheet rules (content of stylesheet) and the {@link AdaptedChild} will
+	 * Note: this is <strong>NOT</strong> the style sheet {@link URL}. This is the
+	 * style sheet rules (content of style sheet) and the {@link AdaptedChild} will
 	 * handle making available to {@link Parent} as a {@link URL}.
 	 * 
-	 * @return {@link Property} to the stylesheet rules.
+	 * @return {@link Property} to the style sheet rules.
 	 */
 	Property<String> style();
 

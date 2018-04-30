@@ -20,6 +20,7 @@ package net.officefloor.eclipse.editor;
 import java.util.List;
 import java.util.function.Function;
 
+import javafx.beans.property.Property;
 import net.officefloor.model.Model;
 
 /**
@@ -64,6 +65,20 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	 *            {@link OverlayVisualFactory}.
 	 */
 	void overlay(double x, double y, OverlayVisualFactory overlayVisualFactory);
+
+	/**
+	 * Obtains the {@link Property} to the style sheet rules for the palette.
+	 * 
+	 * @return {@link Property} to specify the style sheet rules for the palette.
+	 */
+	Property<String> paletteStyle();
+
+	/**
+	 * Obtains the {@link Property} to the style sheet rules for the content.
+	 * 
+	 * @return {@link Property} to specify the style sheet rules for the content.
+	 */
+	Property<String> contentStyle();
 
 	/**
 	 * Obtains the {@link AdaptedErrorHandler}.

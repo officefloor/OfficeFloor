@@ -79,8 +79,8 @@ public class AbstractStyleRegistry implements StyleRegistry {
 
 		@Override
 		public void connect() throws IOException {
-			String url = this.getURL().toExternalForm();
-			this.stylesheetContent = urlPathToStyleContent.get(url);
+			String urlPath = this.getURL().getPath();
+			this.stylesheetContent = urlPathToStyleContent.get(urlPath);
 			if (this.stylesheetContent == null) {
 				throw new IOException("URL " + url + " has no style sheet registered");
 			}
@@ -143,10 +143,18 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	 * 
 	 * @param configurationPath
 	 *            Configuration path.
+	 * @param version
+	 *            Version of the content for the {@link URL}.
 	 * @return {@link URL} for the configuration path.
 	 */
-	protected String getUrl(String configurationPath) {
-		return "officefloorstyle://" + String.valueOf(this.instanceIndex) + "/" + configurationPath;
+	protected URL getUrl(String configurationPath, int version) {
+		String url = "officefloorstyle://" + String.valueOf(this.instanceIndex) + "/" + configurationPath + "?version="
+				+ version;
+		try {
+			return new URL(url);
+		} catch (MalformedURLException ex) {
+			throw new IllegalStateException("Failed to create URL for " + url, ex);
+		}
 	}
 
 	/**
@@ -157,37 +165,24 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	public ReadOnlyProperty<URL> registerStyle(String configurationPath, ReadOnlyProperty<String> stylesheetContent) {
 
 		// Determine the URL
-		String url = this.getUrl(configurationPath);
+		int[] version = new int[] { 0 };
+		URL url = this.getUrl(configurationPath, version[0]++);
 
 		// Load the mapping
-		ReadOnlyProperty<String> stylesheetContentProperty = urlPathToStyleContent.get(url);
+		ReadOnlyProperty<String> stylesheetContentProperty = urlPathToStyleContent.get(url.getPath());
 		if (stylesheetContentProperty != null) {
 			throw new IllegalStateException("Stylesheet already registered for URL " + url);
 		}
 
 		// Register the style property
-		urlPathToStyleContent.put(url, stylesheetContent);
+		urlPathToStyleContent.put(url.getPath(), stylesheetContent);
 
 		// Create property for URL
-		Property<URL> urlProperty;
-		try {
-			urlProperty = new SimpleObjectProperty<>(new URL(url));
-		} catch (MalformedURLException ex) {
-			throw new IllegalStateException("Failed creating URL for " + url);
-		}
+		Property<URL> urlProperty = new SimpleObjectProperty<>(url);
 
 		// Trigger reload of URL on change to style content
 		stylesheetContent.addListener((change) -> {
-
-			// First clear URL (so old style no longer applied)
-			urlProperty.setValue(null);
-
-			// No apply style change (re-load URL with different content)
-			try {
-				urlProperty.setValue(new URL(url));
-			} catch (MalformedURLException ex) {
-				throw new IllegalStateException("Failed creating URL for " + url);
-			}
+			urlProperty.setValue(this.getUrl(configurationPath, version[0]++));
 		});
 
 		// Return the URL property

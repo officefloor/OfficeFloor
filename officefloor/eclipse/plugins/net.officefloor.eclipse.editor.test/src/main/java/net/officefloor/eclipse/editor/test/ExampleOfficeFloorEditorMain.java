@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
+import javafx.beans.property.Property;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -89,12 +90,42 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 				(ctx) -> ctx.getOverlayParent().getChildren().add(new Label("Example editor for testing features")));
 
 		// Provide log of structure
-		root.overlay(10, 50, (ctx) -> {
+		root.overlay(300, 10, (ctx) -> {
 			Button log = new Button("log");
 			log.setOnAction((event) -> {
 				root.getErrorHandler().isError(() -> StructureLogger.logFull(log, System.out));
 			});
 			ctx.getOverlayParent().getChildren().add(log);
+		});
+
+		// Provide styling of palette
+		Property<String> paletteStyle = root.paletteStyle();
+		root.overlay(10, 90, (ctx) -> {
+			Button style = new Button("palette style");
+			boolean[] toggle = new boolean[] { false };
+			style.setOnAction((event) -> {
+				toggle[0] = !toggle[0];
+				String css = toggle[0] ? ".palette Pane { -fx-background-color: yellow }" : "";
+				System.out.println("Toggle style sheet: " + css);
+				paletteStyle.setValue(css);
+			});
+			ctx.getOverlayParent().getChildren().add(style);
+		});
+
+		// Provide styling of content
+		Property<String> contentStyle = root.contentStyle();
+		root.overlay(10, 120, (ctx) -> {
+			Button style = new Button("content style");
+			boolean[] toggle = new boolean[] { false };
+			style.setOnAction((event) -> {
+				toggle[0] = !toggle[0];
+				String css = toggle[0]
+						? ".content Pane { -fx-background-color: black } .connection Path { -fx-stroke: white }"
+						: "";
+				System.out.println("Toggle style sheet: " + css);
+				contentStyle.setValue(css);
+			});
+			ctx.getOverlayParent().getChildren().add(style);
 		});
 
 		// Managed Object Source
@@ -170,7 +201,6 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 						});
 		mosDependencies.label((m) -> m.getOfficeFloorManagedObjectSourceInputDependencyName(),
 				OfficeFloorManagedObjectSourceInputDependencyEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT_DEPENDENCY_NAME);
-		mosDependencies.style().setValue("{ -fx-background-color: red }");
 
 		// Managed Object Source Flows
 		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceFlowModel, OfficeFloorManagedObjectSourceFlowEvent> mosFlows = mos
@@ -226,6 +256,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 						.execute(ctx.getOperations().linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(s, t)))
 				.delete((ctx) -> ctx.getChangeExecutor().execute(
 						ctx.getOperations().removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(ctx.getModel())));
+		mosTeams.style().setValue("{ -fx-text-fill: blue }");
 
 		// Team
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorTeamModel, OfficeFloorTeamEvent> team = root
@@ -247,7 +278,8 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 
 			@Override
 			public void run() {
-				String stylesheet = this.toggle ? "{ -fx-background-color: red }" : "{ -fx-background-color: green }";
+				String stylesheet = this.toggle ? ".parent { -fx-background-color: blue } { -fx-text-fill: white }"
+						: "{ -fx-text-fill: green }";
 				System.out.println("Toggle style sheet: " + stylesheet);
 				team.style().setValue(stylesheet);
 				this.toggle = !this.toggle;
