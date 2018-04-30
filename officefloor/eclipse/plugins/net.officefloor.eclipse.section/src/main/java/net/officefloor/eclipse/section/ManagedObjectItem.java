@@ -64,7 +64,7 @@ public class ManagedObjectItem extends
 	 */
 
 	@Override
-	protected SectionManagedObjectModel prototype() {
+	public SectionManagedObjectModel prototype() {
 		return new SectionManagedObjectModel("Managed Object", null);
 	}
 
@@ -98,7 +98,7 @@ public class ManagedObjectItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getSectionManagedObjectName(),
 				SectionManagedObjectEvent.CHANGE_SECTION_MANAGED_OBJECT_NAME);
 	}

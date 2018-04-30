@@ -47,7 +47,7 @@ public class FunctionFlowItem extends
 		AbstractItem<SectionModel, SectionChanges, FunctionModel, FunctionEvent, FunctionFlowModel, FunctionFlowEvent> {
 
 	@Override
-	protected FunctionFlowModel prototype() {
+	public FunctionFlowModel prototype() {
 		return new FunctionFlowModel();
 	}
 
@@ -67,7 +67,7 @@ public class FunctionFlowItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((m) -> m.getFlowName(), FunctionFlowEvent.CHANGE_FLOW_NAME);
 	}
 

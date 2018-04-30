@@ -70,6 +70,12 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	}
 
 	/**
+	 * Path to the content from the top level. This allows for prefix to
+	 * configuration for the {@link AdaptedModel}.
+	 */
+	private final String configurationPath;
+
+	/**
 	 * Aids in identifying the {@link Model} in configuration.
 	 */
 	private final Class<M> modelClass;
@@ -97,6 +103,8 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	/**
 	 * Instantiate.
 	 * 
+	 * @param configurationPathPrefix
+	 *            Prefix on the configuration path.
 	 * @param modelClass
 	 *            {@link Class} of the {@link Model}.
 	 * @param newAdaptedModel
@@ -104,8 +112,10 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	 * @param contentPartFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AbstractAdaptedFactory(Class<M> modelClass, Supplier<A> newAdaptedModel,
+	public AbstractAdaptedFactory(String configurationPathPrefix, Class<M> modelClass, Supplier<A> newAdaptedModel,
 			OfficeFloorContentPartFactory<R, O> contentPartFactory) {
+		this.configurationPath = ("".equals(configurationPathPrefix) ? "" : configurationPathPrefix + ".")
+				+ modelClass.getSimpleName();
 		this.modelClass = modelClass;
 		this.newAdaptedModel = newAdaptedModel;
 		this.contentPartFactory = contentPartFactory;
@@ -117,6 +127,8 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	/**
 	 * Instantiate from existing {@link AbstractAdaptedFactory}.
 	 * 
+	 * @param adaptedPathPrefix
+	 *            Prefix on the adapted path.
 	 * @param modelClass
 	 *            {@link Class} of the {@link Model}.
 	 * @param newAdaptedModel
@@ -124,9 +136,9 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	 * @param parentAdaptedModel
 	 *            Parent {@link AbstractAdaptedModel}.
 	 */
-	public AbstractAdaptedFactory(Class<M> modelClass, Supplier<A> newAdaptedModel,
+	public AbstractAdaptedFactory(String adaptedPathPrefix, Class<M> modelClass, Supplier<A> newAdaptedModel,
 			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
-		this(modelClass, newAdaptedModel, parentAdaptedModel.contentPartFactory);
+		this(adaptedPathPrefix, modelClass, newAdaptedModel, parentAdaptedModel.contentPartFactory);
 	}
 
 	/**
@@ -171,6 +183,15 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	 */
 	protected OfficeFloorContentPartFactory<R, O> getContentPartFactory() {
 		return this.contentPartFactory;
+	}
+
+	/**
+	 * Obtains the configuration path.
+	 * 
+	 * @return Configuration path.
+	 */
+	public String getConfigurationPath() {
+		return this.configurationPath;
 	}
 
 	/**

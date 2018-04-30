@@ -71,6 +71,8 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	/**
 	 * Instantiate.
 	 * 
+	 * @param configurationPathPrefix
+	 *            Prefix to the configuration path.
 	 * @param modelPrototype
 	 *            {@link Model} prototype.
 	 * @param viewFactory
@@ -78,9 +80,9 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 * @param contentFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AdaptedParentFactory(M modelPrototype, AdaptedModelVisualFactory<M> viewFactory,
-			OfficeFloorContentPartFactory<R, O> contentFactory) {
-		super(modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
+	public AdaptedParentFactory(String configurationPathPrefix, M modelPrototype,
+			AdaptedModelVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
+		super(configurationPathPrefix, modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 		this.errorHandler = contentFactory.getErrorHandler();
 	}
 

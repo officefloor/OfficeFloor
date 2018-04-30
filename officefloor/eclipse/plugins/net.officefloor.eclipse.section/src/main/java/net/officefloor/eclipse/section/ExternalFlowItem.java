@@ -62,7 +62,7 @@ public class ExternalFlowItem extends
 	 */
 
 	@Override
-	protected ExternalFlowModel prototype() {
+	public ExternalFlowModel prototype() {
 		return new ExternalFlowModel("External Flow", null);
 	}
 
@@ -84,7 +84,7 @@ public class ExternalFlowItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getExternalFlowName(), ExternalFlowEvent.CHANGE_EXTERNAL_FLOW_NAME);
 	}
 

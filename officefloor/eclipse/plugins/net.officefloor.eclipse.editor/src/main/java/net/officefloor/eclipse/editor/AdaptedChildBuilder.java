@@ -17,9 +17,12 @@
  */
 package net.officefloor.eclipse.editor;
 
+import java.net.URL;
 import java.util.List;
 import java.util.function.Function;
 
+import javafx.beans.property.Property;
+import javafx.scene.Parent;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
@@ -30,6 +33,13 @@ import net.officefloor.model.change.Change;
  * @author Daniel Sagenschneider
  */
 public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E extends Enum<E>> {
+
+	/**
+	 * Obtains the configuration path.
+	 * 
+	 * @return Configuration path.
+	 */
+	String getConfigurationPath();
 
 	/**
 	 * Obtains the {@link Model} {@link Class}.
@@ -61,6 +71,19 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 	 */
 	@SuppressWarnings("unchecked")
 	void label(Function<M, String> getLabel, LabelChange<M> setLabel, E... labelChangeEvents);
+
+	/**
+	 * <p>
+	 * Obtains the {@link Property} to the stylesheet rules for the
+	 * {@link AdaptedChild}.
+	 * <p>
+	 * Note: this is <strong>NOT</strong> the stylesheet {@link URL}. This is the
+	 * stylesheet rules (content of stylesheet) and the {@link AdaptedChild} will
+	 * handle making available to {@link Parent} as a {@link URL}.
+	 * 
+	 * @return {@link Property} to the stylesheet rules.
+	 */
+	Property<String> style();
 
 	/**
 	 * Registers children for the {@link Model}.

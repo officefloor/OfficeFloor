@@ -11,6 +11,7 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.handlers;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +37,8 @@ import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import com.google.common.collect.HashMultimap;
 
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
@@ -296,13 +297,18 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		 */
 
 		@Override
-		public ReadOnlyStringProperty getLabel() {
+		public ReadOnlyProperty<String> getLabel() {
 			return this.parent.getLabel();
 		}
 
 		@Override
-		public StringProperty getEditLabel() {
+		public Property<String> getEditLabel() {
 			return null;
+		}
+
+		@Override
+		public ReadOnlyProperty<URL> getStylesheetUrl() {
+			return this.parent.getStylesheetUrl();
 		}
 
 		@Override

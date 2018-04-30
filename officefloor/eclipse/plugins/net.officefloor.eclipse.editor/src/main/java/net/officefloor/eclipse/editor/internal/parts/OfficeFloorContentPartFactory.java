@@ -51,6 +51,7 @@ import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
+import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -169,6 +170,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private AdaptedErrorHandler errorHandler;
 
 	/**
+	 * {@link StyleRegistry}.s
+	 */
+	private StyleRegistry styleRegistry;
+
+	/**
 	 * Initialises.
 	 * 
 	 * @param injector
@@ -183,12 +189,13 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 *            {@link ChangeExecutor}.
 	 */
 	public void init(Injector injector, IViewer content, IViewer palette, AdaptedErrorHandler errorHandler,
-			ChangeExecutor changeExecutor) {
+			ChangeExecutor changeExecutor, StyleRegistry styleRegistry) {
 		this.injector = injector;
 		this.contentViewer = content;
 		this.paletteViewer = palette;
 		this.errorHandler = errorHandler;
 		this.changeExecutor = changeExecutor;
+		this.styleRegistry = styleRegistry;
 	}
 
 	/**
@@ -200,6 +207,15 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	public <M extends Model, E extends Enum<E>> void registerModel(AbstractAdaptedFactory<R, O, M, E, ?> builder) {
 		this.models.put(builder.getModelClass(), builder);
 		this.orderedModels.add(builder);
+	}
+
+	/**
+	 * Obtains the {@link StyleRegistry}.
+	 * 
+	 * @return {@link StyleRegistry}.
+	 */
+	public StyleRegistry getStyleRegistry() {
+		return this.styleRegistry;
 	}
 
 	/**
@@ -483,7 +499,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			M modelPrototype, Function<R, List<M>> getParents, AdaptedModelVisualFactory<M> viewFactory,
 			RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
-		return new AdaptedParentFactory<R, O, M, E>(modelPrototype, viewFactory, this);
+		return new AdaptedParentFactory<R, O, M, E>(this.rootModelClass.getSimpleName(), modelPrototype, viewFactory,
+				this);
 	}
 
 	@Override

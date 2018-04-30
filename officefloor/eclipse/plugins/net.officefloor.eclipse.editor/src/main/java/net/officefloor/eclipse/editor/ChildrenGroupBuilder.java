@@ -27,6 +27,13 @@ import net.officefloor.model.Model;
 public interface ChildrenGroupBuilder<R extends Model, O> {
 
 	/**
+	 * Obtains the configuration path.
+	 * 
+	 * @return Configuration path.
+	 */
+	String getConfigurationPath();
+
+	/**
 	 * Adds a child {@link Model}.
 	 * 
 	 * @param modelPrototype

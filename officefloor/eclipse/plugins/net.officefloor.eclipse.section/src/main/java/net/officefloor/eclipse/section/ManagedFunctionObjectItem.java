@@ -46,7 +46,7 @@ public class ManagedFunctionObjectItem extends
 		AbstractItem<SectionModel, SectionChanges, ManagedFunctionModel, ManagedFunctionEvent, ManagedFunctionObjectModel, ManagedFunctionObjectEvent> {
 
 	@Override
-	protected ManagedFunctionObjectModel prototype() {
+	public ManagedFunctionObjectModel prototype() {
 		return new ManagedFunctionObjectModel();
 	}
 
@@ -67,7 +67,7 @@ public class ManagedFunctionObjectItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getObjectName(), ManagedFunctionObjectEvent.CHANGE_OBJECT_NAME);
 	}
 

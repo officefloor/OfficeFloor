@@ -11,6 +11,7 @@
  *******************************************************************************/
 package net.officefloor.eclipse.editor.internal.parts;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -163,6 +164,27 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		pane.getStyleClass().add("child");
 		pane.getStyleClass().add(this.getContent().getModel().getClass().getSimpleName());
 
+		// Determine if specific styling
+		ReadOnlyProperty<URL> stylesheetUrl = this.getContent().getStylesheetUrl();
+		if (stylesheetUrl != null) {
+
+			// Load initial styling
+			URL initialUrl = stylesheetUrl.getValue();
+			if (initialUrl != null) {
+				pane.getStylesheets().add(initialUrl.toExternalForm());
+			}
+
+			// Bind potential changes to the styling
+			stylesheetUrl.addListener((event, oldValue, newValue) -> {
+				if (oldValue != null) {
+					pane.getStylesheets().remove(oldValue.toExternalForm());
+				}
+				if (newValue != null) {
+					pane.getStylesheets().add(newValue.toExternalForm());
+				}
+			});
+		}
+
 		// Return the visual
 		return pane;
 	}
@@ -178,7 +200,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	@Override
 	public Label label(Pane parent) {
 		// Ensure label is configured
-		ReadOnlyStringProperty labelProperty = this.getContent().getLabel();
+		ReadOnlyProperty<String> labelProperty = this.getContent().getLabel();
 		if (labelProperty == null) {
 			throw new IllegalStateException(
 					"No label configured for visual for model " + this.getContent().getModel().getClass().getName());

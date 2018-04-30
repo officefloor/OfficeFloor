@@ -47,7 +47,7 @@ public class FunctionEscalationItem extends
 		AbstractItem<SectionModel, SectionChanges, FunctionModel, FunctionEvent, FunctionEscalationModel, FunctionEscalationEvent> {
 
 	@Override
-	protected FunctionEscalationModel prototype() {
+	public FunctionEscalationModel prototype() {
 		return new FunctionEscalationModel();
 	}
 
@@ -70,7 +70,7 @@ public class FunctionEscalationItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((m) -> m.getEscalationType(), FunctionEscalationEvent.CHANGE_ESCALATION_TYPE);
 	}
 

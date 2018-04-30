@@ -68,7 +68,7 @@ public class FunctionItem extends
 	 */
 
 	@Override
-	protected FunctionModel prototype() {
+	public FunctionModel prototype() {
 		return new FunctionModel("Function", false, null, null, null);
 	}
 
@@ -104,7 +104,7 @@ public class FunctionItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getFunctionName(), FunctionEvent.CHANGE_FUNCTION_NAME);
 	}
 

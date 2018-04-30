@@ -112,7 +112,7 @@ public class SubSectionItem extends
 	 */
 
 	@Override
-	protected SubSectionModel prototype() {
+	public SubSectionModel prototype() {
 		return new SubSectionModel("Sub Section", null, null);
 	}
 
@@ -135,7 +135,7 @@ public class SubSectionItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getSubSectionName(), SubSectionEvent.CHANGE_SUB_SECTION_NAME);
 	}
 

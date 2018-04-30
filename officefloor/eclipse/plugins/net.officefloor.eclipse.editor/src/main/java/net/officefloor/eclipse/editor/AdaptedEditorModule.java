@@ -83,6 +83,7 @@ import net.officefloor.eclipse.editor.internal.parts.OfficeFloorSelectionFeedbac
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorSelectionHandlePartFactory;
 import net.officefloor.eclipse.editor.internal.parts.PaletteRootPart;
 import net.officefloor.eclipse.editor.internal.policies.ContentRestrictedChangeViewportPolicy;
+import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.eclipse.editor.internal.views.ViewersComposite;
 import net.officefloor.model.Model;
 
@@ -206,10 +207,14 @@ public class AdaptedEditorModule extends MvcFxModule {
 		// Load the factory
 		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
 
+		// Create the style registry for the factory
+		StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
+
 		// Load the viewers and change executor
 		this.viewersComposite = new ViewersComposite(this.content, this.palette);
 		ChangeExecutor changeExecutor = new ChangeExecutorImpl(this.factory, this.domain);
-		this.factory.init(this.injector, this.content, this.palette, this.viewersComposite, changeExecutor);
+		this.factory.init(this.injector, this.content, this.palette, this.viewersComposite, changeExecutor,
+				styleRegistry);
 
 		// Configure the models
 		adaptedBuilder.build(this.factory);

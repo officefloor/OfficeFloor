@@ -150,7 +150,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * 
 	 * @return Prototype.
 	 */
-	protected abstract M prototype();
+	public abstract M prototype();
 
 	/**
 	 * Extracts the {@link Model} instances.
@@ -259,7 +259,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 *            {@link Model}.
 		 * @return Label for the {@link Model}.
 		 */
-		String getLabel(M model) {
+		public String getLabel(M model) {
 			return this.labeller.apply(model);
 		}
 
@@ -278,7 +278,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * 
 	 * @return {@link IdeLabeller}.
 	 */
-	protected abstract IdeLabeller label();
+	public abstract IdeLabeller label();
 
 	/**
 	 * Further adapt the {@link AdaptedChildBuilder}.

@@ -90,7 +90,8 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor {
+public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor
+		implements Comparable<AbstractIdeEditor<R, RE, O>> {
 
 	/**
 	 * Indicates if running outside the {@link IWorkbench}.
@@ -488,7 +489,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * @return {@link AbstractConfigurableItem} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	protected final AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents() {
+	public final AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents() {
 		List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = new LinkedList<>();
 		this.loadParents(parents);
 		return parents.toArray(new AbstractConfigurableItem[parents.size()]);
@@ -574,6 +575,15 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 		// Obtain the OfficeFloor compiler
 		return this.osgiBridge;
+	}
+
+	/*
+	 * ============= Comparable ========================
+	 */
+
+	@Override
+	public int compareTo(AbstractIdeEditor<R, RE, O> that) {
+		return this.getClass().getSimpleName().compareTo(that.getClass().getSimpleName());
 	}
 
 	/*

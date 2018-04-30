@@ -91,6 +91,8 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	/**
 	 * Instantiate.
 	 * 
+	 * @param configurationPathPrefix
+	 *            Prefix on the configuration path.
 	 * @param connectionClass
 	 *            {@link ConnectionModel} {@link Class}.
 	 * @param getSource
@@ -98,9 +100,9 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 * @param contentPartFactory
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
-	public AdaptedConnectionFactory(Class<C> connectionClass, Class<S> sourceModelClass, Function<C, S> getSource,
-			AdaptedChildFactory<R, O, ?, ?, ?> adaptedChildModelFactory) {
-		super(connectionClass, () -> new AdaptedConnectionImpl<>(), adaptedChildModelFactory);
+	public AdaptedConnectionFactory(String configurationPathPrefix, Class<C> connectionClass, Class<S> sourceModelClass,
+			Function<C, S> getSource, AdaptedChildFactory<R, O, ?, ?, ?> adaptedChildModelFactory) {
+		super(configurationPathPrefix, connectionClass, () -> new AdaptedConnectionImpl<>(), adaptedChildModelFactory);
 		this.sourceModelClass = sourceModelClass;
 		this.getSource = getSource;
 		this.errorHandler = adaptedChildModelFactory.getContentPartFactory().getErrorHandler();

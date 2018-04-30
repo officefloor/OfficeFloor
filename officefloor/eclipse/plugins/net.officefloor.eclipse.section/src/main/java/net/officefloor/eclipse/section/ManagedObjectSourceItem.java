@@ -120,7 +120,7 @@ public class ManagedObjectSourceItem extends
 	 */
 
 	@Override
-	protected SectionManagedObjectSourceModel prototype() {
+	public SectionManagedObjectSourceModel prototype() {
 		return new SectionManagedObjectSourceModel("Managed Object Source", null, null, "0");
 	}
 
@@ -152,7 +152,7 @@ public class ManagedObjectSourceItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((m) -> m.getSectionManagedObjectSourceName(),
 				SectionManagedObjectSourceEvent.CHANGE_SECTION_MANAGED_OBJECT_SOURCE_NAME);
 	}

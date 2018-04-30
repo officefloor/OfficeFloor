@@ -44,7 +44,7 @@ public class ManagedObjectDependencyItem extends
 		AbstractItem<SectionModel, SectionChanges, SectionManagedObjectModel, SectionManagedObjectEvent, SectionManagedObjectDependencyModel, SectionManagedObjectDependencyEvent> {
 
 	@Override
-	protected SectionManagedObjectDependencyModel prototype() {
+	public SectionManagedObjectDependencyModel prototype() {
 		return new SectionManagedObjectDependencyModel();
 	}
 
@@ -66,7 +66,7 @@ public class ManagedObjectDependencyItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((m) -> m.getSectionManagedObjectDependencyName(),
 				SectionManagedObjectDependencyEvent.CHANGE_SECTION_MANAGED_OBJECT_DEPENDENCY_NAME);
 	}

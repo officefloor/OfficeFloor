@@ -40,7 +40,7 @@ public class SubSectionInputItem extends
 		AbstractItem<SectionModel, SectionChanges, SubSectionModel, SubSectionEvent, SubSectionInputModel, SubSectionInputEvent> {
 
 	@Override
-	protected SubSectionInputModel prototype() {
+	public SubSectionInputModel prototype() {
 		return new SubSectionInputModel();
 	}
 
@@ -60,7 +60,7 @@ public class SubSectionInputItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getSubSectionInputName(),
 				SubSectionInputEvent.CHANGE_PUBLIC_INPUT_NAME);
 	}

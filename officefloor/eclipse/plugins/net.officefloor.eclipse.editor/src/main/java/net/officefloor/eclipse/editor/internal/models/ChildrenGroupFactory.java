@@ -40,6 +40,11 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 		implements ChildrenGroupBuilder<R, O> {
 
 	/**
+	 * Configuration path.
+	 */
+	private final String configurationPath;
+
+	/**
 	 * Children group name.
 	 */
 	private final String childGroupName;
@@ -64,6 +69,8 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 	/**
 	 * Instantiate.
 	 * 
+	 * @param configurationPathPrefix
+	 *            Prefix to the configuration path.
 	 * @param childGroupName
 	 *            Child grouping name.
 	 * @param getChildren
@@ -75,8 +82,10 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 	 * @param parentAdaptedModel
 	 *            Parent {@link AbstractAdaptedFactory}.
 	 */
-	public ChildrenGroupFactory(String childGroupName, Function<M, List<? extends Model>> getChildren,
-			E[] childrenEvents, AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
+	public ChildrenGroupFactory(String configurationPathPrefix, String childGroupName,
+			Function<M, List<? extends Model>> getChildren, E[] childrenEvents,
+			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
+		this.configurationPath = configurationPathPrefix + "." + childGroupName;
 		this.childGroupName = childGroupName;
 		this.getChildren = getChildren;
 		this.childrenEvents = childrenEvents;
@@ -99,9 +108,14 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 	 */
 
 	@Override
+	public String getConfigurationPath() {
+		return this.configurationPath;
+	}
+
+	@Override
 	public <CM extends Model, CE extends Enum<CE>> AdaptedChildBuilder<R, O, CM, CE> addChild(CM modelPrototype,
 			AdaptedModelVisualFactory<CM> viewFactory) {
-		return new AdaptedChildFactory<>(modelPrototype, viewFactory, this.parentAdaptedModel);
+		return new AdaptedChildFactory<>(this.configurationPath, modelPrototype, viewFactory, this.parentAdaptedModel);
 	}
 
 	/**

@@ -170,6 +170,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 						});
 		mosDependencies.label((m) -> m.getOfficeFloorManagedObjectSourceInputDependencyName(),
 				OfficeFloorManagedObjectSourceInputDependencyEvent.CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT_DEPENDENCY_NAME);
+		mosDependencies.style().setValue("{ -fx-background-color: red }");
 
 		// Managed Object Source Flows
 		AdaptedChildBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorManagedObjectSourceFlowModel, OfficeFloorManagedObjectSourceFlowEvent> mosFlows = mos
@@ -240,6 +241,22 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 				(p) -> p.getRootModel().addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", null))));
 		team.action((ctx) -> ctx.getChangeExecutor().execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
 				DefaultImages.DELETE);
+		Runnable toggleTeamStyleRunnable = new Runnable() {
+
+			private boolean toggle = false;
+
+			@Override
+			public void run() {
+				String stylesheet = this.toggle ? "{ -fx-background-color: red }" : "{ -fx-background-color: green }";
+				System.out.println("Toggle style sheet: " + stylesheet);
+				team.style().setValue(stylesheet);
+				this.toggle = !this.toggle;
+			}
+		};
+		toggleTeamStyleRunnable.run();
+		team.action((ctx) -> {
+			toggleTeamStyleRunnable.run();
+		}, (visual) -> new Label("Toggle style"));
 
 		// Offices
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, DeployedOfficeModel, DeployedOfficeEvent> office = root

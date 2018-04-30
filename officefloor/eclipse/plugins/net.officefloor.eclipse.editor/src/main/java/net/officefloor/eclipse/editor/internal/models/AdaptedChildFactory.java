@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.editor.internal.models;
 
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,8 +28,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
@@ -74,6 +78,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	private final AdaptedModelVisualFactory<M> viewFactory;
 
 	/**
+	 * Stylesheet content.
+	 */
+	private final Property<String> stylesheetContent = new SimpleStringProperty();
+
+	/**
 	 * {@link Function} to get the label from the {@link Model}.
 	 */
 	private Function<M, String> getLabel = null;
@@ -105,8 +114,15 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	private final Map<ConnectionKey, AdaptedConnectionFactory<R, O, ?, ?, ?>> connectionFactories = new HashMap<>();
 
 	/**
+	 * {@link ReadOnlyProperty} to the stylesheet {@link URL}.
+	 */
+	private ReadOnlyProperty<URL> stylesheetUrl;
+
+	/**
 	 * Instantiate as {@link AdaptedChild}.
 	 * 
+	 * @param configurationPathPrefix
+	 *            Prefix on the configuration path.
 	 * @param modelPrototype
 	 *            {@link Model} prototype.
 	 * @param viewFactory
@@ -115,10 +131,10 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 *            Parent {@link AbstractAdaptedFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	public AdaptedChildFactory(M modelPrototype, AdaptedModelVisualFactory<M> viewFactory,
-			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
-		super((Class<M>) modelPrototype.getClass(), () -> (A) new AdaptedChildImpl<R, O, M, E, AdaptedChild<M>>(),
-				parentAdaptedModel);
+	public AdaptedChildFactory(String configurationPathPrefix, M modelPrototype,
+			AdaptedModelVisualFactory<M> viewFactory, AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
+		super(configurationPathPrefix, (Class<M>) modelPrototype.getClass(),
+				() -> (A) new AdaptedChildImpl<R, O, M, E, AdaptedChild<M>>(), parentAdaptedModel);
 		this.modelPrototype = modelPrototype;
 		this.viewFactory = viewFactory;
 	}
@@ -126,6 +142,8 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	/**
 	 * Allow {@link AdaptedParentBuilder} inheritance.
 	 * 
+	 * @param configurationPathPrefix
+	 *            Prefix on the configuration path.
 	 * @param modelPrototype
 	 *            {@link Model} prototype.
 	 * @param newAdaptedModel
@@ -136,9 +154,9 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	 *            {@link OfficeFloorContentPartFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected AdaptedChildFactory(M modelPrototype, Supplier<A> newAdaptedModel,
+	protected AdaptedChildFactory(String configurationPathPrefix, M modelPrototype, Supplier<A> newAdaptedModel,
 			AdaptedModelVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentPartFactory) {
-		super((Class<M>) modelPrototype.getClass(), newAdaptedModel, contentPartFactory);
+		super(configurationPathPrefix, (Class<M>) modelPrototype.getClass(), newAdaptedModel, contentPartFactory);
 		this.modelPrototype = modelPrototype;
 		this.viewFactory = viewFactory;
 	}
@@ -185,6 +203,10 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	@Override
 	@SuppressWarnings("unchecked")
 	public void validate() throws IllegalStateException {
+
+		// Register the styling
+		this.stylesheetUrl = this.getContentPartFactory().getStyleRegistry().registerStyle(this.getConfigurationPath(),
+				this.stylesheetContent);
 
 		// Ensure all the connection events are same enum
 		E firstEvent = null;
@@ -312,11 +334,16 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	}
 
 	@Override
+	public Property<String> style() {
+		return this.stylesheetContent;
+	}
+
+	@Override
 	@SafeVarargs
 	public final ChildrenGroupBuilder<R, O> children(String childGroupName,
 			Function<M, List<? extends Model>> getChildren, E... childrenEvents) {
-		ChildrenGroupFactory<R, O, M, E> factory = new ChildrenGroupFactory<>(childGroupName, getChildren,
-				childrenEvents, this);
+		ChildrenGroupFactory<R, O, M, E> factory = new ChildrenGroupFactory<>(this.getConfigurationPath(),
+				childGroupName, getChildren, childrenEvents, this);
 		this.childrenGroups.add(factory);
 		return factory;
 	}
@@ -342,7 +369,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			Class<C> connectionClass, Function<M, List<C>> getConnections, Function<C, M> getSource,
 			E... connectionChangeEvents) {
 		AdaptedConnectionFactory<R, O, M, C, E> adaptedConnectionFactory = new AdaptedConnectionFactory<>(
-				connectionClass, this.getModelClass(), getSource, this);
+				this.getConfigurationPath(), connectionClass, this.getModelClass(), getSource, this);
 		this.loadModelToConnection(connectionClass,
 				new ModelToConnection<>(getConnections, connectionChangeEvents, adaptedConnectionFactory));
 		return adaptedConnectionFactory;
@@ -587,6 +614,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		@Override
 		public StringProperty getEditLabel() {
 			return this.label;
+		}
+
+		@Override
+		public ReadOnlyProperty<URL> getStylesheetUrl() {
+			return this.getFactory().stylesheetUrl;
 		}
 
 		@Override

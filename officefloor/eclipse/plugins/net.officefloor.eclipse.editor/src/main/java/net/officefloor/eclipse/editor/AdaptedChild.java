@@ -17,8 +17,11 @@
  */
 package net.officefloor.eclipse.editor;
 
+import java.net.URL;
 import java.util.List;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
@@ -39,7 +42,7 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 * @return {@link StringProperty} for the label. May be <code>null</code> if no
 	 *         label.
 	 */
-	ReadOnlyStringProperty getLabel();
+	ReadOnlyProperty<String> getLabel();
 
 	/**
 	 * Obtains the {@link StringProperty} to edit the label.
@@ -47,7 +50,7 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 * @return {@link StringProperty} to edit the label. May be <code>null</code> if
 	 *         label not editable.
 	 */
-	StringProperty getEditLabel();
+	Property<String> getEditLabel();
 
 	/**
 	 * Obtains the {@link ChildrenGroup} instances.
@@ -112,6 +115,18 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 * @return Visual {@link Pane}.
 	 */
 	Pane createVisual(AdaptedModelVisualFactoryContext<M> context);
+
+	/**
+	 * <p>
+	 * Obtains the {@link Property} to the Stylesheet URL for this visual of this
+	 * {@link AdaptedChild}.
+	 * <p>
+	 * May be <code>null</code> to indicate no specific styling.
+	 * 
+	 * @return {@link ReadOnlyProperty} to the Stylesheet {@link URL}. May be
+	 *         <code>null</code>.
+	 */
+	ReadOnlyProperty<URL> getStylesheetUrl();
 
 	/**
 	 * Undertakes the {@link ModelAction}.

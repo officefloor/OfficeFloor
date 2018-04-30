@@ -158,7 +158,7 @@ public class FunctionNamespaceItem extends
 	 */
 
 	@Override
-	protected FunctionNamespaceModel prototype() {
+	public FunctionNamespaceModel prototype() {
 		return new FunctionNamespaceModel("Functions", null);
 	}
 
@@ -178,7 +178,7 @@ public class FunctionNamespaceItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getFunctionNamespaceName(),
 				FunctionNamespaceEvent.CHANGE_FUNCTION_NAMESPACE_NAME);
 	}

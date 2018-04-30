@@ -46,7 +46,7 @@ public class SubSectionOutputItem extends
 		AbstractItem<SectionModel, SectionChanges, SubSectionModel, SubSectionEvent, SubSectionOutputModel, SubSectionOutputEvent> {
 
 	@Override
-	protected SubSectionOutputModel prototype() {
+	public SubSectionOutputModel prototype() {
 		return new SubSectionOutputModel();
 	}
 
@@ -67,7 +67,7 @@ public class SubSectionOutputItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getSubSectionOutputName(),
 				SubSectionOutputEvent.CHANGE_SUB_SECTION_OUTPUT_NAME);
 	}

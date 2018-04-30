@@ -62,7 +62,7 @@ public class ExternalManagedObjectItem extends
 	 */
 
 	@Override
-	protected ExternalManagedObjectModel prototype() {
+	public ExternalManagedObjectModel prototype() {
 		return new ExternalManagedObjectModel("External Object", null);
 	}
 
@@ -83,7 +83,7 @@ public class ExternalManagedObjectItem extends
 	}
 
 	@Override
-	protected IdeLabeller label() {
+	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getExternalManagedObjectName(),
 				ExternalManagedObjectEvent.CHANGE_EXTERNAL_MANAGED_OBJECT_NAME);
 	}
