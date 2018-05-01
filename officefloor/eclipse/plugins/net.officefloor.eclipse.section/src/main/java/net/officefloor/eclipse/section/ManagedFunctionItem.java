@@ -25,6 +25,7 @@ import javafx.scene.layout.VBox;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.ConnectionModel;
@@ -90,7 +91,8 @@ public class ManagedFunctionItem extends
 			ctx.getChangeExecutor().execute(this.getConfigurableContext().getOperations().addFunction(functionName,
 					managedFunction, managedFunctionType));
 		}, DefaultImages.ADD));
-		context.addNode(heading, context.connector(ManagedFunctionToFunctionModel.class).getNode());
+		context.addNode(heading,
+				context.connector(DefaultConnectors.DERIVE, ManagedFunctionToFunctionModel.class).getNode());
 		context.addNode(container, context.childGroup(ManagedFunctionObjectItem.class.getSimpleName(), new VBox()));
 		return container;
 	}

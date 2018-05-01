@@ -18,9 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
-import org.eclipse.gef.geometry.planar.IGeometry;
-import org.eclipse.gef.geometry.planar.Point;
-import org.eclipse.gef.geometry.planar.Polygon;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
 import com.google.common.collect.HashMultimap;
@@ -30,12 +27,14 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
+import net.officefloor.eclipse.editor.AdaptedConnectorVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedConnectorVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
@@ -84,7 +83,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	 *            {@link AdaptedConnector}.
 	 * @return {@link GeometryNode}.
 	 */
-	public GeometryNode<?> getAdaptedConnectorNode(AdaptedConnector<?> connector) {
+	public Region getAdaptedConnectorNode(AdaptedConnector<?> connector) {
 		return this.adaptedConnectorVisuals.get(connector).node;
 	}
 
@@ -243,7 +242,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final <G extends IGeometry, N extends GeometryNode<G>> Connector connector(N geometryNode,
+	public final <N extends Region> Connector connector(AdaptedConnectorVisualFactory<N> visualFactory,
 			Class... connectionClasses) {
 		return new Connector() {
 
@@ -255,6 +254,9 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 			// Role specific connection classes
 			private Class<?>[] roleConnectionClasses = null;
+
+			// Geometry Node
+			private Region geometryNode = null;
 
 			@Override
 			public Connector source(Class... sourceConnectionClass) {
@@ -291,8 +293,17 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 				// Determine if already initialised
 				if (this.isInitialised) {
-					return geometryNode;
+					return this.geometryNode;
 				}
+
+				// Create the geometry node
+				Region node = visualFactory.createGeometryNode(new AdaptedConnectorVisualFactoryContext() {
+				});
+				if (!(node instanceof GeometryNode)) {
+					throw new IllegalStateException("Connector visual must implement " + GeometryNode.class.getName()
+							+ " for model " + AdaptedChildPart.this.getContent().getModel().getClass().getName());
+				}
+				this.geometryNode = node;
 
 				// Create the assocation listing
 				List<AdaptedConnector<M>> assocations = new ArrayList<>(connectionClasses.length);
@@ -311,7 +322,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 				}
 
 				// Return geometry node
-				return geometryNode;
+				return this.geometryNode;
 			}
 
 			/**
@@ -346,7 +357,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 					}
 
 					// Load the connector visual
-					visual.node = geometryNode;
+					visual.node = this.geometryNode;
 
 					// Associate the connectors
 					assocations.add(connector);
@@ -354,29 +365,6 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 				}
 			}
 		};
-	}
-
-	@Override
-	@SuppressWarnings("rawtypes")
-	public Connector connector(Class... connectionClasses) {
-
-		// Create the geometry node for the anchor
-		final double X_LEFT = 0;
-		final double X_STEM = 5;
-		final double X_TIP = 9;
-		final double Y_TOP = 0;
-		final double Y_BOTTOM = 10;
-		final double Y_STEM_INSET = 2;
-		final double Y_STEM_TOP = Y_TOP + Y_STEM_INSET;
-		final double Y_STEM_BOTTOM = Y_BOTTOM - Y_STEM_INSET;
-		final double Y_TIP = (Y_BOTTOM - Y_TOP) / 2;
-		GeometryNode<Polygon> node = new GeometryNode<>(new Polygon(new Point(X_LEFT, Y_STEM_TOP),
-				new Point(X_STEM, Y_STEM_TOP), new Point(X_STEM, Y_TOP), new Point(X_TIP, Y_TIP),
-				new Point(X_STEM, Y_BOTTOM), new Point(X_STEM, Y_STEM_BOTTOM), new Point(X_LEFT, Y_STEM_BOTTOM)));
-		node.setFill(Color.BLACK);
-
-		// Return the connector
-		return this.connector(node, connectionClasses);
 	}
 
 	@Override
@@ -393,7 +381,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	public <R extends Model, O> Node action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
 
 		// Provide blank node if palette prototype
-		if (AdaptedChildPart.this.isPalettePrototype) {
+		if (this.isPalettePrototype) {
 			return new Pane();
 		}
 
@@ -428,7 +416,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		/**
 		 * {@link GeometryNode} for the {@link AdaptedConnectorImpl}.
 		 */
-		private GeometryNode<?> node = null;
+		private Region node = null;
 	}
 
 }

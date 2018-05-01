@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.mvc.fx.parts.AbstractContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
@@ -32,6 +31,7 @@ import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 
 import javafx.scene.Node;
+import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
@@ -45,7 +45,7 @@ import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
+public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 
 	@Inject
 	private ActiveConnectionSourceModel activeConnectionSource;
@@ -133,13 +133,13 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 	}
 
 	@Override
-	protected GeometryNode<?> doCreateVisual() {
+	protected Region doCreateVisual() {
 
 		// Obtain the parent
 		AdaptedChildPart<?, ?> parent = (AdaptedChildPart<?, ?>) this.getParent();
 
 		// Obtain the node for the connector
-		GeometryNode<?> node = parent.getAdaptedConnectorNode(this.getContent());
+		Region node = parent.getAdaptedConnectorNode(this.getContent());
 
 		// Add the children group name for CSS
 		node.getStyleClass().add("connector");
@@ -154,11 +154,11 @@ public class AdaptedConnectorPart extends AbstractContentPart<GeometryNode<?>> {
 	}
 
 	@Override
-	protected void doRefreshVisual(GeometryNode<?> visual) {
+	protected void doRefreshVisual(Region visual) {
 	}
 
 	@Override
-	protected void unregisterFromVisualPartMap(IViewer viewer, GeometryNode<?> visual) {
+	protected void unregisterFromVisualPartMap(IViewer viewer, Region visual) {
 		// AdaptedConnectorPart registered multiple times to same node (so handle)
 		Map<Node, IVisualPart<? extends Node>> registry = viewer.getVisualPartMap();
 		if (registry.get(visual) == this) {

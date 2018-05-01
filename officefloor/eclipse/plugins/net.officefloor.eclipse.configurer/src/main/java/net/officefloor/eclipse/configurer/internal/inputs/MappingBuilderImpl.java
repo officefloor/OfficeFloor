@@ -36,6 +36,7 @@ import net.officefloor.eclipse.configurer.internal.ValueInputContext;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -94,7 +95,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 					.parent(new SourceModel("Source"), (mapping) -> mapping.sourceModels, (mapping, ctx) -> {
 						HBox pane = new HBox();
 						ctx.label(pane);
-						ctx.addNode(pane, ctx.connector(MappingConnection.class).getNode());
+						ctx.addNode(pane, ctx.connector(DefaultConnectors.FLOW, MappingConnection.class).getNode());
 						return pane;
 					}, ChangeEvent.CHANGED);
 			source.label((s) -> s.label);
@@ -102,7 +103,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 			// Target
 			root.parent(new TargetModel("Target"), (mapping) -> mapping.targetModels, (mapping, ctx) -> {
 				HBox pane = new HBox();
-				ctx.addNode(pane, ctx.connector(MappingConnection.class).getNode());
+				ctx.addNode(pane, ctx.connector(DefaultConnectors.FLOW, MappingConnection.class).getNode());
 				ctx.label(pane);
 				return pane;
 			}, ChangeEvent.CHANGED).label((t) -> t.label);

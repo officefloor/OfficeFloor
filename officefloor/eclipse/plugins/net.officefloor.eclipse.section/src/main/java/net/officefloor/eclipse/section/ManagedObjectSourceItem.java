@@ -27,6 +27,7 @@ import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
@@ -147,7 +148,8 @@ public class ManagedObjectSourceItem extends
 					.addSectionManagedObject(mosItem.name, ManagedObjectScope.THREAD, mos, moType));
 		}, DefaultImages.ADD));
 		context.addNode(container,
-				context.connector(SectionManagedObjectToSectionManagedObjectSourceModel.class).getNode());
+				context.connector(DefaultConnectors.DERIVE, SectionManagedObjectToSectionManagedObjectSourceModel.class)
+						.getNode());
 		return container;
 	}
 

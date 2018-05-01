@@ -24,6 +24,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ExternalFlowModel;
@@ -92,12 +93,14 @@ public class FunctionItem extends
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.addNode(heading,
-				context.connector(ManagedFunctionToFunctionModel.class, SubSectionOutputToFunctionModel.class,
-						FunctionFlowToFunctionModel.class, FunctionEscalationToFunctionModel.class)
-						.target(FunctionToNextFunctionModel.class).getNode());
+				context.connector(DefaultConnectors.FLOW, ManagedFunctionToFunctionModel.class,
+						SubSectionOutputToFunctionModel.class, FunctionFlowToFunctionModel.class,
+						FunctionEscalationToFunctionModel.class).target(FunctionToNextFunctionModel.class).getNode());
 		context.label(heading);
-		context.addNode(heading,
-				context.connector(FunctionToNextExternalFlowModel.class, FunctionToNextSubSectionInputModel.class)
+		context.addNode(
+				heading, context
+						.connector(DefaultConnectors.FLOW, FunctionToNextExternalFlowModel.class,
+								FunctionToNextSubSectionInputModel.class)
 						.source(FunctionToNextFunctionModel.class).getNode());
 		context.addNode(container, context.childGroup("outputs", new VBox()));
 		return container;

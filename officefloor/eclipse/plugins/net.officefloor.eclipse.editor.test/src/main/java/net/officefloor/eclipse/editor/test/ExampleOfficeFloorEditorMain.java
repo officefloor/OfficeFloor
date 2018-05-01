@@ -31,6 +31,7 @@ import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
@@ -232,8 +233,11 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 						}
 						System.out.println();
 					}, DefaultImages.ADD));
-					context.addNode(container, context
-							.connector(OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class).getNode());
+					context.addNode(
+							container, context
+									.connector(DefaultConnectors.FLOW,
+											OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class)
+									.getNode());
 					return container;
 				});
 		mosFlows.label((m) -> m.getOfficeFloorManagedObjectSourceFlowName(),
@@ -253,8 +257,8 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 						OfficeFloorManagedObjectSourceEvent.REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM)
 				.addChild(new OfficeFloorManagedObjectSourceTeamModel("Prototype", null), (model, context) -> {
 					HBox container = new HBox();
-					context.addNode(container, context
-							.connector(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class).getNode());
+					context.addNode(container, context.connector(DefaultConnectors.TEAM,
+							OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class).getNode());
 					context.label(container);
 					return container;
 				});
@@ -277,8 +281,8 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 				.parent(new OfficeFloorTeamModel("Team", null), (r) -> r.getOfficeFloorTeams(), (model, context) -> {
 					HBox container = new HBox();
 					context.label(container);
-					context.addNode(container, context
-							.connector(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class).getNode());
+					context.addNode(container, context.connector(DefaultConnectors.TEAM,
+							OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class).getNode());
 					return container;
 				}, OfficeFloorEvent.ADD_OFFICE_FLOOR_TEAM, OfficeFloorEvent.REMOVE_OFFICE_FLOOR_TEAM);
 		team.label((m) -> m.getOfficeFloorTeamName(), OfficeFloorTeamEvent.CHANGE_OFFICE_FLOOR_TEAM_NAME);
@@ -321,8 +325,11 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 						DeployedOfficeEvent.REMOVE_DEPLOYED_OFFICE_INPUT)
 				.addChild(new DeployedOfficeInputModel(), (model, context) -> {
 					HBox container = new HBox();
-					context.addNode(container, context
-							.connector(OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class).getNode());
+					context.addNode(
+							container, context
+									.connector(DefaultConnectors.FLOW,
+											OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class)
+									.getNode());
 					context.label(container);
 					return container;
 				});

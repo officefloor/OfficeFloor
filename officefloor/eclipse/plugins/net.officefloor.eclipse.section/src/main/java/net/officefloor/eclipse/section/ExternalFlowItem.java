@@ -21,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
@@ -76,9 +77,9 @@ public class ExternalFlowItem extends
 	public Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,
-				context.connector(FunctionToNextExternalFlowModel.class, FunctionFlowToExternalFlowModel.class,
-						FunctionEscalationToExternalFlowModel.class, SubSectionOutputToExternalFlowModel.class)
-						.getNode());
+				context.connector(DefaultConnectors.FLOW, FunctionToNextExternalFlowModel.class,
+						FunctionFlowToExternalFlowModel.class, FunctionEscalationToExternalFlowModel.class,
+						SubSectionOutputToExternalFlowModel.class).getNode());
 		context.label(container);
 		return container;
 	}

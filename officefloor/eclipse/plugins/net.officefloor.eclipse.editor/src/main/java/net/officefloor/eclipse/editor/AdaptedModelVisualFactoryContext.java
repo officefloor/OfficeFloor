@@ -19,12 +19,12 @@ package net.officefloor.eclipse.editor;
 
 import org.eclipse.gef.fx.anchors.IAnchor;
 import org.eclipse.gef.fx.nodes.GeometryNode;
-import org.eclipse.gef.geometry.planar.IGeometry;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -111,28 +111,18 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	 * Specifies the {@link GeometryNode} as {@link AdaptedConnector}
 	 * {@link IAnchor}.
 	 * 
-	 * @param geometryNode
-	 *            {@link GeometryNode} to be used as the {@link IAnchor}.
+	 * @param visualFactory
+	 *            {@link AdaptedConnectorVisualFactory}.
 	 * @param connectionModelClasses
 	 *            {@link ConnectionModel} {@link Class} instances that this
 	 *            connector satisfies.
 	 * @return {@link Connector}.
-	 */
-	@SuppressWarnings("rawtypes")
-	<G extends IGeometry, N extends GeometryNode<G>> Connector connector(N geometryNode,
-			Class... connectionModelClasses);
-
-	/**
-	 * Configures the default {@link GeometryNode} as {@link AdaptedConnector}
-	 * {@link IAnchor}.
 	 * 
-	 * @param connectionClasses
-	 *            {@link ConnectionModel} {@link Class} instances that this
-	 *            connector satisfies.
-	 * @return {@link Connector}.
+	 * @see DefaultConnectors
 	 */
 	@SuppressWarnings("rawtypes")
-	Connector connector(Class... connectionClasses);
+	<N extends Region> Connector connector(AdaptedConnectorVisualFactory<N> visualFactory,
+			Class... connectionModelClasses);
 
 	/**
 	 * Convenience method to create a {@link Node} with {@link Image} and hover
@@ -145,6 +135,8 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> {
 	 * @param hoverImageFilePath
 	 *            Path to the hover {@link Image}.
 	 * @return {@link Node} for the {@link Image} with hover.
+	 * 
+	 * @see DefaultImages
 	 */
 	Node createImageWithHover(Class<?> resourceClass, String imageFilePath, String hoverImageFilePath);
 

@@ -53,6 +53,8 @@ public interface AdaptedActionVisualFactoryContext {
 	 * @param hoverImageFilePath
 	 *            Path to the hover {@link Image}.
 	 * @return {@link Node} for the {@link Image} with hover.
+	 * 
+	 * @see DefaultImages
 	 */
 	Node createImageWithHover(Class<?> resourceClass, String imageFilePath, String hoverImageFilePath);
 

@@ -22,6 +22,7 @@ import java.util.List;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ExternalFlowModel;
@@ -61,8 +62,11 @@ public class FunctionFlowItem extends
 	public Pane visual(FunctionFlowModel model, AdaptedModelVisualFactoryContext<FunctionFlowModel> context) {
 		HBox container = new HBox();
 		context.label(container);
-		context.addNode(container, context.connector(FunctionFlowToFunctionModel.class,
-				FunctionFlowToExternalFlowModel.class, FunctionFlowToSubSectionInputModel.class).getNode());
+		context.addNode(
+				container, context
+						.connector(DefaultConnectors.FLOW, FunctionFlowToFunctionModel.class,
+								FunctionFlowToExternalFlowModel.class, FunctionFlowToSubSectionInputModel.class)
+						.getNode());
 		return container;
 	}
 

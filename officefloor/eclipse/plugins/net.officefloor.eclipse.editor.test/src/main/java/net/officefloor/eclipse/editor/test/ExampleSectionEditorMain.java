@@ -26,6 +26,7 @@ import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.section.FunctionModel;
@@ -80,9 +81,11 @@ public class ExampleSectionEditorMain extends AbstractEditorApplication {
 		AdaptedParentBuilder<SectionModel, SectionChanges, FunctionModel, FunctionEvent> function = root.parent(
 				new FunctionModel("Function", false, null, null, null), (r) -> r.getFunctions(), (model, context) -> {
 					HBox container = new HBox();
-					context.addNode(container, context.connector().target(FunctionToNextFunctionModel.class).getNode());
+					context.addNode(container, context.connector(DefaultConnectors.FLOW)
+							.target(FunctionToNextFunctionModel.class).getNode());
 					context.label(container);
-					context.addNode(container, context.connector().source(FunctionToNextFunctionModel.class).getNode());
+					context.addNode(container, context.connector(DefaultConnectors.FLOW)
+							.source(FunctionToNextFunctionModel.class).getNode());
 					return container;
 				}, SectionEvent.ADD_FUNCTION, SectionEvent.REMOVE_FUNCTION);
 		function.label((m) -> m.getFunctionName(), FunctionEvent.CHANGE_FUNCTION_NAME);

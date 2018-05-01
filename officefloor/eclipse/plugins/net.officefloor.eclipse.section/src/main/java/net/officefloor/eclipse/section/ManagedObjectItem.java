@@ -24,6 +24,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.section.ManagedFunctionObjectToSectionManagedObjectModel;
@@ -89,7 +90,7 @@ public class ManagedObjectItem extends
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.addNode(heading,
-				context.connector(SectionManagedObjectToSectionManagedObjectSourceModel.class,
+				context.connector(DefaultConnectors.OBJECT, SectionManagedObjectToSectionManagedObjectSourceModel.class,
 						SectionManagedObjectDependencyToSectionManagedObjectModel.class,
 						ManagedFunctionObjectToSectionManagedObjectModel.class).getNode());
 		context.label(heading);

@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.ui.css.swt.theme.ITheme;
 import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
 import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
+import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -51,6 +52,8 @@ import org.w3c.dom.css.CSSStyleDeclaration;
 import org.w3c.dom.css.CSSValue;
 import org.w3c.dom.css.RGBColor;
 
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
@@ -103,8 +106,8 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 			editorName.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, false));
 
 			// Indicate the parents
-			for (AbstractItem<?, ?, ?, ?, ?, ?> item : editor.getParents()) {
-				
+			for (AbstractItem item : editor.getParents()) {
+
 				// Create row for the item
 				Composite itemRow = new Composite(parent, SWT.NONE);
 				itemRow.setLayout(new GridLayout(3, false));
@@ -120,9 +123,13 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				// Indicate the label for item
 				Label itemLabel = new Label(parent, SWT.NONE);
 				itemLabel.setText(itemName);
-				
+
+				// Obtain the visual for item
+				Pane visual = item.visual(prototype, null);
+
 				// Provide the view of the item
-				
+				FXCanvasEx canvas = new FXCanvasEx(parent, SWT.NONE);
+				canvas.setScene(new Scene(visual));
 			}
 		}
 	}
