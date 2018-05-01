@@ -67,13 +67,13 @@ public class ExternalFlowItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getExternalFlows(), SectionEvent.ADD_EXTERNAL_FLOW,
 				SectionEvent.REMOVE_EXTERNAL_FLOW);
 	}
 
 	@Override
-	protected Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
+	public Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,
 				context.connector(FunctionToNextExternalFlowModel.class, FunctionFlowToExternalFlowModel.class,

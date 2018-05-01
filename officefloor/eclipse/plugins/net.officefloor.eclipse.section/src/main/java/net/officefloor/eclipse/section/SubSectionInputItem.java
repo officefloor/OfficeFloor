@@ -45,13 +45,13 @@ public class SubSectionInputItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getSubSectionInputs(), SubSectionEvent.ADD_SUB_SECTION_INPUT,
 				SubSectionEvent.REMOVE_SUB_SECTION_INPUT);
 	}
 
 	@Override
-	protected Pane visual(SubSectionInputModel model, AdaptedModelVisualFactoryContext<SubSectionInputModel> context) {
+	public Pane visual(SubSectionInputModel model, AdaptedModelVisualFactoryContext<SubSectionInputModel> context) {
 		HBox container = new HBox();
 		context.addNode(container, context.connector(FunctionToNextSubSectionInputModel.class,
 				FunctionFlowToSubSectionInputModel.class, FunctionEscalationToSubSectionInputModel.class).getNode());

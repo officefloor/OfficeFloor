@@ -163,16 +163,15 @@ public class FunctionNamespaceItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getFunctionNamespaces(), SectionEvent.ADD_FUNCTION_NAMESPACE,
 				SectionEvent.REMOVE_FUNCTION_NAMESPACE);
 	}
 
 	@Override
-	protected Pane visual(FunctionNamespaceModel model,
-			AdaptedModelVisualFactoryContext<FunctionNamespaceModel> context) {
+	public Pane visual(FunctionNamespaceModel model, AdaptedModelVisualFactoryContext<FunctionNamespaceModel> context) {
 		VBox container = new VBox();
-		context.label(container);
+		context.label(container).getStyleClass().add("title");
 		context.addNode(container, context.childGroup(ManagedFunctionItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
@@ -181,6 +180,14 @@ public class FunctionNamespaceItem extends
 	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getFunctionNamespaceName(),
 				FunctionNamespaceEvent.CHANGE_FUNCTION_NAMESPACE_NAME);
+	}
+
+	@Override
+	public String style() {
+		IdeStyle background = new IdeStyle().rule("-fx-background-color",
+				"radial-gradient(radius 50.0%, blue, lightblue)");
+		IdeStyle text = new IdeStyle(".${model} .title").rule("-fx-text-fill", "white");
+		return background.toString() + text.toString();
 	}
 
 	@Override

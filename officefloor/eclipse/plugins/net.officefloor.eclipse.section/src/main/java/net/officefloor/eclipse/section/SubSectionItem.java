@@ -117,13 +117,13 @@ public class SubSectionItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((root) -> root.getSubSections(), SectionEvent.ADD_SUB_SECTION,
 				SectionEvent.REMOVE_SUB_SECTION);
 	}
 
 	@Override
-	protected Pane visual(SubSectionModel model, AdaptedModelVisualFactoryContext<SubSectionModel> context) {
+	public Pane visual(SubSectionModel model, AdaptedModelVisualFactoryContext<SubSectionModel> context) {
 		VBox container = new VBox();
 		context.label(container);
 		HBox children = context.addNode(container, new HBox());

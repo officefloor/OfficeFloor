@@ -49,14 +49,14 @@ public class ManagedObjectDependencyItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((p) -> p.getSectionManagedObjectDependencies(),
 				SectionManagedObjectEvent.ADD_SECTION_MANAGED_OBJECT_DEPENDENCY,
 				SectionManagedObjectEvent.REMOVE_SECTION_MANAGED_OBJECT_DEPENDENCY);
 	}
 
 	@Override
-	protected Pane visual(SectionManagedObjectDependencyModel model,
+	public Pane visual(SectionManagedObjectDependencyModel model,
 			AdaptedModelVisualFactoryContext<SectionManagedObjectDependencyModel> context) {
 		HBox container = new HBox();
 		context.label(container);

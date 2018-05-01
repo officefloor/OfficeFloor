@@ -78,13 +78,13 @@ public class ManagedObjectItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getSectionManagedObjects(), SectionEvent.ADD_SECTION_MANAGED_OBJECT,
 				SectionEvent.REMOVE_SECTION_MANAGED_OBJECT);
 	}
 
 	@Override
-	protected Pane visual(SectionManagedObjectModel model,
+	public Pane visual(SectionManagedObjectModel model,
 			AdaptedModelVisualFactoryContext<SectionManagedObjectModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());

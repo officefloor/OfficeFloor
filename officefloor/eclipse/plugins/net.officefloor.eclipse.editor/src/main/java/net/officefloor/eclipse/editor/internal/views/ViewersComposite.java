@@ -24,7 +24,7 @@ import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -59,12 +59,17 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	/**
 	 * {@link IViewer} for the content.
 	 */
-	private IViewer contentViewer;
+	private final IViewer contentViewer;
+
+	/**
+	 * Palette indicator.
+	 */
+	private final Pane paletteIndicator = new Pane();
 
 	/**
 	 * {@link IViewer} for the palette.
 	 */
-	private IViewer paletteViewer;
+	private final IViewer paletteViewer;
 
 	/**
 	 * Composite for the view.
@@ -128,9 +133,28 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	 */
 	public void init(boolean isCreateParents) {
 
-		// Obtain the content root
-		Parent contentRootNode = contentViewer.getCanvas();
-		InfiniteCanvas paletteRootNode = ((InfiniteCanvasViewer) paletteViewer).getCanvas();
+		// Obtain the content root (and it's Pane)
+		InfiniteCanvas contentRootNode = ((InfiniteCanvasViewer) this.contentViewer).getCanvas();
+		Pane contentPane = null;
+		for (Node child : contentRootNode.getChildrenUnmodifiable()) {
+			if (child instanceof Pane) {
+				contentPane = (Pane) child;
+			}
+		}
+		contentPane.getStyleClass().add("content");
+
+		// Obtain the palette root (and it's Pane)
+		InfiniteCanvas paletteRootNode = ((InfiniteCanvasViewer) this.paletteViewer).getCanvas();
+		Pane palettePane = null;
+		for (Node child : paletteRootNode.getChildrenUnmodifiable()) {
+			if (child instanceof Pane) {
+				palettePane = (Pane) child;
+			}
+		}
+		palettePane.getStyleClass().add("palette");
+
+		// Keep palette pane same size as canvas (ease styling)
+		palettePane.prefHeightProperty().bind(paletteRootNode.heightProperty());
 
 		// Arrange viewers above each other
 		AnchorPane viewersPane = new AnchorPane();
@@ -161,14 +185,13 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		if (isCreateParents) {
 
 			// Able to create parents, so provide palette
-			Pane paletteIndicator = new Pane();
-			paletteIndicator.setStyle("-fx-background-color: rgba(128,128,128,1);");
-			paletteIndicator.setMaxSize(PALETTE_INDICATOR_WIDTH, Double.MAX_VALUE);
-			paletteIndicator.setMinSize(PALETTE_INDICATOR_WIDTH, 0.0);
-			panes.add(paletteIndicator);
+			this.paletteIndicator.getStyleClass().add("palette-indicator");
+			this.paletteIndicator.setMaxSize(PALETTE_INDICATOR_WIDTH, Double.MAX_VALUE);
+			this.paletteIndicator.setMinSize(PALETTE_INDICATOR_WIDTH, 0.0);
+			panes.add(this.paletteIndicator);
 
 			// Register listeners to show/hide palette
-			paletteIndicator.setOnMouseEntered((event) -> paletteRootNode.setVisible(true));
+			this.paletteIndicator.setOnMouseEntered((event) -> paletteRootNode.setVisible(true));
 			paletteRootNode.setOnMouseExited((event) -> paletteRootNode.setVisible(false));
 
 			// Register listeners to update the palette width
@@ -196,7 +219,7 @@ public class ViewersComposite implements AdaptedErrorHandler {
 
 		// Provide composite
 		HBox editor = new HBox();
-		editor.setStyle("-fx-background-color: transparent;");
+		editor.getStyleClass().add("editor");
 		editor.getChildren().addAll(panes);
 
 		// Ensure composite fills the whole space
@@ -258,12 +281,21 @@ public class ViewersComposite implements AdaptedErrorHandler {
 
 		// Configure the stack trace
 		this.stackTrace.setEditable(false);
-		this.stackTrace.prefHeightProperty().bind(editorWithStackTrace.heightProperty());
+		this.stackTrace.prefHeightProperty().bind(this.editorWithStackTrace.heightProperty());
 		this.stackTrace.prefWidthProperty().bind(Bindings.divide(this.composite.widthProperty(), 2));
 
 		// Configure the composite (initially only error)
-		this.composite.getChildren().add(editorWithStackTrace);
-		VBox.setVgrow(editorWithStackTrace, Priority.ALWAYS);
+		this.composite.getChildren().add(this.editorWithStackTrace);
+		VBox.setVgrow(this.editorWithStackTrace, Priority.ALWAYS);
+	}
+
+	/**
+	 * Obtains the palette indicator {@link Pane}.
+	 * 
+	 * @return Palette indicator {@link Pane}.
+	 */
+	public Pane getPaletteIndicator() {
+		return this.paletteIndicator;
 	}
 
 	/**

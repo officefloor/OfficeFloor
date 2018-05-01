@@ -51,14 +51,13 @@ public class SubSectionOutputItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getSubSectionOutputs(), SubSectionEvent.ADD_SUB_SECTION_OUTPUT,
 				SubSectionEvent.REMOVE_SUB_SECTION_OUTPUT);
 	}
 
 	@Override
-	protected Pane visual(SubSectionOutputModel model,
-			AdaptedModelVisualFactoryContext<SubSectionOutputModel> context) {
+	public Pane visual(SubSectionOutputModel model, AdaptedModelVisualFactoryContext<SubSectionOutputModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		context.addNode(container, context

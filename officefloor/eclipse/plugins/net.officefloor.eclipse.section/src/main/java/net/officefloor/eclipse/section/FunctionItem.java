@@ -82,13 +82,13 @@ public class FunctionItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getFunctions(), SectionEvent.ADD_FUNCTION,
 				SectionEvent.REMOVE_FUNCTION);
 	}
 
 	@Override
-	protected Pane visual(FunctionModel model, AdaptedModelVisualFactoryContext<FunctionModel> context) {
+	public Pane visual(FunctionModel model, AdaptedModelVisualFactoryContext<FunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.addNode(heading,
@@ -106,6 +106,11 @@ public class FunctionItem extends
 	@Override
 	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getFunctionName(), FunctionEvent.CHANGE_FUNCTION_NAME);
+	}
+
+	@Override
+	public String style() {
+		return new IdeStyle().rule("-fx-background-color", "lightblue").toString();
 	}
 
 	@Override

@@ -67,13 +67,13 @@ public class ExternalManagedObjectItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getExternalManagedObjects(),
 				SectionEvent.ADD_EXTERNAL_MANAGED_OBJECT, SectionEvent.REMOVE_EXTERNAL_MANAGED_OBJECT);
 	}
 
 	@Override
-	protected Pane visual(ExternalManagedObjectModel model,
+	public Pane visual(ExternalManagedObjectModel model,
 			AdaptedModelVisualFactoryContext<ExternalManagedObjectModel> context) {
 		HBox container = new HBox();
 		context.addNode(container, context.connector(SectionManagedObjectDependencyToExternalManagedObjectModel.class,

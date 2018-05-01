@@ -74,6 +74,15 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	Property<String> paletteStyle();
 
 	/**
+	 * Obtains the {@link Property} to the style sheet rules for the palette
+	 * indicator.
+	 * 
+	 * @return {@link Property} to specify the style sheet rules for the palette
+	 *         indicator.
+	 */
+	Property<String> paletteIndicatorStyle();
+
+	/**
 	 * Obtains the {@link Property} to the style sheet rules for the content.
 	 * 
 	 * @return {@link Property} to specify the style sheet rules for the content.

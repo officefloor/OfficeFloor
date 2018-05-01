@@ -52,13 +52,13 @@ public class ManagedFunctionItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getManagedFunctions(), FunctionNamespaceEvent.ADD_MANAGED_FUNCTION,
 				FunctionNamespaceEvent.REMOVE_MANAGED_FUNCTION);
 	}
 
 	@Override
-	protected Pane visual(ManagedFunctionModel model, AdaptedModelVisualFactoryContext<ManagedFunctionModel> context) {
+	public Pane visual(ManagedFunctionModel model, AdaptedModelVisualFactoryContext<ManagedFunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.label(heading);

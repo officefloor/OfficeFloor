@@ -52,13 +52,13 @@ public class FunctionFlowItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((p) -> p.getFunctionFlows(), FunctionEvent.ADD_FUNCTION_FLOW,
 				FunctionEvent.REMOVE_FUNCTION_FLOW);
 	}
 
 	@Override
-	protected Pane visual(FunctionFlowModel model, AdaptedModelVisualFactoryContext<FunctionFlowModel> context) {
+	public Pane visual(FunctionFlowModel model, AdaptedModelVisualFactoryContext<FunctionFlowModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		context.addNode(container, context.connector(FunctionFlowToFunctionModel.class,

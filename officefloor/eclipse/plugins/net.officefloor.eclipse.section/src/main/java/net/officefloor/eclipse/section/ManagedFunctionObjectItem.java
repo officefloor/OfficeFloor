@@ -51,13 +51,13 @@ public class ManagedFunctionObjectItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getManagedFunctionObjects(),
 				ManagedFunctionEvent.ADD_MANAGED_FUNCTION_OBJECT, ManagedFunctionEvent.REMOVE_MANAGED_FUNCTION_OBJECT);
 	}
 
 	@Override
-	protected Pane visual(ManagedFunctionObjectModel model,
+	public Pane visual(ManagedFunctionObjectModel model,
 			AdaptedModelVisualFactoryContext<ManagedFunctionObjectModel> context) {
 		HBox container = new HBox();
 		context.label(container);

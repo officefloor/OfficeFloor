@@ -36,6 +36,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
@@ -159,7 +160,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private IViewer contentViewer;
 
 	/**
-	 * Style rules for the content {@link IViewer}.
+	 * Style rules for the content {@link IViewer} {@link Pane}.
 	 */
 	private Property<String> contentStyle;
 
@@ -169,7 +170,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private IViewer paletteViewer;
 
 	/**
-	 * Style rules for the palette {@link IViewer}.
+	 * Style rules for the palette indicator.
+	 */
+	private Property<String> paletteIndicatorStyle;
+
+	/**
+	 * Style rules for the palette {@link IViewer} {@link Pane}.
 	 */
 	private Property<String> paletteStyle;
 
@@ -195,6 +201,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 *            {@link Injector}.
 	 * @param content
 	 *            {@link IViewer} content.
+	 * @param paletteIndiator
+	 *            Palette indicator {@link Pane}.
 	 * @param palette
 	 *            {@link IViewer} palette.
 	 * @param errorHandler
@@ -202,8 +210,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * @param changeExecutor
 	 *            {@link ChangeExecutor}.
 	 */
-	public void init(Injector injector, IViewer content, IViewer palette, AdaptedErrorHandler errorHandler,
-			ChangeExecutor changeExecutor, StyleRegistry styleRegistry) {
+	public void init(Injector injector, IViewer content, Pane paletteIndiator, IViewer palette,
+			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry) {
 		this.injector = injector;
 		this.contentViewer = content;
 		this.paletteViewer = palette;
@@ -211,8 +219,20 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.changeExecutor = changeExecutor;
 		this.styleRegistry = styleRegistry;
 
+		// Register styling for palette indicator
+		this.paletteIndicatorStyle = new SimpleStringProperty(null);
+		ReadOnlyProperty<URL> paletteIndicatorUrl = this.styleRegistry.registerStyle("_palette_indicator_",
+				this.paletteIndicatorStyle);
+		paletteIndicatorUrl.addListener((event, oldValue, newValue) -> {
+			if (oldValue != null) {
+				paletteIndiator.getStylesheets().remove(oldValue.toExternalForm());
+			}
+			if (newValue != null) {
+				paletteIndiator.getStylesheets().add(newValue.toExternalForm());
+			}
+		});
+
 		// Register styling for palette
-		this.paletteViewer.getCanvas().getStyleClass().add("palette");
 		this.paletteStyle = new SimpleStringProperty(null);
 		ReadOnlyProperty<URL> paletteUrl = this.styleRegistry.registerStyle("_palette_", this.paletteStyle);
 		paletteUrl.addListener((event, oldValue, newValue) -> {
@@ -225,7 +245,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		});
 
 		// Register styling for content
-		this.contentViewer.getCanvas().getStyleClass().add("content");
 		this.contentStyle = new SimpleStringProperty(null);
 		ReadOnlyProperty<URL> contentUrl = this.styleRegistry.registerStyle("_content_", this.contentStyle);
 		contentUrl.addListener((event, oldValue, newValue) -> {
@@ -556,6 +575,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	@Override
 	public Property<String> paletteStyle() {
 		return this.paletteStyle;
+	}
+
+	@Override
+	public Property<String> paletteIndicatorStyle() {
+		return this.paletteIndicatorStyle;
 	}
 
 	@Override

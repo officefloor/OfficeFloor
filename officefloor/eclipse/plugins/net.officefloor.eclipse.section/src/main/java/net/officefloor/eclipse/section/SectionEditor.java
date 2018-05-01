@@ -95,6 +95,16 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	@Override
+	public String paletteStyle() {
+		return ".palette { -fx-background-color: cornsilk }";
+	}
+
+	@Override
+	public String contentStyle() {
+		return ".content { -fx-background-color: burlywood }";
+	}
+
+	@Override
 	protected void loadParents(
 			List<AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>> parents) {
 		parents.add(new FunctionNamespaceItem());

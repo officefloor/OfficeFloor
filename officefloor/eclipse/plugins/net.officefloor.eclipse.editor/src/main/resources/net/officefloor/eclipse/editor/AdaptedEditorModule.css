@@ -1,4 +1,16 @@
 
+.editor {
+	-fx-background-color: transparent;
+}
+
+.palette-indicator {
+	-fx-background-color: rgba(128,128,128,1);
+}
+
+.palette {
+	-fx-background-color: rgba(128,128,128,0.75); 
+}
+
 .parent {
 	-fx-background-color: radial-gradient(radius 100.0%, #666, #ccc);
 	-fx-background-radius: 20.0px;

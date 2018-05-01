@@ -125,13 +125,13 @@ public class ManagedObjectSourceItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((r) -> r.getSectionManagedObjectSources(),
 				SectionEvent.ADD_SECTION_MANAGED_OBJECT_SOURCE, SectionEvent.REMOVE_SECTION_MANAGED_OBJECT_SOURCE);
 	}
 
 	@Override
-	protected Pane visual(SectionManagedObjectSourceModel model,
+	public Pane visual(SectionManagedObjectSourceModel model,
 			AdaptedModelVisualFactoryContext<SectionManagedObjectSourceModel> context) {
 		HBox container = new HBox();
 		context.label(container);

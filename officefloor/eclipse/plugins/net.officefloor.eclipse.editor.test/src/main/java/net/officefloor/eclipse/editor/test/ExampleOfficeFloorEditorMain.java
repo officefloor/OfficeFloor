@@ -98,14 +98,28 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 			ctx.getOverlayParent().getChildren().add(log);
 		});
 
+		// Provide styling of palette indicator
+		Property<String> paletteIndicatorStyle = root.paletteIndicatorStyle();
+		root.overlay(10, 200, (ctx) -> {
+			Button style = new Button("palette indicator style");
+			boolean[] toggle = new boolean[] { false };
+			style.setOnAction((event) -> {
+				toggle[0] = !toggle[0];
+				String css = toggle[0] ? ".palette-indicator { -fx-background-color: green }" : "";
+				System.out.println("Toggle style sheet: " + css);
+				paletteIndicatorStyle.setValue(css);
+			});
+			ctx.getOverlayParent().getChildren().add(style);
+		});
+
 		// Provide styling of palette
 		Property<String> paletteStyle = root.paletteStyle();
-		root.overlay(10, 90, (ctx) -> {
+		root.overlay(10, 230, (ctx) -> {
 			Button style = new Button("palette style");
 			boolean[] toggle = new boolean[] { false };
 			style.setOnAction((event) -> {
 				toggle[0] = !toggle[0];
-				String css = toggle[0] ? ".palette Pane { -fx-background-color: yellow }" : "";
+				String css = toggle[0] ? ".palette { -fx-background-color: cornsilk }" : "";
 				System.out.println("Toggle style sheet: " + css);
 				paletteStyle.setValue(css);
 			});
@@ -114,13 +128,13 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 
 		// Provide styling of content
 		Property<String> contentStyle = root.contentStyle();
-		root.overlay(10, 120, (ctx) -> {
+		root.overlay(10, 260, (ctx) -> {
 			Button style = new Button("content style");
 			boolean[] toggle = new boolean[] { false };
 			style.setOnAction((event) -> {
 				toggle[0] = !toggle[0];
 				String css = toggle[0]
-						? ".content Pane { -fx-background-color: black } .connection Path { -fx-stroke: white }"
+						? ".content { -fx-background-color: black } .connection Path { -fx-stroke: white }"
 						: "";
 				System.out.println("Toggle style sheet: " + css);
 				contentStyle.setValue(css);

@@ -52,13 +52,13 @@ public class FunctionEscalationItem extends
 	}
 
 	@Override
-	protected IdeExtractor extract() {
+	public IdeExtractor extract() {
 		return new IdeExtractor((p) -> p.getFunctionEscalations(), FunctionEvent.ADD_FUNCTION_ESCALATION,
 				FunctionEvent.REMOVE_FUNCTION_ESCALATION);
 	}
 
 	@Override
-	protected Pane visual(FunctionEscalationModel model,
+	public Pane visual(FunctionEscalationModel model,
 			AdaptedModelVisualFactoryContext<FunctionEscalationModel> context) {
 		HBox container = new HBox();
 		context.label(container);

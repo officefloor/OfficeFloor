@@ -420,7 +420,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
-	 * Loads the children and thier children recursively.
+	 * Loads the children and their children recursively.
 	 * 
 	 * @param parent
 	 *            Parent {@link AbstractItem}.
@@ -437,6 +437,18 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		for (AbstractItem<?, ?, ?, ?, ?, ?>.IdeConnectionTarget<? extends ConnectionModel, ?, ?> connection : parent
 				.getConnections()) {
 			connection.loadConnection(parentBuilder);
+		}
+
+		// Load the style
+		String style = parent.style();
+		if (style != null) {
+			// Undertake tag replacements
+			style = style.replace("${model}", parent.prototype().getClass().getSimpleName());
+
+			// TODO Use configuration path to pull in override configuration
+
+			// Load the style
+			parentBuilder.style().setValue(style);
 		}
 
 		// Create the children groups
@@ -531,6 +543,24 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	protected abstract void saveRootModel(R model, WritableConfigurationItem configurationItem) throws Exception;
 
 	/**
+	 * Allows overriding the palette styling.
+	 * 
+	 * @return Palette styling. May be <code>null</code> for default styling.
+	 */
+	public String paletteStyle() {
+		return null;
+	}
+
+	/**
+	 * Allows overriding the content styling.
+	 * 
+	 * @return Content styling. May be <code>null</code> for defaulting styling.
+	 */
+	public String contentStyle() {
+		return null;
+	}
+
+	/**
 	 * Creates the operations for the root {@link Model}.
 	 * 
 	 * @param model
@@ -603,6 +633,24 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 		// Create scene and populate canvas with view
 		this.getCanvas().setScene(new Scene(view));
+		
+		// Configure styling of palette
+		String paletteStyle = this.paletteStyle();
+		if (paletteStyle != null) {
+			// TODO pull in override configuration
+
+			// Load the style
+			this.rootBuilder.paletteStyle().setValue(paletteStyle);
+		}
+
+		// Configure styling of content
+		String contentStyle = this.contentStyle();
+		if (contentStyle != null) {
+			// TODO pull in override configuration
+
+			// Load the style
+			this.rootBuilder.contentStyle().setValue(contentStyle);
+		}
 	}
 
 	@Override
@@ -669,7 +717,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			IPath file = saveAsDialog.getResult();
 
 			// TODO handle saving to the path
-			System.out.println("TODO implement SaveAs to " + file.toString());
+			throw new UnsupportedOperationException("TODO implement SaveAs to " + file.toString());
 		}
 	}
 

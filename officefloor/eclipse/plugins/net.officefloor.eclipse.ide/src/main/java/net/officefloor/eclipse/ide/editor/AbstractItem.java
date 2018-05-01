@@ -210,7 +210,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * 
 	 * @return {@link IdeExtractor}.
 	 */
-	protected abstract IdeExtractor extract();
+	public abstract IdeExtractor extract();
 
 	/**
 	 * Creates the visual for the {@link Model}.
@@ -221,7 +221,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 *            {@link AdaptedModelVisualFactoryContext}.
 	 * @return {@link Pane} for the visual.
 	 */
-	protected abstract Pane visual(M model, AdaptedModelVisualFactoryContext<M> context);
+	public abstract Pane visual(M model, AdaptedModelVisualFactoryContext<M> context);
 
 	/**
 	 * Labels the configuration item.
@@ -279,6 +279,65 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @return {@link IdeLabeller}.
 	 */
 	public abstract IdeLabeller label();
+
+	/**
+	 * Convenience {@link Class} to build style.
+	 */
+	public class IdeStyle {
+
+		/**
+		 * Style contents.
+		 */
+		private final StringBuilder style = new StringBuilder();
+
+		/**
+		 * Instantiate with selector.
+		 * 
+		 * @param selector
+		 *            Selector for applying the style.
+		 */
+		public IdeStyle(String selector) {
+			this.style.append(selector + " {" + System.lineSeparator());
+		}
+
+		/**
+		 * Instantiate for the {@link Model}.
+		 */
+		public IdeStyle() {
+			this(".${model}");
+		}
+
+		/**
+		 * Adds a rule for this style.
+		 * 
+		 * @param key
+		 *            Key of the rule.
+		 * @param value
+		 *            Value of the rule.
+		 * @return <code>this</code>.
+		 */
+		public IdeStyle rule(String key, String value) {
+			this.style.append("    " + key + ": " + value + ";" + System.lineSeparator());
+			return this;
+		}
+
+		/*
+		 * ============ Object ==================
+		 */
+
+		public String toString() {
+			return this.style.toString() + "}" + System.lineSeparator();
+		}
+	}
+
+	/**
+	 * Obtains the style for the display of the {@link Model}.
+	 * 
+	 * @return Style for the display of the {@link Model}.
+	 */
+	public String style() {
+		return null;
+	}
 
 	/**
 	 * Further adapt the {@link AdaptedChildBuilder}.
