@@ -23,8 +23,8 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalManagedObjectModel;
-import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
 import net.officefloor.model.section.ExternalManagedObjectModel.ExternalManagedObjectEvent;
+import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionModel;
@@ -86,6 +86,11 @@ public class ExternalManagedObjectItem extends
 	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getExternalManagedObjectName(),
 				ExternalManagedObjectEvent.CHANGE_EXTERNAL_MANAGED_OBJECT_NAME);
+	}
+
+	@Override
+	public String style() {
+		return new IdeStyle().rule("-fx-background-color", "yellowgreen").toString();
 	}
 
 	@Override

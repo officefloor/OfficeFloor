@@ -140,6 +140,14 @@ public class SubSectionItem extends
 	}
 
 	@Override
+	public String style() {
+		IdeStyle background = new IdeStyle().rule("-fx-background-color",
+				"radial-gradient(radius 50.0%, darkorchid, thistle)");
+		IdeStyle text = new IdeStyle(".${model} .title").rule("-fx-text-fill", "white");
+		return background.toString() + text.toString();
+	}
+
+	@Override
 	protected SubSectionItem item(SubSectionModel model) {
 		SubSectionItem item = new SubSectionItem();
 		if (model != null) {

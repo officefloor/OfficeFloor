@@ -23,8 +23,8 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalFlowModel;
-import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
+import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
 import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
 import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.SectionChanges;
@@ -86,6 +86,11 @@ public class ExternalFlowItem extends
 	@Override
 	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getExternalFlowName(), ExternalFlowEvent.CHANGE_EXTERNAL_FLOW_NAME);
+	}
+
+	@Override
+	public String style() {
+		return new IdeStyle().rule("-fx-background-color", "orchid").toString();
 	}
 
 	@Override

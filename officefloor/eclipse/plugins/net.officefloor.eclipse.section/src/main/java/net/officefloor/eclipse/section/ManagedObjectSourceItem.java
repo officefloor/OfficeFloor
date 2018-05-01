@@ -35,8 +35,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
-import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel.SectionManagedObjectSourceEvent;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -134,7 +134,7 @@ public class ManagedObjectSourceItem extends
 	public Pane visual(SectionManagedObjectSourceModel model,
 			AdaptedModelVisualFactoryContext<SectionManagedObjectSourceModel> context) {
 		HBox container = new HBox();
-		context.label(container);
+		context.label(container).getStyleClass().add("title");
 		context.addNode(container, context.action((ctx) -> {
 
 			// Obtain the item to load type
@@ -155,6 +155,12 @@ public class ManagedObjectSourceItem extends
 	public IdeLabeller label() {
 		return new IdeLabeller((m) -> m.getSectionManagedObjectSourceName(),
 				SectionManagedObjectSourceEvent.CHANGE_SECTION_MANAGED_OBJECT_SOURCE_NAME);
+	}
+
+	@Override
+	public String style() {
+		return new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 50.0%, green, darkseagreen)")
+				.toString();
 	}
 
 	@Override

@@ -104,6 +104,11 @@ public class ManagedObjectItem extends
 	}
 
 	@Override
+	public String style() {
+		return new IdeStyle().rule("-fx-background-color", "darkseagreen").toString();
+	}
+
+	@Override
 	public IdeConfigurer configure() {
 		return new IdeConfigurer().refactor((builder, context) -> {
 			builder.title("Managed Object");

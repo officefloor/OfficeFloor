@@ -552,6 +552,16 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
+	 * Allows overriding the palette indicator styling.
+	 * 
+	 * @return Palette indicator styling. May be <code>null</code> for default
+	 *         styling.
+	 */
+	public String paletteIndicatorStyle() {
+		return null;
+	}
+
+	/**
 	 * Allows overriding the content styling.
 	 * 
 	 * @return Content styling. May be <code>null</code> for defaulting styling.
@@ -633,7 +643,16 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 		// Create scene and populate canvas with view
 		this.getCanvas().setScene(new Scene(view));
-		
+
+		// Configure styling of palette indicator
+		String paletteIndicatorStyle = this.paletteIndicatorStyle();
+		if (paletteIndicatorStyle != null) {
+			// TODO pull in override configuration
+
+			// Load the style
+			this.rootBuilder.paletteIndicatorStyle().setValue(paletteIndicatorStyle);
+		}
+
 		// Configure styling of palette
 		String paletteStyle = this.paletteStyle();
 		if (paletteStyle != null) {

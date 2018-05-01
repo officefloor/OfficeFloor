@@ -100,8 +100,13 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	@Override
+	public String paletteIndicatorStyle() {
+		return ".palette-indicator { -fx-background-color: bisque }";
+	}
+
+	@Override
 	public String contentStyle() {
-		return ".content { -fx-background-color: burlywood }";
+		return ".content { -fx-background-color: burlywood } .connection Path { -fx-stroke: royalblue }";
 	}
 
 	@Override
