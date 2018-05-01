@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.editor.internal.style;
 
+import java.util.Arrays;
+
 import net.officefloor.eclipse.editor.internal.officefloorstyle.Handler;
 
 /**
@@ -26,17 +28,28 @@ import net.officefloor.eclipse.editor.internal.officefloorstyle.Handler;
  */
 public class SystemStyleRegistry extends AbstractStyleRegistry {
 
-	static {
-		// Obtain the package path for the URL protocol
-		String protocolPackagePath = Handler.class.getPackage().getName();
-		protocolPackagePath = protocolPackagePath.substring(0, protocolPackagePath.lastIndexOf('.'));
+	/**
+	 * Instantiate.
+	 */
+	public SystemStyleRegistry() {
 
-		// Load in the existing packages
+		// Obtain the package path for the URL protocol
+		String protocolPackageFull = Handler.class.getPackage().getName();
+		final String protocolPackageName = protocolPackageFull.substring(0, protocolPackageFull.lastIndexOf('.'));
+
+		// Determine if already include the package
 		final String PROPERTY_NAME = "java.protocol.handler.pkgs";
-		String existingPackages = System.getProperty(PROPERTY_NAME);
-		String newPackages = (((existingPackages == null) || (existingPackages.trim().length() == 0)) ? ""
-				: existingPackages + "|") + protocolPackagePath;
-		System.setProperty(PROPERTY_NAME, newPackages);
+		String existingPackages = System.getProperty(PROPERTY_NAME, "");
+
+		// Determine if already contains package
+		String[] packages = existingPackages.split("|");
+		if (!Arrays.stream(packages).anyMatch((packageName) -> packageName.equals(protocolPackageName))) {
+
+			// Load in the protocol package
+			String newPackages = (((existingPackages == null) || (existingPackages.trim().length() == 0)) ? ""
+					: existingPackages + "|") + protocolPackageName;
+			System.setProperty(PROPERTY_NAME, newPackages);
+		}
 	}
 
 }

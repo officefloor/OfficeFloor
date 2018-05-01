@@ -40,6 +40,11 @@ import javafx.beans.property.SimpleObjectProperty;
 public class AbstractStyleRegistry implements StyleRegistry {
 
 	/**
+	 * {@link URL} protocol.
+	 */
+	public static final String PROTOCOL = "officefloorstyle";
+
+	/**
 	 * Creates the {@link URLStreamHandler}.
 	 * 
 	 * @param protocol
@@ -148,7 +153,7 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	 * @return {@link URL} for the configuration path.
 	 */
 	protected URL getUrl(String configurationPath, int version) {
-		String url = "officefloorstyle://" + String.valueOf(this.instanceIndex) + "/" + configurationPath + "?version="
+		String url = PROTOCOL + "://" + String.valueOf(this.instanceIndex) + "/" + configurationPath + "?version="
 				+ version;
 		try {
 			return new URL(url);

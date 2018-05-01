@@ -17,9 +17,18 @@
  */
 package net.officefloor.eclipse.editor;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.url.URLStreamHandlerService;
 
+import net.officefloor.eclipse.editor.internal.style.AbstractStyleRegistry;
+import net.officefloor.eclipse.editor.internal.style.OsgiStyleRegistry;
+import net.officefloor.eclipse.editor.internal.style.OsgiURLStreamHandlerService;
 import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.eclipse.editor.internal.style.SystemStyleRegistry;
 
@@ -44,8 +53,8 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 			return new SystemStyleRegistry();
 		}
 
-		// TODO implement OSGi service URL registration
-		throw new UnsupportedOperationException("TODO implement style registry for OSGi environment");
+		// Running within OSGi environment
+		return new OsgiStyleRegistry();
 	}
 
 	/**
@@ -63,10 +72,41 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 	private static AdaptedEditorPlugin INSTANCE;
 
 	/**
+	 * {@link ServiceRegistration} for the {@link OsgiURLStreamHandlerService}.
+	 */
+	private ServiceRegistration<?> styleUrlHandler;
+
+	/**
 	 * Instantiate.
 	 */
 	public AdaptedEditorPlugin() {
 		INSTANCE = this;
+	}
+
+	/*
+	 * =============== AbstractUIPlugin =========================
+	 */
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+
+		// Register the URL handler for styling
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put("url.handler.protocol", AbstractStyleRegistry.PROTOCOL);
+		this.styleUrlHandler = context.registerService(URLStreamHandlerService.class.getName(),
+				new OsgiURLStreamHandlerService(), properties);
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		super.stop(context);
+
+		// Unregister style URL handler
+		if (this.styleUrlHandler != null) {
+			context.ungetService(this.styleUrlHandler.getReference());
+			this.styleUrlHandler = null;
+		}
 	}
 
 }

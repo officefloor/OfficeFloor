@@ -25,3 +25,4 @@ Import-Package: com.google.common.collect,
  javax.inject
 Export-Package: net.officefloor.eclipse.editor
 Bundle-ActivationPolicy: lazy
+Bundle-Activator: net.officefloor.eclipse.editor.AdaptedEditorPlugin
