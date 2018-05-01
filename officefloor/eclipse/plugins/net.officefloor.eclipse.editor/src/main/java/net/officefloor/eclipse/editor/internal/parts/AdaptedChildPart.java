@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
 import com.google.common.collect.HashMultimap;
@@ -25,28 +26,23 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
-import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnector;
-import net.officefloor.eclipse.editor.AdaptedConnectorRole;
-import net.officefloor.eclipse.editor.AdaptedConnectorVisualFactory;
-import net.officefloor.eclipse.editor.AdaptedConnectorVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ChildrenGroup;
-import net.officefloor.eclipse.editor.DefaultImages;
-import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
-public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane>
-		implements AdaptedModelVisualFactoryContext<M>, AdaptedActionVisualFactoryContext {
+/**
+ * {@link IContentPart} for the {@link AdaptedChild}.
+ *
+ * @author Daniel Sagenschneider
+ */
+public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane> {
 
 	/**
 	 * Indicates whether a Palette prototype.
@@ -124,6 +120,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Pane doCreateVisual() {
 
 		// Load the children group visuals
@@ -139,7 +136,65 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		}
 
 		// Create the visual pane
-		Pane pane = this.getContent().createVisual(this);
+		Pane pane = this.getContent().createVisual(new AdaptedModelVisualFactoryContextImpl<M>(
+				(Class<M>) this.getContent().getModel().getClass(), this.isPalettePrototype, () -> {
+
+					// Return the label
+					return this.getContent().getLabel();
+
+				}, (childGroupName, parent) -> {
+
+					// Load the child group pane
+					for (ChildrenGroup<M, ?> childrenGroup : this.getContent().getChildrenGroups()) {
+						if (childGroupName.equals(childrenGroup.getChildrenGroupName())) {
+
+							// Found the child group, so load the pane
+							ChildrenGroupVisual visual = this.childrenGroupVisuals.get(childrenGroup);
+							visual.pane = parent;
+
+							// Child group registered
+							return true;
+						}
+					}
+
+					// Child group not registered
+					return false;
+
+				}, (connectionClasses, role, assocations, node) -> {
+
+					// Load the connectors for the connection classes
+					for (Class<?> connectionClass : connectionClasses) {
+
+						// Obtain the adapted connector
+						AdaptedConnector<M> connector = AdaptedChildPart.this.getContent()
+								.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass, role);
+						if (connector == null) {
+							throw new IllegalStateException(
+									"Connection " + connectionClass.getName() + " not configured to connect to model "
+											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+						}
+
+						// Obtain the visual
+						AdaptedConnectorVisual visual = AdaptedChildPart.this.adaptedConnectorVisuals.get(connector);
+						if (visual.node != null) {
+							throw new IllegalStateException(
+									"Connection " + connectionClass.getName() + " configured more than once for model "
+											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+						}
+
+						// Load the connector visual
+						visual.node = node;
+
+						// Associate the connectors
+						assocations.add(connector);
+						connector.setAssociation(assocations, role);
+					}
+
+				}, (action) -> {
+
+					// Undertake the action
+					this.getContent().action(action);
+				}));
 
 		// Ensure all children groups are configured
 		for (ChildrenGroup<M, ?> childrenGroup : this.getContent().getChildrenGroups()) {
@@ -190,211 +245,6 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	protected void doRefreshVisual(Pane visual) {
-	}
-
-	/*
-	 * ========================== ViewFactoryContext ==========================
-	 */
-
-	@Override
-	public Label label(Pane parent) {
-		// Ensure label is configured
-		ReadOnlyProperty<String> labelProperty = this.getContent().getLabel();
-		if (labelProperty == null) {
-			throw new IllegalStateException(
-					"No label configured for visual for model " + this.getContent().getModel().getClass().getName());
-		}
-
-		// Configure the label
-		Label label = this.addNode(parent, new Label());
-		label.textProperty().bind(labelProperty);
-		return label;
-	}
-
-	@Override
-	public <N extends Node> N addNode(Pane parent, N node) {
-		parent.getChildren().add(node);
-		return node;
-	}
-
-	@Override
-	public <P extends Pane> P childGroup(String childGroupName, P parent) {
-		if (childGroupName == null) {
-			throw new NullPointerException(
-					"No child group name provided for view of " + this.getContent().getModel().getClass().getName());
-		}
-
-		// Load the child group pane
-		for (ChildrenGroup<M, ?> childrenGroup : this.getContent().getChildrenGroups()) {
-			if (childGroupName.equals(childrenGroup.getChildrenGroupName())) {
-
-				// Found the child group, so load the pane
-				ChildrenGroupVisual visual = this.childrenGroupVisuals.get(childrenGroup);
-				visual.pane = parent;
-				return parent;
-			}
-		}
-
-		// As here, no children group registered
-		throw new IllegalStateException("No children group '" + childGroupName + "' registered for view of model "
-				+ this.getContent().getModel().getClass().getName());
-	}
-
-	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final <N extends Region> Connector connector(AdaptedConnectorVisualFactory<N> visualFactory,
-			Class... connectionClasses) {
-		return new Connector() {
-
-			// Indicates if initialised
-			private boolean isInitialised = false;
-
-			// Role of connector (when connecting to self)
-			private AdaptedConnectorRole role = null;
-
-			// Role specific connection classes
-			private Class<?>[] roleConnectionClasses = null;
-
-			// Geometry Node
-			private Region geometryNode = null;
-
-			@Override
-			public Connector source(Class... sourceConnectionClass) {
-				if (this.isInitialised) {
-					throw new IllegalStateException("Connector already initialised for model "
-							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-				}
-				if (this.role != null) {
-					throw new IllegalStateException("Connector already initialised to target for model "
-							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-				}
-				this.role = AdaptedConnectorRole.SOURCE;
-				this.roleConnectionClasses = sourceConnectionClass;
-				return this;
-			}
-
-			@Override
-			public Connector target(Class... targetConnectionClass) {
-				if (this.isInitialised) {
-					throw new IllegalStateException("Connector already initialised for model "
-							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-				}
-				if (this.role != null) {
-					throw new IllegalStateException("Connector already initialised to source for model "
-							+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-				}
-				this.role = AdaptedConnectorRole.TARGET;
-				this.roleConnectionClasses = targetConnectionClass;
-				return this;
-			}
-
-			@Override
-			public Node getNode() {
-
-				// Determine if already initialised
-				if (this.isInitialised) {
-					return this.geometryNode;
-				}
-
-				// Create the geometry node
-				Region node = visualFactory.createGeometryNode(new AdaptedConnectorVisualFactoryContext() {
-				});
-				if (!(node instanceof GeometryNode)) {
-					throw new IllegalStateException("Connector visual must implement " + GeometryNode.class.getName()
-							+ " for model " + AdaptedChildPart.this.getContent().getModel().getClass().getName());
-				}
-				this.geometryNode = node;
-
-				// Create the assocation listing
-				List<AdaptedConnector<M>> assocations = new ArrayList<>(connectionClasses.length);
-
-				// Register the non-typed connections
-				this.loadConnectors(connectionClasses, null, assocations);
-
-				// Provide the type specific connections
-				if (this.roleConnectionClasses != null) {
-					this.loadConnectors(this.roleConnectionClasses, this.role, assocations);
-				}
-
-				// Provide blank node if palette prototype
-				if (AdaptedChildPart.this.isPalettePrototype) {
-					return new Pane();
-				}
-
-				// Return geometry node
-				return this.geometryNode;
-			}
-
-			/**
-			 * Loads the connector.
-			 * 
-			 * @param connectionClasses
-			 *            {@link ConnectionModel} {@link Class} instances.
-			 * @param role
-			 *            {@link AdaptedConnectorRole}.
-			 * @param assocations
-			 *            Associations list for {@link AdaptedConnector}.
-			 */
-			private void loadConnectors(Class<?>[] connectionClasses, AdaptedConnectorRole role,
-					List<AdaptedConnector<M>> assocations) {
-				for (Class<?> connectionClass : connectionClasses) {
-
-					// Obtain the adapted connector
-					AdaptedConnector<M> connector = AdaptedChildPart.this.getContent()
-							.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass, role);
-					if (connector == null) {
-						throw new IllegalStateException(
-								"Connection " + connectionClass.getName() + " not configured to connect to model "
-										+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-					}
-
-					// Obtain the visual
-					AdaptedConnectorVisual visual = AdaptedChildPart.this.adaptedConnectorVisuals.get(connector);
-					if (visual.node != null) {
-						throw new IllegalStateException(
-								"Connection " + connectionClass.getName() + " configured more than once for model "
-										+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-					}
-
-					// Load the connector visual
-					visual.node = this.geometryNode;
-
-					// Associate the connectors
-					assocations.add(connector);
-					connector.setAssociation(assocations, this.role);
-				}
-			}
-		};
-	}
-
-	@Override
-	public Node createImageWithHover(Class<?> resourceClass, String imageFilePath, String hoverImageFilePath) {
-		return DefaultImages.createImageWithHover(resourceClass, imageFilePath, hoverImageFilePath);
-	}
-
-	@Override
-	public <R extends Model, O> void action(ModelAction<R, O, M> action) {
-		this.getContent().action(action);
-	}
-
-	@Override
-	public <R extends Model, O> Node action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-
-		// Provide blank node if palette prototype
-		if (this.isPalettePrototype) {
-			return new Pane();
-		}
-
-		// Provide action
-		Node node = visualFactory.createVisual(this);
-		node.setOnMouseClicked((event) -> this.action(action));
-		node.getStyleClass().add("action");
-		return node;
-	}
-
-	@Override
-	public boolean isPalettePrototype() {
-		return this.isPalettePrototype;
 	}
 
 	/**
