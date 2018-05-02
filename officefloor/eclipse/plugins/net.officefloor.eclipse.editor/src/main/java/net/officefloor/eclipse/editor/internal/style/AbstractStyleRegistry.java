@@ -45,6 +45,19 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	public static final String PROTOCOL = "officefloorstyle";
 
 	/**
+	 * <p>
+	 * Mapping of {@link URL} to style sheet content {@link Property}.
+	 * <p>
+	 * Allow {@link Property} instances to be GC'ed once no longer used by editor.
+	 */
+	private static Map<String, ReadOnlyProperty<String>> urlPathToStyleContent = new WeakHashMap<>();
+
+	/**
+	 * Next instance index.
+	 */
+	private static AtomicInteger nextInstanceIndex = new AtomicInteger(1);
+
+	/**
 	 * Creates the {@link URLStreamHandler}.
 	 * 
 	 * @param protocol
@@ -105,19 +118,6 @@ public class AbstractStyleRegistry implements StyleRegistry {
 			return new ByteArrayInputStream(data);
 		}
 	}
-
-	/**
-	 * <p>
-	 * Mapping of {@link URL} to style sheet content {@link Property}.
-	 * <p>
-	 * Allow {@link Property} instances to be GC'ed once no longer used by editor.
-	 */
-	private static Map<String, ReadOnlyProperty<String>> urlPathToStyleContent = new WeakHashMap<>();
-
-	/**
-	 * Next instance index.
-	 */
-	private static AtomicInteger nextInstanceIndex = new AtomicInteger(1);
 
 	/**
 	 * Index for current instance.

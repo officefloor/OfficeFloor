@@ -41,7 +41,7 @@ import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
-import net.officefloor.eclipse.editor.AdaptedEditorModule;
+import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
@@ -319,8 +319,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.operations = this.createOperations.apply(this.rootModel);
 
 		// Load the default styling
-		this.contentViewer.getCanvas().getScene().getStylesheets()
-				.add(AdaptedEditorModule.class.getName().replace('.', '/') + ".css");
+		AdaptedEditorPlugin.loadDefaulStylesheet(this.contentViewer.getCanvas().getScene());
 
 		// Initialise all the models
 		this.models.values().forEach((model) -> model.init(this.injector, this.models));

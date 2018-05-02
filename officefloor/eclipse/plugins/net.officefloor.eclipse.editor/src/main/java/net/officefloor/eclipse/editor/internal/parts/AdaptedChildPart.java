@@ -26,6 +26,7 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedChild;
@@ -43,6 +44,44 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane> {
+
+	/**
+	 * Loads the styling for the child {@link Pane}.
+	 * 
+	 * @param childPane
+	 *            Child {@link Pane}.
+	 * @param modelClass
+	 *            {@link Class} of the {@link Model}.
+	 * @param stylesheetUrl
+	 *            {@link ReadOnlyProperty} to specific styling {@link URL}.
+	 */
+	public static void loadStyling(Parent childPane, Class<? extends Model> modelClass,
+			ReadOnlyProperty<URL> stylesheetUrl) {
+
+		// Provide model as class for CSS
+		childPane.getStyleClass().add("child");
+		childPane.getStyleClass().add(modelClass.getSimpleName());
+
+		// Determine if specific styling
+		if (stylesheetUrl != null) {
+
+			// Load initial styling
+			URL initialUrl = stylesheetUrl.getValue();
+			if (initialUrl != null) {
+				childPane.getStylesheets().add(initialUrl.toExternalForm());
+			}
+
+			// Bind potential changes to the styling
+			stylesheetUrl.addListener((event, oldValue, newValue) -> {
+				if (oldValue != null) {
+					childPane.getStylesheets().remove(oldValue.toExternalForm());
+				}
+				if (newValue != null) {
+					childPane.getStylesheets().add(newValue.toExternalForm());
+				}
+			});
+		}
+	}
 
 	/**
 	 * Indicates whether a Palette prototype.
@@ -214,30 +253,8 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 			}
 		}
 
-		// Provide model as class for CSS
-		pane.getStyleClass().add("child");
-		pane.getStyleClass().add(this.getContent().getModel().getClass().getSimpleName());
-
-		// Determine if specific styling
-		ReadOnlyProperty<URL> stylesheetUrl = this.getContent().getStylesheetUrl();
-		if (stylesheetUrl != null) {
-
-			// Load initial styling
-			URL initialUrl = stylesheetUrl.getValue();
-			if (initialUrl != null) {
-				pane.getStylesheets().add(initialUrl.toExternalForm());
-			}
-
-			// Bind potential changes to the styling
-			stylesheetUrl.addListener((event, oldValue, newValue) -> {
-				if (oldValue != null) {
-					pane.getStylesheets().remove(oldValue.toExternalForm());
-				}
-				if (newValue != null) {
-					pane.getStylesheets().add(newValue.toExternalForm());
-				}
-			});
-		}
+		// Provide styling
+		loadStyling(pane, this.getContent().getModel().getClass(), this.getContent().getStylesheetUrl());
 
 		// Return the visual
 		return pane;

@@ -17,6 +17,12 @@
  */
 package net.officefloor.eclipse.editor;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -26,6 +32,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.url.URLStreamHandlerService;
 
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.Scene;
 import net.officefloor.eclipse.editor.internal.style.AbstractStyleRegistry;
 import net.officefloor.eclipse.editor.internal.style.OsgiStyleRegistry;
 import net.officefloor.eclipse.editor.internal.style.OsgiURLStreamHandlerService;
@@ -58,6 +67,54 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 	}
 
 	/**
+	 * Loads the default style sheet.
+	 * 
+	 * @param scene
+	 *            {@link Scene}
+	 */
+	public static void loadDefaulStylesheet(Scene scene) {
+
+		// Determine if running within OSGi environment
+		if (INSTANCE == null) {
+
+			// Running outside OSGi environment (so load from class path)
+			scene.getStylesheets().add(AdaptedEditorModule.class.getName().replace('.', '/') + ".css");
+			return;
+		}
+
+		// Ensure have the default style sheet loaded (does not change so URL constant)
+		if (DEFAULT_STYLESHEET_URL == null) {
+
+			// Within OSGi environment, so must ensure load via this module
+			InputStream defaultStyleSheet = AdaptedEditorModule.class
+					.getResourceAsStream(AdaptedEditorModule.class.getSimpleName() + ".css");
+			if (defaultStyleSheet != null) {
+				try (Reader reader = new InputStreamReader(defaultStyleSheet)) {
+
+					// Read in the style sheet
+					StringWriter stylesheet = new StringWriter();
+					for (int character = reader.read(); character != -1; character = reader.read()) {
+						stylesheet.write(character);
+					}
+
+					// Provide style registry URL to default style sheet
+					StyleRegistry registry = createStyleRegistry();
+					ReadOnlyProperty<URL> defaultStyleSheetUrl = registry.registerStyle("_default_",
+							new SimpleStringProperty(stylesheet.toString()));
+					DEFAULT_STYLESHEET_URL = defaultStyleSheetUrl.getValue();
+
+				} catch (IOException ex) {
+					// Should not occur
+					throw new IllegalStateException("Failed to load default style sheet", ex);
+				}
+			}
+		}
+
+		// Load the default style sheet
+		scene.getStylesheets().add(DEFAULT_STYLESHEET_URL.toExternalForm());
+	}
+
+	/**
 	 * Obtains the {@link AdaptedEditorPlugin} singleton.
 	 * 
 	 * @return {@link AdaptedEditorPlugin} singleton.
@@ -70,6 +127,11 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 	 * Singleton.
 	 */
 	private static AdaptedEditorPlugin INSTANCE;
+
+	/**
+	 * Default stylesheet {@link URL}.
+	 */
+	private static URL DEFAULT_STYLESHEET_URL;
 
 	/**
 	 * {@link ServiceRegistration} for the {@link OsgiURLStreamHandlerService}.

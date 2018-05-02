@@ -444,7 +444,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * 
 		 * @return {@link AbstractItem} instances for the {@link ChildrenGroup}.
 		 */
-		AbstractItem<R, O, M, E, ?, ?>[] getChildren() {
+		public AbstractItem<R, O, M, E, ?, ?>[] getChildren() {
 			return this.children;
 		}
 	}

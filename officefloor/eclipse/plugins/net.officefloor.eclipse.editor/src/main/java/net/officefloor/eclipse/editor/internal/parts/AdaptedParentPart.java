@@ -19,6 +19,7 @@ import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
+import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -26,6 +27,17 @@ import net.officefloor.model.Model;
 
 public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, AdaptedParent<M>>
 		implements ITransformableContentPart<Pane> {
+
+	/**
+	 * Loads the styling for the child {@link Pane}.
+	 * 
+	 * @param parentPane
+	 *            Parent {@link Pane}.
+	 */
+	public static void loadStyling(Parent parentPane) {
+		parentPane.getStyleClass().remove("child");
+		parentPane.getStyleClass().add("parent");
+	}
 
 	/**
 	 * {@link AffineTransform} for location of the {@link AdaptedParent}.
@@ -71,8 +83,7 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 		Pane container = super.doCreateVisual();
 
 		// Provide parent styling
-		container.getStyleClass().remove("child");
-		container.getStyleClass().add("parent");
+		loadStyling(container);
 
 		// Specify the initial location
 		M model = this.getContent().getModel();

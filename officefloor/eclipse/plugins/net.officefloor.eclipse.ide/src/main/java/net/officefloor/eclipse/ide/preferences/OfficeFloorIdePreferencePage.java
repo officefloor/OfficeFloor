@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.ide.preferences;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,17 +32,25 @@ import org.eclipse.e4.ui.css.swt.theme.ITheme;
 import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
 import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -52,12 +62,15 @@ import org.w3c.dom.css.CSSStyleDeclaration;
 import org.w3c.dom.css.CSSValue;
 import org.w3c.dom.css.RGBColor;
 
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.paint.Color;
+import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
+import net.officefloor.eclipse.editor.preview.AdaptedEditorPreview;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
+import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeLabeller;
 import net.officefloor.model.Model;
 
@@ -80,6 +93,11 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	private AbstractIdeEditor<?, ?, ?>[] editors = null;
 
 	/**
+	 * Currently displaying {@link ItemStructureDialogue}.
+	 */
+	private ItemStructureDialogue itemStructureDialogue = null;
+
+	/**
 	 * Instantiate.
 	 */
 	public OfficeFloorIdePreferencePage() {
@@ -92,44 +110,118 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 * @param parent
 	 *            Parent.
 	 */
+	@SuppressWarnings("rawtypes")
 	protected void loadPreferencePage(Composite parent) {
+
+		// Load the colours
+		Map<String, Color> colours = this.loadThemeColours(parent, false);
+
+		// Obtain the background colour
+		Color backgroundColour = colours.get("background-color");
+		if (backgroundColour == null) {
+			org.eclipse.swt.graphics.Color swtBackgroundColor = parent.getDisplay()
+					.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
+			backgroundColour = Color.color(swtBackgroundColor.getRed() / 255, swtBackgroundColor.getGreen() / 255,
+					swtBackgroundColor.getBlue() / 255, swtBackgroundColor.getAlpha() / 255);
+		}
 
 		// Sort the editors (too keep deterministic in order displayed)
 		Arrays.sort(this.editors);
+
+		// Scrolled items of editor
+		ScrolledComposite scrolledEditorItems = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolledEditorItems.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, true));
+		scrolledEditorItems.setExpandHorizontal(true);
+		scrolledEditorItems.setExpandVertical(true);
+
+		// Items of editor
+		Composite editorItems = new Composite(scrolledEditorItems, SWT.NONE);
+		editorItems.setLayout(new RowLayout(SWT.VERTICAL));
+
+		// Configure scrolling (never horizontal scroll bar)
+		scrolledEditorItems.setContent(editorItems);
+		scrolledEditorItems.addListener(SWT.Resize, event -> {
+			Rectangle area = scrolledEditorItems.getClientArea();
+			scrolledEditorItems.setMinSize(parent.computeSize(area.width, SWT.DEFAULT));
+		});
 
 		// Allow configurations for each editor
 		for (AbstractIdeEditor<?, ?, ?> editor : this.editors) {
 
 			// Indicate the editor
-			Label editorName = new Label(parent, SWT.TITLE);
+			Label editorName = new Label(editorItems, SWT.TITLE);
 			editorName.setText(editor.getClass().getSimpleName());
-			editorName.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, false));
 
 			// Indicate the parents
 			for (AbstractItem item : editor.getParents()) {
+				this.loadItem(item, 1, editorItems, backgroundColour);
+			}
+		}
+	}
 
-				// Create row for the item
-				Composite itemRow = new Composite(parent, SWT.NONE);
-				itemRow.setLayout(new GridLayout(3, false));
+	/**
+	 * Loads the item and its children.
+	 * 
+	 * @param item
+	 *            {@link AbstractItem}.
+	 * @param depth
+	 *            Depth of the {@link AbstractItem}.
+	 * @param parent
+	 *            Parent {@link Composite}.
+	 * @param backgroundColour
+	 *            Background {@link Color}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void loadItem(AbstractItem item, int depth, Composite parent, Color backgroundColour) {
 
-				// Obtain details for the item
-				Model prototype = item.prototype();
-				IdeLabeller labeller = item.label();
-				String itemName = (labeller == null) ? null : labeller.getLabel(prototype);
-				if ((itemName == null) || (itemName.trim().length() == 0)) {
-					itemName = item.getClass().getSimpleName();
-				}
+		// Create row for item
+		Composite row = new Composite(parent, SWT.NONE);
+		RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
+		rowLayout.marginLeft = 20 * depth;
+		row.setLayout(rowLayout);
 
-				// Indicate the label for item
-				Label itemLabel = new Label(parent, SWT.NONE);
-				itemLabel.setText(itemName);
+		// Obtain details for the item
+		Model prototype = item.prototype();
+		IdeLabeller labeller = item.label();
+		String itemName = (labeller == null) ? null : labeller.getLabel(prototype);
+		if ((itemName == null) || (itemName.trim().length() == 0)) {
+			itemName = item.getClass().getSimpleName();
+		}
+		final String itemLabel = itemName;
 
-				// Obtain the visual for item
-				Pane visual = item.visual(prototype, null);
+		// Provide the view of the item
+		FXCanvasEx canvas = new FXCanvasEx(row, SWT.NONE);
+		boolean isParent = (depth == 1);
+		AdaptedEditorPreview preview = new AdaptedEditorPreview(prototype, itemName, isParent,
+				(model, context) -> item.visual(model, context));
+		canvas.setScene(preview.getPreviewScene());
+		canvas.getScene().setFill(backgroundColour);
 
-				// Provide the view of the item
-				FXCanvasEx canvas = new FXCanvasEx(parent, SWT.NONE);
-				canvas.setScene(new Scene(visual));
+		// Click on canvas to display structure
+		canvas.setToolTipText("Click to display item's JavaFx structure");
+		canvas.addListener(SWT.MouseDown, (event) -> this.displayItemStructure(itemLabel, preview.getPreviewVisual()));
+
+		// Obtain the defaulting styling
+		String defaultStylingRules = item.style();
+
+		// TODO load override styling from preferences
+
+		// Detail the styling
+		Text styling = new Text(row, SWT.MULTI | SWT.ITALIC);
+		styling.setEditable(false);
+		if ((defaultStylingRules == null) || (defaultStylingRules.trim().length() == 0)) {
+			// No styling
+			styling.setFont(JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT));
+			styling.setText("no styling");
+		} else {
+			// Display the styling
+			styling.setText(defaultStylingRules);
+		}
+
+		// Load the children
+		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
+			for (AbstractItem child : childrenGroup.getChildren()) {
+				this.loadItem(child, depth + 1, parent, backgroundColour);
 			}
 		}
 	}
@@ -137,36 +229,13 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	/**
 	 * Loads the {@link ITheme} {@link Color} instances.
 	 * 
-	 * @param parent
-	 *            Parent {@link Composite} to allow creation of dummy {@link Widget}
-	 *            instances.
-	 * @return {@link Map} of CSS property to {@link Color}.
-	 */
-	private Map<String, Color> loadThemeColours(Composite parent) {
-
-		// Obtain the theme details
-		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-		BundleContext bundleContext = bundle.getBundleContext();
-		ServiceReference<IThemeManager> themeManagerReference = bundleContext.getServiceReference(IThemeManager.class);
-
-		// Obtain the theme manager
-		IThemeManager themeManager = bundle.getBundleContext().getService(themeManagerReference);
-		IThemeEngine themeEngine = themeManager.getEngineForDisplay(parent.getDisplay());
-		return this.extractColours(new TreeViewer(parent, SWT.NONE), themeEngine, true);
-	}
-
-	/**
-	 * Extract the colours from the {@link Widget} (to obtain current theme styles).
-	 * 
 	 * @param uiObject
-	 *            UI object.
-	 * @param themeEngine
-	 *            {@link IThemeEngine}.
+	 *            UI object to extract {@link Color} instances.
 	 * @param isDispose
 	 *            Indicates to dispose the {@link Widget} once complete.
-	 * @return {@link Map} of colour property to {@link Color}.
+	 * @return {@link Map} of CSS property to {@link Color}.
 	 */
-	private Map<String, Color> extractColours(Object uiObject, IThemeEngine themeEngine, boolean isDispose) {
+	private Map<String, Color> loadThemeColours(Object uiObject, boolean isDispose) {
 
 		// Obtain the widget
 		Widget widget;
@@ -177,6 +246,15 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		} else {
 			throw new IllegalStateException("Unknown UI object type " + uiObject.getClass().getName());
 		}
+
+		// Obtain the theme details
+		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+		BundleContext bundleContext = bundle.getBundleContext();
+		ServiceReference<IThemeManager> themeManagerReference = bundleContext.getServiceReference(IThemeManager.class);
+
+		// Obtain the theme manager
+		IThemeManager themeManager = bundle.getBundleContext().getService(themeManagerReference);
+		IThemeEngine themeEngine = themeManager.getEngineForDisplay(widget.getDisplay());
 
 		// Style the widget (so has CSS loaded)
 		themeEngine.applyStyles(widget, true);
@@ -248,6 +326,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 		// Provide container
 		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		container.setLayout(new GridLayout(1, false));
 
 		// Provide progress on loading editors
@@ -335,6 +414,102 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				container.layout();
 			});
 		}).start();
+	}
+
+	/**
+	 * Displays the {@link AbstractItem} structure.
+	 * 
+	 * @param itemLabel
+	 *            Label for the {@link AbstractItem}.
+	 * @param itemVisual
+	 *            Visual for the {@link AbstractItem}.
+	 */
+	private void displayItemStructure(String itemLabel, Node itemVisual) {
+
+		// Lazy display dialogue for display structure
+		if (this.itemStructureDialogue == null) {
+			this.itemStructureDialogue = new ItemStructureDialogue(this.getShell());
+			this.itemStructureDialogue.open();
+
+			// Handle clearing on close (so can open again)
+			this.itemStructureDialogue.getShell().addListener(SWT.Dispose,
+					(event) -> this.itemStructureDialogue = null);
+		}
+
+		// Display structure
+		this.itemStructureDialogue.displayStructure(itemLabel, itemVisual);
+		this.itemStructureDialogue.getShell().setFocus();
+	}
+
+	/**
+	 * Provides structure of the {@link AbstractItem}.
+	 */
+	private class ItemStructureDialogue extends TitleAreaDialog {
+
+		/**
+		 * Displays the structure.
+		 */
+		private Text text;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param parentShell
+		 *            Parent {@link Shell}.
+		 */
+		private ItemStructureDialogue(Shell parentShell) {
+			super(parentShell);
+			this.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+			this.setBlockOnOpen(false);
+		}
+
+		/*
+		 * ============== Dialog ==================
+		 */
+
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			Composite area = (Composite) super.createDialogArea(parent);
+			Composite container = new Composite(area, SWT.NONE);
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			container.setLayout(new FillLayout());
+			this.text = new Text(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+			this.text.setEditable(false);
+			return container;
+		}
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, true);
+		}
+
+		/**
+		 * Displays a new {@link AbstractItem}.
+		 * 
+		 * @param itemLabel
+		 *            Label for the {@link AbstractItem}.
+		 * @param itemVisual
+		 *            {@link Parent} for the {@link AbstractItem}.
+		 */
+		private void displayStructure(String itemLabel, Node itemVisual) {
+
+			// Update title of dialogue to new item
+			this.setTitle(itemLabel);
+			this.setMessage("JavaFx structure to aid styling");
+
+			// Indicate structure
+			try {
+				StringWriter structure = new StringWriter();
+				StructureLogger.log(itemVisual, structure);
+				this.text.setText(structure.toString());
+
+			} catch (Exception ex) {
+				// Indicate error in obtaining structure
+				StringWriter error = new StringWriter();
+				ex.printStackTrace(new PrintWriter(error));
+				this.text.setText("Error loading structure\n\n" + error.toString());
+			}
+		}
 	}
 
 }
