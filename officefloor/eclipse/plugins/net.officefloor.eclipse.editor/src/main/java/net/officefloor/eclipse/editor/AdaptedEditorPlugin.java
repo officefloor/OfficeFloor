@@ -67,6 +67,39 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 	}
 
 	/**
+	 * Obtains the default style sheet.
+	 * 
+	 * @return Default style sheet.
+	 */
+	public static String getDefaultStyleSheet() {
+
+		// Obtain the style sheet
+		InputStream defaultStyleSheet = AdaptedEditorModule.class
+				.getResourceAsStream(AdaptedEditorModule.class.getSimpleName() + ".css");
+		if (defaultStyleSheet == null) {
+			// Should not occur
+			throw new IllegalStateException("Default style sheet not available on class path");
+		}
+
+		// Read in the deafult style sheet
+		try (Reader reader = new InputStreamReader(defaultStyleSheet)) {
+
+			// Read in the style sheet
+			StringWriter stylesheet = new StringWriter();
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				stylesheet.write(character);
+			}
+
+			// Return the style sheet
+			return stylesheet.toString();
+
+		} catch (IOException ex) {
+			// Should not occur
+			throw new IllegalStateException("Failed to load default style sheet", ex);
+		}
+	}
+
+	/**
 	 * Loads the default style sheet.
 	 * 
 	 * @param scene
@@ -85,29 +118,14 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 		// Ensure have the default style sheet loaded (does not change so URL constant)
 		if (DEFAULT_STYLESHEET_URL == null) {
 
-			// Within OSGi environment, so must ensure load via this module
-			InputStream defaultStyleSheet = AdaptedEditorModule.class
-					.getResourceAsStream(AdaptedEditorModule.class.getSimpleName() + ".css");
-			if (defaultStyleSheet != null) {
-				try (Reader reader = new InputStreamReader(defaultStyleSheet)) {
+			// Obtain the default style sheet
+			String styleSheet = getDefaultStyleSheet();
 
-					// Read in the style sheet
-					StringWriter stylesheet = new StringWriter();
-					for (int character = reader.read(); character != -1; character = reader.read()) {
-						stylesheet.write(character);
-					}
-
-					// Provide style registry URL to default style sheet
-					StyleRegistry registry = createStyleRegistry();
-					ReadOnlyProperty<URL> defaultStyleSheetUrl = registry.registerStyle("_default_",
-							new SimpleStringProperty(stylesheet.toString()));
-					DEFAULT_STYLESHEET_URL = defaultStyleSheetUrl.getValue();
-
-				} catch (IOException ex) {
-					// Should not occur
-					throw new IllegalStateException("Failed to load default style sheet", ex);
-				}
-			}
+			// Provide style registry URL to default style sheet
+			StyleRegistry registry = createStyleRegistry();
+			ReadOnlyProperty<URL> defaultStyleSheetUrl = registry.registerStyle("_default_",
+					new SimpleStringProperty(styleSheet));
+			DEFAULT_STYLESHEET_URL = defaultStyleSheetUrl.getValue();
 		}
 
 		// Load the default style sheet

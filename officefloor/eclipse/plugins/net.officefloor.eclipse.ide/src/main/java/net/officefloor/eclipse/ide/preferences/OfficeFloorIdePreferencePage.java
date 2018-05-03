@@ -62,10 +62,13 @@ import org.w3c.dom.css.CSSStyleDeclaration;
 import org.w3c.dom.css.CSSValue;
 import org.w3c.dom.css.RGBColor;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
+import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.preview.AdaptedEditorPreview;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
@@ -145,12 +148,32 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 			scrolledEditorItems.setMinSize(parent.computeSize(area.width, SWT.DEFAULT));
 		});
 
+		// TODO provide default common colours
+
+		// Obtain the default styling
+		String defaultStyleSheet = AdaptedEditorPlugin.getDefaultStyleSheet();
+
 		// Allow configurations for each editor
 		for (AbstractIdeEditor<?, ?, ?> editor : this.editors) {
 
+			// Editor title row
+			Composite titleRow = new Composite(editorItems, SWT.NONE);
+			RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
+			titleRow.setLayout(rowLayout);
+
 			// Indicate the editor
-			Label editorName = new Label(editorItems, SWT.TITLE);
+			Label editorName = new Label(titleRow, SWT.TITLE);
 			editorName.setText(editor.getClass().getSimpleName());
+
+			// Detail the styling
+			Text styling = new Text(titleRow, SWT.MULTI);
+			styling.setEditable(false);
+			styling.setText(defaultStyleSheet);
+			ItemStyler styler = new ItemStyler(parent.getShell(), "Editor Styling",
+					new SimpleStringProperty(defaultStyleSheet));
+			styling.addListener(SWT.MouseDown, (event) -> {
+				styler.open();
+			});
 
 			// Indicate the parents
 			for (AbstractItem item : editor.getParents()) {
@@ -206,8 +229,11 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 		// TODO load override styling from preferences
 
+		// Obtain the styling
+		Property<String> style = preview.style();
+
 		// Detail the styling
-		Text styling = new Text(row, SWT.MULTI | SWT.ITALIC);
+		Text styling = new Text(row, SWT.MULTI);
 		styling.setEditable(false);
 		if ((defaultStylingRules == null) || (defaultStylingRules.trim().length() == 0)) {
 			// No styling
@@ -216,7 +242,17 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		} else {
 			// Display the styling
 			styling.setText(defaultStylingRules);
+
+			// Translate and style
+			String translatedStyle = AbstractIdeEditor.translateStyle(defaultStylingRules, item);
+			style.setValue(translatedStyle);
 		}
+
+		// Provide means to change the styling
+		ItemStyler styler = new ItemStyler(parent.getShell(), itemLabel, new SimpleStringProperty(defaultStylingRules));
+		styling.addListener(SWT.MouseDown, (event) -> {
+			styler.open();
+		});
 
 		// Load the children
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
@@ -461,6 +497,9 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 			super(parentShell);
 			this.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
 			this.setBlockOnOpen(false);
+
+			// No help (yet)
+			this.setHelpAvailable(false);
 		}
 
 		/*
@@ -509,6 +548,143 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				ex.printStackTrace(new PrintWriter(error));
 				this.text.setText("Error loading structure\n\n" + error.toString());
 			}
+		}
+	}
+
+	/**
+	 * Styler of an {@link AbstractItem}.
+	 */
+	private class ItemStyler {
+
+		/**
+		 * Parent {@link Shell}.
+		 */
+		private final Shell parentShell;
+
+		/**
+		 * Label for the item.
+		 */
+		private final String itemLabel;
+
+		/**
+		 * {@link Property} to receive changes to the style. Also, provides the initial
+		 * style.
+		 */
+		private final Property<String> style;
+
+		/**
+		 * Active {@link ItemStyleDialogue} for the {@link AbstractItem}.
+		 */
+		private ItemStyleDialogue itemStyleDialogue = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param parentShell
+		 *            Parent {@link Shell}.
+		 * @param itemLabel
+		 *            Label for the item.
+		 * @param style
+		 *            {@link Property} to receive changes to the style. Also, provides
+		 *            the initial style.
+		 */
+		private ItemStyler(Shell parentShell, String itemLabel, Property<String> style) {
+			this.parentShell = parentShell;
+			this.itemLabel = itemLabel;
+			this.style = style;
+		}
+
+		/**
+		 * Opens the {@link ItemStyleDialogue}.
+		 */
+		private void open() {
+
+			// Lazy display dialogue for styling
+			if (this.itemStyleDialogue == null) {
+				this.itemStyleDialogue = new ItemStyleDialogue(this);
+				this.itemStyleDialogue.open();
+
+				// Handle clearing on close (so can open again)
+				this.itemStyleDialogue.getShell().addListener(SWT.Dispose, (event) -> this.itemStyleDialogue = null);
+			}
+
+			// Ensure gets focus on another open
+			this.itemStyleDialogue.getShell().setFocus();
+		}
+	}
+
+	/**
+	 * Provides means to update the styling for an {@link AbstractItem}.
+	 */
+	private class ItemStyleDialogue extends TitleAreaDialog {
+
+		/**
+		 * {@link ItemStyler} co-ordinating this.
+		 */
+		private final ItemStyler itemStyler;
+
+		/**
+		 * Displays the style.
+		 */
+		private Text text;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param parentShell
+		 *            Parent {@link Shell}.
+		 * @param itemLabel
+		 *            Label for the item.
+		 * @param style
+		 *            {@link Property} to receive changes to the style. Also, provides
+		 *            the initial style.
+		 * @param itemStyler
+		 *            {@link ItemStyler} co-ordinating this.
+		 */
+		private ItemStyleDialogue(ItemStyler itemStyler) {
+			super(itemStyler.parentShell);
+			this.itemStyler = itemStyler;
+
+			// Initialise dialogue to non-modal
+			this.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+			this.setBlockOnOpen(false);
+
+			// No help (yet)
+			this.setHelpAvailable(false);
+		}
+
+		/*
+		 * ============== Dialog ==================
+		 */
+
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			Composite area = (Composite) super.createDialogArea(parent);
+
+			// Create container for contents
+			Composite container = new Composite(area, SWT.NONE);
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			container.setLayout(new FillLayout(SWT.VERTICAL));
+
+			// Indicate details
+			this.setTitle(this.itemStyler.itemLabel);
+			this.setMessage("JavaFx CSS rules for the item");
+
+			// Provide means to change the styling
+			this.text = new Text(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+			String styleRules = this.itemStyler.style.getValue();
+			if ((styleRules != null) && (styleRules.trim().length() > 0)) {
+				this.text.setText(styleRules);
+			}
+
+			// Return the container
+			return container;
+		}
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+			createButton(parent, IDialogConstants.OK_ID, "Apply", true);
 		}
 	}
 

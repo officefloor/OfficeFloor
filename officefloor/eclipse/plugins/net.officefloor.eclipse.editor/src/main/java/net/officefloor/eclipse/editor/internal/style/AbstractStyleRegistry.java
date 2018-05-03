@@ -153,8 +153,8 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	 * @return {@link URL} for the configuration path.
 	 */
 	protected URL getUrl(String configurationPath, int version) {
-		String url = PROTOCOL + "://" + String.valueOf(this.instanceIndex) + "/" + configurationPath + "?version="
-				+ version;
+		String url = PROTOCOL + "://in.memory.host/" + String.valueOf(this.instanceIndex) + "/" + configurationPath
+				+ "?version=" + version;
 		try {
 			return new URL(url);
 		} catch (MalformedURLException ex) {
@@ -173,14 +173,17 @@ public class AbstractStyleRegistry implements StyleRegistry {
 		int[] version = new int[] { 0 };
 		URL url = this.getUrl(configurationPath, version[0]++);
 
+		// Use path to find regardless of version (but trigger new URL for styling)
+		String urlPath = url.getPath();
+
 		// Load the mapping
-		ReadOnlyProperty<String> stylesheetContentProperty = urlPathToStyleContent.get(url.getPath());
+		ReadOnlyProperty<String> stylesheetContentProperty = urlPathToStyleContent.get(urlPath);
 		if (stylesheetContentProperty != null) {
 			throw new IllegalStateException("Stylesheet already registered for URL " + url);
 		}
 
 		// Register the style property
-		urlPathToStyleContent.put(url.getPath(), stylesheetContent);
+		urlPathToStyleContent.put(urlPath, stylesheetContent);
 
 		// Create property for URL
 		Property<URL> urlProperty = new SimpleObjectProperty<>(url);

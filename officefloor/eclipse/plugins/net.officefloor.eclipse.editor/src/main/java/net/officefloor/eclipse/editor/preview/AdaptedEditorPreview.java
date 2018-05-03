@@ -17,8 +17,12 @@
  */
 package net.officefloor.eclipse.editor.preview;
 
+import java.net.URL;
+
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -31,6 +35,7 @@ import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedModelVisualFactoryContextImpl;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
+import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.model.Model;
 
 /**
@@ -49,6 +54,11 @@ public class AdaptedEditorPreview<M extends Model> {
 	 * Preview visual.
 	 */
 	private final Pane previewVisual;
+
+	/**
+	 * {@link Property} to obtain specific styling for the {@link IVisualPart}.
+	 */
+	private final Property<String> styling = new SimpleStringProperty();
 
 	/**
 	 * Instantiate.
@@ -86,14 +96,26 @@ public class AdaptedEditorPreview<M extends Model> {
 		// Load into the preview scene
 		this.previewScene = new Scene(visualContainer);
 
-		// Load the default styling
-		AdaptedEditorPlugin.loadDefaulStylesheet(this.previewScene);
-
 		// Load specific styling
 		AdaptedChildPart.loadStyling(this.previewVisual, model.getClass(), null);
 		if (isParent) {
 			AdaptedParentPart.loadStyling(this.previewVisual);
 		}
+
+		// Load the default styling
+		AdaptedEditorPlugin.loadDefaulStylesheet(this.previewScene);
+
+		// Load specific styling
+		StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
+		ReadOnlyProperty<URL> styleUrl = styleRegistry.registerStyle("_preview_", this.styling);
+		styleUrl.addListener((event, oldUrl, newUrl) -> {
+			if (oldUrl != null) {
+				this.previewVisual.getStylesheets().remove(oldUrl.toExternalForm());
+			}
+			if (newUrl != null) {
+				this.previewVisual.getStylesheets().add(newUrl.toExternalForm());
+			}
+		});
 	}
 
 	/**
@@ -112,6 +134,15 @@ public class AdaptedEditorPreview<M extends Model> {
 	 */
 	public Node getPreviewVisual() {
 		return this.previewVisual;
+	}
+
+	/**
+	 * Obtains the style {@link Property}.
+	 * 
+	 * @return Style {@link Property}.
+	 */
+	public Property<String> style() {
+		return this.styling;
 	}
 
 }

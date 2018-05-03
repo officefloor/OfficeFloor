@@ -53,7 +53,6 @@ import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
-import net.officefloor.eclipse.editor.internal.models.AdaptedOverlay;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
@@ -122,11 +121,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * {@link Model}.
 	 */
 	private final List<Function<R, List<? extends Model>>> getParentFunctions = new LinkedList<>();
-
-	/**
-	 * Active {@link AdaptedOverlay} instances.
-	 */
-	private final List<AdaptedOverlay> overlays = new LinkedList<>();
 
 	/**
 	 * {@link AbstractAdaptedFactory} instances for the {@link Model} types.
@@ -392,9 +386,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			}
 		}
 
-		// Load the overlays (afterwards so z-order in front)
-		adaptedContentModels.addAll(this.overlays);
-
 		// Load the adapted connections (aferwards so z-order in front)
 		for (AdaptedParent<?> adaptedParent : adaptedParents) {
 			List<AdaptedConnection<?>> connections = adaptedParent.getConnections();
@@ -519,21 +510,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				}));
 	}
 
-	/**
-	 * Removes the {@link AdaptedOverlay}.
-	 * 
-	 * @param overlay
-	 *            {@link AdaptedOverlay}.
-	 */
-	public void removeOverlay(AdaptedOverlay overlay) {
-
-		// Remove the overlay
-		this.overlays.remove(overlay);
-
-		// Update to stop display overlay
-		this.loadContentModels();
-	}
-
 	/*
 	 * ====================== AdaptedBuilderContext =======================
 	 */
@@ -563,12 +539,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 
 	@Override
 	public void overlay(double x, double y, OverlayVisualFactory overlayVisualFactory) {
-
-		// Add the overlay
-		this.overlays.add(new AdaptedOverlay(new Point(x, y), overlayVisualFactory, this));
-
-		// Reload the content
-		this.loadContentModels();
+		this.contentViewer.getRootPart().addChild(new AdaptedOverlayHandlePart(new Point(x, y), overlayVisualFactory));
 	}
 
 	@Override
@@ -623,8 +594,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 			return this.injector.getInstance(AdaptedConnectionPart.class);
 		} else if (content instanceof AdaptedConnectorImpl) {
 			return this.injector.getInstance(AdaptedConnectorPart.class);
-		} else if (content instanceof AdaptedOverlay) {
-			return this.injector.getInstance(AdaptedOverlayPart.class);
 		}
 
 		// Unknown model

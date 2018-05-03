@@ -94,6 +94,26 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		implements Comparable<AbstractIdeEditor<R, RE, O>> {
 
 	/**
+	 * Translates the style with the details of the item being rendered.
+	 * 
+	 * @param rawStyle
+	 *            Raw style to be translated.
+	 * @param item
+	 *            {@link AbstractItem}.
+	 * @return Ready to use translate.
+	 */
+	public static <M extends Model> String translateStyle(String rawStyle, AbstractItem<?, ?, ?, ?, ?, ?> item) {
+
+		// Ensure have a style
+		if (rawStyle == null) {
+			return null;
+		}
+
+		// Translate the style
+		return rawStyle.replace("${model}", item.prototype().getClass().getSimpleName());
+	}
+
+	/**
 	 * Indicates if running outside the {@link IWorkbench}.
 	 */
 	private static boolean isOutsideWorkbench = false;
@@ -441,11 +461,12 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 		// Load the style
 		String style = parent.style();
-		if (style != null) {
-			// Undertake tag replacements
-			style = style.replace("${model}", parent.prototype().getClass().getSimpleName());
 
-			// TODO Use configuration path to pull in override configuration
+		// TODO Use configuration path to pull in override configuration
+
+		if (style != null) {
+			// Translate the style ready for use
+			style = translateStyle(style, parent);
 
 			// Load the style
 			parentBuilder.style().setValue(style);
