@@ -49,13 +49,18 @@ public class FunctionEscalationItem extends
 
 	@Override
 	public FunctionEscalationModel prototype() {
-		return new FunctionEscalationModel();
+		return new FunctionEscalationModel("Escalation");
 	}
 
 	@Override
 	public IdeExtractor extract() {
 		return new IdeExtractor((p) -> p.getFunctionEscalations(), FunctionEvent.ADD_FUNCTION_ESCALATION,
 				FunctionEvent.REMOVE_FUNCTION_ESCALATION);
+	}
+
+	@Override
+	public void loadToParent(FunctionModel parentModel, FunctionEscalationModel itemModel) {
+		parentModel.addFunctionEscalation(itemModel);
 	}
 
 	@Override

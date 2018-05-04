@@ -110,6 +110,11 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	@Override
+	public SectionModel prototype() {
+		return new SectionModel();
+	}
+
+	@Override
 	protected void loadParents(
 			List<AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, ?, ?, ?>> parents) {
 		parents.add(new FunctionNamespaceItem());

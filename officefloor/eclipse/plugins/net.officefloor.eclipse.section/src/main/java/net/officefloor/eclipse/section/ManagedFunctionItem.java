@@ -49,13 +49,18 @@ public class ManagedFunctionItem extends
 
 	@Override
 	public ManagedFunctionModel prototype() {
-		return new ManagedFunctionModel();
+		return new ManagedFunctionModel("Managed Function");
 	}
 
 	@Override
 	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getManagedFunctions(), FunctionNamespaceEvent.ADD_MANAGED_FUNCTION,
 				FunctionNamespaceEvent.REMOVE_MANAGED_FUNCTION);
+	}
+
+	@Override
+	public void loadToParent(FunctionNamespaceModel parentModel, ManagedFunctionModel itemModel) {
+		parentModel.addManagedFunction(itemModel);
 	}
 
 	@Override

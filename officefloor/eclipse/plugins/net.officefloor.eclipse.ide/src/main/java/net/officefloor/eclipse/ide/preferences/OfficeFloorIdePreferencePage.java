@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.jws.WebParam.Mode;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -38,8 +40,6 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,8 +50,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.osgi.framework.Bundle;
@@ -64,6 +68,7 @@ import org.w3c.dom.css.RGBColor;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.embed.swt.FXCanvas;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.paint.Color;
@@ -76,6 +81,7 @@ import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeLabeller;
 import net.officefloor.model.Model;
+import net.officefloor.model.section.SectionModel;
 
 /**
  * {@link IWorkbenchPreferencePage}.
@@ -113,8 +119,17 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 * @param parent
 	 *            Parent.
 	 */
-	@SuppressWarnings("rawtypes")
 	protected void loadPreferencePage(Composite parent) {
+
+		// Load preferences
+		this.getPreferenceStore().setDefault("TEST", "default");
+		String result = this.getPreferenceStore().getString("TEST");
+		System.out.println("RESULT: " + result);
+		this.getPreferenceStore().addPropertyChangeListener((event) -> {
+			System.out.println("PROPERTY CHANGE: " + event.getProperty() + " from " + event.getOldValue() + " to "
+					+ event.getNewValue());
+		});
+		this.getPreferenceStore().setValue("TEST", "different");
 
 		// Load the colours
 		Map<String, Color> colours = this.loadThemeColours(parent, false);
@@ -131,55 +146,94 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		// Sort the editors (too keep deterministic in order displayed)
 		Arrays.sort(this.editors);
 
-		// Scrolled items of editor
-		ScrolledComposite scrolledEditorItems = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		scrolledEditorItems.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, true));
-		scrolledEditorItems.setExpandHorizontal(true);
-		scrolledEditorItems.setExpandVertical(true);
-
-		// Items of editor
-		Composite editorItems = new Composite(scrolledEditorItems, SWT.NONE);
-		editorItems.setLayout(new RowLayout(SWT.VERTICAL));
-
-		// Configure scrolling (never horizontal scroll bar)
-		scrolledEditorItems.setContent(editorItems);
-		scrolledEditorItems.addListener(SWT.Resize, event -> {
-			Rectangle area = scrolledEditorItems.getClientArea();
-			scrolledEditorItems.setMinSize(parent.computeSize(area.width, SWT.DEFAULT));
-		});
-
-		// TODO provide default common colours
-
 		// Obtain the default styling
 		String defaultStyleSheet = AdaptedEditorPlugin.getDefaultStyleSheet();
+
+		// Create tabs for each editor
+		TabFolder editors = new TabFolder(parent, SWT.BORDER | SWT.INHERIT_FORCE);
+		editors.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Allow configurations for each editor
 		for (AbstractIdeEditor<?, ?, ?> editor : this.editors) {
 
-			// Editor title row
-			Composite titleRow = new Composite(editorItems, SWT.NONE);
-			RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-			titleRow.setLayout(rowLayout);
-
 			// Indicate the editor
-			Label editorName = new Label(titleRow, SWT.TITLE);
-			editorName.setText(editor.getClass().getSimpleName());
+			final String editorName = editor.getClass().getSimpleName();
 
-			// Detail the styling
-			Text styling = new Text(titleRow, SWT.MULTI);
-			styling.setEditable(false);
-			styling.setText(defaultStyleSheet);
-			ItemStyler styler = new ItemStyler(parent.getShell(), "Editor Styling",
-					new SimpleStringProperty(defaultStyleSheet));
-			styling.addListener(SWT.MouseDown, (event) -> {
-				styler.open();
-			});
+			// Create tab for editor
+			TabItem editorTab = new TabItem(editors, SWT.NONE);
+			editorTab.setText(editorName);
 
-			// Indicate the parents
-			for (AbstractItem item : editor.getParents()) {
-				this.loadItem(item, 1, editorItems, backgroundColour);
+			// Load the editor to configure preferences
+			try {
+
+				// Load the prototype of all models
+				Model rootModel = editor.prototype();
+				AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = editor.getParents();
+				for (int i = 0; i < parentItems.length; i++) {
+					AbstractItem<?, ?, ?, ?, ?, ?> parentItem = parentItems[i];
+
+					// Load the prototype model
+					Model parentModel = this.loadPrototypeModel(rootModel, parentItem);
+
+					// Space out the prototypes
+					parentModel.setX(300);
+					parentModel.setY(10 + (100 * i));
+				}
+
+				// Initialise the editor
+				IEditorSite editorSite = new PreferencesEditorSite(editorName, this.workbench, parent.getShell());
+				IEditorInput editorInput = new PreferencesEditorInput(editorName, rootModel);
+				editor.init(editorSite, editorInput);
+
+				// Display the editor
+				editor.createPartControl(editors);
+				editorTab.setControl(editor.getCanvas());
+
+			} catch (Throwable ex) {
+
+				// Dispose the canvas if created
+				FXCanvas canvas = editor.getCanvas();
+				if (canvas != null) {
+					canvas.dispose();
+				}
+
+				// Indicate failure to load editor
+				Text error = new Text(editors, SWT.MULTI);
+				StringWriter stackTrace = new StringWriter();
+				ex.printStackTrace(new PrintWriter(stackTrace));
+				error.setText("Failed to load editor for configuring.\n\n" + stackTrace.toString());
+				error.setEditable(false);
+				editorTab.setControl(error);
 			}
 		}
+	}
+
+	/**
+	 * Recursively loads the prototype {@link Model}.
+	 * 
+	 * @param parentModel
+	 *            Parent {@link Model}.
+	 * @param item
+	 *            {@link AbstractItem} to have its prototype loaded into the
+	 *            {@link Model}.
+	 * @return Prototype {@link Mode} from the {@link AbstractItem}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Model loadPrototypeModel(Model parentModel, AbstractItem item) {
+
+		// Obtain the prototype for the item
+		Model itemModel = item.prototype();
+		item.loadToParent(parentModel, itemModel);
+
+		// Load child items
+		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
+			for (AbstractItem child : childrenGroup.getChildren()) {
+				this.loadPrototypeModel(itemModel, child);
+			}
+		}
+
+		// Return the item model
+		return itemModel;
 	}
 
 	/**
@@ -228,6 +282,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		String defaultStylingRules = item.style();
 
 		// TODO load override styling from preferences
+		defaultStylingRules = item.getConfigurationPath();
 
 		// Obtain the styling
 		Property<String> style = preview.style();

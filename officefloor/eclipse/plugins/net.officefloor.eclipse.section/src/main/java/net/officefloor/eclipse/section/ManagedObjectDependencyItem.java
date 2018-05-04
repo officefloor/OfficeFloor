@@ -46,7 +46,7 @@ public class ManagedObjectDependencyItem extends
 
 	@Override
 	public SectionManagedObjectDependencyModel prototype() {
-		return new SectionManagedObjectDependencyModel();
+		return new SectionManagedObjectDependencyModel("Dependency", null);
 	}
 
 	@Override
@@ -54,6 +54,11 @@ public class ManagedObjectDependencyItem extends
 		return new IdeExtractor((p) -> p.getSectionManagedObjectDependencies(),
 				SectionManagedObjectEvent.ADD_SECTION_MANAGED_OBJECT_DEPENDENCY,
 				SectionManagedObjectEvent.REMOVE_SECTION_MANAGED_OBJECT_DEPENDENCY);
+	}
+
+	@Override
+	public void loadToParent(SectionManagedObjectModel parentModel, SectionManagedObjectDependencyModel itemModel) {
+		parentModel.addSectionManagedObjectDependency(itemModel);
 	}
 
 	@Override

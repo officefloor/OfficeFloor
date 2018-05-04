@@ -73,6 +73,7 @@ import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
+import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
 import net.officefloor.model.ConnectionModel;
@@ -348,6 +349,12 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	private OfficeFloorOsgiBridge osgiBridge;
 
 	/**
+	 * {@link AbstractConfigurableItem} instances for this
+	 * {@link AbstractIdeEditor}.
+	 */
+	private List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = null;
+
+	/**
 	 * Instantiate to capture {@link Injector}.
 	 * 
 	 * @param injector
@@ -523,10 +530,23 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 */
 	@SuppressWarnings("unchecked")
 	public final AbstractConfigurableItem<R, RE, O, ?, ?, ?>[] getParents() {
-		List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = new LinkedList<>();
-		this.loadParents(parents);
+
+		// Lazy load the parents
+		if (this.parents == null) {
+			this.parents = new LinkedList<>();
+			this.loadParents(this.parents);
+		}
+
+		// Return the parents
 		return parents.toArray(new AbstractConfigurableItem[parents.size()]);
 	}
+
+	/**
+	 * Obtains root prototype.
+	 * 
+	 * @return Root prototype.
+	 */
+	public abstract R prototype();
 
 	/**
 	 * Loads the {@link AbstractConfigurableItem} instances.
@@ -652,6 +672,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 */
 
 	@Override
+	public FXCanvas getCanvas() {
+		return super.getCanvas();
+	}
+
+	@Override
 	public final IViewer getContentViewer() {
 		return this.module.getContentViewer();
 	}
@@ -697,9 +722,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	protected final void activate() {
 
 		// Load the model
-		this.rootBuilder.getErrorHandler().isError(() -> {
-			this.model = this.loadRootModel(this.configurationItem);
-		});
+		if (this.model == null) {
+			this.rootBuilder.getErrorHandler().isError(() -> {
+				this.model = this.loadRootModel(this.configurationItem);
+			});
+		}
 
 		// Load the module with root model
 		this.module.loadRootModel(this.model);
@@ -709,6 +736,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected final void setInput(IEditorInput input) {
 		super.setInput(input);
 
@@ -716,9 +744,22 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		this.osgiBridge = null;
 
 		// Obtain the input configuration
-		IFileEditorInput fileInput = (IFileEditorInput) input;
-		this.configurationFile = fileInput.getFile();
-		this.configurationItem = ProjectConfigurationContext.getWritableConfigurationItem(this.configurationFile, null);
+		if (input instanceof IFileEditorInput) {
+			// Load the configuration item from the file
+			IFileEditorInput fileInput = (IFileEditorInput) input;
+			this.configurationFile = fileInput.getFile();
+			this.configurationItem = ProjectConfigurationContext.getWritableConfigurationItem(this.configurationFile,
+					null);
+
+		} else if (input instanceof PreferencesEditorInput) {
+			// Provided the model
+			PreferencesEditorInput preferencesInput = (PreferencesEditorInput) input;
+			this.model = (R) preferencesInput.getRootModel();
+
+		} else {
+			// Unknown editor input
+			throw new IllegalStateException("Unable to edit input " + input.getClass().getName());
+		}
 	}
 
 	@Override

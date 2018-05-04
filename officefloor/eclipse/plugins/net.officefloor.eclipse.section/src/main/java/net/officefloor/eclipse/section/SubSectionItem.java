@@ -123,6 +123,11 @@ public class SubSectionItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, SubSectionModel itemModel) {
+		parentModel.addSubSection(itemModel);
+	}
+
+	@Override
 	public Pane visual(SubSectionModel model, AdaptedModelVisualFactoryContext<SubSectionModel> context) {
 		VBox container = new VBox();
 		context.label(container);

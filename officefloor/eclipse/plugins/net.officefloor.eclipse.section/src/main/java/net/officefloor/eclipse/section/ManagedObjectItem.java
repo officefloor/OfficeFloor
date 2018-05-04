@@ -85,6 +85,11 @@ public class ManagedObjectItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, SectionManagedObjectModel itemModel) {
+		parentModel.addSectionManagedObject(itemModel);
+	}
+
+	@Override
 	public Pane visual(SectionManagedObjectModel model,
 			AdaptedModelVisualFactoryContext<SectionManagedObjectModel> context) {
 		VBox container = new VBox();

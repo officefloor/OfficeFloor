@@ -54,6 +54,16 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		extends AbstractConfigurerRunnable {
 
 	/**
+	 * {@link IdeChildrenGroup} instances for this {@link AbstractItem}.
+	 */
+	private List<IdeChildrenGroup> childrenGroups = null;
+
+	/**
+	 * Configuration path for this {@link AbstractItem}.
+	 */
+	protected String configurationPath = null;
+
+	/**
 	 * {@link ConfigurableContext}.
 	 */
 	private ConfigurableContext<R, O> context;
@@ -211,6 +221,13 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @return {@link IdeExtractor}.
 	 */
 	public abstract IdeExtractor extract();
+
+	/**
+	 * Loads the {@link Model} to the parent {@link Model}. This allows for
+	 * constructing a prototype model for editing preferences of the
+	 * {@link AbstractIdeEditor}.
+	 */
+	public abstract void loadToParent(P parentModel, M itemModel);
 
 	/**
 	 * Creates the visual for the {@link Model}.
@@ -395,7 +412,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * 
 		 * @return Name of the {@link ChildrenGroup}.
 		 */
-		String getChildrenGroupName() {
+		public String getChildrenGroupName() {
 			return this.name;
 		}
 
@@ -425,7 +442,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * @return Change events.
 		 */
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		Enum<?>[] changeEvents() {
+		public Enum<?>[] changeEvents() {
 			if (this.children.length == 1) {
 				// Just the one child, so return from child
 				return this.children[0].extract().getExtractChangeEvents();
@@ -456,9 +473,17 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 */
 	@SuppressWarnings("unchecked")
 	public final IdeChildrenGroup[] getChildrenGroups() {
-		List<IdeChildrenGroup> children = new LinkedList<>();
-		this.children(children);
-		return children.toArray(new AbstractItem.IdeChildrenGroup[children.size()]);
+
+		// Lazy load the children groups
+		if (this.childrenGroups == null) {
+
+			// Load the children groups
+			this.childrenGroups = new LinkedList<>();
+			this.children(this.childrenGroups);
+		}
+
+		// Obtain the children groups
+		return this.childrenGroups.toArray(new AbstractItem.IdeChildrenGroup[this.childrenGroups.size()]);
 	}
 
 	/**
@@ -778,6 +803,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		AdaptedChildBuilder<R, O, M, E> child = childrenGroup.addChild(this.prototype(),
 				(model, ctx) -> this.visual(model, ctx));
 
+		// Capture the configuration path
+		this.configurationPath = child.getConfigurationPath();
+
 		// Determine if configured with label
 		IdeLabeller labeller = this.label();
 		if (labeller != null) {
@@ -789,6 +817,15 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 
 		// Return the child
 		return child;
+	}
+
+	/**
+	 * Obtains the configuration path for this {@link AbstractItem}.
+	 * 
+	 * @return Configuration path for this {@link AbstractIdeEditor}.
+	 */
+	public final String getConfigurationPath() {
+		return this.configurationPath;
 	}
 
 	/*

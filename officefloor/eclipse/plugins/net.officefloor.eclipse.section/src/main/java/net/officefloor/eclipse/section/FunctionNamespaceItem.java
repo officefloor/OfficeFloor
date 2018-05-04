@@ -169,6 +169,11 @@ public class FunctionNamespaceItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, FunctionNamespaceModel itemModel) {
+		parentModel.addFunctionNamespace(itemModel);
+	}
+
+	@Override
 	public Pane visual(FunctionNamespaceModel model, AdaptedModelVisualFactoryContext<FunctionNamespaceModel> context) {
 		VBox container = new VBox();
 		context.label(container).getStyleClass().add("title");

@@ -89,6 +89,11 @@ public class FunctionItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, FunctionModel itemModel) {
+		parentModel.addFunction(itemModel);
+	}
+
+	@Override
 	public Pane visual(FunctionModel model, AdaptedModelVisualFactoryContext<FunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());

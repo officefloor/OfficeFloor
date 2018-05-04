@@ -74,6 +74,11 @@ public class ExternalManagedObjectItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, ExternalManagedObjectModel itemModel) {
+		parentModel.addExternalManagedObject(itemModel);
+	}
+
+	@Override
 	public Pane visual(ExternalManagedObjectModel model,
 			AdaptedModelVisualFactoryContext<ExternalManagedObjectModel> context) {
 		HBox container = new HBox();

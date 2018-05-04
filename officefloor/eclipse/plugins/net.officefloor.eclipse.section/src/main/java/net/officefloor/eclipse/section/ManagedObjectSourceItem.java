@@ -132,6 +132,11 @@ public class ManagedObjectSourceItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, SectionManagedObjectSourceModel itemModel) {
+		parentModel.addSectionManagedObjectSource(itemModel);
+	}
+
+	@Override
 	public Pane visual(SectionManagedObjectSourceModel model,
 			AdaptedModelVisualFactoryContext<SectionManagedObjectSourceModel> context) {
 		HBox container = new HBox();

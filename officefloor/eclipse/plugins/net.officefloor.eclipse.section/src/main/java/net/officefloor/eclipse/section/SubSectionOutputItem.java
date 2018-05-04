@@ -48,13 +48,18 @@ public class SubSectionOutputItem extends
 
 	@Override
 	public SubSectionOutputModel prototype() {
-		return new SubSectionOutputModel();
+		return new SubSectionOutputModel("Output", null, false);
 	}
 
 	@Override
 	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getSubSectionOutputs(), SubSectionEvent.ADD_SUB_SECTION_OUTPUT,
 				SubSectionEvent.REMOVE_SUB_SECTION_OUTPUT);
+	}
+
+	@Override
+	public void loadToParent(SubSectionModel parentModel, SubSectionOutputModel itemModel) {
+		parentModel.addSubSectionOutput(itemModel);
 	}
 
 	@Override

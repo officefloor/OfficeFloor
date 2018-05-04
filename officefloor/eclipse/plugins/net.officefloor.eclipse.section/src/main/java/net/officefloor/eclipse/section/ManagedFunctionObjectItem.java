@@ -48,13 +48,18 @@ public class ManagedFunctionObjectItem extends
 
 	@Override
 	public ManagedFunctionObjectModel prototype() {
-		return new ManagedFunctionObjectModel();
+		return new ManagedFunctionObjectModel("Dependency", null, null, false);
 	}
 
 	@Override
 	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getManagedFunctionObjects(),
 				ManagedFunctionEvent.ADD_MANAGED_FUNCTION_OBJECT, ManagedFunctionEvent.REMOVE_MANAGED_FUNCTION_OBJECT);
+	}
+
+	@Override
+	public void loadToParent(ManagedFunctionModel parentModel, ManagedFunctionObjectModel itemModel) {
+		parentModel.addManagedFunctionObject(itemModel);
 	}
 
 	@Override

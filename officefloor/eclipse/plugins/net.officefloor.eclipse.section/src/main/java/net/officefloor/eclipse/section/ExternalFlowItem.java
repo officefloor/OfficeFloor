@@ -74,6 +74,11 @@ public class ExternalFlowItem extends
 	}
 
 	@Override
+	public void loadToParent(SectionModel parentModel, ExternalFlowModel itemModel) {
+		parentModel.addExternalFlow(itemModel);
+	}
+
+	@Override
 	public Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,

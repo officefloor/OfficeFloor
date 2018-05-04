@@ -49,13 +49,18 @@ public class FunctionFlowItem extends
 
 	@Override
 	public FunctionFlowModel prototype() {
-		return new FunctionFlowModel();
+		return new FunctionFlowModel("Flow", null, null);
 	}
 
 	@Override
 	public IdeExtractor extract() {
 		return new IdeExtractor((p) -> p.getFunctionFlows(), FunctionEvent.ADD_FUNCTION_FLOW,
 				FunctionEvent.REMOVE_FUNCTION_FLOW);
+	}
+
+	@Override
+	public void loadToParent(FunctionModel parentModel, FunctionFlowModel itemModel) {
+		parentModel.addFunctionFlow(itemModel);
 	}
 
 	@Override

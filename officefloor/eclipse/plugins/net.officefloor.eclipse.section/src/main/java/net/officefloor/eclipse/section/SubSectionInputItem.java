@@ -42,13 +42,18 @@ public class SubSectionInputItem extends
 
 	@Override
 	public SubSectionInputModel prototype() {
-		return new SubSectionInputModel();
+		return new SubSectionInputModel("Input", null, false, null);
 	}
 
 	@Override
 	public IdeExtractor extract() {
 		return new IdeExtractor((parent) -> parent.getSubSectionInputs(), SubSectionEvent.ADD_SUB_SECTION_INPUT,
 				SubSectionEvent.REMOVE_SUB_SECTION_INPUT);
+	}
+
+	@Override
+	public void loadToParent(SubSectionModel parentModel, SubSectionInputModel itemModel) {
+		parentModel.addSubSectionInput(itemModel);
 	}
 
 	@Override
