@@ -24,6 +24,7 @@ import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -32,6 +33,7 @@ import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
+import net.officefloor.eclipse.editor.AdaptedModelStyler;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
@@ -44,7 +46,8 @@ import net.officefloor.model.Model;
  *
  * @author Daniel Sagenschneider
  */
-public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane> {
+public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane>
+		implements AdaptedModelStyler {
 
 	/**
 	 * Loads the styling for the child {@link Pane}.
@@ -130,6 +133,20 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	 */
 	public AdaptedErrorHandler getErrorHandler() {
 		return this.getContent().getErrorHandler();
+	}
+
+	/*
+	 * ================== AdaptedModelStyler ========================
+	 */
+
+	@Override
+	public Model getModel() {
+		return this.getContent().getModel();
+	}
+
+	@Override
+	public Property<String> style() {
+		return this.getContent().getStylesheet();
 	}
 
 	/*
@@ -236,15 +253,6 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 					this.getContent().action(action);
 				}));
 
-		// Provide select only
-		SelectOnly selectOnly = this.getContent().getSelectOnly();
-		if (selectOnly != null) {
-			pane.setOnMouseClicked((event) -> {
-				selectOnly.model(this.getContent().getModel());
-				event.consume();
-			});
-		}
-
 		// Ensure all children groups are configured
 		for (ChildrenGroup<M, ?> childrenGroup : this.getContent().getChildrenGroups()) {
 			ChildrenGroupVisual visual = this.childrenGroupVisuals.get(childrenGroup);
@@ -265,6 +273,17 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 		// Provide styling
 		loadStyling(pane, this.getContent().getModel().getClass(), this.getContent().getStylesheetUrl());
+
+		// Provide select only
+		SelectOnly selectOnly = this.getContent().getSelectOnly();
+		if (selectOnly != null) {
+			pane.setOnMouseClicked((event) -> {
+				this.getContent().getErrorHandler().isError(() -> {
+					selectOnly.model(this);
+				});
+				event.consume();
+			});
+		}
 
 		// Return the visual
 		return pane;

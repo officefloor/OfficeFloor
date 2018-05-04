@@ -176,10 +176,23 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 			// Load the adapter actions
 			if (this.getParentFactory().modelToActions.size() > 0) {
 
+				// Determine if click only
+				boolean isClickOnly = (this.getFactory().getContentPartFactory().getSelectOnly() != null);
+
 				// Load the model actions
 				List<AdaptedAction<R, O, M>> actions = new ArrayList<>(this.getParentFactory().modelToActions.size());
 				for (ModelToAction<R, O, M> action : this.getParentFactory().modelToActions) {
-					actions.add(new AdaptedAction<>(action.action, this, action.visualFactory,
+
+					// Obtain the action
+					ModelAction<R, O, M> modelAction = action.action;
+					if (isClickOnly) {
+						// Click only, so dummy action
+						modelAction = (context) -> {
+						};
+					}
+
+					// Add the action
+					actions.add(new AdaptedAction<>(modelAction, this, action.visualFactory,
 							this.getParentFactory().errorHandler));
 				}
 				this.actions = new AdaptedActions<>(actions);

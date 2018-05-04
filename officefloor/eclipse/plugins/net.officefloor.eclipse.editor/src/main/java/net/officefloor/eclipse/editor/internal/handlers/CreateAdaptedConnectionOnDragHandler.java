@@ -175,6 +175,11 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 			return;
 		}
 
+		// Determine if select only
+		if (sourceConnectorPart.getContent().getParentAdaptedChild().getSelectOnly() != null) {
+			return; // select only
+		}
+
 		// Create the proxy connection
 		this.sourceConnector = sourceConnectorPart;
 		this.connection = new ProxyAdaptedConnection<>(this.sourceConnector.getContent());

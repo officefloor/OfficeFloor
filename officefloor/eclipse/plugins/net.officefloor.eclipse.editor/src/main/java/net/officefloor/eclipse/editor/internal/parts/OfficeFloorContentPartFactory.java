@@ -243,7 +243,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		});
 		if (this.selectOnly != null) {
 			paletteIndicator.setOnMouseClicked((event) -> {
-				this.selectOnly.paletteIndicator(this.paletteIndicatorStyle);
+				this.errorHandler.isError(() -> {
+					this.selectOnly.paletteIndicator(() -> this.paletteIndicatorStyle);
+				});
 			});
 		}
 
@@ -262,7 +264,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		if (this.selectOnly != null) {
 			this.paletteViewer.getCanvas().setOnMouseClicked((event) -> {
 				if (event.getTarget() != this.paletteViewer.getCanvas()) {
-					this.selectOnly.palette(this.paletteStyle);
+					this.errorHandler.isError(() -> {
+						this.selectOnly.palette(() -> this.paletteStyle);
+					});
 				}
 			});
 		}
@@ -280,7 +284,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		});
 		if (this.selectOnly != null) {
 			this.contentViewer.getCanvas().setOnMouseClicked((event) -> {
-				this.selectOnly.content(this);
+				this.errorHandler.isError(() -> {
+					this.selectOnly.content(this);
+				});
 			});
 		}
 	}

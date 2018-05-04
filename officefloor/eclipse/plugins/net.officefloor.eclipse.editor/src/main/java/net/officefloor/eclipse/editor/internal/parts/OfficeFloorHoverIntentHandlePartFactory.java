@@ -30,7 +30,7 @@ import net.officefloor.eclipse.editor.internal.models.AdaptedAction;
 import net.officefloor.eclipse.editor.internal.models.AdaptedActions;
 import net.officefloor.model.Model;
 
-public class OfficeFloorHoverHandlePartFactory extends DefaultHoverIntentHandlePartFactory {
+public class OfficeFloorHoverIntentHandlePartFactory extends DefaultHoverIntentHandlePartFactory {
 
 	@Inject
 	private Injector injector;

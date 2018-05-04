@@ -71,6 +71,7 @@ import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeAdapter;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
@@ -355,6 +356,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	private List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = null;
 
 	/**
+	 * {@link SelectOnly}.
+	 */
+	private SelectOnly selectOnly = null;
+
+	/**
 	 * Instantiate to capture {@link Injector}.
 	 * 
 	 * @param injector
@@ -512,6 +518,16 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 */
 	public AbstractIdeEditor(Class<R> rootModelType, Function<R, O> createOperations) {
 		this(new AdaptedEditorModule(), rootModelType, createOperations);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param selectOnly
+	 *            {@link SelectOnly}.
+	 */
+	public void setSelectOnly(SelectOnly selectOnly) {
+		this.selectOnly = selectOnly;
 	}
 
 	/**
@@ -683,6 +699,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 	@Override
 	protected final void hookViewers() {
+
+		// Provide possible select only
+		if (this.selectOnly != null) {
+			this.module.setSelectOnly(selectOnly);
+		}
 
 		// Create the view
 		Pane view = this.module.createParent(this.adaptedBuilder);

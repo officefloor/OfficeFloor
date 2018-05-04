@@ -137,11 +137,18 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 			boolean[] toggle = new boolean[] { false };
 			style.setOnAction((event) -> {
 				toggle[0] = !toggle[0];
+
+				// Provide styling
 				String css = toggle[0] ? ".connection Path { -fx-stroke: white }" : "";
 				System.out.println("Toggle style sheet: " + css);
 				contentStyle.setValue(css);
-				root.setContentBackground(
-						new Background(new BackgroundFill(toggle[0] ? Color.BLACK : null, null, null)));
+
+				// Specify background
+				Background background = toggle[0] ? new Background(new BackgroundFill(Color.BLACK, null, null)) : null;
+				root.setContentBackground(background);
+
+				// Indicate whether to show grid
+				root.getGridModel().setShowGrid(!toggle[0]);
 			});
 			ctx.getOverlayParent().getChildren().add(style);
 		});

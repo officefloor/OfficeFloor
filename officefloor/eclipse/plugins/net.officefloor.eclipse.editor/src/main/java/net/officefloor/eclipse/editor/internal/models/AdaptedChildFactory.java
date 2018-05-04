@@ -115,7 +115,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 	private final Map<ConnectionKey, AdaptedConnectionFactory<R, O, ?, ?, ?>> connectionFactories = new HashMap<>();
 
 	/**
-	 * {@link ReadOnlyProperty} to the stylesheet {@link URL}.
+	 * {@link ReadOnlyProperty} to the style sheet {@link URL}.
 	 */
 	private ReadOnlyProperty<URL> stylesheetUrl;
 
@@ -618,6 +618,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		@Override
+		public Property<String> getStylesheet() {
+			return this.getFactory().stylesheetContent;
+		}
+
+		@Override
 		public ReadOnlyProperty<URL> getStylesheetUrl() {
 			return this.getFactory().stylesheetUrl;
 		}
@@ -760,6 +765,13 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		@Override
 		@SuppressWarnings("unchecked")
 		public <r extends Model, o> void action(ModelAction<r, o, M> action) {
+
+			// Only action if not select only
+			if (this.getFactory().getContentPartFactory().getSelectOnly() != null) {
+				return; // don't action
+			}
+
+			// Undertake the action
 			this.getErrorHandler().isError(() -> {
 				action.execute((ModelActionContext<r, o, M>) this);
 			});

@@ -17,9 +17,7 @@
  */
 package net.officefloor.eclipse.editor;
 
-import javafx.beans.property.Property;
 import net.officefloor.eclipse.editor.internal.models.AdaptedAction;
-import net.officefloor.model.Model;
 
 /**
  * <p>
@@ -39,19 +37,18 @@ public interface SelectOnly {
 	/**
 	 * Notified that the palette indicator was selected.
 	 * 
-	 * @param style
-	 *            {@link Property} to enable configuring the style of the palette
-	 *            indicator.
+	 * @param paletteIndiatorStyler
+	 *            {@link PaletteIndicatorStyler}.
 	 */
-	void paletteIndicator(Property<String> style);
+	void paletteIndicator(PaletteIndicatorStyler paletteIndiatorStyler);
 
 	/**
 	 * Notified that the palette was selected.
 	 * 
-	 * @param style
-	 *            {@link Property} to enable configuring the style of the palette.
+	 * @param paletteStyler
+	 *            {@link PaletteStyler}.
 	 */
-	void palette(Property<String> style);
+	void palette(PaletteStyler paletteStyler);
 
 	/**
 	 * Notified that the content was selected.
@@ -64,9 +61,9 @@ public interface SelectOnly {
 	/**
 	 * Model has been selected.
 	 * 
-	 * @param model
-	 *            Model is selected.
+	 * @param modelStyler
+	 *            {@link AdaptedModelStyler}.
 	 */
-	void model(Model model);
+	void model(AdaptedModelStyler modelStyler);
 
 }

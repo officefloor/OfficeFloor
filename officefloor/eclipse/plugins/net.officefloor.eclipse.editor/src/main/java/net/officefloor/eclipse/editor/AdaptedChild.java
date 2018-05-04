@@ -117,13 +117,21 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	Pane createVisual(AdaptedModelVisualFactoryContext<M> context);
 
 	/**
+	 * Obtains the {@link Property} to the style sheet for this
+	 * {@link AdaptedChild}.
+	 * 
+	 * @return {@link Property} to the style sheet for this {@link AdaptedChild}.
+	 */
+	Property<String> getStylesheet();
+
+	/**
 	 * <p>
-	 * Obtains the {@link Property} to the Stylesheet URL for this visual of this
+	 * Obtains the {@link Property} to the style sheet URL for this visual of this
 	 * {@link AdaptedChild}.
 	 * <p>
 	 * May be <code>null</code> to indicate no specific styling.
 	 * 
-	 * @return {@link ReadOnlyProperty} to the Stylesheet {@link URL}. May be
+	 * @return {@link ReadOnlyProperty} to the style sheet {@link URL}. May be
 	 *         <code>null</code>.
 	 */
 	ReadOnlyProperty<URL> getStylesheetUrl();

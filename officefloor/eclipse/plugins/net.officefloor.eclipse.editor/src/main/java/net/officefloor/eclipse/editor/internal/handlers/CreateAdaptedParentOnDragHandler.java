@@ -151,9 +151,16 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 	@SuppressWarnings("unchecked")
 	public void startDrag(MouseEvent event) {
 
-		// Create proxy to create parent at particular location
+		// Obtain the parent
 		AdaptedParentPart<M> parentPart = this.getHost();
 		AdaptedParent<M> parent = parentPart.getContent();
+
+		// Determine if select only
+		if (parent.getSelectOnly() != null) {
+			return; // select only
+		}
+
+		// Create proxy to create parent at particular location
 		this.prototype = parentPart.getAdapter(AdaptedPrototype.class);
 		if (this.prototype == null) {
 			throw new IllegalStateException(AdaptedParent.class.getSimpleName() + " does not adapt to "
@@ -305,6 +312,11 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		@Override
 		public Property<String> getEditLabel() {
 			return null;
+		}
+
+		@Override
+		public Property<String> getStylesheet() {
+			return this.parent.getStylesheet();
 		}
 
 		@Override

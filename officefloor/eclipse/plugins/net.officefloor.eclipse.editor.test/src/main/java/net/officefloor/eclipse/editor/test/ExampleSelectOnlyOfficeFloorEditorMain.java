@@ -18,13 +18,14 @@
 package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
-import javafx.beans.property.Property;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.paint.Paint;
+import net.officefloor.eclipse.editor.AdaptedModelStyler;
 import net.officefloor.eclipse.editor.ContentStyler;
+import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
+import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
-import net.officefloor.model.Model;
 
 /**
  * Example {@link SelectOnly} {@link ExampleOfficeFloorEditorMain}.
@@ -50,13 +51,13 @@ public class ExampleSelectOnlyOfficeFloorEditorMain extends ExampleOfficeFloorEd
 		this.setSelectOnly(new SelectOnly() {
 
 			@Override
-			public void paletteIndicator(Property<String> style) {
-				style.setValue(".palette-indicator { -fx-background-color: lawngreen }");
+			public void paletteIndicator(PaletteIndicatorStyler styler) {
+				styler.paletteIndicatorStyle().setValue(".palette-indicator { -fx-background-color: lawngreen }");
 			}
 
 			@Override
-			public void palette(Property<String> style) {
-				style.setValue(".palette { -fx-background-color: mediumspringgreen }");
+			public void palette(PaletteStyler styler) {
+				styler.paletteStyle().setValue(".palette { -fx-background-color: mediumspringgreen }");
 			}
 
 			private boolean isContentToggle = false;
@@ -64,15 +65,20 @@ public class ExampleSelectOnlyOfficeFloorEditorMain extends ExampleOfficeFloorEd
 			@Override
 			public void content(ContentStyler contentStyler) {
 				this.isContentToggle = !this.isContentToggle;
-				contentStyler.setContentBackground(this.isContentToggle
+				Background background = this.isContentToggle
 						? new Background(new BackgroundFill(Paint.valueOf("lawngreen"), null, null))
-						: null);
+						: null;
+				contentStyler.setContentBackground(background);
 				contentStyler.getGridModel().setShowGrid(!this.isContentToggle);
 			}
 
 			@Override
-			public void model(Model model) {
-				System.out.println("Selected model " + model.getClass().getName());
+			public void model(AdaptedModelStyler styler) {
+				int red = (int) (Math.random() * 255);
+				int green = (int) (Math.random() * 255);
+				int blue = (int) (Math.random() * 255);
+				styler.style().setValue("." + styler.getModel().getClass().getSimpleName()
+						+ " { -fx-background-color: rgb(" + red + "," + green + "," + blue + ") }");
 			}
 		});
 	}

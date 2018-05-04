@@ -78,7 +78,7 @@ import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorFocusFeedbackPartFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorHoverFeedbackPartFactory;
-import net.officefloor.eclipse.editor.internal.parts.OfficeFloorHoverHandlePartFactory;
+import net.officefloor.eclipse.editor.internal.parts.OfficeFloorHoverIntentHandlePartFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorSelectionFeedbackPartFactory;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorSelectionHandlePartFactory;
 import net.officefloor.eclipse.editor.internal.parts.PaletteRootPart;
@@ -383,7 +383,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	@Override
 	protected void bindHoverHandlePartFactoryAsContentViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 		adapterMapBinder.addBinding(AdapterKey.role(HoverIntentBehavior.HOVER_INTENT_HANDLE_PART_FACTORY))
-				.to(OfficeFloorHoverHandlePartFactory.class);
+				.to(OfficeFloorHoverIntentHandlePartFactory.class);
 	}
 
 	protected void bindHoverModelAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {

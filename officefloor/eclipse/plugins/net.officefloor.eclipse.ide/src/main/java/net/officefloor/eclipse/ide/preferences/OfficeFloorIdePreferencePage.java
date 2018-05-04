@@ -74,6 +74,11 @@ import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
+import net.officefloor.eclipse.editor.AdaptedModelStyler;
+import net.officefloor.eclipse.editor.ContentStyler;
+import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
+import net.officefloor.eclipse.editor.PaletteStyler;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.preview.AdaptedEditorPreview;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
@@ -81,7 +86,6 @@ import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeLabeller;
 import net.officefloor.model.Model;
-import net.officefloor.model.section.SectionModel;
 
 /**
  * {@link IWorkbenchPreferencePage}.
@@ -179,6 +183,30 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 					parentModel.setX(300);
 					parentModel.setY(10 + (100 * i));
 				}
+
+				// Provide select only for styling
+				editor.setSelectOnly(new SelectOnly() {
+
+					@Override
+					public void paletteIndicator(PaletteIndicatorStyler styler) {
+						System.out.println("palette indicator selected");
+					}
+
+					@Override
+					public void palette(PaletteStyler styler) {
+						System.out.println("palette selected");
+					}
+
+					@Override
+					public void content(ContentStyler contentStyler) {
+						System.out.println("content selected");
+					}
+
+					@Override
+					public void model(AdaptedModelStyler styler) {
+						System.out.println("model " + styler.getModel().getClass().getSimpleName() + " selected");
+					}
+				});
 
 				// Initialise the editor
 				IEditorSite editorSite = new PreferencesEditorSite(editorName, this.workbench, parent.getShell());

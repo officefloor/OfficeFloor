@@ -48,6 +48,7 @@ public class AdaptedActionHandlePart<R extends Model, O, M extends Model> extend
 		@Override
 		public void click(MouseEvent event) {
 			AdaptedActionHandlePart.this.adaptedAction.execute();
+			event.consume();
 		}
 	}
 
