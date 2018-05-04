@@ -544,6 +544,15 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				}));
 	}
 
+	/**
+	 * Obtains the {@link SelectOnly}.
+	 * 
+	 * @return {@link SelectOnly} or <code>null</code> if no {@link SelectOnly}.
+	 */
+	public SelectOnly getSelectOnly() {
+		return this.selectOnly;
+	}
+
 	/*
 	 * ====================== AdaptedBuilderContext =======================
 	 */

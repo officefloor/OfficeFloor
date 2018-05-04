@@ -51,6 +51,7 @@ import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
@@ -730,6 +731,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 			Class<?> targetModelClass = target.getModel().getClass();
 			ConnectionKey key = new ConnectionKey(sourceModelClass, targetModelClass);
 			return this.getFactory().connectionFactories.get(key);
+		}
+
+		@Override
+		public SelectOnly getSelectOnly() {
+			return this.getFactory().getContentPartFactory().getSelectOnly();
 		}
 
 		/*

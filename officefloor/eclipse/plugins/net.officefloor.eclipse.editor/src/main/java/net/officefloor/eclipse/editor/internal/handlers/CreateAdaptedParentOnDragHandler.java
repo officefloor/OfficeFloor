@@ -55,6 +55,7 @@ import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ModelAction;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AdaptedPrototype;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
 import net.officefloor.model.ConnectionModel;
@@ -379,6 +380,11 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		@Override
 		public AdaptedErrorHandler getErrorHandler() {
 			return this.parent.getErrorHandler();
+		}
+
+		@Override
+		public SelectOnly getSelectOnly() {
+			return this.parent.getSelectOnly();
 		}
 	}
 

@@ -25,7 +25,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
+import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
@@ -141,7 +141,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 				System.out.println("Toggle style sheet: " + css);
 				contentStyle.setValue(css);
 				root.setContentBackground(
-						new Background(new BackgroundFill(Paint.valueOf(toggle[0] ? "black" : "white"), null, null)));
+						new Background(new BackgroundFill(toggle[0] ? Color.BLACK : null, null, null)));
 			});
 			ctx.getOverlayParent().getChildren().add(style);
 		});

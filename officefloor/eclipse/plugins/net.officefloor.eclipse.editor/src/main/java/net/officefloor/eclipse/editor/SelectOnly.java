@@ -19,6 +19,7 @@ package net.officefloor.eclipse.editor;
 
 import javafx.beans.property.Property;
 import net.officefloor.eclipse.editor.internal.models.AdaptedAction;
+import net.officefloor.model.Model;
 
 /**
  * <p>
@@ -59,5 +60,13 @@ public interface SelectOnly {
 	 *            {@link ContentStyler}.
 	 */
 	void content(ContentStyler contentStyler);
+
+	/**
+	 * Model has been selected.
+	 * 
+	 * @param model
+	 *            Model is selected.
+	 */
+	void model(Model model);
 
 }

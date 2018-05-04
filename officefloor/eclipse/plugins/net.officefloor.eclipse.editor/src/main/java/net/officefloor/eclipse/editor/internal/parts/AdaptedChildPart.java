@@ -33,6 +33,7 @@ import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.ChildrenGroup;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.model.ConnectionModel;
@@ -234,6 +235,15 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 					// Undertake the action
 					this.getContent().action(action);
 				}));
+
+		// Provide select only
+		SelectOnly selectOnly = this.getContent().getSelectOnly();
+		if (selectOnly != null) {
+			pane.setOnMouseClicked((event) -> {
+				selectOnly.model(this.getContent().getModel());
+				event.consume();
+			});
+		}
 
 		// Ensure all children groups are configured
 		for (ChildrenGroup<M, ?> childrenGroup : this.getContent().getChildrenGroups()) {

@@ -24,6 +24,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.paint.Paint;
 import net.officefloor.eclipse.editor.ContentStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
+import net.officefloor.model.Model;
 
 /**
  * Example {@link SelectOnly} {@link ExampleOfficeFloorEditorMain}.
@@ -67,6 +68,11 @@ public class ExampleSelectOnlyOfficeFloorEditorMain extends ExampleOfficeFloorEd
 						? new Background(new BackgroundFill(Paint.valueOf("lawngreen"), null, null))
 						: null);
 				contentStyler.getGridModel().setShowGrid(!this.isContentToggle);
+			}
+
+			@Override
+			public void model(Model model) {
+				System.out.println("Selected model " + model.getClass().getName());
 			}
 		});
 	}

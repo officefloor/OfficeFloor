@@ -143,4 +143,11 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 */
 	AdaptedErrorHandler getErrorHandler();
 
+	/**
+	 * Obtains whether {@link SelectOnly}.
+	 * 
+	 * @return {@link SelectOnly} or <code>null</code> to allow functionality.
+	 */
+	SelectOnly getSelectOnly();
+
 }
