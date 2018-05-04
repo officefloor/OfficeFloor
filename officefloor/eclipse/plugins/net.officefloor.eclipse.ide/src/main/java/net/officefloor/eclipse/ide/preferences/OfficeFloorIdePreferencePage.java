@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import javax.jws.WebParam.Mode;
 
@@ -170,21 +171,17 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 			// Load the editor to configure preferences
 			try {
 
-				// Load the prototype of all models
+				// Create the root model
 				Model rootModel = editor.prototype();
-				AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = editor.getParents();
-				for (int i = 0; i < parentItems.length; i++) {
-					AbstractItem<?, ?, ?, ?, ?, ?> parentItem = parentItems[i];
 
-					// Load the prototype model
-					Model parentModel = this.loadPrototypeModel(rootModel, parentItem);
-
-					// Space out the prototypes
-					parentModel.setX(300);
-					parentModel.setY(10 + (100 * i));
-				}
+				// Initialise the editor
+				IEditorSite editorSite = new PreferencesEditorSite(editorName, this.workbench, parent.getShell());
+				IEditorInput editorInput = new PreferencesEditorInput(editorName, rootModel);
+				editor.init(editorSite, editorInput);
 
 				// Provide select only for styling
+				Map<Model, ModelPreferenceStyler> modelStylers = new HashMap<>();
+				Map<Class<? extends Model>, ModelPreferenceStyler> parentStylers = new HashMap<>();
 				editor.setSelectOnly(new SelectOnly() {
 
 					@Override
@@ -204,18 +201,36 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 					@Override
 					public void model(AdaptedModelStyler styler) {
-						System.out.println("model " + styler.getModel().getClass().getSimpleName() + " selected");
+						// Open styling for the model
+						Model model = styler.getModel();
+						ModelPreferenceStyler modelStyler = modelStylers.get(model);
+						if (modelStyler == null) {
+							modelStyler = parentStylers.get(model.getClass());
+						}
+						modelStyler.open();
 					}
 				});
-
-				// Initialise the editor
-				IEditorSite editorSite = new PreferencesEditorSite(editorName, this.workbench, parent.getShell());
-				IEditorInput editorInput = new PreferencesEditorInput(editorName, rootModel);
-				editor.init(editorSite, editorInput);
 
 				// Display the editor
 				editor.createPartControl(editors);
 				editorTab.setControl(editor.getCanvas());
+
+				// Load the prototype of all models
+				AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = editor.getParents();
+				for (int i = 0; i < parentItems.length; i++) {
+					AbstractItem<?, ?, ?, ?, ?, ?> parentItem = parentItems[i];
+
+					// Load the prototype model
+					final int index = i;
+					this.loadPrototypeModel(rootModel, parentItem, modelStylers, parent.getShell(), (model, styler) -> {
+						// Space out the prototypes
+						model.setX(300);
+						model.setY(10 + (100 * index));
+
+						// Register parents (prototypes in palette different instance)
+						parentStylers.put(model.getClass(), styler);
+					});
+				}
 
 			} catch (Throwable ex) {
 
@@ -244,19 +259,69 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 * @param item
 	 *            {@link AbstractItem} to have its prototype loaded into the
 	 *            {@link Model}.
+	 * @param modelStylers
+	 *            {@link Map} of {@link Model} to {@link ModelPreferenceStyler} to
+	 *            be populated.
+	 * @param parentShell
+	 *            Parent {@link Shell}.
+	 * @param decorator
+	 *            Decorator on the {@link Model}.
 	 * @return Prototype {@link Mode} from the {@link AbstractItem}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Model loadPrototypeModel(Model parentModel, AbstractItem item) {
+	private Model loadPrototypeModel(Model parentModel, AbstractItem item,
+			Map<Model, ModelPreferenceStyler> modelStylers, Shell parentShell,
+			BiConsumer<Model, ModelPreferenceStyler> decorator) {
 
 		// Obtain the prototype for the item
 		Model itemModel = item.prototype();
+
+		// Obtain label for the item
+		IdeLabeller labeller = item.label();
+		String itemName = (labeller == null) ? null : labeller.getLabel(itemModel);
+		if ((itemName == null) || (itemName.trim().length() == 0)) {
+			itemName = item.getClass().getSimpleName();
+		}
+		final String itemLabel = itemName;
+
+		// Obtain configuration path identifying the item
+		String configurationPath = item.getBuilder().getConfigurationPath();
+
+		// Obtain the style property to change the appearance
+		Property<String> style = item.getBuilder().style();
+
+		// Obtain the styling
+		String defaultStyle = item.style();
+		String overrideStyle = this.getPreferenceStore().getString(configurationPath);
+
+		// Create the style property
+		Property<String> rawStyle = new SimpleStringProperty(
+				(overrideStyle != null) && (overrideStyle.trim().length() > 0) ? overrideStyle : defaultStyle);
+		rawStyle.addListener((event, oldValue, newValue) -> {
+			// Translate and update the style
+			String translatedStyle = AbstractIdeEditor.translateStyle(newValue, item);
+			javafx.application.Platform.runLater(() -> {
+				// Ensure on JavaFx thread to update style
+				style.setValue(translatedStyle);
+			});
+		});
+
+		// Create and register the model styler
+		ModelPreferenceStyler styler = new ModelPreferenceStyler(parentShell, itemLabel, rawStyle);
+		modelStylers.put(itemModel, styler);
+
+		// Determine if decorate the model
+		if (decorator != null) {
+			decorator.accept(itemModel, styler);
+		}
+
+		// Connect into the model
 		item.loadToParent(parentModel, itemModel);
 
 		// Load child items
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
 			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadPrototypeModel(itemModel, child);
+				this.loadPrototypeModel(itemModel, child, modelStylers, parentShell, null);
 			}
 		}
 
@@ -310,7 +375,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		String defaultStylingRules = item.style();
 
 		// TODO load override styling from preferences
-		defaultStylingRules = item.getConfigurationPath();
+		defaultStylingRules = item.getBuilder().getConfigurationPath();
 
 		// Obtain the styling
 		Property<String> style = preview.style();
@@ -332,10 +397,11 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		}
 
 		// Provide means to change the styling
-		ItemStyler styler = new ItemStyler(parent.getShell(), itemLabel, new SimpleStringProperty(defaultStylingRules));
-		styling.addListener(SWT.MouseDown, (event) -> {
-			styler.open();
-		});
+		// ItemStyler styler = new ItemStyler(parent.getShell(), itemLabel, new
+		// SimpleStringProperty(defaultStylingRules));
+		// styling.addListener(SWT.MouseDown, (event) -> {
+		// styler.open();
+		// });
 
 		// Load the children
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
@@ -631,143 +697,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				ex.printStackTrace(new PrintWriter(error));
 				this.text.setText("Error loading structure\n\n" + error.toString());
 			}
-		}
-	}
-
-	/**
-	 * Styler of an {@link AbstractItem}.
-	 */
-	private class ItemStyler {
-
-		/**
-		 * Parent {@link Shell}.
-		 */
-		private final Shell parentShell;
-
-		/**
-		 * Label for the item.
-		 */
-		private final String itemLabel;
-
-		/**
-		 * {@link Property} to receive changes to the style. Also, provides the initial
-		 * style.
-		 */
-		private final Property<String> style;
-
-		/**
-		 * Active {@link ItemStyleDialogue} for the {@link AbstractItem}.
-		 */
-		private ItemStyleDialogue itemStyleDialogue = null;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param parentShell
-		 *            Parent {@link Shell}.
-		 * @param itemLabel
-		 *            Label for the item.
-		 * @param style
-		 *            {@link Property} to receive changes to the style. Also, provides
-		 *            the initial style.
-		 */
-		private ItemStyler(Shell parentShell, String itemLabel, Property<String> style) {
-			this.parentShell = parentShell;
-			this.itemLabel = itemLabel;
-			this.style = style;
-		}
-
-		/**
-		 * Opens the {@link ItemStyleDialogue}.
-		 */
-		private void open() {
-
-			// Lazy display dialogue for styling
-			if (this.itemStyleDialogue == null) {
-				this.itemStyleDialogue = new ItemStyleDialogue(this);
-				this.itemStyleDialogue.open();
-
-				// Handle clearing on close (so can open again)
-				this.itemStyleDialogue.getShell().addListener(SWT.Dispose, (event) -> this.itemStyleDialogue = null);
-			}
-
-			// Ensure gets focus on another open
-			this.itemStyleDialogue.getShell().setFocus();
-		}
-	}
-
-	/**
-	 * Provides means to update the styling for an {@link AbstractItem}.
-	 */
-	private class ItemStyleDialogue extends TitleAreaDialog {
-
-		/**
-		 * {@link ItemStyler} co-ordinating this.
-		 */
-		private final ItemStyler itemStyler;
-
-		/**
-		 * Displays the style.
-		 */
-		private Text text;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param parentShell
-		 *            Parent {@link Shell}.
-		 * @param itemLabel
-		 *            Label for the item.
-		 * @param style
-		 *            {@link Property} to receive changes to the style. Also, provides
-		 *            the initial style.
-		 * @param itemStyler
-		 *            {@link ItemStyler} co-ordinating this.
-		 */
-		private ItemStyleDialogue(ItemStyler itemStyler) {
-			super(itemStyler.parentShell);
-			this.itemStyler = itemStyler;
-
-			// Initialise dialogue to non-modal
-			this.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
-			this.setBlockOnOpen(false);
-
-			// No help (yet)
-			this.setHelpAvailable(false);
-		}
-
-		/*
-		 * ============== Dialog ==================
-		 */
-
-		@Override
-		protected Control createDialogArea(Composite parent) {
-			Composite area = (Composite) super.createDialogArea(parent);
-
-			// Create container for contents
-			Composite container = new Composite(area, SWT.NONE);
-			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			container.setLayout(new FillLayout(SWT.VERTICAL));
-
-			// Indicate details
-			this.setTitle(this.itemStyler.itemLabel);
-			this.setMessage("JavaFx CSS rules for the item");
-
-			// Provide means to change the styling
-			this.text = new Text(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-			String styleRules = this.itemStyler.style.getValue();
-			if ((styleRules != null) && (styleRules.trim().length() > 0)) {
-				this.text.setText(styleRules);
-			}
-
-			// Return the container
-			return container;
-		}
-
-		@Override
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-			createButton(parent, IDialogConstants.OK_ID, "Apply", true);
 		}
 	}
 

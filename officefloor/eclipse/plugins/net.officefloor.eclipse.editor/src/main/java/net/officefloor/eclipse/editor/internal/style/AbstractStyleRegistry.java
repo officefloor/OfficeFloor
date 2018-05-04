@@ -24,8 +24,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.beans.property.Property;
@@ -50,7 +50,7 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	 * <p>
 	 * Allow {@link Property} instances to be GC'ed once no longer used by editor.
 	 */
-	private static Map<String, ReadOnlyProperty<String>> urlPathToStyleContent = new WeakHashMap<>();
+	private static Map<String, ReadOnlyProperty<String>> urlPathToStyleContent = new HashMap<>();
 
 	/**
 	 * Next instance index.
@@ -88,7 +88,6 @@ public class AbstractStyleRegistry implements StyleRegistry {
 		 */
 		protected OfficeFloorUrlConnection(URL url) {
 			super(url);
-			this.setUseCaches(false);
 		}
 
 		/*
@@ -100,7 +99,7 @@ public class AbstractStyleRegistry implements StyleRegistry {
 			String urlPath = this.getURL().getPath();
 			this.stylesheetContent = urlPathToStyleContent.get(urlPath);
 			if (this.stylesheetContent == null) {
-				throw new IOException("URL " + url + " has no style sheet registered");
+				throw new IOException("URL " + this.getURL() + " has no style sheet registered");
 			}
 		}
 

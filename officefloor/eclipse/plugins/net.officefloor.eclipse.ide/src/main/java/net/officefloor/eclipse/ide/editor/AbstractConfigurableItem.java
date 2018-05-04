@@ -201,8 +201,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 				(root) -> extractor.extract(root), (model, ctx) -> this.visual(model, ctx),
 				extractor.getExtractChangeEvents());
 
-		// Capture the configuration path
-		this.configurationPath = parent.getConfigurationPath();
+		// Capture the builder
+		this.builder = parent;
 
 		// Determine if configured with label
 		IdeLabeller labeller = this.label();

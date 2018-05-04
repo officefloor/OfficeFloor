@@ -56,12 +56,12 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * {@link IdeChildrenGroup} instances for this {@link AbstractItem}.
 	 */
-	private List<IdeChildrenGroup> childrenGroups = null;
+	private List<IdeChildrenGroup> childrenGroups;
 
 	/**
-	 * Configuration path for this {@link AbstractItem}.
+	 * {@link AdaptedChildBuilder}.
 	 */
-	protected String configurationPath = null;
+	protected AdaptedChildBuilder<R, O, M, E> builder;
 
 	/**
 	 * {@link ConfigurableContext}.
@@ -800,32 +800,28 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	public final AdaptedChildBuilder<R, O, M, E> createChild(ChildrenGroupBuilder<R, O> childrenGroup) {
 
 		// Add the child
-		AdaptedChildBuilder<R, O, M, E> child = childrenGroup.addChild(this.prototype(),
-				(model, ctx) -> this.visual(model, ctx));
-
-		// Capture the configuration path
-		this.configurationPath = child.getConfigurationPath();
+		this.builder = childrenGroup.addChild(this.prototype(), (model, ctx) -> this.visual(model, ctx));
 
 		// Determine if configured with label
 		IdeLabeller labeller = this.label();
 		if (labeller != null) {
-			child.label((model) -> labeller.getLabel(model), labeller.getLabelChangeEvents());
+			this.builder.label((model) -> labeller.getLabel(model), labeller.getLabelChangeEvents());
 		}
 
 		// Further adapt the child
-		this.furtherAdapt(child);
+		this.furtherAdapt(this.builder);
 
 		// Return the child
-		return child;
+		return this.builder;
 	}
 
 	/**
-	 * Obtains the configuration path for this {@link AbstractItem}.
+	 * Obtains the {@link AdaptedChildBuilder} for the {@link AbstractItem}.
 	 * 
-	 * @return Configuration path for this {@link AbstractIdeEditor}.
+	 * @return {@link AdaptedChildBuilder} for the {@link AbstractItem}.
 	 */
-	public final String getConfigurationPath() {
-		return this.configurationPath;
+	public final AdaptedChildBuilder<R, O, M, E> getBuilder() {
+		return this.builder;
 	}
 
 	/*
