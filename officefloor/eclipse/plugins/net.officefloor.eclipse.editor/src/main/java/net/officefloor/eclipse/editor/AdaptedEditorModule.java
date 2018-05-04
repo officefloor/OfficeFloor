@@ -120,9 +120,30 @@ public class AdaptedEditorModule extends MvcFxModule {
 	private ViewersComposite viewersComposite;
 
 	/**
+	 * {@link SelectOnly}.
+	 */
+	private SelectOnly selectOnly = null;
+
+	/**
 	 * {@link OfficeFloorContentPartFactory}.
 	 */
 	private OfficeFloorContentPartFactory<?, ?> factory;
+
+	/**
+	 * Flags that the editor is select only.
+	 * 
+	 * @param selectOnly
+	 *            {@link SelectOnly}.
+	 */
+	public void setSelectOnly(SelectOnly selectOnly) {
+		if (this.factory != null) {
+			throw new IllegalStateException(
+					"May not configure " + SelectOnly.class.getSimpleName() + " after loading editor");
+		}
+
+		// Specify select only
+		this.selectOnly = selectOnly;
+	}
 
 	/*
 	 * ========== Convenience creation methods ==============
@@ -211,10 +232,10 @@ public class AdaptedEditorModule extends MvcFxModule {
 		StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
 
 		// Load the viewers and change executor
-		this.viewersComposite = new ViewersComposite(this.content, this.palette);
+		this.viewersComposite = new ViewersComposite(this.content, this.palette, this.selectOnly);
 		ChangeExecutor changeExecutor = new ChangeExecutorImpl(this.factory, this.domain);
 		this.factory.init(this.injector, this.content, this.viewersComposite.getPaletteIndicator(), this.palette,
-				this.viewersComposite, changeExecutor, styleRegistry);
+				this.viewersComposite, changeExecutor, styleRegistry, this.selectOnly);
 
 		// Configure the models
 		adaptedBuilder.build(this.factory);

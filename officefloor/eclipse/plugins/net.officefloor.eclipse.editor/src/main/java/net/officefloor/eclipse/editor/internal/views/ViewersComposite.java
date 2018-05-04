@@ -42,6 +42,7 @@ import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.editor.AdaptedEditorModule;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedParent;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.behaviors.PaletteFocusBehavior;
 
 /**
@@ -70,6 +71,11 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	 * {@link IViewer} for the palette.
 	 */
 	private final IViewer paletteViewer;
+
+	/**
+	 * {@link SelectOnly}. May be <code>null</code>.
+	 */
+	private final SelectOnly selectOnly;
 
 	/**
 	 * Composite for the view.
@@ -118,10 +124,13 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	 *            {@link IViewer} for the editor.
 	 * @param paletteViewer
 	 *            {@link IViewer} for the palette.
+	 * @param selectOnly
+	 *            {@link SelectOnly}. May be <code>null</code>.
 	 */
-	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer) {
+	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer, SelectOnly selectOnly) {
 		this.contentViewer = contentViewer;
 		this.paletteViewer = paletteViewer;
+		this.selectOnly = selectOnly;
 	}
 
 	/**
@@ -209,11 +218,14 @@ public class ViewersComposite implements AdaptedErrorHandler {
 			});
 
 			// Hide palette when a palette element is pressed
-			paletteRootNode.addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
-				if (event.getTarget() != paletteRootNode) {
-					paletteRootNode.setVisible(false);
-				}
-			});
+			if (this.selectOnly == null) {
+				// No select only, so click hides
+				paletteRootNode.addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
+					if (event.getTarget() != paletteRootNode) {
+						paletteRootNode.setVisible(false);
+					}
+				});
+			}
 		}
 		panes.add(viewersPane);
 

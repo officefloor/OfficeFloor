@@ -24,11 +24,13 @@ import java.util.function.Function;
 import javax.inject.Singleton;
 
 import org.eclipse.gef.geometry.planar.Point;
+import org.eclipse.gef.mvc.fx.models.GridModel;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
 import org.eclipse.gef.mvc.fx.parts.IFeedbackPart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
+import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import com.google.inject.Injector;
 
@@ -36,6 +38,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
@@ -51,6 +54,7 @@ import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
+import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
@@ -149,9 +153,14 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private O operations;
 
 	/**
-	 * {@link IViewer} for the content.
+	 * {@link InfiniteCanvasViewer} for the content.
 	 */
-	private IViewer contentViewer;
+	private InfiniteCanvasViewer contentViewer;
+
+	/**
+	 * Default content {@link Background}.
+	 */
+	private Background defaultContentBackground;
 
 	/**
 	 * Style rules for the content {@link IViewer} {@link Pane}.
@@ -189,13 +198,18 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private StyleRegistry styleRegistry;
 
 	/**
+	 * {@link SelectOnly}. May be <code>null</code>.
+	 */
+	private SelectOnly selectOnly = null;
+
+	/**
 	 * Initialises.
 	 * 
 	 * @param injector
 	 *            {@link Injector}.
 	 * @param content
 	 *            {@link IViewer} content.
-	 * @param paletteIndiator
+	 * @param paletteIndicator
 	 *            Palette indicator {@link Pane}.
 	 * @param palette
 	 *            {@link IViewer} palette.
@@ -204,14 +218,16 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	 * @param changeExecutor
 	 *            {@link ChangeExecutor}.
 	 */
-	public void init(Injector injector, IViewer content, Pane paletteIndiator, IViewer palette,
-			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry) {
+	public void init(Injector injector, IViewer content, Pane paletteIndicator, IViewer palette,
+			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry,
+			SelectOnly selectOnly) {
 		this.injector = injector;
-		this.contentViewer = content;
+		this.contentViewer = (InfiniteCanvasViewer) content;
 		this.paletteViewer = palette;
 		this.errorHandler = errorHandler;
 		this.changeExecutor = changeExecutor;
 		this.styleRegistry = styleRegistry;
+		this.selectOnly = selectOnly;
 
 		// Register styling for palette indicator
 		this.paletteIndicatorStyle = new SimpleStringProperty(null);
@@ -219,17 +235,23 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				this.paletteIndicatorStyle);
 		paletteIndicatorUrl.addListener((event, oldValue, newValue) -> {
 			if (oldValue != null) {
-				paletteIndiator.getStylesheets().remove(oldValue.toExternalForm());
+				paletteIndicator.getStylesheets().remove(oldValue.toExternalForm());
 			}
 			if (newValue != null) {
-				paletteIndiator.getStylesheets().add(newValue.toExternalForm());
+				paletteIndicator.getStylesheets().add(newValue.toExternalForm());
 			}
 		});
+		if (this.selectOnly != null) {
+			paletteIndicator.setOnMouseClicked((event) -> {
+				this.selectOnly.paletteIndicator(this.paletteIndicatorStyle);
+			});
+		}
 
 		// Register styling for palette
 		this.paletteStyle = new SimpleStringProperty(null);
 		ReadOnlyProperty<URL> paletteUrl = this.styleRegistry.registerStyle("_palette_", this.paletteStyle);
 		paletteUrl.addListener((event, oldValue, newValue) -> {
+			// Obtain the pane for the palette
 			if (oldValue != null) {
 				this.paletteViewer.getCanvas().getStylesheets().remove(oldValue.toExternalForm());
 			}
@@ -237,6 +259,13 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				this.paletteViewer.getCanvas().getStylesheets().add(newValue.toExternalForm());
 			}
 		});
+		if (this.selectOnly != null) {
+			this.paletteViewer.getCanvas().setOnMouseClicked((event) -> {
+				if (event.getTarget() != this.paletteViewer.getCanvas()) {
+					this.selectOnly.palette(this.paletteStyle);
+				}
+			});
+		}
 
 		// Register styling for content
 		this.contentStyle = new SimpleStringProperty(null);
@@ -249,6 +278,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 				this.contentViewer.getCanvas().getStylesheets().add(newValue.toExternalForm());
 			}
 		});
+		if (this.selectOnly != null) {
+			this.contentViewer.getCanvas().setOnMouseClicked((event) -> {
+				this.selectOnly.content(this);
+			});
+		}
 	}
 
 	/**
@@ -550,6 +584,23 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	@Override
 	public Property<String> paletteIndicatorStyle() {
 		return this.paletteIndicatorStyle;
+	}
+
+	@Override
+	public void setContentBackground(Background background) {
+
+		// Ensure capture the default background
+		if (this.defaultContentBackground == null) {
+			this.defaultContentBackground = this.contentViewer.getCanvas().getBackground();
+		}
+
+		// Specify the background
+		this.contentViewer.getCanvas().setBackground(background == null ? this.defaultContentBackground : background);
+	}
+
+	@Override
+	public GridModel getGridModel() {
+		return this.contentViewer.getAdapter(GridModel.class);
 	}
 
 	@Override

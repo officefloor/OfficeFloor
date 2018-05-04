@@ -24,6 +24,11 @@ import net.officefloor.model.Model;
 public abstract class AbstractEditorApplication extends Application {
 
 	/**
+	 * {@link SelectOnly}.
+	 */
+	private SelectOnly selectOnly = null;
+
+	/**
 	 * Builds the {@link AdaptedModel} instances.
 	 * 
 	 * @param context
@@ -50,6 +55,16 @@ public abstract class AbstractEditorApplication extends Application {
 		return new AdaptedEditorModule();
 	}
 
+	/**
+	 * Allows specifying that {@link SelectOnly}.
+	 * 
+	 * @param selectOnly
+	 *            {@link SelectOnly}.
+	 */
+	protected void setSelectOnly(SelectOnly selectOnly) {
+		this.selectOnly = selectOnly;
+	}
+
 	/*
 	 * ==================== Application ==========================
 	 */
@@ -59,6 +74,11 @@ public abstract class AbstractEditorApplication extends Application {
 
 		// Create the module
 		AdaptedEditorModule module = this.createModule();
+
+		// Configure select only (if specified)
+		if (this.selectOnly != null) {
+			module.setSelectOnly(this.selectOnly);
+		}
 
 		// Create the parent
 		Parent parent = module.createParent((context) -> this.buildModels(context));

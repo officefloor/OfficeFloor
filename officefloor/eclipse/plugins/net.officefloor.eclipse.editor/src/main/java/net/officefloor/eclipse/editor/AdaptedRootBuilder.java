@@ -28,7 +28,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedRootBuilder<R extends Model, O> {
+public interface AdaptedRootBuilder<R extends Model, O> extends ContentStyler {
 
 	/**
 	 * Adds an {@link AdaptedParent}.
@@ -81,13 +81,6 @@ public interface AdaptedRootBuilder<R extends Model, O> {
 	 *         indicator.
 	 */
 	Property<String> paletteIndicatorStyle();
-
-	/**
-	 * Obtains the {@link Property} to the style sheet rules for the content.
-	 * 
-	 * @return {@link Property} to specify the style sheet rules for the content.
-	 */
-	Property<String> contentStyle();
 
 	/**
 	 * Obtains the {@link AdaptedErrorHandler}.
