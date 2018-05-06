@@ -31,15 +31,11 @@ import javax.jws.WebParam.Mode;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.e4.ui.css.swt.theme.ITheme;
-import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
-import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -54,18 +50,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
-import org.w3c.dom.css.CSSStyleDeclaration;
-import org.w3c.dom.css.CSSValue;
-import org.w3c.dom.css.RGBColor;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
@@ -76,6 +64,7 @@ import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedModelStyler;
+import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.ContentStyler;
 import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
 import net.officefloor.eclipse.editor.PaletteStyler;
@@ -135,18 +124,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 					+ event.getNewValue());
 		});
 		this.getPreferenceStore().setValue("TEST", "different");
-
-		// Load the colours
-		Map<String, Color> colours = this.loadThemeColours(parent, false);
-
-		// Obtain the background colour
-		Color backgroundColour = colours.get("background-color");
-		if (backgroundColour == null) {
-			org.eclipse.swt.graphics.Color swtBackgroundColor = parent.getDisplay()
-					.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
-			backgroundColour = Color.color(swtBackgroundColor.getRed() / 255, swtBackgroundColor.getGreen() / 255,
-					swtBackgroundColor.getBlue() / 255, swtBackgroundColor.getAlpha() / 255);
-		}
 
 		// Sort the editors (too keep deterministic in order displayed)
 		Arrays.sort(this.editors);
@@ -222,14 +199,15 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 					// Load the prototype model
 					final int index = i;
-					this.loadPrototypeModel(rootModel, parentItem, modelStylers, parent.getShell(), (model, styler) -> {
-						// Space out the prototypes
-						model.setX(300);
-						model.setY(10 + (100 * index));
+					this.loadPrototypeModel(rootModel, parentItem, true, modelStylers, parent.getShell(),
+							(model, styler) -> {
+								// Space out the prototypes
+								model.setX(300);
+								model.setY(10 + (100 * index));
 
-						// Register parents (prototypes in palette different instance)
-						parentStylers.put(model.getClass(), styler);
-					});
+								// Register parents (prototypes in palette different instance)
+								parentStylers.put(model.getClass(), styler);
+							});
 				}
 
 			} catch (Throwable ex) {
@@ -259,6 +237,8 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 * @param item
 	 *            {@link AbstractItem} to have its prototype loaded into the
 	 *            {@link Model}.
+	 * @param isParent
+	 *            Indicate if {@link AdaptedParent}.
 	 * @param modelStylers
 	 *            {@link Map} of {@link Model} to {@link ModelPreferenceStyler} to
 	 *            be populated.
@@ -269,7 +249,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 * @return Prototype {@link Mode} from the {@link AbstractItem}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Model loadPrototypeModel(Model parentModel, AbstractItem item,
+	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent,
 			Map<Model, ModelPreferenceStyler> modelStylers, Shell parentShell,
 			BiConsumer<Model, ModelPreferenceStyler> decorator) {
 
@@ -307,7 +287,8 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		});
 
 		// Create and register the model styler
-		ModelPreferenceStyler styler = new ModelPreferenceStyler(parentShell, itemLabel, rawStyle);
+		ModelPreferenceStyler styler = new ModelPreferenceStyler(parentShell, item, itemModel, itemLabel, isParent,
+				rawStyle);
 		modelStylers.put(itemModel, styler);
 
 		// Determine if decorate the model
@@ -321,7 +302,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		// Load child items
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
 			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadPrototypeModel(itemModel, child, modelStylers, parentShell, null);
+				this.loadPrototypeModel(itemModel, child, false, modelStylers, parentShell, null);
 			}
 		}
 
@@ -407,92 +388,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
 			for (AbstractItem child : childrenGroup.getChildren()) {
 				this.loadItem(child, depth + 1, parent, backgroundColour);
-			}
-		}
-	}
-
-	/**
-	 * Loads the {@link ITheme} {@link Color} instances.
-	 * 
-	 * @param uiObject
-	 *            UI object to extract {@link Color} instances.
-	 * @param isDispose
-	 *            Indicates to dispose the {@link Widget} once complete.
-	 * @return {@link Map} of CSS property to {@link Color}.
-	 */
-	private Map<String, Color> loadThemeColours(Object uiObject, boolean isDispose) {
-
-		// Obtain the widget
-		Widget widget;
-		if (uiObject instanceof Widget) {
-			widget = (Widget) uiObject;
-		} else if (uiObject instanceof Viewer) {
-			widget = ((Viewer) uiObject).getControl();
-		} else {
-			throw new IllegalStateException("Unknown UI object type " + uiObject.getClass().getName());
-		}
-
-		// Obtain the theme details
-		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-		BundleContext bundleContext = bundle.getBundleContext();
-		ServiceReference<IThemeManager> themeManagerReference = bundleContext.getServiceReference(IThemeManager.class);
-
-		// Obtain the theme manager
-		IThemeManager themeManager = bundle.getBundleContext().getService(themeManagerReference);
-		IThemeEngine themeEngine = themeManager.getEngineForDisplay(widget.getDisplay());
-
-		// Style the widget (so has CSS loaded)
-		themeEngine.applyStyles(widget, true);
-
-		// Extract the colours from the widget
-		Map<String, Color> colours = new HashMap<>();
-		this.extractColours(widget, "", colours, themeEngine);
-
-		// Determine if dipose widget (now that have colours)
-		if (isDispose) {
-			widget.dispose();
-		}
-
-		// Return the colours
-		return colours;
-	}
-
-	/**
-	 * Extracts the colours from the {@link ITheme}.
-	 * 
-	 * @param widget
-	 *            {@link Widget} to inspect.
-	 * @param prefix
-	 *            Prefix on the return colour.
-	 * @param colours
-	 *            {@link Map} to load the {@link Color}.
-	 * @param themeEngine
-	 *            {@link IThemeEngine}.
-	 */
-	private void extractColours(Widget widget, String prefix, Map<String, Color> colours, IThemeEngine themeEngine) {
-
-		// Extract the colours from the widget
-		CSSStyleDeclaration style = themeEngine.getStyle(widget);
-		if (style != null) {
-			for (int i = 0; i < style.getLength(); i++) {
-				String name = style.item(i);
-				CSSValue value = style.getPropertyCSSValue(name);
-				if (value instanceof RGBColor) {
-					RGBColor valueColour = (RGBColor) value;
-					double red = Double.parseDouble(valueColour.getRed().getCssText()) / 255;
-					double green = Double.parseDouble(valueColour.getGreen().getCssText()) / 255;
-					double blue = Double.parseDouble(valueColour.getBlue().getCssText()) / 255;
-					Color colour = Color.color(red, green, blue);
-					colours.put(prefix + name, colour);
-				}
-			}
-		}
-
-		// Extract colours from possible children
-		if (widget instanceof Composite) {
-			Composite composite = (Composite) widget;
-			for (Control child : composite.getChildren()) {
-				this.extractColours(child, prefix + widget.getClass().getSimpleName() + ".", colours, themeEngine);
 			}
 		}
 	}
