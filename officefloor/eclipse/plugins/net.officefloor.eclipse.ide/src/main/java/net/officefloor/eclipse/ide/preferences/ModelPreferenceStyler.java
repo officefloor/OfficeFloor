@@ -182,14 +182,14 @@ public class ModelPreferenceStyler<M extends Model> {
 
 			// Create the area
 			Composite area = (Composite) super.createDialogArea(parent);
-			GridDataFactory.fillDefaults().grab(true, true).applyTo(area);
+			GridDataFactory.defaultsFor(area).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(area);
 
 			// Easy access to styler
 			ModelPreferenceStyler<M> styler = ModelPreferenceStyler.this;
 
 			// Create container for contents
 			Composite container = new Composite(area, SWT.NONE);
-			GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+			GridDataFactory.defaultsFor(container).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
 			container.setLayout(new GridLayout(2, false));
 
 			// Indicate details
@@ -198,7 +198,8 @@ public class ModelPreferenceStyler<M extends Model> {
 
 			// Provide the preview of the item
 			FXCanvasEx canvas = new FXCanvasEx(container, SWT.NONE);
-			GridDataFactory.defaultsFor(canvas).align(SWT.BEGINNING, SWT.BEGINNING).indent(INDENT, 0).applyTo(canvas);
+			GridDataFactory.defaultsFor(canvas).align(SWT.BEGINNING, SWT.BEGINNING).grab(false, false)
+					.indent(INDENT, INDENT).applyTo(canvas);
 			AdaptedEditorPreview<M> preview = new AdaptedEditorPreview<>(styler.prototype, styler.itemLabel,
 					styler.isParent, (model, context) -> styler.item.visual(model, context));
 			canvas.setScene(preview.getPreviewScene());
@@ -206,8 +207,8 @@ public class ModelPreferenceStyler<M extends Model> {
 
 			// Provide the structure of the item
 			Text structureText = new Text(container, SWT.READ_ONLY | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-			GridDataFactory.defaultsFor(structureText).align(SWT.FILL, SWT.BEGINNING).indent(INDENT, INDENT)
-					.applyTo(structureText);
+			GridDataFactory.defaultsFor(structureText).align(SWT.FILL, SWT.BEGINNING).grab(true, false)
+					.indent(INDENT, INDENT).applyTo(structureText);
 			SwtTheme.autoHideScrollbars(structureText);
 			try {
 				StringWriter structure = new StringWriter();
@@ -230,10 +231,6 @@ public class ModelPreferenceStyler<M extends Model> {
 			if ((styleRules != null) && (styleRules.trim().length() > 0)) {
 				this.text.setText(styleRules);
 			}
-
-			// Listen to resize
-			structureText.addListener(SWT.Resize, (event) -> System.out
-					.println("Resize: " + structureText.getSize().x + ", " + this.text.getSize().x));
 
 			// Return the container
 			return container;
