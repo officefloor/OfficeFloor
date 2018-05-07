@@ -20,7 +20,7 @@ package net.officefloor.eclipse.editor;
 import org.eclipse.gef.mvc.fx.models.GridModel;
 
 import javafx.beans.property.Property;
-import javafx.scene.layout.Background;
+import javafx.scene.paint.Paint;
 
 /**
  * Enables styling the content.
@@ -30,12 +30,12 @@ import javafx.scene.layout.Background;
 public interface ContentStyler {
 
 	/**
-	 * Specifies the content {@link Background}.
+	 * Specifies the content background.
 	 * 
 	 * @param background
-	 *            {@link Background}. <code>null</code> to resent to default.
+	 *            {@link Paint} background. <code>null</code> to resent to default.
 	 */
-	void setContentBackground(Background background);
+	void setContentBackground(Paint background);
 
 	/**
 	 * Obtains the {@link GridModel} to configure the content grid.

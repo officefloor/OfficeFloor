@@ -25,22 +25,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.jws.WebParam.Mode;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -57,11 +54,10 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableMap;
 import javafx.embed.swt.FXCanvas;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.paint.Color;
-import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedModelStyler;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -69,7 +65,6 @@ import net.officefloor.eclipse.editor.ContentStyler;
 import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
 import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
-import net.officefloor.eclipse.editor.preview.AdaptedEditorPreview;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
@@ -82,7 +77,6 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("restriction")
 public class OfficeFloorIdePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	/**
@@ -91,20 +85,23 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	private IWorkbench workbench;
 
 	/**
-	 * {@link AbstractIdeEditor} instances.
+	 * {@link EditorWrapper} instances.
 	 */
-	private AbstractIdeEditor<?, ?, ?>[] editors = null;
+	private EditorWrapper[] editors = null;
 
 	/**
-	 * Currently displaying {@link ItemStructureDialogue}.
+	 * {@link TabFolder} for the {@link EditorWrapper} instances.
 	 */
-	private ItemStructureDialogue itemStructureDialogue = null;
+	private TabFolder editorTabs;
 
 	/**
-	 * Instantiate.
+	 * Obtains the active {@link EditorWrapper}.
+	 * 
+	 * @return Active {@link EditorWrapper}.
 	 */
-	public OfficeFloorIdePreferencePage() {
-		this.setPreferenceStore(OfficeFloorIdePlugin.getDefault().getPreferenceStore());
+	private EditorWrapper getActiveEditor() {
+		TabItem editorTab = this.editorTabs.getSelection()[0];
+		return (EditorWrapper) editorTab.getData();
 	}
 
 	/**
@@ -115,16 +112,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 */
 	protected void loadPreferencePage(Composite parent) {
 
-		// Load preferences
-		this.getPreferenceStore().setDefault("TEST", "default");
-		String result = this.getPreferenceStore().getString("TEST");
-		System.out.println("RESULT: " + result);
-		this.getPreferenceStore().addPropertyChangeListener((event) -> {
-			System.out.println("PROPERTY CHANGE: " + event.getProperty() + " from " + event.getOldValue() + " to "
-					+ event.getNewValue());
-		});
-		this.getPreferenceStore().setValue("TEST", "different");
-
 		// Sort the editors (too keep deterministic in order displayed)
 		Arrays.sort(this.editors);
 
@@ -132,18 +119,17 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		String defaultStyleSheet = AdaptedEditorPlugin.getDefaultStyleSheet();
 
 		// Create tabs for each editor
-		TabFolder editors = new TabFolder(parent, SWT.BORDER | SWT.INHERIT_FORCE);
-		editors.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		this.editorTabs = new TabFolder(parent, SWT.BORDER | SWT.INHERIT_FORCE);
+		this.editorTabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Allow configurations for each editor
-		for (AbstractIdeEditor<?, ?, ?> editor : this.editors) {
-
-			// Indicate the editor
-			final String editorName = editor.getClass().getSimpleName();
+		for (EditorWrapper wrapper : this.editors) {
+			AbstractIdeEditor<?, ?, ?> editor = wrapper.ideEditor;
 
 			// Create tab for editor
-			TabItem editorTab = new TabItem(editors, SWT.NONE);
-			editorTab.setText(editorName);
+			TabItem editorTab = new TabItem(this.editorTabs, SWT.INHERIT_FORCE);
+			editorTab.setText(wrapper.editorName);
+			wrapper.setTabItem(editorTab);
 
 			// Load the editor to configure preferences
 			try {
@@ -152,8 +138,9 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				Model rootModel = editor.prototype();
 
 				// Initialise the editor
-				IEditorSite editorSite = new PreferencesEditorSite(editorName, this.workbench, parent.getShell());
-				IEditorInput editorInput = new PreferencesEditorInput(editorName, rootModel);
+				IEditorSite editorSite = new PreferencesEditorSite(wrapper.editorName, this.workbench,
+						parent.getShell());
+				IEditorInput editorInput = new PreferencesEditorInput(wrapper.editorName, rootModel);
 				editor.init(editorSite, editorInput);
 
 				// Provide select only for styling
@@ -189,7 +176,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				});
 
 				// Display the editor
-				editor.createPartControl(editors);
+				editor.createPartControl(this.editorTabs);
 				editorTab.setControl(editor.getCanvas());
 
 				// Load the prototype of all models
@@ -199,7 +186,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 					// Load the prototype model
 					final int index = i;
-					this.loadPrototypeModel(rootModel, parentItem, true, modelStylers, parent.getShell(),
+					this.loadPrototypeModel(rootModel, parentItem, true, modelStylers, wrapper, parent.getShell(),
 							(model, styler) -> {
 								// Space out the prototypes
 								model.setX(300);
@@ -219,13 +206,19 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				}
 
 				// Indicate failure to load editor
-				Text error = new Text(editors, SWT.MULTI);
+				Text error = new Text(this.editorTabs, SWT.MULTI);
 				StringWriter stackTrace = new StringWriter();
 				ex.printStackTrace(new PrintWriter(stackTrace));
 				error.setText("Failed to load editor for configuring.\n\n" + stackTrace.toString());
 				error.setEditable(false);
 				editorTab.setControl(error);
 			}
+		}
+
+		// Let the active editor handle being active
+		EditorWrapper activeEditor = this.getActiveEditor();
+		if (activeEditor != null) {
+			activeEditor.handleBecomingActive();
 		}
 	}
 
@@ -242,6 +235,8 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 * @param modelStylers
 	 *            {@link Map} of {@link Model} to {@link ModelPreferenceStyler} to
 	 *            be populated.
+	 * @param editorWrapper
+	 *            {@link EditorWrapper}.
 	 * @param parentShell
 	 *            Parent {@link Shell}.
 	 * @param decorator
@@ -250,7 +245,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent,
-			Map<Model, ModelPreferenceStyler> modelStylers, Shell parentShell,
+			Map<Model, ModelPreferenceStyler> modelStylers, EditorWrapper editorWrapper, Shell parentShell,
 			BiConsumer<Model, ModelPreferenceStyler> decorator) {
 
 		// Obtain the prototype for the item
@@ -264,15 +259,16 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		}
 		final String itemLabel = itemName;
 
-		// Obtain configuration path identifying the item
-		String configurationPath = item.getBuilder().getConfigurationPath();
+		// Obtain preference style identifier
+		String preferenceStyleId = item.getPreferenceStyleId();
 
 		// Obtain the style property to change the appearance
 		Property<String> style = item.getBuilder().style();
 
 		// Obtain the styling
+		IPreferenceStore preferences = this.getPreferenceStore();
 		String defaultStyle = item.style();
-		String overrideStyle = this.getPreferenceStore().getString(configurationPath);
+		String overrideStyle = preferences.getString(preferenceStyleId);
 
 		// Create the style property
 		Property<String> rawStyle = new SimpleStringProperty(
@@ -285,10 +281,19 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				style.setValue(translatedStyle);
 			});
 		});
+		preferences.addPropertyChangeListener((event) -> {
+			// Update style on preference changes (typically reseting to defaults)
+			if (preferenceStyleId.equals(event.getProperty())) {
+				String updatedStyle = preferences.getString(preferenceStyleId);
+				String newRawStyle = (updatedStyle != null) && (updatedStyle.trim().length() > 0) ? updatedStyle
+						: defaultStyle;
+				rawStyle.setValue(newRawStyle);
+			}
+		});
 
 		// Create and register the model styler
 		ModelPreferenceStyler styler = new ModelPreferenceStyler(parentShell, item, itemModel, itemLabel, isParent,
-				rawStyle);
+				rawStyle, defaultStyle, editorWrapper.preferencesToChange);
 		modelStylers.put(itemModel, styler);
 
 		// Determine if decorate the model
@@ -302,94 +307,12 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		// Load child items
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
 			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadPrototypeModel(itemModel, child, false, modelStylers, parentShell, null);
+				this.loadPrototypeModel(itemModel, child, false, modelStylers, editorWrapper, parentShell, null);
 			}
 		}
 
 		// Return the item model
 		return itemModel;
-	}
-
-	/**
-	 * Loads the item and its children.
-	 * 
-	 * @param item
-	 *            {@link AbstractItem}.
-	 * @param depth
-	 *            Depth of the {@link AbstractItem}.
-	 * @param parent
-	 *            Parent {@link Composite}.
-	 * @param backgroundColour
-	 *            Background {@link Color}.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void loadItem(AbstractItem item, int depth, Composite parent, Color backgroundColour) {
-
-		// Create row for item
-		Composite row = new Composite(parent, SWT.NONE);
-		RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-		rowLayout.marginLeft = 20 * depth;
-		row.setLayout(rowLayout);
-
-		// Obtain details for the item
-		Model prototype = item.prototype();
-		IdeLabeller labeller = item.label();
-		String itemName = (labeller == null) ? null : labeller.getLabel(prototype);
-		if ((itemName == null) || (itemName.trim().length() == 0)) {
-			itemName = item.getClass().getSimpleName();
-		}
-		final String itemLabel = itemName;
-
-		// Provide the view of the item
-		FXCanvasEx canvas = new FXCanvasEx(row, SWT.NONE);
-		boolean isParent = (depth == 1);
-		AdaptedEditorPreview preview = new AdaptedEditorPreview(prototype, itemName, isParent,
-				(model, context) -> item.visual(model, context));
-		canvas.setScene(preview.getPreviewScene());
-		canvas.getScene().setFill(backgroundColour);
-
-		// Click on canvas to display structure
-		canvas.setToolTipText("Click to display item's JavaFx structure");
-		canvas.addListener(SWT.MouseDown, (event) -> this.displayItemStructure(itemLabel, preview.getPreviewVisual()));
-
-		// Obtain the defaulting styling
-		String defaultStylingRules = item.style();
-
-		// TODO load override styling from preferences
-		defaultStylingRules = item.getBuilder().getConfigurationPath();
-
-		// Obtain the styling
-		Property<String> style = preview.style();
-
-		// Detail the styling
-		Text styling = new Text(row, SWT.MULTI);
-		styling.setEditable(false);
-		if ((defaultStylingRules == null) || (defaultStylingRules.trim().length() == 0)) {
-			// No styling
-			styling.setFont(JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT));
-			styling.setText("no styling");
-		} else {
-			// Display the styling
-			styling.setText(defaultStylingRules);
-
-			// Translate and style
-			String translatedStyle = AbstractIdeEditor.translateStyle(defaultStylingRules, item);
-			style.setValue(translatedStyle);
-		}
-
-		// Provide means to change the styling
-		// ItemStyler styler = new ItemStyler(parent.getShell(), itemLabel, new
-		// SimpleStringProperty(defaultStylingRules));
-		// styling.addListener(SWT.MouseDown, (event) -> {
-		// styler.open();
-		// });
-
-		// Load the children
-		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
-			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadItem(child, depth + 1, parent, backgroundColour);
-			}
-		}
 	}
 
 	/*
@@ -399,6 +322,80 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	@Override
 	public void init(IWorkbench workbench) {
 		this.workbench = workbench;
+	}
+
+	@Override
+	protected IPreferenceStore doGetPreferenceStore() {
+		return OfficeFloorIdePlugin.getDefault().getPreferenceStore();
+	}
+
+	@Override
+	protected void performDefaults() {
+
+		// Obtain the active editor
+		EditorWrapper editor = this.getActiveEditor();
+
+		// Ensure want to reset to defaults
+		if (!MessageDialog.openConfirm(this.getShell(), "Reset defaults",
+				"Please confirm you want to reset defaults for editor " + editor.editorName
+						+ ".\n\nThis can not be undone.")) {
+			return; // do not reset
+		}
+
+		// Restore defaults for editor
+		IPreferenceStore preferences = this.getPreferenceStore();
+		editor.visitPreferences((preferenceId) -> {
+			preferences.setToDefault(preferenceId);
+		});
+		editor.preferencesToChange.clear();
+
+		// Update as the active editor
+		editor.handleBecomingActive();
+
+		// Continue defaults
+		super.performDefaults();
+	}
+
+	@Override
+	protected void performApply() {
+
+		// Obtain the active editor
+		EditorWrapper editor = this.getActiveEditor();
+
+		// Apply preference changes for active editor
+		for (String name : editor.preferencesToChange.keySet()) {
+			String value = editor.preferencesToChange.get(name);
+			this.getPreferenceStore().setValue(name, value);
+		}
+		editor.preferencesToChange.clear();
+
+		// Update as the active editor
+		editor.handleBecomingActive();
+
+		// Continue applying
+		super.performApply();
+	}
+
+	@Override
+	public boolean okToLeave() {
+		// TODO Auto-generated method stub
+		return super.okToLeave();
+	}
+
+	@Override
+	public boolean performOk() {
+
+		// Apply all changes
+		for (EditorWrapper editor : this.editors) {
+			// Apply preference changes for active editor
+			for (String name : editor.preferencesToChange.keySet()) {
+				String value = editor.preferencesToChange.get(name);
+				this.getPreferenceStore().setValue(name, value);
+			}
+		}
+
+		// Continue applying changes
+		return super.performOk();
 	}
 
 	@Override
@@ -426,6 +423,15 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 		// Return the container
 		return container;
+	}
+
+	@Override
+	public synchronized void createControl(Composite parent) {
+		super.createControl(parent);
+
+		// Initial buttons are not visible
+		this.getApplyButton().setVisible(false);
+		this.getDefaultsButton().setVisible(false);
 	}
 
 	/**
@@ -484,7 +490,10 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 				// Load the editors
 				synchronized (OfficeFloorIdePreferencePage.this) {
-					OfficeFloorIdePreferencePage.this.editors = finalEditors;
+					OfficeFloorIdePreferencePage.this.editors = new EditorWrapper[finalEditors.length];
+					for (int i = 0; i < finalEditors.length; i++) {
+						OfficeFloorIdePreferencePage.this.editors[i] = new EditorWrapper(finalEditors[i]);
+					}
 				}
 
 				// Load the preference page
@@ -497,101 +506,153 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	}
 
 	/**
-	 * Displays the {@link AbstractItem} structure.
-	 * 
-	 * @param itemLabel
-	 *            Label for the {@link AbstractItem}.
-	 * @param itemVisual
-	 *            Visual for the {@link AbstractItem}.
+	 * Editor wrapper.
 	 */
-	private void displayItemStructure(String itemLabel, Node itemVisual) {
-
-		// Lazy display dialogue for display structure
-		if (this.itemStructureDialogue == null) {
-			this.itemStructureDialogue = new ItemStructureDialogue(this.getShell());
-			this.itemStructureDialogue.open();
-
-			// Handle clearing on close (so can open again)
-			this.itemStructureDialogue.getShell().addListener(SWT.Dispose,
-					(event) -> this.itemStructureDialogue = null);
-		}
-
-		// Display structure
-		this.itemStructureDialogue.displayStructure(itemLabel, itemVisual);
-		this.itemStructureDialogue.getShell().setFocus();
-	}
-
-	/**
-	 * Provides structure of the {@link AbstractItem}.
-	 */
-	private class ItemStructureDialogue extends TitleAreaDialog {
+	private class EditorWrapper implements Comparable<EditorWrapper> {
 
 		/**
-		 * Displays the structure.
+		 * {@link AbstractIdeEditor} being wrapped.
 		 */
-		private Text text;
+		private final AbstractIdeEditor<?, ?, ?> ideEditor;
+
+		/**
+		 * Name of the {@link AbstractIdeEditor}.
+		 */
+		private final String editorName;
+
+		/**
+		 * {@link ObservableMap} of preferences to change within the
+		 * {@link IPreferenceStore}.
+		 */
+		private final ObservableMap<String, String> preferencesToChange = FXCollections.observableHashMap();
+
+		/**
+		 * {@link TabItem} for this {@link AbstractIdeEditor}.
+		 */
+		private TabItem editorTab;
+
+		/**
+		 * Preference change listener to update the apply button.
+		 */
+		private final MapChangeListener<String, String> preferenceChangeListener = (event) -> {
+
+			// Ensure have editor
+			if ((this.editorTab == null)
+					&& (this.editorTab != OfficeFloorIdePreferencePage.this.editorTabs.getSelection()[0])) {
+				return; // not the active tab
+			}
+
+			// Indicate if changes
+			boolean isChanges = this.preferencesToChange.size() > 0;
+			OfficeFloorIdePreferencePage.this.getApplyButton().setVisible(isChanges);
+		};
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param parentShell
-		 *            Parent {@link Shell}.
+		 * @param ideEditor
+		 *            {@link AbstractIdeEditor} being wrapped.
 		 */
-		private ItemStructureDialogue(Shell parentShell) {
-			super(parentShell);
-			this.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
-			this.setBlockOnOpen(false);
+		private EditorWrapper(AbstractIdeEditor<?, ?, ?> ideEditor) {
+			this.ideEditor = ideEditor;
 
-			// No help (yet)
-			this.setHelpAvailable(false);
-		}
+			// Indicate the editor
+			this.editorName = this.ideEditor.getClass().getSimpleName();
 
-		/*
-		 * ============== Dialog ==================
-		 */
-
-		@Override
-		protected Control createDialogArea(Composite parent) {
-			Composite area = (Composite) super.createDialogArea(parent);
-			Composite container = new Composite(area, SWT.NONE);
-			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			container.setLayout(new FillLayout());
-			this.text = new Text(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-			this.text.setEditable(false);
-			return container;
-		}
-
-		@Override
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, true);
+			// Hook in listening changes
+			this.preferencesToChange.addListener(preferenceChangeListener);
 		}
 
 		/**
-		 * Displays a new {@link AbstractItem}.
+		 * Specifies the {@link TabItem} for this {@link EditorWrapper}.
 		 * 
-		 * @param itemLabel
-		 *            Label for the {@link AbstractItem}.
-		 * @param itemVisual
-		 *            {@link Parent} for the {@link AbstractItem}.
+		 * @param editorTab
+		 *            {@link TabItem} for this {@link EditorWrapper}.
 		 */
-		private void displayStructure(String itemLabel, Node itemVisual) {
+		private void setTabItem(TabItem editorTab) {
+			this.editorTab = editorTab;
 
-			// Update title of dialogue to new item
-			this.setTitle(itemLabel);
-			this.setMessage("JavaFx structure to aid styling");
+			// Associate this with the tab
+			this.editorTab.setData(this);
 
-			// Indicate structure
-			try {
-				StringWriter structure = new StringWriter();
-				StructureLogger.log(itemVisual, structure);
-				this.text.setText(structure.toString());
+			// Listen to becoming active
+			OfficeFloorIdePreferencePage.this.editorTabs.addListener(SWT.Selection, (event) -> {
+				// Determine if become active
+				if (this == OfficeFloorIdePreferencePage.this.getActiveEditor()) {
+					this.handleBecomingActive();
+				}
+			});
+		}
 
-			} catch (Exception ex) {
-				// Indicate error in obtaining structure
-				StringWriter error = new StringWriter();
-				ex.printStackTrace(new PrintWriter(error));
-				this.text.setText("Error loading structure\n\n" + error.toString());
+		/**
+		 * Handles becoming the active {@link EditorWrapper}.
+		 */
+		private void handleBecomingActive() {
+			// Update to be active editor
+			this.preferenceChangeListener.onChanged(null);
+			this.updateDefaultsButton();
+		}
+
+		/**
+		 * Indicates if only defaults configured for the {@link AbstractIdeEditor}.
+		 * 
+		 * @return <code>true<code> indicates if only defaults for the
+		 *         {@link AbstractIdeEditor}.
+		 */
+		private void updateDefaultsButton() {
+
+			// Determine if only defaults
+			boolean[] isDefaults = new boolean[] { true };
+			this.visitPreferences((preferenceId) -> {
+				if (!OfficeFloorIdePreferencePage.this.getPreferenceStore().isDefault(preferenceId)) {
+					isDefaults[0] = false;
+				}
+			});
+
+			// Update defaults button to indicate if reset to default
+			OfficeFloorIdePreferencePage.this.getDefaultsButton().setVisible(!isDefaults[0]);
+		}
+
+		/**
+		 * Visits all preferences for the {@link AbstractIdeEditor}.
+		 * 
+		 * @param visitor
+		 *            {@link Consumer} to visit each preference identifier for the
+		 *            {@link AbstractIdeEditor}.
+		 */
+		private void visitPreferences(Consumer<String> visitor) {
+			visitor.accept(this.ideEditor.getPaletteIndicatorStyleId());
+			visitor.accept(this.ideEditor.getPaletteStyleId());
+			visitor.accept(this.ideEditor.getContentStyleId());
+			for (AbstractItem<?, ?, ?, ?, ?, ?> item : this.ideEditor.getParents()) {
+				this.visitItemPreferences(item, visitor);
 			}
+		}
+
+		/**
+		 * Visits the {@link AbstractItem}.
+		 * 
+		 * @param item
+		 *            {@link AbstractItem} being visited.
+		 * @param visitor
+		 *            {@link Consumer} visitor.
+		 */
+		private void visitItemPreferences(AbstractItem item, Consumer<String> visitor) {
+			visitor.accept(item.getPreferenceStyleId());
+			for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
+				for (AbstractItem<?, ?, ?, ?, ?, ?> child : childrenGroup.getChildren()) {
+					this.visitItemPreferences(child, visitor);
+				}
+			}
+		}
+
+		/*
+		 * ============= Comparable ========================
+		 */
+
+		@Override
+		public int compareTo(EditorWrapper that) {
+			return this.editorName.compareTo(that.editorName);
 		}
 	}
 

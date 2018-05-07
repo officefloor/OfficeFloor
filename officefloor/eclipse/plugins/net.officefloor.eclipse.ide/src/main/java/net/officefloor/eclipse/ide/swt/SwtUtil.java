@@ -23,9 +23,13 @@ import java.util.Map;
 import org.eclipse.e4.ui.css.swt.theme.ITheme;
 import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
 import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -50,7 +54,7 @@ import javafx.scene.paint.Color;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings("restriction")
-public class SwtTheme {
+public class SwtUtil {
 
 	/**
 	 * Name of the background.
@@ -102,6 +106,25 @@ public class SwtTheme {
 	}
 
 	/**
+	 * Creates error decoration on the {@link Control}.
+	 * 
+	 * @param control
+	 *            {@link Control} to have error decoration.
+	 * @param style
+	 *            {@link SWT} style.
+	 * @return {@link ControlDecoration}.
+	 */
+	public static ControlDecoration errorDecoration(Control control, int style) {
+		ControlDecoration decorator = new ControlDecoration(control, style);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
+		Image img = fieldDecoration.getImage();
+		decorator.setImage(img);
+		decorator.hide();
+		return decorator;
+	}
+
+	/**
 	 * Loads the {@link ITheme} {@link Color} instances.
 	 * 
 	 * @param uiObject
@@ -123,7 +146,7 @@ public class SwtTheme {
 		}
 
 		// Obtain the theme details
-		Bundle bundle = FrameworkUtil.getBundle(SwtTheme.class);
+		Bundle bundle = FrameworkUtil.getBundle(SwtUtil.class);
 		BundleContext bundleContext = bundle.getBundleContext();
 		ServiceReference<IThemeManager> themeManagerReference = bundleContext.getServiceReference(IThemeManager.class);
 
@@ -200,6 +223,6 @@ public class SwtTheme {
 	/**
 	 * All access via static methods.
 	 */
-	private SwtTheme() {
+	private SwtUtil() {
 	}
 }

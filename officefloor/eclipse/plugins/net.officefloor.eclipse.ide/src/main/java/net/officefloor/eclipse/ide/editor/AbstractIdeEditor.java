@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
@@ -39,6 +40,8 @@ import org.eclipse.gef.mvc.fx.ui.parts.AbstractFXEditor;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -53,6 +56,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import javafx.beans.property.Property;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -72,8 +76,10 @@ import net.officefloor.eclipse.editor.ChangeAdapter;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
 import net.officefloor.eclipse.editor.SelectOnly;
+import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
+import net.officefloor.eclipse.ide.editor.AbstractItem.PreferenceListener;
 import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
@@ -92,8 +98,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor
-		implements Comparable<AbstractIdeEditor<R, RE, O>> {
+public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor {
 
 	/**
 	 * Translates the style with the details of the item being rendered.
@@ -356,6 +361,23 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	private List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents = null;
 
 	/**
+	 * {@link IPreferenceStore}. May be <code>null</code>.
+	 */
+	private IPreferenceStore preferenceStore;
+
+	/**
+	 * Registered {@link IPropertyChangeListener} instances for this
+	 * {@link AbstractIdeEditor}. Need to be unregistered on close of this
+	 * {@link AbstractIdeEditor}.
+	 */
+	private List<IPropertyChangeListener> preferenceChangeListeners = new LinkedList<>();
+
+	/**
+	 * {@link ConfigurableContext}.
+	 */
+	private ConfigurableContext<R, O> configurableContext;
+
+	/**
 	 * {@link SelectOnly}.
 	 */
 	private SelectOnly selectOnly = null;
@@ -405,8 +427,13 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				return this.operations;
 			});
 
+			// Obtain the preferences (may not be running in OSGi environment)
+			this.preferenceStore = OfficeFloorIdePlugin.getDefault() != null
+					? OfficeFloorIdePlugin.getDefault().getPreferenceStore()
+					: null;
+
 			// Create the configurable context
-			ConfigurableContext<R, O> configurableContext = new ConfigurableContext<R, O>() {
+			this.configurableContext = new ConfigurableContext<R, O>() {
 
 				@Override
 				public AdaptedRootBuilder<R, O> getRootBuilder() {
@@ -432,6 +459,38 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				public ChangeExecutor getChangeExecutor() {
 					return AbstractIdeEditor.this.rootBuilder.getChangeExecutor();
 				}
+
+				@Override
+				public String getPreference(String preferenceId) {
+					IPreferenceStore preferences = AbstractIdeEditor.this.preferenceStore;
+					return preferences == null ? null : preferences.getString(preferenceId);
+				}
+
+				@Override
+				public void addPreferenceListener(String preferenceId, PreferenceListener preferenceListener) {
+					IPreferenceStore preferences = AbstractIdeEditor.this.preferenceStore;
+					if (preferences != null) {
+
+						// Create and register listening to preference change
+						IPropertyChangeListener changeListener = (event) -> {
+							if (preferenceId.equals(event.getProperty())) {
+
+								// Obtain the value
+								Object value = event.getNewValue();
+								if (!(value instanceof String)) {
+									value = value.toString();
+								}
+
+								// Notify of value change
+								preferenceListener.preferenceValueChanged((String) value);
+							}
+						};
+						preferences.addPropertyChangeListener(changeListener);
+
+						// Register for removing on editor close
+						AbstractIdeEditor.this.preferenceChangeListeners.add(changeListener);
+					}
+				}
 			};
 
 			// Allow initialising of editor
@@ -447,7 +506,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 				AdaptedParentBuilder parentBuilder = parent.createAdaptedParent();
 
 				// Load the children
-				loadChildren(parent, parentBuilder, configurableContext);
+				loadChildren(parent, parentBuilder);
 			}
 		};
 	}
@@ -463,8 +522,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 *            {@link ConfigurableContext}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static void loadChildren(AbstractItem parent, AdaptedChildBuilder parentBuilder,
-			ConfigurableContext configurableContext) {
+	private void loadChildren(AbstractItem parent, AdaptedChildBuilder parentBuilder) {
 
 		// Load the connections
 		for (AbstractItem<?, ?, ?, ?, ?, ?>.IdeConnectionTarget<? extends ConnectionModel, ?, ?> connection : parent
@@ -472,18 +530,9 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			connection.loadConnection(parentBuilder);
 		}
 
-		// Load the style
-		String style = parent.style();
-
-		// TODO Use configuration path to pull in override configuration
-
-		if (style != null) {
-			// Translate the style ready for use
-			style = translateStyle(style, parent);
-
-			// Load the style
-			parentBuilder.style().setValue(style);
-		}
+		// Load styling
+		this.loadPreferredStyling(parent.getPreferenceStyleId(), parentBuilder.style(), parent.style(),
+				(rawStyle) -> translateStyle(rawStyle, parent));
 
 		// Create the children groups
 		for (IdeChildrenGroup ideChildrenGroup : parent.getChildrenGroups()) {
@@ -496,15 +545,54 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			for (AbstractItem child : ideChildrenGroup.getChildren()) {
 
 				// Initialise the child
-				child.init(configurableContext);
+				child.init(this.configurableContext);
 
 				// Build the child
 				AdaptedChildBuilder childBuilder = child.createChild(childrenGroup);
 
 				// Load the grand children (and connections)
-				loadChildren(child, childBuilder, configurableContext);
+				loadChildren(child, childBuilder);
 			}
 		}
+	}
+
+	/**
+	 * Loads the preferred styling.
+	 * 
+	 * @param preferenceId
+	 *            {@link IPreferenceStore} identifier for the preferred styling.
+	 * @param style
+	 *            {@link Property} to be loaded with the styling.
+	 * @param defaultStyle
+	 *            Default style. May be <code>null</code>.
+	 * @param translator
+	 *            Optional translator to translate the raw styling. May be
+	 *            <code>null</code>.
+	 */
+	private void loadPreferredStyling(String preferenceId, Property<String> style, String defaultStyle,
+			Function<String, String> translator) {
+
+		// Function to apply the style
+		Consumer<String> applyStyle = (rawStyle) -> {
+
+			// Use appropriate style
+			if ((rawStyle == null) || (rawStyle.trim().length() == 0)) {
+				rawStyle = defaultStyle;
+			}
+
+			// Translate the style ready for use
+			String translatedStyle = translator == null ? rawStyle : translator.apply(rawStyle);
+
+			// Load the style
+			style.setValue(translatedStyle);
+		};
+
+		// Obtain the override style
+		String overrideStyle = this.configurableContext.getPreference(preferenceId);
+
+		// Set initial style (and listen to changes)
+		applyStyle.accept(overrideStyle);
+		this.configurableContext.addPreferenceListener(preferenceId, (value) -> applyStyle.accept(value));
 	}
 
 	/**
@@ -518,6 +606,35 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 */
 	public AbstractIdeEditor(Class<R> rootModelType, Function<R, O> createOperations) {
 		this(new AdaptedEditorModule(), rootModelType, createOperations);
+	}
+
+	/**
+	 * Obtains the {@link IPreferenceStore} identifier for the palette indicator
+	 * styling.
+	 * 
+	 * @return {@link IPreferenceStore} identifier for the palette indicator
+	 *         styling.
+	 */
+	public String getPaletteIndicatorStyleId() {
+		return this.prototype().getClass().getSimpleName() + ".palette.indicator.style";
+	}
+
+	/**
+	 * Obtains the {@link IPreferenceStore} identifier for the palette styling.
+	 * 
+	 * @return {@link IPreferenceStore} identifier for the palette styling.
+	 */
+	public String getPaletteStyleId() {
+		return this.prototype().getClass().getSimpleName() + ".palette.style";
+	}
+
+	/**
+	 * Obtains the {@link IPreferenceStore} identifier for the content styling.
+	 * 
+	 * @return {@link IPreferenceStore} identifier for the content styling.
+	 */
+	public String getContentStyleId() {
+		return this.prototype().getClass().getSimpleName() + ".content.style";
 	}
 
 	/**
@@ -675,15 +792,6 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/*
-	 * ============= Comparable ========================
-	 */
-
-	@Override
-	public int compareTo(AbstractIdeEditor<R, RE, O> that) {
-		return this.getClass().getSimpleName().compareTo(that.getClass().getSimpleName());
-	}
-
-	/*
 	 * ============== AbstractFXEditor ==================
 	 */
 
@@ -702,7 +810,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 		// Provide possible select only
 		if (this.selectOnly != null) {
-			this.module.setSelectOnly(selectOnly);
+			this.module.setSelectOnly(this.selectOnly);
 		}
 
 		// Create the view
@@ -712,31 +820,14 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		this.getCanvas().setScene(new Scene(view));
 
 		// Configure styling of palette indicator
-		String paletteIndicatorStyle = this.paletteIndicatorStyle();
-		if (paletteIndicatorStyle != null) {
-			// TODO pull in override configuration
-
-			// Load the style
-			this.rootBuilder.paletteIndicatorStyle().setValue(paletteIndicatorStyle);
-		}
+		this.loadPreferredStyling(this.getPaletteIndicatorStyleId(), this.rootBuilder.paletteIndicatorStyle(),
+				this.paletteIndicatorStyle(), null);
 
 		// Configure styling of palette
-		String paletteStyle = this.paletteStyle();
-		if (paletteStyle != null) {
-			// TODO pull in override configuration
-
-			// Load the style
-			this.rootBuilder.paletteStyle().setValue(paletteStyle);
-		}
+		this.loadPreferredStyling(this.getPaletteStyleId(), this.rootBuilder.paletteStyle(), this.paletteStyle(), null);
 
 		// Configure styling of content
-		String contentStyle = this.contentStyle();
-		if (contentStyle != null) {
-			// TODO pull in override configuration
-
-			// Load the style
-			this.rootBuilder.contentStyle().setValue(contentStyle);
-		}
+		this.loadPreferredStyling(this.getContentStyleId(), this.rootBuilder.contentStyle(), this.contentStyle(), null);
 	}
 
 	@Override
@@ -821,6 +912,20 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			// TODO handle saving to the path
 			throw new UnsupportedOperationException("TODO implement SaveAs to " + file.toString());
 		}
+	}
+
+	@Override
+	public void dispose() {
+
+		// Remove the preference change listeners
+		if (this.preferenceStore != null) {
+			for (IPropertyChangeListener listener : this.preferenceChangeListeners) {
+				this.preferenceStore.removePropertyChangeListener(listener);
+			}
+		}
+
+		// Further clean up
+		super.dispose();
 	}
 
 }

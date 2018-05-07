@@ -634,6 +634,16 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			throw new UnsupportedOperationException(
 					MainConfigurableContext.class.getName() + " does not support " + ChangeListener.class.getName());
 		}
+
+		@Override
+		public String getPreference(String preferenceId) {
+			return null; // always use defaults
+		}
+
+		@Override
+		public void addPreferenceListener(String preferenceId, PreferenceListener preferenceListener) {
+			// never changes
+		}
 	}
 
 }

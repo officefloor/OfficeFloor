@@ -38,8 +38,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Paint;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
@@ -158,9 +158,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private InfiniteCanvasViewer contentViewer;
 
 	/**
-	 * Default content {@link Background}.
+	 * Default content background.
 	 */
-	private Background defaultContentBackground;
+	private Paint defaultContentBackground;
 
 	/**
 	 * Style rules for the content {@link IViewer} {@link Pane}.
@@ -602,15 +602,16 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	}
 
 	@Override
-	public void setContentBackground(Background background) {
+	public void setContentBackground(Paint background) {
 
 		// Ensure capture the default background
 		if (this.defaultContentBackground == null) {
-			this.defaultContentBackground = this.contentViewer.getCanvas().getBackground();
+			this.defaultContentBackground = this.contentViewer.getCanvas().getScene().getFill();
 		}
 
 		// Specify the background
-		this.contentViewer.getCanvas().setBackground(background == null ? this.defaultContentBackground : background);
+		this.contentViewer.getCanvas().getScene()
+				.setFill(background == null ? this.defaultContentBackground : background);
 	}
 
 	@Override

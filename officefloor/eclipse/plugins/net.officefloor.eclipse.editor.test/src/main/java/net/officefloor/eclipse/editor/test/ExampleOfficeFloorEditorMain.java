@@ -21,11 +21,10 @@ import javafx.application.Application;
 import javafx.beans.property.Property;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
@@ -144,7 +143,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 				contentStyle.setValue(css);
 
 				// Specify background
-				Background background = toggle[0] ? new Background(new BackgroundFill(Color.BLACK, null, null)) : null;
+				Paint background = toggle[0] ? Color.BLACK : null;
 				root.setContentBackground(background);
 
 				// Indicate whether to show grid

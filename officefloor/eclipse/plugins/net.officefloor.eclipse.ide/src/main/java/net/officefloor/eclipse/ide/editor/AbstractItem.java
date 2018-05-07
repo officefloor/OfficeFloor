@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -90,6 +91,26 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		OfficeFloorOsgiBridge getOsgiBridge() throws Exception;
 
 		/**
+		 * Obtains a preference value.
+		 * 
+		 * @param preferenceId
+		 *            Identifier for the preference value.
+		 * @return Preference value. May be <code>null</code> if no preference
+		 *         configured for identifier.
+		 */
+		String getPreference(String preferenceId);
+
+		/**
+		 * Adds a {@link PreferenceListener}.
+		 * 
+		 * @param preferenceId
+		 *            Identifier of the preference value to listen for changes.
+		 * @param preferenceListener
+		 *            {@link PreferenceListener}.
+		 */
+		void addPreferenceListener(String preferenceId, PreferenceListener preferenceListener);
+
+		/**
 		 * Obtains the parent {@link Shell}.
 		 * 
 		 * @return Parent {@link Shell}.
@@ -109,6 +130,20 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * @return {@link ChangeExecutor}.
 		 */
 		ChangeExecutor getChangeExecutor();
+	}
+
+	/**
+	 * Listener to change of a preference.
+	 */
+	public static interface PreferenceListener {
+
+		/**
+		 * Notified of preference value change.
+		 * 
+		 * @param newPreferenceValue
+		 *            New value for the preference. May be <code>null</code>.
+		 */
+		void preferenceValueChanged(String newPreferenceValue);
 	}
 
 	/**
@@ -822,6 +857,17 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 */
 	public final AdaptedChildBuilder<R, O, M, E> getBuilder() {
 		return this.builder;
+	}
+
+	/**
+	 * Obtains the {@link IPreferenceStore} identifier for styling this
+	 * {@link AbstractItem}.
+	 * 
+	 * @return {@link IPreferenceStore} identifier for styling this
+	 *         {@link AbstractItem}.
+	 */
+	public final String getPreferenceStyleId() {
+		return this.getBuilder().getConfigurationPath() + ".style";
 	}
 
 	/*

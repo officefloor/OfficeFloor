@@ -18,8 +18,6 @@
 package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.paint.Paint;
 import net.officefloor.eclipse.editor.AdaptedModelStyler;
 import net.officefloor.eclipse.editor.ContentStyler;
@@ -65,9 +63,7 @@ public class ExampleSelectOnlyOfficeFloorEditorMain extends ExampleOfficeFloorEd
 			@Override
 			public void content(ContentStyler contentStyler) {
 				this.isContentToggle = !this.isContentToggle;
-				Background background = this.isContentToggle
-						? new Background(new BackgroundFill(Paint.valueOf("lawngreen"), null, null))
-						: null;
+				Paint background = this.isContentToggle ? Paint.valueOf("lawngreen") : null;
 				contentStyler.setContentBackground(background);
 				contentStyler.getGridModel().setShowGrid(!this.isContentToggle);
 			}
