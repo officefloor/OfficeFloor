@@ -77,6 +77,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class OfficeFloorIdePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	/**
@@ -115,16 +116,19 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		// Sort the editors (too keep deterministic in order displayed)
 		Arrays.sort(this.editors);
 
-		// Obtain the default styling
-		String defaultStyleSheet = AdaptedEditorPlugin.getDefaultStyleSheet();
-
 		// Create tabs for each editor
 		this.editorTabs = new TabFolder(parent, SWT.BORDER | SWT.INHERIT_FORCE);
 		this.editorTabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		// Obtain the parent shell
+		Shell parentShell = parent.getShell();
+
 		// Allow configurations for each editor
 		for (EditorWrapper wrapper : this.editors) {
 			AbstractIdeEditor<?, ?, ?> editor = wrapper.ideEditor;
+
+			// Obtain the default styling
+			String defaultStyleSheet = AdaptedEditorPlugin.getDefaultStyleSheet();
 
 			// Create tab for editor
 			TabItem editorTab = new TabItem(this.editorTabs, SWT.INHERIT_FORCE);
@@ -148,19 +152,44 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				Map<Class<? extends Model>, ModelPreferenceStyler> parentStylers = new HashMap<>();
 				editor.setSelectOnly(new SelectOnly() {
 
+					private NodePreferenceStyler paletteIndicator = null;
+
+					private NodePreferenceStyler palette = null;
+
+					private NodePreferenceStyler content = null;
+
 					@Override
 					public void paletteIndicator(PaletteIndicatorStyler styler) {
-						System.out.println("palette indicator selected");
+						if (this.paletteIndicator == null) {
+							this.paletteIndicator = new NodePreferenceStyler("Palette Indicator",
+									"JavaFx CSS rules for the palette indicator", styler.getPaletteIndicator(),
+									editor.getPaletteIndicatorStyleId(), styler.paletteIndicatorStyle(),
+									editor.paletteIndicatorStyle(), wrapper.preferencesToChange,
+									editor.getCanvas().getScene(), parentShell);
+						}
+						this.paletteIndicator.open();
 					}
 
 					@Override
 					public void palette(PaletteStyler styler) {
-						System.out.println("palette selected");
+						if (this.palette == null) {
+							this.palette = new NodePreferenceStyler("Palette", "JavaFx CSS rules for the palette",
+									styler.getPalette(), editor.getPaletteStyleId(), styler.paletteStyle(),
+									editor.paletteStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
+									parentShell);
+						}
+						this.palette.open();
 					}
 
 					@Override
-					public void content(ContentStyler contentStyler) {
-						System.out.println("content selected");
+					public void content(ContentStyler styler) {
+						if (this.content == null) {
+							this.content = new NodePreferenceStyler("Content", "JavaFx CSS rules for the content",
+									styler.getContent(), editor.getContentStyleId(), styler.contentStyle(),
+									editor.contentStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
+									parentShell);
+						}
+						this.content.open();
 					}
 
 					@Override
@@ -216,9 +245,13 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		}
 
 		// Let the active editor handle being active
-		EditorWrapper activeEditor = this.getActiveEditor();
-		if (activeEditor != null) {
-			activeEditor.handleBecomingActive();
+		try {
+			EditorWrapper activeEditor = this.getActiveEditor();
+			if (activeEditor != null) {
+				activeEditor.handleBecomingActive();
+			}
+		} catch (Throwable ex) {
+			// Best attempt to handle becoming active
 		}
 	}
 
@@ -243,7 +276,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	 *            Decorator on the {@link Model}.
 	 * @return Prototype {@link Mode} from the {@link AbstractItem}.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent,
 			Map<Model, ModelPreferenceStyler> modelStylers, EditorWrapper editorWrapper, Shell parentShell,
 			BiConsumer<Model, ModelPreferenceStyler> decorator) {
@@ -276,10 +308,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		rawStyle.addListener((event, oldValue, newValue) -> {
 			// Translate and update the style
 			String translatedStyle = AbstractIdeEditor.translateStyle(newValue, item);
-			javafx.application.Platform.runLater(() -> {
-				// Ensure on JavaFx thread to update style
-				style.setValue(translatedStyle);
-			});
+			style.setValue(translatedStyle);
 		});
 		preferences.addPropertyChangeListener((event) -> {
 			// Update style on preference changes (typically reseting to defaults)

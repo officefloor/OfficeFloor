@@ -54,6 +54,8 @@ import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
+import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
+import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
@@ -64,8 +66,8 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 @Singleton
-public class OfficeFloorContentPartFactory<R extends Model, O>
-		implements IContentPartFactory, AdaptedRootBuilder<R, O>, AdaptedBuilderContext {
+public class OfficeFloorContentPartFactory<R extends Model, O> implements IContentPartFactory, AdaptedRootBuilder<R, O>,
+		AdaptedBuilderContext, PaletteIndicatorStyler, PaletteStyler {
 
 	/**
 	 * Indicates if contains an {@link ConnectionModel}.
@@ -173,14 +175,19 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	private IViewer paletteViewer;
 
 	/**
-	 * Style rules for the palette indicator.
-	 */
-	private Property<String> paletteIndicatorStyle;
-
-	/**
 	 * Style rules for the palette {@link IViewer} {@link Pane}.
 	 */
 	private Property<String> paletteStyle;
+
+	/**
+	 * Palette indicator.
+	 */
+	private Pane paletteIndicator;
+
+	/**
+	 * Style rules for the palette indicator.
+	 */
+	private Property<String> paletteIndicatorStyle;
 
 	/**
 	 * {@link ChangeExecutor}.
@@ -230,22 +237,21 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		this.selectOnly = selectOnly;
 
 		// Register styling for palette indicator
+		this.paletteIndicator = paletteIndicator;
 		this.paletteIndicatorStyle = new SimpleStringProperty(null);
 		ReadOnlyProperty<URL> paletteIndicatorUrl = this.styleRegistry.registerStyle("_palette_indicator_",
 				this.paletteIndicatorStyle);
 		paletteIndicatorUrl.addListener((event, oldValue, newValue) -> {
 			if (oldValue != null) {
-				paletteIndicator.getStylesheets().remove(oldValue.toExternalForm());
+				this.paletteIndicator.getStylesheets().remove(oldValue.toExternalForm());
 			}
 			if (newValue != null) {
-				paletteIndicator.getStylesheets().add(newValue.toExternalForm());
+				this.paletteIndicator.getStylesheets().add(newValue.toExternalForm());
 			}
 		});
 		if (this.selectOnly != null) {
-			paletteIndicator.setOnMouseClicked((event) -> {
-				this.errorHandler.isError(() -> {
-					this.selectOnly.paletteIndicator(() -> this.paletteIndicatorStyle);
-				});
+			this.paletteIndicator.setOnMouseClicked((event) -> {
+				this.errorHandler.isError(() -> this.selectOnly.paletteIndicator(this));
 			});
 		}
 
@@ -264,9 +270,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		if (this.selectOnly != null) {
 			this.paletteViewer.getCanvas().setOnMouseClicked((event) -> {
 				if (event.getTarget() != this.paletteViewer.getCanvas()) {
-					this.errorHandler.isError(() -> {
-						this.selectOnly.palette(() -> this.paletteStyle);
-					});
+					this.errorHandler.isError(() -> this.selectOnly.palette(this));
 				}
 			});
 		}
@@ -284,9 +288,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		});
 		if (this.selectOnly != null) {
 			this.contentViewer.getCanvas().setOnMouseClicked((event) -> {
-				this.errorHandler.isError(() -> {
-					this.selectOnly.content(this);
-				});
+				this.errorHandler.isError(() -> this.selectOnly.content(this));
 			});
 		}
 	}
@@ -592,13 +594,30 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 	}
 
 	@Override
-	public Property<String> paletteStyle() {
-		return this.paletteStyle;
+	public AdaptedErrorHandler getErrorHandler() {
+		if (this.errorHandler == null) {
+			throw new IllegalStateException(
+					AdaptedErrorHandler.class.getSimpleName() + " not initialised for " + this.getClass().getName());
+		}
+		return this.errorHandler;
 	}
 
 	@Override
-	public Property<String> paletteIndicatorStyle() {
-		return this.paletteIndicatorStyle;
+	public ChangeExecutor getChangeExecutor() {
+		if (this.changeExecutor == null) {
+			throw new IllegalStateException(
+					ChangeExecutor.class.getSimpleName() + " not initialised for " + this.getClass().getName());
+		}
+		return this.changeExecutor;
+	}
+
+	/*
+	 * ===================== ContentStyler =========================
+	 */
+
+	@Override
+	public Node getContent() {
+		return this.contentViewer.getCanvas();
 	}
 
 	@Override
@@ -624,22 +643,32 @@ public class OfficeFloorContentPartFactory<R extends Model, O>
 		return this.contentStyle;
 	}
 
+	/*
+	 * ================== PaletteIndicatorStyler ====================
+	 */
+
 	@Override
-	public AdaptedErrorHandler getErrorHandler() {
-		if (this.errorHandler == null) {
-			throw new IllegalStateException(
-					AdaptedErrorHandler.class.getSimpleName() + " not initialised for " + this.getClass().getName());
-		}
-		return this.errorHandler;
+	public Node getPaletteIndicator() {
+		return this.paletteIndicator;
 	}
 
 	@Override
-	public ChangeExecutor getChangeExecutor() {
-		if (this.changeExecutor == null) {
-			throw new IllegalStateException(
-					ChangeExecutor.class.getSimpleName() + " not initialised for " + this.getClass().getName());
-		}
-		return this.changeExecutor;
+	public Property<String> paletteIndicatorStyle() {
+		return this.paletteIndicatorStyle;
+	}
+
+	/*
+	 * ===================== PaletteStyler ==========================
+	 */
+
+	@Override
+	public Node getPalette() {
+		return this.paletteViewer.getCanvas();
+	}
+
+	@Override
+	public Property<String> paletteStyle() {
+		return this.paletteStyle;
 	}
 
 	/*

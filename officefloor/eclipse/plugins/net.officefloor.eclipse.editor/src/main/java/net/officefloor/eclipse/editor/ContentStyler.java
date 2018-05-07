@@ -20,6 +20,7 @@ package net.officefloor.eclipse.editor;
 import org.eclipse.gef.mvc.fx.models.GridModel;
 
 import javafx.beans.property.Property;
+import javafx.scene.Node;
 import javafx.scene.paint.Paint;
 
 /**
@@ -28,6 +29,16 @@ import javafx.scene.paint.Paint;
  * @author Daniel Sagenschneider
  */
 public interface ContentStyler {
+
+	/**
+	 * <p>
+	 * Obtains the content.
+	 * <p>
+	 * This allows for interrogating the structure of the content.
+	 * 
+	 * @return Content.
+	 */
+	Node getContent();
 
 	/**
 	 * Specifies the content background.
