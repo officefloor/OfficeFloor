@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -51,6 +52,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
@@ -78,6 +81,11 @@ import net.officefloor.model.Model;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class OfficeFloorIdePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(OfficeFloorIdePreferencePage.class);
 
 	/**
 	 * {@link IWorkbench}.
@@ -433,12 +441,15 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 		// Provide progress on loading editors
 		Composite progressContainer = new Composite(container, SWT.NONE);
-		progressContainer.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, false));
+		GridDataFactory.defaultsFor(progressContainer).align(SWT.FILL, SWT.TOP).grab(true, false)
+				.applyTo(progressContainer);
 		progressContainer.setLayout(new GridLayout(2, false));
+
+		// Provide progress of loading
 		Label label = new Label(progressContainer, SWT.NONE);
 		label.setText("Loading editors  ");
 		ProgressBar progress = new ProgressBar(progressContainer, SWT.NONE);
-		progress.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true, false));
+		GridDataFactory.defaultsFor(progress).align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(progress);
 
 		// Load the editors
 		IConfigurationElement[] elements = Platform.getExtensionRegistry()
@@ -482,6 +493,11 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 				} catch (CoreException ex) {
 					// Ignore failed to load editors
+					String editorName = element.getAttribute("class");
+					if (editorName == null) {
+						editorName = element.getNamespaceIdentifier();
+					}
+					LOGGER.info("Failed to load " + editorName + " : " + ex.getMessage());
 				}
 
 				// Update progress

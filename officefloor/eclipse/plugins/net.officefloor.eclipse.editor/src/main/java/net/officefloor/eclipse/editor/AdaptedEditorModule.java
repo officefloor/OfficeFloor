@@ -276,6 +276,9 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 		// Load the root model
 		this.factory.loadRootModel(rootModel);
+
+		// Completed load
+		this.viewersComposite.loadComplete();
 	}
 
 	/*

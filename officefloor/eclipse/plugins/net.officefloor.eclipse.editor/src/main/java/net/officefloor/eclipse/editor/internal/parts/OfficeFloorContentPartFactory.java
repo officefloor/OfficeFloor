@@ -350,6 +350,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	public void loadRootModel(Model rootModel) {
 
 		// Ensure correct root model
+		if (rootModel == null) {
+			throw new IllegalStateException("No root model provided");
+		}
 		if (!this.rootModelClass.equals(rootModel.getClass())) {
 			throw new IllegalStateException("Incorrect root model type " + rootModel.getClass().getName()
 					+ " as configured with " + this.rootModelClass.getName());

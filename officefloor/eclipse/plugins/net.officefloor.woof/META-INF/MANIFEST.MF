@@ -75,3 +75,4 @@ Export-Package: net.officefloor.server,
  net.officefloor.woof.teams,
  net.officefloor.woof.template,
  net.officefloor.woof.template.impl
+Require-Bundle: net.officefloor.core;bundle-version="3.0.0"

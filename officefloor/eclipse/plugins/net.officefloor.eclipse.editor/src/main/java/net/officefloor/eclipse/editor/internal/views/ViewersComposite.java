@@ -118,6 +118,11 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	private final TextArea stackTrace = new TextArea();
 
 	/**
+	 * Indicates loading the editor, so can not yet report errors.
+	 */
+	private boolean isLoading = true;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param contentViewer
@@ -319,6 +324,13 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		return this.composite;
 	}
 
+	/**
+	 * Indicates loading complete so may show errors.
+	 */
+	public void loadComplete() {
+		this.isLoading = false;
+	}
+
 	/*
 	 * ================= AdaptedErrorHandler ====================
 	 */
@@ -388,6 +400,15 @@ public class ViewersComposite implements AdaptedErrorHandler {
 			return false;
 
 		} catch (Throwable ex) {
+
+			// Determine if still loading editor (as can not show error)
+			if (this.isLoading) {
+				if (ex instanceof RuntimeException) {
+					throw (RuntimeException) ex;
+				} else {
+					throw new RuntimeException(ex);
+				}
+			}
 
 			// Show the error
 			this.showError(ex);

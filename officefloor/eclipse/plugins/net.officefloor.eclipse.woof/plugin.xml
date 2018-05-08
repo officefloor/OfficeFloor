@@ -8,7 +8,7 @@
         contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
         default="true"
         extensions="woof"
-        id="net.officefloor.editor.woof"
+        id="net.officefloor.eclipse.woof"
         name="Woof Editor"/>
 	</extension>
 <!--

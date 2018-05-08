@@ -5,6 +5,7 @@ Bundle-SymbolicName: net.officefloor.core
 Bundle-Vendor: OfficeFloor
 Bundle-Version: 3.0.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
  officecompiler-3.0.0.jar,
  officeframe-3.0.0.jar,
