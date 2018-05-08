@@ -19,6 +19,7 @@ package net.officefloor.eclipse.common.javafx.structure;
 
 import java.io.IOException;
 
+import javafx.css.CssMetaData;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
@@ -44,7 +45,7 @@ public class StructureLogger {
 	}
 
 	/**
-	 * Logs the {@link Node} and all it's descendants.
+	 * Logs the {@link Node} and all its descendants.
 	 * 
 	 * @param node
 	 *            {@link Node}.
@@ -54,7 +55,26 @@ public class StructureLogger {
 	 *             If fails to log.
 	 */
 	public static void log(Node node, Appendable output) throws IOException {
-		log(node, 0, output);
+		log(node, 0, -1, false, output);
+	}
+
+	/**
+	 * Logs the {@link Node} including its {@link CssMetaData} and all its
+	 * descendants.
+	 * 
+	 * @param node
+	 *            {@link Node}.
+	 * @param maxDepth
+	 *            Maximum depth to recurse before stopping. Note that CSS output is
+	 *            quite large, hence need to limit depth. Use <code>-1</code> for
+	 *            unlimited depth.
+	 * @param output
+	 *            {@link Appendable}.
+	 * @throws IOException
+	 *             If fails to log.
+	 */
+	public static void logCss(Node node, int maxDepth, Appendable output) throws IOException {
+		log(node, 0, maxDepth, true, output);
 	}
 
 	/**
@@ -64,28 +84,63 @@ public class StructureLogger {
 	 *            {@link Node}.
 	 * @param depth
 	 *            Depth.
+	 * @param maxDepth
+	 *            Maximum depth. <code>-1</code> for unlimited depth.
+	 * @param isIncludeCss
+	 *            Indicates to include the {@link CssMetaData}.
 	 * @param output
 	 *            {@link Appendable}.
 	 * @throws IOException
 	 *             If fails to log.
 	 */
-	private static void log(Node node, int depth, Appendable output) throws IOException {
+	private static void log(Node node, int depth, int maxDepth, boolean isIncludeCss, Appendable output)
+			throws IOException {
 
-		// Indent
-		for (int i = 0; i < (depth * 2); i++) {
-			output.append(" ");
+		// Determine if reaached max depth
+		if ((maxDepth >= 0) && (depth >= maxDepth)) {
+			indent(depth, output);
+			output.append("...");
+			output.append(System.lineSeparator());
+			return;
 		}
 
 		// Log details of the node
+		indent(depth, output);
 		output.append(node.toString());
 		output.append(System.lineSeparator());
+
+		// Include CSS meta-data
+		if (isIncludeCss) {
+			for (CssMetaData<?, ?> metaData : node.getCssMetaData()) {
+				indent(depth, output);
+				output.append("-");
+				output.append(metaData.toString());
+				output.append(System.lineSeparator());
+			}
+		}
 
 		// Load possible children
 		if (node instanceof Parent) {
 			Parent parent = (Parent) node;
 			for (Node child : parent.getChildrenUnmodifiable()) {
-				log(child, depth + 1, output);
+				log(child, depth + 1, maxDepth, isIncludeCss, output);
 			}
+		}
+	}
+
+	/**
+	 * Indents the depth.
+	 * 
+	 * @param depth
+	 *            Depth.
+	 * @param output
+	 *            {@link Appendable}.
+	 * @throws IOException
+	 *             If fails to indent.
+	 */
+	private static void indent(int depth, Appendable output) throws IOException {
+		for (int i = 0; i < (depth * 2); i++) {
+			output.append(" ");
 		}
 	}
 

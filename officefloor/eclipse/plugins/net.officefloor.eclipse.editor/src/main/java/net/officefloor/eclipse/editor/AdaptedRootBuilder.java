@@ -28,7 +28,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedRootBuilder<R extends Model, O> extends ContentStyler {
+public interface AdaptedRootBuilder<R extends Model, O> extends EditorStyler {
 
 	/**
 	 * Adds an {@link AdaptedParent}.

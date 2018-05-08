@@ -51,12 +51,12 @@ public interface SelectOnly {
 	void palette(PaletteStyler paletteStyler);
 
 	/**
-	 * Notified that the content was selected.
+	 * Notified that the editor was selected.
 	 * 
-	 * @param contentStyler
-	 *            {@link ContentStyler}.
+	 * @param editorStyler
+	 *            {@link EditorStyler}.
 	 */
-	void content(ContentStyler contentStyler);
+	void editor(EditorStyler editorStyler);
 
 	/**
 	 * Model has been selected.

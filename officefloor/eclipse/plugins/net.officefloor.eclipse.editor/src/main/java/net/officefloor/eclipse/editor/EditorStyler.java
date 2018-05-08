@@ -20,33 +20,25 @@ package net.officefloor.eclipse.editor;
 import org.eclipse.gef.mvc.fx.models.GridModel;
 
 import javafx.beans.property.Property;
-import javafx.scene.Node;
-import javafx.scene.paint.Paint;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 
 /**
  * Enables styling the content.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ContentStyler {
+public interface EditorStyler {
 
 	/**
 	 * <p>
-	 * Obtains the content.
+	 * Obtains the root {@link Parent} for the editor.
 	 * <p>
-	 * This allows for interrogating the structure of the content.
+	 * This allows for interrogating the structure of the editor.
 	 * 
-	 * @return Content.
+	 * @return Editor {@link Parent}.
 	 */
-	Node getContent();
-
-	/**
-	 * Specifies the content background.
-	 * 
-	 * @param background
-	 *            {@link Paint} background. <code>null</code> to resent to default.
-	 */
-	void setContentBackground(Paint background);
+	Parent getEditor();
 
 	/**
 	 * Obtains the {@link GridModel} to configure the content grid.
@@ -56,9 +48,10 @@ public interface ContentStyler {
 	GridModel getGridModel();
 
 	/**
-	 * Obtains the {@link Property} to the style sheet rules for the content.
+	 * Obtains the {@link Property} to the style sheet rules for the {@link Scene}.
 	 * 
-	 * @return {@link Property} to specify the style sheet rules for the content.
+	 * @return {@link Property} to specify the style sheet rules for the
+	 *         {@link Scene}.
 	 */
-	Property<String> contentStyle();
+	Property<String> editorStyle();
 }

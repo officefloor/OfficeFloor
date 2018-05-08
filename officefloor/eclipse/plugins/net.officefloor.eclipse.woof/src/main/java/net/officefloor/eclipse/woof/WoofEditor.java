@@ -17,11 +17,69 @@
  */
 package net.officefloor.eclipse.woof;
 
+import java.util.List;
+
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofChangesImpl;
+import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofRepository;
+import net.officefloor.woof.model.woof.WoofRepositoryImpl;
+
 /**
  * Web on OfficeFloor (WoOF) Editor.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditor {
+public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChanges> {
+
+	/**
+	 * Test editor.
+	 */
+	public static void main(String[] args) throws Exception {
+		WoofEditor.launch("<woof />");
+	}
+
+	/**
+	 * {@link WoofRepository}.
+	 */
+	private static final WoofRepository WOOF_REPOSITORY = new WoofRepositoryImpl(new ModelRepositoryImpl());
+
+	/**
+	 * Instantiate.
+	 */
+	public WoofEditor() {
+		super(WoofModel.class, (model) -> new WoofChangesImpl(model));
+	}
+
+	/*
+	 * ================= AbstractIdeEditor ==================
+	 */
+
+	@Override
+	public WoofModel prototype() {
+		return new WoofModel();
+	}
+
+	@Override
+	protected void loadParents(List<AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, ?, ?, ?>> parents) {
+	}
+
+	@Override
+	protected WoofModel loadRootModel(ConfigurationItem configurationItem) throws Exception {
+		WoofModel woof = new WoofModel();
+		WOOF_REPOSITORY.retrieveWoof(woof, configurationItem);
+		return woof;
+	}
+
+	@Override
+	protected void saveRootModel(WoofModel model, WritableConfigurationItem configurationItem) throws Exception {
+		WOOF_REPOSITORY.storeWoof(model, configurationItem);
+	}
 
 }

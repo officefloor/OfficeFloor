@@ -25,9 +25,9 @@ import org.eclipse.ui.IWorkbench;
 import javafx.scene.control.Label;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
-import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
@@ -105,8 +105,8 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	@Override
-	public String contentStyle() {
-		return ".content { -fx-background-color: burlywood } .connection Path { -fx-stroke: royalblue }";
+	public String editorStyle() {
+		return ".editor { -fx-background-color: burlywood } .connection Path { -fx-stroke: royalblue }";
 	}
 
 	@Override

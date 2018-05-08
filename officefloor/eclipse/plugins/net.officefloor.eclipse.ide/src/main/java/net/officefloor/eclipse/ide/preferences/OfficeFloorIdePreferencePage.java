@@ -58,10 +58,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.embed.swt.FXCanvas;
-import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedModelStyler;
 import net.officefloor.eclipse.editor.AdaptedParent;
-import net.officefloor.eclipse.editor.ContentStyler;
+import net.officefloor.eclipse.editor.EditorStyler;
 import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
 import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
@@ -127,9 +126,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		for (EditorWrapper wrapper : this.editors) {
 			AbstractIdeEditor<?, ?, ?> editor = wrapper.ideEditor;
 
-			// Obtain the default styling
-			String defaultStyleSheet = AdaptedEditorPlugin.getDefaultStyleSheet();
-
 			// Create tab for editor
 			TabItem editorTab = new TabItem(this.editorTabs, SWT.INHERIT_FORCE);
 			editorTab.setText(wrapper.editorName);
@@ -182,11 +178,11 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 					}
 
 					@Override
-					public void content(ContentStyler styler) {
+					public void editor(EditorStyler styler) {
 						if (this.content == null) {
-							this.content = new NodePreferenceStyler("Content", "JavaFx CSS rules for the content",
-									styler.getContent(), editor.getContentStyleId(), styler.contentStyle(),
-									editor.contentStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
+							this.content = new NodePreferenceStyler("Editor", "JavaFx CSS rules for the editor",
+									styler.getEditor(), editor.getEditorStyleId(), styler.editorStyle(),
+									editor.editorStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
 									parentShell);
 						}
 						this.content.open();
@@ -652,7 +648,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		private void visitPreferences(Consumer<String> visitor) {
 			visitor.accept(this.ideEditor.getPaletteIndicatorStyleId());
 			visitor.accept(this.ideEditor.getPaletteStyleId());
-			visitor.accept(this.ideEditor.getContentStyleId());
+			visitor.accept(this.ideEditor.getEditorStyleId());
 			for (AbstractItem<?, ?, ?, ?, ?, ?> item : this.ideEditor.getParents()) {
 				this.visitItemPreferences(item, visitor);
 			}

@@ -103,7 +103,7 @@ public class AdaptedEditorPlugin extends AbstractUIPlugin {
 	 * Loads the default style sheet.
 	 * 
 	 * @param scene
-	 *            {@link Scene}
+	 *            {@link Scene}.
 	 */
 	public static void loadDefaulStylesheet(Scene scene) {
 

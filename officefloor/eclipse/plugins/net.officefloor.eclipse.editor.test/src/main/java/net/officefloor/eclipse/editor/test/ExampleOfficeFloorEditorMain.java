@@ -23,8 +23,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
@@ -129,22 +127,20 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 			ctx.getOverlayParent().getChildren().add(style);
 		});
 
-		// Provide styling of content
-		Property<String> contentStyle = root.contentStyle();
+		// Provide styling of editor
+		Property<String> editorStyle = root.editorStyle();
 		root.overlay(10, 260, (ctx) -> {
-			Button style = new Button("content style");
+			Button style = new Button("editor style");
 			boolean[] toggle = new boolean[] { false };
 			style.setOnAction((event) -> {
 				toggle[0] = !toggle[0];
 
 				// Provide styling
-				String css = toggle[0] ? ".connection Path { -fx-stroke: white }" : "";
+				String css = toggle[0]
+						? ".editor { -fx-background-color: green } .connection Path { -fx-stroke: white }"
+						: "";
 				System.out.println("Toggle style sheet: " + css);
-				contentStyle.setValue(css);
-
-				// Specify background
-				Paint background = toggle[0] ? Color.BLACK : null;
-				root.setContentBackground(background);
+				editorStyle.setValue(css);
 
 				// Indicate whether to show grid
 				root.getGridModel().setShowGrid(!toggle[0]);

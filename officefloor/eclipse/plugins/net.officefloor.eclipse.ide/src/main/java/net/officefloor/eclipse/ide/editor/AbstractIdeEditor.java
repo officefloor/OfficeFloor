@@ -629,12 +629,12 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
-	 * Obtains the {@link IPreferenceStore} identifier for the content styling.
+	 * Obtains the {@link IPreferenceStore} identifier for the editor styling.
 	 * 
-	 * @return {@link IPreferenceStore} identifier for the content styling.
+	 * @return {@link IPreferenceStore} identifier for the editor styling.
 	 */
-	public String getContentStyleId() {
-		return this.prototype().getClass().getSimpleName() + ".content.style";
+	public String getEditorStyleId() {
+		return this.prototype().getClass().getSimpleName() + ".editor.style";
 	}
 
 	/**
@@ -736,11 +736,11 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
-	 * Allows overriding the content styling.
+	 * Allows overriding the editor styling.
 	 * 
-	 * @return Content styling. May be <code>null</code> for defaulting styling.
+	 * @return Editor styling. May be <code>null</code> for defaulting styling.
 	 */
-	public String contentStyle() {
+	public String editorStyle() {
 		return null;
 	}
 
@@ -819,15 +819,15 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		// Create scene and populate canvas with view
 		this.getCanvas().setScene(new Scene(view));
 
+		// Configure styling of editor
+		this.loadPreferredStyling(this.getEditorStyleId(), this.rootBuilder.editorStyle(), this.editorStyle(), null);
+
 		// Configure styling of palette indicator
 		this.loadPreferredStyling(this.getPaletteIndicatorStyleId(), this.rootBuilder.paletteIndicatorStyle(),
 				this.paletteIndicatorStyle(), null);
 
 		// Configure styling of palette
 		this.loadPreferredStyling(this.getPaletteStyleId(), this.rootBuilder.paletteStyle(), this.paletteStyle(), null);
-
-		// Configure styling of content
-		this.loadPreferredStyling(this.getContentStyleId(), this.rootBuilder.contentStyle(), this.contentStyle(), null);
 	}
 
 	@Override

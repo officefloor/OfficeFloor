@@ -234,8 +234,9 @@ public class AdaptedEditorModule extends MvcFxModule {
 		// Load the viewers and change executor
 		this.viewersComposite = new ViewersComposite(this.content, this.palette, this.selectOnly);
 		ChangeExecutor changeExecutor = new ChangeExecutorImpl(this.factory, this.domain);
-		this.factory.init(this.injector, this.content, this.viewersComposite.getPaletteIndicator(), this.palette,
-				this.viewersComposite, changeExecutor, styleRegistry, this.selectOnly);
+		this.factory.init(this.injector, this.viewersComposite.getComposite(), this.content,
+				this.viewersComposite.getPaletteIndicator(), this.palette, this.viewersComposite, changeExecutor,
+				styleRegistry, this.selectOnly);
 
 		// Configure the models
 		adaptedBuilder.build(this.factory);

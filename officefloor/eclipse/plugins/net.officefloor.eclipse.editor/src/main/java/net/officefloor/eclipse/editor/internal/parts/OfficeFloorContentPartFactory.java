@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.inject.Singleton;
@@ -30,7 +31,6 @@ import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
 import org.eclipse.gef.mvc.fx.parts.IFeedbackPart;
 import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
-import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import com.google.inject.Injector;
 
@@ -38,8 +38,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Paint;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
@@ -155,19 +155,19 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	private O operations;
 
 	/**
-	 * {@link InfiniteCanvasViewer} for the content.
+	 * Editor {@link Pane}.
 	 */
-	private InfiniteCanvasViewer contentViewer;
+	private Pane editorPane;
 
 	/**
-	 * Default content background.
+	 * {@link IViewer} for the content.
 	 */
-	private Paint defaultContentBackground;
+	private IViewer contentViewer;
 
 	/**
-	 * Style rules for the content {@link IViewer} {@link Pane}.
+	 * Style rules for the editor.
 	 */
-	private Property<String> contentStyle;
+	private Property<String> editorStyle;
 
 	/**
 	 * {@link IViewer} for the palette.
@@ -214,6 +214,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	 * 
 	 * @param injector
 	 *            {@link Injector}.
+	 * @param editorPane
+	 *            Editor {@link Pane}.
 	 * @param content
 	 *            {@link IViewer} content.
 	 * @param paletteIndicator
@@ -225,16 +227,34 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	 * @param changeExecutor
 	 *            {@link ChangeExecutor}.
 	 */
-	public void init(Injector injector, IViewer content, Pane paletteIndicator, IViewer palette,
+	public void init(Injector injector, Pane editorPane, IViewer content, Pane paletteIndicator, IViewer palette,
 			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry,
 			SelectOnly selectOnly) {
 		this.injector = injector;
-		this.contentViewer = (InfiniteCanvasViewer) content;
+		this.editorPane = editorPane;
+		this.contentViewer = content;
 		this.paletteViewer = palette;
 		this.errorHandler = errorHandler;
 		this.changeExecutor = changeExecutor;
 		this.styleRegistry = styleRegistry;
 		this.selectOnly = selectOnly;
+
+		// Register styling for editor
+		this.editorStyle = new SimpleStringProperty(null);
+		ReadOnlyProperty<URL> editorUrl = this.styleRegistry.registerStyle("_editor_", this.editorStyle);
+		editorUrl.addListener((event, oldValue, newValue) -> {
+			if (oldValue != null) {
+				this.editorPane.getStylesheets().remove(oldValue.toExternalForm());
+			}
+			if (newValue != null) {
+				this.editorPane.getScene().getStylesheets().add(newValue.toExternalForm());
+			}
+		});
+		if (this.selectOnly != null) {
+			this.contentViewer.getCanvas().setOnMouseClicked((event) -> {
+				this.errorHandler.isError(() -> this.selectOnly.editor(this));
+			});
+		}
 
 		// Register styling for palette indicator
 		this.paletteIndicator = paletteIndicator;
@@ -272,23 +292,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 				if (event.getTarget() != this.paletteViewer.getCanvas()) {
 					this.errorHandler.isError(() -> this.selectOnly.palette(this));
 				}
-			});
-		}
-
-		// Register styling for content
-		this.contentStyle = new SimpleStringProperty(null);
-		ReadOnlyProperty<URL> contentUrl = this.styleRegistry.registerStyle("_content_", this.contentStyle);
-		contentUrl.addListener((event, oldValue, newValue) -> {
-			if (oldValue != null) {
-				this.contentViewer.getCanvas().getStylesheets().remove(oldValue.toExternalForm());
-			}
-			if (newValue != null) {
-				this.contentViewer.getCanvas().getStylesheets().add(newValue.toExternalForm());
-			}
-		});
-		if (this.selectOnly != null) {
-			this.contentViewer.getCanvas().setOnMouseClicked((event) -> {
-				this.errorHandler.isError(() -> this.selectOnly.content(this));
 			});
 		}
 	}
@@ -355,7 +358,19 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		this.operations = this.createOperations.apply(this.rootModel);
 
 		// Load the default styling
-		AdaptedEditorPlugin.loadDefaulStylesheet(this.contentViewer.getCanvas().getScene());
+		AdaptedEditorPlugin.loadDefaulStylesheet(this.editorPane.getScene());
+
+		// Re-apply styles (after so overrides default style)
+		Consumer<Property<String>> reapplyStyle = (style) -> {
+			String styleRules = style.getValue();
+			if ((styleRules != null) && (styleRules.trim().length() > 0)) {
+				style.setValue(""); // clear rules
+				style.setValue(styleRules); // re-apply
+			}
+		};
+		reapplyStyle.accept(this.editorStyle);
+		reapplyStyle.accept(this.paletteIndicatorStyle);
+		reapplyStyle.accept(this.paletteStyle);
 
 		// Initialise all the models
 		this.models.values().forEach((model) -> model.init(this.injector, this.models));
@@ -612,25 +627,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	}
 
 	/*
-	 * ===================== ContentStyler =========================
+	 * ===================== EditorStyler =========================
 	 */
 
 	@Override
-	public Node getContent() {
-		return this.contentViewer.getCanvas();
-	}
-
-	@Override
-	public void setContentBackground(Paint background) {
-
-		// Ensure capture the default background
-		if (this.defaultContentBackground == null) {
-			this.defaultContentBackground = this.contentViewer.getCanvas().getScene().getFill();
-		}
-
-		// Specify the background
-		this.contentViewer.getCanvas().getScene()
-				.setFill(background == null ? this.defaultContentBackground : background);
+	public Parent getEditor() {
+		return this.editorPane;
 	}
 
 	@Override
@@ -639,8 +641,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	}
 
 	@Override
-	public Property<String> contentStyle() {
-		return this.contentStyle;
+	public Property<String> editorStyle() {
+		return this.editorStyle;
 	}
 
 	/*
