@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test WoOF Editor
+Bundle-SymbolicName: net.officefloor.eclipse.woof.test;singleton:=true
+Bundle-Version: 3.0.0
+Bundle-Vendor: OfficeFloor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.google.inject,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.core,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.gef.common,
+ org.eclipse.gef.geometry,
+ org.eclipse.gef.fx,
+ org.eclipse.gef.mvc.fx,
+ org.eclipse.gef.mvc.fx.ui,
+ net.officefloor.core;bundle-version="3.0.0",
+ net.officefloor.eclipse.editor;bundle-version="3.0.0",
+ net.officefloor.eclipse.osgi;bundle-version="3.0.0",
+ net.officefloor.eclipse.configurer;bundle-version="3.0.0",
+ net.officefloor.eclipse.ide;bundle-version="3.0.0",
+ net.officefloor.woof;bundle-version="3.0.0",
+ net.officefloor.eclipse.woof;bundle-version="3.0.0",
+ org.junit

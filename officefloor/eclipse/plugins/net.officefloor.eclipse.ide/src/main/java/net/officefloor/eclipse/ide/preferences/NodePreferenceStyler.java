@@ -131,7 +131,7 @@ public class NodePreferenceStyler {
 		this.node = node;
 		this.preferenceStyleId = preferenceStyleId;
 		this.style = style;
-		this.defaultStyle = defaultStyle;
+		this.defaultStyle = defaultStyle == null ? "" : defaultStyle;
 		this.preferencesToChange = preferencesToChange;
 		this.scene = scene;
 		this.parentShell = parentShell;

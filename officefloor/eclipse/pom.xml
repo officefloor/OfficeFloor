@@ -16,7 +16,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<modules>
-		<!-- Core eclipse functionality -->
 		<module>plugins/net.officefloor.core</module>
 		<module>plugins/net.officefloor.eclipse.target</module>
 		<module>plugins/net.officefloor.eclipse.common</module>
@@ -32,6 +31,7 @@
 		<module>plugins/net.officefloor.eclipse.launch</module>
 		<module>plugins/net.officefloor.woof</module>
 		<module>plugins/net.officefloor.eclipse.woof</module>
+		<module>plugins/net.officefloor.eclipse.woof.test</module>
 		<!-- <module>plugins/net.officefloor.core</module> <module>plugins/net.officefloor.ui</module> 
 			<module>plugins/net.officefloor.ui.tests</module> <module>features/net.officefloor.feature</module> -->
 		<!-- WoOF eclipse functionality -->

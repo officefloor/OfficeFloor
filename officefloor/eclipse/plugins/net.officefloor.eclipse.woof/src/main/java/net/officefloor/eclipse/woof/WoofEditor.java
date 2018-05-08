@@ -18,11 +18,15 @@
 package net.officefloor.eclipse.woof;
 
 import java.util.List;
+import java.util.function.Consumer;
+
+import org.eclipse.ui.IWorkbench;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofChangesImpl;
@@ -51,6 +55,21 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	private static final WoofRepository WOOF_REPOSITORY = new WoofRepositoryImpl(new ModelRepositoryImpl());
 
 	/**
+	 * Convenience method to launch {@link AbstractConfigurableItem} outside
+	 * {@link IWorkbench}.
+	 * 
+	 * @param configurableItem
+	 *            {@link AbstractConfigurableItem}.
+	 * @param prototypeDecorator
+	 *            Optional prototype decorator.
+	 */
+	public static <M extends Model, E extends Enum<E>, I> void launchConfigurer(
+			AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, M, E, I> configurableItem,
+			Consumer<M> prototypeDecorator) {
+		configurableItem.main(new WoofModel(), WoofEditor.class, prototypeDecorator);
+	}
+
+	/**
 	 * Instantiate.
 	 */
 	public WoofEditor() {
@@ -68,6 +87,7 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 
 	@Override
 	protected void loadParents(List<AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, ?, ?, ?>> parents) {
+		parents.add(new WoofHttpContinuationItem());
 	}
 
 	@Override

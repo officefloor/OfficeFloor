@@ -338,6 +338,21 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.woof</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.woof</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.woof.test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -349,11 +364,6 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.woof</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

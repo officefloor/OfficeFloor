@@ -15,10 +15,12 @@ import org.eclipse.gef.geometry.convert.fx.FX2Geometry;
 import org.eclipse.gef.geometry.convert.fx.Geometry2FX;
 import org.eclipse.gef.geometry.planar.AffineTransform;
 import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
+import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
+import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Affine;
@@ -103,9 +105,18 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	public void setContentTransform(Affine totalTransform) {
 		this.contentTransform = FX2Geometry.toAffineTransform(totalTransform);
 
-		// Update the location for the model
-		this.getContent().changeLocation((int) this.contentTransform.getTranslateX(),
-				(int) this.contentTransform.getTranslateY());
+		// Determine the location
+		Bounds boundsInScene = this.getVisual().localToScene(this.getVisual().getLayoutBounds());
+		Bounds boundsInParent = ((InfiniteCanvasViewer) getRoot().getViewer()).getCanvas().getScrolledOverlayGroup()
+				.sceneToLocal(boundsInScene);
+
+		// Obtain the location
+		int x = (int) boundsInParent.getMinX();
+		int y = (int) boundsInParent.getMinY();
+
+		// Update location on model (as already within change location operation)
+		this.getContent().getModel().setX(x);
+		this.getContent().getModel().setY(y);
 	}
 
 }
