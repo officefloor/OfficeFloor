@@ -74,4 +74,20 @@ public interface AdaptedErrorHandler {
 		void run() throws Throwable;
 	}
 
+	/**
+	 * Message only {@link Exception}.
+	 */
+	public static class MessageOnlyException extends RuntimeException {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param message
+		 *            Message.
+		 */
+		public MessageOnlyException(String message) {
+			super(message);
+		}
+	}
+
 }

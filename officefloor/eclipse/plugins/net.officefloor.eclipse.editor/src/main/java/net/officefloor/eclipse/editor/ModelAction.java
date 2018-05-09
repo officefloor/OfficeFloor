@@ -31,9 +31,9 @@ public interface ModelAction<R extends Model, O, M extends Model> {
 	 * 
 	 * @param context
 	 *            {@link ModelActionContext}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             Possible {@link Exception} in executing {@link ModelAction}.
 	 */
-	void execute(ModelActionContext<R, O, M> context) throws Exception;
+	void execute(ModelActionContext<R, O, M> context) throws Throwable;
 
 }

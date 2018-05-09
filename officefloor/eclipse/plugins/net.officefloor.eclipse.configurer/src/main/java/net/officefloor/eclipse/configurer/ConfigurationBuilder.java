@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.configurer;
 
-import java.util.function.Consumer;
-
 /**
  * Builds the configuration.
  * 
@@ -52,14 +50,48 @@ public interface ConfigurationBuilder<M> extends InputBuilder<M> {
 	void error(ErrorListener errorListener);
 
 	/**
-	 * Configures a {@link Consumer} to apply the configured model.
+	 * Applier.
+	 */
+	@FunctionalInterface
+	interface Applier<M> {
+
+		/**
+		 * Applies the configuration.
+		 * 
+		 * @param model
+		 *            Model.
+		 * @throws Throwable
+		 *             Possible failure in applying the change.
+		 */
+		void apply(M model) throws Throwable;
+	}
+
+	/**
+	 * Thrown from {@link Applier} to indicate message only error. If thrown the
+	 * stack trace will not be displayed (nor any causes).
+	 */
+	public class MessageOnlyApplyException extends Exception {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param message
+		 *            Message.
+		 */
+		public MessageOnlyApplyException(String message) {
+			super(message);
+		}
+	}
+
+	/**
+	 * Configures a {@link Applier} to apply the configured model.
 	 * 
 	 * @param label
 	 *            Label for the applying {@link Actioner}.
 	 * @param applier
-	 *            {@link Consumer} to apply the configured model.
+	 *            {@link Applier} to apply the configured model.
 	 */
-	void apply(String label, Consumer<M> applier);
+	void apply(String label, Applier<M> applier);
 
 	/**
 	 * Specifies the {@link CloseListener}.

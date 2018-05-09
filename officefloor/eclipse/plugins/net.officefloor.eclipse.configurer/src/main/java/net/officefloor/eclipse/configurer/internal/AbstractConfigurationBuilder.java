@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.swt.widgets.Shell;
@@ -136,9 +135,9 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	private String applierLabel = null;
 
 	/**
-	 * {@link Consumer} to apply the model.
+	 * {@link Applier} to apply the model.
 	 */
-	private Consumer<M> applier = null;
+	private Applier<M> applier = null;
 
 	/**
 	 * {@link CloseListener}.
@@ -411,7 +410,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	}
 
 	@Override
-	public void apply(String label, Consumer<M> applier) {
+	public void apply(String label, Applier<M> applier) {
 		if ((label == null) || (label.trim().length() == 0)) {
 			label = "Apply"; // ensure have label
 		}
@@ -966,7 +965,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		/**
 		 * Applier.
 		 */
-		private final Consumer<M> applier;
+		private final Applier<M> applier;
 
 		/**
 		 * Dirty {@link Property}.
@@ -991,13 +990,13 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 * @param label
 		 *            Label.
 		 * @param applier
-		 *            Applier.
+		 *            {@link Applier}.
 		 * @param dirtyProperty
 		 *            Dirty {@link Property}.
 		 * @param closeListner
 		 *            {@link CloseListener}.
 		 */
-		private ActionerImpl(M model, String label, Consumer<M> applier, Property<Boolean> dirtyProperty,
+		private ActionerImpl(M model, String label, Applier<M> applier, Property<Boolean> dirtyProperty,
 				CloseListener closeListner) {
 			this.model = model;
 			this.label = label;
@@ -1020,7 +1019,12 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 			// Apply the model (handle potential failure in applying)
 			try {
-				this.applier.accept(this.model);
+				this.applier.apply(this.model);
+
+			} catch (MessageOnlyApplyException ex) {
+				this.errorListener.error(null, ex.getMessage());
+				return; // failed to apply, so do not carry on to close
+
 			} catch (Throwable ex) {
 				this.errorListener.error(null, ex);
 				return; // failed to apply, so do not carry on to close

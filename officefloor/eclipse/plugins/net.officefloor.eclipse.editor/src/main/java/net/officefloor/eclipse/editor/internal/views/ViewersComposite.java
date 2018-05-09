@@ -418,20 +418,4 @@ public class ViewersComposite implements AdaptedErrorHandler {
 		}
 	}
 
-	/**
-	 * Message only {@link Exception}.
-	 */
-	private static class MessageOnlyException extends Exception {
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param message
-		 *            Message.
-		 */
-		public MessageOnlyException(String message) {
-			super(message);
-		}
-	}
-
 }

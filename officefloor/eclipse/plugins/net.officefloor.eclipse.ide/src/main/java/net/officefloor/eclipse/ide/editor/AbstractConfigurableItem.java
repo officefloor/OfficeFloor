@@ -20,7 +20,6 @@ package net.officefloor.eclipse.ide.editor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import org.eclipse.swt.SWT;
@@ -36,7 +35,9 @@ import org.eclipse.swt.widgets.TabItem;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.CloseListener;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
+import net.officefloor.eclipse.configurer.ConfigurationBuilder.MessageOnlyApplyException;
 import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.eclipse.editor.AdaptedErrorHandler.MessageOnlyException;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
@@ -46,6 +47,7 @@ import net.officefloor.eclipse.ide.ConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
 
 /**
  * Abstract {@link ConfigurableItem}.
@@ -82,7 +84,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Delete item.
 		 */
-		private Consumer<ConfigurableModelContext<O, M>> delete = null;
+		private ItemDeleter<O, M> delete = null;
 
 		/**
 		 * Convenience method to provide add and refactor configuration.
@@ -125,19 +127,20 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 * Provides delete configuration.
 		 * 
 		 * @param deletion
-		 *            {@link Consumer} to delete item.
+		 *            {@link ItemDeleter} to delete item.
 		 * @return <code>this</code>.
 		 */
-		public IdeConfigurer delete(Consumer<ConfigurableModelContext<O, M>> deletion) {
+		public IdeConfigurer delete(ItemDeleter<O, M> deletion) {
 			this.delete = deletion;
 			return this;
 		}
 	}
 
 	/**
-	 * {@link Function} inteerface for configuring an item.
+	 * Configures an item.
 	 */
-	public interface ItemConfigurer<O, M, I> {
+	@FunctionalInterface
+	public static interface ItemConfigurer<O, M, I> {
 
 		/**
 		 * Builds the item configuration.
@@ -148,6 +151,23 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 *            {@link ConfigurableModelContext}.
 		 */
 		void configure(ConfigurationBuilder<I> builder, ConfigurableModelContext<O, M> context);
+	}
+
+	/**
+	 * Deletes an item.
+	 */
+	@FunctionalInterface
+	public static interface ItemDeleter<O, M> {
+
+		/**
+		 * Undertakes deleting the item.
+		 * 
+		 * @param deletion
+		 *            {@link ConfigurableModelContext}.
+		 * @throws Throwable
+		 *             If failure in deleting item.
+		 */
+		void delete(ConfigurableModelContext<O, M> deletion) throws Throwable;
 	}
 
 	/**
@@ -174,8 +194,10 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 * 
 		 * @param change
 		 *            {@link Change}.
+		 * @throws Throwable
+		 *             If unable to execute the {@link Change}.
 		 */
-		void execute(Change<M> change);
+		void execute(Change<M> change) throws Throwable;
 	}
 
 	/**
@@ -252,13 +274,13 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 						}
 
 						@Override
-						public void execute(Change<M> change) {
+						public void execute(Change<M> change) throws Throwable {
 
 							// Position the added model
 							ctx.position(change.getTarget());
 
 							// Execute the change
-							executor.execute(change);
+							executeChange(executor, change);
 						}
 					};
 
@@ -326,8 +348,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 						}
 
 						@Override
-						public void execute(Change<M> change) {
-							executor.execute(change);
+						public void execute(Change<M> change) throws Throwable {
+							executeChange(executor, change);
 						}
 					};
 
@@ -363,7 +385,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 
 		// Determine if can delete
 		if ((ideConfigurer != null) && (ideConfigurer.delete != null)) {
-			parent.action((ctx) -> ideConfigurer.delete.accept((new ConfigurableModelContext<O, M>() {
+			parent.action((ctx) -> ideConfigurer.delete.delete((new ConfigurableModelContext<O, M>() {
 
 				@Override
 				public O getOperations() {
@@ -376,14 +398,66 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 				}
 
 				@Override
-				public void execute(Change<M> change) {
-					ctx.getChangeExecutor().execute(change);
+				public void execute(Change<M> change) throws Throwable {
+					try {
+						executeChange(ctx.getChangeExecutor(), change);
+					} catch (MessageOnlyApplyException ex) {
+						// Translate to message only exception
+						throw new MessageOnlyException(ex.getMessage());
+					}
 				}
 			})), DefaultImages.DELETE);
 		}
 
 		// Return the parent
 		return parent;
+	}
+
+	/**
+	 * Executes the {@link Change}.
+	 * 
+	 * @param changeExecutor
+	 *            {@link ChangeExecutor}.
+	 * @param change
+	 *            {@link Change} to be executed.
+	 * @throws MessageOnlyApplyException
+	 *             If not able to execute the {@link Change}.
+	 * @throws Throwable
+	 *             If failure in {@link Conflict}.
+	 */
+	private static void executeChange(ChangeExecutor changeExecutor, Change<?> change)
+			throws MessageOnlyApplyException, Throwable {
+
+		// Determine if able to apply
+		if (!change.canApply()) {
+
+			// Unable to apply, so throw appropriate exception
+			StringBuilder message = new StringBuilder();
+			boolean isFirst = true;
+			for (Conflict conflict : change.getConflicts()) {
+
+				// Determine if cause
+				Throwable cause = conflict.getConflictCause();
+				if (cause != null) {
+					throw cause;
+				}
+
+				// Construct the message
+				if (!isFirst) {
+					message.append(System.lineSeparator());
+				}
+				isFirst = false;
+				String description = conflict.getConflictDescription();
+				if ((description == null) || (description.trim().length() == 0)) {
+					description = "Conflict in making change";
+				}
+				message.append(description);
+			}
+			throw new MessageOnlyApplyException(message.toString());
+		}
+
+		// Apply the change
+		changeExecutor.execute(change);
 	}
 
 	/*
@@ -537,7 +611,11 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			Button deleteButton = new Button(deleteGroup, SWT.NONE);
 			deleteButton.setText("Delete");
 			deleteButton.addListener(SWT.Selection, (event) -> {
-				ideConfigurer.delete.accept(deleteContext);
+				try {
+					ideConfigurer.delete.delete(deleteContext);
+				} catch (Throwable ex) {
+					System.out.println("Failed to delete " + ex.getMessage());
+				}
 			});
 		}
 	}
@@ -613,8 +691,16 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		@Override
 		public void execute(Change<?> change) {
 			// Log running the change
-			System.out.println("Executing change '" + change.getChangeDescription() + "' for target "
+			StringBuilder message = new StringBuilder();
+			message.append("Executing change '" + change.getChangeDescription() + "' for target "
 					+ change.getTarget().getClass().getName());
+			if (!change.canApply()) {
+				message.append(" (can not apply)");
+				for (Conflict conflict : change.getConflicts()) {
+					message.append(System.lineSeparator() + "\t" + conflict.getConflictDescription());
+				}
+			}
+			System.out.println(message.toString());
 		}
 
 		@Override
