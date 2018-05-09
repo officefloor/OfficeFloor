@@ -29,11 +29,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.gef.mvc.fx.domain.IDomain;
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
+import net.officefloor.eclipse.editor.AdaptedErrorHandler.MessageOnlyException;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler.UncertainOperation;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChangeListener;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
 
 /**
  * {@link Change} executor.
@@ -76,8 +78,39 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 
 	@Override
 	public void execute(Change<?> change) {
-		this.contentPartFactory.getErrorHandler()
-				.isError(() -> this.domain.execute(new ChangeTransactionalOperation(change), null));
+		this.contentPartFactory.getErrorHandler().isError(() -> {
+			
+			// Determine if able to apply
+			if (!change.canApply()) {
+
+				// Unable to apply, so throw appropriate exception
+				StringBuilder message = new StringBuilder();
+				boolean isFirst = true;
+				for (Conflict conflict : change.getConflicts()) {
+
+					// Determine if cause
+					Throwable cause = conflict.getConflictCause();
+					if (cause != null) {
+						throw cause;
+					}
+
+					// Construct the message
+					if (!isFirst) {
+						message.append(System.lineSeparator());
+					}
+					isFirst = false;
+					String description = conflict.getConflictDescription();
+					if ((description == null) || (description.trim().length() == 0)) {
+						description = "Conflict in making change";
+					}
+					message.append(description);
+				}
+				throw new MessageOnlyException(message.toString());
+			}
+			
+			// Register executing the change (executes the change)
+			this.domain.execute(new ChangeTransactionalOperation(change), null);
+		});
 	}
 
 	@Override
