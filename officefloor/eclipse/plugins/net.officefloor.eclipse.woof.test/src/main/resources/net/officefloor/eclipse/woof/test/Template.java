@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2017 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.template.build;
+package net.officefloor.eclipse.woof.test;
 
-import net.officefloor.web.build.WebArchitect;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
- * Architect to create web templates.
+ * Example template logic.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebTemplateArchitect extends WebTemplateFactory {
+public class Template {
 
-	/**
-	 * Informs the {@link WebArchitect} of the templates. This is to be invoked once
-	 * all templates are configured.
-	 */
-	void informWebArchitect();
+	@FlowInterface
+	public static interface Flows {
 
+		void flow();
+	}
+
+	public void getTemplate(Flows flows) {
+	}
 }

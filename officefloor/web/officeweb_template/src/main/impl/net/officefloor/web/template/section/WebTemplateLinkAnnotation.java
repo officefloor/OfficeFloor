@@ -53,7 +53,7 @@ public class WebTemplateLinkAnnotation {
 	 * @param httpMethodNames
 	 *            {@link HttpMethod} names supported by the link.
 	 */
-	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName, String[] httpMethodNames) {
+	public WebTemplateLinkAnnotation(boolean isLinkSecure, String linkName, String... httpMethodNames) {
 		this.isLinkSecure = isLinkSecure;
 		this.linkName = linkName;
 		this.httpMethodNames = httpMethodNames;

@@ -17,20 +17,13 @@
  */
 package net.officefloor.web.template.build;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
-import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
@@ -48,7 +41,6 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
 import net.officefloor.web.template.section.WebTemplateRedirectAnnotation;
@@ -59,7 +51,7 @@ import net.officefloor.web.template.section.WebTemplateSectionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
+public class WebTemplateArchitectEmployer extends AbstractWebTemplateFactory implements WebTemplateArchitect {
 
 	/**
 	 * Employs the {@link WebTemplateArchitect}.
@@ -75,6 +67,17 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 	public static WebTemplateArchitect employWebTemplater(WebArchitect webArchitect, OfficeArchitect officeArchitect,
 			OfficeSourceContext officeSourceContext) {
 		return new WebTemplateArchitectEmployer(webArchitect, officeArchitect, officeSourceContext);
+	}
+
+	/**
+	 * Employs the {@link WebTemplateLoader}.
+	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 * @return {@link WebTemplateLoader}.
+	 */
+	public static WebTemplateLoader employWebTemplateLoader(OfficeFloorCompiler compiler) {
+		return new WebTemplateLoaderImpl(compiler);
 	}
 
 	/**
@@ -115,62 +118,31 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 	}
 
 	/*
-	 * ====================== WebTemplater ===========================
+	 * ======================= WebTemplateFactory ============================
 	 */
 
 	@Override
-	public WebTemplate addTemplate(boolean isSecure, String applicationPath, Reader templateContent) {
-
-		// Read in the template
-		StringWriter content = new StringWriter();
-		try {
-			for (int character = templateContent.read(); character != -1; character = templateContent.read()) {
-				content.write(character);
-			}
-		} catch (IOException ex) {
-			throw this.officeArchitect.addIssue("Failed to read in template content for " + applicationPath, ex);
-		}
-
-		// Add the template
-		return this.addTemplate(isSecure, applicationPath, (properties) -> properties
-				.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT).setValue(content.toString()));
+	protected PropertyList createPropertyList() {
+		return this.sourceContext.createPropertyList();
 	}
 
 	@Override
-	public WebTemplate addTemplate(boolean isSecure, String applicationPath, String locationOfTemplate) {
-
-		// Add the template
-		return this.addTemplate(isSecure, applicationPath, (properties) -> properties
-				.addProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION).setValue(locationOfTemplate));
+	protected SourceIssues getSourceIssues() {
+		return this.officeArchitect;
 	}
 
-	/**
-	 * Adds the {@link WebTemplate}.
-	 * 
-	 * @param isSecure
-	 *            Indicates if requires secure {@link ServerHttpConnection} to
-	 *            render the {@link WebTemplate}.
-	 * @param applicationPath
-	 *            Application path.
-	 * @param configurer
-	 *            {@link Consumer} to configure the {@link PropertyList}.
-	 * @return {@link WebTemplate}.
-	 */
-	private WebTemplate addTemplate(boolean isSecure, String applicationPath, Consumer<PropertyList> configurer) {
+	@Override
+	protected boolean isPathParameters(String applicationPath) {
+		return this.webArchitect.isPathParameters(applicationPath);
+	}
+
+	@Override
+	protected WebTemplate addTemplate(boolean isSecure, String applicationPath, PropertyList properties) {
 
 		// Add the section for the template
 		WebTemplateSectionSource webTemplateSectionSource = new WebTemplateSectionSource();
 		OfficeSection templateSection = this.officeArchitect.addOfficeSection(applicationPath, webTemplateSectionSource,
 				applicationPath);
-
-		// Determine if dynamic path
-		boolean isPathParameters = this.webArchitect.isPathParameters(applicationPath);
-
-		// Configure the template properties
-		PropertyList properties = this.sourceContext.createPropertyList();
-		properties.addProperty(WebTemplateSectionSource.PROPERTY_IS_PATH_PARAMETERS)
-				.setValue(String.valueOf(isPathParameters));
-		configurer.accept(properties);
 
 		// Add the template
 		WebTemplateImpl template = new WebTemplateImpl(isSecure, applicationPath, webTemplateSectionSource,
@@ -180,6 +152,10 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 		// Return the template
 		return template;
 	}
+
+	/*
+	 * ====================== WebTemplateArchitect ===========================
+	 */
 
 	@Override
 	public void informWebArchitect() {
@@ -191,17 +167,7 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 	/**
 	 * {@link WebTemplate} implementation.
 	 */
-	private class WebTemplateImpl implements WebTemplate {
-
-		/**
-		 * Indicates if the {@link WebTemplate} is secure.
-		 */
-		private final boolean isSecure;
-
-		/**
-		 * Application path for the {@link WebTemplate}.
-		 */
-		private final String applicationPath;
+	private class WebTemplateImpl extends AbstractWebTemplate {
 
 		/**
 		 * {@link WebTemplateSectionSource}.
@@ -214,66 +180,17 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 		private final OfficeSection section;
 
 		/**
-		 * {@link PropertyList}.
-		 */
-		private final PropertyList properties;
-
-		/**
 		 * {@link OfficeSectionInput} to render the {@link WebTemplate}.
 		 */
 		private final OfficeSectionInput sectionInput;
 
 		/**
-		 * {@link HttpUrlContinuation} to redirect to render the
-		 * {@link WebTemplate}.
+		 * {@link HttpUrlContinuation} to redirect to render the {@link WebTemplate}.
 		 */
 		private final HttpUrlContinuation templateInput;
 
 		/**
-		 * Name of the logic {@link Class} for the {@link WebTemplate}.
-		 */
-		private String logicClassName = null;
-
-		/**
-		 * Name of {@link Method} on the logic {@link Class} to return the
-		 * values for path parameters in redirecting to this
-		 * {@link WebTemplate}.
-		 */
-		private String redirectValuesFunctionName = null;
-
-		/**
-		 * Secure links.
-		 */
-		private Map<String, Boolean> secureLinks = new HashMap<>();
-
-		/**
-		 * Link separator character.
-		 */
-		private char linkSeparatorCharacter = '+';
-
-		/**
-		 * <code>Content-Type</code> for the {@link WebTemplate}.
-		 */
-		private String contentType = null;
-
-		/**
-		 * Name of the {@link Charset}.
-		 */
-		private String charsetName = null;
-
-		/**
-		 * Render {@link HttpMethod} names.
-		 */
-		private final List<String> renderHttpMethodNames = new LinkedList<>();
-
-		/**
-		 * Super {@link WebTemplate}.
-		 */
-		private WebTemplateImpl superTemplate = null;
-
-		/**
-		 * {@link OfficeFlowSinkNode} to render {@link WebTemplate} by values
-		 * type.
+		 * {@link OfficeFlowSinkNode} to render {@link WebTemplate} by values type.
 		 */
 		private final Map<String, OfficeFlowSinkNode> renderInputs = new HashMap<>();
 
@@ -281,8 +198,8 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 		 * Instantiate.
 		 * 
 		 * @param isSecure
-		 *            Indicates if requires secure {@link ServerHttpConnection}
-		 *            to render the {@link WebTemplate}.
+		 *            Indicates if requires secure {@link ServerHttpConnection} to
+		 *            render the {@link WebTemplate}.
 		 * @param applicationPath
 		 *            Application path for the {@link WebTemplate}.
 		 * @param webTemplateSectionSource
@@ -295,16 +212,13 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 		private WebTemplateImpl(boolean isSecure, String applicationPath,
 				WebTemplateSectionSource webTemplateSectionSource, OfficeSection templateSection,
 				PropertyList properties) {
-			this.isSecure = isSecure;
-			this.applicationPath = applicationPath;
+			super(isSecure, applicationPath, properties, WebTemplateArchitectEmployer.this.officeArchitect);
 			this.webTemplateSectionSource = webTemplateSectionSource;
 			this.section = templateSection;
-			this.properties = properties;
 
 			// Configure the input
 			this.sectionInput = this.section.getOfficeSectionInput(WebTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
-			this.templateInput = WebTemplateArchitectEmployer.this.webArchitect.getHttpInput(this.isSecure,
-					this.applicationPath);
+			this.templateInput = WebTemplateArchitectEmployer.this.webArchitect.getHttpInput(isSecure, applicationPath);
 			WebTemplateArchitectEmployer.this.officeArchitect.link(this.templateInput.getInput(), this.sectionInput);
 		}
 
@@ -318,99 +232,14 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 			this.webTemplateSectionSource.setHttpInputPath(templateInputPath);
 
 			// Configure properties for the template
-			if (this.logicClassName != null) {
-				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CLASS_NAME)
-						.setValue(this.logicClassName);
-			}
-			if (this.redirectValuesFunctionName != null) {
-				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_REDIRECT_VALUES_FUNCTION)
-						.setValue(this.redirectValuesFunctionName);
-			}
-			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_LINK_SEPARATOR)
-					.setValue(String.valueOf(this.linkSeparatorCharacter));
-			if (this.contentType != null) {
-				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CONTENT_TYPE)
-						.setValue(this.contentType);
-			}
-			if (this.charsetName != null) {
-				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_CHARSET).setValue(this.charsetName);
-			}
-			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_SECURE)
-					.setValue(String.valueOf(this.isSecure));
-			for (String linkName : this.secureLinks.keySet()) {
-				Boolean isLinkSecure = this.secureLinks.get(linkName);
-				this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_LINK_SECURE_PREFIX + linkName)
-						.setValue(String.valueOf(isLinkSecure));
-			}
-
-			// Configure inheritance properties
-			Deque<WebTemplateImpl> inheritanceHeirarchy = new LinkedList<>();
-			WebTemplateImpl parent = this.superTemplate;
-			StringBuilder cycle = new StringBuilder();
-			cycle.append(this.applicationPath + " ::");
-			while (parent != null) {
-
-				// Determine if inheritance cycle
-				if (inheritanceHeirarchy.contains(parent)) {
-					throw WebTemplateArchitectEmployer.this.officeArchitect.addIssue(
-							WebTemplate.class.getSimpleName() + " inheritance cycle " + cycle.toString() + " ...");
-				}
-
-				// Include parent on report for cycle
-				cycle.append(" " + parent.applicationPath + " ::");
-
-				// Include in inheritance hierarchy
-				inheritanceHeirarchy.push(parent);
-				parent = parent.superTemplate;
-			}
-			this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES_COUNT)
-					.setValue(String.valueOf(inheritanceHeirarchy.size()));
-			int inheritanceIndex = 0;
-			while (inheritanceHeirarchy.size() > 0) {
-				parent = inheritanceHeirarchy.pop();
-
-				// Attempt to load content
-				Property parentContent = parent.properties
-						.getProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT);
-				if (parentContent != null) {
-					this.properties.getOrAddProperty(
-							WebTemplateSectionSource.PROPERTY_TEMPLATE_CONTENT + "." + String.valueOf(inheritanceIndex))
-							.setValue(parentContent.getValue());
-				} else {
-					Property parentLocation = parent.properties
-							.getProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION);
-					this.properties.getOrAddProperty(WebTemplateSectionSource.PROPERTY_TEMPLATE_LOCATION + "."
-							+ String.valueOf(inheritanceIndex)).setValue(parentLocation.getValue());
-				}
-
-				// Next parent
-				inheritanceIndex++;
-			}
+			PropertyList properties = this.loadProperties(templateInputPath.isPathParameters());
 
 			// Configure the properties into the section
-			this.properties.configureProperties(this.section);
-
-			// Ensure appropriately configured
-			if (templateInputPath.isPathParameters()) {
-
-				// Must have logic class
-				if (this.logicClassName == null) {
-					throw WebTemplateArchitectEmployer.this.officeArchitect
-							.addIssue("Must provide template logic class for template " + this.applicationPath
-									+ ", as has dynamic path");
-				}
-
-				// Must have redirect values function
-				if (CompileUtil.isBlank(this.redirectValuesFunctionName)) {
-					throw WebTemplateArchitectEmployer.this.officeArchitect.addIssue(
-							"Must provide redirect values function for template /{param}, as has dynamic path");
-				}
-			}
+			properties.configureProperties(this.section);
 
 			// Load the type
 			OfficeSectionType type = WebTemplateArchitectEmployer.this.sourceContext.loadOfficeSectionType(
-					this.applicationPath, WebTemplateSectionSource.class.getName(), this.applicationPath,
-					this.properties);
+					this.applicationPath, WebTemplateSectionSource.class.getName(), this.applicationPath, properties);
 
 			// Load other methods
 			for (String httpMethodName : this.renderHttpMethodNames) {
@@ -474,65 +303,6 @@ public class WebTemplateArchitectEmployer implements WebTemplateArchitect {
 		/*
 		 * ================== WebTemplate ============================
 		 */
-
-		@Override
-		public void addProperty(String name, String value) {
-			this.properties.addProperty(name).setValue(value);
-		}
-
-		@Override
-		public WebTemplate setLogicClass(String logicClassName) {
-			this.logicClassName = logicClassName;
-			return this;
-		}
-
-		@Override
-		public WebTemplate setRedirectValuesFunction(String functionName) {
-			this.redirectValuesFunctionName = functionName;
-			return this;
-		}
-
-		@Override
-		public WebTemplate setContentType(String contentType) {
-			this.contentType = contentType;
-			return this;
-		}
-
-		@Override
-		public WebTemplate setCharset(String charsetName) {
-			this.charsetName = charsetName;
-			return this;
-		}
-
-		@Override
-		public WebTemplate setLinkSeparatorCharacter(char separator) {
-			this.linkSeparatorCharacter = separator;
-			return this;
-		}
-
-		@Override
-		public WebTemplate setLinkSecure(String linkName, boolean isSecure) {
-			this.secureLinks.put(linkName, isSecure);
-			return this;
-		}
-
-		@Override
-		public HttpSecurableBuilder getHttpSecurer() {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("TODO implement Security for WebTemplate");
-		}
-
-		@Override
-		public WebTemplate addRenderHttpMethod(String httpMethodName) {
-			this.renderHttpMethodNames.add(httpMethodName);
-			return this;
-		}
-
-		@Override
-		public WebTemplate setSuperTemplate(WebTemplate superTemplate) {
-			this.superTemplate = (WebTemplateImpl) superTemplate;
-			return this;
-		}
 
 		@Override
 		public WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension) {

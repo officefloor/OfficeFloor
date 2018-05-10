@@ -1,11 +1,21 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/http/continuation" secure="true" x="414" y="93">
+    <http-continuation path="/http/continuation" secure="true" x="216" y="24">
     </http-continuation>
   </http-continuations>
   <http-inputs>
+    <http-input path="/http/input" method="POST" secure="false" x="419" y="21">
+    </http-input>
   </http-inputs>
   <templates>
+    <template path="/template" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="633" y="21">
+      <output name="flow" argument-type="">
+      </output>
+      <output name="link" argument-type="">
+      </output>
+      <output name="redirectToTemplate" argument-type="">
+      </output>
+    </template>
   </templates>
   <sections>
   </sections>

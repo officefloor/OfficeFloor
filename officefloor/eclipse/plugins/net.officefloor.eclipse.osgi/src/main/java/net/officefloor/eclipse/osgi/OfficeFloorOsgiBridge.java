@@ -28,9 +28,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -218,7 +217,7 @@ public class OfficeFloorOsgiBridge {
 		} else {
 
 			// Use java project to determine if on class path
-			IType type = this.javaProject.findType(className);
+			IType type = this.javaProject.findType(className, (IProgressMonitor) null);
 			return (type != null);
 		}
 	}
@@ -362,42 +361,10 @@ public class OfficeFloorOsgiBridge {
 	 */
 	public boolean isResourceOnClassPath(String resourcePath) throws Exception {
 
-		// Determine if have java project
-		if (this.javaProject == null) {
-
-			// Check on provided class path
-			ClassLoader classLoader = this.getClassLoader();
-			Enumeration<URL> resources = classLoader.getResources(resourcePath);
-			return resources.hasMoreElements();
-
-		} else {
-			// Use java project to determine if resource on class path
-
-			// Obtain the resource for the path
-			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-
-			// Determine if resource on the class path
-			IClasspathEntry[] classPath = this.javaProject.getResolvedClasspath(true);
-			for (IClasspathEntry entry : classPath) {
-
-				// Obtain the class path resource
-				IPath fullPath = entry.getPath().append(resourcePath);
-
-				// Obtain the resource
-				IResource resource = workspaceRoot.findMember(fullPath);
-				if (resource == null) {
-					continue;
-				}
-
-				// Determine if resource on class path
-				if (this.javaProject.isOnClasspath(resource)) {
-					return true; // resource on class path
-				}
-			}
-
-			// As here, did not find resource on class path
-			return false;
-		}
+		// Check on provided class path
+		ClassLoader classLoader = this.getClassLoader();
+		Enumeration<URL> resources = classLoader.getResources(resourcePath);
+		return resources.hasMoreElements();
 	}
 
 	/**
@@ -481,7 +448,7 @@ public class OfficeFloorOsgiBridge {
 		IJavaProject javaProject = this.getJavaProject();
 
 		// Strip filter down to just the simple name
-		String filter = resourcePath;
+		String filter = resourcePath == null ? "" : resourcePath;
 		int index = filter.lastIndexOf('/');
 		if (index >= 0) {
 			filter = filter.substring(index + "/".length());

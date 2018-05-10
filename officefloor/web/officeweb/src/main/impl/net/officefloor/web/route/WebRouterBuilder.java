@@ -43,6 +43,17 @@ import net.officefloor.web.HttpInputPathSegment.HttpInputPathSegmentEnum;
 public class WebRouterBuilder {
 
 	/**
+	 * Indicates if the path contains parameters.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @return <code>true</code> should the path contain parameters.
+	 */
+	public static boolean isPathParameters(String path) {
+		return path.contains("{");
+	}
+
+	/**
 	 * Context path.
 	 */
 	private final String contextPath;
@@ -60,17 +71,6 @@ public class WebRouterBuilder {
 	 */
 	public WebRouterBuilder(String contextPath) {
 		this.contextPath = contextPath;
-	}
-
-	/**
-	 * Indicates if the path contains parameters.
-	 * 
-	 * @param path
-	 *            Path.
-	 * @return <code>true</code> should the path contain parameters.
-	 */
-	public boolean isPathParameters(String path) {
-		return path.contains("{");
 	}
 
 	/**

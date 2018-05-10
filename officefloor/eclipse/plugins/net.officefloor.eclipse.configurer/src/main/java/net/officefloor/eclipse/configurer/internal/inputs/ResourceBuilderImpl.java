@@ -88,7 +88,7 @@ public class ResourceBuilderImpl<M>
 
 			// Determine if resource on the class path
 			if (!this.osgiBridge.isResourceOnClassPath(resourcePath)) {
-				ctx.setError("Resource not on project's class path");
+				ctx.setError("resource '" + resourcePath + "' not on project's class path");
 				return;
 			}
 		});

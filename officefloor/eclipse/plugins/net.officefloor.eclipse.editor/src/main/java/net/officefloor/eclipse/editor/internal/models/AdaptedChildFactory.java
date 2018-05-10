@@ -530,40 +530,42 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 				String initialLabel = this.getFactory().getLabel.apply(this.getModel());
 				this.label = new ReadOnlyStringWrapper(this.getModel(), "Label",
 						initialLabel != null ? initialLabel : "");
-				this.label.addListener((lister, oldValue, newValue) -> {
+				if (this.getFactory().setLabel != null) {
+					this.label.addListener((lister, oldValue, newValue) -> {
 
-					// Drop out (of potential loop) if changing to same model value
-					String currentValue = this.getFactory().getLabel.apply(this.getModel());
-					currentValue = currentValue == null ? "" : currentValue;
-					newValue = newValue == null ? "" : newValue;
-					if (currentValue.equals(newValue)) {
-						return;
-					}
-
-					// Attempt to change the label
-					Change<M> change = this.getFactory().setLabel.changeLabel(this.getModel(), newValue);
-					Conflict[] conflicts = change.getConflicts();
-					if (conflicts.length > 0) {
-
-						// Load the conflict error
-						StringBuilder message = new StringBuilder(conflicts[0].getConflictDescription());
-						for (int i = 1; i < conflicts.length; i++) {
-							message.append("\n");
-							message.append(conflicts[i].getConflictDescription());
+						// Drop out (of potential loop) if changing to same model value
+						String currentValue = this.getFactory().getLabel.apply(this.getModel());
+						currentValue = currentValue == null ? "" : currentValue;
+						newValue = newValue == null ? "" : newValue;
+						if (currentValue.equals(newValue)) {
+							return;
 						}
-						this.labelConflict.set(message.toString());
-						return;
-					}
 
-					// As here, no conflicts
-					this.labelConflict.set("");
+						// Attempt to change the label
+						Change<M> change = this.getFactory().setLabel.changeLabel(this.getModel(), newValue);
+						Conflict[] conflicts = change.getConflicts();
+						if (conflicts.length > 0) {
 
-					// Set to new label before changing in model (stops loops)
-					this.label.set(newValue);
+							// Load the conflict error
+							StringBuilder message = new StringBuilder(conflicts[0].getConflictDescription());
+							for (int i = 1; i < conflicts.length; i++) {
+								message.append("\n");
+								message.append(conflicts[i].getConflictDescription());
+							}
+							this.labelConflict.set(message.toString());
+							return;
+						}
 
-					// Under take the change
-					this.getChangeExecutor().execute(change);
-				});
+						// As here, no conflicts
+						this.labelConflict.set("");
+
+						// Set to new label before changing in model (stops loops)
+						this.label.set(newValue);
+
+						// Under take the change
+						this.getChangeExecutor().execute(change);
+					});
+				}
 
 				// Observe if label changed externally
 				this.registerEventListener(this.getFactory().labelEvents, (event) -> {

@@ -72,8 +72,7 @@ public class SectionLoaderUtil {
 	 * @param sectionSourceClass
 	 *            {@link SectionSource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends SectionSource> PropertyList validateSpecification(Class<S> sectionSourceClass,
@@ -96,8 +95,7 @@ public class SectionLoaderUtil {
 	 * @param sectionSource
 	 *            {@link SectionSource}.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static PropertyList validateSpecification(SectionSource sectionSource, String... propertyNameLabels) {
@@ -147,8 +145,7 @@ public class SectionLoaderUtil {
 	}
 
 	/**
-	 * Facade method to validate the {@link SectionType} and
-	 * {@link OfficeSection}.
+	 * Facade method to validate the {@link SectionType} and {@link OfficeSection}.
 	 * 
 	 * @param <S>
 	 *            {@link SectionSource} type.
@@ -162,8 +159,8 @@ public class SectionLoaderUtil {
 	 *            Typically this will be the {@link Assert} instance.
 	 * @param resourceName
 	 *            Name of the resource. This is used with the
-	 *            <code>offsetObject</code> to determine the
-	 *            {@link OfficeSection} location.
+	 *            <code>offsetObject</code> to determine the {@link OfficeSection}
+	 *            location.
 	 * @param propertyNameValuePairs
 	 *            Listing of {@link Property} name/value pairs.
 	 */
@@ -265,7 +262,7 @@ public class SectionLoaderUtil {
 	 * @param actualSection
 	 *            Actual {@link SectionType} to validate.
 	 */
-	private static void validateSectionType(SectionDesigner designer, SectionType actualSection) {
+	public static void validateSectionType(SectionDesigner designer, SectionType actualSection) {
 
 		// Compile Context
 		CompileContext compileContext = new CompileContextImpl(null);
@@ -291,8 +288,8 @@ public class SectionLoaderUtil {
 			// Validate the input annotations
 			Object[] eAnnotations = eInput.getAnnotations();
 			Object[] aAnnotations = aInput.getAnnotations();
-			Assert.assertEquals("Incorrect number of annoations for input " + eInput.getSectionInputName(),
-					eAnnotations.length, aAnnotations.length);
+			LoaderUtil.assertLength("Incorrect number of annoations for input " + eInput.getSectionInputName(),
+					eAnnotations, aAnnotations, (annotation) -> annotation.toString());
 			for (int a = 0; a < eAnnotations.length; a++) {
 				Assert.assertEquals("Incorrect annotation " + a + " for input " + eInput.getSectionInputName(),
 						eAnnotations[a].getClass(), aAnnotations[a].getClass());
@@ -334,8 +331,8 @@ public class SectionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that validates the loaded {@link OfficeSection}
-	 * against expected {@link OfficeSection} from the {@link SectionDesigner}.
+	 * Convenience method that validates the loaded {@link OfficeSection} against
+	 * expected {@link OfficeSection} from the {@link SectionDesigner}.
 	 * 
 	 * @param <S>
 	 *            {@link SectionSource} type.
@@ -674,8 +671,8 @@ public class SectionLoaderUtil {
 	 *            Items to generate list.
 	 * @param valueExtractor
 	 *            Extracts the value from the item.
-	 * @return {@link IntFunction} to generate the list highlighting the items
-	 *         at the particular index.
+	 * @return {@link IntFunction} to generate the list highlighting the items at
+	 *         the particular index.
 	 */
 	private static <O> IntFunction<String> createLister(O[] items, Function<O, String> valueExtractor) {
 		return (index) -> {

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2017 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +17,22 @@
  */
 package net.officefloor.web.template.build;
 
-import net.officefloor.web.build.WebArchitect;
+import net.officefloor.compile.section.SectionType;
 
 /**
- * Architect to create web templates.
+ * Loads the type for the {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebTemplateArchitect extends WebTemplateFactory {
+public interface WebTemplateLoader extends WebTemplateFactory {
 
 	/**
-	 * Informs the {@link WebArchitect} of the templates. This is to be invoked once
-	 * all templates are configured.
+	 * Loads the {@link SectionType} for the {@link WebTemplate}.
+	 * 
+	 * @param template
+	 *            Configured {@link WebTemplate} to provide the type information.
+	 * @return {@link SectionType} for the {@link WebTemplate}.
 	 */
-	void informWebArchitect();
+	SectionType loadWebTemplateType(WebTemplate template);
 
 }

@@ -321,7 +321,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * @return <code>true</code> should the path contain parameters.
 	 */
 	public boolean isPathParameters(String path) {
-		return this.builder.isPathParameters(path);
+		return WebRouterBuilder.isPathParameters(path);
 	}
 
 	/**

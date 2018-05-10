@@ -88,6 +88,8 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	@Override
 	protected void loadParents(List<AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, ?, ?, ?>> parents) {
 		parents.add(new WoofHttpContinuationItem());
+		parents.add(new WoofHttpInputItem());
+		parents.add(new WoofTemplateItem());
 	}
 
 	@Override
