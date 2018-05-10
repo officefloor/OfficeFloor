@@ -90,6 +90,7 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 		parents.add(new WoofHttpContinuationItem());
 		parents.add(new WoofHttpInputItem());
 		parents.add(new WoofTemplateItem());
+		parents.add(new WoofSecurityItem());
 	}
 
 	@Override

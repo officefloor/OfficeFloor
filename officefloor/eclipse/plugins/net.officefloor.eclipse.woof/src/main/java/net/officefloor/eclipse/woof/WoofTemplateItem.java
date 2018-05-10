@@ -153,6 +153,43 @@ public class WoofTemplateItem extends
 	 */
 	private String renderHttpMethods;
 
+	/**
+	 * Obtains the {@link Map} of links secure.
+	 * 
+	 * @param item
+	 *            {@link WoofTemplateItem}.
+	 * @return {@link Map} of link to secure.
+	 */
+	private Map<String, Boolean> getLinksSecure(WoofTemplateItem item) {
+		Map<String, Boolean> links = new HashMap<>();
+		for (LinkSecure link : item.links) {
+			if ((link.linkName != null) && (link.linkName.trim().length() > 0)) {
+				links.put(link.linkName.trim(), link.isSecure);
+			}
+		}
+		return links;
+	}
+
+	/**
+	 * Obtains the {@link WoofTemplateChangeContext}.
+	 * 
+	 * @param context
+	 *            {@link ConfigurableContext}.
+	 * @return {@link WoofTemplateChangeContext}.
+	 * @throws Exception
+	 *             If fails to create {@link WoofTemplateChangeContext}.
+	 */
+	private WoofTemplateChangeContext getWoofTemplateChangeContext(ConfigurableContext<WoofModel, WoofChanges> context)
+			throws Exception {
+		// Create the template change
+		ClassLoader classLoader = context.getOsgiBridge().getClassLoader();
+		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
+		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil.getWoofChangeIssues();
+		WoofTemplateChangeContext changeContext = new WoofTemplateChangeContextImpl(false, classLoader,
+				configurationContext, issues);
+		return changeContext;
+	}
+
 	/*
 	 * ================== AbstractConfigurableItem ====================
 	 */
@@ -173,6 +210,7 @@ public class WoofTemplateItem extends
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.label(heading);
+		context.addNode(container, context.childGroup(WoofTemplateOutputItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
 
@@ -200,16 +238,8 @@ public class WoofTemplateItem extends
 			item.linkSeparatorCharacter = model.getLinkSeparatorCharacter();
 
 			// Load render HTTP methods
-			StringBuilder methods = new StringBuilder();
-			boolean isFirst = true;
-			for (WoofTemplateRenderHttpMethodModel method : model.getRenderHttpMethods()) {
-				if (!isFirst) {
-					methods.append(", ");
-				}
-				isFirst = false;
-				methods.append(method.getWoofTemplateRenderHttpMethodName());
-			}
-			item.renderHttpMethods = methods.toString();
+			item.renderHttpMethods = this.translateToCommaSeparateList(model.getRenderHttpMethods(),
+					(method) -> method.getWoofTemplateRenderHttpMethodName());
 
 			// Links
 			for (WoofTemplateLinkModel link : model.getLinks()) {
@@ -299,7 +329,7 @@ public class WoofTemplateItem extends
 				if ((separator != null) && (separator.length() > 0)) {
 					template.setLinkSeparatorCharacter(separator.charAt(0));
 				}
-				for (String method : this.getRenderHttpMethods(item)) {
+				for (String method : this.translateFromCommaSeparatedList(item.renderHttpMethods, (value) -> value)) {
 					template.addRenderHttpMethod(method);
 				}
 				for (LinkSecure secure : item.links) {
@@ -318,7 +348,9 @@ public class WoofTemplateItem extends
 
 				// Add template
 				Map<String, Boolean> linksSecure = this.getLinksSecure(item);
-				String[] renderHttpMethods = this.getRenderHttpMethods(item);
+				String[] renderHttpMethods = this
+						.translateFromCommaSeparatedList(item.renderHttpMethods, (value) -> value)
+						.toArray(new String[0]);
 				WoofTemplateChangeContext changeContext = this
 						.getWoofTemplateChangeContext(this.getConfigurableContext());
 				context.execute(context.getOperations().addTemplate(item.applicationPath, item.location,
@@ -337,7 +369,9 @@ public class WoofTemplateItem extends
 
 				// Refactor template
 				Map<String, Boolean> linksSecure = this.getLinksSecure(item);
-				String[] renderHttpMethods = this.getRenderHttpMethods(item);
+				String[] renderHttpMethods = this
+						.translateFromCommaSeparatedList(item.renderHttpMethods, (value) -> value)
+						.toArray(new String[0]);
 				WoofTemplateChangeContext changeContext = this
 						.getWoofTemplateChangeContext(this.getConfigurableContext());
 				context.execute(context.getOperations().refactorTemplate(context.getModel(), item.applicationPath,
@@ -352,60 +386,9 @@ public class WoofTemplateItem extends
 		});
 	}
 
-	/**
-	 * Obtains the {@link Map} of links secure.
-	 * 
-	 * @param item
-	 *            {@link WoofTemplateItem}.
-	 * @return {@link Map} of link to secure.
-	 */
-	private Map<String, Boolean> getLinksSecure(WoofTemplateItem item) {
-		Map<String, Boolean> links = new HashMap<>();
-		for (LinkSecure link : item.links) {
-			if ((link.linkName != null) && (link.linkName.trim().length() > 0)) {
-				links.put(link.linkName.trim(), link.isSecure);
-			}
-		}
-		return links;
-	}
-
-	/**
-	 * Obtains the render HTTP methods.
-	 * 
-	 * @param item
-	 *            {@link WoofTemplateItem}.
-	 * @return Render HTTP methods.
-	 */
-	private String[] getRenderHttpMethods(WoofTemplateItem item) {
-		String[] parts = (item.renderHttpMethods == null ? "" : item.renderHttpMethods).split(",");
-		List<String> methods = new LinkedList<>();
-		for (String part : parts) {
-			part = part.trim();
-			if (part.length() > 0) {
-				methods.add(part);
-			}
-		}
-		return methods.toArray(new String[methods.size()]);
-	}
-
-	/**
-	 * Obtains the {@link WoofTemplateChangeContext}.
-	 * 
-	 * @param context
-	 *            {@link ConfigurableContext}.
-	 * @return {@link WoofTemplateChangeContext}.
-	 * @throws Exception
-	 *             If fails to create {@link WoofTemplateChangeContext}.
-	 */
-	private WoofTemplateChangeContext getWoofTemplateChangeContext(ConfigurableContext<WoofModel, WoofChanges> context)
-			throws Exception {
-		// Create the template change
-		ClassLoader classLoader = context.getOsgiBridge().getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
-		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil.getWoofChangeIssues();
-		WoofTemplateChangeContext changeContext = new WoofTemplateChangeContextImpl(false, classLoader,
-				configurationContext, issues);
-		return changeContext;
+	@Override
+	protected void children(List<IdeChildrenGroup> childGroups) {
+		childGroups.add(new IdeChildrenGroup(new WoofTemplateOutputItem()));
 	}
 
 	/**

@@ -24,7 +24,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -35,6 +34,7 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.HttpCredentials;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.spi.security.AuthenticateContext;
@@ -42,8 +42,6 @@ import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
-import net.officefloor.web.spi.security.LogoutContext;
-import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
@@ -52,6 +50,8 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 
 /**
  * Tests loading the {@link HttpSecurityType}.
@@ -298,8 +298,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link HttpSecurityDependencyMetaData}
-	 * in array.
+	 * Ensure issue if <code>null</code> {@link HttpSecurityDependencyMetaData} in
+	 * array.
 	 */
 	public void testNullDependencyMetaData() {
 
@@ -424,8 +424,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link HttpSecurityFlowMetaData} in
-	 * array.
+	 * Ensure issue if <code>null</code> {@link HttpSecurityFlowMetaData} in array.
 	 */
 	public void testNullFlowMetaData() {
 
@@ -563,8 +562,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link HttpSecurityType} correct with keyed dependencies and
-	 * flows.
+	 * Ensure {@link HttpSecurityType} correct with keyed dependencies and flows.
 	 */
 	public void testKeyedDependenciesAndFlows() {
 
@@ -630,8 +628,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link HttpSecurityType} correct with indexed dependencies and
-	 * flows.
+	 * Ensure {@link HttpSecurityType} correct with indexed dependencies and flows.
 	 */
 	public void testIndexedDependenciesAndFlows() {
 
@@ -748,8 +745,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the authentication, access control and credentials
-	 * class from the {@link HttpSecuritySourceMetaData}.
+	 * Records obtaining the authentication, access control and credentials class
+	 * from the {@link HttpSecuritySourceMetaData}.
 	 */
 	private void record_authenticationAccessControlAndCredentialsClass() {
 		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
@@ -762,8 +759,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * {@link HttpSecuritySourceMetaData}.
 	 * 
 	 * @param flowKeys
-	 *            Flow keys to be defined in meta-data. Provide
-	 *            <code>null</code> values for indexing.
+	 *            Flow keys to be defined in meta-data. Provide <code>null</code>
+	 *            values for indexing.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
@@ -847,8 +844,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		// Create the HTTP security loader and load the HTTP security type
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler, this.issues);
+		HttpSecurityLoader securityLoader = HttpSecurityArchitectEmployer.employHttpSecurityLoader(compiler);
 		MockHttpSecuritySource.init = init;
 		HttpSecurityType securityType = securityLoader.loadHttpSecurityType(new MockHttpSecuritySource(), propertyList);
 

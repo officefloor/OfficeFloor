@@ -35,13 +35,13 @@ import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
+import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionRemover;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
-import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
-import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionRemover;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -188,6 +188,49 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 			}
 		}
 		return propertyList;
+	}
+
+	/**
+	 * Convenience method to translate list of items to a comma separated list.
+	 * 
+	 * @param items
+	 *            Items.
+	 * @param getValue
+	 *            Obtains the value for the comma separate list from the item.
+	 * @return Comma separate text for the items.
+	 */
+	protected final <CSVI> String translateToCommaSeparateList(List<CSVI> items, Function<CSVI, String> getValue) {
+		StringBuilder text = new StringBuilder();
+		boolean isFirst = true;
+		for (CSVI item : items) {
+			if (!isFirst) {
+				text.append(", ");
+			}
+			isFirst = false;
+			text.append(getValue.apply(item));
+		}
+		return text.toString();
+	}
+
+	/**
+	 * Convenience method to translate comma separated text into a list.
+	 * 
+	 * @param text
+	 *            Comma separated text.
+	 * @param getItem
+	 *            Creates the item from the comma separated value.
+	 * @return List of items.
+	 */
+	protected final <CSVI> List<CSVI> translateFromCommaSeparatedList(String text, Function<String, CSVI> getItem) {
+		String[] parts = (text == null ? "" : text).split(",");
+		List<CSVI> items = new LinkedList<>();
+		for (String part : parts) {
+			part = part.trim();
+			if (part.length() > 0) {
+				items.add(getItem.apply(part));
+			}
+		}
+		return items;
 	}
 
 	/**

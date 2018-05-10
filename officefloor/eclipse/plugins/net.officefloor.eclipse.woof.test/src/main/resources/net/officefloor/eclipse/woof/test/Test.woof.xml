@@ -20,6 +20,10 @@
   <sections>
   </sections>
   <securities>
+    <security name="Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="482" y="270">
+      <property name="realm" value="OfficeFloor"/>
+      <content type="application/json"/>
+    </security>
   </securities>
   <governances>
   </governances>
