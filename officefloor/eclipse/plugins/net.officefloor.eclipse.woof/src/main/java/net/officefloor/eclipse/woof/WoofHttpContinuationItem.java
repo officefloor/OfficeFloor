@@ -27,9 +27,10 @@ import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
-import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
+import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel;
@@ -40,12 +41,14 @@ import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofHttpContinuationModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofHttpContinuationModel;
 
 /**
  * Configuration for the {@link WoofHttpContinuationModel}.
@@ -94,12 +97,11 @@ public class WoofHttpContinuationItem extends
 	public Pane visual(WoofHttpContinuationModel model,
 			AdaptedModelVisualFactoryContext<WoofHttpContinuationModel> context) {
 		HBox container = new HBox();
-		context.addNode(container,
-				context.connector(DefaultConnectors.FLOW)
-						.target(WoofHttpContinuationToWoofHttpContinuationModel.class,
-								WoofHttpInputToWoofHttpContinuationModel.class,
-								WoofTemplateOutputToWoofHttpContinuationModel.class)
-						.getNode());
+		context.addNode(container, context.connector(DefaultConnectors.FLOW).target(
+				WoofHttpContinuationToWoofHttpContinuationModel.class, WoofHttpInputToWoofHttpContinuationModel.class,
+				WoofTemplateOutputToWoofHttpContinuationModel.class,
+				WoofSecurityOutputToWoofHttpContinuationModel.class, WoofSectionOutputToWoofHttpContinuationModel.class,
+				WoofExceptionToWoofHttpContinuationModel.class).getNode());
 		context.label(container);
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSectionInputModel.class,

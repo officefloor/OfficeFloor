@@ -22,17 +22,28 @@ import java.util.List;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
 import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputModel.WoofSecurityOutputEvent;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 
 /**
  * Configuration for the {@link WoofSecurityOutputModel}.
@@ -67,6 +78,11 @@ public class WoofSecurityOutputItem extends
 			AdaptedModelVisualFactoryContext<WoofSecurityOutputModel> context) {
 		HBox container = new HBox();
 		context.label(container);
+		context.addNode(container, context.connector(DefaultConnectors.FLOW)
+				.target(WoofSecurityOutputToWoofSectionInputModel.class, WoofSecurityOutputToWoofTemplateModel.class,
+						WoofSecurityOutputToWoofResourceModel.class, WoofSecurityOutputToWoofSecurityModel.class,
+						WoofSecurityOutputToWoofHttpContinuationModel.class)
+				.getNode());
 		return container;
 	}
 
@@ -94,82 +110,61 @@ public class WoofSecurityOutputItem extends
 							.execute(ctx.getOperations().removeSecurityOuputToSectionInput(ctx.getModel()));
 				}));
 
-		// // Template
-		// connections.add(new
-		// IdeConnection<>(WoofTemplateOutputToWoofTemplateModel.class)
-		// .connectOne(s -> s.getWoofTemplate(), c -> c.getWoofTemplateOutput(),
-		// WoofTemplateOutputEvent.CHANGE_WOOF_TEMPLATE)
-		// .to(WoofTemplateModel.class)
-		// .many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofTemplate(),
-		// WoofTemplateEvent.ADD_WOOF_TEMPLATE_OUTPUT,
-		// WoofTemplateEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
-		// .create((s, t, ctx) -> {
-		// ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToTemplate(s,
-		// t));
-		// }).delete((ctx) -> {
-		// ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOuputToTemplate(ctx.getModel()));
-		// }));
-		//
-		// // Resource
-		// connections.add(new
-		// IdeConnection<>(WoofTemplateOutputToWoofResourceModel.class)
-		// .connectOne(s -> s.getWoofResource(), c -> c.getWoofTemplateOutput(),
-		// WoofTemplateOutputEvent.CHANGE_WOOF_RESOURCE)
-		// .to(WoofResourceModel.class).many(t -> t.getWoofTemplateOutputs(), c ->
-		// c.getWoofResource(),
-		// WoofResourceEvent.ADD_WOOF_HTTP_INPUT,
-		// WoofResourceEvent.REMOVE_WOOF_HTTP_INPUT)
-		// .create((s, t, ctx) -> {
-		// ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToResource(s,
-		// t));
-		// }).delete((ctx) -> {
-		// ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOuputToResource(ctx.getModel()));
-		// }));
-		//
-		// // Security
-		// connections.add(new
-		// IdeConnection<>(WoofTemplateOutputToWoofSecurityModel.class)
-		// .connectOne(s -> s.getWoofSecurity(), c -> c.getWoofTemplateOutput(),
-		// WoofTemplateOutputEvent.CHANGE_WOOF_SECURITY)
-		// .to(WoofSecurityModel.class)
-		// .many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofSecurity(),
-		// WoofSecurityEvent.ADD_WOOF_TEMPLATE_OUTPUT,
-		// WoofSecurityEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
-		// .create((s, t, ctx) -> {
-		// ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToSecurity(s,
-		// t));
-		// }).delete((ctx) -> {
-		// ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOuputToSecurity(ctx.getModel()));
-		// }));
-		//
-		// // HTTP Continuation
-		// connections
-		// .add(new IdeConnection<>(WoofTemplateOutputToWoofHttpContinuationModel.class)
-		// .connectOne(s -> s.getWoofHttpContinuation(), c -> c.getWoofTemplateOutput(),
-		// WoofTemplateOutputEvent.CHANGE_WOOF_HTTP_CONTINUATION)
-		// .to(WoofHttpContinuationModel.class)
-		// .many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofHttpContinuation(),
-		// WoofHttpContinuationEvent.ADD_WOOF_TEMPLATE_OUTPUT,
-		// WoofHttpContinuationEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
-		// .create((s, t, ctx) -> {
-		//
-		// // TODO REMOVE
-		// throw new UnsupportedOperationException(
-		// "TODO implement connect TemplateOutput to HTTP Continuation");
-		//
-		// //
-		// ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToHttpContinuation(s,
-		// // t));
-		// }).delete((ctx) -> {
-		//
-		// // TODO REMOVE
-		// throw new UnsupportedOperationException(
-		// "TODO implement remove TemplateOutput to HTTP Continuation");
-		//
-		// // ctx.getChangeExecutor().execute(
-		// //
-		// ctx.getOperations().removeTemplateOutputToHttpContinuation(ctx.getModel()));
-		// }));
+		// Template
+		connections.add(new IdeConnection<>(WoofSecurityOutputToWoofTemplateModel.class)
+				.connectOne(s -> s.getWoofTemplate(), c -> c.getWoofSecurityOutput(),
+						WoofSecurityOutputEvent.CHANGE_WOOF_TEMPLATE)
+				.to(WoofTemplateModel.class)
+				.many(t -> t.getWoofSecurityOutputs(), c -> c.getWoofTemplate(),
+						WoofTemplateEvent.ADD_WOOF_SECURITY_OUTPUT, WoofTemplateEvent.REMOVE_WOOF_SECURITY_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToTemplate(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOuputToTemplate(ctx.getModel()));
+				}));
+
+		// Resource
+		connections.add(new IdeConnection<>(WoofSecurityOutputToWoofResourceModel.class)
+				.connectOne(s -> s.getWoofResource(), c -> c.getWoofSecurityOutput(),
+						WoofSecurityOutputEvent.CHANGE_WOOF_RESOURCE)
+				.to(WoofResourceModel.class)
+				.many(t -> t.getWoofSecurityOutputs(), c -> c.getWoofResource(),
+						WoofResourceEvent.ADD_WOOF_SECURITY_OUTPUT, WoofResourceEvent.REMOVE_WOOF_SECURITY_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToResource(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOuputToResource(ctx.getModel()));
+				}));
+
+		// Security
+		connections.add(new IdeConnection<>(WoofSecurityOutputToWoofSecurityModel.class)
+				.connectOne(s -> s.getWoofSecurity(), c -> c.getWoofSecurityOutput(),
+						WoofSecurityOutputEvent.CHANGE_WOOF_SECURITY)
+				.to(WoofSecurityModel.class)
+				.many(t -> t.getWoofSecurityOutputs(), c -> c.getWoofSecurity(),
+						WoofSecurityEvent.ADD_WOOF_SECURITY_OUTPUT, WoofSecurityEvent.REMOVE_WOOF_SECURITY_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToSecurity(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOuputToSecurity(ctx.getModel()));
+				}));
+
+		// HTTP Continuation
+		connections
+				.add(new IdeConnection<>(WoofSecurityOutputToWoofHttpContinuationModel.class)
+						.connectOne(s -> s.getWoofHttpContinuation(), c -> c.getWoofSecurityOutput(),
+								WoofSecurityOutputEvent.CHANGE_WOOF_HTTP_CONTINUATION)
+						.to(WoofHttpContinuationModel.class)
+						.many(t -> t.getWoofSecurityOutputs(), c -> c.getWoofHttpContinuation(),
+								WoofHttpContinuationEvent.ADD_WOOF_SECURITY_OUTPUT,
+								WoofHttpContinuationEvent.REMOVE_WOOF_SECURITY_OUTPUT)
+						.create((s, t, ctx) -> {
+							ctx.getChangeExecutor()
+									.execute(ctx.getOperations().linkSecurityOutputToHttpContinuation(s, t));
+						}).delete((ctx) -> {
+							ctx.getChangeExecutor()
+									.execute(ctx.getOperations().removeSecurityOuputToHttpContinuation(ctx.getModel()));
+						}));
 	}
 
 }

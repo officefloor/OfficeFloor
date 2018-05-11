@@ -24,11 +24,14 @@ import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 
@@ -72,11 +75,11 @@ public class WoofResourceItem extends
 	@Override
 	public Pane visual(WoofResourceModel model, AdaptedModelVisualFactoryContext<WoofResourceModel> context) {
 		HBox container = new HBox();
-		context.addNode(
-				container, context
-						.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofResourceModel.class,
-								WoofHttpInputToWoofResourceModel.class, WoofTemplateOutputToWoofResourceModel.class)
-						.getNode());
+		context.addNode(container,
+				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofResourceModel.class,
+						WoofHttpInputToWoofResourceModel.class, WoofTemplateOutputToWoofResourceModel.class,
+						WoofSecurityOutputToWoofResourceModel.class, WoofSectionOutputToWoofResourceModel.class,
+						WoofExceptionToWoofResourceModel.class).getNode());
 		context.label(container);
 		return container;
 	}

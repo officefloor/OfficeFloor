@@ -23,12 +23,16 @@ import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 import net.officefloor.woof.model.woof.WoofSectionModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionModel.WoofSectionEvent;
 
@@ -61,8 +65,9 @@ public class WoofSectionInputItem extends
 		HBox container = new HBox();
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSectionInputModel.class,
-						WoofHttpInputToWoofSectionInputModel.class, WoofTemplateOutputToWoofSectionInputModel.class)
-						.getNode());
+						WoofHttpInputToWoofSectionInputModel.class, WoofTemplateOutputToWoofSectionInputModel.class,
+						WoofSecurityOutputToWoofSectionInputModel.class, WoofSectionOutputToWoofSectionInputModel.class,
+						WoofExceptionToWoofSectionInputModel.class, WoofStartToWoofSectionInputModel.class).getNode());
 		context.label(container);
 		return container;
 	}

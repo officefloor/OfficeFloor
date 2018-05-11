@@ -101,7 +101,8 @@ public class WoofTemplateOutputItem extends
 						WoofTemplateOutputEvent.CHANGE_WOOF_SECTION_INPUT)
 				.to(WoofSectionInputModel.class)
 				.many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofSectionInput(),
-						WoofSectionInputEvent.ADD_WOOF_HTTP_INPUT, WoofSectionInputEvent.REMOVE_WOOF_HTTP_INPUT)
+						WoofSectionInputEvent.ADD_WOOF_TEMPLATE_OUTPUT,
+						WoofSectionInputEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToSectionInput(s, t));
 				}).delete((ctx) -> {
@@ -126,8 +127,9 @@ public class WoofTemplateOutputItem extends
 		connections.add(new IdeConnection<>(WoofTemplateOutputToWoofResourceModel.class)
 				.connectOne(s -> s.getWoofResource(), c -> c.getWoofTemplateOutput(),
 						WoofTemplateOutputEvent.CHANGE_WOOF_RESOURCE)
-				.to(WoofResourceModel.class).many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofResource(),
-						WoofResourceEvent.ADD_WOOF_HTTP_INPUT, WoofResourceEvent.REMOVE_WOOF_HTTP_INPUT)
+				.to(WoofResourceModel.class)
+				.many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofResource(),
+						WoofResourceEvent.ADD_WOOF_TEMPLATE_OUTPUT, WoofResourceEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToResource(s, t));
 				}).delete((ctx) -> {

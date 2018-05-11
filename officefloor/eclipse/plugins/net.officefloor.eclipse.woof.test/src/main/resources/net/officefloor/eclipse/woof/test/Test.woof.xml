@@ -34,14 +34,14 @@
     </http-input>
   </http-inputs>
   <templates>
-    <template path="/template/resource" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="813" y="31">
+    <template path="/template/resource" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="634" y="142">
       <output name="link" argument-type="">
         <resource path="/resource"/>
       </output>
       <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
-    <template path="/template/sectionAndTemplate" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="507" y="30">
+    <template path="/template/sectionAndTemplate" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="510" y="24">
       <output name="flow" argument-type="">
         <section name="Section" input="input"/>
       </output>
@@ -51,7 +51,7 @@
       <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
-    <template path="/template/security" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="831" y="162">
+    <template path="/template/security" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="477" y="215">
       <output name="link" argument-type="">
         <security name="Form Security"/>
       </output>
@@ -60,35 +60,104 @@
     </template>
   </templates>
   <sections>
-    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="613" y="394">
+    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="490" y="348">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
       </output>
     </section>
+    <section name="Section to Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="494" y="565">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <resource path="/resource"/>
+      </output>
+    </section>
+    <section name="Section To Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="495" y="426">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <section name="Section" input="input"/>
+      </output>
+    </section>
+    <section name="Section to Security" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="496" y="631">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <security name="Form Security"/>
+      </output>
+    </section>
+    <section name="Section to Template" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="497" y="492">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <template path="/template/sectionAndTemplate"/>
+      </output>
+    </section>
+    <section name="Security to Continuation" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="498" y="700">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <redirect path="/continuation/section"/>
+      </output>
+    </section>
   </sections>
   <securities>
-    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="615" y="229">
+    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="931" y="71">
       <property name="realm" value="OfficeFloor"/>
       <content type="application/json"/>
     </security>
-    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="610" y="300">
+    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="928" y="119">
       <property name="realm" value="OfficeFloor"/>
       <content type="text/html"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+        <section name="Section" input="input"/>
+      </output>
+    </security>
+    <security name="Security to Template" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="930" y="191">
+      <property name="realm" value="OfficeFloor"/>
+      <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+        <template path="/template/sectionAndTemplate"/>
+      </output>
+    </security>
+    <security name="Security to Resource" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="930" y="266">
+      <property name="realm" value="OfficeFloor"/>
+      <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+        <resource path="/resource"/>
+      </output>
+    </security>
+    <security name="Security To Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="932" y="350">
+      <property name="realm" value="OfficeFloor"/>
+      <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+        <security name="Form Security"/>
+      </output>
+    </security>
+    <security name="Security to Continuation" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="943" y="423">
+      <property name="realm" value="OfficeFloor"/>
+      <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+        <redirect path="/continuation/section"/>
       </output>
     </security>
   </securities>
   <governances>
   </governances>
   <resources>
-    <resource path="/resource" x="620" y="502"/>
+    <resource path="/resource" x="997" y="581"/>
   </resources>
   <exceptions>
-    <exception class="java.io.IOException" x="211" y="678">
+    <exception class="java.io.IOException" x="214" y="658">
+      <section name="Section" input="input"/>
+    </exception>
+    <exception class="java.lang.Exception" x="211" y="837">
+      <redirect path="/continuation/section"/>
+    </exception>
+    <exception class="java.lang.IllegalStateException" x="213" y="793">
+      <security name="Security to Template"/>
+    </exception>
+    <exception class="java.lang.NullPointerException" x="211" y="703">
+      <template path="/template/security"/>
+    </exception>
+    <exception class="java.lang.NumberFormatException" x="214" y="749">
+      <resource path="/resource"/>
     </exception>
   </exceptions>
   <starting>
-    <start x="219" y="639">
+    <start x="863" y="674">
+      <section name="Section to Security" input="input"/>
     </start>
   </starting>
 </woof>

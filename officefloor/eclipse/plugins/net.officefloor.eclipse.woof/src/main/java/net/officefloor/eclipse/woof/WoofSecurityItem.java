@@ -36,12 +36,15 @@ import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofSecurityContentTypeModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
 
@@ -115,11 +118,11 @@ public class WoofSecurityItem extends
 	public Pane visual(WoofSecurityModel model, AdaptedModelVisualFactoryContext<WoofSecurityModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
-		context.addNode(
-				heading, context
-						.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSecurityModel.class,
-								WoofHttpInputToWoofSecurityModel.class, WoofTemplateOutputToWoofSecurityModel.class)
-						.getNode());
+		context.addNode(heading,
+				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSecurityModel.class,
+						WoofHttpInputToWoofSecurityModel.class, WoofTemplateOutputToWoofSecurityModel.class,
+						WoofSecurityOutputToWoofSecurityModel.class, WoofSectionOutputToWoofSecurityModel.class,
+						WoofExceptionToWoofSecurityModel.class).getNode());
 		context.label(heading);
 		context.addNode(container, context.childGroup(WoofSecurityOutputItem.class.getSimpleName(), new HBox()));
 		return container;

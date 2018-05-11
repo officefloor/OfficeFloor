@@ -17,17 +17,23 @@
  */
 package net.officefloor.eclipse.woof;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
-import org.eclipse.gef.geometry.planar.Ellipse;
+import java.util.List;
 
 import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 import net.officefloor.woof.model.woof.WoofStartModel;
 import net.officefloor.woof.model.woof.WoofStartModel.WoofStartEvent;
+import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
 
 /**
  * Configuration for the {@link WoofStartModel}.
@@ -61,14 +67,11 @@ public class WoofStartItem extends
 
 	@Override
 	public Node visual(WoofStartModel model, AdaptedModelVisualFactoryContext<WoofStartModel> context) {
-		return new GeometryNode<Ellipse>(new Ellipse(0, 0, 15, 15));
-	}
-
-	@Override
-	public String style() {
-		return new IdeStyle().rule("-fx-background-color", "RGBA(0, 0, 0, 0)").rule("-fx-background-radius", "0")
-				.rule("-fx-fill", "black").rule("-fx-border-radius", "0").rule("-fx-padding", "0")
-				.rule("-fx-stroke-width", "0").rule("-fx-pref-width", "15").rule("-fx-pref-height", "15").toString();
+		HBox container = new HBox();
+		context.addNode(container, new Label("Start"));
+		context.addNode(container,
+				context.connector(DefaultConnectors.FLOW, WoofStartToWoofSectionInputModel.class).getNode());
+		return container;
 	}
 
 	@Override
@@ -84,6 +87,22 @@ public class WoofStartItem extends
 	@Override
 	protected WoofStartItem item(WoofStartModel model) {
 		return new WoofStartItem();
+	}
+
+	@Override
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
+
+		// Section Input
+		connections.add(new IdeConnection<>(WoofStartToWoofSectionInputModel.class)
+				.connectOne(s -> s.getWoofSectionInput(), c -> c.getWoofStart(),
+						WoofStartEvent.CHANGE_WOOF_SECTION_INPUT)
+				.to(WoofSectionInputModel.class).many(t -> t.getWoofStarts(), c -> c.getWoofSectionInput(),
+						WoofSectionInputEvent.ADD_WOOF_START, WoofSectionInputEvent.REMOVE_WOOF_START)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkStartToSectionInput(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeStartToSectionInput(ctx.getModel()));
+				}));
 	}
 
 	@Override
