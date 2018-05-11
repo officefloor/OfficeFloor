@@ -1,35 +1,77 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/http/continuation" secure="true" x="216" y="24">
+    <http-continuation path="/continuation/redirect" secure="false" x="219" y="241">
+      <redirect path="/continuation/section"/>
+    </http-continuation>
+    <http-continuation path="/continuation/resource" secure="false" x="218" y="125">
+      <resource path="/resource"/>
+    </http-continuation>
+    <http-continuation path="/continuation/section" secure="true" x="216" y="24">
+      <section name="Section" input="input"/>
+    </http-continuation>
+    <http-continuation path="/continuation/security" secure="false" x="219" y="186">
+      <security name="Basic Security"/>
+    </http-continuation>
+    <http-continuation path="/continuation/template" secure="false" x="216" y="71">
+      <template path="/template/sectionAndTemplate"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
-    <http-input path="/http/input" method="POST" secure="false" x="419" y="21">
+    <http-input path="/input/security" method="DELETE" secure="false" x="207" y="522">
+      <security name="Form Security"/>
+    </http-input>
+    <http-input path="/input/continuation" method="POST" secure="false" x="210" y="574">
+      <redirect path="/continuation/redirect"/>
+    </http-input>
+    <http-input path="/input/section" method="POST" secure="false" x="215" y="359">
+      <section name="Section" input="input"/>
+    </http-input>
+    <http-input path="/input/template" method="POST" secure="false" x="210" y="411">
+      <template path="/template/sectionAndTemplate"/>
+    </http-input>
+    <http-input path="/input/resource" method="PUT" secure="false" x="212" y="470">
+      <resource path="/resource"/>
     </http-input>
   </http-inputs>
   <templates>
-    <template path="/template" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="633" y="21">
+    <template path="/template/resource" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="813" y="31">
+      <output name="link" argument-type="">
+        <resource path="/resource"/>
+      </output>
+      <output name="redirectToTemplate" argument-type="">
+      </output>
+    </template>
+    <template path="/template/sectionAndTemplate" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="507" y="30">
       <output name="flow" argument-type="">
+        <section name="Section" input="input"/>
       </output>
       <output name="link" argument-type="">
+        <template path="/template/resource"/>
+      </output>
+      <output name="redirectToTemplate" argument-type="">
+      </output>
+    </template>
+    <template path="/template/security" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="831" y="162">
+      <output name="link" argument-type="">
+        <security name="Form Security"/>
       </output>
       <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
   </templates>
   <sections>
-    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="426" y="336">
+    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="613" y="394">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
       </output>
     </section>
   </sections>
   <securities>
-    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="302" y="202">
+    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="615" y="229">
       <property name="realm" value="OfficeFloor"/>
       <content type="application/json"/>
     </security>
-    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="488" y="199">
+    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="610" y="300">
       <property name="realm" value="OfficeFloor"/>
       <content type="text/html"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
@@ -39,14 +81,14 @@
   <governances>
   </governances>
   <resources>
-    <resource path="/resource" x="612" y="343"/>
+    <resource path="/resource" x="620" y="502"/>
   </resources>
   <exceptions>
-    <exception class="java.io.IOException" x="197" y="349">
+    <exception class="java.io.IOException" x="211" y="678">
     </exception>
   </exceptions>
   <starting>
-    <start x="366" y="470">
+    <start x="219" y="639">
     </start>
   </starting>
 </woof>

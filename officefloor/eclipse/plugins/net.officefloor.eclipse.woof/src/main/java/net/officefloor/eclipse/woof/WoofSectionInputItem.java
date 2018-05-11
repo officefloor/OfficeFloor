@@ -20,12 +20,16 @@ package net.officefloor.eclipse.woof;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 import net.officefloor.woof.model.woof.WoofSectionModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionModel.WoofSectionEvent;
 
 /**
@@ -55,6 +59,10 @@ public class WoofSectionInputItem extends
 	@Override
 	public Pane visual(WoofSectionInputModel model, AdaptedModelVisualFactoryContext<WoofSectionInputModel> context) {
 		HBox container = new HBox();
+		context.addNode(container,
+				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSectionInputModel.class,
+						WoofHttpInputToWoofSectionInputModel.class, WoofTemplateOutputToWoofSectionInputModel.class)
+						.getNode());
 		context.label(container);
 		return container;
 	}

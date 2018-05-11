@@ -17,16 +17,35 @@
  */
 package net.officefloor.eclipse.woof;
 
+import java.util.List;
+
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
 import net.officefloor.woof.model.woof.WoofHttpInputModel;
 import net.officefloor.woof.model.woof.WoofHttpInputModel.WoofHttpInputEvent;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
+import net.officefloor.woof.model.woof.WoofSectionInputModel;
+import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
+import net.officefloor.woof.model.woof.WoofSecurityModel;
+import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
+import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 
 /**
  * Configuration for the {@link WoofHttpInputModel}.
@@ -81,6 +100,12 @@ public class WoofHttpInputItem extends
 	public Pane visual(WoofHttpInputModel model, AdaptedModelVisualFactoryContext<WoofHttpInputModel> context) {
 		HBox container = new HBox();
 		context.label(container);
+		context.addNode(container,
+				context.connector(DefaultConnectors.FLOW)
+						.target(WoofHttpInputToWoofSectionInputModel.class, WoofHttpInputToWoofTemplateModel.class,
+								WoofHttpInputToWoofResourceModel.class, WoofHttpInputToWoofSecurityModel.class,
+								WoofHttpInputToWoofHttpContinuationModel.class)
+						.getNode());
 		return container;
 	}
 
@@ -104,6 +129,73 @@ public class WoofHttpInputItem extends
 			item.isHttps = model.getIsSecure();
 		}
 		return item;
+	}
+
+	@Override
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
+
+		// Section Input
+		connections.add(new IdeConnection<>(WoofHttpInputToWoofSectionInputModel.class)
+				.connectOne(s -> s.getWoofSectionInput(), c -> c.getWoofHttpInput(),
+						WoofHttpInputEvent.CHANGE_WOOF_SECTION_INPUT)
+				.to(WoofSectionInputModel.class)
+				.many(t -> t.getWoofHttpInputs(), c -> c.getWoofSectionInput(),
+						WoofSectionInputEvent.ADD_WOOF_HTTP_INPUT, WoofSectionInputEvent.REMOVE_WOOF_HTTP_INPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpInputToSectionInput(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeHttpInputToSectionInput(ctx.getModel()));
+				}));
+
+		// Template
+		connections.add(new IdeConnection<>(WoofHttpInputToWoofTemplateModel.class)
+				.connectOne(s -> s.getWoofTemplate(), c -> c.getWoofHttpInput(),
+						WoofHttpInputEvent.CHANGE_WOOF_TEMPLATE)
+				.to(WoofTemplateModel.class).many(t -> t.getWoofHttpInputs(), c -> c.getWoofTemplate(),
+						WoofTemplateEvent.ADD_WOOF_HTTP_INPUT, WoofTemplateEvent.REMOVE_WOOF_HTTP_INPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpInputToTemplate(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeHttpInputToTemplate(ctx.getModel()));
+				}));
+
+		// Resource
+		connections.add(new IdeConnection<>(WoofHttpInputToWoofResourceModel.class)
+				.connectOne(s -> s.getWoofResource(), c -> c.getWoofHttpInput(),
+						WoofHttpInputEvent.CHANGE_WOOF_RESOURCE)
+				.to(WoofResourceModel.class).many(t -> t.getWoofHttpInputs(), c -> c.getWoofResource(),
+						WoofResourceEvent.ADD_WOOF_HTTP_INPUT, WoofResourceEvent.REMOVE_WOOF_HTTP_INPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpInputToResource(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeHttpInputToResource(ctx.getModel()));
+				}));
+
+		// Security
+		connections.add(new IdeConnection<>(WoofHttpInputToWoofSecurityModel.class)
+				.connectOne(s -> s.getWoofSecurity(), c -> c.getWoofHttpInput(),
+						WoofHttpInputEvent.CHANGE_WOOF_SECURITY)
+				.to(WoofSecurityModel.class).many(t -> t.getWoofHttpInputs(), c -> c.getWoofSecurity(),
+						WoofSecurityEvent.ADD_WOOF_HTTP_INPUT, WoofSecurityEvent.REMOVE_WOOF_HTTP_INPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpInputToSecurity(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeHttpInputToSecurity(ctx.getModel()));
+				}));
+
+		// HTTP Continuation
+		connections.add(new IdeConnection<>(WoofHttpInputToWoofHttpContinuationModel.class)
+				.connectOne(s -> s.getWoofHttpContinuation(), c -> c.getWoofHttpInput(),
+						WoofHttpInputEvent.CHANGE_WOOF_HTTP_CONTINUATION)
+				.to(WoofHttpContinuationModel.class)
+				.many(t -> t.getWoofHttpInputs(), c -> c.getWoofHttpContinuation(),
+						WoofHttpContinuationEvent.ADD_WOOF_HTTP_INPUT, WoofHttpContinuationEvent.REMOVE_WOOF_HTTP_INPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpInputToHttpContinuation(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor()
+							.execute(ctx.getOperations().removeHttpInputToHttpContinuation(ctx.getModel()));
+				}));
 	}
 
 	@Override

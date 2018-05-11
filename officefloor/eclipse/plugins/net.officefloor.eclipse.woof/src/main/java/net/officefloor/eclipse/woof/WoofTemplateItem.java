@@ -34,6 +34,7 @@ import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationCo
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.web.template.build.WebTemplate;
@@ -41,6 +42,8 @@ import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
 import net.officefloor.web.template.build.WebTemplateLoader;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
@@ -48,6 +51,7 @@ import net.officefloor.woof.model.woof.WoofTemplateChangeContextImpl;
 import net.officefloor.woof.model.woof.WoofTemplateExtension;
 import net.officefloor.woof.model.woof.WoofTemplateLinkModel;
 import net.officefloor.woof.model.woof.WoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 import net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderUtil;
@@ -209,6 +213,11 @@ public class WoofTemplateItem extends
 	public Pane visual(WoofTemplateModel model, AdaptedModelVisualFactoryContext<WoofTemplateModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
+		context.addNode(
+				heading, context
+						.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofTemplateModel.class,
+								WoofHttpInputToWoofTemplateModel.class, WoofTemplateOutputToWoofTemplateModel.class)
+						.getNode());
 		context.label(heading);
 		context.addNode(container, context.childGroup(WoofTemplateOutputItem.class.getSimpleName(), new VBox()));
 		return container;
