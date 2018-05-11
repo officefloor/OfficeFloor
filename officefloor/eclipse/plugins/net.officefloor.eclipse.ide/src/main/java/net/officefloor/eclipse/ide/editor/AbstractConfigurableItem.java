@@ -82,9 +82,33 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		private final List<ItemConfigurer<O, M, I>> refactor = new LinkedList<>();
 
 		/**
+		 * Add item immediately (as requires no configuration).
+		 */
+		private ItemActioner<O, M> addImmediately = null;
+
+		/**
 		 * Delete item.
 		 */
-		private ItemDeleter<O, M> delete = null;
+		private ItemActioner<O, M> delete = null;
+
+		/**
+		 * Ensure not add immediately.
+		 */
+		private void ensureNotAddImmediately() {
+			if (this.addImmediately != null) {
+				throw new IllegalStateException("Configured to add immediately, so can not configure add");
+			}
+		}
+
+		/**
+		 * Ensure not add configured.
+		 */
+		private void ensureNotAddConfigured() {
+			if (this.add.size() > 0) {
+				throw new IllegalStateException(
+						"Configured to add with configuration, so can not configure add immediately");
+			}
+		}
 
 		/**
 		 * Convenience method to provide add and refactor configuration.
@@ -94,6 +118,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer addAndRefactor(ItemConfigurer<O, M, I> configuration) {
+			this.ensureNotAddImmediately();
 			this.add.add(configuration);
 			this.refactor.add(configuration);
 			return this;
@@ -107,6 +132,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer add(ItemConfigurer<O, M, I> configuration) {
+			this.ensureNotAddImmediately();
 			this.add.add(configuration);
 			return this;
 		}
@@ -124,13 +150,26 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		}
 
 		/**
+		 * Provides add immediate (without configuration).
+		 * 
+		 * @param add
+		 *            {@link ItemActioner} to add item.
+		 * @return <code>this</code>.
+		 */
+		public IdeConfigurer add(ItemActioner<O, M> add) {
+			this.ensureNotAddConfigured();
+			this.addImmediately = add;
+			return this;
+		}
+
+		/**
 		 * Provides delete configuration.
 		 * 
 		 * @param deletion
-		 *            {@link ItemDeleter} to delete item.
+		 *            {@link ItemActioner} to delete item.
 		 * @return <code>this</code>.
 		 */
-		public IdeConfigurer delete(ItemDeleter<O, M> deletion) {
+		public IdeConfigurer delete(ItemActioner<O, M> deletion) {
 			this.delete = deletion;
 			return this;
 		}
@@ -154,20 +193,20 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	}
 
 	/**
-	 * Deletes an item.
+	 * Immediate action for an item.
 	 */
 	@FunctionalInterface
-	public static interface ItemDeleter<O, M> {
+	public static interface ItemActioner<O, M> {
 
 		/**
-		 * Undertakes deleting the item.
+		 * Undertakes action for the item.
 		 * 
-		 * @param deletion
+		 * @param action
 		 *            {@link ConfigurableModelContext}.
 		 * @throws Throwable
-		 *             If failure in deleting item.
+		 *             If failure in actioning.
 		 */
-		void delete(ConfigurableModelContext<O, M> deletion) throws Throwable;
+		void action(ConfigurableModelContext<O, M> context) throws Throwable;
 	}
 
 	/**
@@ -236,78 +275,112 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		IdeConfigurer ideConfigurer = this.configure();
 
 		// Determine if can create
-		if ((ideConfigurer != null) && (ideConfigurer.add.size() > 0)) {
-			parent.create((ctx) -> {
+		if (ideConfigurer != null) {
 
-				// Obtain details for dialog
-				OfficeFloorOsgiBridge bridge = this.getConfigurableContext().getOsgiBridge();
-				Shell shell = this.getConfigurableContext().getParentShell();
+			// Determine if add via configuration
+			if (ideConfigurer.add.size() > 0) {
+				parent.create((ctx) -> {
 
-				// Obtain details for executing change
-				O operations = ctx.getOperations();
-				ChangeExecutor executor = ctx.getChangeExecutor();
+					// Obtain details for dialog
+					OfficeFloorOsgiBridge bridge = this.getConfigurableContext().getOsgiBridge();
+					Shell shell = this.getConfigurableContext().getParentShell();
 
-				// Create the overlay to add external flow
-				ctx.overlay((visual) -> {
+					// Obtain details for executing change
+					O operations = ctx.getOperations();
+					ChangeExecutor executor = ctx.getChangeExecutor();
 
-					// Prepare the parent
-					Pane overlay = visual.getOverlayParent();
-					overlay.setPrefWidth(500);
-					overlay.setPrefHeight(400);
-					overlay.applyCss();
+					// Create the overlay to add external flow
+					ctx.overlay((visual) -> {
 
-					// Create the configurer
-					Configurer<I> configurer = new Configurer<>(bridge, shell);
-					ConfigurationBuilder<I> builder = configurer;
+						// Prepare the parent
+						Pane overlay = visual.getOverlayParent();
+						overlay.setPrefWidth(500);
+						overlay.setPrefHeight(400);
+						overlay.applyCss();
 
-					// Create the configurable context
-					ConfigurableModelContext<O, M> modelContext = new ConfigurableModelContext<O, M>() {
+						// Create the configurer
+						Configurer<I> configurer = new Configurer<>(bridge, shell);
+						ConfigurationBuilder<I> builder = configurer;
 
-						@Override
-						public O getOperations() {
-							return operations;
+						// Create the configurable context
+						ConfigurableModelContext<O, M> modelContext = new ConfigurableModelContext<O, M>() {
+
+							@Override
+							public O getOperations() {
+								return operations;
+							}
+
+							@Override
+							public M getModel() {
+								return null; // no model on create
+							}
+
+							@Override
+							public void execute(Change<M> change) throws Throwable {
+
+								// Position the added model
+								ctx.position(change.getTarget());
+
+								// Execute the change
+								executeChange(executor, change);
+							}
+						};
+
+						// Build the configuration
+						for (ItemConfigurer<O, M, I> itemConfigurer : ideConfigurer.add) {
+							itemConfigurer.configure(builder, modelContext);
 						}
 
-						@Override
-						public M getModel() {
-							return null; // no model on create
-						}
+						// Configure close
+						builder.close(new CloseListener() {
 
-						@Override
-						public void execute(Change<M> change) throws Throwable {
+							@Override
+							public void cancelled() {
+								visual.close();
+							}
 
-							// Position the added model
-							ctx.position(change.getTarget());
+							@Override
+							public void applied() {
+								visual.close();
+							}
+						});
 
-							// Execute the change
-							executeChange(executor, change);
-						}
-					};
+						// Show the configuration
+						I item = this.item(null);
+						configurer.loadConfiguration(item, overlay);
+					});
+				});
+			}
 
-					// Build the configuration
-					for (ItemConfigurer<O, M, I> itemConfigurer : ideConfigurer.add) {
-						itemConfigurer.configure(builder, modelContext);
+			// Determine if add immediately
+			if (ideConfigurer.addImmediately != null) {
+				parent.create((ctx) -> ideConfigurer.addImmediately.action((new ConfigurableModelContext<O, M>() {
+
+					@Override
+					public O getOperations() {
+						return ctx.getOperations();
 					}
 
-					// Configure close
-					builder.close(new CloseListener() {
+					@Override
+					public M getModel() {
+						return ctx.getModel();
+					}
 
-						@Override
-						public void cancelled() {
-							visual.close();
+					@Override
+					public void execute(Change<M> change) throws Throwable {
+						
+						// Position the added model
+						ctx.position(change.getTarget());
+
+						try {
+							executeChange(ctx.getChangeExecutor(), change);
+						} catch (MessageOnlyApplyException ex) {
+							// Translate to message only exception
+							throw new MessageOnlyException(ex.getMessage());
 						}
-
-						@Override
-						public void applied() {
-							visual.close();
-						}
-					});
-
-					// Show the configuration
-					I item = this.item(null);
-					configurer.loadConfiguration(item, overlay);
-				});
-			});
+					}
+				})));
+			}
 		}
 
 		// Determine if can refactor
@@ -385,7 +458,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 
 		// Determine if can delete
 		if ((ideConfigurer != null) && (ideConfigurer.delete != null)) {
-			parent.action((ctx) -> ideConfigurer.delete.delete((new ConfigurableModelContext<O, M>() {
+			parent.action((ctx) -> ideConfigurer.delete.action((new ConfigurableModelContext<O, M>() {
 
 				@Override
 				public O getOperations() {
@@ -543,6 +616,41 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			addConfigurer.loadConfiguration(addItem, addGroup);
 		}
 
+		// Load the add immediately
+		if (ideConfigurer.addImmediately != null) {
+			TabItem addTab = new TabItem(folder, SWT.NONE);
+			addTab.setText("Add");
+			Group addGroup = new Group(folder, SWT.NONE);
+			addGroup.setLayout(new RowLayout());
+			addTab.setControl(addGroup);
+			ConfigurableModelContext<O, M> addContext = new ConfigurableModelContext<O, M>() {
+
+				@Override
+				public O getOperations() {
+					return mainContext.getOperations();
+				}
+
+				@Override
+				public M getModel() {
+					return null; // no modal on add
+				}
+
+				@Override
+				public void execute(Change<M> change) {
+					mainContext.getChangeExecutor().execute(change);
+				}
+			};
+			Button addButton = new Button(addGroup, SWT.NONE);
+			addButton.setText("Add");
+			addButton.addListener(SWT.Selection, (event) -> {
+				try {
+					ideConfigurer.addImmediately.action(addContext);
+				} catch (Throwable ex) {
+					System.out.println("Failed to add " + ex.getMessage());
+				}
+			});
+		}
+
 		// Load the refactor configuration
 		if (ideConfigurer.refactor.size() > 0) {
 			TabItem refactorTab = new TabItem(folder, SWT.NONE);
@@ -612,7 +720,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			deleteButton.setText("Delete");
 			deleteButton.addListener(SWT.Selection, (event) -> {
 				try {
-					ideConfigurer.delete.delete(deleteContext);
+					ideConfigurer.delete.action(deleteContext);
 				} catch (Throwable ex) {
 					System.out.println("Failed to delete " + ex.getMessage());
 				}

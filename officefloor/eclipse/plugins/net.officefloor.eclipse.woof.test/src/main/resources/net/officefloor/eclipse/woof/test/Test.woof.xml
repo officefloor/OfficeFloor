@@ -18,19 +18,35 @@
     </template>
   </templates>
   <sections>
+    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="426" y="336">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+      </output>
+    </section>
   </sections>
   <securities>
-    <security name="Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="482" y="270">
+    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="302" y="202">
       <property name="realm" value="OfficeFloor"/>
       <content type="application/json"/>
+    </security>
+    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="488" y="199">
+      <property name="realm" value="OfficeFloor"/>
+      <content type="text/html"/>
+      <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+      </output>
     </security>
   </securities>
   <governances>
   </governances>
   <resources>
+    <resource path="/resource" x="612" y="343"/>
   </resources>
   <exceptions>
+    <exception class="java.io.IOException" x="197" y="349">
+    </exception>
   </exceptions>
   <starting>
+    <start x="366" y="470">
+    </start>
   </starting>
 </woof>

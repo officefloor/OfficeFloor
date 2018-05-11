@@ -15,28 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.woof.test;
 
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
-import net.officefloor.model.Model;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
- * Creates a visual {@link Pane} for the {@link Model}.
+ * Mock section {@link Class} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedModelVisualFactory<M extends Model> {
+public class MockSection {
 
-	/**
-	 * Creates the visual {@link Pane}.
-	 * 
-	 * @param adaptedModel
-	 *            {@link AdaptedModel}.
-	 * @param context
-	 *            {@link AdaptedModelVisualFactoryContext}.
-	 * @return Visual {@link Node}.
-	 */
-	Node createVisual(M model, AdaptedModelVisualFactoryContext<M> context);
+	@FlowInterface
+	public static interface Flows {
+		void flow();
+	}
+
+	public void input(Flows flows) {
+	}
 
 }

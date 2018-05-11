@@ -21,14 +21,14 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
 import javafx.geometry.Bounds;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.model.Model;
 
 public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, AdaptedParent<M>>
-		implements ITransformableContentPart<Pane> {
+		implements ITransformableContentPart<Node> {
 
 	/**
 	 * Loads the styling for the child {@link Pane}.
@@ -36,9 +36,9 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	 * @param parentPane
 	 *            Parent {@link Pane}.
 	 */
-	public static void loadStyling(Parent parentPane) {
-		parentPane.getStyleClass().remove("child");
-		parentPane.getStyleClass().add("parent");
+	public static void loadStyling(Node visualNode) {
+		visualNode.getStyleClass().remove("child");
+		visualNode.getStyleClass().add("parent");
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	}
 
 	@Override
-	public Pane doCreateVisual() {
+	public Node doCreateVisual() {
 
 		// Flag as palette prototype (if one)
 		if (this.getContent().isPalettePrototype()) {
@@ -82,7 +82,7 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 		}
 
 		// Obtain the visual
-		Pane container = super.doCreateVisual();
+		Node container = super.doCreateVisual();
 
 		// Provide parent styling
 		loadStyling(container);

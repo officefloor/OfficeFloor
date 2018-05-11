@@ -24,6 +24,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.model.ConnectionModel;
@@ -112,9 +113,9 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	 * 
 	 * @param context
 	 *            {@link AdaptedModelVisualFactoryContext}.
-	 * @return Visual {@link Pane}.
+	 * @return Visual {@link Node}.
 	 */
-	Pane createVisual(AdaptedModelVisualFactoryContext<M> context);
+	Node createVisual(AdaptedModelVisualFactoryContext<M> context);
 
 	/**
 	 * Obtains the {@link Property} to the style sheet for this

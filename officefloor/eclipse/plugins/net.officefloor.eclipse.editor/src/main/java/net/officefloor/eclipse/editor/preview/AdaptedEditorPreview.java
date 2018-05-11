@@ -26,6 +26,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
@@ -51,9 +52,9 @@ public class AdaptedEditorPreview<M extends Model> {
 	private final Scene previewScene;
 
 	/**
-	 * Preview visual.
+	 * Preview visual {@link Node}.
 	 */
-	private final Pane previewVisual;
+	private final Node previewVisual;
 
 	/**
 	 * {@link Property} to obtain specific styling for the {@link IVisualPart}.
@@ -105,17 +106,20 @@ public class AdaptedEditorPreview<M extends Model> {
 		// Load the default styling
 		AdaptedEditorPlugin.loadDefaulStylesheet(this.previewScene);
 
-		// Load specific styling
-		StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
-		ReadOnlyProperty<URL> styleUrl = styleRegistry.registerStyle("_preview_", this.styling);
-		styleUrl.addListener((event, oldUrl, newUrl) -> {
-			if (oldUrl != null) {
-				this.previewVisual.getStylesheets().remove(oldUrl.toExternalForm());
-			}
-			if (newUrl != null) {
-				this.previewVisual.getStylesheets().add(newUrl.toExternalForm());
-			}
-		});
+		// Load specific styling (if able)
+		if (this.previewVisual instanceof Parent) {
+			Parent previewParent = (Parent) this.previewVisual;
+			StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
+			ReadOnlyProperty<URL> styleUrl = styleRegistry.registerStyle("_preview_", this.styling);
+			styleUrl.addListener((event, oldUrl, newUrl) -> {
+				if (oldUrl != null) {
+					previewParent.getStylesheets().remove(oldUrl.toExternalForm());
+				}
+				if (newUrl != null) {
+					previewParent.getStylesheets().add(newUrl.toExternalForm());
+				}
+			});
+		}
 	}
 
 	/**

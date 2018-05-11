@@ -17,6 +17,10 @@
  */
 package net.officefloor.eclipse.woof;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -107,6 +111,7 @@ public class WoofSecurityItem extends
 	public Pane visual(WoofSecurityModel model, AdaptedModelVisualFactoryContext<WoofSecurityModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
+		context.addNode(container, context.childGroup(WoofSecurityOutputItem.class.getSimpleName(), new HBox()));
 		context.label(heading);
 		return container;
 	}
@@ -134,6 +139,11 @@ public class WoofSecurityItem extends
 					(type) -> type.getContentType());
 		}
 		return item;
+	}
+
+	@Override
+	protected void children(List<IdeChildrenGroup> childGroups) {
+		childGroups.add(new IdeChildrenGroup(new WoofSecurityOutputItem()));
 	}
 
 	@Override
@@ -182,6 +192,13 @@ public class WoofSecurityItem extends
 		}).refactor((builder, context) -> {
 			builder.apply("Refactor", (item) -> {
 
+				// TODO provide mapping
+				Map<String, String> outputMapping = new HashMap<>();
+
+				String[] contentTypes = this.translateFromCommaSeparatedList(item.contentTypes, (value) -> value)
+						.toArray(new String[0]);
+				context.execute(context.getOperations().refactorSecurity(context.getModel(), item.name,
+						item.sourceClassName, item.timeout, item.properties, contentTypes, item.type, outputMapping));
 			});
 
 		}).delete((context) -> {

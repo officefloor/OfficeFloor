@@ -46,25 +46,31 @@ import net.officefloor.model.Model;
  *
  * @author Daniel Sagenschneider
  */
-public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Pane>
+public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Node>
 		implements AdaptedModelStyler {
 
 	/**
 	 * Loads the styling for the child {@link Pane}.
 	 * 
-	 * @param childPane
-	 *            Child {@link Pane}.
+	 * @param visualNode
+	 *            Child visual {@link Node}.
 	 * @param modelClass
 	 *            {@link Class} of the {@link Model}.
 	 * @param stylesheetUrl
 	 *            {@link ReadOnlyProperty} to specific styling {@link URL}.
 	 */
-	public static void loadStyling(Parent childPane, Class<? extends Model> modelClass,
+	public static void loadStyling(Node visualNode, Class<? extends Model> modelClass,
 			ReadOnlyProperty<URL> stylesheetUrl) {
 
+		// Determine if can style node
+		if (!(visualNode instanceof Parent)) {
+			return;
+		}
+		Parent childVisual = (Parent) visualNode;
+
 		// Provide model as class for CSS
-		childPane.getStyleClass().add("child");
-		childPane.getStyleClass().add(modelClass.getSimpleName());
+		childVisual.getStyleClass().add("child");
+		childVisual.getStyleClass().add(modelClass.getSimpleName());
 
 		// Determine if specific styling
 		if (stylesheetUrl != null) {
@@ -72,16 +78,16 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 			// Load initial styling
 			URL initialUrl = stylesheetUrl.getValue();
 			if (initialUrl != null) {
-				childPane.getStylesheets().add(initialUrl.toExternalForm());
+				childVisual.getStylesheets().add(initialUrl.toExternalForm());
 			}
 
 			// Bind potential changes to the styling
 			stylesheetUrl.addListener((event, oldValue, newValue) -> {
 				if (oldValue != null) {
-					childPane.getStylesheets().remove(oldValue.toExternalForm());
+					childVisual.getStylesheets().remove(oldValue.toExternalForm());
 				}
 				if (newValue != null) {
-					childPane.getStylesheets().add(newValue.toExternalForm());
+					childVisual.getStylesheets().add(newValue.toExternalForm());
 				}
 			});
 		}
@@ -178,7 +184,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Pane doCreateVisual() {
+	public Node doCreateVisual() {
 
 		// Load the children group visuals
 		this.childrenGroupVisuals = new HashMap<>();
@@ -192,8 +198,8 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 			this.adaptedConnectorVisuals.put(adaptedConnector, new AdaptedConnectorVisual());
 		}
 
-		// Create the visual pane
-		Pane pane = this.getContent().createVisual(new AdaptedModelVisualFactoryContextImpl<M>(
+		// Create the visual node
+		Node visualNode = this.getContent().createVisual(new AdaptedModelVisualFactoryContextImpl<M>(
 				(Class<M>) this.getContent().getModel().getClass(), this.isPalettePrototype, () -> {
 
 					// Return the label
@@ -272,12 +278,12 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		}
 
 		// Provide styling
-		loadStyling(pane, this.getContent().getModel().getClass(), this.getContent().getStylesheetUrl());
+		loadStyling(visualNode, this.getContent().getModel().getClass(), this.getContent().getStylesheetUrl());
 
 		// Provide select only
 		SelectOnly selectOnly = this.getContent().getSelectOnly();
 		if (selectOnly != null) {
-			pane.setOnMouseClicked((event) -> {
+			visualNode.setOnMouseClicked((event) -> {
 				this.getContent().getErrorHandler().isError(() -> {
 					selectOnly.model(this);
 				});
@@ -286,11 +292,11 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		}
 
 		// Return the visual
-		return pane;
+		return visualNode;
 	}
 
 	@Override
-	protected void doRefreshVisual(Pane visual) {
+	protected void doRefreshVisual(Node visual) {
 	}
 
 	/**

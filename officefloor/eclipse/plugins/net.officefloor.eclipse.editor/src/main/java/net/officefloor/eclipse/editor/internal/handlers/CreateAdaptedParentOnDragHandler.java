@@ -43,7 +43,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnector;
@@ -380,7 +379,7 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
-		public Pane createVisual(AdaptedModelVisualFactoryContext<M> context) {
+		public Node createVisual(AdaptedModelVisualFactoryContext<M> context) {
 			return this.parent.createVisual(context);
 		}
 

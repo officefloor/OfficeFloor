@@ -34,7 +34,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.layout.Pane;
+import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnection;
@@ -720,7 +720,7 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		@Override
-		public Pane createVisual(AdaptedModelVisualFactoryContext<M> context) {
+		public Node createVisual(AdaptedModelVisualFactoryContext<M> context) {
 			return this.getFactory().viewFactory.createVisual(this.getModel(), context);
 		}
 

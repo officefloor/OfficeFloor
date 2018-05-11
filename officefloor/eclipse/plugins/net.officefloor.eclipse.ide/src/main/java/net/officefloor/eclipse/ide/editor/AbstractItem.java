@@ -27,7 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import javafx.scene.layout.Pane;
+import javafx.scene.Node;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.configuration.ConfigurationItem;
@@ -314,9 +314,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 *            {@link Model}.
 	 * @param context
 	 *            {@link AdaptedModelVisualFactoryContext}.
-	 * @return {@link Pane} for the visual.
+	 * @return {@link Node} for the visual.
 	 */
-	public abstract Pane visual(M model, AdaptedModelVisualFactoryContext<M> context);
+	public abstract Node visual(M model, AdaptedModelVisualFactoryContext<M> context);
 
 	/**
 	 * Labels the configuration item.

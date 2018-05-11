@@ -33,7 +33,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedModelVisualFactoryContext<M extends Model> {
+public interface AdaptedModelVisualFactoryContext<M extends Model> extends AdaptedConnectorVisualFactoryContext {
 
 	/**
 	 * Convenience method to add the {@link AdaptedModel} {@link Label} to the
