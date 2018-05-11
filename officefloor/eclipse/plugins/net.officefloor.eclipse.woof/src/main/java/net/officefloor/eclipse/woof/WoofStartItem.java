@@ -17,9 +17,11 @@
  */
 package net.officefloor.eclipse.woof;
 
+import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.geometry.planar.Ellipse;
+
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
-import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofModel;
@@ -59,7 +61,14 @@ public class WoofStartItem extends
 
 	@Override
 	public Node visual(WoofStartModel model, AdaptedModelVisualFactoryContext<WoofStartModel> context) {
-		return DefaultConnectors.OBJECT.createGeometryNode(context);
+		return new GeometryNode<Ellipse>(new Ellipse(0, 0, 15, 15));
+	}
+
+	@Override
+	public String style() {
+		return new IdeStyle().rule("-fx-background-color", "RGBA(0, 0, 0, 0)").rule("-fx-background-radius", "0")
+				.rule("-fx-fill", "black").rule("-fx-border-radius", "0").rule("-fx-padding", "0")
+				.rule("-fx-stroke-width", "0").rule("-fx-pref-width", "15").rule("-fx-pref-height", "15").toString();
 	}
 
 	@Override

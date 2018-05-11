@@ -57,7 +57,7 @@ public class DefaultConnectors {
 	 * {@link AdaptedConnectorVisualFactory} for object connector.
 	 */
 	public static AdaptedConnectorVisualFactory<Region> OBJECT = (context) -> {
-		GeometryNode<Ellipse> node = new GeometryNode<Ellipse>(new Ellipse(0, 0, 12, 6));
+		GeometryNode<Ellipse> node = new GeometryNode<Ellipse>(new Ellipse(0, 0, 6, 6));
 		node.setFill(Color.BLACK);
 		return node;
 	};
