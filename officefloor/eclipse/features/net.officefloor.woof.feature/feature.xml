@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      label="Web on OfficeFloor (WoOF) Feature"
       id="net.officefloor.woof.feature"
+      label="Web on OfficeFloor (WoOF) Feature"
       version="3.0.0"
       provider-name="OfficeFloor">
 
@@ -21,22 +21,19 @@
       <update label="OfficeFloor" url="http://www.officefloor.net/update"/>
    </url>
 
+   <includes
+         id="net.officefloor.feature"
+         version="0.0.0"/>
+
    <requires>
       <import feature="net.officefloor.feature" version="3.0.0"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.jobs"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.jface"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="net.officefloor.core" version="3.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="net.officefloor.woof"
-         version="3.0.0"
          download-size="0"
          install-size="0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
