@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="4.2"?>
 <plugin>
+	<extension point="org.eclipse.ui.newWizards">
+		<wizard 
+			id="net.officefloor.eclipse.woof.WoofNewWizard"
+			class="net.officefloor.eclipse.woof.WoofNewWizard"
+			category="net.officefloor.category"
+			name="WoOF">
+		</wizard>
+	</extension>
 	<extension id="net.officefloor.ui.OfficeFloorEditors" name="OfficeFloor Editors"
 		point="org.eclipse.ui.editors">
 		<editor
@@ -11,18 +19,4 @@
         id="net.officefloor.eclipse.woof"
         name="Woof Editor"/>
 	</extension>
-<!--
-	<extension point="org.eclipse.ui.newWizards">
-		<category
-        id="net.officefloor.eclipse"
-        name="OfficeFloor"
-        parentCategory="net.officefloor.eclipse">
-		</category>
-		<wizard category="net.officefloor.eclipse"
-			class="net.officefloor.eclipse.wizard.file.OfficeFloorNewWizard"
-			icon="icons/OfficeFloor.png" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard"
-			name="OfficeFloor">
-		</wizard>
-	</extension>
--->
 </plugin>

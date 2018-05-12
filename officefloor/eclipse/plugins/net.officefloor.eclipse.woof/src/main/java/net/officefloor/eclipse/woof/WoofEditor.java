@@ -81,6 +81,11 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	 */
 
 	@Override
+	public String fileName() {
+		return "application.woof";
+	}
+
+	@Override
 	public WoofModel prototype() {
 		return new WoofModel();
 	}
@@ -106,7 +111,7 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	}
 
 	@Override
-	protected void saveRootModel(WoofModel model, WritableConfigurationItem configurationItem) throws Exception {
+	public void saveRootModel(WoofModel model, WritableConfigurationItem configurationItem) throws Exception {
 		WOOF_REPOSITORY.storeWoof(model, configurationItem);
 	}
 

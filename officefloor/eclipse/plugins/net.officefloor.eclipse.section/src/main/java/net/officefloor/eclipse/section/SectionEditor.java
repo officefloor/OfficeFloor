@@ -110,6 +110,11 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	@Override
+	public String fileName() {
+		return "new.section";
+	}
+
+	@Override
 	public SectionModel prototype() {
 		return new SectionModel();
 	}
@@ -134,7 +139,7 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	}
 
 	@Override
-	protected void saveRootModel(SectionModel model, WritableConfigurationItem configurationItem) throws Exception {
+	public void saveRootModel(SectionModel model, WritableConfigurationItem configurationItem) throws Exception {
 		SECTION_REPOSITORY.storeSection(model, configurationItem);
 	}
 

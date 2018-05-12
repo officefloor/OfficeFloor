@@ -80,6 +80,7 @@ import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.editor.AbstractItem.PreferenceListener;
+import net.officefloor.eclipse.ide.newwizard.AbstractNewWizard;
 import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
@@ -675,6 +676,15 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	}
 
 	/**
+	 * Obtains the default file name for the editor.
+	 * 
+	 * @return Default file name for the editor.
+	 * 
+	 * @see AbstractNewWizard
+	 */
+	public abstract String fileName();
+
+	/**
 	 * Obtains root prototype.
 	 * 
 	 * @return Root prototype.
@@ -714,7 +724,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 *             If fails to save the root {@link Model} into the
 	 *             {@link WritableConfigurationItem}.
 	 */
-	protected abstract void saveRootModel(R model, WritableConfigurationItem configurationItem) throws Exception;
+	public abstract void saveRootModel(R model, WritableConfigurationItem configurationItem) throws Exception;
 
 	/**
 	 * Allows overriding the palette styling.

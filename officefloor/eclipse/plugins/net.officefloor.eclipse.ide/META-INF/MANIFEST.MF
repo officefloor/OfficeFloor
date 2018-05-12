@@ -24,7 +24,8 @@ Require-Bundle: net.officefloor.core;bundle-version="3.0.0",
  org.eclipse.gef.mvc.fx,
  org.eclipse.gef.mvc.fx.ui,
  org.eclipse.e4.ui.css.swt.theme
-Export-Package: net.officefloor.eclipse.ide.editor
+Export-Package: net.officefloor.eclipse.ide.editor,
+ net.officefloor.eclipse.ide.newwizard
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.officefloor.eclipse.ide.OfficeFloorIdePlugin
 Import-Package: org.slf4j

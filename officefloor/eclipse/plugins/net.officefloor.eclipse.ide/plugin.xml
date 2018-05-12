@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="4.2"?>
 <plugin>
-<extension
-      point = "org.eclipse.ui.preferencePages">
-       <page id="new.officefloor.eclipse.ide.preferences"
+	<extension point="org.eclipse.ui.preferencePages">
+		<page 
+			id="new.officefloor.eclipse.ide.preferences"
 	    	class="net.officefloor.eclipse.ide.preferences.OfficeFloorIdePreferencePage"
-            name="OfficeFloor">
-       </page>
-   </extension>
+            name="OfficeFloor"
+            />
+	</extension>
+	<extension point="org.eclipse.ui.newWizards">
+		<category id="net.officefloor.category" name="OfficeFloor" />
+	</extension>
 </plugin>
