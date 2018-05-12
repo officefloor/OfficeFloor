@@ -6,17 +6,20 @@
 			id="net.officefloor.eclipse.woof.WoofNewWizard"
 			class="net.officefloor.eclipse.woof.WoofNewWizard"
 			category="net.officefloor.category"
-			name="WoOF">
-		</wizard>
+			name="WoOF"
+			/>
 	</extension>
-	<extension id="net.officefloor.ui.OfficeFloorEditors" name="OfficeFloor Editors"
-		point="org.eclipse.ui.editors">
+	<extension point="org.eclipse.ui.editors"
+		id="net.officefloor.ui.OfficeFloorEditors" 
+		name="OfficeFloor Editors"
+		>
 		<editor
-        class="net.officefloor.eclipse.woof.WoofEditor"
-        contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
-        default="true"
-        extensions="woof"
-        id="net.officefloor.eclipse.woof"
-        name="Woof Editor"/>
+			id="net.officefloor.eclipse.woof"
+        	class="net.officefloor.eclipse.woof.WoofEditor"
+        	contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
+        	default="true"
+        	extensions="woof"
+        	name="WoOF Editor"
+        	/>
 	</extension>
 </plugin>

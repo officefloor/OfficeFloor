@@ -1095,11 +1095,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				designer.link(methodFunction.function, initialFunction);
 			}
 		}
-
-		// Link last template task to output
-		// SectionOutput output =
-		// this.getOrCreateOutput(ON_COMPLETION_OUTPUT_NAME, null, false);
-		// designer.link(previousTemplateFunction, output);
 	}
 
 	/**

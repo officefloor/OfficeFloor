@@ -11,7 +11,7 @@
       <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
-    <template path="/href" location="href.woof.html" class="" content-type="text/html" charset="" secure="false" redirect-values-function="" link-separator-character="" x="73" y="29">
+    <template path="/href" location="href.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="73" y="29">
       <output name="link" argument-type="">
         <template path="/form"/>
       </output>

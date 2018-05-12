@@ -121,7 +121,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure default values for template
 		response.assertResponse(200, "");
-		response.assertHeader("content-type", "text/plain");
+		response.assertHeader("content-type", "text/html");
 	}
 
 	/**

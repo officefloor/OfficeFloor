@@ -83,8 +83,7 @@ public class WebTemplateInitialFunction extends
 	 * Initiate.
 	 * 
 	 * @param isRequireSecure
-	 *            Indicates if a secure {@link ServerHttpConnection} is
-	 *            required.
+	 *            Indicates if a secure {@link ServerHttpConnection} is required.
 	 * @param contentType
 	 *            Content-type for the {@link ParsedTemplate}. May be
 	 *            <code>null</code>.
@@ -98,7 +97,7 @@ public class WebTemplateInitialFunction extends
 	public WebTemplateInitialFunction(boolean isRequireSecure, String contentType, Charset charset,
 			HttpInputPath inputPath, int terminatingPathCharacter) {
 		this.isRequireSecure = isRequireSecure;
-		this.contentType = contentType == null ? null : new HttpHeaderValue(contentType);
+		this.contentType = contentType == null ? new HttpHeaderValue("text/html") : new HttpHeaderValue(contentType);
 		this.charset = charset;
 		this.inputPath = inputPath;
 		this.terminatingPathCharacter = terminatingPathCharacter;
@@ -122,13 +121,13 @@ public class WebTemplateInitialFunction extends
 		if (this.isRequireSecure) {
 
 			/*
-			 * Request may have come in on another URL continuation which did
-			 * not require a secure connection and is to now to render this HTTP
-			 * template. Therefore trigger redirect for a secure connection.
+			 * Request may have come in on another URL continuation which did not require a
+			 * secure connection and is to now to render this HTTP template. Therefore
+			 * trigger redirect for a secure connection.
 			 * 
-			 * Note that do not down grade to non-secure connection as already
-			 * have the request and no need to close the existing secure
-			 * connection and establish a new non-secure connection.
+			 * Note that do not down grade to non-secure connection as already have the
+			 * request and no need to close the existing secure connection and establish a
+			 * new non-secure connection.
 			 */
 			boolean isConnectionSecure = connection.isSecure();
 			if (!isConnectionSecure) {
