@@ -22,9 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
-
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.web.HttpParameters;
+import net.officefloor.web.HttpSessionStateful;
 
 /**
  * Example logic for the template.
@@ -73,8 +72,7 @@ public class TemplateLogic {
 	 *            {@link Post} that is dependency injected with HTTP parameters
 	 *            loaded onto it.
 	 * @param posts
-	 *            {@link Posts} that is dependency injected from the HTTP
-	 *            session.
+	 *            {@link Posts} that is dependency injected from the HTTP session.
 	 */
 	public void post(Post post, Posts posts) {
 		posts.addPost(post);

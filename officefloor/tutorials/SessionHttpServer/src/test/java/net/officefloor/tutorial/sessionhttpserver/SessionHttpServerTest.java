@@ -61,10 +61,10 @@ public class SessionHttpServerTest extends TestCase {
 		OfficeFloorMain.open();
 
 		// Send request for empty session
-		this.doRequest("http://localhost:7878/post.woof");
+		this.doRequest("http://localhost:7878/post");
 
 		// Add a post
-		this.doRequest("http://localhost:7878/post-post.woof?text=TEST");
+		this.doRequest("http://localhost:7878/post+post?text=TEST");
 	}
 
 	private void doRequest(String url) throws Exception {

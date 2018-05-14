@@ -17,15 +17,13 @@
  */
 package net.officefloor.tutorial.rawhttpserver;
 
-import java.io.ByteArrayOutputStream;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Tests the web application is returning correctly.
@@ -35,27 +33,28 @@ import net.officefloor.server.http.HttpClientTestUtil;
 public class RawHttpServerTest extends TestCase {
 
 	/**
+	 * {@link MockWoofServer}.
+	 */
+	private MockWoofServer server = null;
+
+	/**
 	 * Ensure able to obtain the Raw HTML.
 	 */
 	public void testRawHtml() throws Exception {
 
 		// Start server
-		OfficeFloorMain.open();
+		this.server = MockWoofServer.open();
 
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Send request for dynamic page
-			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/example.woof"));
+			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
 
 			// Ensure request is successful
-			assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-
-			// Indicate response
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			response.getEntity().writeTo(buffer);
-			String responseText = new String(buffer.toByteArray());
+			assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
 
 			// Ensure raw html rendered to page
+			String responseText = response.getEntity(null);
 			assertTrue("Should have raw HTML rendered", responseText.contains("Web on OfficeFloor (WoOF)"));
 		}
 	}
@@ -63,7 +62,7 @@ public class RawHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop server
-		OfficeFloorMain.close();
+		this.server.close();
 	}
 
 }

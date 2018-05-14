@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorial.rawhttpserver;
 
-import net.officefloor.plugin.web.http.template.UnescapedHtml;
+import net.officefloor.web.template.NotEscaped;
 
 /**
  * Example template logic.
@@ -38,14 +38,13 @@ public class TemplateLogic {
 
 	/**
 	 * Provides the raw HTML to render. It is not escaped due to the
-	 * {@link UnescapedHtml} annotation.
+	 * {@link NotEscaped} annotation.
 	 * 
 	 * @return Raw HTML to render.
 	 */
-	@UnescapedHtml
+	@NotEscaped
 	public String getRawHtml() {
-		return "<p style=\"color: blue\">"
-				+ "<img src=\"./images/OfficeFloorLogo.png\" />"
+		return "<p style=\"color: blue\">" + "<img src=\"./images/OfficeFloorLogo.png\" />"
 				+ " Web on OfficeFloor (WoOF)</p>";
 	}
 

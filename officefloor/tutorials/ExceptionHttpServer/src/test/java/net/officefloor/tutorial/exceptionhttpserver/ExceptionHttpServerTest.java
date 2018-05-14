@@ -20,6 +20,7 @@ package net.officefloor.tutorial.exceptionhttpserver;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -48,7 +49,10 @@ public class ExceptionHttpServerTest extends TestCase {
 		error.reset();
 
 		// Submit to trigger the exception
-		this.client.execute(new HttpGet("http://localhost:7878/template-submit.woof"));
+		try (CloseableHttpResponse response = this.client
+				.execute(new HttpGet("http://localhost:7878/template+submit"))) {
+			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		}
 
 		// Ensure handling by logging the failure
 		String log = new String(error.toByteArray()).trim();
