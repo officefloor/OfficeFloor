@@ -276,8 +276,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure section logic {@link Method} can have <code>void</code> return if
-	 * no properties are required.
+	 * Ensure section logic {@link Method} can have <code>void</code> return if no
+	 * properties are required.
 	 */
 	public void testSectionWithVoidMethod() throws Exception {
 		VoidBeanLogic.isInvoked = false;
@@ -644,8 +644,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure allows template responses to {@link HttpMethod} values other than
-	 * GET.
+	 * Ensure allows template responses to {@link HttpMethod} values other than GET.
 	 */
 	public void testOtherMethod() throws Exception {
 		MockHttpResponse response = this.template(
@@ -856,17 +855,16 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link HttpAccessControl} can be applied to the
-	 * {@link WebTemplate}.
+	 * Ensure {@link HttpAccessControl} can be applied to the {@link WebTemplate}.
 	 */
 	public void testAccessControl() throws Exception {
-		
+
 		// FIXME implement code to pass this test
 		if (true) {
 			System.err.println("TODO implement " + this.getClass().getName() + " testAccessControl");
 			return;
 		}
-		
+
 		MockHttpResponse response = this.template((context, templater) -> {
 			WebArchitect web = context.getWebArchitect();
 			OfficeArchitect office = context.getOfficeArchitect();
@@ -915,8 +913,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link WebTemplate} and it's super {@link WebTemplate}
-	 * from a resource.
+	 * Ensure can load {@link WebTemplate} and it's super {@link WebTemplate} from a
+	 * resource.
 	 */
 	public void testLoadSuperFromResource() throws Exception {
 		this.template("/child", (context, templater) -> {
@@ -927,8 +925,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can specify multiple {@link WebTemplate} instances for
-	 * inheritance.
+	 * Ensure can specify multiple {@link WebTemplate} instances for inheritance.
 	 */
 	public void testGrandSuperTemplate() throws Exception {
 		this.template("/child", (context, templater) -> {
@@ -962,8 +959,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can provide <code>Data</code> suffix to section {@link Method}
-	 * name.
+	 * Ensure can provide <code>Data</code> suffix to section {@link Method} name.
 	 */
 	public void testDataSuffix() throws Exception {
 		this.template("/path",
@@ -1021,7 +1017,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	public void testExtendTemplate() throws Exception {
 		this.template("/extend", (context, templater) -> {
 			WebTemplate template = templater.addTemplate(false, "/extend", new StringReader("original"));
-			template.addExtension(new MockWebTemplateExtension()).addProperty("test", "available");
+			template.addExtension(MockWebTemplateExtension.class.getName()).addProperty("test", "available");
 		}, "extended");
 	}
 
@@ -1112,8 +1108,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Runs a {@link WebTemplate} and validates the {@link HttpResponse}
-	 * content.
+	 * Runs a {@link WebTemplate} and validates the {@link HttpResponse} content.
 	 * 
 	 * @param path
 	 *            Request path.

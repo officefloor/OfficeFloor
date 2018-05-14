@@ -481,6 +481,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	@SuppressWarnings("unchecked")
 	public <M extends Model> AdaptedModel<M> createAdaptedModel(M model, AdaptedModel<?> parentAdaptedModel) {
 
+		// Ensure have a model
+		if (model == null) {
+			throw new IllegalArgumentException("Must provide model");
+		}
+
 		// Determine if already and adapted model
 		AdaptedModel<M> adapted = (AdaptedModel<M>) this.modelToAdaption.get(model);
 		if (adapted != null) {

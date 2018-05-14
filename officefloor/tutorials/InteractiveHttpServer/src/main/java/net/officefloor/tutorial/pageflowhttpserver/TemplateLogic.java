@@ -20,7 +20,7 @@ package net.officefloor.tutorial.pageflowhttpserver;
 import java.io.Serializable;
 
 import lombok.Data;
-import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Example logic for the template.
@@ -54,8 +54,8 @@ public class TemplateLogic {
 	 * 
 	 * @param submittedParameters
 	 *            Same {@link Parameters} that was constructed for
-	 *            {@link #handleSubmission(Parameters)}. This allows the page to
-	 *            be rendered with the values provided by the client.
+	 *            {@link #handleSubmission(Parameters)}. This allows the page to be
+	 *            rendered with the values provided by the client.
 	 * @return {@link Parameters} for rendering to page.
 	 */
 	public Parameters getTemplateData(Parameters submittedParameters) {
@@ -66,9 +66,9 @@ public class TemplateLogic {
 	 * Reflectively invoked to handle form submission.
 	 * 
 	 * @param submittedParameters
-	 *            {@link Parameters} which is dependency injected. It is
-	 *            constructed via its default constructor and has the HTTP
-	 *            parameters values loaded by corresponding names.
+	 *            {@link Parameters} which is dependency injected. It is constructed
+	 *            via its default constructor and has the HTTP parameters values
+	 *            loaded by corresponding names.
 	 */
 	public void handleSubmission(Parameters submittedParameters) {
 

@@ -41,7 +41,6 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
 import net.officefloor.web.template.section.WebTemplateRedirectAnnotation;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
@@ -75,9 +74,11 @@ public class WebTemplateArchitectEmployer extends AbstractWebTemplateFactory imp
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
 	 * @return {@link WebTemplateLoader}.
+	 * @throws Exception
+	 *             If fails to load the {@link WebTemplateLoader}.
 	 */
-	public static WebTemplateLoader employWebTemplateLoader(OfficeFloorCompiler compiler) {
-		return new WebTemplateLoaderImpl(compiler);
+	public static WebTemplateLoader employWebTemplateLoader(OfficeFloorCompiler compiler) throws Exception {
+		return compiler.run(WebTemplateLoaderImpl.class);
 	}
 
 	/**
@@ -170,11 +171,6 @@ public class WebTemplateArchitectEmployer extends AbstractWebTemplateFactory imp
 	private class WebTemplateImpl extends AbstractWebTemplate {
 
 		/**
-		 * {@link WebTemplateSectionSource}.
-		 */
-		private final WebTemplateSectionSource webTemplateSectionSource;
-
-		/**
 		 * {@link OfficeSection} for the {@link WebTemplate}.
 		 */
 		private final OfficeSection section;
@@ -212,8 +208,8 @@ public class WebTemplateArchitectEmployer extends AbstractWebTemplateFactory imp
 		private WebTemplateImpl(boolean isSecure, String applicationPath,
 				WebTemplateSectionSource webTemplateSectionSource, OfficeSection templateSection,
 				PropertyList properties) {
-			super(isSecure, applicationPath, properties, WebTemplateArchitectEmployer.this.officeArchitect);
-			this.webTemplateSectionSource = webTemplateSectionSource;
+			super(webTemplateSectionSource, isSecure, applicationPath, properties,
+					WebTemplateArchitectEmployer.this.officeArchitect);
 			this.section = templateSection;
 
 			// Configure the input
@@ -305,9 +301,8 @@ public class WebTemplateArchitectEmployer extends AbstractWebTemplateFactory imp
 		 */
 
 		@Override
-		public WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension) {
-			return this.webTemplateSectionSource.addWebTemplateExtension(extension,
-					WebTemplateArchitectEmployer.this.sourceContext.createPropertyList());
+		protected PropertyList createPropertyList() {
+			return WebTemplateArchitectEmployer.this.createPropertyList();
 		}
 
 		@Override

@@ -18,6 +18,7 @@
 package net.officefloor.web.template.build;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.properties.PropertyList;
@@ -27,16 +28,15 @@ import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.web.route.WebRouterBuilder;
-import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
-import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateEnhancements;
 
 /**
  * {@link WebTemplateLoader} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory implements WebTemplateLoader, SourceIssues {
+public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory
+		implements OfficeFloorCompilerRunnable<WebTemplateLoader>, WebTemplateLoader, SourceIssues {
 
 	/**
 	 * {@link OfficeFloorCompiler}.
@@ -44,13 +44,29 @@ public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory implements
 	private final OfficeFloorCompiler compiler;
 
 	/**
+	 * Instantiate for {@link OfficeFloorCompilerRunnable}.
+	 */
+	public WebTemplateLoaderImpl() {
+		this.compiler = null;
+	}
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
 	 */
-	public WebTemplateLoaderImpl(OfficeFloorCompiler compiler) {
+	private WebTemplateLoaderImpl(OfficeFloorCompiler compiler) {
 		this.compiler = compiler;
+	}
+
+	/*
+	 * ===== OfficeFloorCompilerRunnable ========
+	 */
+
+	@Override
+	public WebTemplateLoader run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {
+		return new WebTemplateLoaderImpl(compiler);
 	}
 
 	/*
@@ -114,19 +130,13 @@ public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory implements
 		SectionLoader sectionLoader = this.compiler.getSectionLoader();
 
 		// Load and return the section (web template) type
-		return WebTemplateSectionSource.executeWithEnhancements(template.enhancements, () -> sectionLoader
-				.loadSectionType(WebTemplateSectionSource.class, template.applicationPath, properties));
+		return sectionLoader.loadSectionType(template.webTemplateSectionSource, template.applicationPath, properties);
 	}
 
 	/**
 	 * {@link WebTemplate} implementation for determining type.
 	 */
 	private class TypeWebTemplate extends AbstractWebTemplate implements OfficeFlowSinkNode, OfficeFlowSourceNode {
-
-		/**
-		 * {@link WebTemplateEnhancements}.
-		 */
-		private final WebTemplateEnhancements enhancements = new WebTemplateEnhancements();
 
 		/**
 		 * Instantiate.
@@ -142,7 +152,7 @@ public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory implements
 		 */
 		private TypeWebTemplate(boolean isSecure, String applicationPath, PropertyList properties,
 				SourceIssues sourceIssues) {
-			super(isSecure, applicationPath, properties, sourceIssues);
+			super(new WebTemplateSectionSource(), isSecure, applicationPath, properties, sourceIssues);
 		}
 
 		/*
@@ -150,9 +160,8 @@ public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory implements
 		 */
 
 		@Override
-		public WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension) {
-			return this.enhancements.createWebTempalteExtensionBuilder(extension,
-					WebTemplateLoaderImpl.this.createPropertyList());
+		protected PropertyList createPropertyList() {
+			return WebTemplateLoaderImpl.this.createPropertyList();
 		}
 
 		@Override

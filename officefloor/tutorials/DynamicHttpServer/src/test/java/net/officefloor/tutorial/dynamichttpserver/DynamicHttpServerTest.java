@@ -17,13 +17,10 @@
  */
 package net.officefloor.tutorial.dynamichttpserver;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-
 import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Tests the {@link DynamicHttpServer}.
@@ -31,6 +28,11 @@ import net.officefloor.server.http.HttpClientTestUtil;
  * @author Daniel Sagenschneider
  */
 public class DynamicHttpServerTest extends TestCase {
+
+	/**
+	 * {@link MockWoofServer}.
+	 */
+	private MockWoofServer server = null;
 
 	// START SNIPPET: pojo
 	public void testTemplateLogic() {
@@ -47,24 +49,20 @@ public class DynamicHttpServerTest extends TestCase {
 	public void testDynamicPage() throws Exception {
 
 		// Start server
-		OfficeFloorMain.open();
+		this.server = MockWoofServer.open();
 
 		// Send request for dynamic page
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/example.woof"));
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
 
-			// Ensure request is successful
-			assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-
-			// Indicate response
-			response.getEntity().writeTo(System.out);
-		}
+		// Ensure request is successful
+		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Stop server
-		OfficeFloorMain.close();
+		if (this.server != null) {
+			this.server.close();
+		}
 	}
 
 }

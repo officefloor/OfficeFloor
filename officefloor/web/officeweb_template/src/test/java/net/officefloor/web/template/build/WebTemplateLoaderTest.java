@@ -122,7 +122,7 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testExtendTemplate() throws Exception {
 		this.doTypeTest(false, "/extend", "#{override}", (template) -> {
-			template.addExtension(new MockWebTemplateExtension()).addProperty("test", "available");
+			template.addExtension(MockWebTemplateExtension.class.getName()).addProperty("test", "available");
 		}, (designer) -> {
 			designer.addSectionInput("extend", null).addAnnotation(new WebTemplateLinkAnnotation(false, "extend"));
 			designer.addSectionOutput("extend", null, false);
@@ -140,7 +140,7 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle template inheritance.
 	 */
-	public void testTemplateInheritance() {
+	public void testTemplateInheritance() throws Exception {
 
 		// Create the loader
 		WebTemplateLoader loader = WebTemplateArchitectEmployer
@@ -185,30 +185,35 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void doTypeTest(boolean isSecure, String path, String templateContent,
 			Consumer<WebTemplate> webTemplateDecorator, Consumer<SectionDesigner> typeDecorator) {
+		try {
 
-		// Create the loader
-		WebTemplateLoader loader = WebTemplateArchitectEmployer
-				.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+			// Create the loader
+			WebTemplateLoader loader = WebTemplateArchitectEmployer
+					.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
 
-		// Load the type
-		WebTemplate template = loader.addTemplate(isSecure, path, new StringReader(templateContent));
-		if (webTemplateDecorator != null) {
-			webTemplateDecorator.accept(template);
+			// Load the type
+			WebTemplate template = loader.addTemplate(isSecure, path, new StringReader(templateContent));
+			if (webTemplateDecorator != null) {
+				webTemplateDecorator.accept(template);
+			}
+			SectionType type = loader.loadWebTemplateType(template);
+
+			// Create the expected type (already supplying common)
+			SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
+			if (typeDecorator != null) {
+				typeDecorator.accept(expected);
+			}
+			expected.addSectionInput("renderTemplate", null);
+			expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
+			expected.addSectionOutput("redirectToTemplate", null, false);
+			expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
+
+			// Validate the type
+			SectionLoaderUtil.validateSectionType(expected, type);
+
+		} catch (Exception ex) {
+			throw fail(ex);
 		}
-		SectionType type = loader.loadWebTemplateType(template);
-
-		// Create the expected type (already supplying common)
-		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
-		if (typeDecorator != null) {
-			typeDecorator.accept(expected);
-		}
-		expected.addSectionInput("renderTemplate", null);
-		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
-		expected.addSectionOutput("redirectToTemplate", null, false);
-		expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
-
-		// Validate the type
-		SectionLoaderUtil.validateSectionType(expected, type);
 	}
 
 }

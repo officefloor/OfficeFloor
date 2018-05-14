@@ -43,6 +43,11 @@ import net.officefloor.web.template.section.WebTemplateSectionSource;
 public abstract class AbstractWebTemplate implements WebTemplate {
 
 	/**
+	 * {@link WebTemplateSectionSource}.
+	 */
+	protected final WebTemplateSectionSource webTemplateSectionSource;
+
+	/**
 	 * Indicates if the {@link WebTemplate} is secure.
 	 */
 	protected final boolean isSecure;
@@ -106,6 +111,8 @@ public abstract class AbstractWebTemplate implements WebTemplate {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param webTemplateSectionSoure
+	 *            {@link WebTemplateSectionSource} instance to use.
 	 * @param isSecure
 	 *            Indicates if requires secure {@link ServerHttpConnection} to
 	 *            render the {@link WebTemplate}.
@@ -118,13 +125,21 @@ public abstract class AbstractWebTemplate implements WebTemplate {
 	 * @param sourceIssues
 	 *            {@link SourceIssues}.
 	 */
-	protected AbstractWebTemplate(boolean isSecure, String applicationPath, PropertyList properties,
-			SourceIssues sourceIssues) {
+	protected AbstractWebTemplate(WebTemplateSectionSource webTemplateSectionSource, boolean isSecure,
+			String applicationPath, PropertyList properties, SourceIssues sourceIssues) {
+		this.webTemplateSectionSource = webTemplateSectionSource;
 		this.isSecure = isSecure;
 		this.applicationPath = applicationPath;
 		this.properties = properties;
 		this.sourceIssues = sourceIssues;
 	}
+
+	/**
+	 * Creates a new {@link PropertyList}.
+	 * 
+	 * @return New {@link PropertyList}.
+	 */
+	protected abstract PropertyList createPropertyList();
 
 	/**
 	 * Loads the properties.
@@ -285,6 +300,12 @@ public abstract class AbstractWebTemplate implements WebTemplate {
 	public WebTemplate setSuperTemplate(WebTemplate superTemplate) {
 		this.superTemplate = (AbstractWebTemplate) superTemplate;
 		return this;
+	}
+
+	@Override
+	public WebTemplateExtensionBuilder addExtension(String webTemplateExtensionClassName) {
+		return this.webTemplateSectionSource.addWebTemplateExtension(webTemplateExtensionClassName,
+				this.createPropertyList());
 	}
 
 }

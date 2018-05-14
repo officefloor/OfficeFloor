@@ -51,13 +51,13 @@ public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * <p>
-	 * Specifies the {@link Method} name on the logic {@link Class} to provide
-	 * the values for redirect path parameters to this {@link WebTemplate}. The
-	 * returned type from the {@link Method} will be used to source values for
-	 * parameters in constructing the path to this {@link WebTemplate}.
+	 * Specifies the {@link Method} name on the logic {@link Class} to provide the
+	 * values for redirect path parameters to this {@link WebTemplate}. The returned
+	 * type from the {@link Method} will be used to source values for parameters in
+	 * constructing the path to this {@link WebTemplate}.
 	 * <p>
-	 * Should the path to the template be static (i.e. has no path parameters),
-	 * no {@link Method} need be specified.
+	 * Should the path to the template be static (i.e. has no path parameters), no
+	 * {@link Method} need be specified.
 	 * 
 	 * @param functionName
 	 *            Logic {@link Class} {@link Method} name.
@@ -66,8 +66,7 @@ public interface WebTemplate extends PropertyConfigurable {
 	WebTemplate setRedirectValuesFunction(String functionName);
 
 	/**
-	 * Specifies the <code>Content-Type</code> output by this
-	 * {@link WebTemplate}.
+	 * Specifies the <code>Content-Type</code> output by this {@link WebTemplate}.
 	 * 
 	 * @param contentType
 	 *            <code>Content-Type</code> output by this {@link WebTemplate}.
@@ -86,8 +85,7 @@ public interface WebTemplate extends PropertyConfigurable {
 	WebTemplate setCharset(String charsetName);
 
 	/**
-	 * Allows overriding the default separator character between the path and
-	 * link.
+	 * Allows overriding the default separator character between the path and link.
 	 * 
 	 * @param separator
 	 *            Separator to use to separate path and link.
@@ -97,8 +95,8 @@ public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * <p>
-	 * Indicate whether a secure connection is required for the link. This
-	 * overrides the default template secure setting for the link.
+	 * Indicate whether a secure connection is required for the link. This overrides
+	 * the default template secure setting for the link.
 	 * <p>
 	 * Example use could be the landing page may be insecure but the login form
 	 * submission link on the page is to be secure.
@@ -114,8 +112,8 @@ public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * <p>
-	 * Obtains the {@link HttpSecurableBuilder} to configure access controls to
-	 * this {@link WebTemplate}.
+	 * Obtains the {@link HttpSecurableBuilder} to configure access controls to this
+	 * {@link WebTemplate}.
 	 * <p>
 	 * Calling this method without providing configuration requires only
 	 * authentication to access the {@link WebTemplate}.
@@ -126,9 +124,9 @@ public interface WebTemplate extends PropertyConfigurable {
 
 	/**
 	 * <p>
-	 * Adds a {@link HttpMethod} that will render the {@link WebTemplate}.
-	 * Should the {@link HttpMethod} not be in this list, a redirect will occur
-	 * to {@link HttpMethodEnum#GET}.
+	 * Adds a {@link HttpMethod} that will render the {@link WebTemplate}. Should
+	 * the {@link HttpMethod} not be in this list, a redirect will occur to
+	 * {@link HttpMethodEnum#GET}.
 	 * <p>
 	 * Note that {@link HttpMethodEnum#GET} is added by default.
 	 * 
@@ -152,11 +150,11 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * Adds a {@link WebTemplateExtension} for this {@link WebTemplate}.
 	 * 
 	 * @param extension
-	 *            {@link WebTemplateExtension}.
+	 *            {@link WebTemplateExtension} {@link Class}.
 	 * @return {@link WebTemplateExtensionBuilder} to build the
 	 *         {@link WebTemplateExtension}.
 	 */
-	WebTemplateExtensionBuilder addExtension(WebTemplateExtension extension);
+	WebTemplateExtensionBuilder addExtension(String webTemplateExtensionClassName);
 
 	/**
 	 * Obtains the {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
@@ -164,8 +162,8 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * @param valuesType
 	 *            Name of type provided as a parameter to the
 	 *            {@link OfficeFlowSinkNode} should the path parameters require
-	 *            being obtained. The type should provide a bean property for
-	 *            each path parameter for the {@link WebTemplate}. May be
+	 *            being obtained. The type should provide a bean property for each
+	 *            path parameter for the {@link WebTemplate}. May be
 	 *            <code>null</code> if no path parameters are required.
 	 * @return {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
 	 */
@@ -185,8 +183,8 @@ public interface WebTemplate extends PropertyConfigurable {
 	 * Adds {@link Governance} for this {@link WebTemplate}.
 	 * <p>
 	 * This enables providing {@link Governance} over all
-	 * {@link OfficeSectionFunction} instances within the {@link WebTemplate}
-	 * and all its subsequent {@link OfficeSubSection} instances.
+	 * {@link OfficeSectionFunction} instances within the {@link WebTemplate} and
+	 * all its subsequent {@link OfficeSubSection} instances.
 	 * 
 	 * @param governance
 	 *            {@link OfficeGovernance}.

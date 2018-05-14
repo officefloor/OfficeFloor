@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
@@ -117,58 +116,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 */
 	public static final class NoLogicClass {
 		public void notIncludedInput() {
-		}
-	}
-
-	/**
-	 * Enhancements for the {@link WebTemplate}. Typically used for loading type
-	 * information via different {@link ClassLoader}.
-	 */
-	public static class WebTemplateEnhancements {
-
-		/**
-		 * {@link WebTemplateExtensionBuilder} instances.
-		 */
-		private List<WebTemplateExtensionBuilderImpl> extensions = new LinkedList<>();
-
-		/**
-		 * Creates an override {@link WebTemplateExtensionBuilder}.
-		 * 
-		 * @param extension
-		 *            {@link WebTemplateExtension}.
-		 * @param propertyList
-		 *            {@link PropertyList}.
-		 * @return {@link WebTemplateExtensionBuilder}.
-		 */
-		public WebTemplateExtensionBuilder createWebTempalteExtensionBuilder(WebTemplateExtension extension,
-				PropertyList propertyList) {
-			WebTemplateExtensionBuilderImpl extensionBuilder = new WebTemplateExtensionBuilderImpl(extension,
-					propertyList);
-			this.extensions.add(extensionBuilder);
-			return extensionBuilder;
-		}
-	}
-
-	/**
-	 * Active {@link WebTemplateEnhancements}.
-	 */
-	private static WebTemplateEnhancements activeEnhancements = null;
-
-	/**
-	 * Executes with the provided {@link WebTemplateExtensionBuilder} instances.
-	 * 
-	 * @param overrides
-	 *            {@link WebTemplateEnhancements}.
-	 * @param logic
-	 *            Logic.
-	 * @return Value from {@link Supplier}.
-	 */
-	public static <T> T executeWithEnhancements(WebTemplateEnhancements overrides, Supplier<T> logic) {
-		activeEnhancements = overrides;
-		try {
-			return logic.get();
-		} finally {
-			activeEnhancements = null;
 		}
 	}
 
@@ -509,15 +456,16 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Adds a {@link WebTemplateExtensionBuilder}.
 	 * 
-	 * @param extension
-	 *            {@link WebTemplateExtension}.
+	 * @param webtemplateExtensionClassName
+	 *            {@link WebTemplateExtension} {@link Class} name.
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 * @return {@link WebTemplateExtensionBuilder}.
 	 */
-	public WebTemplateExtensionBuilder addWebTemplateExtension(WebTemplateExtension extension,
+	public WebTemplateExtensionBuilder addWebTemplateExtension(String webtemplateExtensionClassName,
 			PropertyList propertyList) {
-		WebTemplateExtensionBuilderImpl extensionBuilder = new WebTemplateExtensionBuilderImpl(extension, propertyList);
+		WebTemplateExtensionBuilderImpl extensionBuilder = new WebTemplateExtensionBuilderImpl(
+				webtemplateExtensionClassName, propertyList);
 		this.extensions.add(extensionBuilder);
 		return extensionBuilder;
 	}
@@ -721,18 +669,18 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
 
 		// Extend the template content as necessary
-		List<WebTemplateExtensionBuilderImpl> extensions = this.extensions;
-		if (activeEnhancements != null) {
-			extensions = new ArrayList<>(this.extensions.size() + activeEnhancements.extensions.size());
-			extensions.addAll(this.extensions);
-			extensions.addAll(activeEnhancements.extensions);
-		}
-		for (WebTemplateExtensionBuilderImpl extension : extensions) {
+		for (WebTemplateExtensionBuilderImpl extension : this.extensions) {
+
+			// Load the extension
+			@SuppressWarnings("unchecked")
+			Class<? extends WebTemplateExtension> extensionClass = (Class<? extends WebTemplateExtension>) context
+					.loadClass(extension.webTemplateExtensionClassName);
+			WebTemplateExtension extensionInstance = extensionClass.newInstance();
 
 			// Run the extension of template
 			WebTemplateExtensionContext extensionContext = new WebTemplateSectionExtensionContextImpl(templateContent,
 					extension.propertyList, nonRenderTemplateTaskKeys);
-			extension.webTemplateExtension.extendWebTemplate(extensionContext);
+			extensionInstance.extendWebTemplate(extensionContext);
 
 			// Override template details
 			templateContent = extensionContext.getTemplateContent();
@@ -1834,9 +1782,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	private static class WebTemplateExtensionBuilderImpl implements WebTemplateExtensionBuilder {
 
 		/**
-		 * {@link WebTemplateExtension}.
+		 * {@link WebTemplateExtension} {@link Class} name.
 		 */
-		private final WebTemplateExtension webTemplateExtension;
+		private final String webTemplateExtensionClassName;
 
 		/**
 		 * {@link PropertyList} to configure the {@link WebTemplateExtension}.
@@ -1846,14 +1794,14 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param webTemplateExtension
-		 *            {@link WebTemplateExtension}.
+		 * @param webTemplateExtensionClassName
+		 *            {@link WebTemplateExtension} {@link Class} name.
 		 * @param propertyList
 		 *            {@link PropertyList} to configure the
 		 *            {@link WebTemplateExtension}.
 		 */
-		private WebTemplateExtensionBuilderImpl(WebTemplateExtension webTemplateExtension, PropertyList propertyList) {
-			this.webTemplateExtension = webTemplateExtension;
+		private WebTemplateExtensionBuilderImpl(String webTemplateExtensionClassName, PropertyList propertyList) {
+			this.webTemplateExtensionClassName = webTemplateExtensionClassName;
 			this.propertyList = propertyList;
 		}
 

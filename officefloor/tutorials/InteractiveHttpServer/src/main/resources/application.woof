@@ -1,14 +1,24 @@
 <woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
   <templates>
-    <template name="example" uri="example" path="Template.woof.html" class="net.officefloor.tutorial.pageflowhttpserver.TemplateLogic" x="88" y="58">
-      <output name="output" argument-type="">
+    <template path="/example" location="Template.woof.html" class="net.officefloor.tutorial.pageflowhttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="244" y="84">
+      <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
   </templates>
   <sections>
   </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
   <resources>
   </resources>
   <exceptions>
   </exceptions>
+  <starting>
+  </starting>
 </woof>
