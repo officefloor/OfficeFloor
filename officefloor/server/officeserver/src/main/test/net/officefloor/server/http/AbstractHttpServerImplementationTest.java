@@ -1047,6 +1047,12 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 					fail("Timed out waiting for response");
 				}
 
+				// Handle possible connection close
+				if (!selectionKey.isValid()) {
+					fail("Lost connection after sending " + requestSentCount + " requests and received "
+							+ responseReceivedCount + " responses");
+				}
+
 				// Send the request
 				if (selectionKey.isWritable()) {
 					// Keep writing until fill socket of all requests sent
