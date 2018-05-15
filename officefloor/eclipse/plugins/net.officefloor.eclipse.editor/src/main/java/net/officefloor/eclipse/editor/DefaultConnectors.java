@@ -70,11 +70,24 @@ public class DefaultConnectors {
 	public static AdaptedConnectorVisualFactory<Region> TEAM = FLOW;
 
 	/**
-	 * TODO provide specific connector.
-	 * 
 	 * {@link AdaptedConnectorVisualFactory} for derivative connector.
 	 */
-	public static AdaptedConnectorVisualFactory<Region> DERIVE = FLOW;
+	public static AdaptedConnectorVisualFactory<Region> DERIVE = (context) -> {
+		final double Y_TOP = 0;
+		final double Y_STEM = 5;
+		final double Y_BOTTOM = 9;
+		final double X_LEFT = 0;
+		final double X_RIGHT = 10;
+		final double X_STEM_INSET = 2;
+		final double X_STEM_LEFT = X_LEFT + X_STEM_INSET;
+		final double X_STEM_RIGHT = X_RIGHT - X_STEM_INSET;
+		final double X_TIP = (X_RIGHT - X_LEFT) / 2;
+		GeometryNode<Polygon> node = new GeometryNode<>(new Polygon(new Point(X_STEM_LEFT, Y_BOTTOM),
+				new Point(X_STEM_LEFT, Y_STEM), new Point(X_LEFT, Y_STEM), new Point(X_TIP, Y_TOP),
+				new Point(X_RIGHT, Y_STEM), new Point(X_STEM_RIGHT, Y_STEM), new Point(X_STEM_RIGHT, Y_BOTTOM)));
+		node.setFill(Color.LIGHTGRAY);
+		return node;
+	};
 
 	/**
 	 * All access via static methods.

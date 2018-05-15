@@ -20,8 +20,8 @@ package net.officefloor.tutorial.securepagehttpserver;
 import java.io.Serializable;
 
 import lombok.Data;
-import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Logic for the card template.
@@ -44,8 +44,7 @@ public class CardLogic {
 		private String csc;
 	}
 
-	public CardDetails getTemplateData(CardDetails cardDetails,
-			ServerHttpConnection connection) {
+	public CardDetails getTemplateData(CardDetails cardDetails, ServerHttpConnection connection) {
 
 		// Confirm a secure connection (not needed but included for tutorial)
 		if (!connection.isSecure()) {

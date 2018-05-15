@@ -1,18 +1,24 @@
 <woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
   <templates>
-    <template name="card" uri="card" path="card.woof.html" class="net.officefloor.tutorial.securepagehttpserver.CardLogic" secure="true" x="280" y="97">
+    <template path="/card" location="card.woof.html" class="net.officefloor.tutorial.securepagehttpserver.CardLogic" content-type="" charset="" secure="true" redirect-values-function="" link-separator-character="" x="209" y="122">
       <output name="main" argument-type="">
-        <template name="main"/>
+        <template path="/main"/>
       </output>
     </template>
-    <template name="main" uri="main" path="main.woof.html" class="" secure="false" x="116" y="89">
+    <template path="/main" location="main.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="405" y="160">
       <output name="card" argument-type="">
-        <template name="card"/>
+        <template path="/card"/>
       </output>
     </template>
   </templates>
   <sections>
   </sections>
+  <securities>
+  </securities>
   <governances>
   </governances>
   <resources>

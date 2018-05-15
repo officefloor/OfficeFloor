@@ -38,8 +38,6 @@
       <output name="link" argument-type="">
         <resource path="/resource"/>
       </output>
-      <output name="redirectToTemplate" argument-type="">
-      </output>
     </template>
     <template path="/template/sectionAndTemplate" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="510" y="24">
       <output name="flow" argument-type="">
@@ -48,14 +46,11 @@
       <output name="link" argument-type="">
         <template path="/template/resource"/>
       </output>
-      <output name="redirectToTemplate" argument-type="">
-      </output>
     </template>
     <template path="/template/security" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="477" y="215">
+      <extends template="/template/sectionAndTemplate"/>
       <output name="link" argument-type="">
         <security name="Form Security"/>
-      </output>
-      <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
   </templates>

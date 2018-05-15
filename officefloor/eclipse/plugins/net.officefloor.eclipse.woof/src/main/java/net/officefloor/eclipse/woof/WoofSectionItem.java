@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.woof;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
@@ -127,6 +128,16 @@ public class WoofSectionItem extends
 	 * {@link SectionType}.
 	 */
 	private SectionType sectionType;
+
+	/**
+	 * {@link SectionInputType} name mapping.
+	 */
+	private Map<String, String> inputNameMapping;
+
+	/**
+	 * {@link SectionOutputType} name mapping.
+	 */
+	private Map<String, String> outputNameMapping;
 
 	/*
 	 * =================== AbstractConfigurableItem ====================
@@ -233,6 +244,12 @@ public class WoofSectionItem extends
 
 				// Attempt to load the type
 				item.sectionType = loadSectionType(item, osgiBridge);
+
+				// Load the mappings
+				item.inputNameMapping = this.translateToNameMappings(item.sectionType.getSectionInputTypes(),
+						(input) -> input.getSectionInputName());
+				item.outputNameMapping = this.translateToNameMappings(item.sectionType.getSectionOutputTypes(),
+						(output) -> output.getSectionOutputName());
 			});
 
 		}).add((builder, context) -> {
@@ -243,14 +260,9 @@ public class WoofSectionItem extends
 
 		}).refactor((builder, context) -> {
 			builder.apply("Refactor", (item) -> {
-
-				// TODO provide mapping
-				Map<String, String> inputMapping = new HashMap<>();
-				Map<String, String> outputMapping = new HashMap<>();
-
-				context.execute(
-						context.getOperations().refactorSection(context.getModel(), item.name, item.sourceClassName,
-								item.location, item.properties, item.sectionType, inputMapping, outputMapping));
+				context.execute(context.getOperations().refactorSection(context.getModel(), item.name,
+						item.sourceClassName, item.location, item.properties, item.sectionType, item.inputNameMapping,
+						item.outputNameMapping));
 			});
 
 		}).delete((context) -> {

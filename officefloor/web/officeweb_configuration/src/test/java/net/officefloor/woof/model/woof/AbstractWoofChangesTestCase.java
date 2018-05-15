@@ -39,6 +39,8 @@ import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
+import net.officefloor.web.template.type.WebTemplateType;
+import net.officefloor.web.template.type.WebTemplateTypeImpl;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofChangesImpl;
@@ -166,6 +168,22 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		SectionTypeContextImpl context = new SectionTypeContextImpl();
 		constructor.construct(context);
 		return context;
+	}
+
+	/**
+	 * Constructs the {@link WebTemplateType} for testing.
+	 * 
+	 * @param constructor
+	 *            {@link SectionTypeConstructor}.
+	 * @return {@link WebTemplateType}.
+	 */
+	protected WebTemplateType constructWebTemplateType(SectionTypeConstructor constructor) {
+
+		// Construct the section type
+		SectionType sectionType = this.constructSectionType(constructor);
+
+		// Return the web template type
+		return new WebTemplateTypeImpl(sectionType);
 	}
 
 	/**
@@ -570,8 +588,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	}
 
 	/**
-	 * Item for {@link HttpSecurityDependencyType} and
-	 * {@link HttpSecurityFlowType}.
+	 * Item for {@link HttpSecurityDependencyType} and {@link HttpSecurityFlowType}.
 	 */
 	private class HttpSecurityTypeItem<E extends Enum<E>>
 			implements HttpSecurityDependencyType<E>, HttpSecurityFlowType<E> {

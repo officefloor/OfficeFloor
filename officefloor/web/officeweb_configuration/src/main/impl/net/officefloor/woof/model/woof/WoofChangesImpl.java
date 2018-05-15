@@ -49,6 +49,8 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.template.type.WebTemplateOutputType;
+import net.officefloor.web.template.type.WebTemplateType;
 import net.officefloor.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
 
@@ -1017,7 +1019,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateModel> addTemplate(String applicationPath, String templateLocation,
-			String templateLogicClass, SectionType section, String redirectValuesFunction, String contentType,
+			String templateLogicClass, WebTemplateType templateType, String redirectValuesFunction, String contentType,
 			String charsetName, boolean isTemplateSecure, String linkSeparatorCharacter,
 			Map<String, Boolean> linksSecure, String[] renderHttpMethods, WoofTemplateExtension[] extensions,
 			WoofTemplateChangeContext context) {
@@ -1051,7 +1053,7 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Add the outputs for the template
-		for (SectionOutputType output : section.getSectionOutputTypes()) {
+		for (WebTemplateOutputType output : templateType.getWebTemplateOutputTypes()) {
 
 			// Ignore escalations
 			if (output.isEscalationOnly()) {
@@ -1059,7 +1061,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 
 			// Obtain the output details
-			String outputName = output.getSectionOutputName();
+			String outputName = output.getWebTemplateOutputName();
 			String argumentType = output.getArgumentType();
 
 			// Add the Woof Template Output
@@ -1201,11 +1203,11 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template, String applicationPath,
-			String templateLocation, String templateLogicClass, SectionType sectionType, String redirectValuesFunction,
-			Set<String> inheritedTemplateOutputNames, String contentType, String charsetName, boolean isTemplateSecure,
-			String linkSeparatorCharacter, Map<String, Boolean> linksSecure, String[] renderHttpMethods,
-			WoofTemplateExtension[] extensions, Map<String, String> templateOutputNameMapping,
-			WoofTemplateChangeContext context) {
+			String templateLocation, String templateLogicClass, WebTemplateType templateType,
+			String redirectValuesFunction, Set<String> inheritedTemplateOutputNames, String contentType,
+			String charsetName, boolean isTemplateSecure, String linkSeparatorCharacter,
+			Map<String, Boolean> linksSecure, String[] renderHttpMethods, WoofTemplateExtension[] extensions,
+			Map<String, String> templateOutputNameMapping, WoofTemplateChangeContext context) {
 
 		// Determine if not unique application path
 		Change<WoofTemplateModel> nonUnique = this.checkUniqueGetApplicationPath(applicationPath, template,
@@ -1345,7 +1347,7 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Refactor the outputs (either refactoring, adding or removing)
-		for (final SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
+		for (final WebTemplateOutputType outputType : templateType.getWebTemplateOutputTypes()) {
 
 			// Ignore escalations
 			if (outputType.isEscalationOnly()) {
@@ -1353,7 +1355,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 
 			// Obtain the output details
-			final String outputName = outputType.getSectionOutputName();
+			final String outputName = outputType.getWebTemplateOutputName();
 			final String argumentType = outputType.getArgumentType();
 
 			// Ignore if inheriting the output configuration

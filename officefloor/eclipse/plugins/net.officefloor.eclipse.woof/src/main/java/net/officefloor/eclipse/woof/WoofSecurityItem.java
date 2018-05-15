@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.woof;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,7 @@ import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
+import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurity;
@@ -40,12 +40,12 @@ import net.officefloor.woof.model.woof.WoofExceptionToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityContentTypeModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
 
 /**
@@ -98,6 +98,11 @@ public class WoofSecurityItem extends
 	 * {@link HttpSecurityType}.
 	 */
 	private HttpSecurityType<?, ?, ?, ?, ?> type;
+
+	/**
+	 * {@link HttpSecurityFlowType} name mapping.
+	 */
+	private Map<String, String> flowNameMapping;
 
 	/*
 	 * ================= AbstractConfigurableItem ========================
@@ -191,6 +196,10 @@ public class WoofSecurityItem extends
 
 				// Load the type
 				item.type = loader.loadHttpSecurityType(httpSecuritySource, item.properties);
+
+				// Load the mappings
+				this.flowNameMapping = this.translateToNameMappings(item.type.getFlowTypes(),
+						(flow) -> flow.getFlowName());
 			});
 
 		}).add((builder, context) -> {
@@ -203,14 +212,11 @@ public class WoofSecurityItem extends
 
 		}).refactor((builder, context) -> {
 			builder.apply("Refactor", (item) -> {
-
-				// TODO provide mapping
-				Map<String, String> outputMapping = new HashMap<>();
-
 				String[] contentTypes = this.translateFromCommaSeparatedList(item.contentTypes, (value) -> value)
 						.toArray(new String[0]);
-				context.execute(context.getOperations().refactorSecurity(context.getModel(), item.name,
-						item.sourceClassName, item.timeout, item.properties, contentTypes, item.type, outputMapping));
+				context.execute(
+						context.getOperations().refactorSecurity(context.getModel(), item.name, item.sourceClassName,
+								item.timeout, item.properties, contentTypes, item.type, item.flowNameMapping));
 			});
 
 		}).delete((context) -> {

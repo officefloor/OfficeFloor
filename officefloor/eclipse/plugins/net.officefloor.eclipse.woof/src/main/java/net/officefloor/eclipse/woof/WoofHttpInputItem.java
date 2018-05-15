@@ -201,7 +201,7 @@ public class WoofHttpInputItem extends
 	@Override
 	public IdeConfigurer configure() {
 		return new IdeConfigurer().addAndRefactor((builder, context) -> {
-			builder.title("HTTP Continuation");
+			builder.title("HTTP Input");
 			builder.text("HTTP Method").init((item) -> item.httpMethod)
 					.validate(ValueValidator.notEmptyString("Must specify HTTP method"))
 					.setValue((item, value) -> item.httpMethod = value);

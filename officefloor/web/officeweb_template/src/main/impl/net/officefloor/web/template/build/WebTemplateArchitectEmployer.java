@@ -44,6 +44,8 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
 import net.officefloor.web.template.section.WebTemplateRedirectAnnotation;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
+import net.officefloor.web.template.type.WebTemplateLoader;
+import net.officefloor.web.template.type.WebTemplateLoaderImpl;
 
 /**
  * {@link WebTemplateArchitect} implementation.

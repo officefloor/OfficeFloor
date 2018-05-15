@@ -5,8 +5,6 @@
   </http-inputs>
   <templates>
     <template path="/post" location="Template.woof.html" class="net.officefloor.tutorial.sessionhttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="74" y="48">
-      <output name="redirectToTemplate" argument-type="">
-      </output>
     </template>
   </templates>
   <sections>

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.inherithttpserver;
+package net.officefloor.web.template.type;
 
-import lombok.Data;
-import net.officefloor.web.state.HttpRequestState;
+import net.officefloor.web.template.build.WebTemplate;
 
 /**
- * Logic for the <code>grandchild.woof.html</code>.
+ * <code>Type definition</code> of a {@link WebTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: tutorial
-public class GrandChildLogic extends ParentLogic {
+public interface WebTemplateType {
 
-	@Data
-	public static class AlternateHeaderValues {
-		private final String other;
-	}
+	/**
+	 * Obtains the {@link WebTemplateOutputType} definitions for the outputs from
+	 * the {@link WebTemplateType}.
+	 * 
+	 * @return {@link WebTemplateOutputType} definitions for the outputs from the
+	 *         {@link WebTemplateType}.
+	 */
+	WebTemplateOutputType[] getWebTemplateOutputTypes();
 
-	public AlternateHeaderValues getTemplateData(HttpRequestState requestState) {
-		return new AlternateHeaderValues("GRAND CHILD");
-	}
 }
-// END SNIPPET: tutorial

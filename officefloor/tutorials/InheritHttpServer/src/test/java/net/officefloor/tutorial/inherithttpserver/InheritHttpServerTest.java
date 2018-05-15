@@ -23,15 +23,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Ensure appropriately inherit content.
@@ -41,45 +37,39 @@ import net.officefloor.server.http.HttpClientTestUtil;
 public class InheritHttpServerTest extends TestCase {
 
 	/**
-	 * {@link CloseableHttpClient}.
+	 * {@link MockWoofServer}.
 	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	private MockWoofServer server;
 
 	@Override
 	protected void setUp() throws Exception {
-		OfficeFloorMain.open();
+		this.server = MockWoofServer.open();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Stop the client
-			this.client.close();
-		} finally {
-			// Stop the server
-			OfficeFloorMain.close();
-		}
+		this.server.close();
 	}
 
 	/**
 	 * Ensure able to obtain parent template.
 	 */
 	public void testParent() throws IOException {
-		this.doTest("parent.woof", "parent-expected.html");
+		this.doTest("parent", "parent-expected.html");
 	}
 
 	/**
 	 * Ensure able to obtain child template.
 	 */
 	public void testChild() throws IOException {
-		this.doTest("child.woof", "child-expected.html");
+		this.doTest("child", "child-expected.html");
 	}
 
 	/**
 	 * Ensure able to obtain grand child template.
 	 */
 	public void testGrandChild() throws IOException {
-		this.doTest("grandchild.woof", "grandchild-expected.html");
+		this.doTest("grandchild", "grandchild-expected.html");
 	}
 
 	/**
@@ -94,9 +84,9 @@ public class InheritHttpServerTest extends TestCase {
 	private void doTest(String url, String fileNameContainingExpectedContent) throws IOException {
 
 		// Undertake the request
-		HttpResponse response = this.client.execute(new HttpGet("http://localhost:7878/" + url));
-		assertEquals("Incorrect response status for URL " + url, 200, response.getStatusLine().getStatusCode());
-		String content = EntityUtils.toString(response.getEntity());
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/" + url));
+		assertEquals("Incorrect response status for URL " + url, 200, response.getStatus().getStatusCode());
+		String content = response.getEntity(null);
 
 		// Obtain the expected content
 		InputStream contentInputStream = Thread.currentThread().getContextClassLoader()

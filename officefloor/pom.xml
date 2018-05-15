@@ -57,7 +57,8 @@
 		<module>server</module>
 		<module>web</module>
 		<module>eclipse</module>
-		<!-- <module>plugins</module> <module>maven</module> <module>tutorials</module> -->
+		<module>tutorials</module>
+		<!-- <module>plugins</module> <module>maven</module> -->
 	</modules>
 	<properties>
 		<current.year>2018</current.year>

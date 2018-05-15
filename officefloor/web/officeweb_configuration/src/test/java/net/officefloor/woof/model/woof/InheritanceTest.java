@@ -19,8 +19,8 @@ package net.officefloor.woof.model.woof;
 
 import java.util.Set;
 
-import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
+import net.officefloor.web.template.type.WebTemplateType;
 
 /**
  * Tests inheritance of {@link WoofTemplateModel}.
@@ -158,8 +158,8 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testRefactorSuperTemplateApplicationPath() {
 
-		// Create the section type
-		SectionType section = this.constructSectionType((context) -> {
+		// Create the type
+		WebTemplateType type = this.constructWebTemplateType((context) -> {
 		});
 
 		// Test
@@ -167,7 +167,7 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 
 		// Change template application path
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(this.grandParent, "/change",
-				"example/Change.ofp", null, section, null, null, null, null, false, null, null, null, null, null,
+				"example/Change.ofp", null, type, null, null, null, null, false, null, null, null, null, null,
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change

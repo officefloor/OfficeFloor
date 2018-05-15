@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.template.build;
+package net.officefloor.web.template.type;
 
-import net.officefloor.compile.section.SectionType;
+import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.build.WebTemplateFactory;
 
 /**
  * Loads the type for the {@link WebTemplate}.
@@ -27,12 +28,12 @@ import net.officefloor.compile.section.SectionType;
 public interface WebTemplateLoader extends WebTemplateFactory {
 
 	/**
-	 * Loads the {@link SectionType} for the {@link WebTemplate}.
+	 * Loads the {@link WebTemplateType} for the {@link WebTemplate}.
 	 * 
 	 * @param template
 	 *            Configured {@link WebTemplate} to provide the type information.
-	 * @return {@link SectionType} for the {@link WebTemplate}.
+	 * @return {@link WebTemplateType} for the {@link WebTemplate}.
 	 */
-	SectionType loadWebTemplateType(WebTemplate template);
+	WebTemplateType loadWebTemplateType(WebTemplate template);
 
 }

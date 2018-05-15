@@ -19,19 +19,21 @@
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
 		<module>InheritHttpServer</module>
-		<module>JavaScriptApp</module>
 		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
-		<module>Presentation</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>SectionHttpServer</module>
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>
 		<module>SessionHttpServer</module>
+		
+<!--  
 		<module>TeamHttpServer</module>
 		<module>TestHttpServer</module>
 		<module>TransactionHttpServer</module>
+		<module>JavaScriptApp</module> TODO make REST example
+-->
 
 <!-- TODO: fix up to v3.0 of OfficeFloor 
 		<module>WoofServletDependencyInjection</module>

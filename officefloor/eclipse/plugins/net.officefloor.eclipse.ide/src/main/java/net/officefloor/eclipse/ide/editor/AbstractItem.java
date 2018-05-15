@@ -18,8 +18,10 @@
 package net.officefloor.eclipse.ide.editor;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -231,6 +233,24 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 			}
 		}
 		return items;
+	}
+
+	/**
+	 * Translate the list of items to name mapping.
+	 * 
+	 * @param items
+	 *            Items.
+	 * @param getName
+	 *            {@link Function} to extract the name from the item.
+	 * @return Name mapping.
+	 */
+	protected final <I> Map<String, String> translateToNameMappings(I[] items, Function<I, String> getName) {
+		Map<String, String> mapping = new HashMap<>();
+		for (I item : items) {
+			String name = getName.apply(item);
+			mapping.put(name, name);
+		}
+		return mapping;
 	}
 
 	/**

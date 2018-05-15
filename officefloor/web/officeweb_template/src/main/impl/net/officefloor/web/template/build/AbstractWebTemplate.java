@@ -142,13 +142,31 @@ public abstract class AbstractWebTemplate implements WebTemplate {
 	protected abstract PropertyList createPropertyList();
 
 	/**
+	 * Obtains the application path.
+	 * 
+	 * @return Application path.
+	 */
+	public String getApplicationPath() {
+		return this.applicationPath;
+	}
+
+	/**
+	 * Obtains the {@link WebTemplateSectionSource}.
+	 * 
+	 * @return {@link WebTemplateSectionSource}.
+	 */
+	public WebTemplateSectionSource getWebTemplateSectionSource() {
+		return this.webTemplateSectionSource;
+	}
+
+	/**
 	 * Loads the properties.
 	 * 
 	 * @param isPathParameters
 	 *            Indicates if path parameters.
 	 * @return {@link PropertyList}.
 	 */
-	protected PropertyList loadProperties(boolean isPathParameters) {
+	public PropertyList loadProperties(boolean isPathParameters) {
 
 		// Configure properties for the template
 		if (this.logicClassName != null) {

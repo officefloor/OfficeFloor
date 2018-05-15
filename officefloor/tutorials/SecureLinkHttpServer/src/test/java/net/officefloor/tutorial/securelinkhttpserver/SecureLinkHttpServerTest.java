@@ -24,8 +24,8 @@ import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 
 /**
  * Tests the Secure Link.
@@ -45,7 +45,7 @@ public class SecureLinkHttpServerTest extends TestCase {
 		try {
 			this.client.close();
 		} finally {
-			OfficeFloorMain.open();
+			OfficeFloorMain.close();
 		}
 	}
 
@@ -55,19 +55,21 @@ public class SecureLinkHttpServerTest extends TestCase {
 	// START SNIPPET: tutorial
 	public void testLinkRenderedSecure() throws Exception {
 
-		// Obtain the default host name for the link
-		String hostName = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
-
 		// Start the server
-		OfficeFloorMain.close();
+		OfficeFloorMain.open();
+
+		// Obtain the host name
+		String hostName = HttpServerLocationImpl.getDefaultHostName();
 
 		// Obtain the page
 		HttpResponse response = this.client.execute(new HttpGet("http://" + hostName + ":7878"));
 		String renderedPage = EntityUtils.toString(response.getEntity());
 
+		System.out.println("page: " + renderedPage);
+
 		// Ensure login form (link) is secure
 		assertTrue("Login form should be secure",
-				renderedPage.contains("form action=\"https://" + hostName + ":7979/-login.woof"));
+				renderedPage.contains("form action=\"https://" + hostName + ":7979/+login"));
 	}
 	// END SNIPPET: tutorial
 

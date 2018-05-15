@@ -1,6 +1,6 @@
 <objects>
 
-	<managed-object source="net.officefloor.plugin.web.http.security.store.MockCredentialStoreManagedObjectSource" 
-					type="net.officefloor.plugin.web.http.security.store.CredentialStore" />
+	<managed-object source="net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource" 
+					type="net.officefloor.web.security.store.CredentialStore" />
 
 </objects>

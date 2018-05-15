@@ -638,7 +638,7 @@ public class SectionLoaderUtil {
 	 * @return {@link OfficeFloorCompiler}.
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
-		// Create the office floor compiler that fails on first issue
+		// Create the OfficeFloor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;

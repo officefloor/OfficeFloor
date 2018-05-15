@@ -22,15 +22,16 @@ import java.io.StringReader;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.extension.WebTemplateExtensionContext;
 import net.officefloor.web.template.section.WebTemplateLinkAnnotation;
+import net.officefloor.web.template.type.WebTemplateLoader;
+import net.officefloor.web.template.type.WebTemplateLoaderUtil;
+import net.officefloor.web.template.type.WebTemplateType;
 
 /**
  * Tests the {@link WebTemplateLoader}.
@@ -154,19 +155,18 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 		template.setSuperTemplate(parent);
 
 		// Load the type
-		SectionType type = loader.loadWebTemplateType(template);
+		WebTemplateType type = loader.loadWebTemplateType(template);
 
 		// Create the expected type (already supplying common)
-		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
+		SectionDesigner expected = WebTemplateLoaderUtil.createSectionDesigner();
 		expected.addSectionInput("link", null).addAnnotation(new WebTemplateLinkAnnotation(false, "link"));
 		expected.addSectionInput("renderTemplate", null);
 		expected.addSectionOutput("link", null, false);
 		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
-		expected.addSectionOutput("redirectToTemplate", null, false);
 		expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
 
 		// Validate the type
-		SectionLoaderUtil.validateSectionType(expected, type);
+		WebTemplateLoaderUtil.validateWebTemplateType(expected, type);
 	}
 
 	/**
@@ -196,20 +196,19 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 			if (webTemplateDecorator != null) {
 				webTemplateDecorator.accept(template);
 			}
-			SectionType type = loader.loadWebTemplateType(template);
+			WebTemplateType type = loader.loadWebTemplateType(template);
 
 			// Create the expected type (already supplying common)
-			SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
+			SectionDesigner expected = WebTemplateLoaderUtil.createSectionDesigner();
 			if (typeDecorator != null) {
 				typeDecorator.accept(expected);
 			}
 			expected.addSectionInput("renderTemplate", null);
 			expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
-			expected.addSectionOutput("redirectToTemplate", null, false);
 			expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
 
 			// Validate the type
-			SectionLoaderUtil.validateSectionType(expected, type);
+			WebTemplateLoaderUtil.validateWebTemplateType(expected, type);
 
 		} catch (Exception ex) {
 			throw fail(ex);

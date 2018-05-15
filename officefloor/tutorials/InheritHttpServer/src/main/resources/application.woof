@@ -1,19 +1,27 @@
 <woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
   <templates>
-    <template name="child" uri="child" path="child.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ChildLogic" secure="false" continue-rendering="false" x="56" y="117">
+    <template path="/child" location="child.woof.html" class="net.officefloor.tutorial.inherithttpserver.ChildLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="190" y="204">
+      <extends template="/parent"/>
     </template>
-    <template name="contact" uri="contact" path="contact.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" secure="false" continue-rendering="false" x="213" y="56">
+    <template path="/contact" location="contact.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="362" y="114">
     </template>
-    <template name="grandchild" uri="grandchild" path="grandchild.woof.html" extends="child" class="net.officefloor.tutorial.inherithttpserver.GrandChildLogic" secure="false" continue-rendering="false" x="55" y="178">
+    <template path="/grandchild" location="grandchild.woof.html" class="net.officefloor.tutorial.inherithttpserver.GrandChildLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="186" y="300">
+      <extends template="/child"/>
     </template>
-    <template name="parent" uri="parent" path="parent.woof.html" extends="" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" secure="false" continue-rendering="false" x="50" y="44">
+    <template path="/parent" location="parent.woof.html" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="184" y="89">
       <output name="contact" argument-type="">
-        <template name="contact"/>
+        <template path="/contact"/>
       </output>
     </template>
   </templates>
   <sections>
   </sections>
+  <securities>
+  </securities>
   <governances>
   </governances>
   <resources>

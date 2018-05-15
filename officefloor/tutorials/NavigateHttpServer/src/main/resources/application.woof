@@ -4,18 +4,14 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/one" location="TemplateOne.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateOne" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="213" y="129">
+    <template path="/one" location="TemplateOne.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateOne" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="137" y="52">
       <output name="external" argument-type="">
         <template path="/two"/>
       </output>
-      <output name="redirectToTemplate" argument-type="">
-      </output>
     </template>
-    <template path="/two" location="TemplateTwo.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateTwo" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="384" y="254">
+    <template path="/two" location="TemplateTwo.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateTwo" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="337" y="90">
       <output name="next" argument-type="">
         <template path="/one"/>
-      </output>
-      <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
   </templates>

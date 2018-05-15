@@ -8,14 +8,10 @@
       <output name="handleSubmit" argument-type="">
         <template path="/href"/>
       </output>
-      <output name="redirectToTemplate" argument-type="">
-      </output>
     </template>
     <template path="/href" location="href.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="73" y="29">
       <output name="link" argument-type="">
         <template path="/form"/>
-      </output>
-      <output name="redirectToTemplate" argument-type="">
       </output>
     </template>
   </templates>

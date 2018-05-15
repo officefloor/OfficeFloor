@@ -17,10 +17,7 @@
  */
 package net.officefloor.tutorial.rawhttpserver;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-
 import junit.framework.TestCase;
-import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -45,18 +42,15 @@ public class RawHttpServerTest extends TestCase {
 		// Start server
 		this.server = MockWoofServer.open();
 
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+		// Send request for dynamic page
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
 
-			// Send request for dynamic page
-			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
+		// Ensure request is successful
+		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
 
-			// Ensure request is successful
-			assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
-
-			// Ensure raw html rendered to page
-			String responseText = response.getEntity(null);
-			assertTrue("Should have raw HTML rendered", responseText.contains("Web on OfficeFloor (WoOF)"));
-		}
+		// Ensure raw html rendered to page
+		String responseText = response.getEntity(null);
+		assertTrue("Should have raw HTML rendered", responseText.contains("Web on OfficeFloor (WoOF)"));
 	}
 
 	@Override

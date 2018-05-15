@@ -28,7 +28,6 @@ import java.util.Set;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import net.officefloor.compile.section.SectionType;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.eclipse.configurer.ListBuilder;
@@ -36,18 +35,21 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
-import net.officefloor.web.template.build.WebTemplateLoader;
+import net.officefloor.web.template.type.WebTemplateLoader;
+import net.officefloor.web.template.type.WebTemplateOutputType;
+import net.officefloor.web.template.type.WebTemplateType;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
 import net.officefloor.woof.model.woof.WoofTemplateChangeContextImpl;
@@ -57,6 +59,7 @@ import net.officefloor.woof.model.woof.WoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel;
+import net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderUtil;
 
 /**
@@ -121,9 +124,14 @@ public class WoofTemplateItem extends
 	private String logicClass;
 
 	/**
-	 * {@link SectionType} for the {@link WebTemplate}.
+	 * {@link WebTemplateType} for the {@link WebTemplate}.
 	 */
-	private SectionType type;
+	private WebTemplateType type;
+
+	/**
+	 * {@link WebTemplateOutputType} name mapping.
+	 */
+	private Map<String, String> outputNameMapping;
 
 	/**
 	 * Redirect values function.
@@ -220,8 +228,11 @@ public class WoofTemplateItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofTemplateModel.class,
 						WoofHttpInputToWoofTemplateModel.class, WoofTemplateOutputToWoofTemplateModel.class,
 						WoofSecurityOutputToWoofTemplateModel.class, WoofSectionOutputToWoofTemplateModel.class,
-						WoofExceptionToWoofTemplateModel.class).getNode());
+						WoofExceptionToWoofTemplateModel.class).target(WoofTemplateToSuperWoofTemplateModel.class)
+						.getNode());
 		context.label(heading);
+		context.addNode(heading, context.connector(DefaultConnectors.DERIVE)
+				.source(WoofTemplateToSuperWoofTemplateModel.class).getNode());
 		context.addNode(container, context.childGroup(WoofTemplateOutputItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
@@ -259,6 +270,23 @@ public class WoofTemplateItem extends
 			}
 		}
 		return item;
+	}
+
+	@Override
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
+
+		// Template Inheritance
+		connections.add(new IdeConnection<>(WoofTemplateToSuperWoofTemplateModel.class)
+				.connectOne(s -> s.getSuperWoofTemplate(), c -> c.getChildWoofTemplate(),
+						WoofTemplateEvent.CHANGE_SUPER_WOOF_TEMPLATE)
+				.to(WoofTemplateModel.class)
+				.many(t -> t.getChildWoofTemplates(), c -> c.getSuperWoofTemplate(),
+						WoofTemplateEvent.ADD_CHILD_WOOF_TEMPLATE, WoofTemplateEvent.REMOVE_CHILD_WOOF_TEMPLATE)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateToSuperTemplate(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateToSuperTemplate(ctx.getModel()));
+				}));
 	}
 
 	@Override
@@ -350,6 +378,10 @@ public class WoofTemplateItem extends
 
 				// Load the type
 				item.type = loader.loadWebTemplateType(template);
+
+				// Load the output mappings
+				item.outputNameMapping = this.translateToNameMappings(item.type.getWebTemplateOutputTypes(),
+						(output) -> output.getWebTemplateOutputName());
 			});
 
 		}).add((builder, context) -> {
@@ -377,7 +409,6 @@ public class WoofTemplateItem extends
 				// TODO provide handling of output mappings
 				Set<String> inherited = context.getOperations().getInheritableOutputNames(context.getModel());
 				WoofTemplateExtension[] extensions = null;
-				Map<String, String> templateOutputNameMapping = new HashMap<>();
 
 				// Refactor template
 				Map<String, Boolean> linksSecure = this.getLinksSecure(item);
@@ -389,7 +420,7 @@ public class WoofTemplateItem extends
 				context.execute(context.getOperations().refactorTemplate(context.getModel(), item.applicationPath,
 						item.location, item.logicClass, item.type, item.redirectValuesFunction, inherited,
 						item.contentType, item.charset, item.isSecure, item.linkSeparatorCharacter, linksSecure,
-						renderHttpMethods, extensions, templateOutputNameMapping, changeContext));
+						renderHttpMethods, extensions, item.outputNameMapping, changeContext));
 			});
 
 		}).delete((context) -> {

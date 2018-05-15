@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.template.build;
+package net.officefloor.web.template.type;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
@@ -28,7 +28,11 @@ import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.web.route.WebRouterBuilder;
+import net.officefloor.web.template.build.AbstractWebTemplate;
+import net.officefloor.web.template.build.AbstractWebTemplateFactory;
+import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
+import net.officefloor.web.template.type.WebTemplateLoader;
 
 /**
  * {@link WebTemplateLoader} implementation.
@@ -112,7 +116,7 @@ public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory
 	 */
 
 	@Override
-	public SectionType loadWebTemplateType(WebTemplate webTemplate) {
+	public WebTemplateType loadWebTemplateType(WebTemplate webTemplate) {
 
 		// Ensure appropriate type
 		if (!(webTemplate instanceof TypeWebTemplate)) {
@@ -121,16 +125,18 @@ public class WebTemplateLoaderImpl extends AbstractWebTemplateFactory
 		TypeWebTemplate template = (TypeWebTemplate) webTemplate;
 
 		// Determine if path parameters
-		boolean isPathParameters = this.isPathParameters(template.applicationPath);
+		boolean isPathParameters = this.isPathParameters(template.getApplicationPath());
 
 		// Load the properties
 		PropertyList properties = template.loadProperties(isPathParameters);
 
-		// Obtain the section loader to load the type
+		// Obtain the section loader and load section type
 		SectionLoader sectionLoader = this.compiler.getSectionLoader();
+		SectionType sectionType = sectionLoader.loadSectionType(template.getWebTemplateSectionSource(),
+				template.getApplicationPath(), properties);
 
 		// Load and return the section (web template) type
-		return sectionLoader.loadSectionType(template.webTemplateSectionSource, template.applicationPath, properties);
+		return new WebTemplateTypeImpl(sectionType);
 	}
 
 	/**

@@ -58,13 +58,13 @@ public class SecurePageTest extends TestCase {
 		OfficeFloorMain.open();
 
 		// Ensure redirect to secure access to page
-		this.assertHttpRequest("http://localhost:7878/card.woof");
+		this.assertHttpRequest("http://localhost:7878/card");
 
 		// Ensure redirect to secure link access to page
-		this.assertHttpRequest("http://localhost:7878/main-card.woof");
+		this.assertHttpRequest("http://localhost:7878/main+card");
 
 		// Send the card details
-		this.assertHttpRequest("http://localhost:7878/card-save.woof?number=123");
+		this.assertHttpRequest("http://localhost:7878/card+save?number=123");
 	}
 
 	private void assertHttpRequest(String url) throws IOException {

@@ -36,6 +36,7 @@ import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.template.type.WebTemplateType;
 
 /**
  * Changes that can be made to a {@link WoofModel}.
@@ -146,8 +147,8 @@ public interface WoofChanges {
 	 *            Path to the template file.
 	 * @param templateLogicClass
 	 *            Name of the logic {@link Class} for the template.
-	 * @param sectionType
-	 *            {@link SectionType} for the {@link WoofTemplateModel}.
+	 * @param webTemplateType
+	 *            {@link WebTemplateType} for the {@link WoofTemplateModel}.
 	 * @param redirectValuesFunction
 	 *            Render redirect {@link ManagedFunction} name.
 	 * @param contentType
@@ -174,7 +175,7 @@ public interface WoofChanges {
 	 * @return {@link Change} to add a {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> addTemplate(String applicationPath, String templateLocation, String templateLogicClass,
-			SectionType sectionType, String redirectValuesFunction, String contentType, String charsetName,
+			WebTemplateType webTemplateType, String redirectValuesFunction, String contentType, String charsetName,
 			boolean isTemplateSecure, String linkSeparatorCharacter, Map<String, Boolean> linksSecure,
 			String[] renderHttpMethods, WoofTemplateExtension[] extensions, WoofTemplateChangeContext context);
 
@@ -202,8 +203,9 @@ public interface WoofChanges {
 	 *            New template location for the {@link WoofTemplateModel}.
 	 * @param templateLogicClass
 	 *            New logic class for the {@link WoofTemplateModel}.
-	 * @param sectionType
-	 *            {@link SectionType} for the refactored {@link WoofTemplateModel}.
+	 * @param webTemplateType
+	 *            {@link WebTemplateType} for the refactored
+	 *            {@link WoofTemplateModel}.
 	 * @param redirectValuesFunction
 	 *            New render redirect {@link ManagedFunction} name.
 	 * @param inheritedTemplateOutputNames
@@ -237,11 +239,11 @@ public interface WoofChanges {
 	 * @return {@link Change} to refactor the {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template, String applicationPath,
-			String templateLocation, String templateLogicClass, SectionType sectionType, String redirectValuesFunction,
-			Set<String> inheritedTemplateOutputNames, String contentType, String charsetName, boolean isTemplateSecure,
-			String linkSeparatorCharacter, Map<String, Boolean> linksSecure, String[] renderHttpMethods,
-			WoofTemplateExtension[] extensions, Map<String, String> templateOutputNameMapping,
-			WoofTemplateChangeContext context);
+			String templateLocation, String templateLogicClass, WebTemplateType webTemplateType,
+			String redirectValuesFunction, Set<String> inheritedTemplateOutputNames, String contentType,
+			String charsetName, boolean isTemplateSecure, String linkSeparatorCharacter,
+			Map<String, Boolean> linksSecure, String[] renderHttpMethods, WoofTemplateExtension[] extensions,
+			Map<String, String> templateOutputNameMapping, WoofTemplateChangeContext context);
 
 	/**
 	 * Changes the application path for the {@link WoofTemplateModel}.

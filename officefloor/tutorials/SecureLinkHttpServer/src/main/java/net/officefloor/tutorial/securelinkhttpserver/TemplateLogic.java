@@ -19,9 +19,9 @@ package net.officefloor.tutorial.securelinkhttpserver;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.server.http.ServerHttpConnection;
 import lombok.Data;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Logic for the template.
@@ -40,8 +40,7 @@ public class TemplateLogic {
 		private String password;
 	}
 
-	public void login(LoginParameters credentials,
-			ServerHttpConnection connection) {
+	public void login(LoginParameters credentials, ServerHttpConnection connection) {
 
 		// Confirm a secure connection (not needed but included for tutorial)
 		if (!connection.isSecure()) {

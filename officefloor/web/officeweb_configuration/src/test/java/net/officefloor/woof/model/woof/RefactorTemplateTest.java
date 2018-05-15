@@ -25,14 +25,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofTemplateExtension;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionImpl;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionPropertyImpl;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
+import net.officefloor.web.template.type.WebTemplateType;
 
 /**
  * Tests refactoring the {@link WoofTemplateModel}.
@@ -64,8 +58,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 		assertEquals("Incorrect template", TEMPLATE_APPLICATION_PATH, template.getApplicationPath());
 
-		// Create the section type
-		SectionType section = this.constructSectionType((context) -> {
+		// Create the type
+		WebTemplateType type = this.constructWebTemplateType((context) -> {
 			context.addSectionInput("renderTemplate", null);
 			context.addSectionOutput("OUTPUT_A", Integer.class, false);
 			context.addSectionOutput("OUTPUT_B", String.class, false);
@@ -110,7 +104,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_1", Boolean.TRUE);
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(template, TEMPLATE_APPLICATION_PATH,
-				"example/Template.html", "net.example.LogicClass", section, "redirect",
+				"example/Template.html", "net.example.LogicClass", type, "redirect",
 				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), "text/plain; charset=UTF-16", "UTF-16", true, "_",
 				secureLinks, new String[] { "POST", "PUT", "OTHER" }, extensions, this.templateOutputNameMapping,
 				this.getWoofTemplateChangeContext());
@@ -133,8 +127,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 		assertEquals("Incorrect template", "/template", template.getApplicationPath());
 
-		// Create the section type
-		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+		// Create the type
+		WebTemplateType type = this.constructWebTemplateType(new SectionTypeConstructor() {
 			@Override
 			public void construct(SectionTypeContext context) {
 				context.addSectionInput("renderTemplate", null);
@@ -178,7 +172,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_2", Boolean.TRUE);
 		secureLinks.put("LINK_3", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(template, TEMPLATE_APPLICATION_PATH,
-				"example/Change.html", "net.example.ChangeClass", section, "change-redirect",
+				"example/Change.html", "net.example.ChangeClass", type, "change-redirect",
 				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), "text/changed", "UTF-CHANGE", false, "c",
 				secureLinks, new String[] { "CHANGE" }, extensions, this.templateOutputNameMapping,
 				this.getWoofTemplateChangeContext());
@@ -202,8 +196,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 		assertEquals("Incorrect template", TEMPLATE_APPLICATION_PATH, template.getApplicationPath());
 
-		// Create the section type
-		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+		// Create the type
+		WebTemplateType type = this.constructWebTemplateType(new SectionTypeConstructor() {
 			@Override
 			public void construct(SectionTypeContext context) {
 				context.addSectionInput("renderTemplate", null);
@@ -224,7 +218,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(template, TEMPLATE_APPLICATION_PATH,
-				"example/Remove.ofp", null, section, null, null, null, null, false, null, null, null, null, null,
+				"example/Remove.ofp", null, type, null, null, null, null, false, null, null, null, null, null,
 				this.getWoofTemplateChangeContext());
 
 		// Validate change
@@ -246,8 +240,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(2);
 		assertEquals("Incorrect template", TEMPLATE_APPLICATION_PATH, template.getApplicationPath());
 
-		// Create the section type
-		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+		// Create the type
+		WebTemplateType type = this.constructWebTemplateType(new SectionTypeConstructor() {
 			@Override
 			public void construct(SectionTypeContext context) {
 				context.addSectionInput("renderTemplate", null);
@@ -286,7 +280,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_1", Boolean.TRUE);
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(template, TEMPLATE_APPLICATION_PATH,
-				"example/Add.html", "net.example.AddClass", section, "redirect",
+				"example/Add.html", "net.example.AddClass", type, "redirect",
 				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT", "OUTPUT_GRAND_INHERIT")),
 				"text/html; charset=UTF-8", "UTF-8", true, "_", secureLinks, new String[] { "POST", "OTHER" },
 				extensions, this.templateOutputNameMapping, this.getWoofTemplateChangeContext());

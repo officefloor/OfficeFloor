@@ -21,9 +21,9 @@ import java.io.Serializable;
 
 import lombok.Data;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.security.HttpCredentials;
-import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
+import net.officefloor.web.HttpParameters;
+import net.officefloor.web.security.HttpCredentials;
+import net.officefloor.web.security.scheme.HttpCredentialsImpl;
 
 /**
  * Logic for <code>login</code> page.

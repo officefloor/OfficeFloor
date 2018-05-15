@@ -19,9 +19,9 @@ package net.officefloor.tutorial.authenticationhttpserver;
 
 import lombok.Data;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.web.http.security.HttpAuthentication;
-import net.officefloor.plugin.web.http.security.HttpCredentials;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.web.security.HttpAccess;
+import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
 
 /**
  * Logic for <code>hello</code> page.
@@ -38,13 +38,14 @@ public class HelloLogic {
 
 	}
 
-	public TemplateData getTemplateData(HttpSecurity security) {
-		String username = security.getRemoteUser();
+	@HttpAccess
+	public TemplateData getTemplateData(HttpAccessControl accessControl) {
+		String username = accessControl.getPrincipal().getName();
 		return new TemplateData(username);
 	}
 
 	@NextFunction("LoggedOut")
-	public void logout(HttpAuthentication<HttpSecurity, HttpCredentials> authentication) {
+	public void logout(HttpAuthentication<?> authentication) {
 		authentication.logout(null);
 	}
 
