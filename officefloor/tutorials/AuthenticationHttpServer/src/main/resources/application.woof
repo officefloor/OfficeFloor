@@ -9,6 +9,11 @@
         <template path="/logout"/>
       </output>
     </template>
+    <template path="/login" location="login.woof.html" class="net.officefloor.tutorial.authenticationhttpserver.LoginLogic" content-type="" charset="" secure="true" redirect-values-function="" link-separator-character="" x="591" y="189">
+      <output name="authenticate" argument-type="net.officefloor.web.security.HttpCredentials">
+        <security name="Security"/>
+      </output>
+    </template>
     <template path="/logout" location="logout.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="309" y="79">
       <output name="hello" argument-type="">
         <template path="/hello"/>
@@ -18,6 +23,12 @@
   <sections>
   </sections>
   <securities>
+    <security name="Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="542" y="87">
+      <property name="realm" value="Test"/>
+      <output name="form" argument-type="java.lang.Void">
+        <template path="/login"/>
+      </output>
+    </security>
   </securities>
   <governances>
   </governances>

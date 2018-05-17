@@ -14,8 +14,10 @@
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>AuthenticationHttpServer</module>
+<!--  
 		<module>DatabaseHttpServer</module>
 		<module>DiPojoHttpServer</module>
+-->
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
 		<module>InheritHttpServer</module>

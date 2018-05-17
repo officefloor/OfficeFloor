@@ -8,7 +8,6 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>InteractiveHttpServer</artifactId>
-	<packaging>war</packaging>
 	<name>Interactive HTTP Server Tutorial</name>
 	<description>Tutorial of an interactive page</description>
 	<properties>

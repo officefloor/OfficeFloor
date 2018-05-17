@@ -19,10 +19,11 @@ package net.officefloor.web.security.type;
 
 import java.io.Serializable;
 
-import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.OfficeFloorCompilerRunnable;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -44,7 +45,7 @@ import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
+public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCompilerRunnable<HttpSecurityLoader> {
 
 	/**
 	 * {@link Loader}.
@@ -52,17 +53,29 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	private final Loader loader;
 
 	/**
+	 * Instantiate for {@link OfficeFloorCompilerRunnable}.
+	 */
+	public HttpSecurityLoaderImpl() {
+		this.loader = null;
+	}
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectLoader
-	 *            {@link ManagedObjectLoader}.
-	 * @param node
-	 *            {@link Node} context for {@link CompilerIssues}.
-	 * @param compilerIssues
-	 *            {@link CompilerIssues}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 */
-	public HttpSecurityLoaderImpl(ManagedObjectLoader managedObjectLoader, Node node, CompilerIssues compilerIssues) {
+	public HttpSecurityLoaderImpl(OfficeFloorCompiler compiler) {
+		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
 		this.loader = new Loader() {
+
+			@Override
+			public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> S newInstance(
+					Class<S> httpSecuritySourceClass) {
+				return CompileUtil.newInstance(httpSecuritySourceClass, HttpSecuritySource.class, compiler,
+						compiler.getCompilerIssues());
+			}
+
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public PropertyList loadSpecification(
@@ -78,7 +91,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 
 			@Override
 			public CompileError addIssue(String issueDescription) {
-				return compilerIssues.addIssue(node, issueDescription);
+				return compiler.getCompilerIssues().addIssue(compiler, issueDescription);
 			}
 		};
 	}
@@ -96,6 +109,13 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	public HttpSecurityLoaderImpl(OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext,
 			final String managedObjectSourceName) {
 		this.loader = new Loader() {
+
+			@Override
+			public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> S newInstance(
+					Class<S> httpSecuritySourceClass) {
+				return CompileUtil.newInstance(httpSecuritySourceClass, HttpSecuritySource.class, officeArchitect);
+			}
+
 			@Override
 			@SuppressWarnings("rawtypes")
 			public PropertyList loadSpecification(
@@ -120,8 +140,33 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	}
 
 	/*
+	 * =================== OfficeFloorCompilerRunnable =====================
+	 */
+
+	@Override
+	public HttpSecurityLoader run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {
+		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(compiler);
+		return securityLoader;
+
+	}
+
+	/*
 	 * ======================== HttpSecurityLoader ==========================
 	 */
+
+	@Override
+	public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> PropertyList loadSpecification(
+			Class<S> httpSecuritySourceClass) {
+
+		// Instantiate the security source
+		HttpSecuritySource<A, AC, C, O, F> securitySource = this.loader.newInstance(httpSecuritySourceClass);
+		if (securitySource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Return specification
+		return this.loadSpecification(securitySource);
+	}
 
 	@Override
 	public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> PropertyList loadSpecification(
@@ -140,6 +185,20 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 
 		// Return the properties
 		return propertyList[0];
+	}
+
+	@Override
+	public <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
+			Class<S> httpSecuritySourceClass, PropertyList propertyList) {
+
+		// Instantiate the security source
+		HttpSecuritySource<A, AC, C, O, F> securitySource = this.loader.newInstance(httpSecuritySourceClass);
+		if (securitySource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Load and return type
+		return this.loadHttpSecurityType(securitySource, propertyList);
 	}
 
 	@Override
@@ -207,6 +266,16 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * Loader.
 	 */
 	private static interface Loader {
+
+		/**
+		 * Creates a new instance of the {@link HttpSecuritySource}.
+		 * 
+		 * @param httpSecuritySourceClass
+		 *            {@link HttpSecuritySource} {@link Class}.
+		 * @return New {@link HttpSecuritySource}.
+		 */
+		<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> S newInstance(
+				Class<S> httpSecuritySourceClass);
 
 		/**
 		 * Loads the specification.
@@ -412,8 +481,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	}
 
 	/**
-	 * {@link HttpSecurityFlowType} adapted from the
-	 * {@link ManagedObjectFlowType}.
+	 * {@link HttpSecurityFlowType} adapted from the {@link ManagedObjectFlowType}.
 	 */
 	private static class HttpSecurityFlowTypeImpl<F extends Enum<F>> implements HttpSecurityFlowType<F> {
 

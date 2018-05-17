@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -124,12 +123,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
 	 * @return {@link HttpSecurityLoader}.
+	 * @throws Exception
+	 *             If fails to load the {@link HttpSecurityLoader}.
 	 */
-	public static HttpSecurityLoader employHttpSecurityLoader(OfficeFloorCompiler compiler) {
-		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler,
-				compiler.getCompilerIssues());
-		return securityLoader;
+	public static HttpSecurityLoader employHttpSecurityLoader(OfficeFloorCompiler compiler) throws Exception {
+		return compiler.run(HttpSecurityLoaderImpl.class);
 	}
 
 	/**

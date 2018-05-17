@@ -17,16 +17,15 @@
  */
 package net.officefloor.tutorial.authenticationhttpserver;
 
-import java.io.IOException;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.WritableHttpCookie;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.session.HttpSessionManagedObjectSource;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Tests the Secure Link.
@@ -36,34 +35,57 @@ import net.officefloor.server.http.HttpClientTestUtil;
 public class AuthenticationHttpServerTest extends TestCase {
 
 	/**
-	 * {@link CloseableHttpClient}.
+	 * Main to run for manual testing.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true);
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
+
+	/**
+	 * {@link MockWoofServer}.
+	 */
+	private MockWoofServer server;
+
+	/**
+	 * {@link HttpSession} {@link WritableHttpCookie}.
+	 */
+	private WritableHttpCookie session;
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Ensure stop
-		try {
-			this.client.close();
-		} finally {
-			OfficeFloorMain.close();
-		}
+		this.server.close();
 	}
 
 	// START SNIPPET: tutorial
 	public void testLogin() throws Exception {
 
 		// Start the server
-		OfficeFloorMain.open();
+		this.server = MockWoofServer.open();
 
 		// Ensure require login to get to page
-		String loginPage = this.doHttpRequest("http://localhost:7878/hello.woof");
-		assertTrue("Ensure login page", loginPage.contains("<title>Login</title>"));
+		MockHttpResponse loginRedirect = this.server.send(MockHttpServer.mockRequest("/hello"));
+		assertEquals("Ensure redirect", 303, loginRedirect.getStatus().getStatusCode());
+		loginRedirect.assertHeader("location", "https://mock.officefloor.net/login");
+
+		// Obtain the session cookie
+		this.session = loginRedirect.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME);
 
 		// Login
-		String helloPage = this
-				.doHttpRequest("https://localhost:7979/login-login.woof?username=Daniel&password=Daniel");
-		assertTrue("Ensure hello page with login", helloPage.contains("<p>Hi Daniel</p>"));
+		MockHttpRequestBuilder loginRequest = MockHttpServer.mockRequest("/login+login?username=Daniel&password=Daniel")
+				.secure(true).cookie(this.session.getName(), this.session.getValue());
+		MockHttpResponse loggedInRedirect = this.server.send(loginRequest);
+		assertEquals("Ensure successful login: " + loggedInRedirect.getEntity(null), 200,
+				loggedInRedirect.getStatus().getStatusCode());
+
+		// Ensure now able to access hello page
+		MockHttpResponse helloPage = this.server
+				.send(MockHttpServer.mockRequest("/hello").cookie(this.session.getName(), this.session.getValue()));
+		String helloPageContent = helloPage.getEntity(null);
+		assertEquals("Should obtain hello page: " + helloPageContent, 200, helloPage.getStatus().getStatusCode());
+		assertTrue("Ensure hello page with login: " + helloPageContent, helloPageContent.contains("<p>Hi Daniel</p>"));
 	}
 
 	public void testLogout() throws Exception {
@@ -72,22 +94,17 @@ public class AuthenticationHttpServerTest extends TestCase {
 		this.testLogin();
 
 		// Logout
-		String logoutPage = this.doHttpRequest("http://localhost:7878/hello-logout.woof");
-		assertTrue("Ensure logout page", logoutPage.contains("<title>Logout</title>"));
+		MockHttpResponse logoutRedirect = this.server.send(
+				MockHttpServer.mockRequest("/hello+logout").cookie(this.session.getName(), this.session.getValue()));
+		assertEquals("Ensure logout: " + logoutRedirect.getEntity(null), 303,
+				logoutRedirect.getStatus().getStatusCode());
+		logoutRedirect.assertHeader("location", "/logout");
 
 		// Attempt to go back to page (but require login)
-		String loginPage = this.doHttpRequest("http://localhost:7878/hello.woof");
-		assertTrue("Ensure login page", loginPage.contains("<title>Login</title>"));
-	}
-
-	private String doHttpRequest(String url) throws IOException {
-
-		// Obtain the page
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		String page = EntityUtils.toString(response.getEntity());
-
-		// Return the page
-		return page;
+		MockHttpResponse loginPage = this.server
+				.send(MockHttpServer.mockRequest("/hello").cookie(this.session.getName(), this.session.getValue()));
+		assertEquals("Ensure redirect", 303, loginPage.getStatus().getStatusCode());
+		loginPage.assertHeader("location", "https://mock.officefloor.net/login");
 	}
 	// END SNIPPET: tutorial
 

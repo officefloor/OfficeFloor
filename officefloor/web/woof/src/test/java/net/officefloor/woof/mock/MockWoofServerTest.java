@@ -18,6 +18,7 @@
 package net.officefloor.woof.mock;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.woof.WoofLoaderExtensionService;
 
@@ -51,7 +52,7 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 		// Ensure WoOF configuration loaded
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/template"));
 		response.assertResponse(200, "TEMPLATE");
-		
+
 		// FIXME
 		if (true) {
 			System.err.println("TODO implement /objects /resources /teams to ensure WoOF loads appropriately");
@@ -69,6 +70,28 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 		// Ensure Teams loaded
 		response = this.server.send(MockWoofServer.mockRequest("/teams"));
 		response.assertResponse(200, "TEAMS");
+	}
+
+	/**
+	 * Ensure can handle multiple requests.
+	 */
+	public void testMultipleRequests() throws Exception {
+
+		// Start WoOF application for testing
+		this.server = MockWoofServer.open();
+
+		// Run multiple requests ensuring appropriately handles
+		MockHttpResponse response = null;
+		for (int i = 0; i < 100; i++) {
+
+			// Undertake request
+			MockHttpRequestBuilder request = MockWoofServer.mockRequest("/path?param=" + i);
+			if (response != null) {
+				request.cookies(response);
+			}
+			response = this.server.send(request);
+			response.assertResponse(200, "param=" + i + ", previous=" + (i - 1));
+		}
 	}
 
 }

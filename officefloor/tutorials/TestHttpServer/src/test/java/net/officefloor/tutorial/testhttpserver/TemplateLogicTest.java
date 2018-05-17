@@ -17,16 +17,14 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -58,21 +56,27 @@ public class TemplateLogicTest extends Assert {
 	public void systemTest() throws Exception {
 
 		// Start the application
-		OfficeFloorMain.open();
+		MockWoofServer server = MockWoofServer.open();
 
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+		try {
 
 			// Send request to add
-			HttpGet request = new HttpGet("http://localhost:7878/template-add.woof?a=1&b=2");
-			HttpResponse response = client.execute(request);
+			MockHttpResponse response = server
+					.send(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
+			assertEquals("Should follow POST/GET pattern", 303, response.getStatus().getStatusCode());
+			String redirect = response.getHeader("location").getValue();
+
+			// Obtain the result
+			response = server.send(MockHttpServer.mockRequest(redirect).cookies(response));
+			assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 			// Ensure added the values
-			String entity = EntityUtils.toString(response.getEntity());
+			String entity = response.getEntity(null);
 			assertTrue("Should have added the values", entity.contains("= 3"));
 
 		} finally {
 			// Stop the application
-			OfficeFloorMain.close();
+			server.close();
 		}
 	}
 	// END SNIPPET: system

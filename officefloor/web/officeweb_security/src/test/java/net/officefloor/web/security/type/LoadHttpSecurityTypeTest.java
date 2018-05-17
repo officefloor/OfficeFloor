@@ -842,11 +842,16 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the HTTP security loader and load the HTTP security type
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		compiler.setCompilerIssues(this.issues);
-		HttpSecurityLoader securityLoader = HttpSecurityArchitectEmployer.employHttpSecurityLoader(compiler);
-		MockHttpSecuritySource.init = init;
-		HttpSecurityType securityType = securityLoader.loadHttpSecurityType(new MockHttpSecuritySource(), propertyList);
+		HttpSecurityType securityType;
+		try {
+			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+			compiler.setCompilerIssues(this.issues);
+			HttpSecurityLoader securityLoader = HttpSecurityArchitectEmployer.employHttpSecurityLoader(compiler);
+			MockHttpSecuritySource.init = init;
+			securityType = securityLoader.loadHttpSecurityType(MockHttpSecuritySource.class, propertyList);
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 
 		// Verify the mock objects
 		this.verifyMockObjects();

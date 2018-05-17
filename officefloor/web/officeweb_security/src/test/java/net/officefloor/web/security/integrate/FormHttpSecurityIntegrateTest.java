@@ -55,7 +55,7 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 
 		// Provide the form login page
 		OfficeSection form = context.addSection("FORM", LoginPage.class);
-		office.link(security.getOutput("FORM_LOGIN_PAGE"), form.getOfficeSectionInput("form"));
+		office.link(security.getOutput("form"), form.getOfficeSectionInput("form"));
 		office.link(web.getHttpInput(false, "/login").getInput(), form.getOfficeSectionInput("login"));
 		office.link(form.getOfficeSectionOutput("authenticate"), security.getAuthenticateInput());
 

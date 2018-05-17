@@ -23,7 +23,6 @@ import org.junit.Assert;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
@@ -61,8 +60,7 @@ public class HttpSecurityLoaderUtil {
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> PropertyList validateSpecification(
@@ -99,8 +97,8 @@ public class HttpSecurityLoaderUtil {
 
 	/**
 	 * Validates the {@link HttpSecurityType} contained in the
-	 * {@link HttpSecurityTypeBuilder} against the {@link HttpSecurityType}
-	 * loaded from the {@link HttpSecuritySource}.
+	 * {@link HttpSecurityTypeBuilder} against the {@link HttpSecurityType} loaded
+	 * from the {@link HttpSecuritySource}.
 	 * 
 	 * @param <A>
 	 *            Authentication type.
@@ -158,8 +156,8 @@ public class HttpSecurityLoaderUtil {
 	}
 
 	/**
-	 * Convenience method to load the {@link HttpSecuritySource} initialised
-	 * ready for testing.
+	 * Convenience method to load the {@link HttpSecuritySource} initialised ready
+	 * for testing.
 	 * 
 	 * @param <A>
 	 *            Authentication type.
@@ -313,8 +311,7 @@ public class HttpSecurityLoaderUtil {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 		CompilerIssues issues = new FailTestCompilerIssues();
 		compiler.setCompilerIssues(issues);
-		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler, issues);
+		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(compiler);
 		return securityLoader;
 	}
 

@@ -35,8 +35,33 @@ public interface HttpSecurityLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link HttpSecuritySourceSpecification} for the
-	 * {@link HttpSecuritySource}.
+	 * {@link HttpSecuritySourceSpecification} for the {@link HttpSecuritySource}.
+	 *
+	 * @param <A>
+	 *            Authentication type.
+	 * @param <AC>
+	 *            Access control type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <O>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
+	 * @param <S>
+	 *            {@link HttpSecuritySource} type.
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource} {@link Class}.
+	 * @return {@link PropertyList} of the {@link HttpSecuritySourceProperty}
+	 *         instances of the {@link HttpSecuritySourceSpecification} or
+	 *         <code>null</code> if issue, which is reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> PropertyList loadSpecification(
+			Class<S> httpSecuritySourceClass);
+
+	/**
+	 * Loads and returns the {@link PropertyList} from the
+	 * {@link HttpSecuritySourceSpecification} for the {@link HttpSecuritySource}.
 	 *
 	 * @param <A>
 	 *            Authentication type.
@@ -49,7 +74,7 @@ public interface HttpSecurityLoader {
 	 * @param <F>
 	 *            {@link Flow} keys type.
 	 * @param httpSecuritySource
-	 *            {@link HttpSecuritySource} class.
+	 *            {@link HttpSecuritySource}.
 	 * @return {@link PropertyList} of the {@link HttpSecuritySourceProperty}
 	 *         instances of the {@link HttpSecuritySourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
@@ -75,13 +100,43 @@ public interface HttpSecurityLoader {
 	 *            Dependency keys type.
 	 * @param <F>
 	 *            {@link Flow} keys type.
+	 * @param <S>
+	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySource
-	 *            {@link HttpSecuritySource} instance to use.
+	 *            {@link HttpSecuritySource} {@link Class}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link HttpSecurityType}.
-	 * @return {@link HttpSecurityType} or <code>null</code> if issues, which
-	 *         are reported to the {@link CompilerIssues}.
+	 * @return {@link HttpSecurityType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
+			Class<S> httpSecuritySourceClass, PropertyList propertyList);
+
+	/**
+	 * <p>
+	 * Loads and returns the {@link HttpSecurityType} for the
+	 * {@link HttpSecuritySource}.
+	 * <p>
+	 * This method will also initialise the {@link HttpSecuritySource}.
+	 * 
+	 * @param <A>
+	 *            Authentication type.
+	 * @param <AC>
+	 *            Access control type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <O>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link HttpSecurityType}.
+	 * @return {@link HttpSecurityType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
 			HttpSecuritySource<A, AC, C, O, F> httpSecuritySource, PropertyList propertyList);

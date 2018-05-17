@@ -135,8 +135,7 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		// Validate the response
 		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
 		assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
-		assertEquals("Should be one header (plus content-type and content-length)", 3,
-				response.getHeaders().size());
+		assertEquals("Should be one header (plus content-type and content-length)", 3, response.getHeaders().size());
 		assertEquals("Incorrect content-type", "text/plain", response.getHeader("content-type").getValue());
 		assertEquals("Incorrect content-length", "11", response.getHeader("content-length").getValue());
 		assertEquals("Incorrect header value", "Value", response.getHeader("TEST").getValue());
@@ -182,13 +181,41 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		assertSame("Incorrect status", HttpStatus.NO_CONTENT, response.getStatus());
 		assertEquals("Should be just the one header", 1, response.getHeaders().size());
 		assertEquals("Incorrect header value", "Value", response.getHeader("TEST").getValue());
-		assertEquals("Should be no entity", "",
-				response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		assertEquals("Should be no entity", "", response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 	}
 
 	public static class NoEntityHandler {
 		public void service(ServerHttpConnection connection) {
 			connection.getResponse().getHeaders().addHeader("TEST", "Value");
+		}
+	}
+
+	/**
+	 * Ensure can mock multiple requests.
+	 */
+	public void testMultipleRequests() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", MultipleRequestHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure service multiple requests
+		for (int i = 0; i < 100; i++) {
+
+			// Ensure can service request
+			MockHttpRequestBuilder request = MockHttpServer.mockRequest();
+			MockHttpResponse response = this.server.send(request);
+
+			// Validate the response
+			assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
+			assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
+			assertEquals("Incorrect response", "RESPONSE", response.getEntity(null));
+		}
+	}
+
+	public static class MultipleRequestHandler {
+		public void service(ServerHttpConnection connection) throws Exception {
+			connection.getResponse().getEntityWriter().write("RESPONSE");
 		}
 	}
 

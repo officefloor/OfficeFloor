@@ -19,7 +19,6 @@ package net.officefloor.web.security.type;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -31,11 +30,9 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.HttpCredentials;
-import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
-import net.officefloor.web.spi.security.LogoutContext;
-import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -43,6 +40,8 @@ import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySourceProperty;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 
 /**
  * Tests the {@link HttpSecurityLoaderImpl}.
@@ -139,8 +138,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	}
 
 	/**
-	 * Ensures issue if element in {@link HttpSecuritySourceProperty} array is
-	 * null.
+	 * Ensures issue if element in {@link HttpSecuritySourceProperty} array is null.
 	 */
 	public void testNullHttpSecuritySourcePropertyElement() {
 
@@ -157,8 +155,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link HttpSecuritySourceProperty}
-	 * name.
+	 * Ensures issue if <code>null</code> {@link HttpSecuritySourceProperty} name.
 	 */
 	public void testNullHttpSecuritySourcePropertyName() {
 
@@ -178,8 +175,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link HttpSecuritySourceProperty}
-	 * name.
+	 * Ensures issue if fails to get the {@link HttpSecuritySourceProperty} name.
 	 */
 	public void testFailGetHttpSecuritySourcePropertyName() {
 
@@ -202,8 +198,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link HttpSecuritySourceProperty}
-	 * label.
+	 * Ensures issue if fails to get the {@link HttpSecuritySourceProperty} label.
 	 */
 	public void testFailGetHttpSecuritySourcePropertyLabel() {
 
@@ -284,8 +279,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		// Load the HTTP security specification specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler, this.issues);
+		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(compiler);
 		PropertyList propertyList = httpSecurityLoader.loadSpecification(new MockHttpSecuritySource());
 
 		// Determine if expected to load

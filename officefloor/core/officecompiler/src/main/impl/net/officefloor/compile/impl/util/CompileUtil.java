@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
+import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
@@ -155,8 +156,49 @@ public class CompileUtil {
 	}
 
 	/**
-	 * Convenience method to instantiate and instance of a {@link Class} from
-	 * its fully qualified name.
+	 * Instantiates a new instance of the input {@link Class} by its default
+	 * constructor. If fails to instantiate, then reports issue via
+	 * {@link SourceIssues}.
+	 * 
+	 * @param <T>
+	 *            Type of instance.
+	 * @param <E>
+	 *            Expected type.
+	 * @param clazz
+	 *            {@link Class} to instantiate.
+	 * @param expectedType
+	 *            Expected type that is to be instantiated.
+	 * @param issues
+	 *            {@link SourceIssues}.
+	 * @return New instance or <code>null</code> if not able to instantiate.
+	 */
+	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType, SourceIssues issues) {
+		try {
+			// Create the instance
+			T instance = clazz.newInstance();
+
+			// Ensure the instance is of the expected type
+			if (!expectedType.isInstance(instance)) {
+				// Indicate issue
+				issues.addIssue("Must implement " + expectedType.getSimpleName() + " (class=" + clazz.getName() + ")");
+				return null; // instance not of type
+			}
+
+			// Return the instance
+			return instance;
+
+		} catch (Throwable ex) {
+			// Indicate issue (catching exception from constructor)
+			issues.addIssue(
+					"Failed to instantiate " + (clazz != null ? clazz.getName() : null) + " by default constructor",
+					ex);
+			return null; // no instance
+		}
+	}
+
+	/**
+	 * Convenience method to instantiate and instance of a {@link Class} from its
+	 * fully qualified name.
 	 * 
 	 * @param <T>
 	 *            Expected type.
@@ -233,14 +275,13 @@ public class CompileUtil {
 	 * @param <N>
 	 *            {@link Node} type within the listing.
 	 * @param <T>
-	 *            Type returned from the {@link Node} instances within the
-	 *            listing.
+	 *            Type returned from the {@link Node} instances within the listing.
 	 * @param nodesMap
-	 *            {@link Map} of {@link Node} instances by their names to load
-	 *            types from.
+	 *            {@link Map} of {@link Node} instances by their names to load types
+	 *            from.
 	 * @param sortKeyExtractor
-	 *            {@link Function} to extract the sort key (to enable
-	 *            deterministic order of loading the types).
+	 *            {@link Function} to extract the sort key (to enable deterministic
+	 *            order of loading the types).
 	 * @param typeLoader
 	 *            {@link Function} to load the type from the {@link Node}.
 	 * @param arrayGenerator
@@ -259,13 +300,12 @@ public class CompileUtil {
 	 * @param <N>
 	 *            {@link Node} type within the listing.
 	 * @param <T>
-	 *            Type returned from the {@link Node} instances within the
-	 *            listing.
+	 *            Type returned from the {@link Node} instances within the listing.
 	 * @param nodes
 	 *            {@link Stream} of {@link Node} instances to load types from.
 	 * @param sortKeyExtractor
-	 *            {@link Function} to extract the sort key (to enable
-	 *            deterministic order of loading the types).
+	 *            {@link Function} to extract the sort key (to enable deterministic
+	 *            order of loading the types).
 	 * @param typeLoader
 	 *            {@link Function} to load the type from the {@link Node}.
 	 * @param arrayGenerator
@@ -302,12 +342,10 @@ public class CompileUtil {
 	 * @param <N>
 	 *            {@link Node} type.
 	 * @param nodesMap
-	 *            {@link Map} of {@link Node} instances by their names to
-	 *            source.
+	 *            {@link Map} of {@link Node} instances by their names to source.
 	 * @param sortKeyExtractor
-	 *            {@link Function} to extract the sort key (to enable
-	 *            deterministic order of sourcing the sub {@link Node}
-	 *            instances).
+	 *            {@link Function} to extract the sort key (to enable deterministic
+	 *            order of sourcing the sub {@link Node} instances).
 	 * @param sourcer
 	 *            {@link Predicate} to source the sub {@link Node}.
 	 * @return <code>true</code> if all sub {@link Node} instances sourced.

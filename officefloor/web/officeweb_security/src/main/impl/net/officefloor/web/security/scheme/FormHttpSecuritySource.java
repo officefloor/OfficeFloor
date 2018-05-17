@@ -78,8 +78,8 @@ public class FormHttpSecuritySource extends
 	 * <p>
 	 * Undertakes the authentication.
 	 * <p>
-	 * This is separated out so that may be overridden to provide differing
-	 * means for authentication.
+	 * This is separated out so that may be overridden to provide differing means
+	 * for authentication.
 	 * 
 	 * @param userId
 	 *            Identifier for the user.
@@ -89,8 +89,7 @@ public class FormHttpSecuritySource extends
 	 *            Password.
 	 * @param store
 	 *            {@link CredentialStore}.
-	 * @return {@link HttpAccessControl} or <code>null</code> if not
-	 *         authenticated.
+	 * @return {@link HttpAccessControl} or <code>null</code> if not authenticated.
 	 * @throws HttpException
 	 *             If fails communication with the {@link CredentialStore}.
 	 */
@@ -123,7 +122,7 @@ public class FormHttpSecuritySource extends
 		context.setAccessControlClass(HttpAccessControl.class);
 		context.setCredentialsClass(HttpCredentials.class);
 		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
-		context.addFlow(Flows.FORM_LOGIN_PAGE, null);
+		context.addFlow(Flows.FORM_LOGIN_PAGE, null).setLabel("form");
 	}
 
 	@Override

@@ -39,9 +39,9 @@ public class HttpServerLocationImpl implements HttpServerLocation {
 	 */
 	public static String getDefaultHostName() {
 		try {
-			return InetAddress.getLocalHost().getCanonicalHostName();
+			return InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException ex) {
-			return "localhost";
+			return "127.0.0.1"; // loop back (localhost requires network connection for some browsers)
 		}
 	}
 

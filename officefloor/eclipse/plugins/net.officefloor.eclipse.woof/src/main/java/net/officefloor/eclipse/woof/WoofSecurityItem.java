@@ -164,6 +164,7 @@ public class WoofSecurityItem extends
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public IdeConfigurer configure() {
 		return new IdeConfigurer().addAndRefactor((builder, context) -> {
 			builder.title("Security");
@@ -187,18 +188,18 @@ public class WoofSecurityItem extends
 				WoofSecurityItem item = ctx.getModel();
 
 				// Obtain the HTTP Security Source
-				HttpSecuritySource<?, ?, ?, ?, ?> httpSecuritySource = this.getConfigurableContext().getOsgiBridge()
-						.loadClass(item.sourceClassName, HttpSecuritySource.class).newInstance();
+				Class<? extends HttpSecuritySource> httpSecuritySourceClass = this.getConfigurableContext()
+						.getOsgiBridge().loadClass(item.sourceClassName, HttpSecuritySource.class);
 
 				// Obtain the loader
 				HttpSecurityLoader loader = HttpSecurityArchitectEmployer.employHttpSecurityLoader(
 						this.getConfigurableContext().getOsgiBridge().getOfficeFloorCompiler());
 
 				// Load the type
-				item.type = loader.loadHttpSecurityType(httpSecuritySource, item.properties);
+				item.type = loader.loadHttpSecurityType(httpSecuritySourceClass, item.properties);
 
 				// Load the mappings
-				this.flowNameMapping = this.translateToNameMappings(item.type.getFlowTypes(),
+				item.flowNameMapping = this.translateToNameMappings(item.type.getFlowTypes(),
 						(flow) -> flow.getFlowName());
 			});
 

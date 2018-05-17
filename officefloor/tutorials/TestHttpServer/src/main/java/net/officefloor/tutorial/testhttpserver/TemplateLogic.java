@@ -20,7 +20,7 @@ package net.officefloor.tutorial.testhttpserver;
 import java.io.Serializable;
 
 import lombok.Data;
-import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Logic for the template.

@@ -8,7 +8,6 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>PrototypeHttpServer</artifactId>
-	<packaging>war</packaging>
 	<name>Prototype HTTP Server Tutorial</name>
 	<description>Tutorial of using WoOF wireframe prototyping within a HTTP Server</description>
 	<properties>

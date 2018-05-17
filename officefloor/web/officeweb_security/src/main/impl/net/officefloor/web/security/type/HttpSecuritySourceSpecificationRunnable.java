@@ -19,9 +19,7 @@ package net.officefloor.web.security.type;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
@@ -60,9 +58,7 @@ public class HttpSecuritySourceSpecificationRunnable implements OfficeFloorCompi
 		String httpSecuritySourceClassName = (String) parameters[0];
 
 		// Load the HTTP Security Loader
-		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
-		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader, compiler,
-				compiler.getCompilerIssues());
+		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(compiler);
 
 		// Instantiate the HTTP Security Source
 		Class<?> httpSecuritySourceClass = compiler.getClassLoader().loadClass(httpSecuritySourceClassName);

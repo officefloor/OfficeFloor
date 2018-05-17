@@ -1,7 +1,20 @@
 <woof>
 
+	<http-continuations>
+		<http-continuation path="/path">
+			<section name="Section" input="service" />
+		</http-continuation>
+	</http-continuations>
+
 	<templates>
 		<template path="/template" location="template.ofp" />
 	</templates>
+
+	<sections>
+		<section name="Section" source="CLASS"
+			location="net.officefloor.woof.mock.MockSection">
+			<input name="service" />
+		</section>
+	</sections>
 
 </woof>

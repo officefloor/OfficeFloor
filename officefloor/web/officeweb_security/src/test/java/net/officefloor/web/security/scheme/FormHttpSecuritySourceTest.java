@@ -77,7 +77,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		type.setCredentialsClass(HttpCredentials.class);
 		type.setInput(true);
 		type.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class, null);
-		type.addFlow(Flows.FORM_LOGIN_PAGE, null);
+		type.addFlow("form", null, 0, Flows.FORM_LOGIN_PAGE);
 
 		// Validate type
 		HttpSecurityLoaderUtil.validateHttpSecurityType(type, FormHttpSecuritySource.class,
