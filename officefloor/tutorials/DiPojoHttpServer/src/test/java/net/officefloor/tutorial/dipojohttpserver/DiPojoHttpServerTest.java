@@ -17,14 +17,10 @@
  */
 package net.officefloor.tutorial.dipojohttpserver;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Ensure correctly renders the page.
@@ -33,20 +29,11 @@ import net.officefloor.server.http.HttpClientTestUtil;
  */
 public class DiPojoHttpServerTest extends TestCase {
 
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	private MockWoofServer server;
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Stop the client
-			this.client.close();
-		} finally {
-			// Stop the server
-			OfficeFloorMain.open();
-		}
+		this.server.close();
 	}
 
 	/**
@@ -56,14 +43,14 @@ public class DiPojoHttpServerTest extends TestCase {
 	public void testRenderPage() throws Exception {
 
 		// Start the server
-		OfficeFloorMain.close();
+		this.server = MockWoofServer.open();
 
 		// Obtain the page
-		HttpResponse response = this.client.execute(new HttpGet("http://localhost:7878/template.woof"));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/template"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure page contains correct rendered content
-		String page = EntityUtils.toString(response.getEntity());
+		String page = response.getEntity(null);
 		assertTrue("Ensure correct page content", page.contains("Hello World"));
 	}
 	// END SNIPPET: test

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <property name="maven_compile_classpath" refid="maven.compile.classpath"/>
+  <property name="maven_runtime_classpath" refid="maven.runtime.classpath"/>
+  <property name="maven_test_classpath" refid="maven.test.classpath"/>
+  <property name="maven_classpath" value="${maven_compile_classpath}:${maven_runtime_classpath}:${maven_test_classpath}"/>
+  <echo file="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/dependencies.raw" message="${maven_classpath}:property/version-available.jar"/>
+  <replace file="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/dependencies.raw" value="" token="/home/daniel/OfficeFloor/officefloor/persistence/target/classes"/>
+  <replace file="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/dependencies.raw" value="" token="/home/daniel/OfficeFloor/officefloor/persistence/target/test-classes"/>
+  <copy file="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/dependencies.raw" tofile="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/dependencies.properties">
+    <filterchain>
+      <tokenfilter>
+        <stringtokenizer suppressdelims="true" delims=":"/>
+        <containsregex pattern="(.+)/([^/]+)-([^-/]+)\.([^.]+)"/>
+        <replaceregex pattern="(.+)/([^/]+)-([^-/]+)\.([^.]+)" replace="@{\2_version}=\3&#10;"/>
+      </tokenfilter>
+    </filterchain>
+  </copy>
+  <replace replacefilterfile="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/dependencies.properties" file="/home/daniel/OfficeFloor/officefloor/persistence/target/verifier/verifications.xml"/>
+</target>
+</project>

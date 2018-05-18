@@ -176,13 +176,12 @@ public class MockDataSource implements DataSource {
 	}
 
 	@Override
-	public Connection getConnection(String username, String password)
-			throws SQLException {
+	public Connection getConnection(String username, String password) throws SQLException {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	// New to Java 7 (not override to allow compatibility with Java 6)
+	@Override
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		TestCase.fail("Should not be invoked");
 		return null;

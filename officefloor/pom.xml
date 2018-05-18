@@ -56,9 +56,10 @@
 		<module>core</module>
 		<module>server</module>
 		<module>web</module>
+		<module>persistence</module>
 		<module>eclipse</module>
 		<module>tutorials</module>
-		<!-- <module>plugins</module> <module>maven</module> -->
+		<!-- <module>maven</module> -->
 	</modules>
 	<properties>
 		<current.year>2018</current.year>
@@ -190,6 +191,18 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- Persistence -->
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>persistence</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejdbc</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Plugins -->
