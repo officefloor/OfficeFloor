@@ -15,15 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.jdbc.datasource;
+package net.officefloor.jdbc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
 
@@ -33,15 +31,14 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.jdbc.datasource.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
- * Tests the {@link DataSourceManagedObjectSource}.
+ * Tests the {@link ConnectionManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceManagedObjectSourceTest extends OfficeFrameTestCase {
+public class ConnectionManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the {@link Connection}.
@@ -65,7 +62,7 @@ public class DataSourceManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Loads the properties for the {@link DataSourceManagedObjectSource}.
+	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
 	 * 
 	 * @param mos
 	 *            {@link OfficeManagedObjectSource}.
@@ -83,6 +80,9 @@ public class DataSourceManagedObjectSourceTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
+		// Reset mock section
+		MockSection.connection = null;
+
 		// Create the connection
 		this.connection = this.getConnection();
 
@@ -92,6 +92,13 @@ public class DataSourceManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Create table for testing
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE TEST ( ID INT, NAME VARCHAR(255) )");
+		}
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		if (this.connection != null) {
+			this.connection.close();
 		}
 	}
 
@@ -124,7 +131,7 @@ public class DataSourceManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			// Create the managed object
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					DataSourceManagedObjectSource.class.getName());
+					ConnectionManagedObjectSource.class.getName());
 			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
@@ -143,13 +150,21 @@ public class DataSourceManagedObjectSourceTest extends OfficeFrameTestCase {
 			assertTrue("Should have row", resultSet.next());
 			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
 		}
+
+		// Ensure the connection is closed
+		assertNotNull("Should have connection", MockSection.connection);
+		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
 	}
 
 	public static class MockSection {
-		public void section(DataSource dataSource) throws SQLException {
-			try (Connection connection = dataSource.getConnection()) {
-				connection.createStatement().execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 2, 'OfficeFloor' )");
+
+		private static Connection connection = null;
+
+		public void section(Connection connection) throws SQLException {
+			try (Statement statement = connection.createStatement()) {
+				statement.execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 2, 'OfficeFloor' )");
 			}
+			MockSection.connection = connection;
 		}
 	}
 
