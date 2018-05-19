@@ -29,8 +29,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public interface RecycleManagedObjectParameter<MO extends ManagedObject> {
 
 	/**
-	 * Convenience method to obtain the {@link RecycleManagedObjectParameter}
-	 * from the {@link ManagedFunctionContext}.
+	 * Convenience method to obtain the {@link RecycleManagedObjectParameter} from
+	 * the {@link ManagedFunctionContext}.
 	 * 
 	 * @param context
 	 *            {@link ManagedFunctionContext}.
@@ -55,12 +55,8 @@ public interface RecycleManagedObjectParameter<MO extends ManagedObject> {
 	 * </p>
 	 * Should this method not be invoked, the {@link ManagedObject} will be
 	 * destroyed.
-	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject} that has been recycled and ready for
-	 *            re-use.
 	 */
-	void reuseManagedObject(MO managedObject);
+	void reuseManagedObject();
 
 	/**
 	 * Obtains possible {@link CleanupEscalation} instances that occurred in

@@ -18,21 +18,26 @@
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceFlow;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.impl.construct.managedobjectpool.ManagedObjectPoolBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -65,14 +70,17 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private ManagingOfficeBuilder<F> managingOfficeBuilder;
 
 	/**
-	 * {@link OfficeBuilder} for the office using the
-	 * {@link ManagedObjectSource}.
+	 * {@link OfficeBuilder} for the office using the {@link ManagedObjectSource}.
 	 */
 	private OfficeBuilder officeBuilder;
 
 	/**
-	 * Name of the {@link ManagedFunction} to clean up this
-	 * {@link ManagedObject}.
+	 * Default {@link ManagedObjectPoolConfiguration}.
+	 */
+	private ManagedObjectPoolConfiguration defaultManagedObjectPool;
+
+	/**
+	 * Name of the {@link ManagedFunction} to clean up this {@link ManagedObject}.
 	 */
 	private String recycleFunctionName = null;
 
@@ -117,12 +125,22 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	}
 
 	/**
+	 * Obtains the default {@link ManagedObjectPoolConfiguration}.
+	 * 
+	 * @return Default {@link ManagedObjectPoolConfiguration}. May be
+	 *         <code>null</code> if no default {@link ManagedObjectPool}.
+	 */
+	public ManagedObjectPoolConfiguration getDefaultManagedObjectPoolConfiguration() {
+		return this.defaultManagedObjectPool;
+	}
+
+	/**
 	 * Obtains the name of the {@link ManagedFunction} to recycle this
 	 * {@link ManagedObject}.
 	 * 
 	 * @return Name of the {@link ManagedFunction} to recycle this
-	 *         {@link ManagedObject} or <code>null</code> if no recycling of
-	 *         this {@link ManagedObject}.
+	 *         {@link ManagedObject} or <code>null</code> if no recycling of this
+	 *         {@link ManagedObject}.
 	 */
 	public String getRecycleFunctionName() {
 		return this.recycleFunctionName;
@@ -142,6 +160,13 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	/*
 	 * =============== ManagedObjectSourceContext =====================
 	 */
+
+	@Override
+	public ManagedObjectPoolBuilder setDefaultManagedObjectPool(ManagedObjectPoolFactory managedObjectPoolFactory) {
+		ManagedObjectPoolBuilderImpl poolBuilder = new ManagedObjectPoolBuilderImpl(managedObjectPoolFactory);
+		this.defaultManagedObjectPool = poolBuilder;
+		return poolBuilder;
+	}
 
 	@Override
 	public <O extends Enum<O>, f extends Enum<f>> ManagedObjectFunctionBuilder<O, f> getRecycleFunction(

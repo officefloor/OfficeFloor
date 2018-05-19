@@ -547,7 +547,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 			this.cleanupEscalationHandler.handleCleanupEscalations(managedObject, parameter.getCleanupEscalations());
 
 			// Enable re-use of the object
-			parameter.reuseManagedObject(managedObject);
+			parameter.reuseManagedObject();
 
 			// Nothing further
 			return null;
@@ -555,8 +555,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	/**
-	 * {@link ManagedObject} providing <code>null</code> value. Must implement
-	 * all {@link ManagedObject} interfaces to avoid {@link ClassCastException}.
+	 * {@link ManagedObject} providing <code>null</code> value. Must implement all
+	 * {@link ManagedObject} interfaces to avoid {@link ClassCastException}.
 	 */
 	private static class NullManagedObject implements ManagedObject, NameAwareManagedObject,
 			CoordinatingManagedObject<None>, AsynchronousManagedObject, ProcessAwareManagedObject {

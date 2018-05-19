@@ -47,7 +47,7 @@ public class RecycleJdbcManagedFunction extends StaticManagedFunction<Indexed, I
 		mo.recycle();
 
 		// Recycled, may reuse
-		recycleParameter.reuseManagedObject(mo);
+		recycleParameter.reuseManagedObject();
 
 		// No further tasks
 		return null;

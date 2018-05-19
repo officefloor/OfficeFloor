@@ -21,6 +21,7 @@
 package net.officefloor.frame.api.managedobject.pool;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 
 /**
@@ -55,5 +56,19 @@ public interface ManagedObjectPool {
 	 *            Cause for the {@link ManagedObject} to be lost.
 	 */
 	void lostManagedObject(ManagedObject managedObject, Throwable cause);
+
+	/**
+	 * Should the {@link ManagedObjectPool} create a wrapper {@link ManagedObject}
+	 * for pooling, this method is required to be implemented to extract the
+	 * {@link ManagedObject} sourced from the {@link ManagedObjectSource}.
+	 * 
+	 * @param pooledManagedObject
+	 *            {@link ManagedObject} source from this {@link ManagedObjectPool}.
+	 * @return {@link ManagedObject} sourced from the underlying
+	 *         {@link ManagedObjectSource}.
+	 */
+	default ManagedObject getSourcedManagedObject(ManagedObject pooledManagedObject) {
+		return pooledManagedObject;
+	}
 
 }

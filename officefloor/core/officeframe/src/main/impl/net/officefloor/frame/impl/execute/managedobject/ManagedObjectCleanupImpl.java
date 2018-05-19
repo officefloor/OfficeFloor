@@ -117,8 +117,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	}
 
 	/**
-	 * Runs the {@link FunctionState} and all its subsequent
-	 * {@link FunctionState} instances in the specified {@link ThreadState}.
+	 * Runs the {@link FunctionState} and all its subsequent {@link FunctionState}
+	 * instances in the specified {@link ThreadState}.
 	 */
 	private class RunInThreadStateFunctionState extends AbstractDelegateFunctionState {
 
@@ -237,16 +237,22 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		 */
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public MO getManagedObject() {
-			return this.managedObject;
+			// Ensure provide source managed object to recycle
+			if (this.pool != null) {
+				return (MO) this.pool.getSourcedManagedObject(this.managedObject);
+			} else {
+				return this.managedObject;
+			}
 		}
 
 		@Override
-		public void reuseManagedObject(MO managedObject) {
+		public void reuseManagedObject() {
 
 			// Return to pool
 			if (this.pool != null) {
-				this.pool.returnManagedObject(managedObject);
+				this.pool.returnManagedObject(this.managedObject);
 			}
 
 			// Flag recycled

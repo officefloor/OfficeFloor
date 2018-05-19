@@ -241,6 +241,10 @@ public class RawManagedObjectMetaDataFactory {
 		ThreadCompletionListener[] threadCompletionListeners = null;
 		ManagedObjectPoolConfiguration managedObjectPoolConfiguration = configuration
 				.getManagedObjectPoolConfiguration();
+		if (managedObjectPoolConfiguration == null) {
+			// Determine if default managed object pool configured
+			managedObjectPoolConfiguration = context.getDefaultManagedObjectPoolConfiguration();
+		}
 		if (managedObjectPoolConfiguration != null) {
 
 			// Create the managed object pool for the managed object source

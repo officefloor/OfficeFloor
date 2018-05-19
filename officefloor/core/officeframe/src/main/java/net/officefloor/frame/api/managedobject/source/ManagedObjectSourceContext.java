@@ -17,11 +17,14 @@
  */
 package net.officefloor.frame.api.managedobject.source;
 
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -31,6 +34,20 @@ import net.officefloor.frame.internal.structure.Flow;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceContext {
+
+	/**
+	 * <p>
+	 * Specifies the default {@link ManagedObjectPool}.
+	 * <p>
+	 * This may be overridden by {@link ManagedObjectBuilder} configuration, however
+	 * allows for a default {@link ManagedObjectPool} should one not be configured.
+	 * 
+	 * @param managedObjectPoolFactory
+	 *            {@link ManagedObjectPoolFactory} for the default
+	 *            {@link ManagedObjectPool}.
+	 * @return {@link ManagedObjectPoolBuilder}.
+	 */
+	ManagedObjectPoolBuilder setDefaultManagedObjectPool(ManagedObjectPoolFactory poolFactory);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceFlow}.
@@ -90,8 +107,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 
 	/**
 	 * <p>
-	 * Adds a {@link ManagedFunction} to invoke on start up of the
-	 * {@link Office}.
+	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
 	 * <p>
 	 * The {@link ManagedFunction} must be registered by this
 	 * {@link ManagedObjectSource}.

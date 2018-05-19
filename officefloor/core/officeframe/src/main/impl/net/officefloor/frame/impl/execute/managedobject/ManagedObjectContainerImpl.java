@@ -80,8 +80,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 *            {@link ManagedObjectIndex} to identify the
 	 *            {@link ManagedObjectContainer}.
 	 * @param managedFunction
-	 *            {@link ManagedFunctionContainer} to specify context for
-	 *            obtaining the {@link ManagedObjectContainer}.
+	 *            {@link ManagedFunctionContainer} to specify context for obtaining
+	 *            the {@link ManagedObjectContainer}.
 	 * @return {@link ManagedObjectContainer}.
 	 */
 	public static ManagedObjectContainer getManagedObjectContainer(ManagedObjectIndex index,
@@ -110,8 +110,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	/**
-	 * Value indicating that there currently is no asynchronous operation
-	 * occurring.
+	 * Value indicating that there currently is no asynchronous operation occurring.
 	 */
 	private static final long NO_ASYNC_OPERATION = -1;
 
@@ -127,8 +126,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private final ThreadState responsibleThreadState;
 
 	/**
-	 * {@link AssetLatch} for waiting to source the {@link ManagedObject}
-	 * instance (the {@link Asset}).
+	 * {@link AssetLatch} for waiting to source the {@link ManagedObject} instance
+	 * (the {@link Asset}).
 	 */
 	private final AssetLatch sourcingLatch;
 
@@ -149,7 +148,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private ManagedObjectContainerState containerState = ManagedObjectContainerState.NOT_LOADED;
 
 	/**
-	 * {@link ManagedObject} being managed.
+	 * {@link ManagedObject} being managed. This is the {@link ManagedObject} from
+	 * the {@link ManagedObjectSource}.
 	 */
 	private ManagedObject managedObject = null;
 
@@ -175,8 +175,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private boolean isRequireThreadStateSafety = false;
 
 	/**
-	 * Time that an asynchronous operation was started by the
-	 * {@link ManagedObject}.
+	 * Time that an asynchronous operation was started by the {@link ManagedObject}.
 	 */
 	private long asynchronousStartTime = NO_ASYNC_OPERATION;
 
@@ -251,7 +250,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				((AsynchronousManagedObject) this.managedObject).setAsynchronousContext(new AsynchronousContextImpl());
 			}
 		} catch (Throwable ex) {
-			// Flag failure to handle later when funciton attempts to use it
+			// Flag failure to handle later when function attempts to use it
 			this.failure = ex;
 		}
 	}
@@ -408,8 +407,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					} else {
 						// Source directly
 						ManagedObjectSource<?, ?> managedObjectSource = container.metaData.getManagedObjectSource();
-						ManagedObjectUser user = new ManagedObjectUserImpl();
-						managedObjectSource.sourceManagedObject(user);
+						managedObjectSource.sourceManagedObject(new ManagedObjectUserImpl());
 					}
 
 				} catch (Throwable ex) {
@@ -447,22 +445,29 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// If not setup, then managed object should still be ready
 					boolean isCheckReady = false;
 
+					// Obtained the source managed object to configure
+					ManagedObject sourceManagedObject = container.managedObject;
+					ManagedObjectPool pool = container.metaData.getManagedObjectPool();
+					if (pool != null) {
+						sourceManagedObject = pool.getSourcedManagedObject(sourceManagedObject);
+					}
+
 					// Provide process awareness if process aware
 					if (container.metaData.isProcessAwareManagedObject()) {
-						((ProcessAwareManagedObject) container.managedObject)
+						((ProcessAwareManagedObject) sourceManagedObject)
 								.setProcessAwareContext(new ProcessAwareContextImpl());
 					}
 
 					// Provide bound name if name aware
 					if (container.metaData.isNameAwareManagedObject()) {
-						((NameAwareManagedObject) container.managedObject)
+						((NameAwareManagedObject) sourceManagedObject)
 								.setBoundManagedObjectName(container.metaData.getBoundManagedObjectName());
 						isCheckReady = true;
 					}
 
 					// Provide listener if asynchronous managed object
 					if (container.metaData.isManagedObjectAsynchronous()) {
-						((AsynchronousManagedObject) container.managedObject)
+						((AsynchronousManagedObject) sourceManagedObject)
 								.setAsynchronousContext(new AsynchronousContextImpl());
 						isCheckReady = true;
 					}
@@ -471,7 +476,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					if (container.metaData.isCoordinatingManagedObject()) {
 						ObjectRegistry<?> objectRegistry = container.metaData
 								.createObjectRegistry(this.managedFunction);
-						CoordinatingManagedObject cmo = (CoordinatingManagedObject) container.managedObject;
+						CoordinatingManagedObject cmo = (CoordinatingManagedObject) sourceManagedObject;
 						cmo.loadObjects(objectRegistry);
 						isCheckReady = true;
 					}
@@ -785,8 +790,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		/**
-		 * Create the {@link FunctionState} for the
-		 * {@link AsynchronousOperation}.
+		 * Create the {@link FunctionState} for the {@link AsynchronousOperation}.
 		 * 
 		 * @param operation
 		 *            {@link AsynchronousOperation}.
@@ -892,8 +896,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 									+ container.containerState);
 				}
 
+				// Obtain the source managed object
+				ManagedObject sourceManagedObject = container.managedObject;
+				ManagedObjectPool pool = container.metaData.getManagedObjectPool();
+				if (pool != null) {
+					sourceManagedObject = pool.getSourcedManagedObject(sourceManagedObject);
+				}
+
 				// Extract the extension
-				E extension = extractor.extractExtension(container.managedObject, container.metaData);
+				E extension = extractor.extractExtension(sourceManagedObject, container.metaData);
 
 				// Register the extension
 				managedObjectExtensions[extensionIndex] = extension;
@@ -1044,7 +1055,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// No recycle, so return directly to pool (if pooled)
 				ManagedObjectPool pool = container.metaData.getManagedObjectPool();
 				if (pool != null) {
-					pool.returnManagedObject(managedObject);
+					pool.returnManagedObject(this.managedObject);
 				}
 			}
 
@@ -1105,8 +1116,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	/**
-	 * {@link FunctionState} to place the {@link ManagedObjectContainer} in a
-	 * failed state.
+	 * {@link FunctionState} to place the {@link ManagedObjectContainer} in a failed
+	 * state.
 	 */
 	private class FailManagedObjectOperation extends ManagedObjectOperation {
 
@@ -1215,14 +1226,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		LOADED,
 
 		/**
-		 * Indicates the {@link ManagedObject} has been loaded and is not in the
-		 * process of being governed.
+		 * Indicates the {@link ManagedObject} has been loaded and is not in the process
+		 * of being governed.
 		 */
 		GOVERNING,
 
 		/**
-		 * Indicates the {@link ManagedObject} now has appropriate
-		 * {@link Governance}.
+		 * Indicates the {@link ManagedObject} now has appropriate {@link Governance}.
 		 */
 		GOVERNED,
 
@@ -1238,9 +1248,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		OBJECT_AVAILABLE,
 
 		/**
-		 * Indicates that the {@link ManagedObject} is waiting on a
-		 * {@link Governance} to be unloaded. At this point, it should no longer
-		 * be used for {@link Task} functionality.
+		 * Indicates that the {@link ManagedObject} is waiting on a {@link Governance}
+		 * to be unloaded. At this point, it should no longer be used for {@link Task}
+		 * functionality.
 		 */
 		UNLOAD_WAITING_GOVERNANCE,
 
@@ -1250,8 +1260,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		UNLOADING,
 
 		/**
-		 * {@link ManagedObject} has been unloaded and
-		 * {@link ManagedObjectContainer} is complete in its use.
+		 * {@link ManagedObject} has been unloaded and {@link ManagedObjectContainer} is
+		 * complete in its use.
 		 */
 		COMPLETE
 	}

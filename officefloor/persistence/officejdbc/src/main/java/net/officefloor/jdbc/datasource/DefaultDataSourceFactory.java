@@ -1,0 +1,234 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.jdbc.datasource;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import net.officefloor.compile.properties.Property;
+import net.officefloor.frame.api.source.SourceContext;
+
+/**
+ * Default {@link DataSourceFactory}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class DefaultDataSourceFactory implements DataSourceFactory {
+
+	/**
+	 * {@link Property} name for the {@link DataSource} {@link Class}.
+	 */
+	public static final String PROPERTY_DATA_SOURCE_CLASS_NAME = "datasource.class";
+
+	/**
+	 * Loads the properties onto the {@link DataSource}.
+	 * 
+	 * @param <S>
+	 *            {@link DataSource} type.
+	 * @param dataSource
+	 *            {@link DataSource}.
+	 * @param context
+	 *            {@link SourceContext}.
+	 * @throws Exception
+	 *             If fails to load properties.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <S extends DataSource> void loadProperties(S dataSource, SourceContext context) throws Exception {
+
+		// Obtain the class
+		Class<S> dataSourceClass = (Class<S>) dataSource.getClass();
+
+		// Obtain the setters from the class
+		List<Setter<S>> setters = new LinkedList<Setter<S>>();
+		for (Method method : dataSource.getClass().getMethods()) {
+
+			// Ensure the method is a public setter with only one argument
+			if (!Modifier.isPublic(method.getModifiers())) {
+				continue;
+			}
+			if (!method.getName().startsWith("set")) {
+				continue;
+			}
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			if (parameterTypes.length != 1) {
+				continue;
+			}
+
+			// Create and add the setter
+			Setter<S> setter = new Setter<>(dataSourceClass, method);
+			setters.add(setter);
+		}
+
+		// Load the properties for the data source
+		for (Setter<S> setter : setters) {
+
+			// Obtain the property value
+			String propertyName = setter.getPropertyName();
+			String propertyValue = context.getProperty(propertyName, null);
+			if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
+				// Property not configured, so do not load
+				continue;
+			}
+
+			// Load the property value
+			setter.setPropertyValue(dataSource, propertyValue);
+		}
+	}
+
+	/*
+	 * ================== DataSourceFactory =========================
+	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public DataSource createDataSource(SourceContext context) throws Exception {
+
+		// Obtain the data source
+		String dataSourceClassName = context.getProperty(PROPERTY_DATA_SOURCE_CLASS_NAME);
+		Class<?> objectClass = context.loadClass(dataSourceClassName);
+		if (!DataSource.class.isAssignableFrom(objectClass)) {
+			throw new IllegalArgumentException(
+					"Non " + DataSource.class.getSimpleName() + " class configured: " + dataSourceClassName);
+		}
+		Class<? extends DataSource> dataSourceClass = (Class<? extends DataSource>) objectClass;
+
+		// Load the data source
+		DataSource dataSource = dataSourceClass.newInstance();
+
+		// Load the properties
+		loadProperties(dataSource, context);
+
+		// Return the data source
+		return dataSource;
+	}
+
+	/**
+	 * Setter {@link Method} wrapper.
+	 */
+	private static class Setter<S extends DataSource> {
+
+		/**
+		 * Class containing this.
+		 */
+		private final Class<S> clazz;
+
+		/**
+		 * Setter method.
+		 */
+		private final Method method;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param clazz
+		 *            Class for the {@link Method}.
+		 * @param method
+		 *            Setter method.
+		 */
+		private Setter(Class<S> clazz, Method method) {
+			this.clazz = clazz;
+			this.method = method;
+		}
+
+		/**
+		 * Obtains the property name for this setter.
+		 * 
+		 * @return Property name for this setter.
+		 */
+		private String getPropertyName() {
+			String propertyName = this.method.getName();
+			propertyName = propertyName.substring("set".length());
+			propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+			return propertyName;
+		}
+
+		/**
+		 * Sets the value onto the bean.
+		 * 
+		 * @param dataSource
+		 *            {@link DataSource} to have the value loaded.
+		 * @param value
+		 *            Value to set on the bean.
+		 * @throws Exception
+		 *             If fails to set the value.
+		 */
+		private void setValue(S dataSource, Object value) throws Exception {
+
+			// Obtain the method to load
+			Method setMethod;
+			if (dataSource.getClass() == this.clazz) {
+				setMethod = this.method;
+			} else {
+				// Obtain method from sub type
+				setMethod = dataSource.getClass().getMethod(this.method.getName(), this.method.getParameterTypes());
+			}
+
+			try {
+				// Set the value onto the object
+				setMethod.invoke(dataSource, value);
+			} catch (InvocationTargetException ex) {
+				// Throw bean failure
+				Throwable cause = ex.getCause();
+				if (cause instanceof Exception) {
+					throw (Exception) cause;
+				} else if (cause instanceof Error) {
+					throw (Error) cause;
+				} else {
+					// Can not throw, so indicate via invocation failure
+					throw ex;
+				}
+			}
+		}
+
+		/**
+		 * Sets the property value onto the bean.
+		 * 
+		 * @param dataSource
+		 *            {@link DataSource} to have the value loaded.
+		 * @param value
+		 *            Value to set on the bean.
+		 * @throws Exception
+		 *             If fails to set property value.
+		 */
+		private void setPropertyValue(S dataSource, String value) throws Exception {
+
+			// Transform the value to set on bean
+			Object loadValue;
+			Class<?> parameterType = this.method.getParameterTypes()[0];
+			if (String.class.isAssignableFrom(parameterType)) {
+				loadValue = value;
+			} else if (Integer.class.isAssignableFrom(parameterType) || int.class.isAssignableFrom(parameterType)) {
+				loadValue = Integer.valueOf(value);
+			} else if (Boolean.class.isAssignableFrom(parameterType) || boolean.class.isAssignableFrom(parameterType)) {
+				loadValue = Boolean.valueOf(value);
+			} else {
+				// Unknown property type, so can not load
+				throw new IllegalArgumentException("Unknown property value type " + parameterType.getName());
+			}
+
+			// Set the property value on the bean
+			this.setValue(dataSource, loadValue);
+		}
+	}
+
+}

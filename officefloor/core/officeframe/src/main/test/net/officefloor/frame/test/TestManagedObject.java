@@ -93,8 +93,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public boolean isProcessAwareManagedObject = false;
 
 	/**
-	 * Optional {@link Consumer} to enhance the
-	 * {@link ManagedObjectSourceMetaData}.
+	 * Optional {@link Consumer} to enhance the {@link ManagedObjectSourceMetaData}.
 	 */
 	public Consumer<MetaDataContext<O, F>> enhanceMetaData = null;
 
@@ -139,8 +138,8 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public boolean isRecycle = true;
 
 	/**
-	 * {@link Consumer} to be provided the {@link RecycleManagedObjectParameter}
-	 * on recycling.
+	 * {@link Consumer} to be provided the {@link RecycleManagedObjectParameter} on
+	 * recycling.
 	 */
 	public Consumer<RecycleManagedObjectParameter<?>> recycleConsumer = null;
 
@@ -424,8 +423,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 
 			// Indicate whether to recycle the managed object
 			if (TestManagedObject.this.isRecycle) {
-				TestManagedObject<O, F> managedObject = parameter.getManagedObject();
-				parameter.reuseManagedObject(managedObject);
+				parameter.reuseManagedObject();
 			}
 
 			// No further functionality
