@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import net.officefloor.frame.api.build.None;
@@ -46,6 +47,11 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	private static final Logger LOGGER = Logger.getLogger(ConnectionManagedObjectSource.class.getName());
 
 	/**
+	 * {@link DataSource}.
+	 */
+	private DataSource dataSource;
+
+	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
 	 * 
 	 * @return {@link DataSourceFactory}.
@@ -55,9 +61,20 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	}
 
 	/**
-	 * {@link DataSource}.
+	 * Obtains the {@link ConnectionPoolDataSource}.
+	 * 
+	 * @return {@link ConnectionPoolDataSource}.
+	 * @throws IllegalStateException
+	 *             If {@link DataSource} configured is not a
+	 *             {@link ConnectionPoolDataSource}.
 	 */
-	private DataSource dataSource;
+	public ConnectionPoolDataSource getConnectionPoolDataSource() throws IllegalStateException {
+
+		// Ensure a connection pool data source
+
+		// Return the connection pool data source
+		return (ConnectionPoolDataSource) this.dataSource;
+	}
 
 	/*
 	 * ================== AbstractManagedObjectSource ===================
@@ -76,42 +93,24 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 
 		// Configure meta-data
 		context.setObjectClass(Connection.class);
+		context.setManagedObjectClass(AbstractConnectionManagedObject.class);
 		context.getManagedObjectSourceContext().setDefaultManagedObjectPool(
 				(poolContext) -> new DefaultManagedObjectPool(poolContext.getManagedObjectSource()));
 	}
 
 	@Override
-	protected ManagedObject getManagedObject() throws Throwable {
-		return new ConnectionManagedObject(this.dataSource.getConnection());
+	protected ManagedObject getManagedObject() {
+		return new ConnectionManagedObject();
 	}
 
 	/**
 	 * {@link Connection} {@link ManagedObject}.
 	 */
-	private static class ConnectionManagedObject implements ManagedObject {
-
-		/**
-		 * {@link Connection}.
-		 */
-		private final Connection connection;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param connection
-		 *            {@link Connection}.
-		 */
-		private ConnectionManagedObject(Connection connection) {
-			this.connection = connection;
-		}
-
-		/*
-		 * ================= ManagedObject =====================
-		 */
+	private class ConnectionManagedObject extends AbstractConnectionManagedObject {
 
 		@Override
-		public Object getObject() throws Throwable {
-			return this.connection;
+		protected Connection getConnection() throws SQLException {
+			return ConnectionManagedObjectSource.this.dataSource.getConnection();
 		}
 	}
 

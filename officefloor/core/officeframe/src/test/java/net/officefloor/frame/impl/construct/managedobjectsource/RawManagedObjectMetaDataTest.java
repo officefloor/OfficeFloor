@@ -506,8 +506,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to handle plain {@link ManagedObject} instance (ie not
-	 * {@link AsynchronousManagedObject} or {@link CoordinatingManagedObject}).
+	 * Ensures able to configure {@link ManagedObjectPool}.
 	 */
 	public void testManagedObjectPool() throws Exception {
 
@@ -533,6 +532,32 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ThreadCompletionListener[] threadCompletionListeners = rawMetaData.getThreadCompletionListeners();
 		assertEquals("Incorrect number of thread completion listeners", 1, threadCompletionListeners.length);
 		assertEquals("Incorrect thread completion listener", threadCompletionListener, threadCompletionListeners[0]);
+	}
+
+	/**
+	 * Ensures gracefully handles failure to create {@link ManagedObjectPool}.
+	 */
+	public void testManagedObjectPoolCreationFailure() throws Exception {
+
+		final Throwable FAILURE = new Throwable("TEST");
+
+		// Record plain managed object
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+
+		// Record issue
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME, "Failed to create ManagedObjectPool",
+				FAILURE);
+
+		// Configure the pool with thread completion listener
+		this.configuration.setManagedObjectPool((context) -> {
+			throw FAILURE;
+		});
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(false);
+		this.verifyMockObjects();
 	}
 
 	/**

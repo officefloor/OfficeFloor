@@ -250,7 +250,13 @@ public class RawManagedObjectMetaDataFactory {
 			// Create the managed object pool for the managed object source
 			ManagedObjectPoolFactory poolFactory = managedObjectPoolConfiguration.getManagedObjectPoolFactory();
 			ManagedObjectPoolContext poolContext = new ManagedObjectPoolContextImpl(managedObjectSource);
-			managedObjectPool = poolFactory.createManagedObjectPool(poolContext);
+			try {
+				managedObjectPool = poolFactory.createManagedObjectPool(poolContext);
+			} catch (Throwable ex) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"Failed to create " + ManagedObjectPool.class.getSimpleName(), ex);
+				return null; // can not carry on
+			}
 
 			// Create the thread completion listeners
 			ThreadCompletionListenerFactory[] threadCompletionListenerFactories = managedObjectPoolConfiguration

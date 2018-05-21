@@ -41,10 +41,13 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
@@ -54,6 +57,75 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
  * @author Daniel Sagenschneider
  */
 public class CompileOfficeFloor extends AbstractOfficeFloorSource {
+
+	/**
+	 * Convenience method to invoke the {@link ProcessState} for the
+	 * {@link ManagedFunction} within the default {@link Office}.
+	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloor}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param parameter
+	 *            Parameter to the {@link ManagedFunction}.
+	 * @throws Throwable
+	 *             If fails to invoke the {@link ProcessState}.
+	 */
+	public static void invokeProcess(OfficeFloor officeFloor, String functionName, Object parameter) throws Throwable {
+		invokeProcess(officeFloor, "OFFICE", functionName, parameter);
+	}
+
+	/**
+	 * Convenience method to invoke the {@link ProcessState} for the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloor}.
+	 * @param officeName
+	 *            Name of the {@link Office} containing the {@link ManagedFunction}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param parameter
+	 *            Parameter to the {@link ManagedFunction}.
+	 * @throws Throwable
+	 *             If fails to invoke the {@link ProcessState}.
+	 */
+	public static void invokeProcess(OfficeFloor officeFloor, String officeName, String functionName, Object parameter)
+			throws Throwable {
+
+		// Obtain the function
+		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager(functionName);
+
+		// Invoke the function (ensuring completes within reasonable time)
+		long startTimestamp = System.currentTimeMillis();
+		boolean[] isComplete = new boolean[] { false };
+		Throwable[] failure = new Throwable[] { null };
+		function.invokeProcess(parameter, (exception) -> {
+			synchronized (isComplete) {
+				failure[0] = exception;
+				isComplete[0] = true;
+				isComplete.notify(); // wake up immediately
+			}
+		});
+		synchronized (isComplete) {
+			while (!isComplete[0]) {
+
+				// Determine if timed out
+				if ((startTimestamp + 3000) < System.currentTimeMillis()) {
+					throw new Exception(
+							"Timed out waiting on process (" + officeName + "." + functionName + ") to complete");
+				}
+
+				// Sleep some time
+				isComplete.wait(100);
+			}
+
+			// Determine if failure
+			if (failure[0] != null) {
+				throw failure[0];
+			}
+		}
+	}
 
 	/**
 	 * {@link OfficeFloorCompiler}.

@@ -30,7 +30,9 @@ public interface ManagedObjectPoolFactory {
 	 * @param managedObjectPoolContext
 	 *            {@link ManagedObjectPoolContext}.
 	 * @return {@link ManagedObjectPool}.
+	 * @throws Throwable
+	 *             If fails to create the {@link ManagedObjectPool}.
 	 */
-	ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext);
+	ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext) throws Throwable;
 
 }

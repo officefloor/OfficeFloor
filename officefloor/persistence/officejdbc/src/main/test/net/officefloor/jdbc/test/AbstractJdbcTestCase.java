@@ -1,0 +1,283 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.jdbc.test;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+
+/**
+ * Abstract tests for an JDBC vendor implementation.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
+
+	/**
+	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
+	 * 
+	 * @param mos
+	 *            {@link PropertyConfigurable}.
+	 */
+	protected abstract void loadProperties(PropertyConfigurable mos);
+
+	/**
+	 * Cleans the database.
+	 * 
+	 * @param connection
+	 *            {@link Connection}.
+	 */
+	protected abstract void cleanDatabase(Connection connection) throws SQLException;
+
+	/**
+	 * {@link Connection}.
+	 */
+	protected Connection connection;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Run OfficeFloor with pool to obtain connection
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			context.addSection("SECTION", SetupSection.class);
+
+			// Connection
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					ConnectionManagedObjectSource.class.getName());
+			this.loadProperties(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Pool the connection
+			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+					ThreadLocalJdbcConnectionPoolSource.class.getName());
+			context.getOfficeArchitect().link(mos, pool);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		try {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
+		} catch (Throwable ex) {
+			throw fail(ex);
+		} finally {
+			officeFloor.closeOfficeFloor();
+		}
+
+		// Obtain connection
+		// Must keep reference to keep potential in memory databases active
+		this.connection = SetupSection.connection;
+
+		// Clean database
+		this.cleanDatabase(this.connection);
+	}
+
+	public static class SetupSection {
+
+		private static Connection connection;
+
+		public void script(Connection connection) throws SQLException {
+			SetupSection.connection = connection;
+		}
+	}
+
+	/**
+	 * Ensure can connect to database.
+	 */
+	public void testConnectivity() throws Throwable {
+
+		// Run connectivity to create table and add row
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			context.addSection("SECTION", ConnectivitySection.class);
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					ConnectionManagedObjectSource.class.getName());
+			this.loadProperties(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.checkConnectivity", null);
+		officeFloor.closeOfficeFloor();
+
+		// Ensure row in database
+		try (PreparedStatement statement = this.connection
+				.prepareStatement("SELECT NAME FROM OFFICE_FLOOR_JDBC_TEST WHERE ID = ?")) {
+			statement.setInt(1, 1);
+			ResultSet resultSet = statement.executeQuery();
+			assertTrue("Should have row in database", resultSet.next());
+			assertEquals("Incorrect row in database", "test", resultSet.getString("NAME"));
+		}
+
+		// As no pooling, should close the connection
+		assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
+	}
+
+	public static class ConnectivitySection {
+
+		private static Connection connection;
+
+		public void checkConnectivity(Connection connection) throws SQLException {
+			ConnectivitySection.connection = connection;
+
+			// Create table with row
+			try (Statement statement = connection.createStatement()) {
+				statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+				statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
+			}
+		}
+	}
+
+	/**
+	 * Ensure can stress test against the database.
+	 */
+	public void testStress() throws Throwable {
+		this.doStressTest(false);
+	}
+
+	/**
+	 * Ensure can stress test against the database with transactions.
+	 */
+	public void testTransactionStress() throws Throwable {
+		this.doStressTest(true);
+	}
+
+	/**
+	 * Undertake stress test.
+	 * 
+	 * @param isTransaction
+	 *            Whether test uses transactions.
+	 */
+	private void doStressTest(boolean isTransaction) throws Throwable {
+
+		final int RUN_COUNT = 10000;
+		final int WARM_UP = RUN_COUNT / 10;
+		StressSection.isTransaction = isTransaction;
+
+		// Undertake stress test
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.officeFloor((context) -> {
+			// Provide different thread
+			context.addManagedObject("tag", NewThread.class, ManagedObjectScope.THREAD);
+			context.getOfficeFloorDeployer().addTeam("TEAM", new ExecutorCachedTeamSource()).addTypeQualification(null,
+					NewThread.class.getName());
+		});
+		compiler.office((context) -> {
+			context.getOfficeArchitect().enableAutoWireTeams();
+			context.addSection("SECTION", StressSection.class);
+
+			// Connection
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					ConnectionManagedObjectSource.class.getName());
+			this.loadProperties(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Pool the connection
+			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+					ThreadLocalJdbcConnectionPoolSource.class.getName());
+			context.getOfficeArchitect().link(mos, pool);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Setup table
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.setup", null);
+
+		// Undertake warm up
+		for (int i = 0; i < WARM_UP; i++) {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
+		}
+
+		// Run test
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < RUN_COUNT; i++) {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
+		}
+		long runTime = System.currentTimeMillis() - startTime;
+		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));
+		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
+				+ +requestsPerSecond + " inserts/sec");
+
+		// Ensure inserted all rows
+		try (PreparedStatement statement = this.connection
+				.prepareStatement("SELECT COUNT(*) AS ENTRY_COUNT FROM OFFICE_FLOOR_JDBC_TEST")) {
+			ResultSet resultSet = statement.executeQuery();
+			resultSet.next();
+			assertEquals("Should create 2 rows for each run", ((RUN_COUNT + WARM_UP) * 2),
+					resultSet.getInt("ENTRY_COUNT"));
+		}
+
+		// Complete
+		officeFloor.closeOfficeFloor();
+	}
+
+	public static class NewThread {
+	}
+
+	public static class StressSection {
+
+		private static volatile boolean isTransaction = false;
+
+		@FlowInterface
+		public static interface Flows {
+			void thread();
+		}
+
+		private final AtomicInteger id = new AtomicInteger(1);
+
+		public void setup(Connection connection) throws SQLException {
+			try (Statement statement = connection.createStatement()) {
+				statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			}
+		}
+
+		public void run(Connection connection, Flows flows) throws SQLException {
+			if (isTransaction) {
+				connection.setAutoCommit(false);
+			}
+			this.insertRow(connection, "run");
+			flows.thread();
+		}
+
+		public void thread(Connection connection, NewThread thread) throws SQLException {
+			this.insertRow(connection, Thread.currentThread().getName());
+		}
+
+		private void insertRow(Connection connection, String name) throws SQLException {
+			try (PreparedStatement statement = connection
+					.prepareStatement("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( ?, ? )")) {
+				statement.setInt(1, this.id.getAndIncrement());
+				statement.setString(2, name);
+				assertEquals("Should add the row", 1, statement.executeUpdate());
+			}
+		}
+	}
+
+}
