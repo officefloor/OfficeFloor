@@ -25,9 +25,14 @@ import java.util.logging.Logger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -96,6 +101,8 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 		context.setManagedObjectClass(AbstractConnectionManagedObject.class);
 		context.getManagedObjectSourceContext().setDefaultManagedObjectPool(
 				(poolContext) -> new DefaultManagedObjectPool(poolContext.getManagedObjectSource()));
+		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
+				RecycleManagedObjectParameter.class);
 	}
 
 	@Override
@@ -111,6 +118,38 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 		@Override
 		protected Connection getConnection() throws SQLException {
 			return ConnectionManagedObjectSource.this.dataSource.getConnection();
+		}
+	}
+
+	/**
+	 * Recycles the {@link Connection}.
+	 */
+	private static class RecycleFunction extends StaticManagedFunction<Indexed, None> {
+
+		@Override
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+
+			// Obtain the connection
+			RecycleManagedObjectParameter<AbstractConnectionManagedObject> recycle = RecycleManagedObjectParameter
+					.getRecycleManagedObjectParameter(context);
+			Connection connection = recycle.getManagedObject().connection;
+
+			// Determine if within transaction
+			if (!connection.getAutoCommit()) {
+
+				// If clean up escalation, then rollback (otherwise commit)
+				CleanupEscalation[] escalations = recycle.getCleanupEscalations();
+				if ((escalations != null) && (escalations.length > 0)) {
+					// Escalations, so rollback transaction
+					connection.rollback();
+				} else {
+					// No escalations, so commit the transaction
+					connection.commit();
+				}
+			}
+
+			// Nothing further
+			return null;
 		}
 	}
 
