@@ -148,6 +148,9 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 				}
 			}
 
+			// Reuse the connection
+			recycle.reuseManagedObject();
+
 			// Nothing further
 			return null;
 		}
