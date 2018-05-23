@@ -22,10 +22,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.h2.jdbcx.JdbcDataSource;
+
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
+import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
  * Tests the {@link ConnectionManagedObjectSource}.
@@ -58,6 +63,27 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 			assertTrue("Should have row", resultSet.next());
 			assertEquals("Incorrect row", "test", resultSet.getString("NAME"));
 		}
+	}
+
+	/**
+	 * Validate the specification.
+	 */
+	public void testSpecification() {
+		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class);
+	}
+
+	/**
+	 * Validate the type.
+	 */
+	public void testType() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		type.setObjectClass(Connection.class);
+
+		// Validate type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, ConnectionManagedObjectSource.class,
+				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
 	}
 
 	/**

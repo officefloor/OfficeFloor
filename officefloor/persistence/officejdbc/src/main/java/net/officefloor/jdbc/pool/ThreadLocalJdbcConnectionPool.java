@@ -294,7 +294,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			// Handle specific methods
 			switch (method.getName()) {
 			case "close":
-				throw new SQLException("Should not close the pooled connection");
+				return null; // ignore closing
 
 			case "setAutoCommit":
 				if (!(Boolean) args[0]) {

@@ -23,11 +23,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -35,6 +37,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
  * Abstract tests for an JDBC vendor implementation.
@@ -42,6 +45,57 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
+
+	/**
+	 * Obtains a {@link Connection} with the {@link ConnectionManagedObjectSource}
+	 * properties.
+	 * 
+	 * @param propertyLoader
+	 *            Loads the properties.
+	 * @return {@link Connection}.
+	 * @throws Exception
+	 *             If fails to create {@link Connection}.
+	 */
+	public static Connection getConnection(Consumer<PropertyConfigurable> propertyLoader) throws Exception {
+
+		// Run OfficeFloor with pool to obtain connection
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			context.addSection("SECTION", SetupSection.class);
+
+			// Connection
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					ConnectionManagedObjectSource.class.getName());
+			propertyLoader.accept(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Pool the connection
+			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+					ThreadLocalJdbcConnectionPoolSource.class.getName());
+			context.getOfficeArchitect().link(mos, pool);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		try {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
+		} catch (Throwable ex) {
+			throw fail(ex);
+		} finally {
+			officeFloor.closeOfficeFloor();
+		}
+
+		// Obtain connection
+		// Must keep reference to keep potential in memory databases active
+		return SetupSection.connection;
+	}
+
+	public static class SetupSection {
+
+		private static Connection connection;
+
+		public void script(Connection connection) throws SQLException {
+			SetupSection.connection = connection;
+		}
+	}
 
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
@@ -68,46 +122,12 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		// Run OfficeFloor with pool to obtain connection
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.office((context) -> {
-			context.addSection("SECTION", SetupSection.class);
-
-			// Connection
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
-			this.loadProperties(mos);
-			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
-
-			// Pool the connection
-			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-					ThreadLocalJdbcConnectionPoolSource.class.getName());
-			context.getOfficeArchitect().link(mos, pool);
-		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-		try {
-			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
-		} catch (Throwable ex) {
-			throw fail(ex);
-		} finally {
-			officeFloor.closeOfficeFloor();
-		}
-
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = SetupSection.connection;
+		this.connection = getConnection((mos) -> this.loadProperties(mos));
 
 		// Clean database
 		this.cleanDatabase(this.connection);
-	}
-
-	public static class SetupSection {
-
-		private static Connection connection;
-
-		public void script(Connection connection) throws SQLException {
-			SetupSection.connection = connection;
-		}
 	}
 
 	/**
@@ -208,7 +228,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
 		// Setup table
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.setup", null);
+		try (Statement statement = this.connection.createStatement()) {
+			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+		}
 
 		// Undertake warm up
 		for (int i = 0; i < WARM_UP; i++) {
@@ -252,12 +274,6 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 		private final AtomicInteger id = new AtomicInteger(1);
 
-		public void setup(Connection connection) throws SQLException {
-			try (Statement statement = connection.createStatement()) {
-				statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
-			}
-		}
-
 		public void run(Connection connection, Flows flows) throws SQLException {
 			if (isTransaction) {
 				connection.setAutoCommit(false);
@@ -276,6 +292,107 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				statement.setInt(1, this.id.getAndIncrement());
 				statement.setString(2, name);
 				assertEquals("Should add the row", 1, statement.executeUpdate());
+			}
+		}
+	}
+
+	/**
+	 * Undertakes select stress.
+	 */
+	public void testSelectStress() throws Throwable {
+
+		final int RUN_COUNT = 10000;
+		final int WARM_UP = RUN_COUNT / 10;
+
+		// Undertake stress test
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.officeFloor((context) -> {
+			// Provide different thread
+			context.getOfficeFloorDeployer().addTeam("TEAM", new ExecutorCachedTeamSource()).addTypeQualification(null,
+					NewThread.class.getName());
+		});
+		compiler.office((context) -> {
+			context.getOfficeArchitect().enableAutoWireTeams();
+			context.addSection("SECTION", SelectSection.class);
+			context.addManagedObject("tag", NewThread.class, ManagedObjectScope.THREAD);
+
+			// Connection
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					ConnectionManagedObjectSource.class.getName());
+			this.loadProperties(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Pool the connection
+			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+					ThreadLocalJdbcConnectionPoolSource.class.getName());
+			context.getOfficeArchitect().link(mos, pool);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Setup table
+		try (Statement statement = this.connection.createStatement()) {
+			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID , NAME ) VALUES ( 1, 'test' )");
+		}
+
+		// Undertake warm up
+		for (int i = 0; i < WARM_UP; i++) {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
+		}
+
+		// Run test
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < RUN_COUNT; i++) {
+			SelectSection.isCompleted = false;
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
+			assertTrue("Should be complete", SelectSection.isCompleted);
+		}
+		long runTime = System.currentTimeMillis() - startTime;
+		long requestsPerSecond = (int) ((RUN_COUNT * SelectSection.THREAD_COUNT) / (((float) runTime) / 1000.0));
+		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
+				+ +requestsPerSecond + " selects/sec");
+
+		// Complete
+		officeFloor.closeOfficeFloor();
+	}
+
+	private static class SelectParameter {
+
+		private volatile String name = null;
+	}
+
+	public static class SelectSection {
+
+		private static int THREAD_COUNT = 10;
+
+		private static boolean isCompleted = false;
+
+		@FlowInterface
+		public static interface Flows {
+			void thread(SelectParameter parameter, FlowCallback callback);
+		}
+
+		public void run(Flows flows) throws SQLException {
+			int[] completed = new int[] { 0 };
+			for (int i = 0; i < THREAD_COUNT; i++) {
+				SelectParameter parameter = new SelectParameter();
+				flows.thread(parameter, (exception) -> {
+					assertNull("Should be no failure in thread", exception);
+					assertEquals("Should obtain name", "test", parameter.name);
+					completed[0]++;
+					if (completed[0] == THREAD_COUNT) {
+						isCompleted = true;
+					}
+				});
+			}
+		}
+
+		public void thread(Connection connection, @Parameter SelectParameter parameter, NewThread tag)
+				throws SQLException {
+			try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM OFFICE_FLOOR_JDBC_TEST")) {
+				ResultSet resultSet = statement.executeQuery();
+				assertTrue("Should have row from database", resultSet.next());
+				parameter.name = resultSet.getString("NAME");
 			}
 		}
 	}
