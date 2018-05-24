@@ -19,20 +19,22 @@ package net.officefloor.jpa;
 
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.properties.Property;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -50,10 +52,45 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	public static final String PROPERTY_PERSISTENCE_UNIT = "persistence.unit.name";
 
 	/**
+	 * {@link Property} to obtain the {@link Class} name for the
+	 * {@link PersistenceFactory}.
+	 */
+	public static final String PROPERTY_PERSISTENCE_FACTORY = "persistence.factory";
+
+	/**
 	 * Dependencies.
 	 */
 	public static enum Dependencies {
 		CONNECTION
+	}
+
+	/**
+	 * <p>
+	 * {@link FunctionalInterface} to create the {@link EntityManagerFactory}.
+	 * <p>
+	 * Note: the {@link EntityManagerFactory} is required to be configured with the
+	 * input {@link DataSource}.
+	 */
+	@FunctionalInterface
+	public static interface PersistenceFactory {
+
+		/**
+		 * Creates the {@link EntityManagerFactory}.
+		 * 
+		 * @param persistenceUnitName
+		 *            Persistence Unit name.
+		 * @param dataSource
+		 *            {@link DataSource} to use for the {@link EntityManagerFactory}.
+		 * @param properties
+		 *            Existing properties configured to the
+		 *            {@link JpaManagedObjectSource}.
+		 * @return Configuration for the {@link EntityManagerFactory} to use the
+		 *         {@link DataSource}.
+		 * @throws Exception
+		 *             If fails to create the {@link EntityManagerFactory}.
+		 */
+		EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
+				Properties properties) throws Exception;
 	}
 
 	/**
@@ -82,28 +119,39 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	private ClassLoader classLoader;
 
 	/**
-	 * {@link EntityManagerFactory}.
+	 * {@link PersistenceFactory}.
 	 */
-	private volatile EntityManagerFactory factory;
+	private PersistenceFactory persistenceFactory;
 
 	/**
-	 * Allows overriding the creation of the {@link EntityManager}.
-	 * 
-	 * @param factory
-	 *            {@link EntityManagerFactory} configured with properties of this
-	 *            {@link JpaManagedObjectSource}.
-	 * @param connection
-	 *            {@link Connection} to use for the {@link EntityManager}.
-	 * @return Created {@link EntityManager}.
+	 * {@link EntityManagerFactory}.
 	 */
-	protected EntityManager createEntityManager(EntityManagerFactory factory, Connection connection) {
+	private EntityManagerFactory entityManagerFactory;
 
-		// Create properties to provide connection to entity manager
-		Map<String, Object> properties = new HashMap<>(1);
-		// properties.put(key, value);
+	/**
+	 * <p>
+	 * Obtains the {@link PersistenceFactory}.
+	 * <p>
+	 * Specific vendor implementations may override this method to specify the
+	 * {@link PersistenceFactory}.
+	 * <p>
+	 * By default, this method uses the {@link #PROPERTY_PERSISTENCE_FACTORY}
+	 * {@link Property} to load the {@link PersistenceFactory}.
+	 * 
+	 * @param context
+	 *            {@link MetaDataContext}.
+	 * @return {@link PersistenceFactory}.
+	 * @throws Exception
+	 *             If fails to create the {@link PersistenceFactory}.
+	 */
+	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Dependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Create the entity manager
-		return factory.createEntityManager(properties);
+		// Obtain the class name
+		String className = mosContext.getProperty(PROPERTY_PERSISTENCE_FACTORY);
+
+		// Create instance and return
+		return (PersistenceFactory) mosContext.loadClass(className).newInstance();
 	}
 
 	/*
@@ -113,6 +161,11 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_PERSISTENCE_UNIT, "Persistence Unit");
+
+		// Determine if using default implementation
+		if (this.getClass() == JpaManagedObjectSource.class) {
+			context.addProperty(PROPERTY_PERSISTENCE_FACTORY, "Persistence Factory");
+		}
 	}
 
 	@Override
@@ -123,6 +176,10 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		context.setObjectClass(EntityManager.class);
 		context.setManagedObjectClass(JpaManagedObject.class);
 		context.addDependency(Dependencies.CONNECTION, Connection.class);
+		context.addManagedObjectExtension(EntityManager.class,
+				(managedObject) -> ((JpaManagedObject) managedObject).entityManager);
+		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
+				RecycleManagedObjectParameter.class);
 
 		// Obtain the details to create Entity Manager Factory
 		this.persistenceUnitName = mosContext.getProperty(PROPERTY_PERSISTENCE_UNIT);
@@ -139,6 +196,9 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 					throw new UnsupportedOperationException("Method " + method.getName()
 							+ " not available from JPA proxy " + DataSource.class.getSimpleName());
 				});
+
+		// Obtain the persistence factory
+		this.persistenceFactory = this.getPersistenceFactory(context);
 	}
 
 	@Override
@@ -169,45 +229,37 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			// Easy access to managed object source
 			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
 
-			// Provide proxy connection (that does not close connection)
-			Connection proxyConnection = (Connection) Proxy.newProxyInstance(mos.classLoader,
-					new Class<?>[] { Connection.class }, (proxy, method, args) -> {
+			// If still reference to persistence factory (then likely factory not created)
+			if (mos.persistenceFactory != null) {
 
-						// Do not close
-						if ("close".equals(method.getName())) {
-							return null;
-						}
+				// Attempt to ensure only one factory created
+				synchronized (mos) {
+					if (mos.entityManagerFactory == null) {
 
-						// Invoke connection
-						return connection.getClass().getMethod(method.getName(), method.getParameterTypes())
-								.invoke(connection, args);
-					});
+						// Specify connection for setup of entity manager factory
+						mos.dataSourceConnection.set(connection);
 
-			// Ensure have factory
-			if (mos.factory == null) {
+						// Create the entity manager factory
+						mos.entityManagerFactory = mos.persistenceFactory
+								.createEntityManagerFactory(mos.persistenceUnitName, mos.dataSource, mos.properties);
+					}
 
-				// Specify connection for setup of entity manager factory
-				mos.dataSourceConnection.set(proxyConnection);
-
-				// Create the entity manager factory
-				Map map = new HashMap(mos.properties);
-
-				// TODO provide means to make this configurable for different vendors
-				map.put("datanucleus.ConnectionFactory", mos.dataSource);
-
-				mos.factory = Persistence.createEntityManagerFactory(persistenceUnitName, map);
+					// Factory created (so indicate no need to create anymore)
+					mos.persistenceFactory = null;
+				}
 			}
 
 			// Create the entity manager
-			EntityManagerFactory factory = JpaManagedObjectSource.this.factory;
+			EntityManagerFactory factory = JpaManagedObjectSource.this.entityManagerFactory;
 			EntityManager entityManager = factory.createEntityManager();
 
-			// Provide proxy entity manager (specifying connection)
+			// Provide proxy entity manager (to specify connection)
 			this.entityManager = (EntityManager) Proxy.newProxyInstance(mos.classLoader,
 					new Class<?>[] { EntityManager.class }, (proxy, method, args) -> {
 
 						// Specify the connection
-						mos.dataSourceConnection.set(proxyConnection);
+						// All entity manager operations synchronous so will use
+						mos.dataSourceConnection.set(connection);
 
 						// Invoke entity manager method with appropriate connection
 						return entityManager.getClass().getMethod(method.getName(), method.getParameterTypes())
@@ -218,6 +270,34 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		@Override
 		public Object getObject() throws Throwable {
 			return this.entityManager;
+		}
+	}
+
+	/**
+	 * Recycles the {@link EntityManager}.
+	 */
+	private static class RecycleFunction extends StaticManagedFunction<Indexed, None> {
+
+		@Override
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+
+			// Obtain the entity manager
+			RecycleManagedObjectParameter<JpaManagedObject> recycle = RecycleManagedObjectParameter
+					.getRecycleManagedObjectParameter(context);
+			EntityManager entityManager = recycle.getManagedObject().entityManager;
+
+			// If no escalations, then commit changes
+			CleanupEscalation[] escalations = recycle.getCleanupEscalations();
+			if ((escalations == null) || (escalations.length == 0)) {
+				// No escalations, so commit the changes
+				entityManager.close();
+			}
+
+			// Reuse the connection
+			recycle.reuseManagedObject();
+
+			// Nothing further
+			return null;
 		}
 	}
 

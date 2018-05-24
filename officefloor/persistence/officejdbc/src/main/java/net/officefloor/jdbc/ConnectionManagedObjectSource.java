@@ -17,6 +17,7 @@
  */
 package net.officefloor.jdbc;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -34,6 +35,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
@@ -52,9 +54,19 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	private static final Logger LOGGER = Logger.getLogger(ConnectionManagedObjectSource.class.getName());
 
 	/**
+	 * {@link Connection} for {@link Proxy}.
+	 */
+	private static final Class<?>[] CONNECTION_TYPE = new Class[] { Connection.class };
+
+	/**
 	 * {@link DataSource}.
 	 */
 	private DataSource dataSource;
+
+	/**
+	 * {@link ClassLoader} for {@link Proxy}.
+	 */
+	private ClassLoader classLoader;
 
 	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
@@ -76,6 +88,11 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	public ConnectionPoolDataSource getConnectionPoolDataSource() throws IllegalStateException {
 
 		// Ensure a connection pool data source
+		if (!(this.dataSource instanceof ConnectionPoolDataSource)) {
+			throw new IllegalStateException(DataSource.class.getSimpleName() + " provided does not implement "
+					+ ConnectionPoolDataSource.class.getName() + " (implementing " + DataSource.class.getSimpleName()
+					+ " " + this.dataSource.getClass().getName() + ")");
+		}
 
 		// Return the connection pool data source
 		return (ConnectionPoolDataSource) this.dataSource;
@@ -91,10 +108,14 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Create the data source
 		DataSourceFactory factory = this.getDataSourceFactory();
-		this.dataSource = factory.createDataSource(context.getManagedObjectSourceContext());
+		this.dataSource = factory.createDataSource(mosContext);
+
+		// Obtain the class loader for proxies
+		this.classLoader = mosContext.getClassLoader();
 
 		// Configure meta-data
 		context.setObjectClass(Connection.class);
@@ -115,9 +136,38 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	 */
 	private class ConnectionManagedObject extends AbstractConnectionManagedObject {
 
+		/**
+		 * {@link Proxy} {@link Connection}.
+		 */
+		private Connection proxy;
+
 		@Override
 		protected Connection getConnection() throws SQLException {
-			return ConnectionManagedObjectSource.this.dataSource.getConnection();
+
+			// Lazy create the connection
+			if (this.proxy == null) {
+				this.connection = ConnectionManagedObjectSource.this.dataSource.getConnection();
+				this.proxy = (Connection) Proxy.newProxyInstance(ConnectionManagedObjectSource.this.classLoader,
+						CONNECTION_TYPE, (proxy, method, args) -> {
+
+							// Do not close the connection (as managed)
+							if ("close".equals(method.getName())) {
+								return null;
+							}
+
+							// Otherwise undertake method
+							return this.connection.getClass().getMethod(method.getName(), method.getParameterTypes())
+									.invoke(connection, args);
+						});
+			}
+
+			// Return the proxy connection
+			return this.proxy;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this.getConnection();
 		}
 	}
 

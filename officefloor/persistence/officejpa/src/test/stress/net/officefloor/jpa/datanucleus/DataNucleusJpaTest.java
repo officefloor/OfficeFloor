@@ -17,10 +17,19 @@
  */
 package net.officefloor.jpa.datanucleus;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.sql.DataSource;
+
 import org.datanucleus.enhancer.DataNucleusEnhancer;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jpa.JpaManagedObjectSource;
+import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
 
 /**
@@ -41,6 +50,23 @@ public class DataNucleusJpaTest extends AbstractJpaTestCase {
 
 		// Load the properties
 		mos.addProperty(JpaManagedObjectSource.PROPERTY_PERSISTENCE_UNIT, "test");
+		mos.addProperty(JpaManagedObjectSource.PROPERTY_PERSISTENCE_FACTORY,
+				DataNucleusPersistenceFactory.class.getName());
+	}
+
+	/**
+	 * DataNucleus {@link PersistenceFactory}.
+	 */
+	public static class DataNucleusPersistenceFactory implements PersistenceFactory {
+
+		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
+				Properties properties) throws Exception {
+			Map configuration = new HashMap<>(properties);
+			configuration.put("datanucleus.ConnectionFactory", dataSource);
+			return Persistence.createEntityManagerFactory(persistenceUnitName, configuration);
+		}
 	}
 
 }

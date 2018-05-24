@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 import net.officefloor.jpa.JpaManagedObjectSource;
+import net.officefloor.jpa.JpaManagedObjectSource.Dependencies;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -61,6 +63,16 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @param jpa
 	 */
 	protected abstract void loadJpaProperties(PropertyConfigurable jpa);
+
+	/**
+	 * Allows overriding the {@link JpaManagedObjectSource} {@link Class} for vendor
+	 * specific implementations.
+	 * 
+	 * @return {@link JpaManagedObjectSource} {@link Class} to use in testing.
+	 */
+	protected Class<? extends JpaManagedObjectSource> getJpaManagedObjectSourceClass() {
+		return JpaManagedObjectSource.class;
+	}
 
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
@@ -129,7 +141,22 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * Validate the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(JpaManagedObjectSource.class);
+
+		// Determine if default JPA implementation
+		Class<? extends JpaManagedObjectSource> jpaMosClass = this.getJpaManagedObjectSourceClass();
+
+		// Create the specification
+		List<String> specification = new ArrayList<>(2);
+		specification.add(JpaManagedObjectSource.PROPERTY_PERSISTENCE_UNIT);
+		specification.add("Persistence Unit");
+		if (jpaMosClass == JpaManagedObjectSource.class) {
+			specification.add(JpaManagedObjectSource.PROPERTY_PERSISTENCE_FACTORY);
+			specification.add("Persistence Factory");
+		}
+
+		// Validate the specification
+		ManagedObjectLoaderUtil.validateSpecification(jpaMosClass,
+				specification.toArray(new String[specification.size()]));
 	}
 
 	/**
@@ -140,6 +167,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
+		type.addDependency(Dependencies.CONNECTION, Connection.class, null);
 		type.addExtensionInterface(EntityManager.class);
 
 		// Load the properties
@@ -150,7 +178,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		});
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, JpaManagedObjectSource.class,
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
 				properties.toArray(new String[properties.size()]));
 	}
 
@@ -380,7 +408,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	public void testStressSelect() throws Throwable {
 
-		final int RUN_COUNT = 10000;
+		final int RUN_COUNT = 1000;
 		final int WARM_UP = RUN_COUNT / 10;
 
 		// Create the two rows
@@ -408,13 +436,13 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		for (int i = 0; i < RUN_COUNT; i++) {
 			StressSelectSection.isCompleted = false;
 			CompileOfficeFloor.invokeProcess(officeFloor, "StressSelect.run", new SelectInput(rowTwoId));
-			assertTrue("Should be complete", StressSelectSection.isCompleted);
 		}
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * StressSelectSection.THREAD_COUNT * 2)
 				/ (((float) runTime) / 1000.0));
 		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
 				+ +requestsPerSecond + " selects/sec");
+		assertTrue("Should be complete", StressSelectSection.isCompleted);
 
 		// Complete
 		officeFloor.closeOfficeFloor();
@@ -453,6 +481,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		public void run(@Parameter SelectInput input, Flows flows, EntityManager entityManager) throws SQLException {
+			int[] completed = new int[] { 0 };
 			for (int i = 0; i < THREAD_COUNT; i++) {
 
 				// Obtain first row
@@ -463,7 +492,6 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 				// Obtain second row on another thread
 				SelectParameter parameter = new SelectParameter(input);
-				int[] completed = new int[] { 0 };
 				flows.thread(parameter, (exception) -> {
 					assertNull("Should be no failure in thread", exception);
 					assertEquals("Should obtain entity", "two", parameter.entity.getName());
@@ -512,7 +540,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 			// Add JPA
 			OfficeManagedObjectSource jpaMos = context.getOfficeArchitect().addOfficeManagedObjectSource("JPA",
-					JpaManagedObjectSource.class.getName());
+					this.getJpaManagedObjectSourceClass().getName());
 			this.loadJpaProperties(jpaMos);
 			jpaMos.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
 
