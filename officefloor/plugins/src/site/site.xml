@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project>
-	<body>
-		<menu ref="modules" />
-		<menu ref="parent" />
-	</body>
-</project>
