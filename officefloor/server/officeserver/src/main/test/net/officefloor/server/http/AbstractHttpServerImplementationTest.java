@@ -1054,82 +1054,92 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 				}
 
 				// Send the request
-				if (selectionKey.isWritable()) {
-					// Keep writing until fill socket of all requests sent
-					FINISHED_WRITING: while (requestSentCount < requestCount) {
-						int writtenBytes = this.channel.write(requestBuffer);
-						requestDataSent += writtenBytes;
-						if (requestDataSent == requestData.length) {
-							// Request written
-							requestSentCount++;
+				try {
+					if (selectionKey.isWritable()) {
+						// Keep writing until fill socket of all requests sent
+						FINISHED_WRITING: while (requestSentCount < requestCount) {
+							int writtenBytes = this.channel.write(requestBuffer);
+							requestDataSent += writtenBytes;
+							if (requestDataSent == requestData.length) {
+								// Request written
+								requestSentCount++;
 
-							// Setup for next request
-							requestDataSent = 0;
-							requestBuffer.clear();
-						} else {
-							// Buffer full, so wait until can write again
-							break FINISHED_WRITING;
+								// Setup for next request
+								requestDataSent = 0;
+								requestBuffer.clear();
+							} else {
+								// Buffer full, so wait until can write again
+								break FINISHED_WRITING;
+							}
 						}
 					}
+				} catch (Exception ex) {
+					throw new RuntimeException("Exception on write for sending " + requestSentCount
+							+ " requests and received " + responseReceivedCount + " responses", ex);
 				}
 
 				// Read in next response
-				if (selectionKey.isReadable()) {
-					// Read in as many requests as possible
-					int bytesRead;
-					do {
-						responseBuffer.clear();
-						bytesRead = this.channel.read(responseBuffer);
+				try {
+					if (selectionKey.isReadable()) {
+						// Read in as many requests as possible
+						int bytesRead;
+						do {
+							responseBuffer.clear();
+							bytesRead = this.channel.read(responseBuffer);
 
-						// Determine if time out
-						if (bytesRead > 0) {
-							// Have bytes, so reset
-							noDataStart = -1;
-						} else if (bytesRead < 0) {
-							fail("Connection closed");
-						} else {
-							// No data
-							if (noDataStart == -1) {
-								// Capture start time of no data
-								noDataStart = System.currentTimeMillis();
-							} else if ((System.currentTimeMillis() - noDataStart) > (WAIT_FOR_DATA_TIMEOUT)) {
-								fail("Timed out waiting on data");
+							// Determine if time out
+							if (bytesRead > 0) {
+								// Have bytes, so reset
+								noDataStart = -1;
+							} else if (bytesRead < 0) {
+								fail("Connection closed");
+							} else {
+								// No data
+								if (noDataStart == -1) {
+									// Capture start time of no data
+									noDataStart = System.currentTimeMillis();
+								} else if ((System.currentTimeMillis() - noDataStart) > (WAIT_FOR_DATA_TIMEOUT)) {
+									fail("Timed out waiting on data");
+								}
 							}
-						}
 
-						// Handle the data
-						responseBuffer.flip();
-						responseBuffer.mark();
-						for (int i = 0; i < bytesRead; i++) {
-							byte expectedCharacter = responseData[responseDataPosition];
-							byte actualCharacter = responseBuffer.get();
-							if (expectedCharacter != actualCharacter) {
+							// Handle the data
+							responseBuffer.flip();
+							responseBuffer.mark();
+							for (int i = 0; i < bytesRead; i++) {
+								byte expectedCharacter = responseData[responseDataPosition];
+								byte actualCharacter = responseBuffer.get();
+								if (expectedCharacter != actualCharacter) {
 
-								// Obtain the text
-								byte[] responseBytes = new byte[bytesRead];
-								responseBuffer.reset();
-								responseBuffer.get(responseBytes);
-								StringBuilder responseText = new StringBuilder(
-										UsAsciiUtil.convertToString(responseBytes));
+									// Obtain the text
+									byte[] responseBytes = new byte[bytesRead];
+									responseBuffer.reset();
+									responseBuffer.get(responseBytes);
+									StringBuilder responseText = new StringBuilder(
+											UsAsciiUtil.convertToString(responseBytes));
 
-								// Add in quotes to identify incorrect
-								// character
-								responseText.insert(i, "{");
-								responseText.insert(i + 2, "}");
+									// Add in quotes to identify incorrect
+									// character
+									responseText.insert(i, "{");
+									responseText.insert(i + 2, "}");
 
-								// Provide the error
-								assertEquals("Incorrect character " + i + " of response " + responseReceivedCount + " ("
-										+ UsAsciiUtil.convertToChar(expectedCharacter) + " != "
-										+ UsAsciiUtil.convertToChar(actualCharacter) + "): " + responseText.toString(),
-										expectedCharacter, actualCharacter);
+									// Provide the error
+									assertEquals("Incorrect character " + i + " of response " + responseReceivedCount
+											+ " (" + UsAsciiUtil.convertToChar(expectedCharacter) + " != "
+											+ UsAsciiUtil.convertToChar(actualCharacter) + "): "
+											+ responseText.toString(), expectedCharacter, actualCharacter);
+								}
+								responseDataPosition = (responseDataPosition + 1) % responseData.length;
+								if (responseDataPosition == 0) {
+									// Another response received
+									responseReceivedCount++;
+								}
 							}
-							responseDataPosition = (responseDataPosition + 1) % responseData.length;
-							if (responseDataPosition == 0) {
-								// Another response received
-								responseReceivedCount++;
-							}
-						}
-					} while (bytesRead != 0);
+						} while (bytesRead != 0);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException("Exception on read for sending " + requestSentCount
+							+ " requests and received " + responseReceivedCount + " responses", ex);
 				}
 			}
 
