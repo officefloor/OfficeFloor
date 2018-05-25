@@ -104,6 +104,7 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
+		this.getDataSourceFactory().loadSpecification(context);
 	}
 
 	@Override

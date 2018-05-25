@@ -19,6 +19,7 @@ package net.officefloor.jdbc.datasource;
 
 import javax.sql.DataSource;
 
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
@@ -27,6 +28,14 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public interface DataSourceFactory {
+
+	/**
+	 * Loads the specification required by this {@link DataSourceFactory}.
+	 * 
+	 * @param context
+	 *            {@link SpecificationContext}.
+	 */
+	void loadSpecification(SpecificationContext context);
 
 	/**
 	 * Creates the {@link DataSource}.

@@ -22,12 +22,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
+import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -47,16 +54,20 @@ import net.officefloor.plugin.section.clazz.Parameter;
 public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Obtains a {@link Connection} with the {@link ConnectionManagedObjectSource}
-	 * properties.
-	 * 
+	 * Obtains a {@link Connection} with the input
+	 * {@link ConnectionManagedObjectSource} and properties.
+	 *
+	 * @param connectionMosClass
+	 *            {@link ConnectionManagedObjectSource} {@link Class} used to obtain
+	 *            the {@link Connection}.
 	 * @param propertyLoader
 	 *            Loads the properties.
 	 * @return {@link Connection}.
 	 * @throws Exception
 	 *             If fails to create {@link Connection}.
 	 */
-	public static Connection getConnection(Consumer<PropertyConfigurable> propertyLoader) throws Exception {
+	public static Connection getConnection(Class<? extends ConnectionManagedObjectSource> connectionMosClass,
+			Consumer<PropertyConfigurable> propertyLoader) throws Exception {
 
 		// Run OfficeFloor with pool to obtain connection
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -65,11 +76,11 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 			// Connection
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
+					connectionMosClass.getName());
 			propertyLoader.accept(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
-			// Pool the connection
+			// Pool the connection (keeps it alive)
 			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
 					ThreadLocalJdbcConnectionPoolSource.class.getName());
 			context.getOfficeArchitect().link(mos, pool);
@@ -84,7 +95,6 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// Obtain connection
-		// Must keep reference to keep potential in memory databases active
 		return SetupSection.connection;
 	}
 
@@ -96,6 +106,13 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			SetupSection.connection = connection;
 		}
 	}
+
+	/**
+	 * Obtains the {@link ConnectionManagedObjectSource} {@link Class} being tested.
+	 * 
+	 * @return {@link ConnectionManagedObjectSource} {@link Class} being tested.
+	 */
+	protected abstract Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass();
 
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
@@ -124,10 +141,64 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = getConnection((mos) -> this.loadProperties(mos));
+		this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
+				(mos) -> this.loadProperties(mos));
 
 		// Clean database
 		this.cleanDatabase(this.connection);
+	}
+
+	/**
+	 * Enables adding additional properties to specification.
+	 * 
+	 * @param properties
+	 *            {@link Properties} to be loaded with additional specification.
+	 */
+	protected void loadOptionalSpecification(Properties properties) {
+	}
+
+	/**
+	 * Ensure correct specification.
+	 */
+	public void testSpecification() throws Exception {
+
+		// Load the specification
+		PropertyList specification = OfficeFloorCompiler.newOfficeFloorCompiler(null).getManagedObjectLoader()
+				.loadSpecification(this.getConnectionManagedObjectSourceClass());
+		Properties actual = specification.getProperties();
+		this.loadOptionalSpecification(actual);
+
+		// Obtain the expected properties
+		Properties expected = new Properties();
+		this.loadProperties((name, value) -> expected.put(name, value));
+
+		// Ensure the correct specification
+		for (String name : expected.stringPropertyNames()) {
+			assertTrue("Missing specification property " + name, actual.containsKey(name));
+		}
+		assertEquals("Incorrect number of properties (e: " + expected + ", a: " + actual + ")", expected.size(),
+				actual.size());
+	}
+
+	/**
+	 * Ensure correct type.
+	 */
+	public void testType() throws Exception {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		type.setObjectClass(Connection.class);
+
+		// Create the properties
+		List<String> properties = new LinkedList<>();
+		this.loadProperties((name, value) -> {
+			properties.add(name);
+			properties.add(value);
+		});
+
+		// Validate type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getConnectionManagedObjectSourceClass(),
+				properties.toArray(new String[properties.size()]));
 	}
 
 	/**
@@ -140,7 +211,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		compiler.office((context) -> {
 			context.addSection("SECTION", ConnectivitySection.class);
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
+					this.getConnectionManagedObjectSourceClass().getName());
 			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 		});
@@ -216,7 +287,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 			// Connection
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
+					this.getConnectionManagedObjectSourceClass().getName());
 			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
@@ -318,7 +389,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 			// Connection
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
+					this.getConnectionManagedObjectSourceClass().getName());
 			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 

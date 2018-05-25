@@ -69,7 +69,8 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 	 * Validate the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class,
+				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, "DataSource Class");
 	}
 
 	/**

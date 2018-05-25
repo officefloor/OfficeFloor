@@ -9,7 +9,6 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>DatabaseHttpServer</artifactId>
-	<packaging>war</packaging>
 	<name>Database HTTP Server Tutorial</name>
 	<description>Tutorial of using OfficeFloor for a HTTP Server connected to a database</description>
 	<properties>

@@ -9,7 +9,6 @@
 		<version>3.0.0</version>
 	</parent>
 	<artifactId>TeamHttpServer</artifactId>
-	<packaging>war</packaging>
 	<name>Team HTTP Server Tutorial</name>
 	<description>Tutorial of using OfficeFloor for a HTTP Server with specific teams for tasks</description>
 	<properties>

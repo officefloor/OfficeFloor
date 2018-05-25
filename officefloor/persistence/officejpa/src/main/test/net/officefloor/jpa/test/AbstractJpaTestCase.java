@@ -112,7 +112,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = AbstractJdbcTestCase.getConnection((mos) -> this.loadDatabaseProperties(mos));
+		this.connection = AbstractJdbcTestCase.getConnection(ConnectionManagedObjectSource.class,
+				(mos) -> this.loadDatabaseProperties(mos));
 
 		// Clean database for testing
 		this.cleanDatabase(this.connection);

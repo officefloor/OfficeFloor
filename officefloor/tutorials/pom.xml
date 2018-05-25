@@ -14,10 +14,8 @@
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>AuthenticationHttpServer</module>
-<!--  
 		<module>DatabaseHttpServer</module>
 		<module>DiPojoHttpServer</module>
--->
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
 		<module>InheritHttpServer</module>
@@ -29,19 +27,11 @@
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>
 		<module>SessionHttpServer</module>
-		
-<!--  
 		<module>TeamHttpServer</module>
 		<module>TestHttpServer</module>
+<!--  
 		<module>TransactionHttpServer</module>
 		<module>JavaScriptApp</module> TODO make REST example
--->
-
-<!-- TODO: fix up to v3.0 of OfficeFloor 
-		<module>WoofServletDependencyInjection</module>
-		<module>WoofServletJspIntegration</module>
-		<module>WoofServletMigration</module>
-		<module>WoofServletWebApplication</module>
 -->
 	</modules>
 	<properties>

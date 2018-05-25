@@ -14,6 +14,7 @@
 	<description>Provides modules for persistence</description>
 	<modules>
 		<module>officejdbc</module>
+		<module>officejdbc_h2</module>
 		<module>officejpa</module>
 	</modules>
 	<dependencies>

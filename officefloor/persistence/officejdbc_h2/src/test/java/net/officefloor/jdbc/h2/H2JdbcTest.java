@@ -15,29 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officfloor.jdbc.h2;
+package net.officefloor.jdbc.h2;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.h2.jdbcx.JdbcDataSource;
-
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
- * Tests H2 implementation.
+ * Tests the {@link H2ConnectionManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class H2JdbcTest extends AbstractJdbcTestCase {
 
 	@Override
+	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
+		return H2ConnectionManagedObjectSource.class;
+	}
+
+	@Override
 	protected void loadProperties(PropertyConfigurable mos) {
-		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
-		mos.addProperty("uRL", "jdbc:h2:mem:test");
+		mos.addProperty("url", "jdbc:h2:mem:test");
+		mos.addProperty("user", "test");
+		mos.addProperty("password", "test");
 	}
 
 	@Override
