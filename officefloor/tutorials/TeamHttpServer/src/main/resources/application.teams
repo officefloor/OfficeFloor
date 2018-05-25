@@ -1,7 +1,5 @@
 <teams>
 
-	<team source="net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource" type="javax.sql.DataSource">
-	    <property name="size" value="10" />
-	</team>
+	<team source="net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource" type="java.sql.Connection" />
 
 </teams>

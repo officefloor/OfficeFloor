@@ -25,12 +25,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.web.HttpSessionStateful;
 
 /**
  * Logic for the template.
@@ -98,28 +96,23 @@ public class Template implements Serializable {
 
 	// START SNIPPET: database
 	@NextFunction("setDisplayCode")
-	public LetterEncryption retrieveFromDatabase(@Parameter char letter, DataSource dataSource) throws SQLException {
+	public LetterEncryption retrieveFromDatabase(@Parameter char letter, Connection connection) throws SQLException {
 
 		// Specify thread name
 		this.databaseThreadName = Thread.currentThread().getName();
 
 		// Retrieve from database and cache
-		Connection connection = dataSource.getConnection();
-		try {
-			PreparedStatement statement = connection.prepareStatement("SELECT CODE FROM LETTER_CODE WHERE LETTER = ?");
-			statement.setString(1, String.valueOf(letter));
-			ResultSet resultSet = statement.executeQuery();
-			resultSet.next();
-			String code = resultSet.getString("CODE");
-			LetterEncryption letterCode = new LetterEncryption(letter, code.charAt(0));
+		PreparedStatement statement = connection.prepareStatement("SELECT CODE FROM LETTER_CODE WHERE LETTER = ?");
+		statement.setString(1, String.valueOf(letter));
+		ResultSet resultSet = statement.executeQuery();
+		resultSet.next();
+		String code = resultSet.getString("CODE");
+		LetterEncryption letterCode = new LetterEncryption(letter, code.charAt(0));
 
-			// Cache
-			this.cache.put(new Character(letter), letterCode);
+		// Cache
+		this.cache.put(new Character(letter), letterCode);
 
-			return letterCode;
-		} finally {
-			connection.close();
-		}
+		return letterCode;
 	}
 
 	// END SNIPPET: database

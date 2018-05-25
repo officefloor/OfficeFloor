@@ -21,8 +21,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
 /**
  * Sets up the database.
  * 
@@ -31,25 +29,19 @@ import javax.sql.DataSource;
 // START SNIPPET: tutorial
 public class Setup {
 
-	public void setupDatabase(DataSource dataSource) throws SQLException {
+	public void setupDatabase(Connection connection) throws SQLException {
 
-		Connection connection = dataSource.getConnection();
-		try {
-			connection
-					.createStatement()
-					.execute(
-							"CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
-			
-			PreparedStatement statement = connection
-					.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )");
-			for (char letter = ' '; letter <= 'z'; letter++) {
-				char code = (char) ('z' - letter + ' '); // simple reverse order
-				statement.setString(1, String.valueOf(letter));
-				statement.setString(2, String.valueOf(code));
-				statement.execute();
-			}
-		} finally {
-			connection.close();
+		// Create the table
+		connection.createStatement().execute("CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
+
+		// Load the data
+		PreparedStatement statement = connection
+				.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )");
+		for (char letter = ' '; letter <= 'z'; letter++) {
+			char code = (char) ('z' - letter + ' '); // simple reverse order
+			statement.setString(1, String.valueOf(letter));
+			statement.setString(2, String.valueOf(code));
+			statement.execute();
 		}
 	}
 

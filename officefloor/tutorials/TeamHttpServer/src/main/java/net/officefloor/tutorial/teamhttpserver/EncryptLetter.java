@@ -19,7 +19,7 @@ package net.officefloor.tutorial.teamhttpserver;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Request to encode the letter.

@@ -18,19 +18,13 @@
 package net.officefloor.tutorial.teamhttpserver;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 
-import javax.sql.DataSource;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.hsqldb.jdbc.jdbcDataSource;
-
 import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Tests the {@link TeamHttpServer}.
@@ -40,69 +34,57 @@ import net.officefloor.server.http.HttpClientTestUtil;
 public class TeamHttpServerTest extends TestCase {
 
 	/**
-	 * URL for the database.
+	 * {@link Connection}.
 	 */
-	private static final String DATABASE_URL = "jdbc:hsqldb:mem:exampleDb";
+	private Connection connection;
 
 	/**
-	 * User for the database.
+	 * {@link MockWoofServer}.
 	 */
-	private static final String DATABASE_USER = "sa";
-
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	private MockWoofServer server;
 
 	@Override
 	protected void setUp() throws Exception {
+
+		// Keep connection to database to keep in memory database alive
+		this.connection = DefaultDataSourceFactory.createDataSource("datasource.properties").getConnection();
+
 		// Start the database and HTTP Server
-		OfficeFloorMain.open();
+		this.server = MockWoofServer.open();
 
 		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/example.woof");
+		this.server.send(MockHttpServer.mockRequest("/example"));
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
-		try {
-			// Disconnect client
-			this.client.close();
-		} finally {
-			try {
-				// Stop HTTP Server
-				OfficeFloorMain.close();
-			} finally {
-				// Stop database for new instance each test
-				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "").createStatement()
-						.execute("SHUTDOWN IMMEDIATELY");
-			}
+		// Stop the server
+		if (this.server != null) {
+			this.server.close();
+		}
+
+		// Close connection (to clean up database)
+		if (this.connection != null) {
+			this.connection.close();
 		}
 	}
 
 	/**
-	 * Ensure able to connect to database with {@link DataSource}.
+	 * Ensure able to connect to database.
 	 */
 	public void testConnection() throws Exception {
 
 		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/example.woof");
-
-		// Obtain connection via DataSource
-		jdbcDataSource dataSource = new jdbcDataSource();
-		dataSource.setDatabase(DATABASE_URL);
-		dataSource.setUser(DATABASE_USER);
-		Connection connection = dataSource.getConnection();
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
+		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
 
 		// Ensure can get initial row
-		Thread.sleep(100); // allow time for database setup
-		ResultSet resultSet = connection.createStatement()
+		ResultSet resultSet = this.connection.createStatement()
 				.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
 		assertTrue("Ensure have result", resultSet.next());
 		assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
 		assertFalse("Ensure no further results", resultSet.next());
-		resultSet.close();
 	}
 
 	/**
@@ -111,20 +93,15 @@ public class TeamHttpServerTest extends TestCase {
 	// START SNIPPET: test
 	public void testRetrieveEncryptions() throws Exception {
 
-		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/example.woof");
-
-		// Retrieving from database
-		this.doRequest("http://localhost:7878/example-encrypt.woof?letter=A");
+		// Retrieving from database (will have value cached)
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
+		assertEquals("Follow POST then GET pattern", 303, response.getStatus().getStatusCode());
+		assertFalse("Ensure not cached (obtain from database)", response.getEntity(null).contains("[cached]"));
 
 		// Looking up within cache
-		this.doRequest("http://localhost:7878/example-encrypt.woof?letter=A");
-	}
-
-	private void doRequest(String url) throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		response.getEntity().writeTo(System.out);
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
+		response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
+		assertEquals("Follow POST then GET pattern", 303, response.getStatus().getStatusCode());
+		assertFalse("Ensure cached", response.getEntity(null).contains("[cached]"));
 	}
 	// END SNIPPET: test
 
