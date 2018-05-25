@@ -17,6 +17,7 @@
  */
 package net.officefloor.tutorial.databasehttpserver;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +25,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.sql.DataSource;
+import lombok.Data;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Provides logic for the template.
@@ -34,63 +36,54 @@ import javax.sql.DataSource;
 // START SNIPPET: getRows
 public class Template {
 
-	public Row[] getRows(DataSource dataSource) throws SQLException {
+	public Row[] getRows(Connection connection) throws SQLException {
 
-		Connection connection = dataSource.getConnection();
-		try {
-			
-			// Obtain the row instances
-			ResultSet resultSet = connection.createStatement().executeQuery(
-					"SELECT * FROM EXAMPLE ORDER BY ID");
+		// Obtain the row instances
+		try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM EXAMPLE ORDER BY ID")) {
+
+			ResultSet resultSet = statement.executeQuery();
 			List<Row> rows = new LinkedList<Row>();
 			while (resultSet.next()) {
-				rows.add(new Row(resultSet.getInt("ID"), resultSet
-						.getString("NAME"), resultSet.getString("DESCRIPTION")));
+				rows.add(new Row(resultSet.getInt("ID"), resultSet.getString("NAME"),
+						resultSet.getString("DESCRIPTION")));
 			}
-			resultSet.close();
 
 			// Return the row instances
 			return rows.toArray(new Row[rows.size()]);
-			
-		} finally {
-			connection.close();
 		}
 	}
 	// END SNIPPET: getRows
 
 	// START SNIPPET: addRow
-	public void addRow(Row row, DataSource dataSource) throws SQLException {
-		
-		Connection connection = dataSource.getConnection();
-		try {
+	public void addRow(Row row, Connection connection) throws SQLException {
 
-			// Add the row
-			PreparedStatement statement = connection
-					.prepareStatement("INSERT INTO EXAMPLE (NAME, DESCRIPTION) VALUES ( ?, ? )");
+		// Add the row
+		try (PreparedStatement statement = connection
+				.prepareStatement("INSERT INTO EXAMPLE (NAME, DESCRIPTION) VALUES ( ?, ? )")) {
 			statement.setString(1, row.getName());
 			statement.setString(2, row.getDescription());
 			statement.executeUpdate();
 
-		} finally {
-			connection.close();
 		}
 	}
 	// END SNIPPET: addRow
 
 	// START SNIPPET: deleteRow
-	public void deleteRow(Row row, DataSource dataSource) throws SQLException {
+	@Data
+	@HttpParameters
+	public static class DeleteRow implements Serializable {
+		private String id;
+	}
 
-		Connection connection = dataSource.getConnection();
-		try {
+	public void deleteRow(DeleteRow delete, Connection connection) throws SQLException {
 
-			// Delete the row
-			PreparedStatement statement = connection
-					.prepareStatement("DELETE FROM EXAMPLE WHERE ID = ?");
-			statement.setInt(1, row.getId());
+		// Obtain the identifier
+		int id = Integer.parseInt(delete.id);
+
+		// Delete the row
+		try (PreparedStatement statement = connection.prepareStatement("DELETE FROM EXAMPLE WHERE ID = ?")) {
+			statement.setInt(1, id);
 			statement.executeUpdate();
-
-		} finally {
-			connection.close();
 		}
 	}
 	// END SNIPPET: deleteRow

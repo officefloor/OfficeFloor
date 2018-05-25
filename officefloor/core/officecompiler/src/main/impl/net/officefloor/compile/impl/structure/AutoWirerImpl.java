@@ -152,8 +152,8 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 								Class<?> sourceClass = this.context.loadOptionalClass(sourceType);
 								Class<?> targetClass = this.context.loadOptionalClass(targetAutoWire.getType());
 								if ((sourceClass == null) || (targetClass == null)) {
-									continue NEXT_AUTO_WIRE; // must load to
-																// match
+									// TODO: Consider providing warning rather than silent failure to load type
+									continue NEXT_AUTO_WIRE;
 								} else if (!sourceClass.isAssignableFrom(targetClass)) {
 									continue NEXT_AUTO_WIRE;
 								}

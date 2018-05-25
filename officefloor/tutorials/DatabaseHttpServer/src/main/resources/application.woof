@@ -1,13 +1,19 @@
 <woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
   <templates>
-    <template name="example" uri="example" path="Template.woof.html" class="net.officefloor.tutorial.databasehttpserver.Template" x="85" y="32">
+    <template path="/example" location="Template.woof.html" class="net.officefloor.tutorial.databasehttpserver.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="85" y="32">
     </template>
   </templates>
   <sections>
-    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.databasehttpserver.Setup" x="99" y="103">
-      <input name="setupDatabase" parameter-type="" uri=""/>
+    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.databasehttpserver.Setup" x="233" y="111">
+      <input name="setupDatabase" parameter-type=""/>
     </section>
   </sections>
+  <securities>
+  </securities>
   <governances>
   </governances>
   <resources>
@@ -15,8 +21,8 @@
   <exceptions>
   </exceptions>
   <starting>
-    <start x="48" y="125">
-      <flow section="Setup" input="setupDatabase"/>
+    <start x="78" y="130">
+      <section name="Setup" input="setupDatabase"/>
     </start>
   </starting>
 </woof>

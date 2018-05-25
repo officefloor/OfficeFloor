@@ -18,8 +18,7 @@
 package net.officefloor.tutorial.databasehttpserver;
 
 import java.sql.Connection;
-
-import javax.sql.DataSource;
+import java.sql.Statement;
 
 /**
  * Sets up the database.
@@ -29,20 +28,11 @@ import javax.sql.DataSource;
 // START SNIPPET: example
 public class Setup {
 
-	public void setupDatabase(DataSource dataSource) throws Exception {
-
-		Connection connection = dataSource.getConnection();
-		try {
-			connection
-					.createStatement()
-					.execute(
-							"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
-			connection
-					.createStatement()
-					.execute(
-							"INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'WoOF', 'Web on OfficeFloor' )");
-		} finally {
-			connection.close();
+	public void setupDatabase(Connection connection) throws Exception {
+		try (Statement statement = connection.createStatement()) {
+			statement.execute(
+					"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
+			statement.execute("INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'WoOF', 'Web on OfficeFloor' )");
 		}
 	}
 

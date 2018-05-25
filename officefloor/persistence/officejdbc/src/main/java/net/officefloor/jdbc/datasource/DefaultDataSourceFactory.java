@@ -17,16 +17,21 @@
  */
 package net.officefloor.jdbc.datasource;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 
 /**
  * Default {@link DataSourceFactory}.
@@ -34,6 +39,67 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public class DefaultDataSourceFactory implements DataSourceFactory {
+
+	/**
+	 * <p>
+	 * Convenience method to create a {@link DataSource}.
+	 * <p>
+	 * This is typically used in testing.
+	 * 
+	 * @param propertiesFileName
+	 *            Name of the {@link Properties} file on the class path.
+	 * @return {@link DataSource}.
+	 * @throws Exception
+	 *             If fails to load the {@link DataSource}.
+	 */
+	public static DataSource createDataSource(String propertiesFileName) throws Exception {
+
+		// Ensure properties name starts with / (so absolute on class path)
+		if (!propertiesFileName.startsWith("/")) {
+			propertiesFileName = "/" + propertiesFileName;
+		}
+
+		// Obtain the properties
+		InputStream propertiesFile = DefaultDataSourceFactory.class.getResourceAsStream(propertiesFileName);
+		if (propertiesFile == null) {
+			throw new FileNotFoundException("Can not find file " + propertiesFileName + " on the class path");
+		}
+		Properties properties = new Properties();
+		properties.load(propertiesFile);
+
+		// Create the data source from the properties
+		return createDataSource(properties);
+	}
+
+	/**
+	 * <p>
+	 * Convenience method to create a {@link DataSource}.
+	 * <p>
+	 * This is typically used in testing.
+	 * 
+	 * @param properties
+	 *            {@link Properties} to configure the {@link DataSource}.
+	 * @return {@link DataSource}.
+	 * @throws Exception
+	 *             If fails to load the {@link DataSource}.
+	 */
+	public static DataSource createDataSource(Properties properties) throws Exception {
+
+		// Provide the source properties
+		SourcePropertiesImpl sourceProperties = new SourcePropertiesImpl();
+		for (String name : properties.stringPropertyNames()) {
+			String value = properties.getProperty(name);
+			sourceProperties.addProperty(name, value);
+		}
+
+		// Create the source context
+		SourceContext rootContext = new SourceContextImpl(false, DefaultDataSourceFactory.class.getClassLoader());
+		SourceContext configuredContext = new SourceContextImpl(false, rootContext,
+				new SourcePropertiesImpl(sourceProperties));
+
+		// Create the data source
+		return new DefaultDataSourceFactory().createDataSource(configuredContext);
+	}
 
 	/**
 	 * {@link Property} name for the {@link DataSource} {@link Class}.

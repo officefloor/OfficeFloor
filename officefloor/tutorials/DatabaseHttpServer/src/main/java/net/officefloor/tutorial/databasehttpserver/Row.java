@@ -19,7 +19,10 @@ package net.officefloor.tutorial.databasehttpserver;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.web.http.application.HttpParameters;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Represents a row from the table in the database.
@@ -27,6 +30,9 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @HttpParameters
 public class Row implements Serializable {
 
@@ -35,39 +41,5 @@ public class Row implements Serializable {
 	private String name;
 
 	private String description;
-
-	public Row() {
-	}
-
-	public Row(int id, String name, String description) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-	}
-
-	public int getId() {
-		return this.id;
-	}
-
-	public void setId(String id) {
-		this.id = Integer.parseInt(id);
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 }
 // END SNIPPET: example

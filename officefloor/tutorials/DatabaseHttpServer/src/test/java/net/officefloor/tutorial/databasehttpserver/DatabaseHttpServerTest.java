@@ -18,19 +18,16 @@
 package net.officefloor.tutorial.databasehttpserver;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.hsqldb.jdbc.jdbcDataSource;
-
 import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Tests the {@link DatabaseHttpServer}.
@@ -40,32 +37,15 @@ import net.officefloor.server.http.HttpClientTestUtil;
 public class DatabaseHttpServerTest extends TestCase {
 
 	/**
-	 * URL for the database.
+	 * {@link MockWoofServer}.
 	 */
-	private static final String DATABASE_URL = "jdbc:hsqldb:mem:exampleDb";
-
-	/**
-	 * User for the database.
-	 */
-	private static final String DATABASE_USER = "sa";
-
-	@Override
-	protected void setUp() throws Exception {
-		// Start the database and HTTP Server
-		OfficeFloorMain.open();
-	}
+	private MockWoofServer server;
 
 	@Override
 	protected void tearDown() throws Exception {
-
-		// Disconnect client
-		this.client.close();
-
-		// Stop HTTP Server
-		OfficeFloorMain.close();
-
-		// Stop database for new instance each test
-		DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "").createStatement().execute("SHUTDOWN IMMEDIATELY");
+		if (this.server != null) {
+			this.server.close();
+		}
 	}
 
 	/**
@@ -73,47 +53,64 @@ public class DatabaseHttpServerTest extends TestCase {
 	 */
 	public void testConnection() throws Exception {
 
-		// Undertake request to allow set-up
-		this.doRequest("http://localhost:7878/example.woof");
-
 		// Obtain connection via DataSource
-		jdbcDataSource dataSource = new jdbcDataSource();
-		dataSource.setDatabase(DATABASE_URL);
-		dataSource.setUser(DATABASE_USER);
-		Connection connection = dataSource.getConnection();
+		// Need to keep connection open to keep database alive
+		try (Connection connection = DefaultDataSourceFactory.createDataSource("datasource.properties")
+				.getConnection()) {
 
-		// Ensure can get initial row
-		ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM EXAMPLE");
-		assertTrue("Ensure have result", resultSet.next());
-		assertEquals("Incorrect name", "WoOF", resultSet.getString("NAME"));
-		assertEquals("Incorrect description", "Web on OfficeFloor", resultSet.getString("DESCRIPTION"));
-		assertFalse("Ensure no further results", resultSet.next());
-		resultSet.close();
+			// Start test server
+			this.server = MockWoofServer.open();
+
+			// Undertake request to allow set-up
+			this.server.send(MockWoofServer.mockRequest("/example"));
+
+			// Ensure can get initial row
+			ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM EXAMPLE");
+			assertTrue("Ensure have result", resultSet.next());
+			assertEquals("Incorrect name", "WoOF", resultSet.getString("NAME"));
+			assertEquals("Incorrect description", "Web on OfficeFloor", resultSet.getString("DESCRIPTION"));
+			assertFalse("Ensure no further results", resultSet.next());
+		}
 	}
 
 	/**
 	 * Requests page from HTTP Server.
 	 */
 	// START SNIPPET: test
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	public void testInteraction() throws Exception {
 
-		// Request page
-		this.doRequest("http://localhost:7878/example.woof");
+		// Need to keep connection open to keep in memory database alive
+		try (Connection connection = DefaultDataSourceFactory.createDataSource("datasource.properties")
+				.getConnection()) {
 
-		// Add row (will pick up parameter values from URL)
-		this.doRequest("http://localhost:7878/example-addRow.woof?name=Daniel&description=Founder");
+			// Start test server
+			this.server = MockWoofServer.open();
 
-		// Delete row
-		this.doRequest("http://localhost:7878/example-deleteRow.woof?id=1");
+			// Request page
+			this.server.send(MockHttpServer.mockRequest("/example"));
+
+			// Add row (will pick up parameter values from URL)
+			MockHttpResponse response = this.server
+					.send(MockHttpServer.mockRequest("/example+addRow?name=Daniel&description=Founder"));
+			assertEquals("Should follow POST then GET pattern", 303, response.getStatus().getStatusCode());
+			assertEquals("Ensure redirect to load page", "/example", response.getHeader("location").getValue());
+
+			// Ensure row in database
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM EXAMPLE WHERE NAME = 'Daniel'");
+			ResultSet resultSet = statement.executeQuery();
+			assertTrue("Should find row", resultSet.next());
+			assertEquals("Ensure correct row", "Founder", resultSet.getString("DESCRIPTION"));
+
+			// Delete row
+			this.server.send(MockHttpServer.mockRequest("/example+deleteRow?id=" + resultSet.getInt("ID")));
+
+			// Ensure row is deleted
+			resultSet = statement.executeQuery();
+			assertFalse("Row should be deleted", resultSet.next());
+		}
 	}
 
-	private void doRequest(String url) throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
-	}
 	// END SNIPPET: test
 
 }
