@@ -120,7 +120,7 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 	 *             If fails to load properties.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <S extends DataSource> void loadProperties(S dataSource, SourceContext context) throws Exception {
+	public static <S> void loadProperties(S dataSource, SourceContext context) throws Exception {
 
 		// Obtain the class
 		Class<S> dataSourceClass = (Class<S>) dataSource.getClass();
@@ -197,7 +197,7 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 	/**
 	 * Setter {@link Method} wrapper.
 	 */
-	private static class Setter<S extends DataSource> {
+	private static class Setter<S> {
 
 		/**
 		 * Class containing this.
