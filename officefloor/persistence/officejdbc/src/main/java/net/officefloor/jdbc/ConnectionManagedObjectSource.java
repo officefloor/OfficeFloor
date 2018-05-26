@@ -111,13 +111,6 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Create the data source
-		DataSourceFactory factory = this.getDataSourceFactory();
-		this.dataSource = factory.createDataSource(mosContext);
-
-		// Obtain the class loader for proxies
-		this.classLoader = mosContext.getClassLoader();
-
 		// Configure meta-data
 		context.setObjectClass(Connection.class);
 		context.setManagedObjectClass(AbstractConnectionManagedObject.class);
@@ -125,6 +118,18 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 				(poolContext) -> new DefaultManagedObjectPool(poolContext.getManagedObjectSource()));
 		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
 				RecycleManagedObjectParameter.class);
+
+		// Only load data source (if not loading type)
+		if (mosContext.isLoadingType()) {
+			return;
+		}
+
+		// Create the data source
+		DataSourceFactory factory = this.getDataSourceFactory();
+		this.dataSource = factory.createDataSource(mosContext);
+
+		// Obtain the class loader for proxies
+		this.classLoader = mosContext.getClassLoader();
 	}
 
 	@Override

@@ -19,10 +19,12 @@ package net.officefloor.jdbc.postgresql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
@@ -50,22 +52,28 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	protected void setUp() throws Exception {
 
 		// Start PostgreSQL
+		System.out.println();
 		System.out.println("Starting PostgreSQL");
+		Consumer<String> print = (message) -> {
+			System.out.print(message == null ? "" : " " + message);
+			System.out.flush();
+		};
 		this.docker = DefaultDockerClient.fromEnv().build();
 		this.docker.pull("postgres:latest", (message) -> {
-			System.out.println(message);
+			print.accept(message.progress());
+			print.accept(message.status());
+			print.accept(message.id());
+			System.out.println();
 		});
 
 		// Bind container port to host port
 		final String[] ports = { "5432" };
 		final Map<String, List<PortBinding>> portBindings = new HashMap<>();
 		for (String port : ports) {
-			List<PortBinding> hostPorts = new ArrayList<>();
-			hostPorts.add(PortBinding.of("0.0.0.0", port));
-			portBindings.put(port, hostPorts);
+			portBindings.put(port, Arrays.asList(PortBinding.of("0.0.0.0", port)));
 		}
 		final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-		final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image("postgres")
+		final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image("postgres:latest")
 				.exposedPorts(ports).env("POSTGRES_USER=test", "POSTGRES_PASSWORD=test").build();
 
 		// Start the container
@@ -105,8 +113,11 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 
 	@Override
 	protected void cleanDatabase(Connection connection) throws SQLException {
-		// TODO Auto-generated method stub
-
+		try (Statement statement = connection.createStatement()) {
+			// New docker image each time, so always clean
+			// Just create table to ensure connection up
+			statement.executeUpdate("CREATE TABLE RUNNING ( ID INT)");
+		}
 	}
 
 }

@@ -17,6 +17,8 @@
  */
 package net.officefloor.jdbc.test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -139,13 +141,46 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		// Obtain connection
-		// Must keep reference to keep potential in memory databases active
-		this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-				(mos) -> this.loadProperties(mos));
+		// Ignore errors in trying to start
+		PrintStream stderr = System.err;
+		System.setErr(new PrintStream(new ByteArrayOutputStream()));
+		try {
 
-		// Clean database
-		this.cleanDatabase(this.connection);
+			// Try until time out (as may take time for database to come up)
+			final int MAX_SETUP_TIME = 5000; // miliseconds
+			long startTime = System.currentTimeMillis();
+			NEXT_TRY: for (;;) {
+				try {
+
+					// Obtain connection
+					// Must keep reference to keep potential in memory databases active
+					this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
+							(mos) -> this.loadProperties(mos));
+
+					// Clean database
+					this.cleanDatabase(this.connection);
+
+					// Successful setup
+					return;
+
+				} catch (Throwable ex) {
+
+					// Failed setup, determine if try again
+					if (System.currentTimeMillis() > (startTime + MAX_SETUP_TIME)) {
+						throw ex;
+
+					} else {
+						// Try again in a little
+						Thread.sleep(100);
+						continue NEXT_TRY;
+					}
+				}
+			}
+
+		} finally {
+			// Reinstate standard error
+			System.setErr(stderr);
+		}
 	}
 
 	/**

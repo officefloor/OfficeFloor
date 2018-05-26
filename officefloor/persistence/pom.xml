@@ -15,6 +15,7 @@
 	<modules>
 		<module>officejdbc</module>
 		<module>officejdbc_h2</module>
+		<module>officejdbc_postgresql</module>
 		<module>officejpa</module>
 	</modules>
 	<dependencies>

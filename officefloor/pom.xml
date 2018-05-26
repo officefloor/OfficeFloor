@@ -212,6 +212,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejdbc_postgresql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -573,6 +578,16 @@
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
 				<version>5.1.28</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.2.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-client</artifactId>
+				<version>8.11.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
