@@ -947,19 +947,24 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	private class PipelineExecutor {
 
 		/**
+		 * Local host port to send requests.
+		 */
+		private final int port;
+
+		/**
 		 * {@link Selector}.
 		 */
-		private final Selector selector;
+		private Selector selector;
 
 		/**
 		 * {@link SocketChannel}.
 		 */
-		private final SocketChannel channel;
+		private SocketChannel channel;
 
 		/**
 		 * {@link SelectionKey}.
 		 */
-		private final SelectionKey selectionKey;
+		private SelectionKey selectionKey;
 
 		/**
 		 * Result of {@link Runnable}.
@@ -975,15 +980,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 *             If fails to connect to {@link HttpServer}.
 		 */
 		private PipelineExecutor(int port) throws IOException {
-
-			// Pipeline requests to server
-			this.selector = Selector.open();
-			this.channel = SocketChannel.open(new InetSocketAddress("localhost", port));
-			this.channel.configureBlocking(false);
-			Socket socket = this.channel.socket();
-			socket.setSendBufferSize(10 * 1024 * 1024);
-			socket.setReceiveBufferSize(10 * 1024 * 1024);
-			this.selectionKey = channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+			this.port = port;
 
 			// Register
 			AbstractHttpServerImplementationTest.this.executors.add(this);
@@ -993,8 +990,12 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 * Closes this {@link PipelineExecutor}.
 		 */
 		private void close() throws IOException {
-			this.channel.close();
-			this.selector.close();
+			if (this.selector != null) {
+				this.selector.close();
+			}
+			if (this.channel != null) {
+				this.channel.close();
+			}
 		}
 
 		/**
@@ -1006,8 +1007,15 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 */
 		private PipelineResult doPipelineRun(int requestCount) throws IOException {
 
-			// Reset selector for run
-			this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+			// Pipeline requests to server
+			// (Connect as about to test, to avoid timeouts closing connection)
+			this.selector = Selector.open();
+			this.channel = SocketChannel.open(new InetSocketAddress("localhost", this.port));
+			this.channel.configureBlocking(false);
+			Socket socket = this.channel.socket();
+			socket.setSendBufferSize(10 * 1024 * 1024);
+			socket.setReceiveBufferSize(10 * 1024 * 1024);
+			this.selectionKey = this.channel.register(this.selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 
 			// Create the request
 			byte[] requestData = AbstractHttpServerImplementationTest.this.createPipelineRequestData();
@@ -1118,8 +1126,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 									StringBuilder responseText = new StringBuilder(
 											UsAsciiUtil.convertToString(responseBytes));
 
-									// Add in quotes to identify incorrect
-									// character
+									// Add in quotes to identify incorrect character
 									responseText.insert(i, "{");
 									responseText.insert(i + 2, "}");
 
