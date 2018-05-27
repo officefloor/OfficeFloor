@@ -25,8 +25,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
-import org.datanucleus.enhancer.DataNucleusEnhancer;
-
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
@@ -39,14 +37,6 @@ import net.officefloor.jpa.test.IMockEntity;
  * @author Daniel Sagenschneider
  */
 public class ValidateJpaTest extends AbstractJpaTestCase {
-
-	static {
-		// Enhance the classes
-		DataNucleusEnhancer enhancer = new DataNucleusEnhancer("JPA", null);
-		enhancer.setVerbose(true);
-		enhancer.addPersistenceUnit("test");
-		enhancer.enhance();
-	}
 
 	@Override
 	protected void loadJpaProperties(PropertyConfigurable mos) {
