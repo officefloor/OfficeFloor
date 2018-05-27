@@ -220,6 +220,11 @@
 				<artifactId>officejpa</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejpa_datanucleus</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
