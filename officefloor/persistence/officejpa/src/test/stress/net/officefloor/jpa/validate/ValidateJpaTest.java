@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.jpa.datanucleus;
+package net.officefloor.jpa.validate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,27 +31,35 @@ import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
+import net.officefloor.jpa.test.IMockEntity;
 
 /**
  * Tests DataNucleus JPA implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class DataNucleusJpaTest extends AbstractJpaTestCase {
+public class ValidateJpaTest extends AbstractJpaTestCase {
 
-	@Override
-	protected void loadJpaProperties(PropertyConfigurable mos) {
-
+	static {
 		// Enhance the classes
 		DataNucleusEnhancer enhancer = new DataNucleusEnhancer("JPA", null);
 		enhancer.setVerbose(true);
 		enhancer.addPersistenceUnit("test");
 		enhancer.enhance();
+	}
+
+	@Override
+	protected void loadJpaProperties(PropertyConfigurable mos) {
 
 		// Load the properties
 		mos.addProperty(JpaManagedObjectSource.PROPERTY_PERSISTENCE_UNIT, "test");
 		mos.addProperty(JpaManagedObjectSource.PROPERTY_PERSISTENCE_FACTORY,
 				DataNucleusPersistenceFactory.class.getName());
+	}
+
+	@Override
+	protected Class<? extends IMockEntity> getMockEntityClass() {
+		return MockEntity.class;
 	}
 
 	/**

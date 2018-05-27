@@ -75,7 +75,7 @@
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<gwt-version>2.6.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
-		<datanucleus-version>5.1.9</datanucleus-version>
+		<datanucleus-version>5.0.2</datanucleus-version>
 		<failsafe-version>2.19.1</failsafe-version>
 		<compiler-version>3.6.0</compiler-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
@@ -962,19 +962,10 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.datanucleus</groupId>
-										<artifactId>maven-datanucleus-plugin</artifactId>
-										<versionRange>[3.0.2,)</versionRange>
-										<goals>
-											<goal>enhance</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
+								<!-- <pluginExecution> <pluginExecutionFilter> <groupId>org.datanucleus</groupId> 
+									<artifactId>maven-datanucleus-plugin</artifactId> <versionRange>[3.0.2,)</versionRange> 
+									<goals> <goal>enhance</goal> </goals> </pluginExecutionFilter> <action> <ignore></ignore> 
+									</action> </pluginExecution> -->
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>

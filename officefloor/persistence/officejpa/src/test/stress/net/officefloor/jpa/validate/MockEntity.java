@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.jpa.test;
+package net.officefloor.jpa.validate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,6 +24,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import lombok.Data;
+import net.officefloor.jpa.test.IMockEntity;
 
 /**
  * Mock {@link Entity}.
@@ -32,7 +33,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-public class MockEntity {
+public class MockEntity implements IMockEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

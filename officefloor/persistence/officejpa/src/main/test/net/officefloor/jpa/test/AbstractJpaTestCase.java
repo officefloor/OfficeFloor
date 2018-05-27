@@ -65,6 +65,13 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	protected abstract void loadJpaProperties(PropertyConfigurable jpa);
 
 	/**
+	 * Obtains the {@link IMockEntity} implementation {@link Class}.
+	 * 
+	 * @return {@link IMockEntity} implementation {@link Class}.
+	 */
+	protected abstract Class<? extends IMockEntity> getMockEntityClass();
+
+	/**
 	 * Allows overriding the {@link JpaManagedObjectSource} {@link Class} for vendor
 	 * specific implementations.
 	 * 
@@ -98,6 +105,11 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * {@link IMockEntity} implementation {@link Class}.
+	 */
+	protected static Class<? extends IMockEntity> mockEntityClass;
+
+	/**
 	 * {@link Connection}.
 	 */
 	protected Connection connection;
@@ -123,6 +135,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 			statement.execute(
 					"CREATE TABLE MOCKENTITY ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20) NOT NULL, DESCRIPTION VARCHAR(256) )");
 		}
+
+		// Capture the mock entity class implementation
+		mockEntityClass = this.getMockEntityClass();
 	}
 
 	@Override
@@ -212,7 +227,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * Holder for the result.
 	 */
 	public static class Result {
-		public MockEntity entity = null;
+		public IMockEntity entity = null;
 	}
 
 	/**
@@ -220,9 +235,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	public static class ReadSection {
 		public void service(@Parameter Result result, EntityManager entityManager) {
-			TypedQuery<MockEntity> query = entityManager.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'",
-					MockEntity.class);
-			MockEntity entity = query.getSingleResult();
+			TypedQuery<? extends IMockEntity> query = entityManager
+					.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'", mockEntityClass);
+			IMockEntity entity = query.getSingleResult();
 			result.entity = entity;
 		}
 	}
@@ -254,8 +269,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * Mock section for inserting entity.
 	 */
 	public static class InsertSection {
-		public void service(EntityManager entityManager) {
-			MockEntity entity = new MockEntity();
+		public void service(EntityManager entityManager) throws Exception {
+			IMockEntity entity = mockEntityClass.newInstance();
 			entity.setName("test");
 			entity.setDescription("mock insert entry");
 			entityManager.persist(entity);
@@ -295,9 +310,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	public static class UpdateSection {
 		public void service(EntityManager entityManager) {
-			MockEntity entity = entityManager
-					.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'", MockEntity.class)
-					.getSingleResult();
+			IMockEntity entity = entityManager
+					.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'", mockEntityClass).getSingleResult();
 			entity.setDescription("mock updated entry");
 		}
 	}
@@ -332,9 +346,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	public static class DeleteSection {
 		public void service(EntityManager entityManager) {
-			MockEntity entity = entityManager
-					.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'", MockEntity.class)
-					.getSingleResult();
+			IMockEntity entity = entityManager
+					.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'", mockEntityClass).getSingleResult();
 			entityManager.remove(entity);
 		}
 	}
@@ -387,17 +400,17 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 			void thread();
 		}
 
-		public void run(EntityManager entityManager, Flows flows) throws SQLException {
+		public void run(EntityManager entityManager, Flows flows) throws Exception {
 			this.insertRow(entityManager, "run");
 			flows.thread();
 		}
 
-		public void thread(EntityManager entityManager, NewThread thread) throws SQLException {
+		public void thread(EntityManager entityManager, NewThread thread) throws Exception {
 			this.insertRow(entityManager, Thread.currentThread().getName());
 		}
 
-		private void insertRow(EntityManager entityManager, String name) throws SQLException {
-			MockEntity entity = new MockEntity();
+		private void insertRow(EntityManager entityManager, String name) throws Exception {
+			IMockEntity entity = mockEntityClass.newInstance();
 			entity.setName(name);
 			entity.setDescription(name);
 			entityManager.persist(entity);
@@ -463,7 +476,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		private final SelectInput input;
 
-		private volatile MockEntity entity;
+		private volatile IMockEntity entity;
 
 		private SelectParameter(SelectInput input) {
 			this.input = input;
@@ -486,8 +499,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 			for (int i = 0; i < THREAD_COUNT; i++) {
 
 				// Obtain first row
-				MockEntity entity = entityManager
-						.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'one'", MockEntity.class)
+				IMockEntity entity = entityManager
+						.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'one'", mockEntityClass)
 						.getSingleResult();
 				assertEquals("Should obtain entity one", "first", entity.getDescription());
 
@@ -506,7 +519,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		public void thread(EntityManager entityManager, @Parameter SelectParameter parameter, NewThread tag)
 				throws SQLException {
-			parameter.entity = entityManager.find(MockEntity.class, parameter.input.rowTwoId);
+			parameter.entity = entityManager.find(mockEntityClass, parameter.input.rowTwoId);
 		}
 	}
 

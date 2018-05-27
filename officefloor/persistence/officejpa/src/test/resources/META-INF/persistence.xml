@@ -5,7 +5,7 @@
 	version="2.2">
 
 	<persistence-unit name="test">
-		<class>net.officefloor.jpa.test.MockEntity</class>
+		<class>net.officefloor.jpa.validate.MockEntity</class>
 		<exclude-unlisted-classes />
 	</persistence-unit>
 
