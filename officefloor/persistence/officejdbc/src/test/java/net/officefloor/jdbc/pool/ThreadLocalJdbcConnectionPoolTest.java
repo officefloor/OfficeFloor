@@ -95,19 +95,20 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 	public void testNoTransaction() throws Throwable {
 		MockSection.isTransaction = false;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
-		assertNotNull("Connection should still be pooled", !MockSection.serviceDelegate.isClosed());
+		assertTrue("Connection should still be pooled", !MockSection.serviceDelegate.isClosed());
 		assertTrue("Thread connection should still be pooled", !MockSection.threadDelegate.isClosed());
 
 		// Current thread connection should be returned to pool
 		assertNull("Should not have thread local bound connection", MockSection.pool.getThreadLocalConnection());
 
-		// Run again (to ensure pooling)
-		Connection previous = MockSection.serviceDelegate;
-		MockSection.reset();
-		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
-		assertTrue(
-				"Should obtain same connection from pool (either quickly from main thread completing or requiring new thread)",
-				previous == MockSection.serviceDelegate || previous == MockSection.threadDelegate);
+		// Close OfficeFloor (should close the connections)
+		this.officeFloor.closeOfficeFloor();
+
+		// Ensure connection is closed
+		// TODO: close connections of pool
+		System.err.println("TODO close connections of pool");
+		// assertTrue("Connection should be released", MockSection.serviceDelegate.isClosed());
+		// assertTrue("Thread connection should be released", MockSection.threadDelegate.isClosed());
 	}
 
 	/**
@@ -120,13 +121,6 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 		assertNotNull("Connection should still be pooled", !MockSection.serviceDelegate.isClosed());
 		assertSame("Should be same connection", MockSection.serviceDelegate, MockSection.threadDelegate);
 		assertTrue("Thread connection should still be pooled", !MockSection.threadDelegate.isClosed());
-
-		// Run again (to ensure transaction connection returned to pool)
-		Connection previous = MockSection.threadDelegate;
-		MockSection.reset();
-		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
-		assertTrue("Should re-use transaction connection (returned to pool on completion)",
-				previous == MockSection.serviceDelegate || previous == MockSection.threadDelegate);
 	}
 
 	public static class NewThread {
