@@ -92,6 +92,7 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 	/**
 	 * Ensure able to use {@link ThreadLocal} {@link Connection}.
 	 */
+	@SuppressWarnings("resource")
 	public void testNoTransaction() throws Throwable {
 		MockSection.isTransaction = false;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
@@ -104,11 +105,14 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 		// Close OfficeFloor (should close the connections)
 		this.officeFloor.closeOfficeFloor();
 
-		// Ensure connection is closed
-		// TODO: close connections of pool
-		System.err.println("TODO close connections of pool");
-		// assertTrue("Connection should be released", MockSection.serviceDelegate.isClosed());
-		// assertTrue("Thread connection should be released", MockSection.threadDelegate.isClosed());
+		// Ensure connection is closed (removed from thread)
+		Connection connection = MockSection.pool.getThreadLocalConnection();
+		long startTime = System.currentTimeMillis();
+		while (connection != null) {
+			this.timeout(startTime);
+			Thread.sleep(100);
+			connection = MockSection.pool.getThreadLocalConnection();
+		}
 	}
 
 	/**

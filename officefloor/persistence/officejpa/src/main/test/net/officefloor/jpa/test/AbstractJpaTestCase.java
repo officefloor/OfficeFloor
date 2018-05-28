@@ -32,6 +32,7 @@ import javax.persistence.TypedQuery;
 import org.h2.jdbcx.JdbcDataSource;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
@@ -44,6 +45,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.Dependencies;
@@ -89,7 +91,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	protected void loadDatabaseProperties(PropertyConfigurable mos) {
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
-		mos.addProperty("uRL", "jdbc:h2:mem:test");
+		mos.addProperty("url", "jdbc:h2:mem:test");
 	}
 
 	/**
@@ -209,7 +211,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor((context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
 			context.addSection("READ", ReadSection.class);
 		});
 
@@ -248,7 +250,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	public void testInsert() throws Throwable {
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor((context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
 			context.addSection("INSERT", InsertSection.class);
 		});
 
@@ -288,7 +290,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor((context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
 			context.addSection("UPDATE", UpdateSection.class);
 		});
 
@@ -327,7 +329,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor((context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
 			context.addSection("DELETE", DeleteSection.class);
 		});
 
@@ -356,12 +358,29 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * Undertake stress insert test.
 	 */
 	public void testStressInsert() throws Throwable {
+		this.doStressInsertTest(false);
+	}
+
+	/**
+	 * Undertake stress insert test with pooled connections.
+	 */
+	public void testStressInsertPooledConnections() throws Throwable {
+		this.doStressInsertTest(true);
+	}
+
+	/**
+	 * Undertakes the stress insert test.
+	 * 
+	 * @param isPoolConnections
+	 *            Indicates whether to pool connections.
+	 */
+	private void doStressInsertTest(boolean isPoolConnections) throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor((context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isPoolConnections, (context) -> {
 			context.addSection("StressInsert", StressInsertSection.class);
 		});
 
@@ -377,8 +396,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));
-		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
-				+ +requestsPerSecond + " inserts/sec");
+		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance " + requestsPerSecond
+				+ " inserts/sec " + (isPoolConnections ? " (pooled)" : ""));
 
 		// Ensure inserted all rows
 		try (PreparedStatement statement = this.connection
@@ -421,8 +440,25 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * Ensure stress select.
 	 */
 	public void testStressSelect() throws Throwable {
+		this.doStressSelectTest(false);
+	}
 
-		final int RUN_COUNT = 1000;
+	/**
+	 * Ensure stress select with pooled connections.
+	 */
+	public void testStressSelectPooledConnections() throws Throwable {
+		this.doStressSelectTest(true);
+	}
+
+	/**
+	 * Undertakes the stress select test.
+	 * 
+	 * @param isPooledConnections
+	 *            Indicates if pool connections.
+	 */
+	private void doStressSelectTest(boolean isPooledConnections) throws Throwable {
+
+		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
 
 		// Create the two rows
@@ -436,7 +472,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor((context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isPooledConnections, (context) -> {
 			context.addSection("StressSelect", StressSelectSection.class);
 		});
 
@@ -465,7 +501,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	private static class SelectInput {
 
-		private final int rowTwoId;
+		private final long rowTwoId;
 
 		private SelectInput(int rowTwoId) {
 			this.rowTwoId = rowTwoId;
@@ -526,13 +562,16 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Compiles and opens the {@link OfficeFloor} for testing.
 	 * 
+	 * @param isPoolConnections
+	 *            Indicates whether to pool connections.
 	 * @param extension
 	 *            {@link CompileOfficeExtension} for test specific configuration.
 	 * @return Open {@link OfficeFloor}.
 	 * @throws Exception
 	 *             If fails to compile and open the {@link OfficeFloor}.
 	 */
-	private OfficeFloor compileAndOpenOfficeFloor(CompileOfficeExtension extension) throws Exception {
+	private OfficeFloor compileAndOpenOfficeFloor(boolean isPoolConnections, CompileOfficeExtension extension)
+			throws Exception {
 
 		// Configure the application
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -551,6 +590,13 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 					.addOfficeManagedObjectSource("connection", ConnectionManagedObjectSource.class.getName());
 			this.loadDatabaseProperties(connectionMos);
 			connectionMos.addOfficeManagedObject("connection", ManagedObjectScope.THREAD);
+
+			// Determine if pool connections
+			if (isPoolConnections) {
+				OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+						ThreadLocalJdbcConnectionPoolSource.class.getName());
+				context.getOfficeArchitect().link(connectionMos, pool);
+			}
 
 			// Add JPA
 			OfficeManagedObjectSource jpaMos = context.getOfficeArchitect().addOfficeManagedObjectSource("JPA",

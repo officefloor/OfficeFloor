@@ -17,6 +17,7 @@
  */
 package net.officefloor.jdbc;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -152,18 +153,31 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 
 			// Lazy create the connection
 			if (this.proxy == null) {
+
+				// Obtain the connection
 				this.connection = ConnectionManagedObjectSource.this.dataSource.getConnection();
+
+				// Create proxy around connection
 				this.proxy = (Connection) Proxy.newProxyInstance(ConnectionManagedObjectSource.this.classLoader,
 						CONNECTION_TYPE, (proxy, method, args) -> {
 
-							// Do not close the connection (as managed)
-							if ("close".equals(method.getName())) {
-								return null;
+							// As managed, can not change particular methods
+							switch (method.getName()) {
+							case "close":
+								return null; // do not close
 							}
 
-							// Otherwise undertake method
-							return this.connection.getClass().getMethod(method.getName(), method.getParameterTypes())
-									.invoke(connection, args);
+							// Obtain the delegate method
+							Method delegateMethod = this.connection.getClass().getMethod(method.getName(),
+									method.getParameterTypes());
+
+							// Invoke method (and retry force access)
+							try {
+								return delegateMethod.invoke(this.connection, args);
+							} catch (IllegalAccessException ex) {
+								delegateMethod.setAccessible(true);
+								return delegateMethod.invoke(this.connection, args);
+							}
 						});
 			}
 

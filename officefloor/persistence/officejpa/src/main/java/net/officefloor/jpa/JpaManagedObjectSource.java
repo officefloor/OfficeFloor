@@ -17,6 +17,7 @@
  */
 package net.officefloor.jpa;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.Properties;
@@ -30,6 +31,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
@@ -56,6 +58,16 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	 * {@link PersistenceFactory}.
 	 */
 	public static final String PROPERTY_PERSISTENCE_FACTORY = "persistence.factory";
+
+	/**
+	 * {@link DataSource} type for {@link Proxy}.
+	 */
+	private static final Class<?>[] DATA_SOURCE_TYPE = new Class[] { DataSource.class };
+
+	/**
+	 * {@link EntityManager} type for {@link Proxy}.
+	 */
+	private static final Class<?>[] ENTITY_MANAGER_TYPE = new Class[] { EntityManager.class };
 
 	/**
 	 * Dependencies.
@@ -187,7 +199,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		this.classLoader = mosContext.getClassLoader();
 
 		// Create the DataSource
-		this.dataSource = (DataSource) Proxy.newProxyInstance(this.classLoader, new Class[] { DataSource.class },
+		this.dataSource = (DataSource) Proxy.newProxyInstance(this.classLoader, DATA_SOURCE_TYPE,
 				(proxy, method, args) -> {
 					switch (method.getName()) {
 					case "getConnection":
@@ -212,6 +224,11 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	private class JpaManagedObject implements CoordinatingManagedObject<Dependencies> {
 
 		/**
+		 * {@link Proxy} {@link EntityManager}.
+		 */
+		private EntityManager proxy;
+
+		/**
 		 * {@link EntityManager}.
 		 */
 		private EntityManager entityManager;
@@ -229,15 +246,15 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			// Easy access to managed object source
 			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
 
+			// Specify connection for setup of entity manager factory and entity manager
+			mos.dataSourceConnection.set(connection);
+
 			// If still reference to persistence factory (then likely factory not created)
 			if (mos.persistenceFactory != null) {
 
 				// Attempt to ensure only one factory created
 				synchronized (mos) {
 					if (mos.entityManagerFactory == null) {
-
-						// Specify connection for setup of entity manager factory
-						mos.dataSourceConnection.set(connection);
 
 						// Create the entity manager factory
 						mos.entityManagerFactory = mos.persistenceFactory
@@ -251,25 +268,48 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 
 			// Create the entity manager
 			EntityManagerFactory factory = JpaManagedObjectSource.this.entityManagerFactory;
-			EntityManager entityManager = factory.createEntityManager();
+			this.entityManager = factory.createEntityManager();
+
+			// Run entity manager within managed transaction
+			this.entityManager.getTransaction().begin();
 
 			// Provide proxy entity manager (to specify connection)
-			this.entityManager = (EntityManager) Proxy.newProxyInstance(mos.classLoader,
-					new Class<?>[] { EntityManager.class }, (proxy, method, args) -> {
+			this.proxy = (EntityManager) Proxy.newProxyInstance(mos.classLoader, ENTITY_MANAGER_TYPE,
+					(proxy, method, args) -> {
+
+						// Disallow access to transaction (as managed)
+						switch (method.getName()) {
+						case "getTransaction":
+							throw new IllegalStateException(EntityManager.class.getSimpleName()
+									+ ".getTransaction() may not be invoked as transaction managed by "
+									+ OfficeFloor.class.getSimpleName());
+
+						case "close":
+							throw new IllegalStateException(EntityManager.class.getSimpleName()
+									+ ".close() may not be invoked as managed by " + OfficeFloor.class.getName());
+						}
 
 						// Specify the connection
 						// All entity manager operations synchronous so will use
 						mos.dataSourceConnection.set(connection);
 
-						// Invoke entity manager method with appropriate connection
-						return entityManager.getClass().getMethod(method.getName(), method.getParameterTypes())
-								.invoke(entityManager, args);
+						// Obtain the delegate method on the entity manager
+						Method delegateMethod = this.entityManager.getClass().getMethod(method.getName(),
+								method.getParameterTypes());
+
+						// Invoke (and retry forcing access)
+						try {
+							return delegateMethod.invoke(this.entityManager, args);
+						} catch (IllegalAccessException ex) {
+							delegateMethod.setAccessible(true);
+							return delegateMethod.invoke(this.entityManager, args);
+						}
 					});
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
-			return this.entityManager;
+			return this.proxy;
 		}
 	}
 
@@ -285,11 +325,20 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			RecycleManagedObjectParameter<JpaManagedObject> recycle = RecycleManagedObjectParameter
 					.getRecycleManagedObjectParameter(context);
 			EntityManager entityManager = recycle.getManagedObject().entityManager;
+			try {
 
-			// If no escalations, then commit changes
-			CleanupEscalation[] escalations = recycle.getCleanupEscalations();
-			if ((escalations == null) || (escalations.length == 0)) {
-				// No escalations, so commit the changes
+				// If no escalations, then commit changes
+				CleanupEscalation[] escalations = recycle.getCleanupEscalations();
+				if ((escalations != null) && (escalations.length > 0)) {
+					// Escalations, so rollback transaction
+					entityManager.getTransaction().rollback();
+				} else {
+					// No escalations, so commit the transaction
+					entityManager.getTransaction().commit();
+				}
+
+			} finally {
+				// Ensure close the entity manager
 				entityManager.close();
 			}
 

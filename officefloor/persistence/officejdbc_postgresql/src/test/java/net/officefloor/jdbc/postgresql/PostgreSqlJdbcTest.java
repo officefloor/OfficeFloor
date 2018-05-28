@@ -22,8 +22,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import com.spotify.docker.client.DefaultDockerClient;
@@ -44,6 +46,42 @@ import net.officefloor.jdbc.test.AbstractJdbcTestCase;
  */
 public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 
+	/**
+	 * Pulled docker images.
+	 */
+	private static final Set<String> pulledDockerImages = new HashSet<>();
+
+	/**
+	 * Pulls the docker image.
+	 * 
+	 * @param imageName
+	 *            Docker image name.
+	 * @param client
+	 *            {@link DockerClient}.
+	 */
+	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
+
+		// Determine if already pulled
+		if (pulledDockerImages.contains(imageName)) {
+			return;
+		}
+
+		// Pull the docker image
+		Consumer<String> print = (message) -> {
+			System.out.print(message == null ? "" : " " + message);
+			System.out.flush();
+		};
+		client.pull(imageName, (message) -> {
+			print.accept(message.progress());
+			print.accept(message.status());
+			print.accept(message.id());
+			System.out.println();
+		});
+
+		// Flag that pulled image
+		pulledDockerImages.add(imageName);
+	}
+
 	private DockerClient docker;
 
 	private String postgresContainerId;
@@ -54,17 +92,8 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		// Start PostgreSQL
 		System.out.println();
 		System.out.println("Starting PostgreSQL");
-		Consumer<String> print = (message) -> {
-			System.out.print(message == null ? "" : " " + message);
-			System.out.flush();
-		};
 		this.docker = DefaultDockerClient.fromEnv().build();
-		this.docker.pull("postgres:latest", (message) -> {
-			print.accept(message.progress());
-			print.accept(message.status());
-			print.accept(message.id());
-			System.out.println();
-		});
+		pullDockerImage("postgres:latest", this.docker);
 
 		// Bind container port to host port
 		final String[] ports = { "5432" };
@@ -73,8 +102,9 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 			portBindings.put(port, Arrays.asList(PortBinding.of("0.0.0.0", port)));
 		}
 		final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-		final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image("postgres:latest")
-				.exposedPorts(ports).env("POSTGRES_USER=test", "POSTGRES_PASSWORD=test").build();
+		final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig)
+				.image("postgres:latest").exposedPorts(ports).env("POSTGRES_USER=test", "POSTGRES_PASSWORD=test")
+				.build();
 
 		// Start the container
 		final ContainerCreation creation = docker.createContainer(containerConfig, "officefloor_postgres");
@@ -89,6 +119,7 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	protected void tearDown() throws Exception {
 
 		// Stop PostgresSQL
+		System.out.println("Stopping PostgreSQL");
 		this.docker.killContainer(this.postgresContainerId);
 		this.docker.removeContainer(this.postgresContainerId);
 		this.docker.close();

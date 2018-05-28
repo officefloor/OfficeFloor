@@ -72,7 +72,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 *             If fails to invoke the {@link ProcessState}.
 	 */
 	public static void invokeProcess(OfficeFloor officeFloor, String functionName, Object parameter) throws Throwable {
-		invokeProcess(officeFloor, "OFFICE", functionName, parameter);
+		invokeProcess(officeFloor, "OFFICE", functionName, parameter, 3000);
 	}
 
 	/**
@@ -87,11 +87,13 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 *            Name of the {@link ManagedFunction}.
 	 * @param parameter
 	 *            Parameter to the {@link ManagedFunction}.
+	 * @param waitTime
+	 *            Time in milliseconds to wait for {@link ProcessState} to complete.
 	 * @throws Throwable
 	 *             If fails to invoke the {@link ProcessState}.
 	 */
-	public static void invokeProcess(OfficeFloor officeFloor, String officeName, String functionName, Object parameter)
-			throws Throwable {
+	public static void invokeProcess(OfficeFloor officeFloor, String officeName, String functionName, Object parameter,
+			long waitTime) throws Throwable {
 
 		// Obtain the function
 		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager(functionName);
@@ -111,7 +113,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 			while (!isComplete[0]) {
 
 				// Determine if timed out
-				if ((startTimestamp + 3000) < System.currentTimeMillis()) {
+				if ((startTimestamp + waitTime) < System.currentTimeMillis()) {
 					throw new Exception(
 							"Timed out waiting on process (" + officeName + "." + functionName + ") to complete");
 				}

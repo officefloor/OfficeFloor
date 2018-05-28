@@ -311,15 +311,33 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			// Obtain the delegate method
 			Method delegateMethod = reference.connection.getClass().getMethod(method.getName(),
 					method.getParameterTypes());
-
 			try {
-				// Invoke the delegate method
-				return delegateMethod.invoke(reference.connection, args);
+
+				// Invoke method (and retry with force access)
+				try {
+					return delegateMethod.invoke(reference.connection, args);
+				} catch (IllegalAccessException ex) {
+					// Access issues, so ensure access
+					delegateMethod.setAccessible(true);
+					return delegateMethod.invoke(reference.connection, args);
+				}
 
 			} finally {
-				// Ensure return possible connection to pool
+				// Ensure return possible connection to thread / pool
 				if (returnReference != null) {
-					ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
+
+					// Determine if current thread can re-use connection
+					// (typically transaction runs on same thread)
+					ConnectionReference threadReference = ThreadLocalJdbcConnectionPool.this.threadLocalConnection
+							.get();
+					if (threadReference == null) {
+						// No thread connection, so bind to thread
+						ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(returnReference);
+
+					} else {
+						// Thread has connection, so return to the pool
+						ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
+					}
 				}
 			}
 		}
