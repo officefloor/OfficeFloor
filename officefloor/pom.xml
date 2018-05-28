@@ -230,6 +230,11 @@
 				<artifactId>officejpa_hibernate</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejpa_eclipselink</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
