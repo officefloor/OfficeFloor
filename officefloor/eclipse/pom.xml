@@ -50,7 +50,7 @@
 				<executions>
 					<execution>
 						<id>Provide linked dependencies for eclipse PDE projects</id>
-						<phase>process-sources</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
