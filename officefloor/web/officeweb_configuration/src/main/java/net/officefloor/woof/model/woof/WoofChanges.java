@@ -36,6 +36,8 @@ import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.type.WebTemplateLoader;
 import net.officefloor.web.template.type.WebTemplateType;
 
 /**
@@ -191,6 +193,20 @@ public interface WoofChanges {
 	 * @return Inheritable {@link WoofTemplateOutputModel} names.
 	 */
 	Set<String> getInheritableOutputNames(WoofTemplateModel childTemplate);
+
+	/**
+	 * Loads the super {@link WoofTemplateModel} models to the {@link WebTemplate}.
+	 * 
+	 * @param template
+	 *            {@link WebTemplate} to be loaded within its super
+	 *            {@link WoofTemplate} instances.
+	 * @param woofTemplate
+	 *            {@link WoofTemplateModel} within the configuration for the
+	 *            {@link WebTemplate}.
+	 * @param templateLoader
+	 *            {@link WebTemplateLoader}.
+	 */
+	void loadSuperTemplates(WebTemplate template, WoofTemplateModel woofTemplate, WebTemplateLoader templateLoader);
 
 	/**
 	 * Refactors the {@link WoofTemplateModel}.

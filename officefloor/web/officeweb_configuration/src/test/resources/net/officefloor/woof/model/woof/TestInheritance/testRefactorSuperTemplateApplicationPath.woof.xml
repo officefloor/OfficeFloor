@@ -6,7 +6,7 @@
 
 	<templates>
 		<template path="/change" location="example/Change.ofp" />
-		<template path="/parent" location="example/Parent.ofp">
+		<template path="/parent" location="net/officefloor/woof/model/woof/TestInheritance/Parent.ofp">
 			<extends template="/change" />
 			<output name="OUTPUT_PARENT_A">
 				<template path="/parent" />

@@ -148,11 +148,10 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 				.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
 
 		// Create the template
-		WebTemplate template = loader.addTemplate(false, "/path", new StringReader("#{link}"));
+		WebTemplate template = loader.addTemplate(false, "/path", new StringReader("<!-- {:template} --> #{link}"));
 
 		// Provide parent
-		WebTemplate parent = loader.addTemplate(false, "/parent", new StringReader("#{link}"));
-		template.setSuperTemplate(parent);
+		template.setSuperTemplate(loader.addTemplate(false, "/parent", new StringReader("parent")));
 
 		// Load the type
 		WebTemplateType type = loader.loadWebTemplateType(template);
@@ -167,6 +166,92 @@ public class WebTemplateLoaderTest extends OfficeFrameTestCase {
 
 		// Validate the type
 		WebTemplateLoaderUtil.validateWebTemplateType(expected, type);
+	}
+
+	/**
+	 * Ensure inherit link from parent template.
+	 */
+	public void testTemplateInheritLink() throws Exception {
+
+		// Create the loader
+		WebTemplateLoader loader = WebTemplateArchitectEmployer
+				.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+
+		// Create the template
+		WebTemplate template = loader.addTemplate(false, "/path", new StringReader("<!-- {:section} --> override"));
+
+		// Provide parent
+		template.setSuperTemplate(
+				loader.addTemplate(false, "/parent", new StringReader("#{link} <!-- {section}--> overridden")));
+
+		// Load the type
+		WebTemplateType type = loader.loadWebTemplateType(template);
+
+		// Create the expected type (already supplying common)
+		SectionDesigner expected = WebTemplateLoaderUtil.createSectionDesigner();
+		expected.addSectionInput("link", null).addAnnotation(new WebTemplateLinkAnnotation(false, "link"));
+		expected.addSectionInput("renderTemplate", null);
+		expected.addSectionOutput("link", null, false);
+		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
+		expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
+
+		// Validate the type
+		WebTemplateLoaderUtil.validateWebTemplateType(expected, type);
+	}
+
+	/**
+	 * Inheritance configuration is only for template content. Logic inheritance
+	 * follows normal java class inheritance (hence extend parent template logic
+	 * class to inherit logic).
+	 */
+	public void testTemplateNotInheritFlow() throws Exception {
+
+		// Create the loader
+		WebTemplateLoader loader = WebTemplateArchitectEmployer
+				.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+
+		// Create the template
+		WebTemplate template = loader.addTemplate(false, "/path", new StringReader("<!-- {:template} -->override"));
+		template.setLogicClass(TemplateOnlyFlow.class.getName());
+
+		// Provide parent
+		WebTemplate parent = loader.addTemplate(false, "/parent", new StringReader("parent"));
+		parent.setLogicClass(IgnoreParentFlowsAsUseInheritance.class.getName());
+		template.setSuperTemplate(parent);
+
+		// Load the type
+		WebTemplateType type = loader.loadWebTemplateType(template);
+
+		// Create the expected type (already supplying common)
+		SectionDesigner expected = WebTemplateLoaderUtil.createSectionDesigner();
+		expected.addSectionOutput("flow", null, false);
+		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
+		expected.addSectionObject(ServerHttpConnection.class.getName(), ServerHttpConnection.class.getName());
+
+		// Validate the type
+		WebTemplateLoaderUtil.validateWebTemplateType(expected, type);
+	}
+
+	public static class IgnoreParentFlowsAsUseInheritance {
+
+		@FlowInterface
+		public static interface ParentFlows {
+			void parentFlow();
+		}
+
+		public void getTemplateData(ParentFlows flows) {
+		}
+	}
+
+	public static class TemplateOnlyFlow {
+
+		@FlowInterface
+		public static interface Flows {
+			void flow();
+		}
+
+		public void getTemplateData(Flows flows) {
+		}
 	}
 
 	/**

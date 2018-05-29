@@ -17,9 +17,17 @@
  */
 package net.officefloor.woof.model.woof;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Set;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.model.change.Change;
+import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
+import net.officefloor.web.template.type.WebTemplateLoader;
+import net.officefloor.web.template.type.WebTemplateLoaderUtil;
 import net.officefloor.web.template.type.WebTemplateType;
 
 /**
@@ -73,6 +81,60 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 				"OUTPUT_GRAND_PARENT_F", "OUTPUT_PARENT_A", "OUTPUT_PARENT_B", "OUTPUT_PARENT_C", "OUTPUT_PARENT_D",
 				"OUTPUT_PARENT_E", "OUTPUT_PARENT_F");
 		assertOutputs(this.operations.getInheritableOutputNames(this.template));
+	}
+
+	/**
+	 * Ensure appropriate type based on inheritance.
+	 */
+	public void testInheritableType() throws Exception {
+
+		// Ensure can load type
+		WebTemplateLoader loader = WebTemplateArchitectEmployer
+				.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+
+		// Load configuration
+		WebTemplate template = loader.addTemplate(false, "/template", new StringReader("test"));
+
+		// Load the super templates
+		this.operations.loadSuperTemplates(template, this.parent, loader);
+
+		// Create the expected template type
+		SectionDesigner expected = WebTemplateLoaderUtil.createSectionDesigner();
+		expected.addSectionOutput("grandParentLink", null, false);
+		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
+
+		// Load the type and ensure as expected
+		WebTemplateType actual = loader.loadWebTemplateType(template);
+		WebTemplateLoaderUtil.validateWebTemplateType(expected, actual);
+	}
+
+	/**
+	 * Ensure appropriate type based on inheritance.
+	 */
+	public void testDeepInheritableType() throws Exception {
+
+		// Connect template to parent
+		this.operations.linkTemplateToSuperTemplate(this.template, this.parent).apply();
+
+		// Ensure can load type
+		WebTemplateLoader loader = WebTemplateArchitectEmployer
+				.employWebTemplateLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+
+		// Load configuration
+		WebTemplate template = loader.addTemplate(false, "/template", new StringReader("<!-- {:child} -->test"));
+
+		// Load the super templates
+		this.operations.loadSuperTemplates(template, this.template, loader);
+
+		// Create the expected template type
+		SectionDesigner expected = WebTemplateLoaderUtil.createSectionDesigner();
+		expected.addSectionOutput("grandParentLink", null, false);
+		expected.addSectionOutput("parentLink", null, false);
+		expected.addSectionOutput(IOException.class.getName(), IOException.class.getName(), true);
+
+		// Load the type and ensure as expected
+		WebTemplateType actual = loader.loadWebTemplateType(template);
+		WebTemplateLoaderUtil.validateWebTemplateType(expected, actual);
 	}
 
 	/**

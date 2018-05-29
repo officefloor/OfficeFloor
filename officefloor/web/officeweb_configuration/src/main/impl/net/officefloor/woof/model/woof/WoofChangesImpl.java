@@ -49,6 +49,8 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
+import net.officefloor.web.template.build.WebTemplate;
+import net.officefloor.web.template.type.WebTemplateLoader;
 import net.officefloor.web.template.type.WebTemplateOutputType;
 import net.officefloor.web.template.type.WebTemplateType;
 import net.officefloor.woof.template.WoofTemplateExtensionLoader;
@@ -1122,6 +1124,39 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return the output names
 		return outputNames;
+	}
+
+	@Override
+	public void loadSuperTemplates(WebTemplate template, WoofTemplateModel woofTemplate,
+			WebTemplateLoader templateLoader) {
+
+		// Function to obtain the super template model
+		Function<WoofTemplateModel, WoofTemplateModel> getSuperTemplate = (child) -> {
+			WoofTemplateModel superTemplate = null;
+			WoofTemplateToSuperWoofTemplateModel conn = child.getSuperWoofTemplate();
+			if (conn != null) {
+				superTemplate = conn.getSuperWoofTemplate();
+			}
+			return superTemplate;
+		};
+
+		// Load the woof super templates
+		WoofTemplateModel superTemplateModel = getSuperTemplate.apply(woofTemplate);
+		while (superTemplateModel != null) {
+
+			// Create template for super template
+			WebTemplate superTemplate = templateLoader.addTemplate(superTemplateModel.getIsTemplateSecure(),
+					superTemplateModel.getApplicationPath(), superTemplateModel.getTemplateLocation());
+
+			// Load as the super template
+			template.setSuperTemplate(superTemplate);
+
+			// Make super template current for next super template
+			template = superTemplate;
+
+			// Obtain the further super template
+			superTemplateModel = getSuperTemplate.apply(superTemplateModel);
+		}
 	}
 
 	@Override

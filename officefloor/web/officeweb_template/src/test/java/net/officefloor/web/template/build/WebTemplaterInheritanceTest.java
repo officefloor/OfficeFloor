@@ -76,8 +76,8 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure that first section is not overridden unless provided with override
-	 * prefix. The default first child section is considered a comment section,
-	 * as typical overriding should occur within the body.
+	 * prefix. The default first child section is considered a comment section, as
+	 * typical overriding should occur within the body.
 	 */
 	public void testDefaultFirstSectionIsCommentSection() {
 		this.doTest(new String[] { "template" }, new String[] { "template" }, "p:template");
@@ -123,9 +123,9 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure that allow parent template to be re-ordered without requiring
-	 * changes to child inheritance. This allows parent sections to be out of
-	 * order to the child overriding sections.
+	 * Ensure that allow parent template to be re-ordered without requiring changes
+	 * to child inheritance. This allows parent sections to be out of order to the
+	 * child overriding sections.
 	 */
 	public void testOverrideInDifferentOrder() {
 		this.doTest(new String[] { "first", "third", "second", "fourth" },
@@ -160,8 +160,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	 *            Child {@link ParsedTemplateSection} names.
 	 * @param resultingSections
 	 *            Resulting {@link ParsedTemplateSection} contents. Allows to
-	 *            distinguish between parent and child by same name for
-	 *            inheritance.
+	 *            distinguish between parent and child by same name for inheritance.
 	 */
 	private void doTest(String[] parentSectionNames, String[] childSectionNames, String... resultingSections) {
 
@@ -179,10 +178,88 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
 			});
 			compile.web((context) -> {
-				WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(context.getWebArchitect(),
-						context.getOfficeArchitect(), context.getOfficeSourceContext());
+				WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(
+						context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
 				WebTemplate parent = templater.addTemplate(false, "/parent", new StringReader(parentContent));
 				WebTemplate child = templater.addTemplate(false, "/child", new StringReader(childContent));
+				child.setSuperTemplate(parent);
+				templater.informWebArchitect();
+			});
+			officeFloor = compile.compileAndOpenOfficeFloor();
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+
+		// Request child template for inheritance
+		MockHttpResponse response = server.value.send(MockHttpServer.mockRequest("/child"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+
+		// Ensure correct content from inheritance
+		String expected = createExpectedTemplateResult(resultingSections);
+		assertEquals("Incorrect resulting content", expected, response.getEntity(null));
+
+		// Ensure close OfficeFloor
+		try {
+			officeFloor.closeOfficeFloor();
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+	}
+
+	/**
+	 * Ensure can override the default first section.
+	 */
+	public void testOverrideDefaultFirstSectionOfGrandParent() {
+		this.doTest(new String[] { "template" }, new String[] { ":template" }, new String[] { ":template" },
+				"c:template");
+	}
+
+	/**
+	 * Ensure can override the default first section.
+	 */
+	public void testParentOverrideGrandParent() {
+		this.doTest(new String[] { "template", "override" }, new String[] { ":override", "section" },
+				new String[] { ":section" }, "g:template p:override c:section");
+	}
+
+	/**
+	 * Undertakes grand parent inheritance test.
+	 * 
+	 * @param grandParentSectionNames
+	 *            Grand parent {@link ParsedTemplateSection} names.
+	 * @param parentSectionNames
+	 *            Parent {@link ParsedTemplateSection} names.
+	 * @param childSectionNames
+	 *            Child {@link ParsedTemplateSection} names.
+	 * @param resultingSections
+	 *            Resulting {@link ParsedTemplateSection} contents. Allows to
+	 *            distinguish between parent and child by same name for inheritance.
+	 */
+	private void doTest(String[] grandParentSectionNames, String[] parentSectionNames, String[] childSectionNames,
+			String... resultingSections) {
+
+		// Create the content
+		String grandParentContent = createMockTemplateContent(grandParentSectionNames, "g:");
+		String parentContent = createMockTemplateContent(parentSectionNames, "p:");
+		String childContent = createMockTemplateContent(childSectionNames, "c:");
+
+		// Create the server
+		Closure<MockHttpServer> server = new Closure<>();
+		OfficeFloor officeFloor;
+		try {
+			WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+			compile.officeFloor((context) -> {
+				server.value = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+			});
+			compile.web((context) -> {
+				WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(
+						context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+				WebTemplate grandParnt = templater.addTemplate(false, "/grandparent",
+						new StringReader(grandParentContent));
+				WebTemplate parent = templater.addTemplate(false, "/parent", new StringReader(parentContent));
+				WebTemplate child = templater.addTemplate(false, "/child", new StringReader(childContent));
+				parent.setSuperTemplate(grandParnt);
 				child.setSuperTemplate(parent);
 				templater.informWebArchitect();
 			});

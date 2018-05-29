@@ -5,7 +5,7 @@
 	</http-continuations>
 
 	<templates>
-		<template path="/grandparent" location="example/GrandParent.ofp">
+		<template path="/grandparent" location="net/officefloor/woof/model/woof/TestInheritance/GrandParent.ofp">
 			<output name="OUTPUT_GRAND_PARENT_A" />
 			<output name="OUTPUT_GRAND_PARENT_B" />
 			<output name="OUTPUT_GRAND_PARENT_C" />
@@ -19,7 +19,7 @@
 			<output name="OUTPUT_PARENT_E" />
 			<output name="OUTPUT_PARENT_F" />
 		</template>
-		<template path="/parent" location="example/Parent.ofp">
+		<template path="/parent" location="net/officefloor/woof/model/woof/TestInheritance/Parent.ofp">
 			<extends template="/grandparent" />
 			<output name="OUTPUT_PARENT_A">
 				<template path="/parent" />
