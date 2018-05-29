@@ -376,6 +376,12 @@ public class WoofTemplateItem extends
 					template.setLinkSecure(secure.linkName, secure.isSecure);
 				}
 
+				// Load the super templates (if model)
+				WoofTemplateModel templateModel = context.getModel();
+				if (templateModel != null) {
+					context.getOperations().loadSuperTemplates(template, templateModel, loader);
+				}
+
 				// Load the type
 				item.type = loader.loadWebTemplateType(template);
 
@@ -387,7 +393,7 @@ public class WoofTemplateItem extends
 		}).add((builder, context) -> {
 			builder.apply("Add", (item) -> {
 
-				// TODO provide handling
+				// TODO provide configuration of extensions
 				WoofTemplateExtension[] extensions = null;
 
 				// Add template
@@ -406,8 +412,10 @@ public class WoofTemplateItem extends
 		}).refactor((builder, context) -> {
 			builder.apply("Refactor", (item) -> {
 
-				// TODO provide handling of output mappings
-				Set<String> inherited = context.getOperations().getInheritableOutputNames(context.getModel());
+				// TODO provide handling of inherited output mappings
+				Set<String> inherited = null; // context.getOperations().getInheritableOutputNames(context.getModel());
+
+				// TODO provide configuration of extensions
 				WoofTemplateExtension[] extensions = null;
 
 				// Refactor template

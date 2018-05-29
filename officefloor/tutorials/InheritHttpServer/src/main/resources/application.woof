@@ -6,11 +6,17 @@
   <templates>
     <template path="/child" location="child.woof.html" class="net.officefloor.tutorial.inherithttpserver.ChildLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="190" y="204">
       <extends template="/parent"/>
+      <output name="contact" argument-type="">
+        <template path="/contact"/>
+      </output>
     </template>
     <template path="/contact" location="contact.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="362" y="114">
     </template>
     <template path="/grandchild" location="grandchild.woof.html" class="net.officefloor.tutorial.inherithttpserver.GrandChildLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="186" y="300">
       <extends template="/child"/>
+      <output name="contact" argument-type="">
+        <template path="/contact"/>
+      </output>
     </template>
     <template path="/parent" location="parent.woof.html" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="184" y="89">
       <output name="contact" argument-type="">
