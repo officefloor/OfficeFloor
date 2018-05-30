@@ -29,7 +29,7 @@ public interface AsynchronousOperation<T extends Throwable> {
 	/**
 	 * Undertakes the asynchronous operation.
 	 * 
-	 * @throws E
+	 * @throws T
 	 *             Possible {@link Escalation}.
 	 */
 	void run() throws T;

@@ -37,8 +37,8 @@ public interface FunctionBuilder<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Specifies the {@link Team} by its {@link Office} registered name that
-	 * that is responsible for this node.
+	 * Specifies the {@link Team} by its {@link Office} registered name that that is
+	 * responsible for this node.
 	 * <p>
 	 * Should this not be specified, any {@link Team} will be used.
 	 * 
@@ -48,14 +48,13 @@ public interface FunctionBuilder<F extends Enum<F>> {
 	void setResponsibleTeam(String officeTeamName);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
-	 * of the {@link Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
+	 * the {@link Flow}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow}.
 	 * @param functionName
-	 *            Name of the initial {@link ManagedFunction} for the
-	 *            {@link Flow}.
+	 *            Name of the initial {@link ManagedFunction} for the {@link Flow}.
 	 * @param argumentType
 	 *            Type of argument passed to the instigated {@link Flow}. May be
 	 *            <code>null</code> to indicate no argument.
@@ -66,14 +65,13 @@ public interface FunctionBuilder<F extends Enum<F>> {
 	void linkFlow(F key, String functionName, Class<?> argumentType, boolean isSpawnThreadState);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
-	 * of the {@link Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
+	 * the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
 	 * @param functionName
-	 *            Name of the initial {@link ManagedFunction} for the
-	 *            {@link Flow}.
+	 *            Name of the initial {@link ManagedFunction} for the {@link Flow}.
 	 * @param argumentType
 	 *            Type of argument passed to the instigated {@link Flow}. May be
 	 *            <code>null</code> to indicate no argument.
@@ -99,8 +97,6 @@ public interface FunctionBuilder<F extends Enum<F>> {
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction} to handle the
 	 *            {@link Escalation}.
-	 * 
-	 * @see #addEscalation(Class, String, String)
 	 */
 	void addEscalation(Class<? extends Throwable> typeOfCause, String functionName);
 

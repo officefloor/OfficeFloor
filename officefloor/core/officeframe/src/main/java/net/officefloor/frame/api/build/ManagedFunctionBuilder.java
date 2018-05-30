@@ -25,6 +25,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -43,10 +44,10 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * This is exposed as is on the {@link FunctionManager} interface for this
 	 * {@link ManagedFunction} to allow reflective:
 	 * <ol>
-	 * <li>identification of this {@link ManagedFunction} (e.g. can check on
-	 * type of this object)</li>
-	 * <li>means to trigger functionality on this {@link ManagedFunction} (e.g.
-	 * can expose functionality to be invoked)</li>
+	 * <li>identification of this {@link ManagedFunction} (e.g. can check on type of
+	 * this object)</li>
+	 * <li>means to trigger functionality on this {@link ManagedFunction} (e.g. can
+	 * expose functionality to be invoked)</li>
 	 * </ol>
 	 * 
 	 * @param annotation
@@ -103,15 +104,20 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	/**
 	 * Adds {@link Administration} to be undertaken before this
 	 * {@link ManagedFunction}.
-	 * 
+	 *
+	 * @param <E>
+	 *            Extension type.
+	 * @param <f>
+	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
 	 * @param administrationName
 	 *            Name of the {@link Administration}.
 	 * @param extension
 	 *            Extension type for {@link Administration}.
 	 * @param administrationFactory
 	 *            {@link AdministrationFactory}.
-	 * @return {@link AdministrationBuilder} to build the
-	 *         {@link Administration}.
+	 * @return {@link AdministrationBuilder} to build the {@link Administration}.
 	 */
 	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preAdminister(String administrationName,
 			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);
@@ -120,14 +126,19 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * Adds {@link Administration} to be undertaken after this
 	 * {@link ManagedFunction}.
 	 * 
+	 * @param <E>
+	 *            Extension type.
+	 * @param <f>
+	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
 	 * @param administrationName
 	 *            Name of the {@link Administration}.
 	 * @param extension
 	 *            Extension type for {@link Administration}.
 	 * @param administrationFactory
 	 *            {@link AdministrationFactory}.
-	 * @return {@link AdministrationBuilder} to build the
-	 *         {@link Administration}.
+	 * @return {@link AdministrationBuilder} to build the {@link Administration}.
 	 */
 	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> postAdminister(String administrationName,
 			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);
@@ -146,8 +157,8 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * <li>enforced when either a {@link ManagedFunction} does not require the
 	 * {@link Governance} or the {@link ThreadState} completes.
 	 * <li>
-	 * <li>disregarded when an escalation occurs to a {@link ManagedFunction}
-	 * not requiring the {@link Governance}. Note that this does allow the
+	 * <li>disregarded when an escalation occurs to a {@link ManagedFunction} not
+	 * requiring the {@link Governance}. Note that this does allow the
 	 * {@link Governance} to stay active should the {@link Escalation}
 	 * {@link ManagedFunction} require the {@link Governance}.</li>
 	 * <li>Manually managed by an {@link Administration}</li>
@@ -170,11 +181,11 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * </ol>
 	 * 
 	 * @param functionManagedObjectName
-	 *            Name of the {@link ManagedObject} to be referenced locally by
-	 *            this {@link ManagedFunction}.
+	 *            Name of the {@link ManagedObject} to be referenced locally by this
+	 *            {@link ManagedFunction}.
 	 * @param officeManagedObjectName
-	 *            Name of the {@link ManagedObject} referenced locally within
-	 *            the {@link Office}.
+	 *            Name of the {@link ManagedObject} referenced locally within the
+	 *            {@link Office}.
 	 * @return {@link DependencyMappingBuilder}.
 	 */
 	DependencyMappingBuilder addManagedObject(String functionManagedObjectName, String officeManagedObjectName);

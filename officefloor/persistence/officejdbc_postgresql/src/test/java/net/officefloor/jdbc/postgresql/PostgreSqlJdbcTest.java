@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.messages.Container;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
 import com.spotify.docker.client.messages.HostConfig;
@@ -89,27 +90,42 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
-		// Start PostgreSQL
-		System.out.println();
-		System.out.println("Starting PostgreSQL");
+		final String IMAGE_NAME = "postgres:latest";
+		final String CONTAINER_NAME = "officefloor_postgres";
+
+		// Create the docker client
 		this.docker = DefaultDockerClient.fromEnv().build();
-		pullDockerImage("postgres:latest", this.docker);
 
-		// Bind container port to host port
-		final String[] ports = { "5432" };
-		final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-		for (String port : ports) {
-			portBindings.put(port, Arrays.asList(PortBinding.of("0.0.0.0", port)));
+		// Determine if container already running
+		for (Container container : this.docker.listContainers()) {
+			for (String name : container.names()) {
+				if (name.equals("/" + CONTAINER_NAME)) {
+					this.postgresContainerId = container.id();
+				}
+			}
 		}
-		final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-		final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig)
-				.image("postgres:latest").exposedPorts(ports).env("POSTGRES_USER=test", "POSTGRES_PASSWORD=test")
-				.build();
 
-		// Start the container
-		final ContainerCreation creation = docker.createContainer(containerConfig, "officefloor_postgres");
-		this.postgresContainerId = creation.id();
-		this.docker.startContainer(this.postgresContainerId);
+		// Start PostgreSQL (if not running)
+		if (this.postgresContainerId == null) {
+			System.out.println();
+			System.out.println("Starting PostgreSQL");
+			pullDockerImage(IMAGE_NAME, this.docker);
+
+			// Bind container port to host port
+			final String[] ports = { "5432" };
+			final Map<String, List<PortBinding>> portBindings = new HashMap<>();
+			for (String port : ports) {
+				portBindings.put(port, Arrays.asList(PortBinding.of("0.0.0.0", port)));
+			}
+			final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
+			final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image(IMAGE_NAME)
+					.exposedPorts(ports).env("POSTGRES_USER=test", "POSTGRES_PASSWORD=test").build();
+
+			// Start the container
+			final ContainerCreation creation = docker.createContainer(containerConfig, CONTAINER_NAME);
+			this.postgresContainerId = creation.id();
+			this.docker.startContainer(this.postgresContainerId);
+		}
 
 		// Run setup (now database available to connect)
 		super.setUp();
@@ -145,9 +161,8 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected void cleanDatabase(Connection connection) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
-			// New docker image each time, so always clean
-			// Just create table to ensure connection up
-			statement.executeUpdate("CREATE TABLE RUNNING ( ID INT)");
+			statement.executeQuery("SELECT * FROM information_schema.tables");
+			statement.executeUpdate("DROP TABLE IF EXISTS OFFICE_FLOOR_JDBC_TEST");
 		}
 	}
 

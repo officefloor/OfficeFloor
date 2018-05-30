@@ -36,6 +36,8 @@ public class LoadServiceError extends AbstractSourceError {
 	 * 
 	 * @param serviceFactoryClassName
 	 *            {@link ServiceFactory} {@link Class} name that failed to load.
+	 * @param failure
+	 *            Cause.
 	 */
 	public LoadServiceError(String serviceFactoryClassName, Throwable failure) {
 		super("Failed to create service from " + serviceFactoryClassName, failure);

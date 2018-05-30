@@ -20,10 +20,15 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Enables building an {@link Administration}.
  * 
+ * @param <F>
+ *            {@link Flow} key type.
+ * @param <G>
+ *            {@link Governance} key type.
  * @author Daniel Sagenschneider
  */
 public interface AdministrationBuilder<F extends Enum<F>, G extends Enum<G>> extends FunctionBuilder<F> {
@@ -43,8 +48,6 @@ public interface AdministrationBuilder<F extends Enum<F>, G extends Enum<G>> ext
 	/**
 	 * Links a {@link Governance}.
 	 * 
-	 * @param <G>
-	 *            {@link Governance} key type.
 	 * @param key
 	 *            Key to identify the {@link Governance}.
 	 * @param governanceName

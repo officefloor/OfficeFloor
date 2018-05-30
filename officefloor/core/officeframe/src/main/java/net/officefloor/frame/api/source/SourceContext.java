@@ -32,12 +32,11 @@ public interface SourceContext extends SourceProperties {
 	 * <p>
 	 * Indicates if just loading as a type.
 	 * <p>
-	 * When loading as a type the configuration provided is disregarded. This
-	 * allows sources to know when to load singleton configuration that will
-	 * take effect.
+	 * When loading as a type the configuration provided is disregarded. This allows
+	 * sources to know when to load singleton configuration that will take effect.
 	 * <p>
-	 * Whether this is <code>true</code> or <code>false</code> the resulting
-	 * type should be the same.
+	 * Whether this is <code>true</code> or <code>false</code> the resulting type
+	 * should be the same.
 	 * 
 	 * @return <code>true</code> if loading as a type.
 	 */
@@ -48,8 +47,8 @@ public interface SourceContext extends SourceProperties {
 	 * 
 	 * @param name
 	 *            Name of the {@link Class}.
-	 * @return {@link Class} or <code>null</code> if the {@link Class} can not
-	 *         be found.
+	 * @return {@link Class} or <code>null</code> if the {@link Class} can not be
+	 *         found.
 	 */
 	Class<?> loadOptionalClass(String name);
 
@@ -82,14 +81,20 @@ public interface SourceContext extends SourceProperties {
 	 *            Location of the resource.
 	 * @return {@link InputStream} to the contents of the resource.
 	 * @throws UnknownResourceError
-	 *             If resource is not found. Let this propagate as OfficeFloor
-	 *             will handle it.
+	 *             If resource is not found. Let this propagate as OfficeFloor will
+	 *             handle it.
 	 */
 	InputStream getResource(String location) throws UnknownResourceError;
 
 	/**
 	 * Loads a single service.
 	 * 
+	 * @param <S>
+	 *            Service type
+	 * @param <F>
+	 *            {@link ServiceFactory} type to create service.
+	 * @param <D>
+	 *            Default {@link ServiceFactory} type.
 	 * @param serviceFactoryType
 	 *            Type of {@link ServiceFactory}.
 	 * @param defaultServiceFactory
@@ -98,8 +103,8 @@ public interface SourceContext extends SourceProperties {
 	 *            configured).
 	 * @return Service.
 	 * @throws UnknownServiceError
-	 *             If service is not configured and no default provided. Will
-	 *             also be thrown if more than one service is configured.
+	 *             If service is not configured and no default provided. Will also
+	 *             be thrown if more than one service is configured.
 	 * @throws LoadServiceError
 	 *             If fails to load the service.
 	 */
@@ -108,22 +113,29 @@ public interface SourceContext extends SourceProperties {
 
 	/**
 	 * Optionally loads a single service.
-	 * 
+	 *
+	 * @param <S>
+	 *            Service type
+	 * @param <F>
+	 *            {@link ServiceFactory} type to create service.
 	 * @param serviceFactoryType
 	 *            Type of {@link ServiceFactory}.
-	 * @param defaultServiceFactory
-	 *            Default {@link ServiceFactory} implementation. May be
-	 *            <code>null</code> for service to optional.
 	 * @return Service or <code>null</code> if no service configured.
 	 * @throws LoadServiceError
-	 *             If fails to load the service or {@link ServiceLoader} finds
-	 *             more than one service configured.
+	 *             If fails to load the service or {@link ServiceLoader} finds more
+	 *             than one service configured.
 	 */
 	<S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType) throws LoadServiceError;
 
 	/**
 	 * Loads multiple services.
 	 * 
+	 * @param <S>
+	 *            Service type
+	 * @param <F>
+	 *            {@link ServiceFactory} type to create service.
+	 * @param <D>
+	 *            Default {@link ServiceFactory} type.
 	 * @param serviceFactoryType
 	 *            Type of {@link ServiceFactory}.
 	 * @param defaultServiceFactory
@@ -142,11 +154,15 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Optionally loads multiple services.
 	 * 
+	 * @param <S>
+	 *            Service type
+	 * @param <F>
+	 *            {@link ServiceFactory} type to create service.
 	 * @param serviceFactoryType
 	 *            Type of {@link ServiceFactory}.
-	 * @return {@link Iterable} over the services. May be no entries available.
-	 *         The {@link Iterable} may also throw {@link LoadServiceError} if
-	 *         fails to create next service.
+	 * @return {@link Iterable} over the services. May be no entries available. The
+	 *         {@link Iterable} may also throw {@link LoadServiceError} if fails to
+	 *         create next service.
 	 * @throws LoadServiceError
 	 *             If fails to load a service.
 	 */
@@ -159,8 +175,7 @@ public interface SourceContext extends SourceProperties {
 	 * <p>
 	 * This is only provided in specific cases where a {@link ClassLoader} is
 	 * required (such as creating a {@link Proxy}). The other methods of this
-	 * interface should be used in preference to the returned
-	 * {@link ClassLoader}.
+	 * interface should be used in preference to the returned {@link ClassLoader}.
 	 * 
 	 * @return {@link ClassLoader}.
 	 */

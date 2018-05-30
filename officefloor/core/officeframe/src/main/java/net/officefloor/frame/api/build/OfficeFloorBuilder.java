@@ -107,24 +107,25 @@ public interface OfficeFloorBuilder {
 			ManagedObjectSource<O, F> managedObjectSource);
 
 	/**
-	 * Adds a {@link Team} which will execute {@link FunctionState} instances
-	 * within this {@link OfficeFloor}.
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
+	 * this {@link OfficeFloor}.
 	 * 
 	 * @param <TS>
 	 *            {@link TeamSource} type.
 	 * @param teamName
 	 *            Name to register the {@link Team} under.
 	 * @param teamSourceClass
-	 *            {@link TeamSource} {@link Class} name to source the
-	 *            {@link Team}.
+	 *            {@link TeamSource} {@link Class} name to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
 	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass);
 
 	/**
-	 * Adds a {@link Team} which will execute {@link FunctionState} instances
-	 * within the {@link OfficeFloor}.
-	 * 
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
+	 * the {@link OfficeFloor}.
+	 *
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamName
 	 *            Name to register the {@link Team} under.
 	 * @param teamSource
@@ -140,6 +141,8 @@ public interface OfficeFloorBuilder {
 	 * This need not be specified, but is available to override the default
 	 * {@link Team}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamSourceClass
 	 *            {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
@@ -168,11 +171,11 @@ public interface OfficeFloorBuilder {
 	 * Builds the {@link OfficeFloor}.
 	 * 
 	 * @param issuesListener
-	 *            {@link OfficeFloorIssues} to listen for issues in constructing
-	 *            the {@link OfficeFloor}.
-	 * @return Built {@link OfficeFloor} if successfully built, or
-	 *         <code>null</code> if could not construct {@link OfficeFloor} with
-	 *         reasons passed to the {@link OfficeFloorIssues}.
+	 *            {@link OfficeFloorIssues} to listen for issues in constructing the
+	 *            {@link OfficeFloor}.
+	 * @return Built {@link OfficeFloor} if successfully built, or <code>null</code>
+	 *         if could not construct {@link OfficeFloor} with reasons passed to the
+	 *         {@link OfficeFloorIssues}.
 	 */
 	OfficeFloor buildOfficeFloor(OfficeFloorIssues issuesListener);
 

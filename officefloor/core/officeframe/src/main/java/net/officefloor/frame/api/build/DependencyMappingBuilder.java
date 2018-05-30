@@ -22,6 +22,7 @@ import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * <p>
@@ -49,8 +50,7 @@ public interface DependencyMappingBuilder {
 	<O extends Enum<O>> void mapDependency(O key, String scopeManagedObjectName);
 
 	/**
-	 * Specifies the {@link ManagedObject} for the index identifying the
-	 * dependency.
+	 * Specifies the {@link ManagedObject} for the index identifying the dependency.
 	 * 
 	 * @param index
 	 *            Index identifying the dependency.
@@ -71,15 +71,20 @@ public interface DependencyMappingBuilder {
 	/**
 	 * Adds {@link Administration} to be undertaken before this
 	 * {@link ManagedObject} is loaded.
-	 * 
+	 *
+	 * @param <E>
+	 *            Extension type.
+	 * @param <f>
+	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
 	 * @param administrationName
 	 *            Name of the {@link Administration}.
 	 * @param extension
 	 *            Extension type for {@link Administration}.
 	 * @param administrationFactory
 	 *            {@link AdministrationFactory}.
-	 * @return {@link AdministrationBuilder} to build the
-	 *         {@link Administration}.
+	 * @return {@link AdministrationBuilder} to build the {@link Administration}.
 	 */
 	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preLoadAdminister(String administrationName,
 			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);

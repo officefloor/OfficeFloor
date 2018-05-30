@@ -18,7 +18,6 @@
 package net.officefloor.frame.api.administration;
 
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
  * Manager over a particular {@link Governance}.
@@ -29,22 +28,16 @@ public interface GovernanceManager {
 
 	/**
 	 * Activates the {@link Governance}.
-	 * 
-	 * @return {@link FunctionState} to activate the {@link Governance}.
 	 */
 	void activateGovernance();
 
 	/**
 	 * Enforces the {@link Governance}.
-	 * 
-	 * @return {@link FunctionState} to enforce the {@link Governance}.
 	 */
 	void enforceGovernance();
 
 	/**
 	 * Disregarding the {@link Governance}.
-	 * 
-	 * @return {@link FunctionState} to disregard the {@link Governance}.
 	 */
 	void disregardGovernance();
 
