@@ -207,7 +207,7 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 		/**
 		 * Creates the {@link AdministrationParameterFactory}.
 		 * 
-		 * @param methodName
+		 * @param functionName
 		 *            Name of the {@link Method}.
 		 * @param parameterType
 		 *            Parameter type.
@@ -218,14 +218,12 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 		 * @param governanceSequence
 		 *            {@link Sequence} for the {@link Governance}.
 		 * @param extensionInterfaceConsumer
-		 *            {@link Consumer} to optionally be provided the extension
-		 *            type.
-		 * @return {@link AdministrationParameterFactory} or <code>null</code>
-		 *         if not appropriate for this to manufacture a
+		 *            {@link Consumer} to optionally be provided the extension type.
+		 * @return {@link AdministrationParameterFactory} or <code>null</code> if not
+		 *         appropriate for this to manufacture a
 		 *         {@link AdministrationParameterFactory}.
 		 * @throws Exception
-		 *             If fails to create the
-		 *             {@link AdministrationParameterFactory}.
+		 *             If fails to create the {@link AdministrationParameterFactory}.
 		 */
 		AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,

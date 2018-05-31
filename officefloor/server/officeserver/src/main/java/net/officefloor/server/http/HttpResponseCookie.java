@@ -31,8 +31,8 @@ import java.util.function.Consumer;
 public interface HttpResponseCookie {
 
 	/**
-	 * Value of <code>Max-Age</code> indicating no age expire and should expire
-	 * with the browser session.
+	 * Value of <code>Max-Age</code> indicating no age expire and should expire with
+	 * the browser session.
 	 */
 	public static final long BROWSER_SESSION_MAX_AGE = -1;
 
@@ -78,8 +78,8 @@ public interface HttpResponseCookie {
 	/**
 	 * Obtains the maximum age in seconds.
 	 * 
-	 * @return Maximum age in seconds. Will be {@link #BROWSER_SESSION_MAX_AGE}
-	 *         if not specified.
+	 * @return Maximum age in seconds. Will be {@link #BROWSER_SESSION_MAX_AGE} if
+	 *         not specified.
 	 */
 	long getMaxAge();
 
@@ -132,10 +132,10 @@ public interface HttpResponseCookie {
 	 * <p>
 	 * Indicates if only communicated across secure a secure connection.
 	 * <p>
-	 * Note that, as per <a href="https://tools.ietf.org/html/rfc6265">RFC
-	 * 6265</a>, this does not guarantee the security of the cookie contents.
-	 * Cookies, as per the specification, are inherently insecure (such as any
-	 * information sent to the client).
+	 * Note that, as per <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>,
+	 * this does not guarantee the security of the cookie contents. Cookies, as per
+	 * the specification, are inherently insecure (such as any information sent to
+	 * the client).
 	 * 
 	 * @return <code>true</code> to only communicate this Cookie across a secure
 	 *         connection.
@@ -143,13 +143,11 @@ public interface HttpResponseCookie {
 	boolean isSecure();
 
 	/**
-	 * Flags whether the client is only to send the Cookie over a secure
-	 * connection.
+	 * Flags whether the client is only to send the Cookie over a secure connection.
 	 * 
 	 * @param isSecure
-	 *            <code>true</code> to request the client to only send this
-	 *            Cookie over a secure connection (assuming the client supports
-	 *            this).
+	 *            <code>true</code> to request the client to only send this Cookie
+	 *            over a secure connection (assuming the client supports this).
 	 * @return this.
 	 */
 	HttpResponseCookie setSecure(boolean isSecure);
@@ -163,13 +161,13 @@ public interface HttpResponseCookie {
 	boolean isHttpOnly();
 
 	/**
-	 * Indicates if only available over HTTP requests (and not, for example,
-	 * made available to JavaScript in the browser).
+	 * Indicates if only available over HTTP requests (and not, for example, made
+	 * available to JavaScript in the browser).
 	 * 
 	 * @param isHttpOnly
-	 *            <code>true</code> to request the client to only send this
-	 *            Cookie in HTTP requests, and not, for example, make available
-	 *            to JavaScript in the browser.
+	 *            <code>true</code> to request the client to only send this Cookie
+	 *            in HTTP requests, and not, for example, make available to
+	 *            JavaScript in the browser.
 	 * @return this.
 	 */
 	HttpResponseCookie setHttpOnly(boolean isHttpOnly);
@@ -178,8 +176,8 @@ public interface HttpResponseCookie {
 	 * <p>
 	 * Allows adding an extension.
 	 * <p>
-	 * The extensions are added as provided (separated by &apos;;&apos;) to the
-	 * end of the <code>Set-Cookie</code> {@link HttpHeader}.
+	 * The extensions are added as provided (separated by ';') to the end of the
+	 * <code>Set-Cookie</code> {@link HttpHeader}.
 	 * 
 	 * @param extension
 	 *            Extension.

@@ -58,13 +58,13 @@ public interface HttpServerImplementationContext {
 	 * <p>
 	 * Obtains the {@link SSLContext} to use for HTTPS.
 	 * <p>
-	 * Should the {@link HttpServer} be behind a Reverse Proxy providing SSL,
-	 * then this may be <code>null</code> if the Reverse Proxy is communicating
-	 * via non-secure HTTP.
+	 * Should the {@link HttpServer} be behind a Reverse Proxy providing SSL, then
+	 * this may be <code>null</code> if the Reverse Proxy is communicating via
+	 * non-secure HTTP.
 	 * 
 	 * @return {@link SSLContext} to use for HTTPS. May be <code>null</code> if
-	 *         behind Reverse Proxy handling SSL (with communication from
-	 *         Reverse Proxy over non-secure HTTP).
+	 *         behind Reverse Proxy handling SSL (with communication from Reverse
+	 *         Proxy over non-secure HTTP).
 	 */
 	SSLContext getSslContext();
 
@@ -78,6 +78,8 @@ public interface HttpServerImplementationContext {
 	/**
 	 * Obtains the {@link ExternalServiceInput}.
 	 * 
+	 * @param <M>
+	 *            {@link ManagedObject} type.
 	 * @param managedObjectType
 	 *            Type of the {@link ManagedObject}.
 	 * @param cleanupEscalationHandler
@@ -88,19 +90,18 @@ public interface HttpServerImplementationContext {
 			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
 
 	/**
-	 * Obtains the {@link OfficeFloorDeployer} to configure the
-	 * {@link HttpServer}.
+	 * Obtains the {@link OfficeFloorDeployer} to configure the {@link HttpServer}.
 	 * 
 	 * @return {@link OfficeFloorDeployer} to configure the {@link HttpServer}.
 	 */
 	OfficeFloorDeployer getOfficeFloorDeployer();
 
 	/**
-	 * Obtains the {@link OfficeFloorSourceContext} to obtain details to
-	 * configure the {@link HttpServerImplementation}.
+	 * Obtains the {@link OfficeFloorSourceContext} to obtain details to configure
+	 * the {@link HttpServerImplementation}.
 	 * 
-	 * @return {@link OfficeFloorSourceContext} to obtain details to configure
-	 *         the {@link HttpServerImplementation}.
+	 * @return {@link OfficeFloorSourceContext} to obtain details to configure the
+	 *         {@link HttpServerImplementation}.
 	 */
 	OfficeFloorSourceContext getOfficeFloorSourceContext();
 

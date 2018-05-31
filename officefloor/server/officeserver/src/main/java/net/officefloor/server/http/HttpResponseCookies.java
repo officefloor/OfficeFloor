@@ -30,14 +30,15 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 * <p>
 	 * Sets a {@link HttpResponseCookie}.
 	 * <p>
-	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
-	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
-	 * added for the name.
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated to
+	 * the value and returned. Otherwise a new {@link HttpResponseCookie} is added
+	 * for the name.
 	 * 
 	 * @param name
 	 *            Name.
 	 * @param value
 	 *            Value.
+	 * @return {@link HttpRequestCookie}.
 	 */
 	HttpResponseCookie setCookie(String name, String value);
 
@@ -45,9 +46,9 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 * <p>
 	 * Sets a {@link HttpResponseCookie}.
 	 * <p>
-	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
-	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
-	 * added for the name.
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated to
+	 * the value and returned. Otherwise a new {@link HttpResponseCookie} is added
+	 * for the name.
 	 * 
 	 * @param name
 	 *            Name.
@@ -65,9 +66,9 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 * <p>
 	 * Sets a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
 	 * <p>
-	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
-	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
-	 * added for the name.
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated to
+	 * the value and returned. Otherwise a new {@link HttpResponseCookie} is added
+	 * for the name.
 	 * <p>
 	 * This is typically used to update the Cookie with the client. For example,
 	 * expiring the Cookie to no longer be sent.
@@ -82,9 +83,9 @@ public interface HttpResponseCookies extends Iterable<HttpResponseCookie> {
 	 * <p>
 	 * Sets a {@link HttpResponseCookie} from a {@link HttpRequestCookie}.
 	 * <p>
-	 * If a {@link HttpResponseCookie} already exists by the name, it is updated
-	 * to the value and returned. Otherwise a new {@link HttpResponseCookie} is
-	 * added for the name.
+	 * If a {@link HttpResponseCookie} already exists by the name, it is updated to
+	 * the value and returned. Otherwise a new {@link HttpResponseCookie} is added
+	 * for the name.
 	 * 
 	 * @param cookie
 	 *            {@link HttpRequestCookie}

@@ -32,7 +32,8 @@ public abstract class AbstractConfigurerRunnable implements Runnable {
 	/**
 	 * Loads the configuration.
 	 * 
-	 * @return Configuration.
+	 * @param shell
+	 *            {@link Shell}.
 	 */
 	protected abstract void loadConfiguration(Shell shell);
 

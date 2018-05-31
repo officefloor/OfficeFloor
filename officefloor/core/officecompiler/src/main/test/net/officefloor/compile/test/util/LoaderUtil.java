@@ -33,6 +33,8 @@ public class LoaderUtil {
 	 * Asserts the arrays are of the same length, providing useful debug information
 	 * if not.
 	 * 
+	 * @param <T>
+	 *            Entry type.
 	 * @param message
 	 *            Message.
 	 * @param expected
@@ -49,7 +51,11 @@ public class LoaderUtil {
 	/**
 	 * Asserts the arrays are of the same length, providing useful debug information
 	 * if not.
-	 * 
+	 *
+	 * @param <E>
+	 *            Expected type.
+	 * @param <A>
+	 *            Actual type.
 	 * @param message
 	 *            Message.
 	 * @param expected

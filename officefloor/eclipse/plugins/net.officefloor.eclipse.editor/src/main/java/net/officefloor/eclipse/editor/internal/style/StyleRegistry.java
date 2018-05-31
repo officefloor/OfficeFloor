@@ -37,7 +37,7 @@ public interface StyleRegistry {
 	 * 
 	 * @param configurationPath
 	 *            Configuration path to the style.
-	 * @param stylesheet
+	 * @param stylesheetContent
 	 *            Style sheet content for the {@link IVisualPart} of the
 	 *            configuration item.
 	 * @return {@link ReadOnlyProperty} to the {@link URL} {@link String} of the

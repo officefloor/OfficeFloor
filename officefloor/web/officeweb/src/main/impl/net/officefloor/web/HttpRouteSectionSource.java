@@ -356,8 +356,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	 * 
 	 * @param isSecure
 	 *            Indicates to redirect to a secure port.
-	 * @param applicationPath
-	 *            Application path for the redirect.
+	 * @param routeInput
+	 *            {@link RouteInput} to redirect to.
 	 * @param parameterType
 	 *            Type of parameter passed to the redirect {@link ManagedFunction}
 	 *            to source values for constructing the path. May be

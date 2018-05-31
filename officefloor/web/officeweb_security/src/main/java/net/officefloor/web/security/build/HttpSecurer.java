@@ -36,7 +36,6 @@ public interface HttpSecurer {
 	 * 
 	 * @param securer
 	 *            {@link HttpOfficeSecurer}.
-	 * @return {@link HttpSecurer} to configure the {@link HttpOfficeSecurer}.
 	 */
 	void secure(HttpOfficeSecurer securer);
 

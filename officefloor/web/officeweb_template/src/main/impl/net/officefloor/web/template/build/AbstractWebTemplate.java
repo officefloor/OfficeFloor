@@ -29,7 +29,6 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.SourceIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
@@ -111,15 +110,13 @@ public abstract class AbstractWebTemplate implements WebTemplate {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param webTemplateSectionSoure
+	 * @param webTemplateSectionSource
 	 *            {@link WebTemplateSectionSource} instance to use.
 	 * @param isSecure
 	 *            Indicates if requires secure {@link ServerHttpConnection} to
 	 *            render the {@link WebTemplate}.
 	 * @param applicationPath
 	 *            Application path for the {@link WebTemplate}.
-	 * @param templateSection
-	 *            {@link OfficeSection} for the {@link WebTemplate}.
 	 * @param properties
 	 *            {@link PropertyList}.
 	 * @param sourceIssues

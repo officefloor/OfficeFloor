@@ -438,6 +438,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	/**
 	 * Ensure can send a single HTTP {@link ByteBuffer} response.
+	 * 
+	 * @throws Exception
+	 *             If test failuure.
 	 */
 	public void testSingleBufferRequest() throws Exception {
 		this.startHttpServer(BufferServicer.class);
@@ -446,6 +449,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	/**
 	 * Ensure can send a single HTTPS {@link ByteBuffer} response.
+	 * 
+	 * @throws Exception
+	 *             If test failuure.
 	 */
 	public void testSingleSecureBufferRequest() throws Exception {
 		this.startHttpServer(BufferServicer.class);
@@ -454,6 +460,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	/**
 	 * Ensure can send a single HTTP {@link FileBuffer} response.
+	 * 
+	 * @throws Exception
+	 *             If test failuure.
 	 */
 	public void testSingleFileRequest() throws Exception {
 		this.startHttpServer(FileServicer.class);
@@ -462,6 +471,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	/**
 	 * Ensure can send a single HTTPS {@link FileBuffer} response.
+	 * 
+	 * @throws Exception
+	 *             If test failuure.
 	 */
 	public void testSingleSecureFileRequest() throws Exception {
 		this.startHttpServer(FileServicer.class);
@@ -470,6 +482,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	/**
 	 * Ensure closes the {@link FileChannel} on write.
+	 * 
+	 * @throws Exception
+	 *             If test failuure.
 	 */
 	public void testSingleCloseFileRequest() throws Exception {
 		CLOSE_FILE = TemporaryFiles.getDefault().createTempFile("testSingleCloseFileRequest",
@@ -481,6 +496,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	/**
 	 * Ensure closes the {@link FileChannel} on write.
+	 * 
+	 * @throws Exception
+	 *             If test failuure.
 	 */
 	public void testSingleSecureCloseFileRequest() throws Exception {
 		CLOSE_FILE = TemporaryFiles.getDefault().createTempFile("testSingleSecureCloseFileRequest",

@@ -51,8 +51,8 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * <p>
 	 * This allows for convenient adding new {@link Node} instances to {@link Pane}.
 	 * 
-	 * @param pane
-	 *            {@link Pane}.
+	 * @param parent
+	 *            Parent {@link Pane}.
 	 * @param node
 	 *            {@link Node}.
 	 * @return Input {@link Node}

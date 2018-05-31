@@ -34,7 +34,6 @@ public interface SectionRepository {
 	 *            {@link SectionModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem} containing the {@link SectionModel}.
-	 * @return {@link SectionModel}.
 	 * @throws Exception
 	 *             If fails to retrieve the {@link SectionModel}.
 	 */

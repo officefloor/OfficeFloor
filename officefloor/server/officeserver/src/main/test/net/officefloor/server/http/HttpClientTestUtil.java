@@ -115,9 +115,6 @@ public class HttpClientTestUtil {
 	 * 
 	 * @param isSecure
 	 *            Indicate if require secure connection.
-	 * @param timeout
-	 *            Timeout in milliseconds. Non-positive number indicates no timeout
-	 *            (useful for debugging).
 	 * @return {@link CloseableHttpClient}.
 	 */
 	public static CloseableHttpClient createHttpClient(boolean isSecure) {
@@ -150,8 +147,6 @@ public class HttpClientTestUtil {
 	 * 
 	 * @param builder
 	 *            {@link HttpClientBuilder}.
-	 * 
-	 * @see #createTestServerSslContext()
 	 */
 	public static void configureHttps(HttpClientBuilder builder) {
 		try {

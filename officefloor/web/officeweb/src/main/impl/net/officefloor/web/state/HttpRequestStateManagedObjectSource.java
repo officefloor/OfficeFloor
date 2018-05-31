@@ -17,7 +17,6 @@
  */
 package net.officefloor.web.state;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,8 +79,6 @@ public class HttpRequestStateManagedObjectSource
 	 * 
 	 * @param momento
 	 *            Momento containing the state for the {@link HttpRequestState}.
-	 * @throws IOException
-	 *             If fails to import state.
 	 * @throws IllegalArgumentException
 	 *             If invalid momento.
 	 */

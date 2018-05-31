@@ -48,8 +48,7 @@ public class WritableHttpHeader implements HttpHeader {
 	private final HttpHeaderValue value;
 
 	/**
-	 * Next {@link WritableHttpHeader} to enable chaining together into linked
-	 * list.
+	 * Next {@link WritableHttpHeader} to enable chaining together into linked list.
 	 */
 	public WritableHttpHeader next = null;
 
@@ -105,9 +104,11 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Writes this {@link HttpHeader} to the {@link StreamBuffer}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
+	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
+	 *            instances.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 */

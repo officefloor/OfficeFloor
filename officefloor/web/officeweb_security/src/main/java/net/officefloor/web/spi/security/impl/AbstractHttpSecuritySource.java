@@ -164,7 +164,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 	protected abstract void loadMetaData(MetaDataContext<A, AC, C, O, F> context) throws Exception;
 
 	/**
-	 * Context for the {@link HttpSecuritySource#getMetaData()}.
+	 * Context for the {@link HttpSecuritySource#init(HttpSecuritySourceContext)}.
 	 */
 	public static interface MetaDataContext<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
@@ -222,8 +222,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		 *            {@link Enum} to identify the dependency.
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
-		 * @return {@link DependencyLabeller} to possibly label the required
-		 *         dependency.
+		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller addDependency(O key, Class<?> dependencyType);
 
@@ -233,8 +232,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		 * 
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
-		 * @return {@link DependencyLabeller} to possibly label the required
-		 *         dependency.
+		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller addDependency(Class<?> dependencyType);
 
@@ -250,8 +248,8 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the order
-		 * the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order the
+		 * {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.

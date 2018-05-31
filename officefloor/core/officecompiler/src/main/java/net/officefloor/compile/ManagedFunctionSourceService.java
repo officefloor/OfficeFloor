@@ -27,8 +27,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
  * {@link Class} alias by including the extension {@link ManagedFunctionSource}
  * jar on the class path.
  * <p>
- * {@link OfficeFloorCompiler#addWorkSourceAlias(String, Class)} will be invoked
- * for each found {@link ManagedFunctionSourceService}.
+ * {@link OfficeFloorCompiler#addManagedFunctionSourceAlias(String, Class)} will
+ * be invoked for each found {@link ManagedFunctionSourceService}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -39,6 +39,7 @@ public interface SupplierSourceContext extends SourceContext {
 	 *            Type of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
+	 * @return {@link SuppliedManagedObjectSource}
 	 */
 	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
 			ManagedObjectSource<D, F> managedObjectSource);
@@ -56,6 +57,7 @@ public interface SupplierSourceContext extends SourceContext {
 	 *            Type of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
+	 * @return {@link SuppliedManagedObjectSource}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
 			Class<?> type, ManagedObjectSource<D, F> managedObjectSource);

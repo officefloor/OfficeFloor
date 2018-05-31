@@ -784,7 +784,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeFunctionToPostAdministrationModel}.
 	 */
 	Change<OfficeFunctionToPostAdministrationModel> removeOfficeFunctionToPostAdministration(
-			OfficeFunctionToPostAdministrationModel officeFunctionToAdministrationDuty);
+			OfficeFunctionToPostAdministrationModel officeFunctionToAdministration);
 
 	/**
 	 * Links the {@link OfficeEscalationModel} to the

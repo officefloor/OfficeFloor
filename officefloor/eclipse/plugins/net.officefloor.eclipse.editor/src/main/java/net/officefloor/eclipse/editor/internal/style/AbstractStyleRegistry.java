@@ -60,8 +60,8 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	/**
 	 * Creates the {@link URLStreamHandler}.
 	 * 
-	 * @param protocol
-	 *            Protocol.
+	 * @param url
+	 *            {@link URL} to open.
 	 * @return {@link URLStreamHandler}.
 	 */
 	public static URLConnection openConnection(URL url) throws IOException {

@@ -31,10 +31,9 @@ public interface ManagedFunctionSource {
 	 * Obtains the {@link ManagedFunctionSourceSpecification} for this
 	 * {@link ManagedFunctionSource}.
 	 * <p>
-	 * This enables the {@link ManagedFunctionSourceContext} to be populated
-	 * with the necessary details as per this
-	 * {@link ManagedFunctionSourceSpecification} in loading the
-	 * {@link FunctionNamespaceType}.
+	 * This enables the {@link ManagedFunctionSourceContext} to be populated with
+	 * the necessary details as per this {@link ManagedFunctionSourceSpecification}
+	 * in loading the {@link FunctionNamespaceType}.
 	 * 
 	 * @return {@link ManagedFunctionSourceSpecification}.
 	 */
@@ -44,13 +43,12 @@ public interface ManagedFunctionSource {
 	 * Sources the {@link FunctionNamespaceType} by populating it via the input
 	 * {@link FunctionNamespaceBuilder}.
 	 * 
-	 * @param namespaceTypeBuilder
+	 * @param functionNamespaceTypeBuilder
 	 *            {@link FunctionNamespaceBuilder} to be populated with the
-	 *            <code>type definition</code> of the
-	 *            {@link ManagedFunctionSource}.
+	 *            <code>type definition</code> of the {@link ManagedFunctionSource}.
 	 * @param context
-	 *            {@link ManagedFunctionSourceContext} to source details to
-	 *            populate the {@link FunctionNamespaceBuilder}.
+	 *            {@link ManagedFunctionSourceContext} to source details to populate
+	 *            the {@link FunctionNamespaceBuilder}.
 	 * @throws Exception
 	 *             If fails to populate the {@link FunctionNamespaceBuilder}.
 	 */

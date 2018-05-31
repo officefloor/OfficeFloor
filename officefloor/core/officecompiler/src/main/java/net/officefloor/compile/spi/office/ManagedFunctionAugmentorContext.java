@@ -47,8 +47,8 @@ public interface ManagedFunctionAugmentorContext extends SourceIssues {
 	 * Adds an {@link OfficeAdministration} to be done before attempting this
 	 * {@link ManagedFunction}.
 	 * <p>
-	 * The order that the {@link OfficeAdministration} instances are added is
-	 * the order they will be done before this {@link ManagedFunction}.
+	 * The order that the {@link OfficeAdministration} instances are added is the
+	 * order they will be done before this {@link ManagedFunction}.
 	 * 
 	 * @param administration
 	 *            {@link OfficeAdministration} to be done before attempting this
@@ -61,30 +61,26 @@ public interface ManagedFunctionAugmentorContext extends SourceIssues {
 	 * Adds an {@link OfficeAdministration} to be done after completing this
 	 * {@link ManagedFunction}.
 	 * <p>
-	 * The order that the {@link OfficeAdministration} instances are added is
-	 * the order they will be done after this {@link ManagedFunction} is
-	 * complete.
+	 * The order that the {@link OfficeAdministration} instances are added is the
+	 * order they will be done after this {@link ManagedFunction} is complete.
 	 * 
-	 * @param duty
+	 * @param administration
 	 *            {@link OfficeAdministration} to be done after completing this
 	 *            {@link ManagedFunction}.
 	 */
 	void addPostAdministration(OfficeAdministration administration);
 
 	/**
-	 * Obtains the {@link AugmentedFunctionObject} for the
-	 * {@link ManagedFunction}.
+	 * Obtains the {@link AugmentedFunctionObject} for the {@link ManagedFunction}.
 	 * 
 	 * @param objectName
-	 *            Name of the {@link FunctionObject} on the
-	 *            {@link ManagedFunction}.
+	 *            Name of the {@link FunctionObject} on the {@link ManagedFunction}.
 	 * @return {@link AugmentedFunctionObject}.
 	 */
 	AugmentedFunctionObject getFunctionObject(String objectName);
 
 	/**
-	 * Links the {@link AugmentedFunctionObject} to the
-	 * {@link OfficeManagedObject}.
+	 * Links the {@link AugmentedFunctionObject} to the {@link OfficeManagedObject}.
 	 * 
 	 * @param object
 	 *            {@link AugmentedFunctionObject}.

@@ -201,7 +201,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Undertakes action for the item.
 		 * 
-		 * @param action
+		 * @param context
 		 *            {@link ConfigurableModelContext}.
 		 * @throws Throwable
 		 *             If failure in actioning.
@@ -368,7 +368,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 
 					@Override
 					public void execute(Change<M> change) throws Throwable {
-						
+
 						// Position the added model
 						ctx.position(change.getTarget());
 
@@ -548,8 +548,6 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	 * @param decoratePrototype
 	 *            Optional decorator of the prototype {@link Model} for refactor
 	 *            testing. May be <code>null</code> to use prototype as is.
-	 * @throws Exception
-	 *             If fails to launch.
 	 */
 	public void main(R rootModel, Class<? extends AbstractIdeEditor<R, RE, O>> ideEditorClass,
 			Consumer<M> decoratePrototype) {

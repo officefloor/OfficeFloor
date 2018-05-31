@@ -50,8 +50,6 @@ public class SingleParameterValueLoaderFactory implements StatelessValueLoaderFa
 	 *            Property name.
 	 * @param methodName
 	 *            {@link Method} name.
-	 * @param location
-	 *            {@link HttpValueLocation}.
 	 */
 	public SingleParameterValueLoaderFactory(String propertyName, String methodName) {
 		this.propertyName = propertyName;

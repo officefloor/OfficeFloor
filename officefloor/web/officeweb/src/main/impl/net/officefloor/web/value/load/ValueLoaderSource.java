@@ -334,8 +334,7 @@ public class ValueLoaderSource {
 	 * Creates the {@link StatelessValueLoader}.
 	 * 
 	 * @param clazz
-	 *            {@link Class} to create the specific
-	 *            {@link StatelessValueLoader}.
+	 *            {@link Class} to create the specific {@link StatelessValueLoader}.
 	 * @param factories
 	 *            {@link StatelessValueLoaderFactory} instances for the
 	 *            {@link StatelessValueLoader}.
@@ -375,7 +374,7 @@ public class ValueLoaderSource {
 	 * 
 	 * @param type
 	 *            Type to interrogate for properties to be loaded.
-	 * @param isCaseSensitive
+	 * @param isCaseInsensitive
 	 *            Flag indicating if case sensitive matching.
 	 * @param aliasMappings
 	 *            Alias Mappings.
@@ -400,16 +399,16 @@ public class ValueLoaderSource {
 	 * Sources the {@link ValueLoaderFactory}.
 	 * <p>
 	 * The returned {@link ValueLoaderFactory} is specific to the input
-	 * {@link Class}. The {@link ValueLoaderFactory} will not work with children
-	 * of the {@link Class}. A new {@link ValueLoaderFactory} must be created
-	 * for each child type.
+	 * {@link Class}. The {@link ValueLoaderFactory} will not work with children of
+	 * the {@link Class}. A new {@link ValueLoaderFactory} must be created for each
+	 * child type.
 	 * 
 	 * @param <T>
 	 *            {@link Class} type.
 	 * @param clazz
-	 *            {@link Class} for a dedicated {@link ValueLoaderFactory}. It
-	 *            is expected that all property methods on the <code>type</code>
-	 *            are on this <code>clazz</code>.
+	 *            {@link Class} for a dedicated {@link ValueLoaderFactory}. It is
+	 *            expected that all property methods on the <code>type</code> are on
+	 *            this <code>clazz</code>.
 	 * @return {@link ValueLoaderFactory}.
 	 * @throws Exception
 	 *             If fails to source the {@link ValueLoaderFactory}.
@@ -449,9 +448,8 @@ public class ValueLoaderSource {
 	}
 
 	/**
-	 * Struct containing details for the
-	 * {@link ObjectParameterValueLoaderFactory} and
-	 * {@link KeyedObjectValueLoaderFactory}.
+	 * Struct containing details for the {@link ObjectParameterValueLoaderFactory}
+	 * and {@link KeyedObjectValueLoaderFactory}.
 	 */
 	private static class ObjectParameterStruct {
 

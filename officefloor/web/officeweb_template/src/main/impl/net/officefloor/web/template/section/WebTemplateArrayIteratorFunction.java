@@ -20,6 +20,7 @@ package net.officefloor.web.template.section;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.web.template.section.WebTemplateSectionSource.WebTemplateArrayIteratorManagedFunctionSource;
 
 /**
  * {@link ManagedFunction} to iterate over an array to render content.

@@ -37,7 +37,11 @@ public interface CompileContext {
 
 	/**
 	 * Registers a possible MBean.
-	 * 
+	 *
+	 * @param <T>
+	 *            Type of MBean.
+	 * @param <S>
+	 *            MBean type.
 	 * @param type
 	 *            Type of MBean.
 	 * @param name
@@ -54,8 +58,8 @@ public interface CompileContext {
 	 * @param managedObjectSourceNode
 	 *            {@link ManagedObjectSourceNode} to obtain the
 	 *            {@link ManagedObjectType}.
-	 * @return {@link ManagedObjectType} or <code>null</code> with issue
-	 *         reported to the {@link CompilerIssues}.
+	 * @return {@link ManagedObjectType} or <code>null</code> with issue reported to
+	 *         the {@link CompilerIssues}.
 	 */
 	ManagedObjectType<?> getOrLoadManagedObjectType(ManagedObjectSourceNode managedObjectSourceNode);
 
@@ -72,8 +76,8 @@ public interface CompileContext {
 	FunctionNamespaceType getOrLoadFunctionNamespaceType(FunctionNamespaceNode functionNamespaceNode);
 
 	/**
-	 * Obtains the existing or loads the {@link SuppliedManagedObjectSourceType}
-	 * for the {@link SuppliedManagedObjectSourceNode}.
+	 * Obtains the existing or loads the {@link SuppliedManagedObjectSourceType} for
+	 * the {@link SuppliedManagedObjectSourceNode}.
 	 * 
 	 * @param suppliedManagedObjectSourceNode
 	 *            {@link SuppliedManagedObjectSourceNode} to obtain the
@@ -90,14 +94,13 @@ public interface CompileContext {
 	 * 
 	 * @param supplierNode
 	 *            {@link SupplierNode} to obtain the {@link SupplierType}.
-	 * @return {@link SupplierType} or <code>null</code> with issue reported to
-	 *         the {@link CompilerIssues}.
+	 * @return {@link SupplierType} or <code>null</code> with issue reported to the
+	 *         {@link CompilerIssues}.
 	 */
 	SupplierType getOrLoadSupplierType(SupplierNode supplierNode);
 
 	/**
-	 * Obtains the existing or loads the {@link TeamType} for the
-	 * {@link TeamNode}.
+	 * Obtains the existing or loads the {@link TeamType} for the {@link TeamNode}.
 	 * 
 	 * @param teamNode
 	 *            {@link TeamNode} to obtain the {@link TeamType}.
@@ -119,8 +122,8 @@ public interface CompileContext {
 	 * @param administrationNode
 	 *            {@link AdministrationNode} to obtain the
 	 *            {@link AdministrationType}.
-	 * @return {@link AdministrationType} or <code>null</code> with issue
-	 *         reported to the {@link CompilerIssues}.
+	 * @return {@link AdministrationType} or <code>null</code> with issue reported
+	 *         to the {@link CompilerIssues}.
 	 */
 	<E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> getOrLoadAdministrationType(
 			AdministrationNode administrationNode);
@@ -135,8 +138,8 @@ public interface CompileContext {
 	 *            Flow key {@link Enum} type.
 	 * @param governanceNode
 	 *            {@link GovernanceNode} to obtain the {@link GovernanceType}.
-	 * @return {@link GovernanceType} or <code>null</code> with issue report to
-	 *         the {@link CompilerIssues}.
+	 * @return {@link GovernanceType} or <code>null</code> with issue report to the
+	 *         {@link CompilerIssues}.
 	 */
 	<E, F extends Enum<F>> GovernanceType<E, F> getOrLoadGovernanceType(GovernanceNode governanceNode);
 

@@ -154,8 +154,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
-	 * Convenience method to create the {@link MockServerHttpConnection} for GET
-	 * / with no headers nor entity.
+	 * Convenience method to create the {@link MockServerHttpConnection} for GET /
+	 * with no headers nor entity.
 	 * 
 	 * @return {@link MockServerHttpConnection}.
 	 */
@@ -167,8 +167,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * Creates the {@link MockServerHttpConnection}.
 	 * 
 	 * @param request
-	 *            {@link MockHttpRequestBuilder} for the {@link HttpRequest} of
-	 *            the {@link MockServerHttpConnection}.
+	 *            {@link MockHttpRequestBuilder} for the {@link HttpRequest} of the
+	 *            {@link MockServerHttpConnection}.
 	 * @return {@link MockServerHttpConnection}.
 	 */
 	public static MockServerHttpConnection mockConnection(MockHttpRequestBuilder request) {
@@ -317,9 +317,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 * @param callback
 		 *            {@link MockHttpRequestCallback}.
 		 * @param bufferPool
-		 *            {@link MockStreamBufferPool} to check all
-		 *            {@link StreamBuffer} instances are released on writing
-		 *            {@link HttpResponse}. May be <code>null</code>.
+		 *            {@link MockStreamBufferPool} to check all {@link StreamBuffer}
+		 *            instances are released on writing {@link HttpResponse}. May be
+		 *            <code>null</code>.
 		 */
 		private MockHttpResponseWriter(MockHttpRequestBuilderImpl request, MockHttpRequestCallback callback,
 				MockStreamBufferPool bufferPool) {
@@ -397,7 +397,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * 
 	 * @param request
 	 *            {@link MockHttpRequestBuilder}.
-	 * @eturn {@link MockHttpResponse}.
+	 * @return {@link MockHttpResponse}.
 	 */
 	public MockHttpResponse send(MockHttpRequestBuilder request) {
 
@@ -673,8 +673,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
-	 * {@link NonMaterialisedHttpHeader} containing the
-	 * {@link HttpRequestCookie} instances.
+	 * {@link NonMaterialisedHttpHeader} containing the {@link HttpRequestCookie}
+	 * instances.
 	 */
 	private static class MockNonMaterialisedHttpCookie implements NonMaterialisedHttpHeader {
 
@@ -689,9 +689,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		private final List<MockCookie> cookies = new LinkedList<>();
 
 		/**
-		 * Listing of {@link MockHttpResponse} instances to have their
-		 * appropriate {@link HttpResponseCookie} instances added as a
-		 * {@link HttpRequestCookie}.
+		 * Listing of {@link MockHttpResponse} instances to have their appropriate
+		 * {@link HttpResponseCookie} instances added as a {@link HttpRequestCookie}.
 		 */
 		private final List<MockHttpResponse> responses = new LinkedList<>();
 

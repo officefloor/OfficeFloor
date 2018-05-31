@@ -43,8 +43,7 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 * Obtains the {@link DeployedOffice} containing this
 	 * {@link DeployedOfficeInput}.
 	 * 
-	 * @return {@link DeployedOffice} containing this
-	 *         {@link DeployedOfficeInput}.
+	 * @return {@link DeployedOffice} containing this {@link DeployedOfficeInput}.
 	 */
 	DeployedOffice getDeployedOffice();
 
@@ -67,20 +66,24 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 * {@link DeployedOfficeInput}.
 	 * <p>
 	 * This allows {@link OfficeFloorExtensionService} instances to run external
-	 * services (running within their own {@link Thread}) to use
-	 * {@link OfficeFloor} to service.
+	 * services (running within their own {@link Thread}) to use {@link OfficeFloor}
+	 * to service.
 	 * <p>
-	 * Should the external service require running within the
-	 * {@link OfficeFloor} open/close life-cycle, add an
-	 * {@link OfficeFloorListener} to the {@link OfficeFloorDeployer}.
+	 * Should the external service require running within the {@link OfficeFloor}
+	 * open/close life-cycle, add an {@link OfficeFloorListener} to the
+	 * {@link OfficeFloorDeployer}.
 	 * <p>
-	 * An example use case is running {@link OfficeFloor} within a JEE server
-	 * and having {@link OfficeFloor} service the Servlet requests.
+	 * An example use case is running {@link OfficeFloor} within a JEE server and
+	 * having {@link OfficeFloor} service the Servlet requests.
 	 * <p>
-	 * Note should more complex interaction be required with
-	 * {@link OfficeFloor}, consider creating a {@link ManagedObjectSource} and
-	 * invoking services through the {@link ManagedObjectExecuteContext}.
-	 * 
+	 * Note should more complex interaction be required with {@link OfficeFloor},
+	 * consider creating a {@link ManagedObjectSource} and invoking services through
+	 * the {@link ManagedObjectExecuteContext}.
+	 *
+	 * @param <O>
+	 *            Object type.
+	 * @param <M>
+	 *            {@link ManagedObject} type.
 	 * @param objectType
 	 *            Type of object provided to the {@link ExternalServiceInput}.
 	 * @param managedObjectType

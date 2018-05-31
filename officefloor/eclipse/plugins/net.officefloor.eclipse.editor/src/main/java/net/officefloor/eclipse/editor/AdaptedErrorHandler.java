@@ -46,7 +46,7 @@ public interface AdaptedErrorHandler {
 	 * Runs an {@link UncertainOperation}.
 	 * 
 	 * <pre>
-	 * UncertainOperation operation = () -> { ... };
+	 * UncertainOperation operation = () -&gt; { ... };
 	 * if (handler.isError(operation) {
 	 * 	  return; // failure in operation
 	 * }

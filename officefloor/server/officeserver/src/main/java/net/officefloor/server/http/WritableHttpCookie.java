@@ -63,8 +63,8 @@ public class WritableHttpCookie implements HttpResponseCookie {
 
 	/**
 	 * Expires {@link DateTimeFormatter}. Default {@link ZoneId} to allow
-	 * {@link Instant#now()} (and derived {@link TemporalAccessor} instances) to
-	 * be formatted.
+	 * {@link Instant#now()} (and derived {@link TemporalAccessor} instances) to be
+	 * formatted.
 	 */
 	private static final DateTimeFormatter EXPIRE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME
 			.withZone(ZoneId.of("GMT"));
@@ -151,8 +151,7 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	};
 
 	/**
-	 * Next {@link WritableHttpCookie} to enable chaining together into linked
-	 * list.
+	 * Next {@link WritableHttpCookie} to enable chaining together into linked list.
 	 */
 	public WritableHttpCookie next = null;
 
@@ -225,9 +224,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	/**
 	 * Writes this HTTP Cookie to the {@link StreamBuffer} stream.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
+	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
+	 *            instances.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 */

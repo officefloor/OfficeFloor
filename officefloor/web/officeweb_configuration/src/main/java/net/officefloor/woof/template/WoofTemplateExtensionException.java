@@ -17,8 +17,10 @@
  */
 package net.officefloor.woof.template;
 
+import net.officefloor.web.template.extension.WebTemplateExtension;
+
 /**
- * Flags that the {@link WebTemplateExtensionSource} is unknown or unable to be
+ * Flags that the {@link WebTemplateExtension} is unknown or unable to be
  * obtained.
  * 
  * @author Daniel Sagenschneider

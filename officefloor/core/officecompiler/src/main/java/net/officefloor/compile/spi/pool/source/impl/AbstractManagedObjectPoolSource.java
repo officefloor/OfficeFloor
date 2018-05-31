@@ -59,8 +59,7 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 	protected abstract void loadSpecification(SpecificationContext context);
 
 	/**
-	 * Context for the
-	 * {@link AbstractManagedObjectPoolSource#getSpecification()}.
+	 * Context for the {@link AbstractManagedObjectPoolSource#getSpecification()}.
 	 */
 	public static interface SpecificationContext {
 
@@ -149,7 +148,8 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 	protected abstract void loadMetaData(MetaDataContext context) throws Exception;
 
 	/**
-	 * Context for the {@link ManagedObjectPoolSource#getMetaData()}.
+	 * Context for the
+	 * {@link ManagedObjectPoolSource#init(ManagedObjectPoolSourceContext)}.
 	 */
 	public static interface MetaDataContext {
 

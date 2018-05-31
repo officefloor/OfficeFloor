@@ -31,7 +31,7 @@ public interface AdaptedParentBuilder<R extends Model, O, M extends Model, E ext
 	 * Configures creating the {@link Model}.
 	 * 
 	 * @param provideParentAction
-	 *            {@link ParentModelProvider}.
+	 *            {@link ModelAction} to provide parent.
 	 */
 	void create(ModelAction<R, O, M> provideParentAction);
 

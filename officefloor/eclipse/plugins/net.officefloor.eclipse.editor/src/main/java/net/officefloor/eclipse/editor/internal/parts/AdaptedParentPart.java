@@ -22,7 +22,6 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.model.Model;
@@ -31,10 +30,10 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 		implements ITransformableContentPart<Node> {
 
 	/**
-	 * Loads the styling for the child {@link Pane}.
+	 * Loads the styling to the visual {@link Node}.
 	 * 
-	 * @param parentPane
-	 *            Parent {@link Pane}.
+	 * @param visualNode
+	 *            Visual {@link Node}.
 	 */
 	public static void loadStyling(Node visualNode) {
 		visualNode.getStyleClass().remove("child");

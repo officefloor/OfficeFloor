@@ -34,7 +34,6 @@ public interface OfficeRepository {
 	 *            {@link OfficeModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem} containing the {@link OfficeModel}.
-	 * @return {@link OfficeModel}.
 	 * @throws Exception
 	 *             If fails to retrieve the {@link OfficeModel}.
 	 */

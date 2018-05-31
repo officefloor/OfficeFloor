@@ -1274,7 +1274,7 @@
 						</goals>
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
-							<excludePackageNames>net.officefloor.plugin.web.http.template.parse</excludePackageNames>
+							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
 							<!-- Include Google Analytics -->
 							<header>
 							<![CDATA[

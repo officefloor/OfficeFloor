@@ -128,9 +128,9 @@ public interface SectionChanges {
 	 *            {@link FunctionNamespaceType} from the
 	 *            {@link ManagedFunctionSource}.
 	 * @param managedFunctionNames
-	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
-	 *            list results in loading all {@link WorkTaskModel} instances
-	 *            for the {@link FunctionNamespaceType}.
+	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty list
+	 *            results in loading all {@link WorkTaskModel} instances for the
+	 *            {@link FunctionNamespaceType}.
 	 * @return {@link Change} to add the {@link WorkModel}.
 	 */
 	Change<FunctionNamespaceModel> addFunctionNamespace(String functionNamspaceName,
@@ -169,8 +169,7 @@ public interface SectionChanges {
 	 *            New {@link ManagedFunctionSource} class name for the
 	 *            {@link FunctionNamespaceModel}.
 	 * @param properties
-	 *            New {@link PropertyList} for the
-	 *            {@link FunctionNamespaceModel}.
+	 *            New {@link PropertyList} for the {@link FunctionNamespaceModel}.
 	 * @param functionNamespaceType
 	 *            {@link FunctionNamespaceType} that the
 	 *            {@link FunctionNamespaceModel} is being refactored to.
@@ -190,9 +189,9 @@ public interface SectionChanges {
 	 *            {@link ManagedFunctionEscalationType} type to the
 	 *            {@link FunctionEscalationModel} type.
 	 * @param managedFunctionNames
-	 *            Listing of {@link ManagedFunctionModel} names to be loaded.
-	 *            Empty list results in loading all {@link ManagedFunctionModel}
-	 *            instances for the {@link FunctionNamespaceType}.
+	 *            Listing of {@link ManagedFunctionModel} names to be loaded. Empty
+	 *            list results in loading all {@link ManagedFunctionModel} instances
+	 *            for the {@link FunctionNamespaceType}.
 	 * @return {@link Change} to refactor the {@link FunctionNamespaceModel}.
 	 */
 	Change<FunctionNamespaceModel> refactorFunctionNamespace(FunctionNamespaceModel functionNamespaceModel,
@@ -203,8 +202,8 @@ public interface SectionChanges {
 			Map<String, Map<String, String>> functionToEscalationTypeMapping, String... managedFunctionNames);
 
 	/**
-	 * Adds the {@link ManagedFunctionType} as a {@link ManagedFunctionModel} to
-	 * the {@link FunctionNamspaceModel}.
+	 * Adds the {@link ManagedFunctionType} as a {@link ManagedFunctionModel} to the
+	 * {@link FunctionNamspaceModel}.
 	 *
 	 * @param <M>
 	 *            Dependency type keys.
@@ -231,8 +230,8 @@ public interface SectionChanges {
 	 *            {@link ManagedFunctionModel} removed.
 	 * @param managedFunctionModel
 	 *            {@link ManagdedFunctionModel} to be removed.
-	 * @return {@link Change} to remove the {@link ManagedFunctionModel} from
-	 *         the {@link FunctionNamespaceModel}.
+	 * @return {@link Change} to remove the {@link ManagedFunctionModel} from the
+	 *         {@link FunctionNamespaceModel}.
 	 */
 	Change<ManagedFunctionModel> removeManagedFunction(FunctionNamespaceModel functionNamespaceModel,
 			ManagedFunctionModel managedFunctionModel);
@@ -248,8 +247,7 @@ public interface SectionChanges {
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 * @param managedFunctionModel
-	 *            {@link ManagedFunctionModel} for the
-	 *            {@link ManagedFunctionType}.
+	 *            {@link ManagedFunctionModel} for the {@link ManagedFunctionType}.
 	 * @param managedFunctionType
 	 *            {@link ManagedFunctionType} for the {@link FunctionModel}.
 	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
@@ -280,13 +278,11 @@ public interface SectionChanges {
 	Change<FunctionModel> renameFunction(FunctionModel functionModel, String newFunctionName);
 
 	/**
-	 * Specifies a {@link ManagedFunctionObjectModel} as a parameter or an
-	 * object.
+	 * Specifies a {@link ManagedFunctionObjectModel} as a parameter or an object.
 	 *
 	 * @param isParameter
-	 *            <code>true</code> for the {@link ManagedFunctionObjectModel}
-	 *            to be a parameter. <code>false</code> to be a dependency
-	 *            object.
+	 *            <code>true</code> for the {@link ManagedFunctionObjectModel} to be
+	 *            a parameter. <code>false</code> to be a dependency object.
 	 * @param managedFunctionObjectModel
 	 *            {@link ManagedFunctionObjectModel} to set as a parameter or
 	 *            object.
@@ -301,8 +297,7 @@ public interface SectionChanges {
 	 *
 	 * @param isPublic
 	 *            <code>true</code> for the {@link FunctionModel} to be public.
-	 *            <code>false</code> for the {@link FunctionModel} to be
-	 *            private.
+	 *            <code>false</code> for the {@link FunctionModel} to be private.
 	 * @param functionModel
 	 *            {@link FunctionModel} to set public/private.
 	 * @return {@link Change} to set the {@link FunctionModel} public/private.
@@ -352,8 +347,7 @@ public interface SectionChanges {
 	Change<ExternalManagedObjectModel> addExternalManagedObject(String externalManagedObjectName, String objectType);
 
 	/**
-	 * Removes the {@link ExternalManagedObjectModel} from the
-	 * {@link SectionModel}.
+	 * Removes the {@link ExternalManagedObjectModel} from the {@link SectionModel}.
 	 *
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to remove.
@@ -386,8 +380,7 @@ public interface SectionChanges {
 	 *            Timeout of the {@link ManagedObject}.
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}.
-	 * @return {@link Change} to add the {@link SectionManagedObjectSourceModel}
-	 *         .
+	 * @return {@link Change} to add the {@link SectionManagedObjectSourceModel} .
 	 */
 	Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties, long timeout,
@@ -398,8 +391,7 @@ public interface SectionChanges {
 	 *
 	 * @param managedObjectSource
 	 *            {@link SectionManagedObjectSourceModel} to remove.
-	 * @return {@link Change} to remove the
-	 *         {@link SectionManagedObjectSourceModel}.
+	 * @return {@link Change} to remove the {@link SectionManagedObjectSourceModel}.
 	 */
 	Change<SectionManagedObjectSourceModel> removeSectionManagedObjectSource(
 			SectionManagedObjectSourceModel managedObjectSource);
@@ -411,8 +403,7 @@ public interface SectionChanges {
 	 *            {@link SectionManagedObjectSourceModel} to rename.
 	 * @param newManagedObjectSourceName
 	 *            New name for the {@link SectionManagedObjectSourceModel}.
-	 * @return {@link Change} to rename the
-	 *         {@link SectionManagedObjectSourceModel}.
+	 * @return {@link Change} to rename the {@link SectionManagedObjectSourceModel}.
 	 */
 	Change<SectionManagedObjectSourceModel> renameSectionManagedObjectSource(
 			SectionManagedObjectSourceModel managedObjectSource, String newManagedObjectSourceName);
@@ -488,8 +479,7 @@ public interface SectionChanges {
 	 * Removes the {@link SubSectionObjectToExternalManagedObjectModel}.
 	 *
 	 * @param subSectionObjectToExternalManagedObject
-	 *            {@link SubSectionObjectToExternalManagedObjectModel} to
-	 *            remove.
+	 *            {@link SubSectionObjectToExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the
 	 *         {@link SubSectionObjectToExternalManagedObjectModel}.
 	 */
@@ -574,15 +564,13 @@ public interface SectionChanges {
 			ManagedFunctionObjectToSectionManagedObjectModel managedFunctionObjectToManagedObject);
 
 	/**
-	 * Links the {@link SubSectionOutputModel} to the
-	 * {@link SubSectionInputModel}.
+	 * Links the {@link SubSectionOutputModel} to the {@link SubSectionInputModel}.
 	 *
 	 * @param subSectionOutput
 	 *            {@link SubSectionOutputModel}.
 	 * @param subSectionInput
 	 *            {@link SubSectionInputModel}.
-	 * @return {@link Change} to add
-	 *         {@link SubSectionOutputToSubSectionInputModel}.
+	 * @return {@link Change} to add {@link SubSectionOutputToSubSectionInputModel}.
 	 */
 	Change<SubSectionOutputToSubSectionInputModel> linkSubSectionOutputToSubSectionInput(
 			SubSectionOutputModel subSectionOutput, SubSectionInputModel subSectionInput);
@@ -629,8 +617,7 @@ public interface SectionChanges {
 	 *            {@link FunctionModel}.
 	 * @param function
 	 *            {@link FunctionModel}.
-	 * @return {@link Change} to add the
-	 *         {@link SubSectionOutputToFunctionModel}.
+	 * @return {@link Change} to add the {@link SubSectionOutputToFunctionModel}.
 	 */
 	Change<SubSectionOutputToFunctionModel> linkSubSectionOutputToFunction(SubSectionOutputModel subSectionOutput,
 			FunctionModel function);
@@ -640,8 +627,7 @@ public interface SectionChanges {
 	 *
 	 * @param subSectionOutputToFunction
 	 *            {@link SubSectionOutputToFunctionModel} to remove.
-	 * @return {@link Change} to remove the
-	 *         {@link SubSectionOutputToFunctionModel}.
+	 * @return {@link Change} to remove the {@link SubSectionOutputToFunctionModel}.
 	 */
 	Change<SubSectionOutputToFunctionModel> removeSubSectionOutputToFunction(
 			SubSectionOutputToFunctionModel subSectionOutputToFunction);
@@ -667,7 +653,8 @@ public interface SectionChanges {
 	 *            {@link FunctionFlowToFunctionModel} to remove.
 	 * @return {@link Change} to remove {@link FunctionFlowToFunctionModel}.
 	 */
-	Change<FunctionFlowToFunctionModel> removeFunctionFlowToFunction(FunctionFlowToFunctionModel taskFlowToTask);
+	Change<FunctionFlowToFunctionModel> removeFunctionFlowToFunction(
+			FunctionFlowToFunctionModel functionFlowToFunction);
 
 	/**
 	 * Links the {@link FunctionFlowModel} to the {@link ExternalFlowModel}.
@@ -702,8 +689,7 @@ public interface SectionChanges {
 	 *            {@link SubSectionInputModel}.
 	 * @param isSpawnThreadState
 	 *            Indicates if to spawn a {@link ThreadState}.
-	 * @return {@link Change} to add a
-	 *         {@link FunctionFlowToSubSectionInputModel}.
+	 * @return {@link Change} to add a {@link FunctionFlowToSubSectionInputModel}.
 	 */
 	Change<FunctionFlowToSubSectionInputModel> linkFunctionFlowToSubSectionInput(FunctionFlowModel functionFlow,
 			SubSectionInputModel subSectionInput, boolean isSpawnThreadState);
@@ -713,8 +699,7 @@ public interface SectionChanges {
 	 *
 	 * @param functionFlowToSubSectionInput
 	 *            {@link FunctionFlowToSubSectionInputModel} to remove.
-	 * @return {@link Change} to remove
-	 *         {@link FunctionFlowToSubSectionInputModel}.
+	 * @return {@link Change} to remove {@link FunctionFlowToSubSectionInputModel}.
 	 */
 	Change<FunctionFlowToSubSectionInputModel> removeFunctionFlowToSubSectionInput(
 			FunctionFlowToSubSectionInputModel functionFlowToSubSectionInput);
@@ -763,14 +748,13 @@ public interface SectionChanges {
 			FunctionToNextExternalFlowModel functionToNextExternalFlow);
 
 	/**
-	 * Links {@link FunctionModel} to next {@link SubSectionInput}.
+	 * Links {@link FunctionModel} to next {@link SubSectionInputModel}.
 	 *
 	 * @param function
 	 *            {@link FunctionModel}.
 	 * @param nextSubSectionInput
 	 *            Next {@link SubSectionInputModel}.
-	 * @return {@link Change} to add a
-	 *         {@link FunctionToNextSubSectionInputModel}.
+	 * @return {@link Change} to add a {@link FunctionToNextSubSectionInputModel}.
 	 */
 	Change<FunctionToNextSubSectionInputModel> linkFunctionToNextSubSectionInput(FunctionModel function,
 			SubSectionInputModel nextSubSectionInput);
@@ -780,8 +764,7 @@ public interface SectionChanges {
 	 *
 	 * @param functionToNextSubSectionInput
 	 *            {@link FunctionToNextSubSectionInputModel} to remove.
-	 * @return {@link Change} to remove
-	 *         {@link FunctionToNextSubSectionInputModel}.
+	 * @return {@link Change} to remove {@link FunctionToNextSubSectionInputModel}.
 	 */
 	Change<FunctionToNextSubSectionInputModel> removeFunctionToNextSubSectionInput(
 			FunctionToNextSubSectionInputModel functionToNextSubSectionInput);
@@ -793,8 +776,7 @@ public interface SectionChanges {
 	 *            {@link FunctionEscalationModel}.
 	 * @param function
 	 *            {@link FunctionModel}.
-	 * @return {@link Change} to add a
-	 *         {@link FunctionEscalationToFunctionModel}.
+	 * @return {@link Change} to add a {@link FunctionEscalationToFunctionModel}.
 	 */
 	Change<FunctionEscalationToFunctionModel> linkFunctionEscalationToFunction(
 			FunctionEscalationModel functionEscalation, FunctionModel function);
@@ -804,8 +786,7 @@ public interface SectionChanges {
 	 *
 	 * @param functionEscalationToFunction
 	 *            {@link FunctionEscalationToFunctionModel} to remove.
-	 * @return {@link Change} to remove
-	 *         {@link FunctionEscalationToFunctionModel}.
+	 * @return {@link Change} to remove {@link FunctionEscalationToFunctionModel}.
 	 */
 	Change<FunctionEscalationToFunctionModel> removeFunctionEscalationToFunction(
 			FunctionEscalationToFunctionModel functionEscalationToFunction);
@@ -817,8 +798,7 @@ public interface SectionChanges {
 	 *            {@link FunctionEscalationModel}.
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel}.
-	 * @return {@link Change} to add
-	 *         {@link FunctionEscalationToExternalFlowModel}.
+	 * @return {@link Change} to add {@link FunctionEscalationToExternalFlowModel}.
 	 */
 	Change<FunctionEscalationToExternalFlowModel> linkFunctionEscalationToExternalFlow(
 			FunctionEscalationModel functionEscalation, ExternalFlowModel externalFlow);
@@ -835,8 +815,7 @@ public interface SectionChanges {
 			FunctionEscalationToExternalFlowModel functionEscalationToExternalFlow);
 
 	/**
-	 * Links {@link FunctionEscalationModel} to the
-	 * {@link SubSectionInputModel}.
+	 * Links {@link FunctionEscalationModel} to the {@link SubSectionInputModel}.
 	 *
 	 * @param functionEscalation
 	 *            {@link FunctionEscalationModel}.
@@ -903,8 +882,8 @@ public interface SectionChanges {
 	 * Removes the {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
 	 *
 	 * @param managedObjectSourceFlowToSubSectionInput
-	 *            {@link SectionManagedObjectSourceFlowToSubSectionInputModel}
-	 *            to remove.
+	 *            {@link SectionManagedObjectSourceFlowToSubSectionInputModel} to
+	 *            remove.
 	 * @return {@link Change} to remove the
 	 *         {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
 	 */
@@ -946,8 +925,7 @@ public interface SectionChanges {
 	 * @param managedObject
 	 *            {@link SectionManagedObjectModel}.
 	 * @return {@link Change} to add the
-	 *         {@link SectionManagedObjectDependencyToSectionManagedObjectModel}
-	 *         .
+	 *         {@link SectionManagedObjectDependencyToSectionManagedObjectModel} .
 	 */
 	Change<SectionManagedObjectDependencyToSectionManagedObjectModel> linkSectionManagedObjectDependencyToSectionManagedObject(
 			SectionManagedObjectDependencyModel dependency, SectionManagedObjectModel managedObject);
@@ -960,8 +938,7 @@ public interface SectionChanges {
 	 *            {@link SectionManagedObjectDependencyToSectionManagedObjectModel}
 	 *            to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link SectionManagedObjectDependencyToSectionManagedObjectModel}
-	 *         .
+	 *         {@link SectionManagedObjectDependencyToSectionManagedObjectModel} .
 	 */
 	Change<SectionManagedObjectDependencyToSectionManagedObjectModel> removeSectionManagedObjectDependencyToSectionManagedObject(
 			SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToManagedObject);
@@ -975,8 +952,7 @@ public interface SectionChanges {
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to add the
-	 *         {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
-	 *         .
+	 *         {@link SectionManagedObjectDependencyToExternalManagedObjectModel} .
 	 */
 	Change<SectionManagedObjectDependencyToExternalManagedObjectModel> linkSectionManagedObjectDependencyToExternalManagedObject(
 			SectionManagedObjectDependencyModel dependency, ExternalManagedObjectModel externalManagedObject);
@@ -989,8 +965,7 @@ public interface SectionChanges {
 	 *            {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
 	 *            to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
-	 *         .
+	 *         {@link SectionManagedObjectDependencyToExternalManagedObjectModel} .
 	 */
 	Change<SectionManagedObjectDependencyToExternalManagedObjectModel> removeSectionManagedObjectDependencyToExternalManagedObject(
 			SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExternalManagedObject);

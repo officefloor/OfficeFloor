@@ -48,8 +48,8 @@ public interface OfficeSectionFunction {
 	 * Adds an {@link OfficeAdministration} to be done before attempting this
 	 * {@link OfficeSectionFunction}.
 	 * <p>
-	 * The order that the {@link OfficeAdministration} instances are added is
-	 * the order they will be done before this {@link OfficeSectionFunction}.
+	 * The order that the {@link OfficeAdministration} instances are added is the
+	 * order they will be done before this {@link OfficeSectionFunction}.
 	 * 
 	 * @param administration
 	 *            {@link OfficeAdministration} to be done before attempting this
@@ -62,11 +62,10 @@ public interface OfficeSectionFunction {
 	 * Adds an {@link OfficeAdministration} to be done after completing this
 	 * {@link OfficeSectionFunction}.
 	 * <p>
-	 * The order that the {@link OfficeAdministration} instances are added is
-	 * the order they will be done after this {@link OfficeSectionFunction} is
-	 * complete.
+	 * The order that the {@link OfficeAdministration} instances are added is the
+	 * order they will be done after this {@link OfficeSectionFunction} is complete.
 	 * 
-	 * @param duty
+	 * @param administration
 	 *            {@link OfficeAdministration} to be done after completing this
 	 *            {@link OfficeSectionFunction}.
 	 */

@@ -31,7 +31,7 @@ public interface ObjectResponse<T> {
 	 * 
 	 * @param object
 	 *            {@link Object} to send as response.
-	 * @throws HTTPException
+	 * @throws HttpException
 	 *             If fails to send the {@link Object}.
 	 */
 	void send(T object) throws HttpException;

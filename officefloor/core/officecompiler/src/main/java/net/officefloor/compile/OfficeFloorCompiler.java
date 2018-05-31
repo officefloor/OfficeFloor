@@ -86,11 +86,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link System#getProperty(String)} that allows specifying the
 	 * {@link OfficeFloorCompiler} implementation {@link Class}.
 	 * <p>
-	 * Should this not be specified the default {@link OfficeFloorCompilerImpl}
-	 * will be used.
-	 * <p>
-	 * Note: it is anticipated that {@link OfficeFloorCompilerImpl} will always
+	 * Should this not be specified the default {@link OfficeFloorCompilerImpl} will
 	 * be used.
+	 * <p>
+	 * Note: it is anticipated that {@link OfficeFloorCompilerImpl} will always be
+	 * used.
 	 */
 	public static final String IMPLEMENTATION_CLASS_PROPERTY_NAME = "net.officefloor.compiler.implementation";
 
@@ -120,11 +120,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	/**
 	 * <p>
-	 * Specifies the {@link OfficeFloorCompilerFactory}. Allows for overriding
-	 * the default behaviour in creating an {@link OfficeFloorCompiler}.
+	 * Specifies the {@link OfficeFloorCompilerFactory}. Allows for overriding the
+	 * default behaviour in creating an {@link OfficeFloorCompiler}.
 	 * <p>
-	 * Typically this should not be called however is included to enable
-	 * flexibility in creating {@link OfficeFloorCompiler} instances.
+	 * Typically this should not be called however is included to enable flexibility
+	 * in creating {@link OfficeFloorCompiler} instances.
 	 * 
 	 * @param factory
 	 *            {@link OfficeFloorCompilerFactory}.
@@ -266,9 +266,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	/**
 	 * <p>
-	 * Executes the {@link OfficeFloorCompilerRunnable} by instantiating it with
-	 * the same {@link ClassLoader} being used by this
-	 * {@link OfficeFloorCompiler}.
+	 * Executes the {@link OfficeFloorCompilerRunnable} by instantiating it with the
+	 * same {@link ClassLoader} being used by this {@link OfficeFloorCompiler}.
 	 * <p>
 	 * This is typically used by graphical editors that need to use the project
 	 * class path rather than the editor's class path.
@@ -279,10 +278,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 *            {@link OfficeFloorCompilerRunnable} class.
 	 * @param parameters
 	 *            Parameters to enable configuration of the
-	 *            {@link OfficeFloorCompilerRunnable}. As {@link Proxy}
-	 *            instances are used to bridge {@link Class} compatibility
-	 *            issues due to different {@link ClassLoader}, all parameters
-	 *            should only be access via their implementing interfaces.
+	 *            {@link OfficeFloorCompilerRunnable}. As {@link Proxy} instances
+	 *            are used to bridge {@link Class} compatibility issues due to
+	 *            different {@link ClassLoader}, all parameters should only be
+	 *            access via their implementing interfaces.
 	 * @return Value returned from the {@link OfficeFloorCompilerRunnable}.
 	 * @throws Exception
 	 *             If fails to run the {@link OfficeFloorCompilerRunnable}.
@@ -433,8 +432,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * Adds a {@link ResourceSource}.
 	 * <p>
 	 * This will be added to the {@link OfficeFrame} before compiling the
-	 * {@link OfficeFloor} and will be available in the {@link SourceContext}
-	 * for loading the various sources.
+	 * {@link OfficeFloor} and will be available in the {@link SourceContext} for
+	 * loading the various sources.
 	 * 
 	 * @param resourceSource
 	 *            {@link ResourceSource}.
@@ -459,8 +458,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link OfficeFloor}.
 	 * <p>
 	 * Implementations of {@link OfficeFloorCompiler} must provide a default
-	 * {@link CompilerIssues}. Typically this will be an implementation that
-	 * writes issues to {@link System#err}.
+	 * {@link CompilerIssues}. Typically this will be an implementation that writes
+	 * issues to {@link System#err}.
 	 * 
 	 * @param issues
 	 *            {@link CompilerIssues}.
@@ -489,9 +488,9 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link OfficeFloorCompiler} implementations must provide a default
 	 * {@link OfficeFloorSource} implementation. The choice of
 	 * {@link OfficeFloorSource} implementation is left to the
-	 * {@link OfficeFloorCompiler}, however it should be clearly documented on
-	 * the {@link OfficeFloorCompiler} implementation which
-	 * {@link OfficeFloorSource} implementation is being used.
+	 * {@link OfficeFloorCompiler}, however it should be clearly documented on the
+	 * {@link OfficeFloorCompiler} implementation which {@link OfficeFloorSource}
+	 * implementation is being used.
 	 * 
 	 * @param <S>
 	 *            {@link OfficeFloorSource} type.
@@ -525,15 +524,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for an {@link OfficeSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link OfficeSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link OfficeSource} classes. This is anticipated to allow
+	 * flexibility as the functionality evolves so that relocating/renaming classes
+	 * does not require significant configuration changes.
 	 * <p>
-	 * Typically this should not be used directly as the
-	 * {@link OfficeSourceService} is the preferred means to provide
-	 * {@link OfficeSource} aliases.
+	 * Typically this should not be used directly as the {@link OfficeSourceService}
+	 * is the preferred means to provide {@link OfficeSource} aliases.
 	 * 
 	 * @param <S>
 	 *            {@link OfficeSource} type.
@@ -548,11 +545,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link SectionSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link SectionSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link SectionSource} classes. This is anticipated to
+	 * allow flexibility as the functionality evolves so that relocating/renaming
+	 * classes does not require significant configuration changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link SectionSourceService} is the preferred means to provide
@@ -571,11 +567,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link ManagedFunctionSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link ManagedFunctionSource} classes. This
-	 * is anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link ManagedFunctionSource} classes. This is anticipated
+	 * to allow flexibility as the functionality evolves so that relocating/renaming
+	 * classes does not require significant configuration changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link ManagedFunctionSourceService} is the preferred means to provide
@@ -595,11 +590,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link ManagedObjectSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link ManagedObjectSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link ManagedObjectSource} classes. This is anticipated
+	 * to allow flexibility as the functionality evolves so that relocating/renaming
+	 * classes does not require significant configuration changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link ManagedObjectSourceService} is the preferred means to provide
@@ -623,11 +617,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link ManagedObjectPoolSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link ManagedObjectPoolSource} classes.
-	 * This is anticipated to allow flexibility as the functionality evolves so
-	 * that relocating/renaming classes does not require significant
-	 * configuration changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link ManagedObjectPoolSource} classes. This is
+	 * anticipated to allow flexibility as the functionality evolves so that
+	 * relocating/renaming classes does not require significant configuration
+	 * changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link ManagedObjectSourceService} is the preferred means to provide
@@ -647,11 +641,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link SupplierSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link SupplierSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link SupplierSource} classes. This is anticipated to
+	 * allow flexibility as the functionality evolves so that relocating/renaming
+	 * classes does not require significant configuration changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link SupplierSourceService} is the preferred means to provide
@@ -670,17 +663,16 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link AdministrationSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link AdministrationSource} classes. This
-	 * is anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link AdministrationSource} classes. This is anticipated
+	 * to allow flexibility as the functionality evolves so that relocating/renaming
+	 * classes does not require significant configuration changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link AdministrationSourceService} is the preferred means to provide
 	 * {@link AdministrationSource} aliases.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
 	 * @param <F>
 	 *            {@link Flow} keys for the {@link Administration}.
@@ -690,7 +682,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 *            {@link AdministrationSource} type.
 	 * @param alias
 	 *            Alias name for the {@link AdministrationSource}.
-	 * @param administratorSourceClass
+	 * @param administrationSourceClass
 	 *            {@link AdministrationSource} {@link Class} for the alias.
 	 */
 	public abstract <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> void addAdministrationSourceAlias(
@@ -700,11 +692,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link GovernanceSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link GovernanceSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link GovernanceSource} classes. This is anticipated to
+	 * allow flexibility as the functionality evolves so that relocating/renaming
+	 * classes does not require significant configuration changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link GovernanceSourceService} is the preferred means to provide
@@ -728,15 +719,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * <p>
 	 * Allows providing an alias name for a {@link TeamSource}.
 	 * <p>
-	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link TeamSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
-	 * relocating/renaming classes does not require significant configuration
-	 * changes.
+	 * This stops the configuration files from being littered with fully qualified
+	 * class names of the {@link TeamSource} classes. This is anticipated to allow
+	 * flexibility as the functionality evolves so that relocating/renaming classes
+	 * does not require significant configuration changes.
 	 * <p>
-	 * Typically this should not be used directly as the
-	 * {@link TeamSourceService} is the preferred means to provide
-	 * {@link TeamSource} aliases.
+	 * Typically this should not be used directly as the {@link TeamSourceService}
+	 * is the preferred means to provide {@link TeamSource} aliases.
 	 * 
 	 * @param <S>
 	 *            {@link TeamSource} type.
@@ -894,8 +883,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * 
 	 * @param officeFloorName
 	 *            Name of the {@link OfficeFloor}.
-	 * @return {@link OfficeFloor} or <code>null</code> if issues in compiling
-	 *         which are reported to the {@link CompilerIssues}.
+	 * @return {@link OfficeFloor} or <code>null</code> if issues in compiling which
+	 *         are reported to the {@link CompilerIssues}.
 	 */
 	public abstract OfficeFloor compile(String officeFloorName);
 

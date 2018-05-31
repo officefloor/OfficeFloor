@@ -22,7 +22,6 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
@@ -40,7 +39,6 @@ import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 import net.officefloor.server.stream.impl.CloseHandler;
 import net.officefloor.server.stream.impl.ProcessAwareServerOutputStream;
@@ -114,8 +112,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private final ProcessAwareContext processAwareContext;
 
 	/**
-	 * {@link CleanupEscalation} instances. Will be <code>null</code> if
-	 * successful clean up.
+	 * {@link CleanupEscalation} instances. Will be <code>null</code> if successful
+	 * clean up.
 	 */
 	private CleanupEscalation[] cleanupEscalations = null;
 
@@ -152,15 +150,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 *            {@link ServerHttpConnection}.
 	 * @param version
 	 *            {@link HttpVersion}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
-	 * @param isIncludeStackTraceOnEscalation
-	 *            <code>true</code> for stack trace to be included on
-	 *            {@link Escalation}.
 	 * @param processAwareContext
 	 *            {@link ProcessAwareContext}.
-	 * @param responseWriter
-	 *            {@link HttpResponseWriter}.
 	 */
 	public ProcessAwareHttpResponse(ProcessAwareServerHttpConnectionManagedObject<B> serverHttpConnection,
 			HttpVersion version, ProcessAwareContext processAwareContext) {
@@ -397,8 +388,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	}
 
 	/**
-	 * Determines if can change the <code>Content-Type</code> and
-	 * {@link Charset}.
+	 * Determines if can change the <code>Content-Type</code> and {@link Charset}.
 	 * 
 	 * @throws IOException
 	 *             If not able to change.

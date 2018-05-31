@@ -61,9 +61,11 @@ public class HttpHeaderName {
 	/**
 	 * Writes this {@link HttpHeaderName} to the {@link StreamBuffer}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
+	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
+	 *            instances.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 */

@@ -59,7 +59,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	 *            Access control type.
 	 * @param <C>
 	 *            Credentials type.
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency keys type.
 	 * @param <F>
 	 *            {@link Flow} keys type.

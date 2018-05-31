@@ -282,7 +282,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	 * 
 	 * @param model
 	 *            Model.
-	 * @param configuartionNode
+	 * @param configurationNode
 	 *            Configuration {@link Node}.
 	 * @param grid
 	 *            {@link GridPane}.

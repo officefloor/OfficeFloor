@@ -41,8 +41,6 @@ public class MockAccessControl implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param authenticationScheme
-	 *            Authentication scheme.
 	 * @param userName
 	 *            User name.
 	 * @param roles

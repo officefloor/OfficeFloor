@@ -305,8 +305,7 @@ public class HttpStatus {
 
 		/**
 		 * <p>
-		 * Obtains the singleton {@link HttpStatus} for this
-		 * {@link HttpStatusEnum}.
+		 * Obtains the singleton {@link HttpStatus} for this {@link HttpStatusEnum}.
 		 * <p>
 		 * Note for {@link HttpStatusEnum#OTHER} this returns <code>null</code>.
 		 * 
@@ -461,6 +460,8 @@ public class HttpStatus {
 	/**
 	 * Writes this {@link HttpStatus} to the {@link StreamBuffer}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param head
 	 *            Head {@link StreamBuffer} of the linked list of
 	 *            {@link StreamBuffer} instances.

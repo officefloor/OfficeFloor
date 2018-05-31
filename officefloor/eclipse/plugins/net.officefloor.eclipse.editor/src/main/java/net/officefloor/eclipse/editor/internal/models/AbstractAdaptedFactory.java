@@ -209,9 +209,6 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	/**
 	 * Undertake validation.
 	 * 
-	 * @param models
-	 *            {@link Map} of {@link Model} {@link Class} to
-	 *            {@link AbstractAdaptedFactory}.
 	 * @throws IllegalStateException
 	 *             If invalid.
 	 */

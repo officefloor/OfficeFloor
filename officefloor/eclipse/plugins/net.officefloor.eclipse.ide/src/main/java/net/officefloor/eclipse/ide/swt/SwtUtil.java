@@ -64,8 +64,8 @@ public class SwtUtil {
 	/**
 	 * Provides auto hiding of the scroll bars.
 	 * 
-	 * @param control
-	 *            Control to have scroll bars auto hidden.
+	 * @param text
+	 *            {@link Text}.
 	 */
 	public static void autoHideScrollbars(Text text) {
 		Listener scrollBarListener = (Event event) -> {
@@ -86,8 +86,8 @@ public class SwtUtil {
 	/**
 	 * Provides auto hiding of the scroll bars.
 	 * 
-	 * @param control
-	 *            Control to have scroll bars auto hidden.
+	 * @param text
+	 *            {@link StyledText}.
 	 */
 	public static void autoHideScrollbars(StyledText text) {
 		Listener scrollBarListener = (Event event) -> {

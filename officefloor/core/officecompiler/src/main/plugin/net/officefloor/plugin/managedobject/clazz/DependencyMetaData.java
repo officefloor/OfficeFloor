@@ -66,7 +66,7 @@ public class DependencyMetaData {
 	 * Obtains the type qualifier for the dependency.
 	 * 
 	 * @return Type qualifier. May be <code>null</code> if no type qualifier.
-	 * @throws IllegalArgumentException
+	 * @throws Exception
 	 *             If fails to obtain the type qualifier.
 	 */
 	@SuppressWarnings("unchecked")

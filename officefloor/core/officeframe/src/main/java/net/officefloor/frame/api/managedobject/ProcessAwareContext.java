@@ -27,6 +27,10 @@ public interface ProcessAwareContext {
 	/**
 	 * Undertakes a {@link ProcessSafeOperation}.
 	 * 
+	 * @param <R>
+	 *            Return type from operation
+	 * @param <T>
+	 *            Possible {@link Throwable} type from operation.
 	 * @param operation
 	 *            {@link ProcessSafeOperation}.
 	 * @return Return value.

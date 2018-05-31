@@ -51,8 +51,7 @@ public class ManagedFunctionLoaderUtil {
 	 * @param managedFunctionSourceClass
 	 *            {@link ManagedFunctionSource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends ManagedFunctionSource> PropertyList validateSpecification(
@@ -76,8 +75,7 @@ public class ManagedFunctionLoaderUtil {
 	 * @param managedFunctionSource
 	 *            {@link ManagedFunctionSource} instance.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static PropertyList validateSpecification(ManagedFunctionSource managedFunctionSource,
@@ -106,8 +104,8 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that validates the {@link FunctionNamespaceType}
-	 * loaded from the input {@link ManagedFunctionSource} against the expected
+	 * Convenience method that validates the {@link FunctionNamespaceType} loaded
+	 * from the input {@link ManagedFunctionSource} against the expected
 	 * {@link FunctionNamespaceType} from the {@link FunctionNamespaceBuilder}.
 	 * 
 	 * @param <S>
@@ -118,8 +116,8 @@ public class ManagedFunctionLoaderUtil {
 	 * @param managedFunctionSourceClass
 	 *            {@link ManagedFunctionSource} class.
 	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link ManagedFunctionSource}.
+	 *            Listing of name/value pairs that comprise the properties for the
+	 *            {@link ManagedFunctionSource}.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	public static <S extends ManagedFunctionSource> FunctionNamespaceType validateManagedFunctionType(
@@ -130,8 +128,8 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that validates the {@link FunctionNamespaceType}
-	 * loaded from the input {@link ManagedFunctionSource} against the expected
+	 * Convenience method that validates the {@link FunctionNamespaceType} loaded
+	 * from the input {@link ManagedFunctionSource} against the expected
 	 * {@link FunctionNamespaceType} from the {@link FunctionNamespaceBuilder}.
 	 * 
 	 * @param <S>
@@ -144,8 +142,8 @@ public class ManagedFunctionLoaderUtil {
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}. May be <code>null</code>.
 	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link ManagedFunctionSource}.
+	 *            Listing of name/value pairs that comprise the properties for the
+	 *            {@link ManagedFunctionSource}.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	public static <S extends ManagedFunctionSource> FunctionNamespaceType validateManagedFunctionType(
@@ -161,20 +159,18 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that validates the {@link FunctionNamespaceType}
-	 * loaded from the input {@link ManagedFunctionSource} against the expected
+	 * Convenience method that validates the {@link FunctionNamespaceType} loaded
+	 * from the input {@link ManagedFunctionSource} against the expected
 	 * {@link FunctionNamespaceType} from the {@link FunctionNamespaceBuilder}.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedFunctionSource} type.
 	 * @param expectedFunctionNamespaceType
 	 *            {@link FunctionNamespaceBuilder} that has had the expected
 	 *            {@link FunctionNamespaceType} built against it.
 	 * @param managedFunctionSource
 	 *            {@link ManagedFunctionSource} instance.
 	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link ManagedFunctionSource}.
+	 *            Listing of name/value pairs that comprise the properties for the
+	 *            {@link ManagedFunctionSource}.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	public static FunctionNamespaceType validateManagedFunctionType(
@@ -189,8 +185,8 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that validates the {@link FunctionNamespaceType}
-	 * loaded from the input {@link ManagedFunctionSource} against the expected
+	 * Convenience method that validates the {@link FunctionNamespaceType} loaded
+	 * from the input {@link ManagedFunctionSource} against the expected
 	 * {@link FunctionNamespaceType} from the {@link FunctionNamespaceBuilder}.
 	 * 
 	 * @param expectedFunctionNamespaceType
@@ -312,17 +308,16 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that loads the {@link FunctionNamespaceType} by
-	 * obtaining the {@link ClassLoader} from the {@link ManagedFunctionSource}
-	 * class.
+	 * Convenience method that loads the {@link FunctionNamespaceType} by obtaining
+	 * the {@link ClassLoader} from the {@link ManagedFunctionSource} class.
 	 * 
 	 * @param <S>
 	 *            {@link ManagedFunctionSource} type.
 	 * @param managedFunctionSourceClass
 	 *            {@link ManagedFunctionSource} class.
 	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link ManagedFunctionSource}.
+	 *            Listing of name/value pairs that comprise the properties for the
+	 *            {@link ManagedFunctionSource}.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	public static <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
@@ -342,8 +337,8 @@ public class ManagedFunctionLoaderUtil {
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
 	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link ManagedFunctionSource}.
+	 *            Listing of name/value pairs that comprise the properties for the
+	 *            {@link ManagedFunctionSource}.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	public static <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
@@ -354,15 +349,14 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that loads the {@link FunctionNamespaceType} by
-	 * obtaining the {@link ClassLoader} from the {@link ManagedFunctionSource}
-	 * class.
+	 * Convenience method that loads the {@link FunctionNamespaceType} by obtaining
+	 * the {@link ClassLoader} from the {@link ManagedFunctionSource} class.
 	 * 
 	 * @param managedFunctionSource
 	 *            {@link ManagedFunctionSource} instance.
 	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link ManagedFunctionSource}.
+	 *            Listing of name/value pairs that comprise the properties for the
+	 *            {@link ManagedFunctionSource}.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	public static FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource,

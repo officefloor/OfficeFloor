@@ -69,21 +69,10 @@ public class ModelToSelfConnection<R extends Model, O, M extends Model, E extend
 	/**
 	 * Instantiate.
 	 * 
-	 * @param getAsSourceConnections
-	 *            Obtains the {@link ConnectionModel} instances when the source of
-	 *            the {@link ConnectionModel}.
-	 * @param sourceChangeEvents
-	 *            {@link Enum} events to indicate change in {@link ConnectionModel}
-	 *            instances when the source of the {@link ConnectionModel}.
-	 * @param getAsTargetConnections
-	 *            Obtains the {@link ConnectionModel} instances when the target of
-	 *            the {@link ConnectionModel}.
-	 * @param targetChangeEvents
-	 *            {@link Enum} events to indicate change in {@link ConnectionModel}
-	 *            instances when the target of the {@link ConnectionModel}.
-	 * @param adaptedConnectionFactory
-	 *            {@link AdaptedConnectionFactory} to create the
-	 *            {@link ConnectionModel}.
+	 * @param sourceToConnection
+	 *            Source {@link ModelToConnection}.
+	 * @param targetToConnection
+	 *            Target {@link ModelToConnection}.
 	 */
 	public ModelToSelfConnection(ModelToConnection<R, O, M, E, C> sourceToConnection,
 			ModelToConnection<R, O, M, E, C> targetToConnection) {

@@ -18,7 +18,7 @@
 package net.officefloor.compile.spi.office;
 
 /**
- * Enables transforming the {@link AutoWireSection}.
+ * Enables transforming the {@link OfficeSection}.
  * 
  * @author Daniel Sagenschneider
  */

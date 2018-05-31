@@ -199,7 +199,7 @@ public interface WoofChanges {
 	 * 
 	 * @param template
 	 *            {@link WebTemplate} to be loaded within its super
-	 *            {@link WoofTemplate} instances.
+	 *            {@link WebTemplate} instances.
 	 * @param woofTemplate
 	 *            {@link WoofTemplateModel} within the configuration for the
 	 *            {@link WebTemplate}.
@@ -934,7 +934,7 @@ public interface WoofChanges {
 	 * Links the {@link WoofSectionOutputModel} to the {@link WoofSecurityModel}.
 	 * 
 	 * @param sectionOutput
-	 *            {@link WoofAccessOutputModel}.
+	 *            {@link WoofSectionOutputModel}.
 	 * @param security
 	 *            {@link WoofSecurityModel}.
 	 * @return {@link Change} to make the link.
@@ -980,7 +980,7 @@ public interface WoofChanges {
 	 * 
 	 * @param sectionOutput
 	 *            {@link WoofSectionOutputModel}.
-	 * @param resource
+	 * @param httpContinuation
 	 *            {@link WoofHttpContinuationModel}.
 	 * @return {@link Change} to make the link.
 	 */

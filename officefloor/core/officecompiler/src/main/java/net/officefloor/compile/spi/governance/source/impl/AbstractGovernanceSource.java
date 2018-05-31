@@ -175,7 +175,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements 
 	}
 
 	/**
-	 * Context for the {@link GovernanceSource#getMetaData()}.
+	 * Context for the {@link GovernanceSource#init(GovernanceSourceContext)}.
 	 */
 	public static interface MetaDataContext<I, F extends Enum<F>> {
 
@@ -214,8 +214,8 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements 
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the order
-		 * the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order the
+		 * {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.

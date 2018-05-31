@@ -44,7 +44,7 @@ public class HttpHeaderValue {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
+	 * @param value
 	 *            {@link HttpHeaderValue}.
 	 */
 	public HttpHeaderValue(String value) {
@@ -64,9 +64,11 @@ public class HttpHeaderValue {
 	/**
 	 * Writes this {@link HttpHeaderValue} to the {@link StreamBuffer}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
+	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
+	 *            instances.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 */

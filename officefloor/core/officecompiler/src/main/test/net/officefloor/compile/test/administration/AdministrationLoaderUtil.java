@@ -58,11 +58,12 @@ public class AdministrationLoaderUtil {
 	 *            {@link Flow} key type.
 	 * @param <G>
 	 *            {@link Governance} key type.
+	 * @param <S>
+	 *            {@link AdministrationSource} type.
 	 * @param administrationSourceClass
 	 *            {@link AdministrationSource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> PropertyList validateSpecification(
@@ -83,6 +84,18 @@ public class AdministrationLoaderUtil {
 	 * Creates the {@link AdministrationTypeBuilder} to create the expected
 	 * {@link AdministrationType}.
 	 * 
+	 * @param <E>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @param flowKeyClass
+	 *            {@link Flow} key type.
+	 * @param governanceKeyClass
+	 *            {@link Governance} key type.
 	 * @return {@link AdministrationTypeBuilder}.
 	 */
 	public static <E, F extends Enum<F>, G extends Enum<G>> AdministrationTypeBuilder<F, G> createAdministrationTypeBuilder(
@@ -99,6 +112,8 @@ public class AdministrationLoaderUtil {
 	 *            Extension interface type.
 	 * @param <F>
 	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
 	 * @param <S>
 	 *            {@link AdministrationSource} type
 	 * @param expectedAdministratorType
@@ -125,12 +140,10 @@ public class AdministrationLoaderUtil {
 		AdministrationType<E, F, G> aType = loadAdministrationType(administratorSourceClass, propertyNameValues);
 
 		// Ensure correct administrator type
-		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionType(),
-				aType.getExtensionType());
+		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionType(), aType.getExtensionType());
 
 		// Validate the type
-		Assert.assertEquals("Incorrect extension interface", eType.getExtensionType(),
-				aType.getExtensionType());
+		Assert.assertEquals("Incorrect extension interface", eType.getExtensionType(), aType.getExtensionType());
 		Assert.assertEquals("Incorrect flow key class", eType.getFlowKeyClass(), aType.getFlowKeyClass());
 		Assert.assertEquals("Incorrect governance key class", eType.getGovernanceKeyClass(),
 				aType.getGovernanceKeyClass());
@@ -191,8 +204,7 @@ public class AdministrationLoaderUtil {
 	}
 
 	/**
-	 * Loads the {@link AdministrationType} from the
-	 * {@link AdministrationSource}.
+	 * Loads the {@link AdministrationType} from the {@link AdministrationSource}.
 	 * 
 	 * @param <E>
 	 *            Extension interface type.
@@ -200,6 +212,8 @@ public class AdministrationLoaderUtil {
 	 *            {@link Flow} key type.
 	 * @param <G>
 	 *            {@link Governance} key type.
+	 * @param <S>
+	 *            {@link AdministrationSource} type.
 	 * @param administrationSourceClass
 	 *            {@link AdministrationSource} class.
 	 * @param propertyNameValues

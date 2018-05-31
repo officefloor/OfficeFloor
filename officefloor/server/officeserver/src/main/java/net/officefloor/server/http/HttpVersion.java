@@ -83,11 +83,9 @@ public class HttpVersion implements Serializable {
 
 		/**
 		 * <p>
-		 * Obtains the singleton {@link HttpVersion} for this
-		 * {@link HttpVersionEnum}.
+		 * Obtains the singleton {@link HttpVersion} for this {@link HttpVersionEnum}.
 		 * <p>
-		 * Note for {@link HttpVersionEnum#OTHER} this returns
-		 * <code>null</code>.
+		 * Note for {@link HttpVersionEnum#OTHER} this returns <code>null</code>.
 		 * 
 		 * @return {@link HttpVersion}.
 		 */
@@ -195,6 +193,8 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Writes this {@link HttpStatus} to the {@link StreamBuffer}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param head
 	 *            Head {@link StreamBuffer} of the linked list of
 	 *            {@link StreamBuffer} instances.

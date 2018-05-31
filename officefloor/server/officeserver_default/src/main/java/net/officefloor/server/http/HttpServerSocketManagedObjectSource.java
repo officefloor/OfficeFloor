@@ -58,6 +58,7 @@ import net.officefloor.server.AcceptedSocketDecorator;
 import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ServerSocketDecorator;
 import net.officefloor.server.SocketManager;
+import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -91,7 +92,7 @@ public class HttpServerSocketManagedObjectSource
 
 	/**
 	 * Name of {@link System} property to specify the number of
-	 * {@link SocketListener} instances. If not specified, will default to
+	 * {@link SocketServicer} instances. If not specified, will default to
 	 * {@link Runtime#availableProcessors()}.
 	 */
 	public static final String SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT = "officefloor.socket.listener.count";
@@ -109,8 +110,8 @@ public class HttpServerSocketManagedObjectSource
 	public static final String SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE = "officefloor.socket.receive.buffer.size";
 
 	/**
-	 * Name of {@link System} property to obtain the maximum number of reads for
-	 * a {@link SocketChannel} per select.
+	 * Name of {@link System} property to obtain the maximum number of reads for a
+	 * {@link SocketChannel} per select.
 	 */
 	public static final String SYSTEM_PROPERTY_MAX_READS_ON_SELECT = "officefloor.socket.max.reads.on.select";
 
@@ -154,8 +155,8 @@ public class HttpServerSocketManagedObjectSource
 	public static final String PROPERTY_MAX_ENTITY_LENGTH = "max.entity.length";
 
 	/**
-	 * Name of {@link Property} for the size of the {@link StreamBuffer}
-	 * instances for the service.
+	 * Name of {@link Property} for the size of the {@link StreamBuffer} instances
+	 * for the service.
 	 */
 	public static final String PROPERTY_SERVICE_BUFFER_SIZE = "service.buffer.size";
 
@@ -219,8 +220,7 @@ public class HttpServerSocketManagedObjectSource
 	}
 
 	/**
-	 * Creates the {@link SocketManager} configured from {@link System}
-	 * properties.
+	 * Creates the {@link SocketManager} configured from {@link System} properties.
 	 * 
 	 * @return {@link SocketManager} configured from {@link System} properties.
 	 * @throws IOException
@@ -233,8 +233,8 @@ public class HttpServerSocketManagedObjectSource
 		 * 
 		 * Defaults are based on following:
 		 * 
-		 * - thread per CPU (leaving non-used CPU utilisation for additional
-		 * threads servicing requests)
+		 * - thread per CPU (leaving non-used CPU utilisation for additional threads
+		 * servicing requests)
 		 * 
 		 * - 8192 to fill a Jumbo Ethernet frame (i.e. 9000)
 		 * 
@@ -267,8 +267,8 @@ public class HttpServerSocketManagedObjectSource
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param instance
-	 *            Instance of the {@link HttpServerSocketManagedObjectSource}
-	 *            using the {@link SocketManager}.
+	 *            Instance of the {@link HttpServerSocketManagedObjectSource} using
+	 *            the {@link SocketManager}.
 	 * @return {@link SocketManager}.
 	 */
 	private static synchronized SocketManager getSocketManager(HttpServerSocketManagedObjectSource instance)
@@ -335,8 +335,7 @@ public class HttpServerSocketManagedObjectSource
 		 * Dumps the active {@link Thread} instances after the specified time.
 		 * 
 		 * @param timeInMilliseconds
-		 *            Time in milliseconds to dump the active {@link Thread}
-		 *            instances.
+		 *            Time in milliseconds to dump the active {@link Thread} instances.
 		 */
 		private void dumpActiveThreadsAfter(long timeInMilliseconds) {
 			long startTime = System.currentTimeMillis();
@@ -471,11 +470,11 @@ public class HttpServerSocketManagedObjectSource
 
 	/**
 	 * <p>
-	 * Releases the {@link HttpServerSocketManagedObjectSource} instance from
-	 * the {@link SocketManager}.
+	 * Releases the {@link HttpServerSocketManagedObjectSource} instance from the
+	 * {@link SocketManager}.
 	 * <p>
-	 * Once all {@link HttpServerSocketManagedObjectSource} instances are
-	 * release, the {@link SocketManager} itself is closed.
+	 * Once all {@link HttpServerSocketManagedObjectSource} instances are release,
+	 * the {@link SocketManager} itself is closed.
 	 * 
 	 * @param instance
 	 *            {@link HttpServerSocketManagedObjectSource}.
@@ -771,8 +770,8 @@ public class HttpServerSocketManagedObjectSource
 		 * @param serviceBufferPool
 		 *            Service {@link StreamBufferPool}.
 		 * @param isIncludeEscalationStackTrace
-		 *            Indicates whether to include the {@link Escalation} stack
-		 *            trace in the {@link HttpResponse}.
+		 *            Indicates whether to include the {@link Escalation} stack trace in
+		 *            the {@link HttpResponse}.
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,

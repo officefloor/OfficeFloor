@@ -108,6 +108,8 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	 * 
 	 * @param inputManagedObjectName
 	 *            Name of the {@link OfficeFloorInputManagedObject}.
+	 * @param inputObjectType
+	 *            Input {@link Object} type.
 	 * @return Added {@link OfficeFloorInputManagedObject}.
 	 */
 	OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName, String inputObjectType);
@@ -118,8 +120,7 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	 * @param managedObjectPoolName
 	 *            Name of the {@link OfficeFloorManagedObjectPool}.
 	 * @param managedObjectPoolSourceClassName
-	 *            Fully qualified class name of the
-	 *            {@link ManagedObjectPoolSource}.
+	 *            Fully qualified class name of the {@link ManagedObjectPoolSource}.
 	 * @return Added {@link OfficeFloorManagedObjectPool}.
 	 */
 	OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
@@ -240,8 +241,7 @@ public interface OfficeFloorDeployer extends SourceIssues {
 			OfficeFloorDependencyObjectNode dependencyObjectNode);
 
 	/**
-	 * Links the {@link OfficeFloorResponsibility} to the
-	 * {@link OfficeFloorTeam}.
+	 * Links the {@link OfficeFloorResponsibility} to the {@link OfficeFloorTeam}.
 	 * 
 	 * @param responsibility
 	 *            {@link OfficeFloorResponsibility}.
@@ -251,8 +251,7 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	void link(OfficeFloorResponsibility responsibility, OfficeFloorTeam officeFloorTeam);
 
 	/**
-	 * Links the {@link ManagingOffice} to be managed by the
-	 * {@link DeployedOffice}.
+	 * Links the {@link ManagingOffice} to be managed by the {@link DeployedOffice}.
 	 * 
 	 * @param managingOffice
 	 *            {@link ManagingOffice}.

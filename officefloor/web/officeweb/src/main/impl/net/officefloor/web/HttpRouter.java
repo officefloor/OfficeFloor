@@ -65,12 +65,10 @@ public class HttpRouter {
 	 * instances for routing.
 	 * 
 	 * @param routes
-	 *            {@link List} of {@link RouteInput} instances for the
-	 *            application.
-	 * @param factory
-	 *            Factory to create the {@link ManagedFunctionTypeBuilder}.
-	 * @return {@link ManagedFunctionTypeBuilder} with the {@link Flow}
-	 *         instances for routing.
+	 *            {@link List} of {@link RouteInput} instances for the application.
+	 * @param function
+	 *            {@link ManagedFunctionTypeBuilder} to be configured with the
+	 *            {@link Flow} instances.
 	 */
 	public void configureRoutes(List<RouteInput> routes, ManagedFunctionTypeBuilder<?, Indexed> function) {
 

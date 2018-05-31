@@ -88,8 +88,8 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 	/**
 	 * Registers children for the {@link Model}.
 	 * 
-	 * @param childModelClass
-	 *            {@link Model} {@link Class}.
+	 * @param childGroupName
+	 *            Name of child group.
 	 * @param getChildren
 	 *            {@link Function} to get the children from the {@link Model}.
 	 * @param childrenEvents

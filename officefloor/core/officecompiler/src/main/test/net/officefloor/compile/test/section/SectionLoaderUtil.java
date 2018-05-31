@@ -205,8 +205,6 @@ public class SectionLoaderUtil {
 	 * Convenience method that validates the loaded {@link SectionType} against
 	 * expected {@link SectionType} from the {@link SectionDesigner}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
 	 * @param designer
 	 *            {@link SectionDesigner} containing the expected
 	 *            {@link SectionType}.

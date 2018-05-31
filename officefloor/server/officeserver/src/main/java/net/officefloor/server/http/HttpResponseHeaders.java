@@ -28,8 +28,8 @@ public interface HttpResponseHeaders extends Iterable<HttpHeader> {
 	 * <p>
 	 * Adds a {@link HttpHeader} for the response.
 	 * <p>
-	 * {@link HttpHeader} instances are provided on the response in the order
-	 * they are added.
+	 * {@link HttpHeader} instances are provided on the response in the order they
+	 * are added.
 	 * 
 	 * @param name
 	 *            Name of {@link HttpHeader}.
@@ -97,13 +97,13 @@ public interface HttpResponseHeaders extends Iterable<HttpHeader> {
 	 * <p>
 	 * Removes all {@link HttpHeader} instances by the name.
 	 * <p>
-	 * This method compliments {@link #addHeader(String, String)} to allow
-	 * adding a new single {@link HttpHeader} instance by name.
+	 * This method compliments {@link #addHeader(String, String)} to allow adding a
+	 * new single {@link HttpHeader} instance by name.
 	 * 
 	 * @param name
 	 *            Name of the {@link HttpHeader} instances to remove.
-	 * @param <code>true</code>
-	 *            if {@link HttpHeader} instances were removed by the name.
+	 * @return <code>true</code> if {@link HttpHeader} instances were removed by the
+	 *         name.
 	 */
 	boolean removeHeaders(String name);
 

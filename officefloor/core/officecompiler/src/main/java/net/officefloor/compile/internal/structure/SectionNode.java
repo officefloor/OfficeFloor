@@ -76,8 +76,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
 
@@ -90,8 +89,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
 
@@ -101,8 +99,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceInheritance(CompileContext compileContext);
 
@@ -128,10 +125,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * 
 	 * @param compileContext
 	 *            {@link CompileContext}.
-	 * @return {@link SectionType} or <code>null</code> if issue loading with
-	 *         issue reported to the {@link CompilerIssues}.
-	 * 
-	 * @see #sourceSection()
+	 * @return {@link SectionType} or <code>null</code> if issue loading with issue
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	SectionType loadSectionType(CompileContext compileContext);
 
@@ -140,10 +135,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * 
 	 * @param compileContext
 	 *            {@link CompileContext}.
-	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading
-	 *         with issue reported to the {@link CompilerIssues}.
-	 * 
-	 * @see #sourceSectionTree()
+	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading with
+	 *         issue reported to the {@link CompilerIssues}.
 	 */
 	OfficeSectionType loadOfficeSectionType(CompileContext compileContext);
 
@@ -154,8 +147,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 *            Parent {@link OfficeSubSectionType}.
 	 * @param compileContext
 	 *            {@link CompileContext}.
-	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue
-	 *         loading with issue reported to the {@link CompilerIssues}.
+	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue loading
+	 *         with issue reported to the {@link CompilerIssues}.
 	 */
 	OfficeSubSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType,
 			CompileContext compileContext);
@@ -166,8 +159,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 * @return {@link OfficeAvailableSectionInputType} instances or
-	 *         <code>null</code> with issues reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>null</code> with issues reported to the {@link CompilerIssues}.
 	 */
 	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(CompileContext compileContext);
 
@@ -189,22 +181,20 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * <ol>
 	 * <li>{@link GovernanceNode} assigned to this particular
 	 * {@link SectionNode}</li>
-	 * <li>{@link GovernanceNode} assigned to any parent
-	 * {@link SectionNode}</li>
+	 * <li>{@link GovernanceNode} assigned to any parent {@link SectionNode}</li>
 	 * </ol>
 	 * 
-	 * @return {@link GovernanceNode} instances providing {@link Governance}
-	 *         over this {@link SectionNode}.
+	 * @return {@link GovernanceNode} instances providing {@link Governance} over
+	 *         this {@link SectionNode}.
 	 */
 	GovernanceNode[] getGoverningGovernances();
 
 	/**
-	 * Obtains the parent {@link SectionNode} containing this
-	 * {@link SectionNode}.
+	 * Obtains the parent {@link SectionNode} containing this {@link SectionNode}.
 	 * 
 	 * @return Parent {@link SectionNode} or <code>null</code> if this
-	 *         {@link SectionNode} is the top level {@link SectionNode} (in
-	 *         other words a {@link OfficeSection}).
+	 *         {@link SectionNode} is the top level {@link SectionNode} (in other
+	 *         words a {@link OfficeSection}).
 	 */
 	SectionNode getParentSectionNode();
 
@@ -220,19 +210,16 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * {@link Office} name.
 	 * 
 	 * @param simpleName
-	 *            Simple name to qualify with the {@link OfficeSection} name
-	 *            space.
+	 *            Simple name to qualify with the {@link OfficeSection} name space.
 	 * @return {@link OfficeSection} qualified name.
 	 */
 	String getQualifiedName(String simpleName);
 
 	/**
-	 * Obtains the {@link SectionNode} qualified name within the
-	 * {@link OfficeNode}.
+	 * Obtains the {@link SectionNode} qualified name within the {@link OfficeNode}.
 	 * 
 	 * @param simpleName
-	 *            Simple name to qualify with the {@link SectionNode} name
-	 *            space.
+	 *            Simple name to qualify with the {@link SectionNode} name space.
 	 * @return {@link SectionNode} qualified name.
 	 */
 	String getSectionQualifiedName(String simpleName);
@@ -248,8 +235,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
 
 	/**
-	 * Auto-wires the {@link SectionFunction} instances to a possible
-	 * responsible {@link Team}.
+	 * Auto-wires the {@link SectionFunction} instances to a possible responsible
+	 * {@link Team}.
 	 * 
 	 * @param autoWirer
 	 *            {@link AutoWirer}.

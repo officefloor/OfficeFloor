@@ -49,7 +49,7 @@ public interface HttpSecurityLoader {
 	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link HttpSecuritySource} type.
-	 * @param httpSecuritySource
+	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} {@link Class}.
 	 * @return {@link PropertyList} of the {@link HttpSecuritySourceProperty}
 	 *         instances of the {@link HttpSecuritySourceSpecification} or
@@ -102,7 +102,7 @@ public interface HttpSecurityLoader {
 	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link HttpSecuritySource} type.
-	 * @param httpSecuritySource
+	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} {@link Class}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the

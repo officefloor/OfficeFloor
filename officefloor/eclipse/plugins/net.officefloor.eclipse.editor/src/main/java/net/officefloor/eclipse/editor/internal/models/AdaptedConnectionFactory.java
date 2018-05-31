@@ -34,7 +34,6 @@ import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
-import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -95,10 +94,12 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 *            Prefix on the configuration path.
 	 * @param connectionClass
 	 *            {@link ConnectionModel} {@link Class}.
+	 * @param sourceModelClass
+	 *            Source {@link Model} {@link Class}.
 	 * @param getSource
 	 *            {@link Function} to obtain the source {@link Model}.
-	 * @param contentPartFactory
-	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param adaptedChildModelFactory
+	 *            {@link AdaptedChildFactory}.
 	 */
 	public AdaptedConnectionFactory(String configurationPathPrefix, Class<C> connectionClass, Class<S> sourceModelClass,
 			Function<C, S> getSource, AdaptedChildFactory<R, O, ?, ?, ?> adaptedChildModelFactory) {

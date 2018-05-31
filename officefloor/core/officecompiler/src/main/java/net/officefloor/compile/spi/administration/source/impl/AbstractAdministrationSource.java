@@ -157,7 +157,8 @@ public abstract class AbstractAdministrationSource<E, F extends Enum<F>, G exten
 	protected abstract void loadMetaData(MetaDataContext<E, F, G> context) throws Exception;
 
 	/**
-	 * Context for the {@link AdministrationSource#getMetaData()}.
+	 * Context for the
+	 * {@link AdministrationSource#init(AdministrationSourceContext)}.
 	 */
 	public static interface MetaDataContext<E, F extends Enum<F>, G extends Enum<G>> {
 
@@ -196,8 +197,8 @@ public abstract class AbstractAdministrationSource<E, F extends Enum<F>, G exten
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the order
-		 * the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order the
+		 * {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.

@@ -66,8 +66,7 @@ public class HttpException extends RuntimeException {
 	private final HttpStatus status;
 
 	/**
-	 * Possible {@link WritableHttpHeader} instances for the
-	 * {@link HttpResponse}.
+	 * Possible {@link WritableHttpHeader} instances for the {@link HttpResponse}.
 	 */
 	private final WritableHttpHeader[] headers;
 
@@ -162,6 +161,8 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Writes the HTTP response for this {@link HttpException}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param version
 	 *            {@link HttpVersion}.
 	 * @param isIncludeStackTrace

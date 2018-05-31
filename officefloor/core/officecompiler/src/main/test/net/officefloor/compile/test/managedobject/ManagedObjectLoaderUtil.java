@@ -160,8 +160,6 @@ public class ManagedObjectLoaderUtil {
 	 *            Dependency keys type.
 	 * @param <F>
 	 *            {@link Flow} keys type.
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
 	 * @param expectedManagedObjectType
 	 *            Expected {@link ManagedObjectType}.
 	 * @param managedObjectSource

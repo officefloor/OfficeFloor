@@ -881,7 +881,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * Loads the {@link IdeConnectionTarget} instances (created from
 	 * {@link IdeConnection} instances).
 	 * 
-	 * @param childGroups
+	 * @param connections
 	 *            {@link IdeConnection} instances.
 	 */
 	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {

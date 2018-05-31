@@ -207,8 +207,6 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link Flow} keys type.
 	 * @param <HS>
 	 *            {@link HttpSecuritySource} type.
-	 * @param <S>
-	 *            {@link HttpSecurity} type.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} class.
 	 * @param propertyNameValues

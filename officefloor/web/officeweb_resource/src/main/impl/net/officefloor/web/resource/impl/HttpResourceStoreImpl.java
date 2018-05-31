@@ -65,8 +65,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	private static final Logger LOGGER = Logger.getLogger(HttpResourceStoreImpl.class.getName());
 
 	/**
-	 * All working files, so delete on close and only allow read access to
-	 * contents.
+	 * All working files, so delete on close and only allow read access to contents.
 	 */
 	private static final OpenOption[] OPEN_OPTIONS = new OpenOption[] { StandardOpenOption.READ,
 			StandardOpenOption.DELETE_ON_CLOSE };
@@ -114,8 +113,8 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	private final ResourceTransformer[] transformers;
 
 	/**
-	 * Cache of the <code>Content-Type</code> {@link HttpHeaderValue} instances
-	 * to reduce GC.
+	 * Cache of the <code>Content-Type</code> {@link HttpHeaderValue} instances to
+	 * reduce GC.
 	 */
 	private final Map<String, HttpHeaderValue> contentTypes = new ConcurrentHashMap<>();
 
@@ -141,9 +140,6 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 *            Location for the {@link ResourceSystemContext}.
 	 * @param resourceSystemService
 	 *            {@link ResourceSystemFactory}.
-	 * @param contextPath
-	 *            Context path for {@link HttpResource} instances from this
-	 *            {@link HttpResourceStore}.
 	 * @param fileCacheFactory
 	 *            {@link FileCacheFactory}.
 	 * @param transformers
@@ -193,8 +189,8 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * 
 	 * @param directory
 	 *            {@link HttpDirectory}.
-	 * @return {@link HttpFile} for the {@link HttpDirectory} or
-	 *         <code>null</code> if no default {@link HttpFile}.
+	 * @return {@link HttpFile} for the {@link HttpDirectory} or <code>null</code>
+	 *         if no default {@link HttpFile}.
 	 * @throws IOException
 	 *             If failure in obtaining default {@link HttpFile}.
 	 */
@@ -386,8 +382,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		 * 
 		 * @param canonicalPath
 		 *            Canonical path to the {@link HttpResource}.
-		 * @return {@link HttpResource} or <code>null</code> if no resource at
-		 *         path.
+		 * @return {@link HttpResource} or <code>null</code> if no resource at path.
 		 */
 		private HttpResource getSafeHttpResource(String canonicalPath) {
 			return HttpResourceStoreImpl.this.cache.get(canonicalPath);
@@ -512,14 +507,13 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 				if (Files.isSameFile(resource, context.resource)) {
 
 					/*
-					 * Must make copy of file. This is so the file channel is
-					 * always backed by a file. Specifically, if the file is
-					 * altered within the resource system outside the control of
-					 * the HTTP resource store, then this needs to be managed
-					 * rather than breaking the file channel.
+					 * Must make copy of file. This is so the file channel is always backed by a
+					 * file. Specifically, if the file is altered within the resource system outside
+					 * the control of the HTTP resource store, then this needs to be managed rather
+					 * than breaking the file channel.
 					 * 
-					 * Furthermore, it ensures that system does not accidently
-					 * delete the source file.
+					 * Furthermore, it ensures that system does not accidently delete the source
+					 * file.
 					 */
 					Path copy = context.createFile();
 					Files.copy(context.resource, copy, StandardCopyOption.REPLACE_EXISTING);
@@ -561,8 +555,8 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	private class ResourceTransformerContextImpl implements ResourceTransformerContext {
 
 		/**
-		 * Path of the {@link HttpResource} to use as name for cached files.
-		 * This aids identifying the file for debugging.
+		 * Path of the {@link HttpResource} to use as name for cached files. This aids
+		 * identifying the file for debugging.
 		 */
 		private final String resourcePath;
 

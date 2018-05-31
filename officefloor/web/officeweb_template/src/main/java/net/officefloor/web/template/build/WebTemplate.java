@@ -43,7 +43,7 @@ public interface WebTemplate extends PropertyConfigurable {
 	/**
 	 * Specifies the logic {@link Class}.
 	 * 
-	 * @param logicClass
+	 * @param logicClassName
 	 *            Name of the logic {@link Class}.
 	 * @return <code>this</code>.
 	 */
@@ -149,8 +149,8 @@ public interface WebTemplate extends PropertyConfigurable {
 	/**
 	 * Adds a {@link WebTemplateExtension} for this {@link WebTemplate}.
 	 * 
-	 * @param extension
-	 *            {@link WebTemplateExtension} {@link Class}.
+	 * @param webTemplateExtensionClassName
+	 *            {@link WebTemplateExtension} {@link Class} name.
 	 * @return {@link WebTemplateExtensionBuilder} to build the
 	 *         {@link WebTemplateExtension}.
 	 */
@@ -159,7 +159,7 @@ public interface WebTemplate extends PropertyConfigurable {
 	/**
 	 * Obtains the {@link OfficeFlowSinkNode} to render the {@link WebTemplate}.
 	 * 
-	 * @param valuesType
+	 * @param valuesTypeName
 	 *            Name of type provided as a parameter to the
 	 *            {@link OfficeFlowSinkNode} should the path parameters require
 	 *            being obtained. The type should provide a bean property for each

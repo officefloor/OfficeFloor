@@ -31,7 +31,7 @@ public interface AdaptedModelVisualFactory<M extends Model> {
 	/**
 	 * Creates the visual {@link Pane}.
 	 * 
-	 * @param adaptedModel
+	 * @param model
 	 *            {@link AdaptedModel}.
 	 * @param context
 	 *            {@link AdaptedModelVisualFactoryContext}.
