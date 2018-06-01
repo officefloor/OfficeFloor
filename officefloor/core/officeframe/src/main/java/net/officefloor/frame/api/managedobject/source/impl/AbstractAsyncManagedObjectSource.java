@@ -69,8 +69,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 	protected abstract void loadSpecification(SpecificationContext context);
 
 	/**
-	 * Context for the
-	 * {@link AbstractAsyncManagedObjectSource#getSpecification()}.
+	 * Context for the {@link AbstractAsyncManagedObjectSource#getSpecification()}.
 	 */
 	public static interface SpecificationContext {
 
@@ -164,7 +163,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 	protected abstract void loadMetaData(MetaDataContext<O, F> context) throws Exception;
 
 	/**
-	 * Context for the {@link ManagedObjectSource#getMetaData()}.
+	 * Context for the {@link ManagedObjectSource#init(ManagedObjectSourceContext)}.
 	 */
 	public static interface MetaDataContext<O extends Enum<O>, F extends Enum<F>> {
 
@@ -176,8 +175,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		ManagedObjectSourceContext<F> getManagedObjectSourceContext();
 
 		/**
-		 * Specifies the type of the object returned from the
-		 * {@link ManagedObject}.
+		 * Specifies the type of the object returned from the {@link ManagedObject}.
 		 * 
 		 * @param objectClass
 		 *            Object type.
@@ -199,8 +197,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 *            {@link Enum} to identify the dependency.
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
-		 * @return {@link DependencyLabeller} to possibly label the required
-		 *         dependency.
+		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller<O> addDependency(O key, Class<?> dependencyType);
 
@@ -210,8 +207,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * 
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
-		 * @return {@link DependencyLabeller} to possibly label the required
-		 *         dependency.
+		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller<O> addDependency(Class<?> dependencyType);
 
@@ -227,8 +223,8 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		Labeller<F> addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the order
-		 * the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order the
+		 * {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
@@ -247,8 +243,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * @param extensionInterfaceFactory
 		 *            {@link ExtensionFactory}.
 		 */
-		<E> void addManagedObjectExtension(Class<E> interfaceType,
-				ExtensionFactory<E> extensionInterfaceFactory);
+		<E> void addManagedObjectExtension(Class<E> interfaceType, ExtensionFactory<E> extensionInterfaceFactory);
 	}
 
 	/**
@@ -285,8 +280,8 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Obtains the key of the dependency or {@link Flow}.
 		 * 
-		 * @return Key of the dependency or {@link Flow}. May be
-		 *         <code>null</code> if {@link Indexed}.
+		 * @return Key of the dependency or {@link Flow}. May be <code>null</code> if
+		 *         {@link Indexed}.
 		 */
 		K getKey();
 

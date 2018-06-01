@@ -32,8 +32,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public interface GovernanceContainer<E> {
 
 	/**
-	 * Indicates if {@link Governance} within this {@link GovernanceContainer}
-	 * is active.
+	 * Indicates if {@link Governance} within this {@link GovernanceContainer} is
+	 * active.
 	 * 
 	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
@@ -41,7 +41,9 @@ public interface GovernanceContainer<E> {
 
 	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
-	 * 
+	 *
+	 * @param <O>
+	 *            Object type.
 	 * @param managedObjectExtension
 	 *            Extension of the {@link ManagedObject} to enable
 	 *            {@link Governance}.

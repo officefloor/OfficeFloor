@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
+
 /**
  * Factory for the {@link ManagedExecution}.
  * 
@@ -27,6 +29,8 @@ public interface ManagedExecutionFactory {
 	/**
 	 * Creates the {@link ManagedExecution}.
 	 * 
+	 * @param <E>
+	 *            Possible {@link Escalation} from {@link Execution}.
 	 * @param execution
 	 *            {@link Execution}.
 	 * @return {@link ManagedExecution}.

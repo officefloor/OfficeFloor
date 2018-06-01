@@ -38,8 +38,8 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * life-cycle so be careful passing in an existing initialised
  * {@link ManagedObject}. For example the {@link AsynchronousContext} instance
  * will be overwritten which will likely cause live-lock as the
- * {@link AsynchronousContext#notifyComplete()} will notify on the wrong
- * {@link ManagedObjectContainer}.</li>
+ * {@link AsynchronousContext#complete(net.officefloor.frame.api.managedobject.AsynchronousOperation)}
+ * will notify on the wrong {@link ManagedObjectContainer}.</li>
  * </ol>
  * 
  * @author Daniel Sagenschneider
@@ -52,8 +52,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param key
 	 *            Key identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter to first {@link ManagedFunction} of the
-	 *            {@link Flow}.
+	 *            Parameter to first {@link ManagedFunction} of the {@link Flow}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.

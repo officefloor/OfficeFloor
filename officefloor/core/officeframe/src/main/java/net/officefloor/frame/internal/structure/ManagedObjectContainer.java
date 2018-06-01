@@ -46,7 +46,7 @@ public interface ManagedObjectContainer {
 	 *            {@link ManagedFunctionContainer} requiring the
 	 *            {@link ManagedObject}.
 	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
-	 *         Should this return </code>null</code>, the
+	 *         Should this return <code>null</code>, the
 	 *         {@link ManagedFunctionContainer} should not then be executed, as it
 	 *         is expecting to wait. This will return the
 	 *         {@link ManagedFunctionContainer} when the {@link ManagedObject} is

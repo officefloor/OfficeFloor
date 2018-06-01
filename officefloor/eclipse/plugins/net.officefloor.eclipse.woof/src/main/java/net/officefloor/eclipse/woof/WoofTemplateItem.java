@@ -90,6 +90,9 @@ public class WoofTemplateItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofTemplateItem(), (model) -> {

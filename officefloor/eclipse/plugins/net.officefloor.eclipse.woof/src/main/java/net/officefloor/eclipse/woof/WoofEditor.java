@@ -47,8 +47,10 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	 * 
 	 * @param args
 	 *            Command line arguments.
+	 * @throws Exception
+	 *             If fails to run.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		WoofEditor.launch("<woof />");
 	}
 

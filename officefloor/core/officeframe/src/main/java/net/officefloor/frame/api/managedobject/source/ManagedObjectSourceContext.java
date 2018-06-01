@@ -42,7 +42,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * This may be overridden by {@link ManagedObjectBuilder} configuration, however
 	 * allows for a default {@link ManagedObjectPool} should one not be configured.
 	 * 
-	 * @param managedObjectPoolFactory
+	 * @param poolFactory
 	 *            {@link ManagedObjectPoolFactory} for the default
 	 *            {@link ManagedObjectPool}.
 	 * @return {@link ManagedObjectPoolBuilder}.
@@ -78,6 +78,10 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * The initial {@link ManagedFunction} will be used as the recycle starting
 	 * point for this {@link ManagedObject}.
 	 *
+	 * @param <O>
+	 *            Dependency key type.
+	 * @param <f>
+	 *            Flow key type.
 	 * @param managedFunctionFactory
 	 *            {@link ManagedFunctionFactory} to create the recycle
 	 *            {@link ManagedFunction}.
@@ -91,7 +95,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * Creates the {@link ManagedObjectFunctionBuilder} to build a
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param <o>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <f>
 	 *            Flow key type.

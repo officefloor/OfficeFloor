@@ -32,6 +32,8 @@ public interface RecycleManagedObjectParameter<MO extends ManagedObject> {
 	 * Convenience method to obtain the {@link RecycleManagedObjectParameter} from
 	 * the {@link ManagedFunctionContext}.
 	 * 
+	 * @param <M>
+	 *            {@link ManagedObject} type.
 	 * @param context
 	 *            {@link ManagedFunctionContext}.
 	 * @return {@link RecycleManagedObjectParameter}.

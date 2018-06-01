@@ -60,32 +60,29 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	 * {@link ManagedObject} instances that must be loaded before the
 	 * {@link ManagedFunction} may be executed.
 	 * <p>
-	 * The order of the {@link ManagedObjectIndex} instances must be respected
-	 * as they are sorted to enable appropriate
-	 * {@link CoordinatingManagedObject} to co-ordinate with dependencies.
+	 * The order of the {@link ManagedObjectIndex} instances must be respected as
+	 * they are sorted to enable appropriate {@link CoordinatingManagedObject} to
+	 * co-ordinate with dependencies.
 	 * 
 	 * @return Listing of {@link ManagedObjectIndex} instances.
 	 */
 	ManagedObjectIndex[] getRequiredManagedObjects();
 
 	/**
-	 * Obtains the activation flags for the {@link Governance}. The index into
-	 * the array identifies the {@link Governance} for the respective activation
-	 * flag.
+	 * Obtains the activation flags for the {@link Governance}. The index into the
+	 * array identifies the {@link Governance} for the respective activation flag.
 	 * 
 	 * @return Activation flags for the {@link Governance}.
 	 */
 	boolean[] getRequiredGovernance();
 
 	/**
-	 * Obtains the {@link ManagedObjectIndex} for the {@link ManagedFunction}
-	 * index.
+	 * Obtains the {@link ManagedObjectIndex} for the {@link ManagedFunction} index.
 	 * 
 	 * @param managedObjectIndex
-	 *            {@link ManagedObjectIndex} for the {@link ManagedFunction}
-	 *            index.
-	 * @return {@link ManagedObjectIndex} to obtain the {@link ManagedObject}
-	 *         for the {@link ManagedFunction}.
+	 *            {@link ManagedObjectIndex} for the {@link ManagedFunction} index.
+	 * @return {@link ManagedObjectIndex} to obtain the {@link ManagedObject} for
+	 *         the {@link ManagedFunction}.
 	 */
 	ManagedObjectIndex getManagedObject(int managedObjectIndex);
 
@@ -99,11 +96,11 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Meta-data of the {@link AdministrationDuty} to undertake before executing
-	 * the {@link ManagedFunction}.
+	 * Meta-data of the {@link Administration} to undertake before executing the
+	 * {@link ManagedFunction}.
 	 * 
-	 * @return Listing of the {@link AdministrationDuty} instances to undertake
-	 *         before executing the {@link ManagedFunction}.
+	 * @return Listing of the {@link Administration} instances to undertake before
+	 *         executing the {@link ManagedFunction}.
 	 */
 	AdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData();
 
@@ -111,8 +108,8 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	 * Meta-data of the {@link Administration} to undertake after executing the
 	 * {@link ManagedFunction}.
 	 * 
-	 * @return Listing the {@link AdministrationDuty} instances to undertake
-	 *         after executing the {@link ManagedFunction}.
+	 * @return Listing the {@link Administration} instances to undertake after
+	 *         executing the {@link ManagedFunction}.
 	 */
 	AdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData();
 

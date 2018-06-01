@@ -30,6 +30,11 @@ public class WoofEditorMain extends WoofEditor {
 
 	/**
 	 * Runs the {@link WoofEditor} for testing.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 * @throws Exception
+	 *             If failure to run.
 	 */
 	public static void main(String[] args) throws Exception {
 		WoofEditorMain.launch(new File(ClassLoader
