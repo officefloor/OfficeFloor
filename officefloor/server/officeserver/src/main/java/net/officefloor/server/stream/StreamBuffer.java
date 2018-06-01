@@ -302,6 +302,8 @@ public abstract class StreamBuffer<B> {
 	 * <p>
 	 * Typical use of this is for the {@link DateTimeFormatter}.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param headBuffer
 	 *            Head {@link StreamBuffer} in the linked list of
 	 *            {@link StreamBuffer} instances.
@@ -340,6 +342,8 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Obtains the {@link StreamBuffer} to use for writing.
 	 * 
+	 * @param <B>
+	 *            Buffer type.
 	 * @param headBuffer
 	 *            Head {@link StreamBuffer} in the linked list of
 	 *            {@link StreamBuffer} instances.
@@ -368,7 +372,9 @@ public abstract class StreamBuffer<B> {
 
 	/**
 	 * Writes a HTTP encoded character.
-	 * 
+	 *
+	 * @param <B>
+	 *            Buffer type.
 	 * @param character
 	 *            Character to write.
 	 * @param writeBuffer

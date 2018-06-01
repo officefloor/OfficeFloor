@@ -47,8 +47,7 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 	private final String governanceName;
 
 	/**
-	 * Index of this {@link RawGovernanceMetaData} within the
-	 * {@link ProcessState}.
+	 * Index of this {@link RawGovernanceMetaData} within the {@link ProcessState}.
 	 */
 	private final int governanceIndex;
 
@@ -113,17 +112,25 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 	 * Obtains the index to obtain the {@link Governance} from the
 	 * {@link ProcessState}.
 	 * 
-	 * @return Index to obtain the {@link Governance} from the
-	 *         {@link ProcessState}.
+	 * @return Index to obtain the {@link Governance} from the {@link ProcessState}.
 	 */
 	public int getGovernanceIndex() {
 		return this.governanceIndex;
 	}
 
 	/**
-	 * Links the {@link ManagedFunctionMetaData} instances to enable
-	 * {@link Flow} of execution.
+	 * Links the {@link ManagedFunctionMetaData} instances to enable {@link Flow} of
+	 * execution.
 	 * 
+	 * @return <code>true</code> if successfully loaded the {@link OfficeMetaData}.
+	 */
+	public GovernanceMetaData<E, F> getGovernanceMetaData() {
+		return this.governanceMetaData;
+	}
+
+	/**
+	 * Obtains the {@link GovernanceMetaData}.
+	 *
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
 	 * @param flowMetaDataFactory
@@ -132,16 +139,6 @@ public class RawGovernanceMetaData<E, F extends Enum<F>> {
 	 *            {@link EscalationFlowFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return <code>true</code> if successfully loaded the
-	 *         {@link OfficeMetaData}.
-	 */
-	public GovernanceMetaData<E, F> getGovernanceMetaData() {
-		return this.governanceMetaData;
-	}
-
-	/**
-	 * Obtains the {@link GovernanceMetaData}.
-	 * 
 	 * @return {@link GovernanceMetaData}.
 	 */
 	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,

@@ -47,25 +47,25 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	public static final String PROPERTY_THREAD_PRIORITY = "thread.priority";
 
 	/**
-	 * Maximum time to wait in seconds for the {@link ExecutorService} to
-	 * shutdown.
+	 * Maximum time to wait in seconds for the {@link ExecutorService} to shutdown.
 	 */
 	public static final String PROPERTY_SHUTDOWN_TIME_IN_SECONDS = "max.shutdown.time";
 
 	/**
-	 * Convenience method to create a {@link Team} from the implementation of
-	 * this {@link AbstractExecutorTeamSource}.
-	 * 
+	 * Convenience method to create a {@link Team} from the implementation of this
+	 * {@link AbstractExecutorTeamSource}.
+	 *
+	 * @param propertyNameValues
+	 *            Property name/value pairs for the {@link TeamSource}.
 	 * @return {@link Team}.
 	 * @throws IllegalArgumentException
-	 *             If fails to provide correct information to load the
-	 *             {@link Team}.
+	 *             If fails to provide correct information to load the {@link Team}.
 	 */
-	public Team createTeam(String... parameterNameValues) throws IllegalArgumentException {
+	public Team createTeam(String... propertyNameValues) throws IllegalArgumentException {
 		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
-		for (int i = 0; i < parameterNameValues.length; i += 2) {
-			String name = parameterNameValues[i];
-			String value = parameterNameValues[i + 1];
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
 			standAlone.addProperty(name, value);
 		}
 		try {

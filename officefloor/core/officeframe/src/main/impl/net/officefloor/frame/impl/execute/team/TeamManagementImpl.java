@@ -40,9 +40,6 @@ public class TeamManagementImpl implements TeamManagement {
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamIdentifier
-	 *            Identifier for the {@link Team} under this
-	 *            {@link TeamManagement}.
 	 * @param team
 	 *            {@link Team} under this {@link TeamManagement}.
 	 */

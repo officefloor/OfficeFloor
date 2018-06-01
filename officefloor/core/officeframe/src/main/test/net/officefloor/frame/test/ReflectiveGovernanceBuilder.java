@@ -107,7 +107,9 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 
 	/**
 	 * Instantiate.
-	 * 
+	 *
+	 * @param <C>
+	 *            {@link Governance} {@link Class} type.
 	 * @param clazz
 	 *            {@link Class}.
 	 * @param object
@@ -176,8 +178,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	 * Constructs the disregard {@link GovernanceActivity}.
 	 * 
 	 * @param methodName
-	 *            Name of {@link Method} for disregarding the
-	 *            {@link Governance}.
+	 *            Name of {@link Method} for disregarding the {@link Governance}.
 	 * @return {@link ReflectiveGovernanceActivityBuilder}.
 	 */
 	public ReflectiveGovernanceActivityBuilder disregard(String methodName) {
@@ -193,8 +194,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	 * @param methodName
 	 *            Name of {@link Method} for the activity.
 	 * @param existing
-	 *            Existing {@link ReflectiveGovernanceActivityBuilder}. Most
-	 *            likely <code>null</code>.
+	 *            Existing {@link ReflectiveGovernanceActivityBuilder}. Most likely
+	 *            <code>null</code>.
 	 * @param expectedExtensionInterface
 	 *            Expected extension interface. May be <code>null</code>.
 	 * @param isExtensionAnArray
@@ -316,8 +317,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		 * @param clazz
 		 *            {@link Class} containing the {@link Method}.
 		 * @param methodName
-		 *            Name of the {@link Method} for the {@link Governance}
-		 *            action.
+		 *            Name of the {@link Method} for the {@link Governance} action.
 		 */
 		private ReflectiveGovernanceActivityBuilder(Class<?> clazz, String methodName) {
 
@@ -366,11 +366,10 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		 * parameter).
 		 * 
 		 * @param isArray
-		 *            Indicates if expecting extension interface to be in an
-		 *            array.
+		 *            Indicates if expecting extension interface to be in an array.
 		 * @param expectedExtensionInterface
-		 *            Optional expected extension interface. May be
-		 *            <code>null</code> to be any interface.
+		 *            Optional expected extension interface. May be <code>null</code> to
+		 *            be any interface.
 		 * @return Extension interface.
 		 */
 		private Class<?> extractExtensionInterface(boolean isArray, Class<?> expectedExtensionInterface) {

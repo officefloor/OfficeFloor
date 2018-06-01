@@ -44,8 +44,11 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 
 	/**
 	 * Test editor.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		WoofEditor.launch("<woof />");
 	}
 
@@ -57,7 +60,13 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	/**
 	 * Convenience method to launch {@link AbstractConfigurableItem} outside
 	 * {@link IWorkbench}.
-	 * 
+	 *
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
+	 * @param <I>
+	 *            Item type.
 	 * @param configurableItem
 	 *            {@link AbstractConfigurableItem}.
 	 * @param prototypeDecorator

@@ -23,6 +23,7 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -53,6 +54,8 @@ public class FlowMetaDataFactory {
 	/**
 	 * Creates the {@link FlowMetaData}.
 	 * 
+	 * @param <F>
+	 *            {@link Flow} key type.
 	 * @param configurations
 	 *            {@link FlowConfiguration} instances.
 	 * @param assetType
@@ -61,8 +64,8 @@ public class FlowMetaDataFactory {
 	 *            Name of the {@link Asset}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return {@link FlowMetaData} or <code>null</code> if failed to create
-	 *         with issues reported to the {@link OfficeFloorIssues}.
+	 * @return {@link FlowMetaData} or <code>null</code> if failed to create with
+	 *         issues reported to the {@link OfficeFloorIssues}.
 	 */
 	public <F extends Enum<F>> FlowMetaData[] createFlowMetaData(FlowConfiguration<F>[] configurations,
 			AssetType assetType, String assetName, OfficeFloorIssues issues) {

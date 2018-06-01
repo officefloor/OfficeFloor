@@ -36,7 +36,9 @@ public interface HttpObjectResponderFactory {
 
 	/**
 	 * Creates the {@link HttpObjectResponder} for the {@link Object} type.
-	 * 
+	 *
+	 * @param <T>
+	 *            Object type.
 	 * @param objectType
 	 *            {@link Object} type.
 	 * @return {@link HttpObjectResponder} for the {@link Object} type.
@@ -46,6 +48,8 @@ public interface HttpObjectResponderFactory {
 	/**
 	 * Creates the {@link HttpObjectResponder} for the {@link Escalation} type.
 	 * 
+	 * @param <E>
+	 *            {@link Escalation} type.
 	 * @param escalationType
 	 *            {@link Escalation} type.
 	 * @return {@link HttpObjectResponder} for the {@link Escalation} type.

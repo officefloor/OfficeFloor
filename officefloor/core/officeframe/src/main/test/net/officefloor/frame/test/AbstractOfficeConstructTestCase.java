@@ -72,8 +72,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	private static int OFFICE_INDEX = 0;
 
 	/**
-	 * Constructed {@link OfficeFloor} instances that need to be closed on tear
-	 * down of tests.
+	 * Constructed {@link OfficeFloor} instances that need to be closed on tear down
+	 * of tests.
 	 */
 	private final List<OfficeFloor> constructedOfficeFloors = new LinkedList<OfficeFloor>();
 
@@ -103,9 +103,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * Flag indicating whether to record the invocations of the
 	 * {@link ReflectiveFunctionBuilder} instances.
 	 * <p>
-	 * This is necessary as stress tests using the
-	 * {@link ReflectiveFunctionBuilder} will get {@link OutOfMemoryError}
-	 * issues should every {@link ManagedFunction} executed be recorded.
+	 * This is necessary as stress tests using the {@link ReflectiveFunctionBuilder}
+	 * will get {@link OutOfMemoryError} issues should every {@link ManagedFunction}
+	 * executed be recorded.
 	 */
 	private boolean isRecordReflectiveFunctionMethodsInvoked = false;
 
@@ -310,8 +310,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Constructs the {@link ReflectiveFunctionBuilder} for a static
-	 * {@link Method}.
+	 * Constructs the {@link ReflectiveFunctionBuilder} for a static {@link Method}.
 	 * 
 	 * @param clazz
 	 *            {@link Class} containing the static {@link Method}.
@@ -328,15 +327,15 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * Specifies whether to record the invocations of the
 	 * {@link ReflectiveFunctionBuilder} instances.
 	 * <p>
-	 * This is necessary as stress tests using the
-	 * {@link ReflectiveFunctionBuilder} will get {@link OutOfMemoryError}
-	 * issues should every {@link ManagedFunction} executed be recorded.
+	 * This is necessary as stress tests using the {@link ReflectiveFunctionBuilder}
+	 * will get {@link OutOfMemoryError} issues should every {@link ManagedFunction}
+	 * executed be recorded.
 	 * <p>
 	 * By default this is <code>false</code> to not record.
 	 * 
 	 * @param isRecord
-	 *            <code>true</code> to record the {@link ManagedFunction}
-	 *            instances invoked.
+	 *            <code>true</code> to record the {@link ManagedFunction} instances
+	 *            invoked.
 	 */
 	public void setRecordReflectiveFunctionMethodsInvoked(boolean isRecord) {
 		synchronized (this.reflectiveFunctionInvokedMethods) {
@@ -345,8 +344,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Invoked by the {@link ReflectiveFunctionBuilder} when it executes the
-	 * method.
+	 * Invoked by the {@link ReflectiveFunctionBuilder} when it executes the method.
 	 * 
 	 * @param methodName
 	 *            Name of method being invoked.
@@ -365,7 +363,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * 
 	 * @param methodNames
 	 *            Order that the reflective methods should be invoked.
-	 * @see #setRecordReflectiveTaskMethodsInvoked(boolean)
+	 * @see #setRecordReflectiveFunctionMethodsInvoked(boolean)
 	 */
 	public void validateReflectiveMethodOrder(String... methodNames) {
 		synchronized (this.reflectiveFunctionInvokedMethods) {
@@ -447,8 +445,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} {@link Class}.
 	 * @param managingOffice
-	 *            Name of the managing {@link Office}. May be <code>null</code>
-	 *            to manually register for {@link ManagingOfficeBuilder}.
+	 *            Name of the managing {@link Office}. May be <code>null</code> to
+	 *            manually register for {@link ManagingOfficeBuilder}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
@@ -487,8 +485,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} instance.
 	 * @param managingOffice
-	 *            Name of the managing {@link Office}. May be <code>null</code>
-	 *            to manually register for {@link ManagingOfficeBuilder}.
+	 *            Name of the managing {@link Office}. May be <code>null</code> to
+	 *            manually register for {@link ManagingOfficeBuilder}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
@@ -521,9 +519,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managingOffice
-	 *            Name of the mananaging {@link Office}. May be
-	 *            <code>null</code> to manually register for
-	 *            {@link ManagingOfficeBuilder}.
+	 *            Name of the mananaging {@link Office}. May be <code>null</code> to
+	 *            manually register for {@link ManagingOfficeBuilder}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public ManagedObjectBuilder<?> constructManagedObject(final Object object, String managedObjectName,
@@ -562,15 +559,14 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * Builds the {@link ManagedObject} for use at the desired
 	 * {@link ManagedObjectScope}.
 	 * 
-	 * @param officeManagedObjectName
+	 * @param bindName
 	 *            Name to bind the {@link ManagedObject} under.
 	 * @param managedObjectScope
 	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
 	 * @param managedFunctionBuilder
 	 *            {@link ManagedFunctionBuilder} if binding to
 	 *            {@link ManagedObjectScope#FUNCTION}.
-	 * @return {@link DependencyMappingBuilder} for the bound
-	 *         {@link ManagedObject}.
+	 * @return {@link DependencyMappingBuilder} for the bound {@link ManagedObject}.
 	 */
 	public DependencyMappingBuilder bindManagedObject(String bindName, ManagedObjectScope managedObjectScope,
 			ManagedFunctionBuilder<?, ?> managedFunctionBuilder) {
@@ -596,8 +592,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * Constructs the {@link Governance}.
 	 * 
 	 * @param object
-	 *            {@link Object} containing the {@link Method} instances used
-	 *            for {@link Governance}.
+	 *            {@link Object} containing the {@link Method} instances used for
+	 *            {@link Governance}.
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
 	 * @return {@link ReflectiveGovernanceBuilder}.
@@ -686,8 +682,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Triggers the {@link ManagedFunction} but does not wait for its
-	 * completion.
+	 * Triggers the {@link ManagedFunction} but does not wait for its completion.
 	 * 
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
@@ -723,25 +718,25 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It
-	 * will create the {@link OfficeFloor} if necessary and times out after 3
-	 * seconds if invoked {@link ManagedFunction} is not complete.
+	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It will
+	 * create the {@link OfficeFloor} if necessary and times out after 3 seconds if
+	 * invoked {@link ManagedFunction} is not complete.
 	 * 
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction} to invoke.
 	 * @param parameter
 	 *            Parameter.
 	 * @throws Exception
-	 *             If fails to construct {@link Office} or
-	 *             {@link ManagedFunction} invocation failure.
+	 *             If fails to construct {@link Office} or {@link ManagedFunction}
+	 *             invocation failure.
 	 */
 	public void invokeFunction(String functionName, Object parameter) throws Exception {
 		this.invokeFunction(functionName, parameter, 3);
 	}
 
 	/**
-	 * Facade method to invoke the {@link ManagedFunction} of an {@link Office}
-	 * and validate the {@link ManagedFunction} instances invoked.
+	 * Facade method to invoke the {@link ManagedFunction} of an {@link Office} and
+	 * validate the {@link ManagedFunction} instances invoked.
 	 * 
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction} to invoke.
@@ -751,8 +746,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *            Names of the expected {@link ManagedFunction} instances to be
 	 *            invoked in the order specified.
 	 * @throws Exception
-	 *             If fails to construct {@link Office} or
-	 *             {@link ManagedFunction} invocation failure.
+	 *             If fails to construct {@link Office} or {@link ManagedFunction}
+	 *             invocation failure.
 	 */
 	public void invokeFunctionAndValidate(String functionName, Object parameter, String... expectedFunctions)
 			throws Exception {
@@ -762,8 +757,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It
-	 * will create the {@link OfficeFloor} if necessary.
+	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It will
+	 * create the {@link OfficeFloor} if necessary.
 	 * 
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction} to invoke.
@@ -772,8 +767,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @param secondsToRun
 	 *            Seconds to run.
 	 * @throws Exception
-	 *             If fails to construct {@link Office} or
-	 *             {@link ManagedFunction} invocation failure.
+	 *             If fails to construct {@link Office} or {@link ManagedFunction}
+	 *             invocation failure.
 	 */
 	public void invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
 

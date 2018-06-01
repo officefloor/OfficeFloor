@@ -50,7 +50,9 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * Add the {@link Node} to the parent {@link Pane} returning it.
 	 * <p>
 	 * This allows for convenient adding new {@link Node} instances to {@link Pane}.
-	 * 
+	 *
+	 * @param <N>
+	 *            {@link Node} type.
 	 * @param parent
 	 *            Parent {@link Pane}.
 	 * @param node
@@ -61,7 +63,9 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 
 	/**
 	 * Specifies the {@link Pane} for the child group.
-	 * 
+	 *
+	 * @param <P>
+	 *            Parent {@link Pane} type.
 	 * @param childGroupName
 	 *            Name of the child group.
 	 * @param parent
@@ -110,7 +114,9 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	/**
 	 * Specifies the {@link GeometryNode} as {@link AdaptedConnector}
 	 * {@link IAnchor}.
-	 * 
+	 *
+	 * @param <N>
+	 *            {@link Node} type.
 	 * @param visualFactory
 	 *            {@link AdaptedConnectorVisualFactory}.
 	 * @param connectionModelClasses
@@ -145,7 +151,11 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * Allows {@link ModelAction} instances to be actioned via visual.
 	 * <p>
 	 * This allows custom visuals (e.g. button) tor trigger an action.
-	 * 
+	 *
+	 * @param <R>
+	 *            Root {@link Model} type.
+	 * @param <O>
+	 *            Operations type.
 	 * @param action
 	 *            {@link ModelAction} to be actioned.
 	 */
@@ -154,7 +164,11 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	/**
 	 * Convenience method to add a {@link ModelAction} to be actioned via
 	 * {@link AdaptedActionVisualFactory}.
-	 * 
+	 *
+	 * @param <R>
+	 *            Root {@link Model} type.
+	 * @param <O>
+	 *            Operations type.
 	 * @param action
 	 *            {@link ModelAction} to be actioned.
 	 * @param visualFactory

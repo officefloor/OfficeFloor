@@ -63,6 +63,8 @@ public class AbstractStyleRegistry implements StyleRegistry {
 	 * @param url
 	 *            {@link URL} to open.
 	 * @return {@link URLStreamHandler}.
+	 * @throws IOException
+	 *             If fails to open the {@link URLConnection}.
 	 */
 	public static URLConnection openConnection(URL url) throws IOException {
 		OfficeFloorUrlConnection connection = new OfficeFloorUrlConnection(url);

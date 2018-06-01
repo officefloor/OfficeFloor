@@ -73,7 +73,9 @@ public class MockAuthentication {
 
 	/**
 	 * Undertakes authentication.
-	 * 
+	 *
+	 * @param credentials
+	 *            {@link MockCredentials}.
 	 * @param completion
 	 *            Optional completion listener.
 	 */

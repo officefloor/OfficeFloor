@@ -170,7 +170,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Convenience method to translate list of property items to a
 	 * {@link PropertyList}.
-	 * 
+	 *
+	 * @param <PI>
+	 *            Property item type.
 	 * @param properties
 	 *            Property items.
 	 * @param getName
@@ -195,6 +197,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Convenience method to translate list of items to a comma separated list.
 	 * 
+	 * @param <CSVI>
+	 *            Comma separated item type.
 	 * @param items
 	 *            Items.
 	 * @param getValue
@@ -216,7 +220,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 
 	/**
 	 * Convenience method to translate comma separated text into a list.
-	 * 
+	 *
+	 * @param <CSVI>
+	 *            Comma separated item type.
 	 * @param text
 	 *            Comma separated text.
 	 * @param getItem
@@ -238,6 +244,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Translate the list of items to name mapping.
 	 * 
+	 * @param <I>
+	 *            Item types.
 	 * @param items
 	 *            Items.
 	 * @param getName
@@ -324,6 +332,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * Loads the {@link Model} to the parent {@link Model}. This allows for
 	 * constructing a prototype model for editing preferences of the
 	 * {@link AbstractIdeEditor}.
+	 * 
+	 * @param parentModel
+	 *            Parent {@link Model}.
+	 * @param itemModel
+	 *            Item {@link Model}.
 	 */
 	public abstract void loadToParent(P parentModel, M itemModel);
 
@@ -682,7 +695,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 
 		/**
 		 * Connects the target.
-		 * 
+		 *
+		 * @param <T>
+		 *            Target {@link Model} type.
+		 * @param <TE>
+		 *            Target {@link Model} event type.
 		 * @param targetClass
 		 *            Target {@link Class}.
 		 * @return {@link IdeConnectionTarget}.

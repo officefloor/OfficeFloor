@@ -180,6 +180,9 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 	/**
 	 * Activates the {@link IDomain}.
+	 * 
+	 * @param rootModel
+	 *            Root {@link Model}.
 	 */
 	public void activateDomain(Model rootModel) {
 

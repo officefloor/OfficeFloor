@@ -229,10 +229,9 @@ public class ManagedObjectSourceStandAlone {
 	 * @param function
 	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
 	 * @param functionContext
-	 *            {@link ManagedFunctionContext} for the
-	 *            {@link ManagedFunction}. Allows for mocking the
-	 *            {@link ManagedFunctionContext} to validate functionality for
-	 *            the {@link ManagedFunction}.
+	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}.
+	 *            Allows for mocking the {@link ManagedFunctionContext} to validate
+	 *            functionality for the {@link ManagedFunction}.
 	 */
 	public void registerInvokeProcessFunction(Enum<?> processKey, ManagedFunction<?, ?> function,
 			ManagedFunctionContext<?, ?> functionContext) {
@@ -245,13 +244,12 @@ public class ManagedObjectSourceStandAlone {
 	 * 
 	 * @param processIndex
 	 *            Index of the {@link ProcessState}.
-	 * @param task
+	 * @param function
 	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
-	 * @param taskContext
-	 *            {@link ManagedFunctionContext} for the
-	 *            {@link ManagedFunction}. Allows for mocking the
-	 *            {@link ManagedFunctionContext} to validate functionality for
-	 *            the {@link ManagedFunction}.
+	 * @param functionContext
+	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}.
+	 *            Allows for mocking the {@link ManagedFunctionContext} to validate
+	 *            functionality for the {@link ManagedFunction}.
 	 */
 	public void registerInvokeProcessFunction(int processIndex, ManagedFunction<?, ?> function,
 			ManagedFunctionContext<?, ?> functionContext) {
@@ -286,8 +284,7 @@ public class ManagedObjectSourceStandAlone {
 
 	/**
 	 * {@link InvokedProcessServicer} containing the details for the initial
-	 * {@link ManagedFunction} to be executed for the invoked
-	 * {@link ProcessState}.
+	 * {@link ManagedFunction} to be executed for the invoked {@link ProcessState}.
 	 */
 	private class FunctionInvokedProcessServicer implements InvokedProcessServicer {
 
@@ -332,14 +329,13 @@ public class ManagedObjectSourceStandAlone {
 	private class LoadExecuteContext<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
 
 		/**
-		 * Processes the {@link ManagedFunction} for the invoked
-		 * {@link ProcessState}.
+		 * Processes the {@link ManagedFunction} for the invoked {@link ProcessState}.
 		 * 
 		 * @param processIndex
 		 *            Index of the {@link ProcessState} to invoke.
 		 * @param parameter
-		 *            Parameter to initial {@link ManagedFunction} of the
-		 *            invoked {@link ProcessState}.
+		 *            Parameter to initial {@link ManagedFunction} of the invoked
+		 *            {@link ProcessState}.
 		 * @param managedObject
 		 *            {@link ManagedObject} for the {@link ProcessState}.
 		 * @param delay

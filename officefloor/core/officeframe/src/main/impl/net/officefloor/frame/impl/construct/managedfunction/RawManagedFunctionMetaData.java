@@ -97,7 +97,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @param requiredManagedObjects
 	 *            Required {@link RawBoundManagedObjectMetaData} for this
 	 *            {@link ManagedFunction}.
-	 * @param taskMetaData
+	 * @param functionMetaData
 	 *            {@link ManagedFunctionMetaDataImpl}.
 	 */
 	public RawManagedFunctionMetaData(String functionName, ManagedFunctionConfiguration<O, F> configuration,
@@ -127,14 +127,13 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 *            {@link OfficeMetaData}.
 	 * @param flowMetaDataFactory
 	 *            {@link FlowMetaDataFactory}.
-	 * @param escalationProcedureFactory
+	 * @param escalationFlowFactory
 	 *            {@link EscalationFlowFactory}.
-	 * @param administrationMetaDataFactory
+	 * @param rawAdministrationMetaDataFactory
 	 *            {@link RawAdministrationMetaDataFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return <code>true</code> if successfully loaded the
-	 *         {@link OfficeMetaData}.
+	 * @return <code>true</code> if successfully loaded the {@link OfficeMetaData}.
 	 */
 	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationFlowFactory,
@@ -244,8 +243,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Constructs the {@link AdministrationMetaData} and registers the
-	 * {@link RawBoundManagedObjectMetaData} instances for
-	 * {@link Administration}.
+	 * {@link RawBoundManagedObjectMetaData} instances for {@link Administration}.
 	 * 
 	 * @param configuration
 	 *            {@link AdministrationConfiguration} instances.

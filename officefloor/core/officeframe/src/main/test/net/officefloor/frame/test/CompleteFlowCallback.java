@@ -41,6 +41,9 @@ public class CompleteFlowCallback implements FlowCallback {
 
 	/**
 	 * Asserts the {@link Flow} is complete.
+	 * 
+	 * @throws Exception
+	 *             If failure in execution.
 	 */
 	public void assertComplete() throws Exception {
 		this.ensureNoFailure();
@@ -49,6 +52,9 @@ public class CompleteFlowCallback implements FlowCallback {
 
 	/**
 	 * Asserts the {@link Flow} is not complete.
+	 * 
+	 * @throws Exception
+	 *             If failure in execution.
 	 */
 	public void assertNotComplete() throws Exception {
 		this.ensureNoFailure();

@@ -65,7 +65,9 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 	/**
 	 * Indicates if add row (configuring {@link TableCell} for add row).
-	 * 
+	 *
+	 * @param <R>
+	 *            Row object type.
 	 * @param tableCell
 	 *            {@link TableCell}.
 	 * @return <code>true</code> if add row.
@@ -388,7 +390,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 				// Load rows to the table
 				rows.setAll(updatedRows);
-				
+
 			} finally {
 				isUpdatingRows[0] = false;
 			}

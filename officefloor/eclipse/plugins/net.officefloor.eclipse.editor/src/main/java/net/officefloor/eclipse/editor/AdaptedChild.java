@@ -90,6 +90,8 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	/**
 	 * Obtains the {@link AdaptedPotentialConnection} to the target.
 	 * 
+	 * @param <T>
+	 *            Target {@link Model} type.
 	 * @param target
 	 *            Target {@link AdaptedChild},
 	 * @return {@link AdaptedPotentialConnection} to the target or <code>null</code>
@@ -100,6 +102,8 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 	/**
 	 * Creates the {@link ConnectionModel} within the {@link Model} structure.
 	 * 
+	 * @param <T>
+	 *            Target {@link Model} type.
 	 * @param target
 	 *            Target {@link AdaptedChild}.
 	 * @param sourceRole
@@ -139,7 +143,11 @@ public interface AdaptedChild<M extends Model> extends AdaptedModel<M> {
 
 	/**
 	 * Undertakes the {@link ModelAction}.
-	 * 
+	 *
+	 * @param <R>
+	 *            Root {@link Model} type.
+	 * @param <O>
+	 *            Operations type.
 	 * @param action
 	 *            {@link ModelAction}.
 	 */

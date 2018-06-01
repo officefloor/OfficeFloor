@@ -38,7 +38,6 @@ public interface ModelRepository {
 	 * @param configuration
 	 *            {@link ConfigurationItem} containing configuration of the
 	 *            {@link Model}.
-	 * @return Configured {@link Model}.
 	 * @throws IOException
 	 *             If fails to configure the {@link Model}.
 	 */
@@ -50,8 +49,7 @@ public interface ModelRepository {
 	 * @param model
 	 *            {@link Model} to be stored.
 	 * @param configuration
-	 *            {@link WritableConfigurationItem} to contain the
-	 *            {@link Model}.
+	 *            {@link WritableConfigurationItem} to contain the {@link Model}.
 	 * @throws IOException
 	 *             If fails to store the {@link Model}.
 	 */

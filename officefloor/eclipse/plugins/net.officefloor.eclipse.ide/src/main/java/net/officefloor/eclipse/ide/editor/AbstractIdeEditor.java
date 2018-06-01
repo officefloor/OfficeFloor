@@ -103,14 +103,14 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 
 	/**
 	 * Translates the style with the details of the item being rendered.
-	 * 
+	 *
 	 * @param rawStyle
 	 *            Raw style to be translated.
 	 * @param item
 	 *            {@link AbstractItem}.
 	 * @return Ready to use translate.
 	 */
-	public static <M extends Model> String translateStyle(String rawStyle, AbstractItem<?, ?, ?, ?, ?, ?> item) {
+	public static String translateStyle(String rawStyle, AbstractItem<?, ?, ?, ?, ?, ?> item) {
 
 		// Ensure have a style
 		if (rawStyle == null) {

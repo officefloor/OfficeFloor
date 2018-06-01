@@ -90,7 +90,10 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 
 	/**
 	 * Initiate.
-	 * 
+	 *
+	 * @param <C>
+	 *            {@link ManagedFunction} {@link Method} containing {@link Class}
+	 *            type.
 	 * @param clazz
 	 *            {@link Class}.
 	 * @param object
@@ -283,8 +286,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	 * @param methodName
 	 *            Name of the {@link Method}.
 	 * @param isPreNotPost
-	 *            <code>true</code> for pre (otherwise <code>false</code> for
-	 *            post).
+	 *            <code>true</code> for pre (otherwise <code>false</code> for post).
 	 * @return {@link ReflectiveAdministrationBuilder}.
 	 */
 	private ReflectiveAdministrationBuilder addAdminster(String methodName, boolean isPreNotPost) {

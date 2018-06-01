@@ -49,6 +49,7 @@ public interface Builder<M, V, B extends Builder<M, V, B>> {
 	 * 
 	 * @param valueLoader
 	 *            {@link ValueLoader} to load the value to the model.
+	 * @return <code>this</code>.
 	 */
 	B setValue(ValueLoader<M, V> valueLoader);
 

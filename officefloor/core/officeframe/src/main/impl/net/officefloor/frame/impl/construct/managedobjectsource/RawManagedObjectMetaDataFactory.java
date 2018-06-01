@@ -46,6 +46,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfigura
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Factory for the creation of {@link RawManagedObjectMetaData}.
@@ -81,10 +82,10 @@ public class RawManagedObjectMetaDataFactory {
 	/**
 	 * Creates the {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param <O>
+	 * @param <d>
 	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
+	 * @param <h>
+	 *            {@link Flow} key type.
 	 * @param <MS>
 	 *            {@link ManagedObjectSource} type.
 	 * @param configuration

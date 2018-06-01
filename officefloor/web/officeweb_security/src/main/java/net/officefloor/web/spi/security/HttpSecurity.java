@@ -35,31 +35,32 @@ public interface HttpSecurity<A, AC extends Serializable, C, O extends Enum<O>, 
 	/**
 	 * Creates the custom authentication.
 	 * 
+	 * @param context
+	 *            {@link AuthenticateContext}.
 	 * @return Custom authentication.
 	 */
 	A createAuthentication(AuthenticationContext<AC, C> context);
 
 	/**
 	 * <p>
-	 * Ratifies whether enough information is available to undertake
-	 * authentication.
+	 * Ratifies whether enough information is available to undertake authentication.
 	 * <p>
-	 * As authentication will likely require communication with external
-	 * services (LDAP store, database, etc), this method allows checking whether
-	 * enough information is available to undertake the authentication. The
-	 * purpose is to avoid the {@link ManagedFunction} depending on dependencies
-	 * of authentication subsequently causing execution by different
-	 * {@link Team}. This is especially as the majority of {@link HttpRequest}
-	 * servicing will use the {@link HttpSession} to cache details and not
-	 * require the authentication dependencies causing the swap in {@link Team}.
+	 * As authentication will likely require communication with external services
+	 * (LDAP store, database, etc), this method allows checking whether enough
+	 * information is available to undertake the authentication. The purpose is to
+	 * avoid the {@link ManagedFunction} depending on dependencies of authentication
+	 * subsequently causing execution by different {@link Team}. This is especially
+	 * as the majority of {@link HttpRequest} servicing will use the
+	 * {@link HttpSession} to cache details and not require the authentication
+	 * dependencies causing the swap in {@link Team}.
 	 * 
 	 * @param credentials
 	 *            Credentials.
 	 * @param context
 	 *            {@link RatifyContext}.
-	 * @return <code>true</code> should enough information be available to
-	 *         undertake authentication. <code>false</code> if not enough
-	 *         information is available for authentication.
+	 * @return <code>true</code> should enough information be available to undertake
+	 *         authentication. <code>false</code> if not enough information is
+	 *         available for authentication.
 	 */
 	boolean ratify(C credentials, RatifyContext<AC> context);
 

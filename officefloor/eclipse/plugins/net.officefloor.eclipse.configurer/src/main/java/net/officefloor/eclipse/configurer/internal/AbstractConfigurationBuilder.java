@@ -294,6 +294,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	 *            Valid {@link Property}.
 	 * @param errorListener
 	 *            {@link ErrorListener}.
+	 * @return {@link Configuration}.
 	 */
 	public Configuration recursiveLoadConfiguration(M model, Node configurationNode, GridPane grid, Actioner actioner,
 			Property<Boolean> dirtyProperty, Property<Boolean> validProperty, ErrorListener errorListener) {

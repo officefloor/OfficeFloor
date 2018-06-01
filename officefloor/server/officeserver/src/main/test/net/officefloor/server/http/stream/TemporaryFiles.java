@@ -60,15 +60,15 @@ public class TemporaryFiles {
 	}
 
 	/**
-	 * Allow files to be read/written by executing user, and allow files to be
-	 * read by group (useful for read-only debugging access).
+	 * Allow files to be read/written by executing user, and allow files to be read
+	 * by group (useful for read-only debugging access).
 	 */
 	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = new FileAttribute[] {
 			PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")) };
 
 	/**
-	 * Allow files to be read/written by executing user, and allow files to be
-	 * read by group (useful for read-only debugging access).
+	 * Allow files to be read/written by executing user, and allow files to be read
+	 * by group (useful for read-only debugging access).
 	 */
 	private static final FileAttribute<?>[] FILE_ATTRIBUTES = new FileAttribute[] {
 			PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r-----")) };
@@ -79,8 +79,7 @@ public class TemporaryFiles {
 	private static final CopyOption[] COPY_OPTIONS = new CopyOption[] { StandardCopyOption.REPLACE_EXISTING };
 
 	/**
-	 * All working files, so delete on close and only allow read access to
-	 * contents.
+	 * All working files, so delete on close and only allow read access to contents.
 	 */
 	private static final OpenOption[] OPEN_OPTIONS = new OpenOption[] { StandardOpenOption.READ,
 			StandardOpenOption.DELETE_ON_CLOSE };
@@ -95,6 +94,8 @@ public class TemporaryFiles {
 	 * 
 	 * @param prefix
 	 *            Prefix for the temporary files area.
+	 * @throws IOException
+	 *             If fails to setup temporary files.
 	 */
 	public TemporaryFiles(String prefix) throws IOException {
 
@@ -184,8 +185,8 @@ public class TemporaryFiles {
 	 * @param contents
 	 *            Contents for the temporary file.
 	 * @param charset
-	 *            {@link Charset} to write the contents. May be
-	 *            <code>null</code> to use default HTTP entity {@link Charset}.
+	 *            {@link Charset} to write the contents. May be <code>null</code> to
+	 *            use default HTTP entity {@link Charset}.
 	 * @return {@link FileChannel} to the temporary file.
 	 * @throws IOException
 	 *             If fails to create temporary file.
@@ -205,8 +206,8 @@ public class TemporaryFiles {
 	}
 
 	/**
-	 * Creates a {@link FileChannel} to the temporary file using the default
-	 * HTTP entity {@link Charset}.
+	 * Creates a {@link FileChannel} to the temporary file using the default HTTP
+	 * entity {@link Charset}.
 	 * 
 	 * @param name
 	 *            Name to aid identifying the temporary file on disk. May be

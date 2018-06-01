@@ -90,6 +90,8 @@ public class PropertyMetaData {
 	 * <p>
 	 * Obtains the value {@link Annotation}.
 	 * 
+	 * @param <A>
+	 *            {@link Annotation} type.
 	 * @param annotationType
 	 *            {@link Annotation}.
 	 * @return {@link Annotation} or <code>null</code>.

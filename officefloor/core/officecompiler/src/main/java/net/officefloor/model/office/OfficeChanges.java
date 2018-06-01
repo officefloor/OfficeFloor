@@ -605,7 +605,7 @@ public interface OfficeChanges {
 			AdministrationToOfficeTeamModel administrationToOfficeTeam);
 
 	/**
-	 * Links the {@link AdministratorModel} to administer the
+	 * Links the {@link AdministrationModel} to administer the
 	 * {@link ExternalManagedObjectModel}.
 	 * 
 	 * @param administration
@@ -630,7 +630,7 @@ public interface OfficeChanges {
 			AdministrationToExternalManagedObjectModel externalManagedObjectToAdministration);
 
 	/**
-	 * Links the {@link AdministratorModel} to administer the
+	 * Links the {@link AdministrationModel} to administer the
 	 * {@link OfficeManagedObjectModel}.
 	 * 
 	 * @param managedObject

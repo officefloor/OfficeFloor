@@ -43,6 +43,9 @@ public class ExternalFlowItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		SectionEditor.launchConfigurer(new ExternalFlowItem(), (flow) -> flow.setArgumentType(String.class.getName()));

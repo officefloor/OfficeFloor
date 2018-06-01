@@ -80,6 +80,8 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	/**
 	 * Creates the {@link AcceptHandler}.
 	 * 
+	 * @param <H>
+	 *            Handle type.
 	 * @param contentType
 	 *            <code>Content-Type</code>
 	 * @param handler
@@ -106,8 +108,8 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	}
 
 	/**
-	 * {@link AcceptType} linked list to use should there be no
-	 * <code>accept</code> {@link HttpHeader} values.
+	 * {@link AcceptType} linked list to use should there be no <code>accept</code>
+	 * {@link HttpHeader} values.
 	 */
 	private static final AcceptType MATCH_ANY = new AnyAcceptType("1", 0);
 
@@ -266,17 +268,16 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	}
 
 	/**
-	 * Parses the <code>accept</code> {@link HttpHeader} value returning the
-	 * head {@link AcceptType} of the linked list of {@link AcceptType}
-	 * instances.
+	 * Parses the <code>accept</code> {@link HttpHeader} value returning the head
+	 * {@link AcceptType} of the linked list of {@link AcceptType} instances.
 	 * 
 	 * @param accept
 	 *            <code>accept</code> {@link HttpHeader} value.
 	 * @param head
 	 *            Head {@link AcceptType} from another
 	 *            <code>accept<code> {@link HttpHeader} should there be multiple <code>accept</code>
-	 *            {@link HttpHeader} values. Will be <code>null</code> if no
-	 *            other <code>accept</code> {@link HttpHeader}.
+	 *            {@link HttpHeader} values. Will be <code>null</code> if no other
+	 *            <code>accept</code> {@link HttpHeader}.
 	 * @return Head {@link AcceptType} for parsed out linked list of
 	 *         {@link AcceptType} instances. The values are sorted with highest
 	 *         weighted first.
@@ -503,8 +504,8 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	}
 
 	/**
-	 * Loads the {@link AcceptType} to the linked list, returning the head of
-	 * the linked list.
+	 * Loads the {@link AcceptType} to the linked list, returning the head of the
+	 * linked list.
 	 * 
 	 * @param accept
 	 *            <code>accept</code> {@link HttpHeader} value.
@@ -659,8 +660,8 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 		 * 
 		 * @param other
 		 *            Other {@link AcceptType}.
-		 * @return Compare -X / 0 / +X based on lesser, equal or greater
-		 *         matching weight.
+		 * @return Compare -X / 0 / +X based on lesser, equal or greater matching
+		 *         weight.
 		 */
 		private int compare(AcceptType other) {
 

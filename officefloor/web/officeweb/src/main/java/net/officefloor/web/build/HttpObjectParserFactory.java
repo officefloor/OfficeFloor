@@ -35,6 +35,8 @@ public interface HttpObjectParserFactory {
 	/**
 	 * Creates the {@link HttpObjectParser} for the {@link Object}.
 	 * 
+	 * @param <T>
+	 *            Object type.
 	 * @param objectClass
 	 *            {@link Object} {@link Class}.
 	 * @return {@link HttpObjectParser} for the {@link Object}. May return

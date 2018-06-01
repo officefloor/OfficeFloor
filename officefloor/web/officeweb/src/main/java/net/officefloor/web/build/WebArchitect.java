@@ -49,8 +49,8 @@ public abstract interface WebArchitect {
 	static String HANDLER_SECTION_NAME = "HANDLE_HTTP_SECTION";
 
 	/**
-	 * Name of the {@link OfficeSectionInput} that handles the
-	 * {@link HttpRequest} instances.
+	 * Name of the {@link OfficeSectionInput} that handles the {@link HttpRequest}
+	 * instances.
 	 */
 	static String HANDLER_INPUT_NAME = "HANDLE_HTTP_INPUT";
 
@@ -68,19 +68,18 @@ public abstract interface WebArchitect {
 
 	/**
 	 * <p>
-	 * Adds another {@link Class} as an alias for the {@link HttpObject}
-	 * annotation.
+	 * Adds another {@link Class} as an alias for the {@link HttpObject} annotation.
 	 * <p>
 	 * As code generators are likely to be used for the HTTP objects, it is not
 	 * always possible to generate the {@link Class} annotated with
-	 * {@link HttpObject}. This allows another {@link Annotation} to indicate
-	 * the parameter object is a HTTP object.
+	 * {@link HttpObject}. This allows another {@link Annotation} to indicate the
+	 * parameter object is a HTTP object.
 	 * 
 	 * @param httpObjectAnnotationAliasClass
 	 *            Alias {@link Annotation} {@link Class} for {@link HttpObject}.
 	 * @param acceptedContentTypes
-	 *            Listing of the <code>content-type</code> values accepted. May
-	 *            be empty array to allow supporting all available
+	 *            Listing of the <code>content-type</code> values accepted. May be
+	 *            empty array to allow supporting all available
 	 *            <code>content-type</code> {@link HttpObjectParser} instances
 	 *            available.
 	 */
@@ -101,8 +100,7 @@ public abstract interface WebArchitect {
 	 * @param objectClass
 	 *            Class of the object.
 	 * @param bindName
-	 *            Name to bind the object within the
-	 *            {@link HttpApplicationState}.
+	 *            Name to bind the object within the {@link HttpApplicationState}.
 	 * @return {@link OfficeManagedObject}.
 	 */
 	OfficeManagedObject addHttpApplicationObject(Class<?> objectClass, String bindName);
@@ -195,8 +193,8 @@ public abstract interface WebArchitect {
 	 * @param objectClass
 	 *            Class of the object.
 	 * @param acceptedContentTypes
-	 *            Listing of the <code>content-type</code> values accepted. May
-	 *            be empty array to allow supporting all available
+	 *            Listing of the <code>content-type</code> values accepted. May be
+	 *            empty array to allow supporting all available
 	 *            <code>content-type</code> {@link HttpObjectParser} instances
 	 *            available.
 	 * @return {@link OfficeManagedObject}.
@@ -254,8 +252,7 @@ public abstract interface WebArchitect {
 	/**
 	 * <p>
 	 * Intercepts all {@link HttpRequest} instances before servicing. Multiple
-	 * intercepts may be configured, with them executed in the order they are
-	 * added.
+	 * intercepts may be configured, with them executed in the order they are added.
 	 * <p>
 	 * This allows, for example, logging all requests to the web application.
 	 * 
@@ -271,20 +268,20 @@ public abstract interface WebArchitect {
 	/**
 	 * <p>
 	 * Chains a {@link OfficeSectionInput} to the end of the servicing chain to
-	 * handle a {@link HttpRequest}. Multiple chained services may be added,
-	 * with them executed in the order they are added.
+	 * handle a {@link HttpRequest}. Multiple chained services may be added, with
+	 * them executed in the order they are added.
 	 * <p>
-	 * The {@link WebArchitect} functionality is always the first in the chain
-	 * to attempt to service the {@link HttpRequest}. This allows, for example,
-	 * adding a chained servicer for serving resources from a file system.
+	 * The {@link WebArchitect} functionality is always the first in the chain to
+	 * attempt to service the {@link HttpRequest}. This allows, for example, adding
+	 * a chained servicer for serving resources from a file system.
 	 * 
 	 * @param flowSinkNode
 	 *            {@link OfficeFlowSinkNode} to handle the {@link HttpRequest}.
 	 * @param notHandledOutput
-	 *            {@link OfficeFlowSourceNode} should this servicer not handle
-	 *            the {@link HttpRequest}. May be <code>null</code> if handles
-	 *            all {@link HttpRequest} instances (any services chained after
-	 *            this will therefore not be used).
+	 *            {@link OfficeFlowSourceNode} should this servicer not handle the
+	 *            {@link HttpRequest}. May be <code>null</code> if handles all
+	 *            {@link HttpRequest} instances (any services chained after this
+	 *            will therefore not be used).
 	 */
 	void chainServicer(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode notHandledOutput);
 
@@ -292,8 +289,9 @@ public abstract interface WebArchitect {
 	 * Creates the {@link AcceptNegotiatorBuilder} to build an
 	 * {@link AcceptNegotiator}.
 	 * 
-	 * @return {@link AcceptNegotiatorBuilder} to build an
-	 *         {@link AcceptNegotiator}.
+	 * @param <H>
+	 *            Handler type.
+	 * @return {@link AcceptNegotiatorBuilder} to build an {@link AcceptNegotiator}.
 	 */
 	<H> AcceptNegotiatorBuilder<H> createAcceptNegotiator();
 

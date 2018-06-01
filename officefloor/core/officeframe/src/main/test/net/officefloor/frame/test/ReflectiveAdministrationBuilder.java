@@ -56,8 +56,8 @@ public class ReflectiveAdministrationBuilder {
 	private final ManagedFunctionBuilder<?, ?> managedFunctionBuilder;
 
 	/**
-	 * Object should the {@link Method} for the {@link AdministrationDuty} not
-	 * be static.
+	 * Object should the {@link Method} for the {@link AdministrationDuty} not be
+	 * static.
 	 */
 	private final Object object;
 
@@ -99,14 +99,18 @@ public class ReflectiveAdministrationBuilder {
 
 	/**
 	 * Instantiate.
-	 * 
+	 *
+	 * @param <C>
+	 *            {@link Administration} {@link Class} type.
 	 * @param clazz
-	 *            {@link Class} to determine the {@link Method} instances for
-	 *            the {@link AdministrationDuty} instances.
+	 *            {@link Class} to determine the {@link Method} instances for the
+	 *            {@link Administration} instances.
 	 * @param object
 	 *            Optional {@link Object} for non-static methods.
 	 * @param methodName
 	 *            Name of the {@link Method} to invoke.
+	 * @param isPreNotPost
+	 *            Indicates if pre-administration (otherwise post-administration).
 	 * @param managedFunctionBuilder
 	 *            {@link ManagedFunctionBuilder}.
 	 * @param testCase

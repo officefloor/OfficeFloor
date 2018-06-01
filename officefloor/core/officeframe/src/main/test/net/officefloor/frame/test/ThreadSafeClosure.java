@@ -90,6 +90,8 @@ public class ThreadSafeClosure<T> {
 	 * @return Value.
 	 * @throws AssertionFailedError
 	 *             If times out waiting for the value.
+	 * @throws InterruptedException
+	 *             If {@link Thread} interrupted.
 	 */
 	public synchronized T waitAndGet() throws InterruptedException {
 		return this.waitAndGet(3000);

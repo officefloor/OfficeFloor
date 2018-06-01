@@ -29,7 +29,7 @@ public interface ThreadProfiler extends FunctionState {
 	/**
 	 * Profiles execution of a {@link ManagedFunction}.
 	 * 
-	 * @param fuctionMetaData
+	 * @param functionMetaData
 	 *            {@link ManagedFunctionLogicMetaData} of the
 	 *            {@link ManagedFunction} being executed.
 	 */

@@ -36,6 +36,8 @@ public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
 	/**
 	 * Obtains the adapter.
 	 * 
+	 * @param <T>
+	 *            Adapted type.
 	 * @param classKey
 	 *            {@link Class} key.
 	 * @return Adapter or <code>null</code> if no adapter available.

@@ -72,7 +72,27 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 *             If fails to invoke the {@link ProcessState}.
 	 */
 	public static void invokeProcess(OfficeFloor officeFloor, String functionName, Object parameter) throws Throwable {
-		invokeProcess(officeFloor, "OFFICE", functionName, parameter, 3000);
+		invokeProcess(officeFloor, functionName, parameter, 3000);
+	}
+
+	/**
+	 * Convenience method to invoke the {@link ProcessState} for the
+	 * {@link ManagedFunction} within the default {@link Office}.
+	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloor}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param parameter
+	 *            Parameter to the {@link ManagedFunction}.
+	 * @param waitTime
+	 *            Time in milliseconds to wait for {@link ProcessState} to complete.
+	 * @throws Throwable
+	 *             If fails to invoke the {@link ProcessState}.
+	 */
+	public static void invokeProcess(OfficeFloor officeFloor, String functionName, Object parameter, long waitTime)
+			throws Throwable {
+		invokeProcess(officeFloor, "OFFICE", functionName, parameter, waitTime);
 	}
 
 	/**

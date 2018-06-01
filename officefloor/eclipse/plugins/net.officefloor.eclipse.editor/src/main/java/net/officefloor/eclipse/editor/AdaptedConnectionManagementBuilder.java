@@ -54,11 +54,13 @@ public interface AdaptedConnectionManagementBuilder<R extends Model, O, S extend
 
 		/**
 		 * Adds a {@link ConnectionModel}.
-		 * 
+		 *
 		 * @param source
 		 *            Source {@link Model}.
 		 * @param target
 		 *            Target {@link Model}.
+		 * @param context
+		 *            {@link ModelActionContext}.
 		 * @throws Exception
 		 *             If failure in adding the {@link ConnectionModel}.
 		 */

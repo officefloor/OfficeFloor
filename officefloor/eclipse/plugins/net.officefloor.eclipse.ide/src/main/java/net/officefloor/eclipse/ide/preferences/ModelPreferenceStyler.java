@@ -106,6 +106,8 @@ public class ModelPreferenceStyler<M extends Model> {
 	 * 
 	 * @param parentShell
 	 *            Parent {@link Shell}.
+	 * @param item
+	 *            {@link AbstractItem}.
 	 * @param prototype
 	 *            Prototype {@link Model} for the item.
 	 * @param itemLabel

@@ -159,7 +159,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 	/**
 	 * Allow overriding to configure the {@link TableColumn}.
-	 * 
+	 *
+	 * @param <R>
+	 *            Row object type.
 	 * @param table
 	 *            {@link TableView} that will contain the {@link TableColumn}.
 	 * @param column

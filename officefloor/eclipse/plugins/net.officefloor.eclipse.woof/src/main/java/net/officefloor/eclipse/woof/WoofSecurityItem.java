@@ -58,6 +58,9 @@ public class WoofSecurityItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofSecurityItem(), (model) -> {

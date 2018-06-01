@@ -79,6 +79,8 @@ public class HttpRequestStateManagedObjectSource
 	 * 
 	 * @param momento
 	 *            Momento containing the state for the {@link HttpRequestState}.
+	 * @param requestState
+	 *            {@link HttpRequestState}
 	 * @throws IllegalArgumentException
 	 *             If invalid momento.
 	 */
@@ -106,7 +108,9 @@ public class HttpRequestStateManagedObjectSource
 
 	/**
 	 * Exports a momento for the current state of this {@link HttpRequestState}.
-	 * 
+	 *
+	 * @param requestState
+	 *            {@link HttpRequestState}.
 	 * @return Momento for the current state of this {@link HttpRequestState}.
 	 */
 	public static Serializable exportHttpRequestState(HttpRequestState requestState) {

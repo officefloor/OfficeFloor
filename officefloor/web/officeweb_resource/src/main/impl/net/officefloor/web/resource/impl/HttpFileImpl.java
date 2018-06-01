@@ -64,6 +64,8 @@ public class HttpFileImpl extends AbstractHttpResource implements HttpFile, File
 	 * 
 	 * @param path
 	 *            Path.
+	 * @param file
+	 *            {@link FileChannel} to the file.
 	 * @param contentEncoding
 	 *            <code>Content-Encoding</code>.
 	 * @param contentType

@@ -128,7 +128,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @param managedObjectSourceMetaData
 	 *            {@link ManagedObjectSourceMetaData} for the
 	 *            {@link ManagedObjectSource}.
-	 * @param Timeout
+	 * @param timeout
 	 *            Timeout for the {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.

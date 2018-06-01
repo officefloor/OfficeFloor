@@ -53,6 +53,10 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 * Purges the {@link LinkedListSet} and executes a {@link FunctionState} for
 	 * each item.
 	 * 
+	 * @param <E>
+	 *            {@link LinkedListSetEntry} type.
+	 * @param <O>
+	 *            Owner type of {@link LinkedListSetEntry}.
 	 * @param linkedListSet
 	 *            {@link LinkedListSet}.
 	 * @param translate
@@ -79,7 +83,11 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 * Executes a {@link FunctionState} for all entries of the
 	 * {@link LinkedListSet}. This does not change the {@link LinkedListSet} (as
 	 * takes copy).
-	 * 
+	 *
+	 * @param <E>
+	 *            {@link LinkedListSetEntry} type.
+	 * @param <O>
+	 *            Owner type of {@link LinkedListSetEntry}.
 	 * @param linkedListSet
 	 *            {@link LinkedListSet}.
 	 * @param translate
@@ -103,8 +111,8 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	}
 
 	/**
-	 * Previous {@link FunctionState} chain to complete before executing the
-	 * next {@link LinkedListSetItem} in the list.
+	 * Previous {@link FunctionState} chain to complete before executing the next
+	 * {@link LinkedListSetItem} in the list.
 	 */
 	private final FunctionState previousFunction;
 
@@ -154,8 +162,8 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 * {@link Function} instances.
 	 * 
 	 * @param previousFunction
-	 *            Previous {@link FunctionState} chain to complete before
-	 *            executing the next {@link LinkedListSetItem} in the list.
+	 *            Previous {@link FunctionState} chain to complete before executing
+	 *            the next {@link LinkedListSetItem} in the list.
 	 * @param head
 	 *            Head {@link LinkedListSetItem} of the listing of
 	 *            {@link FunctionState} instances to execute.

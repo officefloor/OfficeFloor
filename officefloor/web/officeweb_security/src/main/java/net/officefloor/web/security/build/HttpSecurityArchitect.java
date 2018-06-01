@@ -19,6 +19,7 @@ package net.officefloor.web.security.build;
 
 import java.io.Serializable;
 
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -34,6 +35,16 @@ public interface HttpSecurityArchitect {
 	/**
 	 * Adds a {@link HttpSecurity}.
 	 *
+	 * @param <A>
+	 *            Authentication type.
+	 * @param <AC>
+	 *            Access control type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <O>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            {@link Flow} key type.
 	 * @param securityName
 	 *            Name of the {@link HttpSecurityBuilder}. This name is use to
 	 *            qualify dependency injection, should this particular
@@ -48,6 +59,16 @@ public interface HttpSecurityArchitect {
 	/**
 	 * Adds a {@link HttpSecurity}.
 	 * 
+	 * @param <A>
+	 *            Authentication type.
+	 * @param <AC>
+	 *            Access control type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <O>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            {@link Flow} key type.
 	 * @param securityName
 	 *            Name of the {@link HttpSecurityBuilder}. This name is use to
 	 *            qualify dependency injection, should this particular
@@ -63,8 +84,8 @@ public interface HttpSecurityArchitect {
 	 * Creates a {@link HttpSecurer}.
 	 * 
 	 * @param securable
-	 *            {@link HttpSecurable} to provide the access configuration. May
-	 *            be <code>null</code> to just require authentication.
+	 *            {@link HttpSecurable} to provide the access configuration. May be
+	 *            <code>null</code> to just require authentication.
 	 * @return {@link HttpSecurer}.
 	 */
 	HttpSecurer createHttpSecurer(HttpSecurable securable);

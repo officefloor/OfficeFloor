@@ -126,7 +126,11 @@ public interface WoofChanges {
 
 	/**
 	 * Changes the application path for the {@link WoofHttpInputModel}.
-	 * 
+	 *
+	 * @param input
+	 *            {@link WoofHttpInputModel}.
+	 * @param applicationPath
+	 *            New application path.
 	 * @return {@link Change} to the application path.
 	 */
 	Change<WoofHttpInputModel> changeApplicationPath(WoofHttpInputModel input, String applicationPath);
@@ -189,7 +193,9 @@ public interface WoofChanges {
 	 * Note that this searches the super {@link WoofTemplateModel} of the input
 	 * {@link WoofTemplateModel}. The {@link WoofTemplateOutputModel} instances from
 	 * the input {@link WoofTemplateModel} are not included.
-	 * 
+	 *
+	 * @param childTemplate
+	 *            Child {@link WoofTemplateModel}.
 	 * @return Inheritable {@link WoofTemplateOutputModel} names.
 	 */
 	Set<String> getInheritableOutputNames(WoofTemplateModel childTemplate);

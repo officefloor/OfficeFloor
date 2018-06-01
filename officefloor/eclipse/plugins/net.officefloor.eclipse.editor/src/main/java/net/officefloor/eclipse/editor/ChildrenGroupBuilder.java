@@ -36,6 +36,10 @@ public interface ChildrenGroupBuilder<R extends Model, O> {
 	/**
 	 * Adds a child {@link Model}.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
 	 * @param modelPrototype
 	 *            {@link Model} prototype to determine {@link Class} of the
 	 *            {@link Model} and used in visual validation.

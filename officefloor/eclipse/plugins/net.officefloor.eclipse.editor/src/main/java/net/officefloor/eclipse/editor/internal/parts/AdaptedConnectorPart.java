@@ -53,6 +53,9 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 	/**
 	 * Specifies this as the active {@link AdaptedConnectorPart} for the
 	 * {@link CreateAdaptedConnectionOnDragHandler}.
+	 * 
+	 * @param isActive
+	 *            Indicates if active.
 	 */
 	public void setActiveConnector(boolean isActive) {
 		if (isActive) {

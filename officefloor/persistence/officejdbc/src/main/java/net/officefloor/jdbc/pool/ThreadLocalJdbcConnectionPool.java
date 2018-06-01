@@ -105,6 +105,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	 * 
 	 * @param dataSource
 	 *            {@link ConnectionPoolDataSource}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 */
 	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource, ClassLoader classLoader) {
 		this.dataSource = dataSource;

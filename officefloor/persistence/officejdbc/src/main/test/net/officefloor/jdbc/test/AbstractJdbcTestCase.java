@@ -129,6 +129,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
+	 * @throws SQLException
+	 *             On failure to clean up the database.
 	 */
 	protected abstract void cleanDatabase(Connection connection) throws SQLException;
 
@@ -194,6 +196,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure correct specification.
+	 * 
+	 * @throws Exception
+	 *             On test failure.
 	 */
 	public void testSpecification() throws Exception {
 
@@ -217,6 +222,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure correct type.
+	 * 
+	 * @throws Exception
+	 *             On test failure.
 	 */
 	public void testType() throws Exception {
 
@@ -238,6 +246,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can connect to database.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testConnectivity() throws Throwable {
 
@@ -284,6 +295,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can stress test against the database.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testStress() throws Throwable {
 		this.doStressTest(false);
@@ -291,6 +305,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can stress test against the database with transactions.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testTransactionStress() throws Throwable {
 		this.doStressTest(true);
@@ -404,6 +421,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Undertakes select stress.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testSelectStress() throws Throwable {
 

@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.value.retrieve;
 
+import java.lang.annotation.Annotation;
+
 import net.officefloor.server.http.HttpException;
 
 /**
@@ -52,13 +54,15 @@ public interface ValueRetriever<T> {
 	Class<?> getValueType(String name) throws HttpException;
 
 	/**
-	 * Obtains the value annotation for the property on the object graph. It may
-	 * be <code>null</code> indicating either:
+	 * Obtains the value annotation for the property on the object graph. It may be
+	 * <code>null</code> indicating either:
 	 * <ul>
 	 * <li>the path does not exist on the bean graph, or</li>
 	 * <li>no annotation by type for property</li>
 	 * </ul>
 	 * 
+	 * @param <A>
+	 *            {@link Annotation} type.
 	 * @param name
 	 *            Property name.
 	 * @param annotationType

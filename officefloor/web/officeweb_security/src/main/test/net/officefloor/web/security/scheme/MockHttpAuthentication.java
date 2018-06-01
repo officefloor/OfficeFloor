@@ -46,6 +46,8 @@ public class MockHttpAuthentication<C> implements HttpAuthentication<C> {
 	 * 
 	 * @param authentication
 	 *            {@link MockAuthentication}.
+	 * @param credentialsType
+	 *            Credentials type.
 	 */
 	public MockHttpAuthentication(MockAuthentication authentication, Class<C> credentialsType) {
 		this.authentication = authentication;

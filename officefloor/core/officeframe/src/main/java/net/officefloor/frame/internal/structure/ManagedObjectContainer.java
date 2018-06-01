@@ -47,10 +47,10 @@ public interface ManagedObjectContainer {
 	 *            {@link ManagedObject}.
 	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
 	 *         Should this return </code>null</code>, the
-	 *         {@link ManagedFunctionContainer} should not then be executed, as
-	 *         it is expecting to wait. This will return the
-	 *         {@link ManagedFunctionContainer} when the {@link ManagedObject}
-	 *         is loaded.
+	 *         {@link ManagedFunctionContainer} should not then be executed, as it
+	 *         is expecting to wait. This will return the
+	 *         {@link ManagedFunctionContainer} when the {@link ManagedObject} is
+	 *         loaded.
 	 */
 	FunctionState loadManagedObject(ManagedFunctionContainer managedFunctionContainer);
 
@@ -59,36 +59,37 @@ public interface ManagedObjectContainer {
 	 * Creates a {@link FunctionState} to check if the {@link ManagedObject}
 	 * contained within this {@link ManagedObjectContainer} is ready.
 	 * <p>
-	 * Should the {@link ManagedObject} not be ready, then will latch to wait
-	 * for the {@link ManagedObject} to be ready.
+	 * Should the {@link ManagedObject} not be ready, then will latch to wait for
+	 * the {@link ManagedObject} to be ready.
 	 * 
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.
-	 * @return {@link FunctionState} to check if the {@link ManagedObject}
-	 *         contained within this {@link ManagedObjectContainer} is ready.
+	 * @return {@link FunctionState} to check if the {@link ManagedObject} contained
+	 *         within this {@link ManagedObjectContainer} is ready.
 	 */
 	FunctionState checkReady(ManagedObjectReadyCheck check);
 
 	/**
 	 * <p>
-	 * Extracts the {@link ManagedObject} extension from the
-	 * {@link ManagedObject} contained in this {@link ManagedObjectContainer}.
+	 * Extracts the {@link ManagedObject} extension from the {@link ManagedObject}
+	 * contained in this {@link ManagedObjectContainer}.
 	 * <p>
-	 * Should the {@link ManagedObject} not be loaded, then no
-	 * {@link ManagedObject} extension will be loaded.
-	 * 
+	 * Should the {@link ManagedObject} not be loaded, then no {@link ManagedObject}
+	 * extension will be loaded.
+	 *
+	 * @param <E>
+	 *            Extension type.
 	 * @param extractor
 	 *            {@link ManagedObjectExtensionExtractor}.
 	 * @param managedObjectExtensions
 	 *            {@link List} to load the {@link ManagedObject} extension.
 	 * @param extensionIndex
-	 *            Index within the {@link ManagedObject} extensions array to
-	 *            load the extension.
+	 *            Index within the {@link ManagedObject} extensions array to load
+	 *            the extension.
 	 * @param responsibleTeam
-	 *            {@link TeamManagement} responsible for extracting the
-	 *            extension. May be <code>null</code> to use any {@link Team}.
-	 * @return {@link FunctionState} to load the {@link ManagedObject}
-	 *         extension.
+	 *            {@link TeamManagement} responsible for extracting the extension.
+	 *            May be <code>null</code> to use any {@link Team}.
+	 * @return {@link FunctionState} to load the {@link ManagedObject} extension.
 	 */
 	<E> FunctionState extractExtension(ManagedObjectExtensionExtractor<E> extractor, E[] managedObjectExtensions,
 			int extensionIndex, TeamManagement responsibleTeam);
@@ -105,8 +106,8 @@ public interface ManagedObjectContainer {
 	 * 
 	 * @param governanceIndex
 	 *            Index of the {@link Governance}.
-	 * @return {@link FunctionState} to unregister the {@link ManagedObject}
-	 *         from {@link Governance}.
+	 * @return {@link FunctionState} to unregister the {@link ManagedObject} from
+	 *         {@link Governance}.
 	 */
 	FunctionState unregisterGovernance(int governanceIndex);
 

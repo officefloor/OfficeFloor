@@ -184,7 +184,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 	/**
 	 * Undertakes a contextual load.
-	 * 
+	 *
+	 * @param <R>
+	 *            Return type from {@link WoofLoaderRunnable}.
+	 * @param <E>
+	 *            Possible {@link Throwable} from {@link WoofLoaderRunnable}.
 	 * @param runnable
 	 *            {@link WoofLoaderRunnable} to configure the contextual load.
 	 * @return Returned object from {@link WoofLoaderRunnable}.

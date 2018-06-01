@@ -43,6 +43,8 @@ public class FileResourceSystem implements ResourceSystem {
 	 * 
 	 * @param context
 	 *            {@link ResourceSystemContext}.
+	 * @throws IOException
+	 *             If to setup file resources.
 	 */
 	public FileResourceSystem(ResourceSystemContext context) throws IOException {
 

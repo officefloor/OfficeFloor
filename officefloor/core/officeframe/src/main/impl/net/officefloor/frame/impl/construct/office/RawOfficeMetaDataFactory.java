@@ -25,6 +25,7 @@ import java.util.Timer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
@@ -110,6 +111,9 @@ public class RawOfficeMetaDataFactory {
 	 * 
 	 * @param configuration
 	 *            {@link OfficeConfiguration}.
+	 * @param officeManagingManagedObjects
+	 *            {@link RawManagingOfficeMetaData} instances for the
+	 *            {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawOfficeMetaData}.
@@ -516,8 +520,8 @@ public class RawOfficeMetaDataFactory {
 	}
 
 	/**
-	 * Constructs the default {@link ManagedObjectMetaData} listing from the
-	 * input {@link RawBoundManagedObjectMetaData} instances.
+	 * Constructs the default {@link ManagedObjectMetaData} listing from the input
+	 * {@link RawBoundManagedObjectMetaData} instances.
 	 * 
 	 * @param rawBoundManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances.

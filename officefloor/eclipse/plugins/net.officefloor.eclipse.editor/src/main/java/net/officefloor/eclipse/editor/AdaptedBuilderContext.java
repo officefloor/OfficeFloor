@@ -31,6 +31,10 @@ public interface AdaptedBuilderContext {
 	/**
 	 * Specifies the root {@link Model}.
 	 * 
+	 * @param <R>
+	 *            Root {@link Model} type.
+	 * @param <O>
+	 *            Operations type.
 	 * @param rootModelClass
 	 *            {@link Class} of the root {@link Model}.
 	 * @param createOperations

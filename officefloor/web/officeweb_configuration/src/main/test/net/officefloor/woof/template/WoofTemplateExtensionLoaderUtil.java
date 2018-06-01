@@ -65,8 +65,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param woofTemplateExtensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> PropertyList validateSpecification(
@@ -85,8 +84,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param classLoader
 	 *            {@link ClassLoader}. May be <code>null</code>.
 	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 *            Listing of name/label pairs for the {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> PropertyList validateSpecification(
@@ -295,6 +293,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 *            Application path to the {@link WebTemplate}.
 	 * @param template
 	 *            {@link WebTemplate}.
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
 	 * @param webArchitect
 	 *            {@link WebArchitect}.
 	 * @param propertyNameValues

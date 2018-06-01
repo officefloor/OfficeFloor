@@ -29,6 +29,10 @@ public interface ValueValidator<M, V> {
 	/**
 	 * Convenience {@link ValueValidator} for ensuring not <code>null</code>.
 	 * 
+	 * @param <M>
+	 *            Model type.
+	 * @param <V>
+	 *            Value type.
 	 * @param errorMessage
 	 *            Error message if <code>null</code>.
 	 * @return {@link ValueValidator} to validate not <code>null</code>.
@@ -58,7 +62,9 @@ public interface ValueValidator<M, V> {
 
 	/**
 	 * Convenience {@link ValueValidator} for ensuring not an empty {@link String}.
-	 * 
+	 *
+	 * @param <M>
+	 *            Model type.
 	 * @param errorMessage
 	 *            Error message if empty {@link String}.
 	 * @return {@link ValueValidator} to validate not an empty {@link String}.

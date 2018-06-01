@@ -70,6 +70,7 @@ public abstract class AbstractWebTemplateFactory implements WebTemplateFactory {
 	 *            Initial {@link Properties} for the {@link WebTemplate} that should
 	 *            be further configured by the returned {@link WebTemplate}
 	 *            implementation.
+	 * @return {@link WebTemplate}.
 	 */
 	protected abstract WebTemplate addTemplate(boolean isSecure, String applicationPath, PropertyList properties);
 

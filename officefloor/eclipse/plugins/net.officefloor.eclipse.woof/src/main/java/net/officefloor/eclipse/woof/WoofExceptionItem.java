@@ -58,6 +58,9 @@ public class WoofExceptionItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofExceptionItem(), (model) -> {

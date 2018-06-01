@@ -54,6 +54,7 @@ public class SerialisedRequestState implements Serializable {
 	 * Instantiate.
 	 * 
 	 * @param momento
+	 *            Momento.
 	 */
 	public SerialisedRequestState(Serializable momento) {
 		this.momento = momento;

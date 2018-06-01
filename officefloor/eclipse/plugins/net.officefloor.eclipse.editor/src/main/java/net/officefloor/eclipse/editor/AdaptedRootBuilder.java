@@ -33,6 +33,12 @@ public interface AdaptedRootBuilder<R extends Model, O> extends EditorStyler {
 	/**
 	 * Adds an {@link AdaptedParent}.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
+	 * @param <RE>
+	 *            Root {@link Model} event type.
 	 * @param modelPrototype
 	 *            {@link Model} prototype used in view validation, creation
 	 *            prototype and to obtain the {@link Class} of the {@link Model}.

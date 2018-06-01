@@ -40,6 +40,10 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 	/**
 	 * Registers {@link PropertyChangeListener} for the events.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
 	 * @param model
 	 *            {@link Model}.
 	 * @param events
@@ -217,7 +221,9 @@ public abstract class AbstractAdaptedFactory<R extends Model, O, M extends Model
 
 	/**
 	 * Creates the {@link AdaptedModel} for the {@link Model}.
-	 * 
+	 *
+	 * @param <m>
+	 *            {@link Model} type.
 	 * @param model
 	 *            {@link Model}.
 	 * @param parentAdaptedModel

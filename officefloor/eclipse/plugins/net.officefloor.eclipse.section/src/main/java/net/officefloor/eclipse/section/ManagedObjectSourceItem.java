@@ -52,6 +52,9 @@ public class ManagedObjectSourceItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		SectionEditor.launchConfigurer(new ManagedObjectSourceItem(), (model) -> {

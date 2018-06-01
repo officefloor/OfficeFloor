@@ -1442,6 +1442,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param test
 	 *            Test logic to wrap in replay/verify.
 	 * @return Result of test logic.
+	 * @throws T
+	 *             If logic throws {@link Exception}.
 	 */
 	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
 		this.replayMockObjects();
@@ -1463,6 +1465,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Capture <code>std err</code> of test logic.
 	 * 
+	 * @param <T>
+	 *            Possible {@link Exception} type.
 	 * @param test
 	 *            Test logic to capture <code>std err</code>.
 	 * @return <code>std err</code> output.

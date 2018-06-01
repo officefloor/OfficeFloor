@@ -46,8 +46,11 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 
 	/**
 	 * Test editor.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		SectionEditor.launch("<section />");
 	}
 
@@ -60,6 +63,12 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	 * Convenience method to launch {@link AbstractConfigurableItem} outside
 	 * {@link IWorkbench}.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
+	 * @param <I>
+	 *            Item type.
 	 * @param configurableItem
 	 *            {@link AbstractConfigurableItem}.
 	 * @param prototypeDecorator

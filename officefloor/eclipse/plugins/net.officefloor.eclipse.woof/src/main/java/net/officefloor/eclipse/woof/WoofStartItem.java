@@ -45,6 +45,9 @@ public class WoofStartItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofStartItem(), null);

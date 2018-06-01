@@ -56,8 +56,7 @@ public class SocketManager {
 	public static final int DEFAULT_SERVER_SOCKET_BACKLOG_SIZE = 8192;
 
 	/**
-	 * {@link ThreadLocal} to determine if {@link SocketListener}
-	 * {@link Thread}.
+	 * {@link ThreadLocal} to determine if {@link SocketListener} {@link Thread}.
 	 */
 	private static final ThreadLocal<SocketListener> threadSocketLister = new ThreadLocal<>();
 
@@ -100,13 +99,13 @@ public class SocketManager {
 	 * @param socketReceiveBufferSize
 	 *            Receive buffer size for the {@link Socket}.
 	 * @param maxReadsOnSelect
-	 *            Maximum number of reads per {@link SocketChannel} per select.
-	 *            The {@link Selector} has locking overheads that slow
-	 *            performance. By undertaking multiple reads on the
-	 *            {@link SocketChannel} it makes draining and servicing more
-	 *            efficient (and subsequently faster). This also allows the
-	 *            {@link StreamBuffer} sizes to be smaller than the receive
-	 *            {@link Socket} buffer size (but still maintain efficiency).
+	 *            Maximum number of reads per {@link SocketChannel} per select. The
+	 *            {@link Selector} has locking overheads that slow performance. By
+	 *            undertaking multiple reads on the {@link SocketChannel} it makes
+	 *            draining and servicing more efficient (and subsequently faster).
+	 *            This also allows the {@link StreamBuffer} sizes to be smaller than
+	 *            the receive {@link Socket} buffer size (but still maintain
+	 *            efficiency).
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
 	 * @param socketSendBufferSize
@@ -180,12 +179,13 @@ public class SocketManager {
 
 	/**
 	 * Binds a {@link ServerSocket} to be serviced.
-	 * 
+	 *
+	 * @param <R>
+	 *            Request type.
 	 * @param port
 	 *            Port for the {@link ServerSocket}.
 	 * @param serverSocketDecorator
-	 *            Optional {@link ServerSocketDecorator}. May be
-	 *            <code>null</code>.
+	 *            Optional {@link ServerSocketDecorator}. May be <code>null</code>.
 	 * @param acceptedSocketDecorator
 	 *            Optional {@link AcceptedSocketDecorator}. May be
 	 *            <code>null</code>.
@@ -323,15 +323,14 @@ public class SocketManager {
 		 * @param socketReceiveBufferSize
 		 *            Receive buffer size for the {@link Socket}.
 		 * @param maxReadsOnSelect
-		 *            Maximum number of reads per {@link SocketChannel} per
-		 *            select.
+		 *            Maximum number of reads per {@link SocketChannel} per select.
 		 * @param bufferPool
 		 *            {@link StreamBufferPool}.
 		 * @param socketSendBufferSize
 		 *            Send buffer size for the {@link Socket}.
 		 * @throws IOException
-		 *             If fails to establish necessary {@link Socket} and
-		 *             {@link Pipe} facilities.
+		 *             If fails to establish necessary {@link Socket} and {@link Pipe}
+		 *             facilities.
 		 */
 		private SocketListener(int socketReceiveBufferSize, int maxReadsOnSelect,
 				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
@@ -387,8 +386,7 @@ public class SocketManager {
 		 * @param port
 		 *            Port to bind the {@link SocketServicer}.
 		 * @param serverSocketDecorator
-		 *            Optional {@link ServerSocketDecorator}. May be
-		 *            <code>null</code>.
+		 *            Optional {@link ServerSocketDecorator}. May be <code>null</code>.
 		 * @param acceptedSocketDecorator
 		 *            Optional {@link AcceptedSocketDecorator}. May be
 		 *            <code>null</code>.
@@ -440,8 +438,8 @@ public class SocketManager {
 		 * Indicates if the current {@link Thread} is the {@link SocketListener}
 		 * {@link Thread}.
 		 * 
-		 * @return <code>true</code> if current {@link Thread} is
-		 *         {@link SocketListener} {@link Thread}.
+		 * @return <code>true</code> if current {@link Thread} is {@link SocketListener}
+		 *         {@link Thread}.
 		 */
 		private final boolean isSocketListenerThread() {
 			SocketListener threadSafeSocketListener = threadSocketLister.get();
@@ -567,13 +565,10 @@ public class SocketManager {
 										isNewBuffer = true;
 									} else {
 										/*
-										 * Tests are finding that re-using the
-										 * buffer with position != 0 causes
-										 * invalid data. To overcome this, need
-										 * to create duplicate with position 0.
-										 * Note that for direct buffers slicing
-										 * takes a new memory location (likely
-										 * why has issue).
+										 * Tests are finding that re-using the buffer with position != 0 causes invalid
+										 * data. To overcome this, need to create duplicate with position 0. Note that
+										 * for direct buffers slicing takes a new memory location (likely why has
+										 * issue).
 										 */
 										buffer = handler.readBuffer.pooledBuffer.slice();
 										isNewBuffer = false;
@@ -891,15 +886,15 @@ public class SocketManager {
 		private final SelectionKey selectionKey;
 
 		/**
-		 * Indicates if within an active read, so that a flush will be triggered
-		 * at the end. If not going to flush, then must flush on send. This is
-		 * typically because another {@link Thread} has triggered the write.
+		 * Indicates if within an active read, so that a flush will be triggered at the
+		 * end. If not going to flush, then must flush on send. This is typically
+		 * because another {@link Thread} has triggered the write.
 		 */
 		private boolean isGoingToFlush = false;
 
 		/**
-		 * Request {@link StreamBuffer} instances to be released with the
-		 * current request.
+		 * Request {@link StreamBuffer} instances to be released with the current
+		 * request.
 		 */
 		private StreamBuffer<ByteBuffer> releaseRequestBuffers = null;
 
@@ -919,9 +914,9 @@ public class SocketManager {
 		private SocketRequest<R> tail = null;
 
 		/**
-		 * To avoid TCP overheads, response {@link StreamBuffer} instances are
-		 * compacted into a new single {@link StreamBuffer} linked list to fill
-		 * {@link Socket} buffers. This allows disabling Nagle's algorithm.
+		 * To avoid TCP overheads, response {@link StreamBuffer} instances are compacted
+		 * into a new single {@link StreamBuffer} linked list to fill {@link Socket}
+		 * buffers. This allows disabling Nagle's algorithm.
 		 */
 		private StreamBuffer<ByteBuffer> compactedResponseHead = null;
 
@@ -937,8 +932,7 @@ public class SocketManager {
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocket}.
 		 * @param socketListener
-		 *            {@link SocketListener} servicing the
-		 *            {@link AcceptedSocket}.
+		 *            {@link SocketListener} servicing the {@link AcceptedSocket}.
 		 * @throws IOException
 		 *             If fails to set up servicing the {@link AcceptedSocket}.
 		 */
@@ -983,8 +977,7 @@ public class SocketManager {
 		 *            {@link ResponseHeaderWriter}.
 		 * @param headResponseBuffer
 		 *            Head response {@link StreamBuffer} of the linked list of
-		 *            {@link StreamBuffer} instances for the
-		 *            {@link SocketRequest}.
+		 *            {@link StreamBuffer} instances for the {@link SocketRequest}.
 		 */
 		private final void unsafeWriteResponse(SocketRequest<R> socketRequest,
 				ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer) {
@@ -1167,13 +1160,12 @@ public class SocketManager {
 		}
 
 		/**
-		 * Undertakes appending {@link StreamBuffer} instances for writing to
-		 * the {@link SocketChannel}.
+		 * Undertakes appending {@link StreamBuffer} instances for writing to the
+		 * {@link SocketChannel}.
 		 * 
 		 * @param writeHead
-		 *            Head {@link StreamBuffer} to linked list of
-		 *            {@link StreamBuffer} instances to write to the
-		 *            {@link SocketChannel}.
+		 *            Head {@link StreamBuffer} to linked list of {@link StreamBuffer}
+		 *            instances to write to the {@link SocketChannel}.
 		 */
 		private final void unsafeAppendWrite(StreamBuffer<ByteBuffer> writeHead) {
 
@@ -1197,8 +1189,7 @@ public class SocketManager {
 		 * Undertakes sending the response data.
 		 * 
 		 * @return <code>true</code> if all response data written. Otherwise,
-		 *         <code>false</code> indicating the {@link Socket} buffer
-		 *         filled.
+		 *         <code>false</code> indicating the {@link Socket} buffer filled.
 		 */
 		private final boolean unsafeSendWrites() {
 
@@ -1249,7 +1240,8 @@ public class SocketManager {
 				} else {
 					// Pooled / Unpooled buffer
 					ByteBuffer writeBuffer = (this.writeResponseHead.pooledBuffer != null)
-							? this.writeResponseHead.pooledBuffer : this.writeResponseHead.unpooledByteBuffer;
+							? this.writeResponseHead.pooledBuffer
+							: this.writeResponseHead.unpooledByteBuffer;
 
 					// Write the buffer to the socket
 					try {
@@ -1288,8 +1280,8 @@ public class SocketManager {
 		 * Closes the connection.
 		 * 
 		 * @param exception
-		 *            Possible {@link Throwable} being the cause of the close of
-		 *            the connection. <code>null</code> if normal close.
+		 *            Possible {@link Throwable} being the cause of the close of the
+		 *            connection. <code>null</code> if normal close.
 		 */
 		private final void unsafeCloseConnection(Throwable exception) {
 			SocketManager.terminteSelectionKey(this.selectionKey, this.socketListener);
@@ -1511,9 +1503,9 @@ public class SocketManager {
 		 * <p>
 		 * Safely executes the {@link Execution}.
 		 * <p>
-		 * Method is synchronised to ensure data is safe across the
-		 * {@link Thread}, when {@link #handleRead()} is invoked by the
-		 * {@link SocketListener} {@link Thread}.
+		 * Method is synchronised to ensure data is safe across the {@link Thread}, when
+		 * {@link #handleRead()} is invoked by the {@link SocketListener}
+		 * {@link Thread}.
 		 * 
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocketServicer}.
@@ -1593,8 +1585,8 @@ public class SocketManager {
 	}
 
 	/**
-	 * Handles safely writing the {@link Socket} data (from another
-	 * {@link Thread} than the {@link SocketListener} {@link Thread}).
+	 * Handles safely writing the {@link Socket} data (from another {@link Thread}
+	 * than the {@link SocketListener} {@link Thread}).
 	 */
 	private static class SafeWriteSocketHandler extends AbstractReadHandler {
 
@@ -1628,9 +1620,9 @@ public class SocketManager {
 		 * <p>
 		 * Safely writes the response.
 		 * <p>
-		 * Method is synchronised to ensure data is safe across the
-		 * {@link Thread}, when {@link #handleRead()} is invoked by the
-		 * {@link SocketListener} {@link Thread}.
+		 * Method is synchronised to ensure data is safe across the {@link Thread}, when
+		 * {@link #handleRead()} is invoked by the {@link SocketListener}
+		 * {@link Thread}.
 		 * 
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocketServicer}.
@@ -1750,8 +1742,8 @@ public class SocketManager {
 		private final AcceptedSocketServicer<R> acceptedSocket;
 
 		/**
-		 * Head request {@link StreamBuffer} of the linked list of
-		 * {@link StreamBuffer} instances.
+		 * Head request {@link StreamBuffer} of the linked list of {@link StreamBuffer}
+		 * instances.
 		 */
 		private final StreamBuffer<ByteBuffer> headRequestBuffer;
 
@@ -1761,8 +1753,8 @@ public class SocketManager {
 		private ResponseHeaderWriter responseHeaderWriter;
 
 		/**
-		 * Head response {@link StreamBuffer} of the linked list of
-		 * {@link StreamBuffer} instances.
+		 * Head response {@link StreamBuffer} of the linked list of {@link StreamBuffer}
+		 * instances.
 		 */
 		private StreamBuffer<ByteBuffer> headResponseBuffer = null;
 
@@ -1845,9 +1837,9 @@ public class SocketManager {
 		 * <p>
 		 * Safely writes the response.
 		 * <p>
-		 * Method is synchronised to ensure data is safe across the
-		 * {@link Thread}, when {@link #handleRead()} is invoked by the
-		 * {@link SocketListener} {@link Thread}.
+		 * Method is synchronised to ensure data is safe across the {@link Thread}, when
+		 * {@link #handleRead()} is invoked by the {@link SocketListener}
+		 * {@link Thread}.
 		 * 
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocketServicer}.
@@ -1933,8 +1925,7 @@ public class SocketManager {
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocketServicer} to close.
 		 * @param exception
-		 *            Possible {@link Throwable} for cause of closing
-		 *            connection.
+		 *            Possible {@link Throwable} for cause of closing connection.
 		 * @throws IOException
 		 *             If fails to close the connection.
 		 */
@@ -2002,8 +1993,8 @@ public class SocketManager {
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocketServicer} to close.
 		 * @param exception
-		 *            Possible {@link Throwable} for cuase of closing the
-		 *            connection. <code>null</code> if normal close.
+		 *            Possible {@link Throwable} for cuase of closing the connection.
+		 *            <code>null</code> if normal close.
 		 */
 		public SafeCloseConnection(AcceptedSocketServicer<?> acceptedSocket, Throwable exception) {
 			this.acceptedSocket = acceptedSocket;

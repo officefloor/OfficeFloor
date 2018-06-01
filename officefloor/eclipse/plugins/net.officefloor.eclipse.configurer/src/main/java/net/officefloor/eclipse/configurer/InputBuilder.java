@@ -42,6 +42,8 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	/**
 	 * Configures a list of items.
 	 * 
+	 * @param <I>
+	 *            Item type.
 	 * @param label
 	 *            Label for the items.
 	 * @param itemType
@@ -52,7 +54,9 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 
 	/**
 	 * Configures multiple items.
-	 * 
+	 *
+	 * @param <I>
+	 *            Item type.
 	 * @param label
 	 *            Label for the items.
 	 * @param itemType

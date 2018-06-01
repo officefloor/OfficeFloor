@@ -146,7 +146,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 	/**
 	 * Creates a mock {@link HttpResponseCookie}.
-	 * 
+	 *
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            value.
 	 * @return {@link HttpResponseCookie}.
 	 */
 	public static WritableHttpCookie mockResponseCookie(String name, String value) {

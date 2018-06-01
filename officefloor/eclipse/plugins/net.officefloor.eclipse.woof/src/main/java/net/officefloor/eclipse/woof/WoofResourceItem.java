@@ -45,6 +45,9 @@ public class WoofResourceItem extends
 
 	/**
 	 * Test configuration.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofResourceItem(), (model) -> {

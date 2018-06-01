@@ -53,8 +53,7 @@ public interface AuthenticationContext<AC extends Serializable, C> {
 	 * @param credentials
 	 *            Credentials (if available). May be <code>null</code>.
 	 * @param authenticateRequest
-	 *            Optional {@link AuthenticateRequest}. May be
-	 *            <code>null</code>.
+	 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
 	 */
 	void authenticate(C credentials, AuthenticateRequest authenticateRequest);
 
@@ -69,6 +68,10 @@ public interface AuthenticationContext<AC extends Serializable, C> {
 	/**
 	 * Undertakes a {@link ProcessSafeOperation}.
 	 * 
+	 * @param <R>
+	 *            Return type.
+	 * @param <T>
+	 *            Possible {@link Exception} type.
 	 * @param operation
 	 *            {@link ProcessSafeOperation}.
 	 * @return Return value.

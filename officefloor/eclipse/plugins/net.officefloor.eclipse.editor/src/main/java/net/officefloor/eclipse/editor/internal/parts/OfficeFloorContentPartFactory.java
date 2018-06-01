@@ -226,6 +226,10 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	 *            {@link AdaptedErrorHandler}.
 	 * @param changeExecutor
 	 *            {@link ChangeExecutor}.
+	 * @param styleRegistry
+	 *            {@link StyleRegistry}.
+	 * @param selectOnly
+	 *            {@link SelectOnly}.
 	 */
 	public void init(Injector injector, Pane editorPane, IViewer content, Pane paletteIndicator, IViewer palette,
 			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry,
@@ -298,7 +302,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 
 	/**
 	 * Registers the {@link AbstractAdaptedFactory}.
-	 * 
+	 *
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
 	 * @param builder
 	 *            {@link AbstractAdaptedFactory}.
 	 */
@@ -471,7 +479,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 
 	/**
 	 * Creates the wrapper for the {@link Model}.
-	 * 
+	 *
+	 * @param <M>
+	 *            {@link Model} type.
 	 * @param model
 	 *            {@link Model}.
 	 * @param parentAdaptedModel
@@ -510,6 +520,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Adds the {@link ConnectionModel} to the {@link Model} structure.
 	 * 
+	 * @param <S>
+	 *            Source {@link Model} type.
+	 * @param <T>
+	 *            Target {@link Model} type.
+	 * @param <C>
+	 *            {@link ConnectionModel} type.
 	 * @param source
 	 *            Source {@link Model}.
 	 * @param target

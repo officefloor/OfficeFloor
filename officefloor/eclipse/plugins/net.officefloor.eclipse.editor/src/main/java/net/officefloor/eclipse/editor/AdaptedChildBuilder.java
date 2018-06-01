@@ -95,6 +95,7 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 	 * @param childrenEvents
 	 *            {@link Enum} events fired by the {@link Model} for children
 	 *            changes.
+	 * @return {@link ChildrenGroupBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
 	ChildrenGroupBuilder<R, O> children(String childGroupName, Function<M, List<? extends Model>> getChildren,
@@ -103,6 +104,8 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 	/**
 	 * Registers a {@link ConnectionModel} from this {@link AdaptedModel}.
 	 * 
+	 * @param <C>
+	 *            {@link ConnectionModel} type.
 	 * @param connectionClass
 	 *            {@link ConnectionModel} {@link Class}.
 	 * @param getConnection
@@ -122,7 +125,9 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 
 	/**
 	 * Registers multiple {@link ConnectionModel} from this {@link AdaptedModel}.
-	 * 
+	 *
+	 * @param <C>
+	 *            {@link ConnectionModel} type.
 	 * @param connectionClass
 	 *            {@link ConnectionModel} class.
 	 * @param getConnections
@@ -132,6 +137,8 @@ public interface AdaptedChildBuilder<R extends Model, O, M extends Model, E exte
 	 *            {@link Function} to get the source {@link Model} from the
 	 *            {@link ConnectionModel}.
 	 * @param connectionChangeEvents
+	 *            {@link Enum} events fired by the model for {@link ConnectionModel}
+	 *            change.
 	 * @return {@link AdaptedConnectionBuilder} for the {@link ConnectionModel}.
 	 */
 	@SuppressWarnings("unchecked")

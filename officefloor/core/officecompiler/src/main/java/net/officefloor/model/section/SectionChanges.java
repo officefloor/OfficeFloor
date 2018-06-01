@@ -128,10 +128,10 @@ public interface SectionChanges {
 	 *            {@link FunctionNamespaceType} from the
 	 *            {@link ManagedFunctionSource}.
 	 * @param managedFunctionNames
-	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty list
-	 *            results in loading all {@link WorkTaskModel} instances for the
-	 *            {@link FunctionNamespaceType}.
-	 * @return {@link Change} to add the {@link WorkModel}.
+	 *            Listing of {@link ManagedFunctionModel} names to be loaded. Empty
+	 *            list results in loading all {@link ManagedFunctionModel} instances
+	 *            for the {@link FunctionNamespaceType}.
+	 * @return {@link Change} to add the {@link FunctionNamespaceModel}.
 	 */
 	Change<FunctionNamespaceModel> addFunctionNamespace(String functionNamspaceName,
 			String functionNamspaceSourceClassName, PropertyList properties, FunctionNamespaceType functionNamspaceType,
@@ -144,24 +144,24 @@ public interface SectionChanges {
 	 *            {@link FunctionNamespaceModel} to be removed.
 	 * @return {@link Change} to remove the {@link FunctionNamespaceModel}.
 	 */
-	Change<FunctionNamespaceModel> removeFunctionNamespace(FunctionNamespaceModel functionNamspaceModel);
+	Change<FunctionNamespaceModel> removeFunctionNamespace(FunctionNamespaceModel functionNamespaceModel);
 
 	/**
 	 * Renames the {@link FunctionNamespaceModel}.
 	 *
-	 * @param functionNamspaceModel
+	 * @param functionNamespaceModel
 	 *            {@link FunctionNamespaceModel} to rename.
 	 * @param newFunctionNamespaceName
 	 *            New name for the {@link FunctionNamespaceModel}.
 	 * @return {@link Change} to rename the {@link FunctionNamespaceModel}.
 	 */
-	Change<FunctionNamespaceModel> renameFunctionNamespace(FunctionNamespaceModel functionNamspaceModel,
+	Change<FunctionNamespaceModel> renameFunctionNamespace(FunctionNamespaceModel functionNamespaceModel,
 			String newFunctionNamespaceName);
 
 	/**
 	 * Refactors the {@link FunctionNamespaceModel}.
 	 *
-	 * @param functionNamspaceModel
+	 * @param functionNamespaceModel
 	 *            {@link FunctionNamespaceModel} to refactor.
 	 * @param functionNamespaceName
 	 *            New name for the {@link FunctionNamespaceModel}.
@@ -203,7 +203,7 @@ public interface SectionChanges {
 
 	/**
 	 * Adds the {@link ManagedFunctionType} as a {@link ManagedFunctionModel} to the
-	 * {@link FunctionNamspaceModel}.
+	 * {@link FunctionNamespaceModel}.
 	 *
 	 * @param <M>
 	 *            Dependency type keys.
@@ -229,7 +229,7 @@ public interface SectionChanges {
 	 *            {@link FunctionNamespaceModel} to have the
 	 *            {@link ManagedFunctionModel} removed.
 	 * @param managedFunctionModel
-	 *            {@link ManagdedFunctionModel} to be removed.
+	 *            {@link ManagedFunctionModel} to be removed.
 	 * @return {@link Change} to remove the {@link ManagedFunctionModel} from the
 	 *         {@link FunctionNamespaceModel}.
 	 */
@@ -516,14 +516,14 @@ public interface SectionChanges {
 	 * {@link ExternalManagedObjectModel}.
 	 *
 	 * @param managedFunctionObject
-	 *            {@link WorkTaskObjectModel}.
+	 *            {@link ManagedFunctionObjectModel}.
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to add a
 	 *         {@link ManagedFunctionObjectToExternalManagedObjectModel}.
 	 */
 	Change<ManagedFunctionObjectToExternalManagedObjectModel> linkManagedFunctionObjectToExternalManagedObject(
-			ManagedFunctionObjectModel managedFunctionTaskObject, ExternalManagedObjectModel externalManagedObject);
+			ManagedFunctionObjectModel managedFunctionObject, ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Removes the {@link ManagedFunctionObjectToExternalManagedObjectModel}.
@@ -549,7 +549,7 @@ public interface SectionChanges {
 	 *         {@link ManagedFunctionObjectToSectionManagedObjectModel}.
 	 */
 	Change<ManagedFunctionObjectToSectionManagedObjectModel> linkManagedFunctionObjectToSectionManagedObject(
-			ManagedFunctionObjectModel managedFunctionTaskObject, SectionManagedObjectModel managedObject);
+			ManagedFunctionObjectModel managedFunctionObject, SectionManagedObjectModel managedObject);
 
 	/**
 	 * Removes the {@link ManagedFunctionObjectToSectionManagedObjectModel}.

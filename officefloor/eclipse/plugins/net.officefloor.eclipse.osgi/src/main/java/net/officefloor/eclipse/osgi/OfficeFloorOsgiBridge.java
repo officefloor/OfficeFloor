@@ -178,6 +178,8 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Loads the {@link Class}.
 	 * 
+	 * @param <T>
+	 *            {@link Class} type.
 	 * @param className
 	 *            Name of the {@link Class}.
 	 * @param superType

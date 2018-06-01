@@ -47,8 +47,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final String functionName;
 
 	/**
-	 * {@link ManagedFunctionFactory} to create the {@link ManagedFunction} of
-	 * the {@link ManagedFunctionMetaData}.
+	 * {@link ManagedFunctionFactory} to create the {@link ManagedFunction} of the
+	 * {@link ManagedFunctionMetaData}.
 	 */
 	private final ManagedFunctionFactory<O, F> functionFactory;
 
@@ -81,8 +81,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final ManagedObjectIndex[] functionIndexedManagedObjects;
 
 	/**
-	 * {@link ManagedObjectMetaData} for the {@link ManagedObject} instances
-	 * bound to this {@link ManagedFunction}.
+	 * {@link ManagedObjectMetaData} for the {@link ManagedObject} instances bound
+	 * to this {@link ManagedFunction}.
 	 */
 	private final ManagedObjectMetaData<?>[] functionBoundManagedObjects;
 
@@ -106,8 +106,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private ManagedFunctionMetaData<?, ?> nextFunctionMetaData;
 
 	/**
-	 * {@link EscalationProcedure} for exceptions of the {@link ManagedFunction}
-	 * of this {@link ManagedFunctionMetaData}.
+	 * {@link EscalationProcedure} for exceptions of the {@link ManagedFunction} of
+	 * this {@link ManagedFunctionMetaData}.
 	 */
 	private EscalationProcedure escalationProcedure;
 
@@ -124,9 +124,9 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private AdministrationMetaData<?, ?, ?>[] postAdministration;
 
 	/**
-	 * {@link ManagedObjectIndex} instances identifying the
-	 * {@link ManagedObject} instances that must be loaded before the
-	 * {@link ManagedFunction} may be executed.
+	 * {@link ManagedObjectIndex} instances identifying the {@link ManagedObject}
+	 * instances that must be loaded before the {@link ManagedFunction} may be
+	 * executed.
 	 */
 	private ManagedObjectIndex[] requiredManagedObjects;
 
@@ -137,20 +137,21 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            Name of the {@link ManagedFunction}.
 	 * @param functionFactory
 	 *            {@link ManagedFunctionFactory} to create the
-	 *            {@link ManagedFunction} of the
-	 *            {@link ManagedFunctionMetaData}.
+	 *            {@link ManagedFunction} of the {@link ManagedFunctionMetaData}.
 	 * @param annotations
 	 *            Differentiators.
 	 * @param parameterType
 	 *            Parameter type of this {@link ManagedFunction}.
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of the {@link Team} responsible for
-	 *            executing this {@link ManagedFunction}. May be
-	 *            <code>null</code>.
+	 *            executing this {@link ManagedFunction}. May be <code>null</code>.
 	 * @param functionIndexedManagedObjects
 	 *            Translates the {@link ManagedFunction} index to the
-	 *            {@link ManagedObjectIndex} to obtain the {@link ManagedObject}
-	 *            for the {@link ManagedFunction}.
+	 *            {@link ManagedObjectIndex} to obtain the {@link ManagedObject} for
+	 *            the {@link ManagedFunction}.
+	 * @param functionBoundManagedObjects
+	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}
+	 *            instances bound to the {@link ManagedFunction}.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
 	 */
@@ -181,16 +182,15 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link ManagedFunction}.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure} for exceptions of the
-	 *            {@link ManagedFunction} of this
-	 *            {@link ManagedFunctionMetaData}.
+	 *            {@link ManagedFunction} of this {@link ManagedFunctionMetaData}.
 	 * @param preAdministration
 	 *            {@link AdministrationMetaData} specifying the
-	 *            {@link Administration} instances to be completed before
-	 *            executing the {@link ManagedFunction}.
+	 *            {@link Administration} instances to be completed before executing
+	 *            the {@link ManagedFunction}.
 	 * @param postAdministration
 	 *            {@link AdministrationMetaData} specifying the
-	 *            {@link Administration} instances to be completed after
-	 *            executing the {@link ManagedFunction}.
+	 *            {@link Administration} instances to be completed after executing
+	 *            the {@link ManagedFunction}.
 	 * @param requiredManagedObjects
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances that must be loaded before the

@@ -38,8 +38,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * Indicates if this {@link ThreadState} is attached to the current
 	 * {@link Thread}.
 	 * 
-	 * @return <code>true</cod> if {@link ThreadState} is attached to the
-	 *         current {@link Thread}.
+	 * @return <code>true</code> if {@link ThreadState} is attached to the current
+	 *         {@link Thread}.
 	 */
 	boolean isAttachedToThread();
 
@@ -47,8 +47,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * Indicates if changes to the {@link ThreadState} are safe on the current
 	 * {@link Thread}.
 	 * 
-	 * @return <code>true</code> should changes to the {@link ThreadState} be
-	 *         safe on the current {@link Thread}.
+	 * @return <code>true</code> should changes to the {@link ThreadState} be safe
+	 *         on the current {@link Thread}.
 	 */
 	boolean isThreadStateSafe();
 
@@ -60,8 +60,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * @param function
 	 *            Head of initial {@link FunctionState} chain to complete.
 	 * @param thenFunction
-	 *            Head of the second {@link FunctionState} chain to then
-	 *            complete next.
+	 *            Head of the second {@link FunctionState} chain to then complete
+	 *            next.
 	 * @return {@link FunctionState} to execute the chains one after another.
 	 */
 	FunctionState then(FunctionState function, FunctionState thenFunction);
@@ -73,8 +73,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * <p>
 	 * Once the {@link FunctionState} chain has reached this length, it will be
 	 * broken. (spawned in another {@link Thread}). This avoids
-	 * {@link StackOverflowError} issues in {@link FunctionState} chain being
-	 * too large.
+	 * {@link StackOverflowError} issues in {@link FunctionState} chain being too
+	 * large.
 	 * 
 	 * @return Maximum {@link FunctionState} chain length for this
 	 *         {@link ThreadState}.
@@ -86,14 +86,18 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * chains.
 	 * 
 	 * @return {@link TeamManagement} for an active {@link Team}. An active
-	 *         {@link Team} contains {@link Thread} instances that will execute
-	 *         the {@link Job} with a different {@link Thread} stack.
+	 *         {@link Team} contains {@link Thread} instances that will execute the
+	 *         {@link Job} with a different {@link Thread} stack.
 	 */
 	TeamManagement getBreakChainTeamManagement();
 
 	/**
 	 * Runs the {@link ProcessSafeOperation}.
-	 * 
+	 *
+	 * @param <R>
+	 *            Return type from {@link ProcessSafeOperation}.
+	 * @param <T>
+	 *            Possible {@link Escalation} from {@link ProcessSafeOperation}.
 	 * @param operation
 	 *            {@link ProcessSafeOperation}.
 	 * @return Optional return value from {@link ProcessSafeOperation}.
@@ -178,8 +182,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	/**
 	 * Obtains the {@link FunctionState} to register the {@link ThreadProfiler}.
 	 * 
-	 * @return {@link FunctionState} to register the {@link ThreadProfiler}. May
-	 *         be <code>null</code> if no {@link ThreadProfiler} required.
+	 * @return {@link FunctionState} to register the {@link ThreadProfiler}. May be
+	 *         <code>null</code> if no {@link ThreadProfiler} required.
 	 */
 	FunctionState registerThreadProfiler();
 

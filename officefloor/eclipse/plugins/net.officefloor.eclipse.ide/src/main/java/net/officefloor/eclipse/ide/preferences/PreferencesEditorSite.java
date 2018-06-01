@@ -58,8 +58,12 @@ public class PreferencesEditorSite implements IEditorSite {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param editorName
+	 *            Name of the editor.
 	 * @param workbench
 	 *            {@link IWorkbench}.
+	 * @param parentShell
+	 *            Parent {@link Shell}.
 	 */
 	public PreferencesEditorSite(String editorName, IWorkbench workbench, Shell parentShell) {
 		this.editorName = editorName;

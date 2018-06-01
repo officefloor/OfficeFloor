@@ -31,6 +31,7 @@ import javax.persistence.TypedQuery;
 
 import org.h2.jdbcx.JdbcDataSource;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -60,9 +61,11 @@ import net.officefloor.plugin.section.clazz.Parameter;
 public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Loads the properties for the jpama
+	 * Loads the properties for the {@link JpaManagedObjectSource}.
 	 * 
 	 * @param jpa
+	 *            {@link PropertyConfigurable} to receive the {@link Property}
+	 *            values.
 	 */
 	protected abstract void loadJpaProperties(PropertyConfigurable jpa);
 
@@ -99,6 +102,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
+	 * @throws SQLException
+	 *             If fails to clean the database.
 	 */
 	protected void cleanDatabase(Connection connection) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
@@ -202,6 +207,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to read entry from database.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testRead() throws Throwable {
 
@@ -246,6 +254,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to insert entry into database.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testInsert() throws Throwable {
 
@@ -281,6 +292,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to update entry into database.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testUpdate() throws Throwable {
 
@@ -320,6 +334,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to delete entry from database.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testDelete() throws Throwable {
 
@@ -356,6 +373,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Undertake stress insert test.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testStressInsert() throws Throwable {
 		this.doStressInsertTest(false);
@@ -363,6 +383,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Undertake stress insert test with pooled connections.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testStressInsertPooledConnections() throws Throwable {
 		this.doStressInsertTest(true);
@@ -438,6 +461,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure stress select.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testStressSelect() throws Throwable {
 		this.doStressSelectTest(false);
@@ -445,6 +471,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure stress select with pooled connections.
+	 * 
+	 * @throws Throwable
+	 *             On test failure.
 	 */
 	public void testStressSelectPooledConnections() throws Throwable {
 		this.doStressSelectTest(true);

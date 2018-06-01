@@ -32,6 +32,8 @@ public interface ColumnRenderer<I, V> {
 	/**
 	 * Creates the {@link TableColumn}.
 	 *
+	 * @param <R>
+	 *            Row object type.
 	 * @param table
 	 *            {@link TableView} to contain the {@link TableColumn}.
 	 * @param callback

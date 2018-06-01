@@ -30,6 +30,11 @@ public class SectionEditorMain extends SectionEditor {
 
 	/**
 	 * Runs the {@link SectionEditor} for testing.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 * @throws Exception
+	 *             If failure in running.
 	 */
 	public static void main(String[] args) throws Exception {
 		SectionEditorMain.launch(new File(ClassLoader

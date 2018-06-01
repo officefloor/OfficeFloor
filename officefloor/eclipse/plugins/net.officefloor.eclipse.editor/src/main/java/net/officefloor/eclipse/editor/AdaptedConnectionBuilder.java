@@ -33,6 +33,10 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 	/**
 	 * Provides linking to the target {@link ConnectionModel}.
 	 * 
+	 * @param <T>
+	 *            Target {@link Model} type.
+	 * @param <TE>
+	 *            Target {@link Model} event type.
 	 * @param targetModel
 	 *            Target {@link Model} type.
 	 * @param getConnection
@@ -53,6 +57,10 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 	/**
 	 * Provides linking to the target {@link ConnectionModel}.
 	 * 
+	 * @param <T>
+	 *            Target {@link Model} type.
+	 * @param <TE>
+	 *            Target {@link Model} event type.
 	 * @param targetModel
 	 *            Target {@link Model} type.
 	 * @param getConnections
@@ -64,7 +72,7 @@ public interface AdaptedConnectionBuilder<R extends Model, O, S extends Model, C
 	 * @param targetChangeEvents
 	 *            {@link Enum} events on the target {@link Model} indicating change
 	 *            in {@link ConnectionModel}.
-	 * @return
+	 * @return {@link AdaptedConnectionManagementBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
 	<T extends Model, TE extends Enum<TE>> AdaptedConnectionManagementBuilder<R, O, S, C, T> toMany(

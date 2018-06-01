@@ -78,9 +78,9 @@ public class StreamBufferScanner {
 	private final List<StreamBuffer<ByteBuffer>> previousBuffers = new ArrayList<>(1);
 
 	/**
-	 * Start position to read data from for the first previous
-	 * {@link StreamBuffer}. All previous {@link StreamBuffer} instances after
-	 * first are assumed to start at 0.
+	 * Start position to read data from for the first previous {@link StreamBuffer}.
+	 * All previous {@link StreamBuffer} instances after first are assumed to start
+	 * at 0.
 	 */
 	private int firstPreviousBufferStart = 0;
 
@@ -101,9 +101,8 @@ public class StreamBufferScanner {
 	private int currentBufferStartPosition = 0;
 
 	/**
-	 * Scan starting position with the current {@link StreamBuffer}. This allows
-	 * the {@link #currentBufferStartPosition} to only move forward when data
-	 * obtained.
+	 * Scan starting position with the current {@link StreamBuffer}. This allows the
+	 * {@link #currentBufferStartPosition} to only move forward when data obtained.
 	 */
 	private int currentBufferScanStart = 0;
 
@@ -118,8 +117,8 @@ public class StreamBufferScanner {
 	private long bufferLong = 0;
 
 	/**
-	 * Number of bytes from previous buffers. Value is always between 0 - 8 (as
-	 * only 8 bytes in long).
+	 * Number of bytes from previous buffers. Value is always between 0 - 8 (as only
+	 * 8 bytes in long).
 	 */
 	private byte bufferLongByteCount = 0;
 
@@ -164,9 +163,10 @@ public class StreamBufferScanner {
 	}
 
 	/**
-	 * Builds a long (8 bytes) from the {@link StreamBuffer} at current
-	 * position.
-	 * 
+	 * Builds a long (8 bytes) from the {@link StreamBuffer} at current position.
+	 *
+	 * @param <T>
+	 *            Illegal value {@link Exception}
 	 * @param illegalValueExceptionFactory
 	 *            {@link Supplier} to create {@link Throwable} for illegal long
 	 *            value.
@@ -185,16 +185,15 @@ public class StreamBufferScanner {
 		if (remaining >= 8) {
 
 			/*
-			 * Buffer contains enough data to read in the full long. Therefore
-			 * determine whether have data to read in the full long in one go
-			 * (avoid extra build steps below, if just built a short or byte).
-			 * Two scenarios are:
+			 * Buffer contains enough data to read in the full long. Therefore determine
+			 * whether have data to read in the full long in one go (avoid extra build steps
+			 * below, if just built a short or byte). Two scenarios are:
 			 * 
-			 * 1) No previous build of shorter content, so read in entire long
-			 * from scan start
+			 * 1) No previous build of shorter content, so read in entire long from scan
+			 * start
 			 * 
-			 * 2) Or, have already read in some bytes to buffer, so need to
-			 * ensure those bytes are in current buffer for full read
+			 * 2) Or, have already read in some bytes to buffer, so need to ensure those
+			 * bytes are in current buffer for full read
 			 */
 			if ((this.bufferLongByteCount == 0) || (this.bufferLongByteCount < this.currentBufferScanStart)) {
 
@@ -267,9 +266,10 @@ public class StreamBufferScanner {
 	}
 
 	/**
-	 * Builds a short (2 bytes) from the {@link StreamBuffer} at current
-	 * position.
+	 * Builds a short (2 bytes) from the {@link StreamBuffer} at current position.
 	 *
+	 * @param <T>
+	 *            Illegal value {@link Exception}
 	 * @param illegalValueExceptionFactory
 	 *            {@link Supplier} to create {@link Throwable} for illegal short
 	 *            value.
@@ -339,6 +339,8 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a byte from the {@link StreamBuffer} at current position.
 	 *
+	 * @param <T>
+	 *            Illegal value {@link Exception}
 	 * @param illegalValueExceptionFactory
 	 *            {@link Supplier} to create {@link Throwable} for illegal short
 	 *            value.
@@ -404,7 +406,7 @@ public class StreamBufferScanner {
 	 *         <code>-1</code> to indicate did not find {@link ScanTarget} in
 	 *         current {@link StreamBuffer}.
 	 */
-	public <T extends Throwable> int peekToTarget(ScanTarget target) throws T {
+	public int peekToTarget(ScanTarget target) {
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
@@ -484,19 +486,26 @@ public class StreamBufferScanner {
 
 	/**
 	 * <p>
-	 * Scans the {@link StreamBuffer} for the byte value from the current
-	 * position.
+	 * Scans the {@link StreamBuffer} for the byte value from the current position.
 	 * <p>
 	 * The returned {@link StreamBufferByteSequence} is inclusive of the current
-	 * position but exclusive of the target byte. This is because target bytes
-	 * for HTTP are typically delimiters (eg. space, CR, etc) that are not
-	 * included in the bytes of interest.
+	 * position but exclusive of the target byte. This is because target bytes for
+	 * HTTP are typically delimiters (eg. space, CR, etc) that are not included in
+	 * the bytes of interest.
 	 * 
+	 * @param <T>
+	 *            Too long {@link Exception} type.
 	 * @param target
 	 *            {@link ScanTarget}.
+	 * @param maxBytesLength
+	 *            Max bytes.
+	 * @param tooLongExceptionFactory
+	 *            {@link Supplier} to provide too long {@link Exception}.
 	 * @return {@link StreamBufferByteSequence} if found the byte. Otherwise,
-	 *         <code>null</code> indicating further {@link StreamBuffer}
-	 *         instances may contain the byte.
+	 *         <code>null</code> indicating further {@link StreamBuffer} instances
+	 *         may contain the byte.
+	 * @throws T
+	 *             If too long {@link Exception}.
 	 */
 	public <T extends Throwable> StreamBufferByteSequence scanToTarget(ScanTarget target, int maxBytesLength,
 			Supplier<T> tooLongExceptionFactory) throws T {
@@ -714,8 +723,7 @@ public class StreamBufferScanner {
 	 * <p>
 	 * Creates the {@link StreamBufferByteSequence} up to current position.
 	 * <p>
-	 * This will also reset for obtaining the next
-	 * {@link StreamBufferByteSequence}.
+	 * This will also reset for obtaining the next {@link StreamBufferByteSequence}.
 	 * 
 	 * @return {@link StreamBufferByteSequence} up to current position.
 	 */
@@ -773,8 +781,7 @@ public class StreamBufferScanner {
 	 * 
 	 * @param numberOfBytes
 	 *            Number of bytes for the {@link StreamBufferByteSequence}.
-	 * @return {@link StreamBufferByteSequence} with the specified number of
-	 *         bytes.
+	 * @return {@link StreamBufferByteSequence} with the specified number of bytes.
 	 */
 	private StreamBufferByteSequence createByteSequence(int numberOfBytes) {
 
@@ -866,9 +873,9 @@ public class StreamBufferScanner {
 	 * <p>
 	 * Scans the {@link ByteBuffer} to find the next byte of particular value.
 	 * <p>
-	 * Note: the algorithm used does not handle negative byte values. However,
-	 * the values (ASCII characters) searched for in HTTP parsing are all
-	 * positive (lower 7 bits of the byte).
+	 * Note: the algorithm used does not handle negative byte values. However, the
+	 * values (ASCII characters) searched for in HTTP parsing are all positive
+	 * (lower 7 bits of the byte).
 	 * 
 	 * @param bytes
 	 *            Long of 8 bytes to check for the value.
@@ -883,18 +890,17 @@ public class StreamBufferScanner {
 		long xorWithMask = bytes ^ target.mask; // matching byte will be 0
 
 		/*
-		 * Need to find if any byte is zero. As ASCII is 7 bits, can use the top
-		 * bit for overflow to find if any byte is zero. In other words, add
-		 * 0x7f (01111111) to each byte and if top bit is 1, then not the byte
-		 * of interest (as byte of interest is 0 from previous XOR).
+		 * Need to find if any byte is zero. As ASCII is 7 bits, can use the top bit for
+		 * overflow to find if any byte is zero. In other words, add 0x7f (01111111) to
+		 * each byte and if top bit is 1, then not the byte of interest (as byte of
+		 * interest is 0 from previous XOR).
 		 * 
-		 * Note: top bit value of 0 may only mean potential matching byte, as
-		 * could have UTF-8 encoded characters. However, the separation
-		 * characters for HTTP parsing are all 7 bit values. Therefore, will
-		 * need to check for false positives (e.g. null 0). However, most HTTP
-		 * content is 7 bits so win efficiency in scanning past bytes not of
-		 * interest (i.e. can potentially skip past 8 bytes in 4 operations -
-		 * where looping over the 8 bytes is 8 operations minimum).
+		 * Note: top bit value of 0 may only mean potential matching byte, as could have
+		 * UTF-8 encoded characters. However, the separation characters for HTTP parsing
+		 * are all 7 bit values. Therefore, will need to check for false positives (e.g.
+		 * null 0). However, most HTTP content is 7 bits so win efficiency in scanning
+		 * past bytes not of interest (i.e. can potentially skip past 8 bytes in 4
+		 * operations - where looping over the 8 bytes is 8 operations minimum).
 		 */
 		long overflowNonZero = xorWithMask + 0x7f7f7f7f7f7f7f7fL;
 		long topBitCheck = overflowNonZero & 0x8080808080808080L;
@@ -903,13 +909,12 @@ public class StreamBufferScanner {
 			/*
 			 * Potential value within the 8 bytes, so search for it.
 			 * 
-			 * To reduce operations, use binary search to determine where byte
-			 * of interest is.
+			 * To reduce operations, use binary search to determine where byte of interest
+			 * is.
 			 * 
-			 * Note: as may have two bytes of interest within the range, need to
-			 * find the first actual matching byte. Example case is UTF-8
-			 * creating false positives. However, also HTTP with end of HTTP
-			 * headers having repeating CR LF bytes.
+			 * Note: as may have two bytes of interest within the range, need to find the
+			 * first actual matching byte. Example case is UTF-8 creating false positives.
+			 * However, also HTTP with end of HTTP headers having repeating CR LF bytes.
 			 */
 			long IIII_OOOO_Check = topBitCheck & 0xffffffff00000000L;
 			if (IIII_OOOO_Check != 0x8080808000000000L) {

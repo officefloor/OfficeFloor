@@ -35,9 +35,7 @@ public interface OfficeFloorRepository {
 	 * @param officeFloor
 	 *            {@link OfficeFloorModel}.
 	 * @param configuration
-	 *            {@link ConfigurationItem} containing the
-	 *            {@link OfficeFloorModel}.
-	 * @return {@link OfficeFloorModel}.
+	 *            {@link ConfigurationItem} containing the {@link OfficeFloorModel}.
 	 * @throws IOException
 	 *             If fails to retrieve the {@link OfficeFloorModel}.
 	 */
