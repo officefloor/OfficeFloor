@@ -49,8 +49,10 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	 * 
 	 * @param args
 	 *            Command line arguments.
+	 * @throws Exception
+	 *             If fails to run.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		SectionEditor.launch("<section />");
 	}
 
