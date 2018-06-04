@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.woof;
 
+import java.util.List;
+
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
@@ -30,10 +32,10 @@ import net.officefloor.woof.model.woof.WoofHttpInputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
+import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 
 /**
  * Configuration for the {@link WoofResourceModel}.
@@ -104,6 +106,13 @@ public class WoofResourceItem extends
 			item.resourcePath = model.getResourcePath();
 		}
 		return item;
+	}
+
+	@Override
+	protected void loadStyles(List<IdeStyle> styles) {
+		styles.add(new IdeStyle().rule("-fx-background-color",
+				"radial-gradient(radius 100.0%, mediumslateblue, mediumpurple)"));
+		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "lavender"));
 	}
 
 	@Override

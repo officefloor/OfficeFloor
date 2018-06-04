@@ -276,6 +276,12 @@ public class WoofTemplateItem extends
 	}
 
 	@Override
+	protected void loadStyles(List<IdeStyle> styles) {
+		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 50.0%, blue, dodgerblue)"));
+		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "lightcyan"));
+	}
+
+	@Override
 	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 
 		// Template Inheritance

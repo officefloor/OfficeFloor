@@ -102,6 +102,21 @@ public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChan
 	}
 
 	@Override
+	public String paletteStyle() {
+		return ".palette { -fx-background-color: cornsilk }";
+	}
+
+	@Override
+	public String paletteIndicatorStyle() {
+		return ".palette-indicator { -fx-background-color: bisque }";
+	}
+
+	@Override
+	public String editorStyle() {
+		return ".connection Path { -fx-stroke: royalblue; -fx-opacity: 0.6 }";
+	}
+
+	@Override
 	protected void loadParents(List<AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, ?, ?, ?>> parents) {
 		parents.add(new WoofHttpContinuationItem());
 		parents.add(new WoofHttpInputItem());

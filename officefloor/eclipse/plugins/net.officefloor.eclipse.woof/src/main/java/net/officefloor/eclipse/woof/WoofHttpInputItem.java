@@ -135,6 +135,13 @@ public class WoofHttpInputItem extends
 	}
 
 	@Override
+	protected void loadStyles(List<IdeStyle> styles) {
+		styles.add(
+				new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 50.0%, dodgerblue, lightskyblue)"));
+		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "blue"));
+	}
+
+	@Override
 	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 
 		// Section Input

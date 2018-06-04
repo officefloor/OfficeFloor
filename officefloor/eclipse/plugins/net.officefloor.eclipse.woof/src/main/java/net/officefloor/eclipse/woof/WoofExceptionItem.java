@@ -120,6 +120,12 @@ public class WoofExceptionItem extends
 	}
 
 	@Override
+	protected void loadStyles(List<IdeStyle> styles) {
+		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 100.0%, tomato, darkorange)"));
+		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "moccasin"));
+	}
+
+	@Override
 	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 
 		// Section Input

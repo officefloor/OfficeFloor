@@ -162,6 +162,12 @@ public class WoofSecurityItem extends
 	}
 
 	@Override
+	protected void loadStyles(List<IdeStyle> styles) {
+		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 50.0%, gold, goldenrod)"));
+		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "lightgoldenrodyellow"));
+	}
+
+	@Override
 	protected void children(List<IdeChildrenGroup> childGroups) {
 		childGroups.add(new IdeChildrenGroup(new WoofSecurityOutputItem()));
 	}

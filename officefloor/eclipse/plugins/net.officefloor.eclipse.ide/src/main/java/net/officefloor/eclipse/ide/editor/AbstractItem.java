@@ -464,7 +464,33 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @return Style for the display of the {@link Model}.
 	 */
 	public String style() {
-		return null;
+
+		// Load the styles
+		List<IdeStyle> styles = new LinkedList<>();
+		this.loadStyles(styles);
+
+		// Determine if have styling
+		if (styles.size() == 0) {
+			return null;
+		}
+
+		// Load the styling
+		StringBuilder styling = new StringBuilder();
+		for (IdeStyle style : styles) {
+			styling.append(style.toString());
+		}
+
+		// Return the styling
+		return styling.toString();
+	}
+
+	/**
+	 * Default implementation of {@link #style()} will invoke this to load styles.
+	 * 
+	 * @param styles
+	 *            {@link List} to be loaded with the {@link IdeStyle} instances.
+	 */
+	protected void loadStyles(List<IdeStyle> styles) {
 	}
 
 	/**

@@ -180,11 +180,9 @@ public class WoofSectionItem extends
 	}
 
 	@Override
-	public String style() {
-		IdeStyle background = new IdeStyle().rule("-fx-background-color",
-				"radial-gradient(radius 50.0%, darkorchid, thistle)");
-		IdeStyle text = new IdeStyle(".${model} .title").rule("-fx-text-fill", "white");
-		return background.toString() + text.toString();
+	protected void loadStyles(List<IdeStyle> styles) {
+		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 100.0%, green, mediumseagreen)"));
+		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "honeydew"));
 	}
 
 	@Override
