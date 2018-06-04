@@ -401,6 +401,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
+		final long TIMEOUT = 10000;
 
 		// Configure the application
 		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isPoolConnections, (context) -> {
@@ -409,13 +410,13 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Undertake warm up
 		for (int i = 0; i < WARM_UP; i++) {
-			CompileOfficeFloor.invokeProcess(officeFloor, "StressInsert.run", null);
+			CompileOfficeFloor.invokeProcess(officeFloor, "StressInsert.run", null, TIMEOUT);
 		}
 
 		// Run test
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < RUN_COUNT; i++) {
-			CompileOfficeFloor.invokeProcess(officeFloor, "StressInsert.run", null);
+			CompileOfficeFloor.invokeProcess(officeFloor, "StressInsert.run", null, TIMEOUT);
 		}
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));

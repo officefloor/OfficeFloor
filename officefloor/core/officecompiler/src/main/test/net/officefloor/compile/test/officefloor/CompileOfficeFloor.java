@@ -133,9 +133,10 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 			while (!isComplete[0]) {
 
 				// Determine if timed out
-				if ((startTimestamp + waitTime) < System.currentTimeMillis()) {
-					throw new Exception(
-							"Timed out waiting on process (" + officeName + "." + functionName + ") to complete");
+				long currentTimestamp = System.currentTimeMillis();
+				if ((startTimestamp + waitTime) < currentTimestamp) {
+					throw new Exception("Timed out waiting on process (" + officeName + "." + functionName
+							+ ") to complete (" + (currentTimestamp - startTimestamp) + " milliseconds)");
 				}
 
 				// Sleep some time

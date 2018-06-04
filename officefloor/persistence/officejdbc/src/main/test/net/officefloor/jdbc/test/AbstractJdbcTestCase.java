@@ -149,8 +149,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		try {
 
 			// Try until time out (as may take time for database to come up)
-			final int MAX_SETUP_TIME = 5000; // miliseconds
-			long startTime = System.currentTimeMillis();
+			final int MAX_SETUP_TIME = 10000; // milliseconds
+			long startTimestamp = System.currentTimeMillis();
 			NEXT_TRY: for (;;) {
 				try {
 
@@ -168,8 +168,10 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				} catch (Throwable ex) {
 
 					// Failed setup, determine if try again
-					if (System.currentTimeMillis() > (startTime + MAX_SETUP_TIME)) {
-						throw ex;
+					long currentTimestamp = System.currentTimeMillis();
+					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+						throw new RuntimeException("Timed out setting up JDBC test ("
+								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
 
 					} else {
 						// Try again in a little
