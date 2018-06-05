@@ -256,6 +256,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 			return; // not WoOF application
 		}
 
+		// Indicate loading WoOF
+		System.out.println("Extending OfficeFloor with WoOF");
+
 		// Load the HTTP Server
 		if (isLoadHttpServer) {
 
@@ -265,13 +268,21 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 					WebArchitect.HANDLER_INPUT_NAME);
 
 			// Load the HTTP server
-			new HttpServer(officeInput, officeFloorDeployer, context);
+			HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
+
+			// Indicate the implementation of HTTP server
+			System.out.println(
+					"HTTP server implementation " + server.getHttpServerImplementation().getClass().getSimpleName());
 		}
 
 		// Load the optional teams configuration for the application
 		if (isLoadTeams) {
 			ConfigurationItem teamsConfiguration = context.getOptionalConfigurationItem("application.teams", null);
 			if (teamsConfiguration != null) {
+
+				// Indicate loading teams
+				System.out.println("Loading WoOF teams");
+
 				// Load the teams configuration
 				WoofTeamsLoader teamsLoader = new WoofTeamsLoaderImpl(
 						new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
@@ -367,6 +378,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 					null);
 			if (objectsConfiguration != null) {
 
+				// Indicate loading teams
+				System.out.println("Loading WoOF objects");
+
 				// Load the objects configuration
 				WoofObjectsLoader objectsLoader = new WoofObjectsLoaderImpl(
 						new WoofObjectsRepositoryImpl(new ModelRepositoryImpl()));
@@ -395,6 +409,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 			final ConfigurationItem resourcesConfiguration = context
 					.getOptionalConfigurationItem("application.resources", null);
 			if (resourcesConfiguration != null) {
+
+				// Indicate loading teams
+				System.out.println("Loading WoOF resources");
 
 				// Load the resources configuration
 				WoofResourcesLoader resourcesLoader = new WoofResourcesLoaderImpl(
