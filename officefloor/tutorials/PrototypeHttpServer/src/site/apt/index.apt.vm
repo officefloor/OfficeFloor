@@ -6,9 +6,7 @@
 
   <<Wireframe Prototype Tutorial>>
 
-  This tutorial demonstrates the ease of building working a web application prototype that can be later extended to fully a functional web application.
-  
-  The tutorial demonstrates the WoOF prototyping by providing wireframe navigation back and forth between the following two pages:
+  This tutorial demonstrates the ease of building a web application prototype that can be later extended to fully a functional web application.  It demonstrates the WoOF prototyping by providing wire frame navigation back and forth between the following two pages:
   
 [./images/PrototypeHttpServer-href-screenshot.png] PrototypeHttpServer href screen shot.
 
@@ -16,10 +14,7 @@
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PrototypeHttpServer/${projectVersion}/PrototypeHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
-  
-Prototyping the Web Application
-
-  WoOF provides the ability to wireframe the web pages into a working prototype.  This allows users to provide feedback on the web application before any code needs to be written.  Having this feedback catches issues very early in the development life-cycle leading to reduced overall effort/cost in building the web application.
+  WoOF provides the ability to wire frame the web pages into a working prototype.  This allows users to provide feedback on the web application before any code needs to be written.  Having this feedback catches issues very early in the development life-cycle leading to reduced overall effort/cost in building the web application.
   
   Once the users are happy with the web application, the later tutorials will show how to easily extend the prototype into a working application.
 
@@ -31,11 +26,11 @@ HTML pages
 
 *Page with href link  
 
-%{snippet|file=${basedir}/src/main/webapp/href.woof.html}
+%{snippet|file=${basedir}/src/main/resources/href.woof.html|ignoreDownloadError=false}
 
 *Page with form link
 
-%{snippet|file=${basedir}/src/main/webapp/form.woof.html}
+%{snippet|file=${basedir}/src/main/resources/form.woof.html|ignoreDownloadError=false}
 
 *#\{link\}
 

@@ -46,6 +46,21 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		// Create the server
 		MockWoofServer server = new MockWoofServer();
 
+		// Return the open server
+		return open(server);
+	}
+
+	/**
+	 * Opens the {@link MockWoofServer}.
+	 * 
+	 * @param server
+	 *            {@link MockWoofServer}.
+	 * @return Input {@link MockWoofServer}.
+	 * @throws Exception
+	 *             If fails to open the {@link MockWoofServer}.
+	 */
+	protected static MockWoofServer open(MockWoofServer server) throws Exception {
+
 		// Undertake compiling (without HTTP Server loading)
 		return WoofLoaderExtensionService.contextualLoad((loadContext) -> {
 
@@ -75,12 +90,6 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
-
-	/**
-	 * Instantiated via static methods.
-	 */
-	private MockWoofServer() {
-	}
 
 	/**
 	 * Obtains the {@link OfficeFloor}.

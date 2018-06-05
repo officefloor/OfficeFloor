@@ -4,12 +4,12 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/form" location="form.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="126" y="141">
+    <template path="/form" location="form.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="103" y="142">
       <output name="handleSubmit" argument-type="">
         <template path="/href"/>
       </output>
     </template>
-    <template path="/href" location="href.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="73" y="29">
+    <template path="/href" location="href.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="36" y="24">
       <output name="link" argument-type="">
         <template path="/form"/>
       </output>
