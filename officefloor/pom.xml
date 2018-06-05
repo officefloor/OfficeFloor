@@ -1276,6 +1276,7 @@
 							<!-- Ignore generated code that have no control over -->
 							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
 							<!-- Include Google Analytics -->
+							<additionalOptions>--allow-script-in-comments</additionalOptions>
 							<header>
 							<![CDATA[
 			<!-- Google Analytics -->
