@@ -234,7 +234,7 @@ public abstract class AbstractHttpServicerFactory
 						contentType.write(responseHead, socketBufferPool);
 						StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 					}
-					if (contentLength > 0) {
+					if (contentLength >= 0) {
 						CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool);
 						StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
 						StreamBuffer.write(contentLength, responseHead, socketBufferPool);

@@ -20,7 +20,7 @@ Template.woof.html
 
   The HTML for the page is as follows:
 
-%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html}
 
   This is similar HTML to previous tutorials.
 

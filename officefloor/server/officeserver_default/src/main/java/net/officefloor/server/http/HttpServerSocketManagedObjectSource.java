@@ -46,7 +46,6 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -663,12 +662,8 @@ public class HttpServerSocketManagedObjectSource
 		}
 
 		// Add recycle function (to capture clean up failures)
-		mosContext.getRecycleFunction(new ManagedFunctionFactory<Indexed, None>() {
-			@Override
-			public ManagedFunction<Indexed, None> createManagedFunction() throws Throwable {
-				return HttpServerSocketManagedObjectSource.this;
-			}
-		});
+		mosContext.getRecycleFunction(() -> HttpServerSocketManagedObjectSource.this).linkParameter(0,
+				RecycleManagedObjectParameter.class);
 	}
 
 	@Override
