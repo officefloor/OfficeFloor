@@ -17,28 +17,40 @@
  */
 package net.officefloor.tutorial.pageflowhttpserver;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.test.OfficeFloorRule;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the {@link PageFlowHttpServer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PageFlowHttpServerTest extends TestCase {
+public class InteractiveHttpServerTest {
 
 	// START SNIPPET: test
+
+	/**
+	 * See {@link MockWoofServerRule} for faster tests that avoid sending requests
+	 * over sockets. However, for this tutorial we are demonstrating running the
+	 * full application for testing.
+	 */
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule();
+
 	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
-	public void testPageInteraction() throws Exception {
-
-		// Start server
-		OfficeFloorMain.open();
+	@Test
+	public void pageInteraction() throws Exception {
 
 		// Request the initial blank template
 		this.doRequest("http://localhost:7878/example");
@@ -53,12 +65,10 @@ public class PageFlowHttpServerTest extends TestCase {
 		response.getEntity().writeTo(System.out);
 	}
 
-	// END SNIPPET: test
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		this.client.close();
-		OfficeFloorMain.close();
 	}
+	// END SNIPPET: test
 
 }

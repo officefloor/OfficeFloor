@@ -20,7 +20,7 @@ Template.woof.html
 
   The HTML for the page is as follows:
 
-%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
 
   First thing to notice is that the page/template can be rendered in a web browser.  The reason for this is to ensure that web page content can be created/edited by WYSIWYG web design tools.  This is deliberate to allow web page designers to focus on presentation of the web pages rather than having to understand scripting tags and to an extent programming constructs.  It also means the template can be viewed without having written any code - great for reviewing and tweaking the pages.
 
@@ -38,7 +38,7 @@ TemplateLogic Class
   
   Please note that WoOF integrates with {{{http://projectlombok.org/}Project Lombok}} to reduce the necessary code.  As per below the <<<@Data>>> annotations are used to generate the getters and constructors for the inner class beans.  It is highly recommended by the OfficeFloor team to consider use of {{{http://projectlombok.org/}Project Lombok}} to reduce the overall amount of code to be written. 
   
-%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
   WoOF reflectively invokes the <<<getTemplateData>>> method to obtain the bean containing the properties and further beans for dynamically rendering the page.  The returned object from the method is interrogated for the properties and beans.  In the case of above:
   
@@ -48,7 +48,7 @@ TemplateLogic Class
     
     * <<<$\{noBean>>> : is mapped to the <<<Values.getNoBean()>>> which returns <<<null>>> causing the contents to not be rendered.
     
-  WoOF makes generating repeating content (such as tables) very simple.  As the <<<Values.getProperties()>>> returns an array of <<<Property>>> objects, the contents are rendered for each element in the array.  As the contents have two further properties (<<<$\{name\}>>> and <<<$\{value\}>>>) these are taken from the current <<<Property>>> being rendered.
+  WoOF makes generating repeating content, such as tables, very simple.  As the <<<Values.getProperties()>>> returns an array of <<<Property>>> objects, the contents are rendered for each element in the array.  As the contents have two further properties (<<<$\{name\}>>> and <<<$\{value\}>>>) these are taken from the current <<<Property>>> being rendered.
   
   It is possible have beans contain further beans to allow complex data structures to be rendered to the page.
   
@@ -70,15 +70,23 @@ application.woof
     
   To use the graphical configuration of WoOF please ensure you install the Eclipse plug-in.  Details of installing can be found {{{/eclipse/index.html}here}}.
   
-  Once the Eclipse plug-in is installed you will be able to use the new wizard (WoOF is typically under Other... and then OfficeFloor) to create the <<<application.woof>>> file.  On creating and opening there should be a blank editor.  Right clicking within the editor will bring up a context menu to add various items.  Adding a template will bring up the following dialog box:
-
-[./images/add-template-dialog.png] Dialog to add a template.
-
-  Adding the above information and clicking ok will add the template and result in the <<<application.woof>>> looking as follows:
+  Once the Eclipse plug-in is installed you will be able to use the new wizard to create the <<<application.woof>>> file.  On creating and opening there should be a blank editor.  To make configuration changes:
   
-[./images/dynamic-woof.png] application.woof configuration.
+    * hover the mouse on the left of the editor will bring up the pallete.  From this you can drag in new items for configuring.
+    
+    * dragging in a new item will provide a dialogue to configure the item
+    
+    * should you want to change the configuration of an item, however the mouse over it and click on the edit button that appears
+    
+    * to delete, again however over the item, and click the delete button
+    
+    * to wire up connections, click on an arrow within an item and then drag to the connecting arrow of another item
+    
+  For the tutorial, you need only the following configuration:
+  
+[./images/DynamicHttpServer-configuration.png] DynamicHttpServer configuration.
 
-  This is the only configuration necessary for this web application as the template will be made available at <<<http://localhost:7878/example.woof>>> .  Later tutorials will look at linking page flows and dynamic behaviour.
+  This is the only configuration necessary for this web application.  The template will be made available at <<<http://localhost:7878/example>>> .  Later tutorials will look at linking page flows and dynamic behaviour.
    
 
 
@@ -86,7 +94,7 @@ Unit Test
 
   As the template logic is just a POJO, WoOF adheres to OfficeFloor's focus on simplicity in testing.  The following example unit test shows the ease in which the <<<TemplateLogic>>> class can be unit tested.
 
-%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamichttpserver/DynamicHttpServerTest.java}
+%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamichttpserver/DynamicHttpServerTest.java|ignoreDownloadError=false}
 
 
 

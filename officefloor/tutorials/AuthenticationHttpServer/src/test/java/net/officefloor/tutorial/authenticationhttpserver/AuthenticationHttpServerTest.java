@@ -17,22 +17,26 @@
  */
 package net.officefloor.tutorial.authenticationhttpserver;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the Secure Link.
  * 
  * @author Daniel Sagenschneider
  */
-public class AuthenticationHttpServerTest extends TestCase {
+public class AuthenticationHttpServerTest {
 
 	/**
 	 * Main to run for manual testing.
@@ -44,26 +48,14 @@ public class AuthenticationHttpServerTest extends TestCase {
 		OfficeFloorMain.main(args);
 	}
 
-	/**
-	 * {@link MockWoofServer}.
-	 */
-	private MockWoofServer server;
+	// START SNIPPET: tutorial
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
-	/**
-	 * {@link HttpSession} {@link WritableHttpCookie}.
-	 */
 	private WritableHttpCookie session;
 
-	@Override
-	protected void tearDown() throws Exception {
-		this.server.close();
-	}
-
-	// START SNIPPET: tutorial
-	public void testLogin() throws Exception {
-
-		// Start the server
-		this.server = MockWoofServer.open();
+	@Test
+	public void login() throws Exception {
 
 		// Ensure require login to get to page
 		MockHttpResponse loginRedirect = this.server.send(MockHttpServer.mockRequest("/hello"));
@@ -88,10 +80,11 @@ public class AuthenticationHttpServerTest extends TestCase {
 		assertTrue("Ensure hello page with login: " + helloPageContent, helloPageContent.contains("<p>Hi Daniel</p>"));
 	}
 
-	public void testLogout() throws Exception {
+	@Test
+	public void logout() throws Exception {
 
 		// Login (also starts server)
-		this.testLogin();
+		this.login();
 
 		// Logout
 		MockHttpResponse logoutRedirect = this.server.send(

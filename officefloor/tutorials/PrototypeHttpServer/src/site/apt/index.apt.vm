@@ -1,12 +1,12 @@
                                                -----------------------
-                                              Wireframe Prototype Tutorial 
+                                              Wire Frame Prototype Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
   <<Wireframe Prototype Tutorial>>
 
-  This tutorial demonstrates the ease of building a web application prototype that can be later extended to fully a functional web application.  It demonstrates the WoOF prototyping by providing wire frame navigation back and forth between the following two pages:
+  This tutorial demonstrates the ease of building a web application prototype that can be later extended to fully a functional web application.  This is demonstrated by the WoOF prototyping by providing wire frame navigation back and forth between the following two pages:
   
 [./images/PrototypeHttpServer-href-screenshot.png] PrototypeHttpServer href screen shot.
 
@@ -35,6 +35,8 @@ HTML pages
 *#\{link\}
 
   Each of the above pages will render in a web browser.  The HTML does contain the non-intrusive <<<#\{link\}>>> tags which are used by WoOF to determine the links to configure for the page.
+  
+  WoOF focuses on non-intrusive instrumentation of the web pages so the raw HTML can be rendered in a browser.  This makes for quick turn-around in tweaking pages, as the application need not be run - nor even built.
 
 
 
@@ -44,7 +46,7 @@ Configuring the links
 
 [./images/prototype-woof.png] application.woof configuration.
 
-  The names of the links are the tag names.  Later tutorials will show how to map the form submission to a server POJO method.
+  The names of the links are the tag names.  Later tutorials will show how to map the form submission to a server POJO (plain old java object) method.
   
   As the WoOF HTML pages do not contain the actual link URIs, changing the navigation of the web application is controlled by the <<<application.woof>>> configuration.  This allows keeping navigation details out of the web page design.  It also makes changing web application navigation simple as the application evolves.
   
