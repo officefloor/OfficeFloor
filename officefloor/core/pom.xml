@@ -20,7 +20,6 @@
 		<module>officexml</module>
 		<module>officemodelgen</module>
 		<module>officecompiler</module>
-		<module>officebuilding</module>
 	</modules>
 	<dependencies>
 		<dependency>

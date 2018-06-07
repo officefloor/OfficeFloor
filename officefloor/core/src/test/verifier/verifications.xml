@@ -23,9 +23,5 @@
 			<location>officecompiler/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
-		<file>
-			<location>officebuilding/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
 	</files>
 </verifications>
