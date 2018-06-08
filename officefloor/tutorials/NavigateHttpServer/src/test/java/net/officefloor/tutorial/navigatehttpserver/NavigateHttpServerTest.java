@@ -17,51 +17,56 @@
  */
 package net.officefloor.tutorial.navigatehttpserver;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpClientRule;
+import net.officefloor.test.OfficeFloorRule;
 
 /**
  * Tests the {@link NavigateHttpServer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NavigateHttpServerTest extends TestCase {
+public class NavigateHttpServerTest {
+
+	/**
+	 * Run application.
+	 */
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
 
 	// START SNIPPET: test
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule();
 
+	@Rule
+	public HttpClientRule client = new HttpClientRule();
+
+	@Test
 	public void testNavigate() throws Exception {
 
-		// Start server
-		OfficeFloorMain.open();
-
 		// Request template one
-		this.doRequest("http://localhost:7878/one");
+		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/one")));
+		assertEquals("Should obtain first page", 200, response.getStatusLine().getStatusCode());
+		response.getEntity().writeTo(System.out);
 
 		// Click on link on template one
-		this.doRequest("http://localhost:7878/one+navigate");
+		response = this.client.execute(new HttpGet(this.client.url("/one+navigate")));
+		assertEquals("Should navigate to second page", 200, response.getStatusLine().getStatusCode());
+		response.getEntity().writeTo(System.out);
 
 		// Submit on template two
-		this.doRequest("http://localhost:7878/two+process");
-	}
-
-	private void doRequest(String url) throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
+		response = this.client.execute(new HttpGet(this.client.url("/two+process")));
+		assertEquals("Should submit template two", 200, response.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
-
 	// END SNIPPET: test
-
-	@Override
-	protected void tearDown() throws Exception {
-		this.client.close();
-		OfficeFloorMain.close();
-	}
 
 }

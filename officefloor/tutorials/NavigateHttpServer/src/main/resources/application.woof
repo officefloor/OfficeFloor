@@ -4,12 +4,12 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/one" location="TemplateOne.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateOne" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="137" y="52">
+    <template path="/one" location="TemplateOne.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateOne" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="38" y="23">
       <output name="external" argument-type="">
         <template path="/two"/>
       </output>
     </template>
-    <template path="/two" location="TemplateTwo.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateTwo" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="337" y="90">
+    <template path="/two" location="TemplateTwo.woof.html" class="net.officefloor.tutorial.navigatehttpserver.TemplateTwo" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="128" y="106">
       <output name="next" argument-type="">
         <template path="/one"/>
       </output>

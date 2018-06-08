@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -62,11 +63,14 @@ public class InteractiveHttpServerTest {
 		// Request the initial page
 		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/example")));
 		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
+		response.getEntity().writeTo(System.out);
 
 		// Send form submission
-		response = this.client
-				.execute(new HttpPost(this.client.url("/example+handleSubmission?name=Daniel&description=founder")));
+		HttpPost post = new HttpPost(this.client.url("/example+handleSubmission"));
+		post.setEntity(new StringEntity("name=Daniel&description=founder"));
+		response = this.client.execute(post);
 		assertEquals("Should submit successfully", 200, response.getStatusLine().getStatusCode());
+		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test
 

@@ -26,15 +26,15 @@ application.woof
   
 
 
-@NextTask
+@NextFunction
 
   The first template provides a link to navigate to the other template.
 
-%{snippet|file=${basedir}/src/main/webapp/TemplateOne.woof.html}
+%{snippet|file=${basedir}/src/main/resources/TemplateOne.woof.html|ignoreDownloadError=false}
 
   The link is handled by the following method.  The annotation indicates the next task within the flow.
 
-%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java|ignoreDownloadError=false}
 
   As the next task name is not a name of another method (and not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
   
@@ -46,11 +46,11 @@ application.woof
 
   The second template uses a submit to navigate to the first template.
 
-%{snippet|file=${basedir}/src/main/webapp/TemplateTwo.woof.html}
+%{snippet|file=${basedir}/src/main/resources/TemplateTwo.woof.html|ignoreDownloadError=false}
 
   Much like the first template the logic class also navigates to an external flow.  In this case it uses an interface for programmatic control of navigation.
 
-%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java|ignoreDownloadError=false}
 
   As the interface is dependency injected, WoOF sees the <<<@FlowInterface>>> annotation and will provide an implementation of the interface.  Each method on the interface will be linked by name to one of the following:
   
@@ -62,7 +62,7 @@ application.woof
    
   This allows programmatically determining which is the next task.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
   
-  Both <<<@NextTask>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextTask>>> will provide the default next task unless overridden by a method of a <<<@FlowInterface>>> being invoked.
+  Both <<<@NextFunction>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextFunction>>> will provide the default next task unless overridden by a method of a <<<@FlowInterface>>> being invoked.
 
   The above configuration has the external flow linked back to the first template.
 
@@ -72,7 +72,7 @@ Unit Test
 
   The unit test navigates between the templates.
 
-%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java|ignoreDownloadError=false}
 
 
 
