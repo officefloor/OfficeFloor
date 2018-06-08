@@ -202,7 +202,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
 			fail("Server should have stopped listening");
 		} catch (HttpHostConnectException ex) {
-			assertTrue("Incorrect connection error",
+			assertTrue("Incorrect connection error: " + ex.getMessage(),
 					ex.getMessage().startsWith(
 							"Connect to " + this.serverLocation.getDomain() + ":" + this.serverLocation.getHttpPort())
 							&& ex.getMessage().endsWith("failed: Connection refused"));
