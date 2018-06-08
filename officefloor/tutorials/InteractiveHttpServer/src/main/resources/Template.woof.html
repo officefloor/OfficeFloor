@@ -1,6 +1,6 @@
 <html>
 	<body>
-		<form action="#{handleSubmission}" method="POST">
+		<form action="#{POST:handleSubmission}" method="POST">
 			<p>Name: <input type="text" name="name" value="${name}" /> ${nameIssue ${message} $}</p>
 			<p>Description: <input type="text" name="description" value="${description}" /></p>
 			<p><input type="submit" value="Add" /></p>

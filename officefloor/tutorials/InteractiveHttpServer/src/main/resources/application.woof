@@ -4,7 +4,7 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/example" location="Template.woof.html" class="net.officefloor.tutorial.pageflowhttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="244" y="84">
+    <template path="/example" location="Template.woof.html" class="net.officefloor.tutorial.interactivehttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="244" y="84">
     </template>
   </templates>
   <sections>

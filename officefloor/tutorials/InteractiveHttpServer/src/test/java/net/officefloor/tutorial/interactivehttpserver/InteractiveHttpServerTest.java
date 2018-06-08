@@ -15,18 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.pageflowhttpserver;
+package net.officefloor.tutorial.interactivehttpserver;
 
 import static org.junit.Assert.assertEquals;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.junit.After;
+import org.apache.http.client.methods.HttpPost;
 import org.junit.Rule;
 import org.junit.Test;
 
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
@@ -38,7 +37,6 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class InteractiveHttpServerTest {
 
 	// START SNIPPET: test
-
 	/**
 	 * See {@link MockWoofServerRule} for faster tests that avoid sending requests
 	 * over sockets. However, for this tutorial we are demonstrating running the
@@ -47,27 +45,20 @@ public class InteractiveHttpServerTest {
 	@Rule
 	public OfficeFloorRule officeFloor = new OfficeFloorRule();
 
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	@Rule
+	public HttpClientRule client = new HttpClientRule();
 
 	@Test
 	public void pageInteraction() throws Exception {
 
-		// Request the initial blank template
-		this.doRequest("http://localhost:7878/example");
+		// Request the initial page
+		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/example")));
+		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Send form submission
-		this.doRequest("http://localhost:7878/example+handleSubmission?name=Daniel&description=founder");
-	}
-
-	private void doRequest(String url) throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.client.close();
+		response = this.client
+				.execute(new HttpPost(this.client.url("/example+handleSubmission?name=Daniel&description=founder")));
+		assertEquals("Should submit successfully", 200, response.getStatusLine().getStatusCode());
 	}
 	// END SNIPPET: test
 

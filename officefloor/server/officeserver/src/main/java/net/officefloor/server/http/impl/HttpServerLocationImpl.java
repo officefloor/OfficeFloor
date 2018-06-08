@@ -33,6 +33,16 @@ import net.officefloor.server.http.HttpServerLocation;
 public class HttpServerLocationImpl implements HttpServerLocation {
 
 	/**
+	 * Default HTTP port.
+	 */
+	public static final int DEFAULT_HTTP_PORT = 7878;
+
+	/**
+	 * Default HTTPS port.
+	 */
+	public static final int DEFAULT_HTTPS_PORT = 7979;
+
+	/**
 	 * Obtains the default host name.
 	 * 
 	 * @return Default Host name.
@@ -103,8 +113,8 @@ public class HttpServerLocationImpl implements HttpServerLocation {
 
 		// Obtain the public client configuration
 		this.domain = HttpServer.getPropertyString(PROPERTY_DOMAIN, context, () -> getDefaultHostName());
-		this.httpPort = HttpServer.getPropertyInteger(PROPERTY_HTTP_PORT, context, () -> 7878);
-		this.httpsPort = HttpServer.getPropertyInteger(PROPERTY_HTTPS_PORT, context, () -> 7979);
+		this.httpPort = HttpServer.getPropertyInteger(PROPERTY_HTTP_PORT, context, () -> DEFAULT_HTTP_PORT);
+		this.httpsPort = HttpServer.getPropertyInteger(PROPERTY_HTTPS_PORT, context, () -> DEFAULT_HTTPS_PORT);
 
 		// Obtain the cluster configuration
 		this.clusterHostName = HttpServer.getPropertyString(PROPERTY_CLUSTER_HOST_NAME, context, () -> this.domain);
