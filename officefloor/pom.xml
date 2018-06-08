@@ -68,12 +68,9 @@
 		<tycho-version>1.0.0</tycho-version>
 		<maven-version>3.3.9</maven-version>
 		<maven-plugin-version>3.5</maven-plugin-version>
-		<aether-version>1.1.0</aether-version>
-		<plexus-version>1.5.5</plexus-version>
 		<maven-project-info-reports-version>2.8</maven-project-info-reports-version>
 		<maven-changes-version>2.11</maven-changes-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
-		<gwt-version>2.6.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
 		<datanucleus-version>5.0.2</datanucleus-version>
 		<failsafe-version>2.21.0</failsafe-version>
@@ -439,11 +436,6 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>woof-maven-plugin</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -452,72 +444,9 @@
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->
 			<dependency>
-				<!-- TODO: remove and migrate to 6.0 -->
-				<groupId>javaee</groupId>
-				<artifactId>javaee-api</artifactId>
-				<version>5</version>
-			</dependency>
-			<dependency>
-				<groupId>javax</groupId>
-				<artifactId>javaee-api</artifactId>
-				<version>6.0</version>
-			</dependency>
-			<dependency>
-				<!-- JEE spec dependencies are only interfaces -->
-				<groupId>org.eclipse.jetty.orbit</groupId>
-				<artifactId>javax.servlet</artifactId>
-				<version>3.0.0.v201112011016</version>
-			</dependency>
-			<dependency>
-				<!-- JEE spec dependencies are only interfaces -->
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-jpa_3.0_spec</artifactId>
-				<version>1.1.1</version>
-			</dependency>
-			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.12</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-api</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-util</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-impl</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-connector-basic</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-transport-file</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-transport-http</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.aether</groupId>
-				<artifactId>aether-transport-wagon</artifactId>
-				<version>${aether-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-aether-provider</artifactId>
-				<version>${maven-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
@@ -528,11 +457,6 @@
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
 				<version>2.10</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-embedder</artifactId>
-				<version>${maven-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
@@ -555,26 +479,6 @@
 				<version>5.5.4</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.openejb</groupId>
-				<artifactId>openejb-core</artifactId>
-				<version>3.1.4</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.struts</groupId>
-				<artifactId>struts2-core</artifactId>
-				<version>2.3.16</version>
-			</dependency>
-			<dependency>
-				<groupId>org.seleniumhq.selenium.client-drivers</groupId>
-				<artifactId>selenium-java-client-driver</artifactId>
-				<version>1.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-dbcp</groupId>
-				<artifactId>commons-dbcp</artifactId>
-				<version>1.4</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>1.10</version>
@@ -588,11 +492,6 @@
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
 				<version>2.4.0</version>
-			</dependency>
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>5.1.28</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
@@ -620,24 +519,9 @@
 				<version>1.7.7</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.tomcat</groupId>
-				<artifactId>jasper</artifactId>
-				<version>6.0.37</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
-				<version>3.0-alpha-1</version>
-			</dependency>
-			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-webapp</artifactId>
 				<version>${jetty-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.velocity</groupId>
-				<artifactId>velocity</artifactId>
-				<version>1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
@@ -659,26 +543,6 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.5.2</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.gwt</groupId>
-				<artifactId>gwt-user</artifactId>
-				<version>${gwt-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.gwt</groupId>
-				<artifactId>gwt-dev</artifactId>
-				<version>${gwt-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.gdevelop.gwt</groupId>
-				<artifactId>syncrpc</artifactId>
-				<version>${syncrpc-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.gwt.google-apis</groupId>
-				<artifactId>gwt-visualization</artifactId>
-				<version>1.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>

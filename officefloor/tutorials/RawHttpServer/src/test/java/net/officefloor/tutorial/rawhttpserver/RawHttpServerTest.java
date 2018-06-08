@@ -17,46 +17,47 @@
  */
 package net.officefloor.tutorial.rawhttpserver;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the web application is returning correctly.
  * 
  * @author Daniel Sagenschneider
  */
-public class RawHttpServerTest extends TestCase {
+public class RawHttpServerTest {
 
 	/**
-	 * {@link MockWoofServer}.
+	 * Run application.
 	 */
-	private MockWoofServer server = null;
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
+
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
 	/**
 	 * Ensure able to obtain the Raw HTML.
 	 */
+	@Test
 	public void testRawHtml() throws Exception {
-
-		// Start server
-		this.server = MockWoofServer.open();
 
 		// Send request for dynamic page
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
-
-		// Ensure request is successful
 		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure raw html rendered to page
 		String responseText = response.getEntity(null);
 		assertTrue("Should have raw HTML rendered", responseText.contains("Web on OfficeFloor (WoOF)"));
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		// Stop server
-		this.server.close();
 	}
 
 }
