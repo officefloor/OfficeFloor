@@ -20,19 +20,27 @@
 
 
 
+Template Inheritance Configuration
+
+  The below shows the template inheritance configuration.
+
+[./images/InheritHttpServer-screenshot.png] InheritHttpServer configuration.
+
+
+
 Parent
 
   For the parent that does not inherit from a template, it is just a normal template.  It however does specify sections for overriding when inherited from.  The HTML for the parent page is as follows:
 
-%{snippet|file=${basedir}/src/main/webapp/parent.woof.html}
+%{snippet|file=${basedir}/src/main/resources/parent.woof.html|ignoreDownloadError=false}
 
   And the logic for the page is as follows:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ParentLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ParentLogic.java|ignoreDownloadError=false}
 
   When rendered, the page results in the following:
   
-%{snippet|file=${basedir}/src/test/resources/parent-expected.html}
+%{snippet|file=${basedir}/src/test/resources/parent-expected.html|ignoreDownloadError=false}
 
 
 
@@ -55,14 +63,10 @@ Parent
 Child
 
   The child template of this tutorial demonstrates overriding a section, introducing a section and ignoring sections.  
-  
-  The configuration of the child is as follows (note the extension of the template):
-  
-[./images/InheritWizard-screenshot.png] InheritHttpServer child wizard screenshot.
 
   The HTML for the child page is as follows:
 
-%{snippet|file=${basedir}/src/main/webapp/child.woof.html}
+%{snippet|file=${basedir}/src/main/resources/child.woof.html|ignoreDownloadError=false}
 
   The sections, have the following effect:
   
@@ -76,11 +80,11 @@ Child
 
   As the <<<introduced>>> section has a $\{property\}, it requires a corresponding data method in the logic class.  The following is the logic class for the child template.  Note that it extends the parent logic class to inherit the required data methods from the parent.
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ChildLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ChildLogic.java|ignoreDownloadError=false}
 
   When rendered, the page results in the following:
   
-%{snippet|file=${basedir}/src/test/resources/child-expected.html}
+%{snippet|file=${basedir}/src/test/resources/child-expected.html|ignoreDownloadError=false}
 
 
 
@@ -90,7 +94,7 @@ Grand Child
 
   The HTML for the grand child page is as follows:
 
-%{snippet|file=${basedir}/src/main/webapp/grandchild.woof.html}
+%{snippet|file=${basedir}/src/main/resources/grandchild.woof.html}
 
   The sections, have the following effect:
   
@@ -106,23 +110,12 @@ Grand Child
 
   In the case of this tutorial, the following logic class shows overriding the method by name.  The additional parameter is only to create a different method signature to avoid Java compiler issues of returning a different type.
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/GrandChildLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/GrandChildLogic.java|ignoreDownloadError=false}
 
   When rendered, the page results in the following:
   
-%{snippet|file=${basedir}/src/test/resources/grandchild-expected.html}
+%{snippet|file=${basedir}/src/test/resources/grandchild-expected.html|ignoreDownloadError=false}
 
-
-
-Configuration Inheritance
-
-  The link configuration of the template is also inherited.  The below configuration for this tutorial shows that only the parent configures the link while the other templates inherit the link configuration.  This is especially useful to reduce lines in configuration for headers and footers of a web site by including this configuration in a single parent template that all other templates inherit from.
-
-[./images/InheritConfiguration-screenshot.png] InheritHttpServer configuration.
-
-  Along with the output link configuration being inherited, the link secure configuration is also inherited.
-  
-  In both output link and link secure, the inheritance may be overridden by the child template by setting the configuration in the child template.
 
 
 Next

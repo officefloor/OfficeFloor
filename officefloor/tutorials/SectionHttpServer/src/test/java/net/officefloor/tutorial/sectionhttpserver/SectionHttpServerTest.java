@@ -17,33 +17,36 @@
  */
 package net.officefloor.tutorial.sectionhttpserver;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the {@link TemplateLogic}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionHttpServerTest extends TestCase {
+public class SectionHttpServerTest {
 
 	/**
-	 * {@link MockWoofServer}.
+	 * Run application.
 	 */
-	private MockWoofServer server;
-
-	@Override
-	protected void setUp() throws Exception {
-		this.server = MockWoofServer.open();
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		this.server.close();
-	}
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
+	@Test
 	public void testPageRendering() throws Exception {
 
 		// Send request for dynamic page

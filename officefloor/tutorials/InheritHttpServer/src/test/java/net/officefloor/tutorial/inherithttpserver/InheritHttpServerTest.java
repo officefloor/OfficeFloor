@@ -17,43 +17,45 @@
  */
 package net.officefloor.tutorial.inherithttpserver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Ensure appropriately inherit content.
  * 
  * @author Daniel Sagenschneider
  */
-public class InheritHttpServerTest extends TestCase {
+public class InheritHttpServerTest {
 
 	/**
-	 * {@link MockWoofServer}.
+	 * Run application.
 	 */
-	private MockWoofServer server;
-
-	@Override
-	protected void setUp() throws Exception {
-		this.server = MockWoofServer.open();
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		this.server.close();
-	}
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
 	/**
 	 * Ensure able to obtain parent template.
 	 */
+	@Test
 	public void testParent() throws IOException {
 		this.doTest("parent", "parent-expected.html");
 	}
@@ -61,6 +63,7 @@ public class InheritHttpServerTest extends TestCase {
 	/**
 	 * Ensure able to obtain child template.
 	 */
+	@Test
 	public void testChild() throws IOException {
 		this.doTest("child", "child-expected.html");
 	}
@@ -68,6 +71,7 @@ public class InheritHttpServerTest extends TestCase {
 	/**
 	 * Ensure able to obtain grand child template.
 	 */
+	@Test
 	public void testGrandChild() throws IOException {
 		this.doTest("grandchild", "grandchild-expected.html");
 	}
