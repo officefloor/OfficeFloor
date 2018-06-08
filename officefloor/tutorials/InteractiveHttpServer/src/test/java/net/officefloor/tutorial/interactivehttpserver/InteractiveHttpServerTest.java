@@ -25,6 +25,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.junit.Rule;
 import org.junit.Test;
 
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.woof.mock.MockWoofServerRule;
@@ -35,6 +36,13 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * @author Daniel Sagenschneider
  */
 public class InteractiveHttpServerTest {
+
+	/**
+	 * Run application.
+	 */
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
 
 	// START SNIPPET: test
 	/**
