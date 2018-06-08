@@ -17,70 +17,72 @@
  */
 package net.officefloor.tutorial.exceptionhttpserver;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpClientRule;
+import net.officefloor.test.OfficeFloorRule;
 
 /**
  * Ensure appropriately handling exception.
  * 
  * @author Daniel Sagenschneider
  */
-public class ExceptionHttpServerTest extends TestCase {
+public class ExceptionHttpServerTest {
+
+	/**
+	 * Run application.
+	 */
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
 
 	// START SNIPPET: handle
-	public void testExceptionHandling() throws Exception {
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule();
+
+	@Rule
+	public HttpClientRule client = new HttpClientRule();
+
+	private PrintStream stderr;
+
+	@Before
+	public void setup() {
+		// Maintain stderr to reinstate
+		this.stderr = System.err;
+	}
+
+	@Test
+	public void ensureHandleException() throws Exception {
 
 		// Override stderr
 		ByteArrayOutputStream error = new ByteArrayOutputStream();
 		System.setErr(new PrintStream(error, true));
 
-		// Start server
-		OfficeFloorMain.open();
-
-		// Clear setup log
-		error.reset();
-
 		// Submit to trigger the exception
-		try (CloseableHttpResponse response = this.client
-				.execute(new HttpGet("http://localhost:7878/template+submit"))) {
-			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-		}
+		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/template+submit")));
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure handling by logging the failure
 		String log = new String(error.toByteArray()).trim();
 		assertEquals("Should log error", "Test", log);
 	}
-	// END SNIPPET: handle
 
-	private PrintStream stderr;
-
-	private CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
-
-	@Override
-	protected void setUp() throws Exception {
-		// Maintain stderr to reinstate
-		this.stderr = System.err;
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-
+	@After
+	public void reinstate() {
 		// Reinstate stderr
 		System.setErr(this.stderr);
-
-		// Shutdown client
-		this.client.close();
-
-		// Stop server
-		OfficeFloorMain.close();
 	}
+	// END SNIPPET: handle
 
 }

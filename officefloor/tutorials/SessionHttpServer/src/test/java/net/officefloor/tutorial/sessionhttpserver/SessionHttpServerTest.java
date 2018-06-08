@@ -17,24 +17,35 @@
  */
 package net.officefloor.tutorial.sessionhttpserver;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the Session HTTP Server.
  * 
  * @author Daniel Sagenschneider
  */
-public class SessionHttpServerTest extends TestCase {
+public class SessionHttpServerTest {
+
+	/**
+	 * Run application.
+	 */
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
 
 	// START SNIPPET: pojo
+	@Test
 	public void testTemplateLogic() {
 
 		Posts session = new Posts();
@@ -50,38 +61,20 @@ public class SessionHttpServerTest extends TestCase {
 		// Ensure post provided from template logic
 		assertSame("Ensure post available", post, logic.getTemplateData(session).getPosts()[0]);
 	}
-
 	// END SNIPPET: pojo
 
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
 	public void testSessionPage() throws Exception {
 
-		// Start server
-		OfficeFloorMain.open();
-
 		// Send request for empty session
-		this.doRequest("http://localhost:7878/post");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/post"));
+		assertEquals("Should obtain page", 200, response.getStatus().getStatusCode());
 
 		// Add a post
-		this.doRequest("http://localhost:7878/post+post?text=TEST");
-	}
-
-	private void doRequest(String url) throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			// Stop client
-			this.client.close();
-		} finally {
-			// Stop server
-			OfficeFloorMain.close();
-		}
+		response = this.server.send(MockHttpServer.mockRequest("/post+post?text=TEST"));
+		assertEquals("Should add post", 200, response.getStatus().getStatusCode());
 	}
 
 }

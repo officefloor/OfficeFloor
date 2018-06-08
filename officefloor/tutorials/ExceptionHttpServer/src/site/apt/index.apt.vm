@@ -20,11 +20,11 @@ Template throwing exception
 
   The following is the template:
   
-%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
 
   with the logic throwing the exception:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
   Pressing the submit button will trigger the exception to be thrown.  
   
@@ -36,17 +36,17 @@ Exception handling configuration
   
   The following shows the configuration for handling the above template exception.
   
-[./images/ExceptionHttpServer-screenshot.png] ExceptionHttpServer screen shot.
+[./images/ExceptionHttpServer-configuration.png] ExceptionHttpServer screen shot.
 
-  The exception being handled is an <<<SQLException>>>.  To add the exception right click and add exception.
+  The exception being handled is an <<<SQLException>>>.
   
-  The exception is linked to the <<<Handler>>>.  The <<<Handler>>> is the following POJO.  It is added as a class section (right click and add section).
+  The exception is linked to the <<<Handler>>>.  The <<<Handler>>> is the following POJO.  It is added as a class section.
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHandler.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHandler.java|ignoreDownloadError=false}
 
   As per the configuration above, the <<<handleSqlException>>> method is invoked to handle the <<<SQLException>>>.
   
-  Once the method completes it follows normal WoOF behaviour.  In other words, the <<<@NextTask>>> annotation is honoured resulting in the static error page being sent to the client.
+  Once the method completes it follows normal WoOF behaviour.  In other words, the <<<@NextFunction>>> annotation is honoured resulting in the static error page being sent to the client.
 
 
 
@@ -72,9 +72,9 @@ Resource
   
   The remaining configuration indicates that the <<<TechnicalFault>>> should send the following static response.
   
-%{snippet|file=${basedir}/src/main/webapp/Error.html}
+%{snippet|file=${basedir}/src/main/resources/PUBLIC/Error.html|ignoreDownloadError=false}
 
-  It is possible to use the details of the exception within a template to generate a response.  For simplicity of this tutorial however a static resource is used (right click and add resource).
+  It is possible to use the details of the exception within a template to generate a response.  For simplicity of this tutorial however a static resource is used.
   
   
 Template specific exception handling
@@ -89,7 +89,7 @@ Unit Test
 
   The following unit test shows the exception handling by listening in on <<<stderr>>> to ensure the exception message is written to it:
   
-%{snippet|id=handle|file=${basedir}/src/test/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHttpServerTest.java}
+%{snippet|id=handle|file=${basedir}/src/test/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHttpServerTest.java|ignoreDownloadError=false}
 
   
 
