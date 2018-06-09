@@ -20,7 +20,7 @@ HTML
 
   The page template content is as follows.  Please note the link in the form action.
 
-%{snippet|file=${basedir}/src/main/webapp/template.woof.html}
+%{snippet|file=${basedir}/src/main/resources/template.woof.html|ignoreDownloadError=false}
 
 
 
@@ -28,7 +28,7 @@ Secure Link
 
   To configure the link (form action) to always be communicated via a secure channel, the following is the configuration:
   
-[./images/SecureLinkConfiguration-screenshot.png] Secure Link configuration screen shot.
+[./images/SecureLinkHttpServer-configuration.png] Secure Link configuration screen shot.
 
   Adding the link and flagging it secure will ensure WoOF renders the link URL on the page to communicate over a secure channel (HTTPS).  WoOF also prevents non-secure access to the link servicing by responding with a redirect to use a secure channel.
   
@@ -40,7 +40,7 @@ Logic
 
   The logic for the page is the following:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securelinkhttpserver/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securelinkhttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
   This tutorial shows sending information over a secure channel (HTTPS) from a non-secure page.
 

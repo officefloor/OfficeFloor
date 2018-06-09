@@ -4,7 +4,7 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/" location="template.woof.html" class="net.officefloor.tutorial.securelinkhttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="70" y="63">
+    <template path="/" location="template.woof.html" class="net.officefloor.tutorial.securelinkhttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="26" y="25">
       <link name="login" secure="true"/>
     </template>
   </templates>
