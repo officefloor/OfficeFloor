@@ -8,7 +8,7 @@
 
   This tutorial looks at configuring authentication.
   
-  WoOF provides various authentication schemes along with the ability to customise your own authentication scheme (see {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecuritySource.html}HttpSecuritySource}} for more details).  This tutorial will focus on the most common authentication - form based authentication.
+  WoOF provides various authentication schemes along with the ability to customise your own authentication scheme (see {{{/apidocs/net/officefloor/web/spi/security/HttpSecuritySource.html}HttpSecuritySource}} for more details).  This tutorial will focus on form based authentication.
   
   The below example for this tutorial will demonstrate only allowing a logged in user to view a page.  The simple key pages for this tutorial are as follows:
     
@@ -24,13 +24,13 @@ Restricted access page
 
   The page being restricted from access is as follows.
 
-%{snippet|file=${basedir}/src/main/webapp/hello.woof.html}
+%{snippet|file=${basedir}/src/main/resources/hello.woof.html|ignoreDownloadError=false}
 
   With the backing logic class.
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java|ignoreDownloadError=false}
 
-  The dependency on {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/plugin/web/http/security/HttpAuthenticationRequiredException.html}HttpAuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
+  The dependency on {{{/apidocs/net/officefloorweb/spi/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/web/security/AuthenticationRequiredException.html}AuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
   
    [[1]] saving the current request in the HTTP session
    
@@ -42,7 +42,7 @@ Restricted access page
    
   Since the <<<getTemplateData>>> requires a logged in user the page will not be rendered unless there is a logged in user.
   
-  To allow the page to be rendered with or without a logged in user, depend on {{{/apidocs/net/officefloor/plugin/web/http/security/HttpAuthentication.html}HttpAuthentication}} to check if the user is logged in.
+  To allow the page to be rendered with or without a logged in user, depend on {{{/apidocs/net/officefloor/web/security/HttpAuthentication.html}HttpAuthentication}} to check if the user is logged in.
 
 
 
@@ -50,19 +50,17 @@ Configuring access
 
   The following is the configuration for authentication.
   
-[./images/AuthenticationConfiguration-screenshot.png] Authentication configuration screen shot.
-
-  To specify the access, right click and select <<<Set access>>> from the menu.  A wizard will appear to configure the appropriate {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecuritySource.html}HttpSecuritySource}}.
+[./images/AuthenticationHttpServer-configuration.png] Authentication configuration screen shot.
   
-  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, links necessary for the chosen authentication will be displayed for configuration.  In the case of this tutorial, the form login link and authentication link are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
+  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/web/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, links necessary for the chosen authentication will be displayed for configuration.  In the case of this tutorial, the form login link and authentication link are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
   
-  To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/plugin/web/http/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  The following is the managed object configuration for this tutorial.   
+  To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  The following is the managed object configuration for this tutorial.   
   
-%{snippet|file=${basedir}/src/main/resources/application.objects}
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
   
   In this case a mock implementation is used that validates the user by ensuring the password matches the username.  This is a simple implementation useful for testing.
   
-  For production, another {{{/apidocs/net/officefloor/plugin/web/http/security/store/CredentialStore.html}CredentialStore}} should be used.  WoOF comes with existing implementations for standard credential stores.  Customised implementations may also be used for bespoke environments.
+  For production, another {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} should be used.  WoOF comes with existing implementations for standard credential stores.  Customised implementations may also be used for bespoke environments.
 
   
 
@@ -70,13 +68,13 @@ Login page
 
   The login page is as follows.
   
-%{snippet|file=${basedir}/src/main/webapp/login.woof.html}
+%{snippet|file=${basedir}/src/main/resources/login.woof.html|ignoreDownloadError=false}
 
   With the backing logic class.
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/LoginLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/LoginLogic.java|ignoreDownloadError=false}
 
-  The {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}} requires the credentials to be provided within a {{{/apidocs/net/officefloor/plugin/web/http/security/HttpCredentials.html}HttpCredentials}} as a parameter.
+  The {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}} requires the credentials to be provided within a {{{/apidocs/net/officefloor/web/security/HttpCredentials.html}HttpCredentials}} as a parameter.
 
 
   
@@ -86,11 +84,11 @@ Remaining code
   
 * Logout page
 
-%{snippet|file=${basedir}/src/main/webapp/logout.woof.html}
+%{snippet|file=${basedir}/src/main/resources/logout.woof.html|ignoreDownloadError=false}
 
 * Error page
 
-%{snippet|file=${basedir}/src/main/webapp/error.woof.html}
+%{snippet|file=${basedir}/src/main/resources/error.woof.html|ignoreDownloadError=false}
 
 
 
@@ -98,7 +96,7 @@ Unit Test
 
   The unit test demonstrates logging in and logging out. 
 
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/authenticationhttpserver/AuthenticationHttpServerTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/authenticationhttpserver/AuthenticationHttpServerTest.java|ignoreDownloadError=false}
 
 
 

@@ -83,7 +83,7 @@ public class AuthenticationHttpServerTest {
 	@Test
 	public void logout() throws Exception {
 
-		// Login (also starts server)
+		// Login
 		this.login();
 
 		// Logout
