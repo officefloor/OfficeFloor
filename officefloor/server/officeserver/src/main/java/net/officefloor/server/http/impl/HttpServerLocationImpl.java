@@ -17,9 +17,6 @@
  */
 package net.officefloor.server.http.impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.HttpServer;
@@ -48,11 +45,7 @@ public class HttpServerLocationImpl implements HttpServerLocation {
 	 * @return Default Host name.
 	 */
 	public static String getDefaultHostName() {
-		try {
-			return InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException ex) {
-			return "127.0.0.1"; // loop back (localhost requires network connection for some browsers)
-		}
+		return "localhost"; // default only local connections
 	}
 
 	/**

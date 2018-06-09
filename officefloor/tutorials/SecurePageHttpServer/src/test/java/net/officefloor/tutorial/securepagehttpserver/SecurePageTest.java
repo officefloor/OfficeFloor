@@ -17,54 +17,50 @@
  */
 package net.officefloor.tutorial.securepagehttpserver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpClientRule;
+import net.officefloor.test.OfficeFloorRule;
 
 /**
  * Tests the Secure Page.
  * 
  * @author Daniel Sagenschneider
  */
-public class SecurePageTest extends TestCase {
+public class SecurePageTest {
 
-	private CloseableHttpClient client;
-
-	@Override
-	protected void setUp() throws Exception {
-		this.client = HttpClientTestUtil.createHttpClient(true);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			this.client.close();
-		} finally {
-			OfficeFloorMain.close();
-		}
+	/**
+	 * Run application.
+	 */
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
 	}
 
 	// START SNIPPET: tutorial
-	public void testSecurePage() throws Exception {
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule();
 
-		// Start server
-		OfficeFloorMain.open();
+	@Rule
+	public HttpClientRule client = new HttpClientRule(true);
+
+	@Test
+	public void testSecurePage() throws Exception {
 
 		// Ensure redirect to secure access to page
 		this.assertHttpRequest("http://localhost:7878/card");
 
 		// Ensure redirect to secure link access to page
 		this.assertHttpRequest("http://localhost:7878/main+card");
-
-		// Send the card details
-		this.assertHttpRequest("http://localhost:7878/card+save?number=123");
 	}
 
 	private void assertHttpRequest(String url) throws IOException {

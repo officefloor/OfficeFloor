@@ -20,7 +20,7 @@ Secure Page
 
   To configure the page to always be accessed via a secure channel, the following is the configuration for the page:
   
-[./images/SecurePageConfiguration-screenshot.png] Secure Page configuration screen shot.
+[./images/SecurePageHttpServer-configuration.png] Secure Page configuration screen shot.
 
   Checking the secure check box is the only configuration necessary to ensure use of a secure channel (HTTPS) for accessing the page.
   
@@ -28,7 +28,7 @@ Secure Page
   
   For production, a trusted third-party signed security key is recommended to be configured.
   
-  Please also see the {{{/apidocs/net/officefloor/plugin/web/http/location/HttpApplicationLocationManagedObjectSource.html}HttpApplicationLocationManagedObjectSource}} for details on configuring the web application's location for generation of the link URLs.
+  Please also see the {{{/apidocs/net/officefloor/server/http/HttpServerLocation.html}HttpServerLocation}} for details on configuring the web application's location for generation of the link URLs.
 
 
 
@@ -36,7 +36,7 @@ Template
 
   The page template content is as follows:
 
-%{snippet|file=${basedir}/src/main/webapp/card.woof.html}
+%{snippet|file=${basedir}/src/main/resources/card.woof.html|ignoreDownloadError=false}
 
   This is similar HTML to previous tutorials.
 
@@ -46,7 +46,7 @@ Logic Class
 
   The logic for the page is the following:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securepagehttpserver/CardLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securepagehttpserver/CardLogic.java|ignoreDownloadError=false}
 
   Again this is similar to previous tutorials.
 
@@ -56,7 +56,7 @@ Remaining Code
 
   The main page is included for completeness of the tutorial code.
   
-%{snippet|file=${basedir}/src/main/webapp/main.woof.html}
+%{snippet|file=${basedir}/src/main/resources/main.woof.html|ignoreDownloadError=false}
 
 
 
@@ -68,11 +68,9 @@ Unit Test
    
    * via a link from another page
    
-   * sending card details
-   
   The exception within the page logic ensures rendering the response only occurs over a secure channel (HTTPS).
 
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securepagehttpserver/SecurePageTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securepagehttpserver/SecurePageTest.java|ignoreDownloadError=false}
 
 
 

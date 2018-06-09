@@ -4,12 +4,12 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/card" location="card.woof.html" class="net.officefloor.tutorial.securepagehttpserver.CardLogic" content-type="" charset="" secure="true" redirect-values-function="" link-separator-character="" x="209" y="122">
+    <template path="/card" location="card.woof.html" class="net.officefloor.tutorial.securepagehttpserver.CardLogic" content-type="" charset="" secure="true" redirect-values-function="" link-separator-character="" x="119" y="120">
       <output name="main" argument-type="">
         <template path="/main"/>
       </output>
     </template>
-    <template path="/main" location="main.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="405" y="160">
+    <template path="/main" location="main.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="33" y="29">
       <output name="card" argument-type="">
         <template path="/card"/>
       </output>
