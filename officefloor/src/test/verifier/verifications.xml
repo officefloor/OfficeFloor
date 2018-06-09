@@ -33,7 +33,7 @@
 		<!-- Ensure site identifying latest version and copy right -->
 		<file>
 			<location>src/site/resources/index.html</location>
-			<contains><![CDATA[id="version">v${project.version}</p>]]></contains>
+			<contains><![CDATA[id="version">v${project.version}<]]></contains>
 		</file>
 		<file>
 			<location>src/site/resources/index.html</location>

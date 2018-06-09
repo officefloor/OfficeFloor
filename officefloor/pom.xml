@@ -177,11 +177,6 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_rest</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_configuration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -230,78 +225,6 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_eclipselink</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Plugins -->
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>plugins</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_base</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_bayeux</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_ejb</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_gwt</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jdbc</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jms</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jndi</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jpa</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_json</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_launch</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_servlet</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_war</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_woof_servlet</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Eclipse -->
@@ -392,16 +315,7 @@
 				<artifactId>net.officefloor.eclipse.woof.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.ui</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.ui.tests</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+			<!--  
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
@@ -412,17 +326,9 @@
 				<artifactId>net.officefloor.woof.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.extras</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.extras.feature</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+			-->
 			<!-- Maven -->
+			<!--  
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven</artifactId>
@@ -439,6 +345,7 @@
 				<artifactId>woof-archetype</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			-->
 
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
@@ -462,11 +369,6 @@
 				<groupId>mx4j</groupId>
 				<artifactId>mx4j-tools</artifactId>
 				<version>3.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-httpclient</groupId>
-				<artifactId>commons-httpclient</artifactId>
-				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -592,6 +494,8 @@
 				<!-- ================================================ -->
 				<!-- OfficeFloor -->
 				<!-- ================================================ -->
+
+				<!--  				
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
@@ -599,14 +503,10 @@
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>woof-maven-plugin</artifactId>
-					<version>${project.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
 					<artifactId>woof-archetype</artifactId>
 					<version>${project.version}</version>
 				</plugin>
+				-->
 
 				<!-- ================================================ -->
 				<!-- Additional Plugins -->
@@ -795,11 +695,6 @@
 					<groupId>com.atlassian.maven.plugins</groupId>
 					<artifactId>maven-upload-plugin</artifactId>
 					<version>1.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>gwt-maven-plugin</artifactId>
-					<version>${gwt-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.datanucleus</groupId>
@@ -1421,73 +1316,6 @@
 					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
-		</profile>
-		<profile>
-			<!-- Profile for building OfficeFloor -->
-			<id>build-OfficeFloor</id>
-			<activation>
-				<file>
-					<exists>${basedir}/pom.xml</exists>
-				</file>
-			</activation>
-			<repositories>
-				<repository>
-					<!-- Maven Central (first) -->
-					<id>central</id>
-					<name>Maven central</name>
-					<url>http://repo1.maven.org/maven2/</url>
-				</repository>
-				<repository>
-					<!-- OfficeFloor -->
-					<id>maven2-repository.officefloor.net</id>
-					<name>OfficeFloor Repository for Maven</name>
-					<url>http://www.officefloor.net/maven2/</url>
-				</repository>
-				<repository>
-					<!-- Access JEE APIs -->
-					<id>maven2-repository.dev.java.net</id>
-					<name>Java.net Repository for Maven</name>
-					<url>http://download.java.net/maven/2/</url>
-				</repository>
-				<repository>
-					<!-- Embedded Glassfish (for testing JEE integration) -->
-					<id>glassfish.dev.java.net</id>
-					<name>Java.net Repository for Maven</name>
-					<url>http://download.java.net/maven/glassfish/</url>
-				</repository>
-				<repository>
-					<!-- Atlassian -->
-					<id>maven2-repository.atlassian.com</id>
-					<name>Atlassian</name>
-					<url>http://maven.atlassian.com/public</url>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<!-- Maven Central (first) -->
-					<id>central</id>
-					<name>Maven central</name>
-					<url>http://repo1.maven.org/maven2/</url>
-				</pluginRepository>
-				<pluginRepository>
-					<!-- OfficeFloor -->
-					<id>maven2-plugin-repository.officefloor.net</id>
-					<name>OfficeFloor Plug-in Repository for Maven</name>
-					<url>http://www.officefloor.net/maven2/</url>
-				</pluginRepository>
-				<pluginRepository>
-					<!-- Embedded Glassfish (for testing JEE integration) -->
-					<id>glassfish.dev.java.net</id>
-					<name>Java.net Repository for Maven</name>
-					<url>http://download.java.net/maven/glassfish/</url>
-				</pluginRepository>
-				<pluginRepository>
-					<!-- Atlassian -->
-					<id>maven2-repository.atlassian.com</id>
-					<name>Atlassian</name>
-					<url>http://maven.atlassian.com/public</url>
-				</pluginRepository>
-			</pluginRepositories>
 		</profile>
 	</profiles>
 </project>
