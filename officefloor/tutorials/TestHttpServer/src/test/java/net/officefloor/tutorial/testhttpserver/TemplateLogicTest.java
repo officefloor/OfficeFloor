@@ -17,21 +17,38 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
+import org.junit.Rule;
 import org.junit.Test;
 
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the {@link TemplateLogic}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TemplateLogicTest extends Assert {
+public class TemplateLogicTest {
+
+	/**
+	 * Main to run for manual testing.
+	 */
+	public static void main(String[] args) throws Exception {
+		OfficeFloorMain.main(args);
+	}
 
 	// START SNIPPET: unit
 	@Test
@@ -52,33 +69,46 @@ public class TemplateLogicTest extends Assert {
 	// END SNIPPET: unit
 
 	// START SNIPPET: system
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
+
 	@Test
 	public void systemTest() throws Exception {
 
-		// Start the application
-		MockWoofServer server = MockWoofServer.open();
+		// Send request to add
+		MockHttpResponse response = this.server
+				.send(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
+		assertEquals("Should follow POST/GET pattern", 303, response.getStatus().getStatusCode());
+		String redirect = response.getHeader("location").getValue();
 
-		try {
+		// Obtain the result
+		response = server.send(MockHttpServer.mockRequest(redirect).cookies(response));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
-			// Send request to add
-			MockHttpResponse response = server
-					.send(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
-			assertEquals("Should follow POST/GET pattern", 303, response.getStatus().getStatusCode());
-			String redirect = response.getHeader("location").getValue();
-
-			// Obtain the result
-			response = server.send(MockHttpServer.mockRequest(redirect).cookies(response));
-			assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-
-			// Ensure added the values
-			String entity = response.getEntity(null);
-			assertTrue("Should have added the values", entity.contains("= 3"));
-
-		} finally {
-			// Stop the application
-			server.close();
-		}
+		// Ensure added the values
+		String entity = response.getEntity(null);
+		assertTrue("Should have added the values", entity.contains("= 3"));
 	}
 	// END SNIPPET: system
+
+	// START SNIPPET: full-system
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule();
+
+	@Rule
+	public HttpClientRule client = new HttpClientRule();
+
+	@Test
+	public void callingSystemTest() throws Exception {
+
+		// Send request to add
+		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/template+add?a=1&b=2")));
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+
+		// Ensure added the values
+		String entity = EntityUtils.toString(response.getEntity());
+		assertTrue("Should have added the values", entity.contains("= 3"));
+	}
+	// END SNIPPET: full-system
 
 }

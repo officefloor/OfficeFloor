@@ -1,1 +1,15 @@
 TODO enable the integration tests
+
+TODO include following back into tutorial once enable integration tests
+
+Integration Testing
+
+  OfficeFloor provides {{{http://maven.apache.org}Maven}} plug-ins to enable integration testing.  The following is the <<<pom.xml>>> plug-ins starting/stopping WoOF and running the integration tests.
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The integration test is then as follows.
+  
+%{snippet|id=integration|file=${basedir}/src/test/int/net/officefloor/tutorial/testhttpserver/TemplateLogicIT.java|ignoreDownloadError=false}
+
+  Note that the above is a simple request test.  As the WoOF maven plugin runs the application with the same code that deploys it to run anywhere (e.g. Cloud Computing), this enables using more complex integration test tools (e.g. {{{http://seleniumhq.org}SeleniumHQ}}) to validate the application before deploying it.

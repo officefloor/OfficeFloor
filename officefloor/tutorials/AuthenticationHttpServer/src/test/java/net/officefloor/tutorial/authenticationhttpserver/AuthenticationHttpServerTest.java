@@ -40,9 +40,6 @@ public class AuthenticationHttpServerTest {
 
 	/**
 	 * Main to run for manual testing.
-	 * 
-	 * @param args
-	 *            Command line arguments.
 	 */
 	public static void main(String[] args) throws Exception {
 		OfficeFloorMain.main(args);
