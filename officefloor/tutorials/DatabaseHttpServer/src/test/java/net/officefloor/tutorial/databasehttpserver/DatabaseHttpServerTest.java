@@ -17,49 +17,53 @@
  */
 package net.officefloor.tutorial.databasehttpserver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.jdbc.test.DataSourceRule;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the {@link DatabaseHttpServer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DatabaseHttpServerTest extends TestCase {
+public class DatabaseHttpServerTest {
 
 	/**
-	 * {@link MockWoofServer}.
+	 * Run application.
 	 */
-	private MockWoofServer server;
+	public static void main(String[] args) throws Exception {
 
-	@Override
-	protected void tearDown() throws Exception {
-		if (this.server != null) {
-			this.server.close();
+		// Keep database alive by keeping connection
+		DataSource dataSource = DefaultDataSourceFactory.createDataSource("datasource.properties");
+		try (Connection connection = dataSource.getConnection()) {
+			OfficeFloorMain.main(args);
 		}
 	}
 
 	/**
 	 * Ensure able to connect to database with {@link DataSource}.
 	 */
+	@Test
 	public void testConnection() throws Exception {
-
-		// Obtain connection via DataSource
-		// Need to keep connection open to keep database alive
-		try (Connection connection = DefaultDataSourceFactory.createDataSource("datasource.properties")
-				.getConnection()) {
-
-			// Start test server
-			this.server = MockWoofServer.open();
+		try (Connection connection = dataSource.getConnection()) {
 
 			// Undertake request to allow set-up
 			this.server.send(MockWoofServer.mockRequest("/example"));
@@ -73,19 +77,26 @@ public class DatabaseHttpServerTest extends TestCase {
 		}
 	}
 
-	/**
-	 * Requests page from HTTP Server.
-	 */
+	@Test
+	public void ensureFullPage() {
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		String body = response.getEntity(null);
+		assertTrue("Should have row from database: " + body, body.contains("WoOF"));
+		assertTrue("Should have full request: " + body, body.endsWith("</html>"));
+
+	}
+
 	// START SNIPPET: test
+	@ClassRule
+	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
 
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
+
+	@Test
 	public void testInteraction() throws Exception {
-
-		// Need to keep connection open to keep in memory database alive
-		try (Connection connection = DefaultDataSourceFactory.createDataSource("datasource.properties")
-				.getConnection()) {
-
-			// Start test server
-			this.server = MockWoofServer.open();
+		try (Connection connection = dataSource.getConnection()) {
 
 			// Request page
 			this.server.send(MockHttpServer.mockRequest("/example"));
@@ -110,7 +121,6 @@ public class DatabaseHttpServerTest extends TestCase {
 			assertFalse("Row should be deleted", resultSet.next());
 		}
 	}
-
 	// END SNIPPET: test
 
 }

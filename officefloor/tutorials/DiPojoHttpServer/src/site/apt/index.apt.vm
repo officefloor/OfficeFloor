@@ -20,26 +20,26 @@ Template
   
   The following is the content of the template.
 
-%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
 
   With the template logic.
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
   WoOF (via its underlying OfficeFloor framework) injects dependencies into methods.  By injecting dependencies into methods, WoOF makes development of applications simpler.  This is because the application logic is written as loosely coupled methods rather than highly coupled objects.
   
   The injected dependency (POJO) will provide the remaining text of the rendered content.  The code of the injected POJO is as follows.
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/Pojo.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/Pojo.java|ignoreDownloadError=false}
   
 
 Dependency Injection
 
-  Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  Providing this file is optional, as it is anticipated that WoOF annotations will provide most POJO dependency configuration.  However, it is supported to extend WoOF applications with additional dependencies as required.  The file may also be named <<<application.objects.xml>>> for easier editing by XML editors.
+  Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  Providing this file is optional, as it is anticipated that WoOF annotations will provide most POJO dependency configuration.  However, it is supported to extend WoOF applications with additional dependencies as required.
       
   The configuration of dependency injecting the POJO is as follows.
 
-%{snippet|file=${basedir}/src/main/resources/application.objects.xml}
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
 
   WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as WoOF allows qualifying dependencies for auto-wiring.
   
@@ -47,16 +47,17 @@ Dependency Injection
   
   A <<<type>>> attribute can be added to auto-wire the POJO based on one of its super types (e.g. an interface).
 
+  <<<Watch this space>>>: An IDE editor plug-in is in focus to make creation and management of this file easier. 
+
 
 Unit Test
 
   The unit test ensures the correct rendered content is received.
 
-%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dipojohttpserver/DiPojoHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dipojohttpserver/DiPojoHttpServerTest.java|ignoreDownloadError=false}
 
 
 
 Next
 
   The {{{../DatabaseHttpServer/index.html}next tutorial}} covers injecting managed objects.
-

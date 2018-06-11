@@ -17,62 +17,48 @@
  */
 package net.officefloor.tutorial.teamhttpserver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 
-import junit.framework.TestCase;
+import javax.sql.DataSource;
+
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.jdbc.test.DataSourceRule;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the {@link TeamHttpServer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamHttpServerTest extends TestCase {
+public class TeamHttpServerTest {
 
 	/**
-	 * {@link Connection}.
+	 * Run application.
 	 */
-	private Connection connection;
-
-	/**
-	 * {@link MockWoofServer}.
-	 */
-	private MockWoofServer server;
-
-	@Override
-	protected void setUp() throws Exception {
-
-		// Keep connection to database to keep in memory database alive
-		this.connection = DefaultDataSourceFactory.createDataSource("datasource.properties").getConnection();
-
-		// Start the database and HTTP Server
-		this.server = MockWoofServer.open();
-
-		// Request page to allow time for database setup
-		this.server.send(MockHttpServer.mockRequest("/example"));
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Stop the server
-		if (this.server != null) {
-			this.server.close();
-		}
-
-		// Close connection (to clean up database)
-		if (this.connection != null) {
-			this.connection.close();
+	public static void main(String[] args) throws Exception {
+		// Keep database alive by keeping connection
+		DataSource dataSource = DefaultDataSourceFactory.createDataSource("datasource.properties");
+		try (Connection connection = dataSource.getConnection()) {
+			OfficeFloorMain.main(args);
 		}
 	}
 
 	/**
 	 * Ensure able to connect to database.
 	 */
+	@Test
 	public void testConnection() throws Exception {
 
 		// Request page to allow time for database setup
@@ -80,18 +66,24 @@ public class TeamHttpServerTest extends TestCase {
 		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
 
 		// Ensure can get initial row
-		ResultSet resultSet = this.connection.createStatement()
-				.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
-		assertTrue("Ensure have result", resultSet.next());
-		assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
-		assertFalse("Ensure no further results", resultSet.next());
+		try (Connection connection = dataSource.getConnection()) {
+			ResultSet resultSet = connection.createStatement()
+					.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
+			assertTrue("Ensure have result", resultSet.next());
+			assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
+			assertFalse("Ensure no further results", resultSet.next());
+		}
 	}
 
-	/**
-	 * Requests page from HTTP Server.
-	 */
 	// START SNIPPET: test
-	public void testRetrieveEncryptions() throws Exception {
+	@ClassRule
+	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
+
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
+
+	@Test
+	public void retrieveEncryptions() throws Exception {
 
 		// Retrieving from database (will have value cached)
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
