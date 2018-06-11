@@ -102,5 +102,5 @@ Unit Test
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../DiPojoHttpServer/index.html}next tutorial}} covers dependency injection.
 
