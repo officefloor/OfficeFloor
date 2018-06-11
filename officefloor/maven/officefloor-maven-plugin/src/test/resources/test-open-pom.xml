@@ -1,0 +1,12 @@
+<project>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<configuration>
+					<project implementation="net.officefloor.maven.stubs.OfficeFloorProjectStub" />
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
