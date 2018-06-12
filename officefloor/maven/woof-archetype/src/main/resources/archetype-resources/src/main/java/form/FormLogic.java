@@ -1,8 +1,9 @@
 package ${package}.form;
 
 import java.io.Serializable;
-import net.officefloor.plugin.web.http.application.HttpParameters;
+
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.web.HttpParameters;
 
 /**
  * Logic for the <code>form.woof.html</code>.

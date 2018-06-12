@@ -1,49 +1,30 @@
 package ${package};
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.net.URL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import net.officefloor.OfficeFloorMain;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
+
 /**
- * Runs application and ensures a page is available.
+ * Unit/System tests the application.
  */
 public class RunApplicationTest {
 
-	@Before
-	public void runApplication() throws Exception {
-		// Start the application
-		OfficeFloorMain.open();
-	}
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
 	@Test
 	public void ensureApplicationAvailable() throws Exception {
 
-		// Connect to application and obtain page
-		URL url = new URL("http://localhost:7878/static.woof");
-		Reader response = new InputStreamReader(url.openStream());
-		StringWriter content = new StringWriter();
-		for (int character = response.read(); character != -1; character = response
-				.read()) {
-			content.write(character);
-		}
-
-		// Ensure correct page
-		Assert.assertTrue("Incorrect page",
-				content.toString().contains("<title>Static Page</title>"));
-	}
-
-	@After
-	public void stopApplication() throws Exception {
-		// Stop the application
-		OfficeFloorMain.close();
+		// Ensure can obtain static page
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/static"));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertTrue("Incorrect page", response.getEntity(null).contains("<title>Static Page</title>"));
 	}
 
 }

@@ -13,7 +13,7 @@
 		</fileSet>
 
 		<fileSet filtered="false" packaged="false">
-			<directory>src/main/webapp/</directory>
+			<directory>src/main/resources/</directory>
 			<includes>
 				<include>**/*.html</include>
 				<include>**/*.xml</include>
@@ -21,7 +21,7 @@
 				<include>**/*.css</include>
 			</includes>
 		</fileSet>
-		
+
 		<fileSet filtered="true" packaged="false">
 			<directory>src/main/resources/</directory>
 			<includes>

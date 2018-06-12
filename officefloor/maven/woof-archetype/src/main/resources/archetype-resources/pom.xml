@@ -4,29 +4,20 @@
 	<groupId>\${groupId}</groupId>
 	<artifactId>\${artifactId}</artifactId>
 	<version>\${version}</version>
-	<packaging>war</packaging>
 	<name>\${artifactId}</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor-version>${version}</officefloor-version>
-		<jetty-version>9.2.2.v20140723</jetty-version>
-		<compiler-version>3.6.0</compiler-version>
-		<failsafe-version>2.19.1</failsafe-version>
+		<compiler-version>3.7.0</compiler-version>
+		<failsafe-version>2.21.0</failsafe-version>
 		<junit-version>4.12</junit-version>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_woof</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
 			<version>\${officefloor-version}</version>
 		</dependency>
-<!-- Uncomment if within Servlet  
-		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_woof_servlet</artifactId>
-			<version>\${officefloor-version}</version>
-		</dependency>
--->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -42,44 +33,32 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>\${compiler-version}</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>8</source>
+					<target>8</target>
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Test WoOF within Servlet Container -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>\${jetty-version}</version>
-				<configuration>
-					<httpConnector>
-						<port>18080</port>
-					</httpConnector>
-					<stopPort>18181</stopPort>
-					<stopKey>officefloor</stopKey>
-				</configuration>
+				<!-- Run integrations -->
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<version>\${officefloor-version}</version>
 				<executions>
 					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
+						<id>open</id>
 						<goals>
-							<goal>run</goal>
+							<goal>open</goal>
 						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
 					</execution>
 					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
+						<id>close</id>
 						<goals>
-							<goal>stop</goal>
+							<goal>close</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Run tests against WoOF within Servlet Container -->
+				<!-- Run integration tests -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>\${failsafe-version}</version>
