@@ -4,12 +4,12 @@
   <http-inputs>
   </http-inputs>
   <templates>
-    <template path="/form" location="form.woof.html" class="net.officefloor.test.form.FormLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="145" y="182">
+    <template path="/form" location="form.woof.html" class="net.officefloor.test.form.FormLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="132" y="155">
       <output name="complete" argument-type="">
         <template path="/static"/>
       </output>
     </template>
-    <template path="/static" location="static.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="67" y="65">
+    <template path="/static" location="static.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="54" y="38">
       <output name="link" argument-type="">
         <template path="/form"/>
       </output>
