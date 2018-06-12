@@ -1,18 +1,24 @@
 <woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
   <templates>
-    <template name="form" uri="form" path="form.woof.html" class="net.officefloor.test.form.FormLogic" x="279" y="99">
+    <template path="/form" location="form.woof.html" class="net.officefloor.test.form.FormLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="145" y="182">
       <output name="complete" argument-type="">
-        <template name="static"/>
+        <template path="/static"/>
       </output>
     </template>
-    <template name="static" uri="static" path="static.woof.html" class="" x="138" y="98">
+    <template path="/static" location="static.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="67" y="65">
       <output name="link" argument-type="">
-        <template name="form"/>
+        <template path="/form"/>
       </output>
     </template>
   </templates>
   <sections>
   </sections>
+  <securities>
+  </securities>
   <governances>
   </governances>
   <resources>

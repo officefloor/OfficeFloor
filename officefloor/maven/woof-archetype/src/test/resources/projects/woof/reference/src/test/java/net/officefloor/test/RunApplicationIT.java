@@ -9,8 +9,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Tests the application running within JEE Container and ensures a page is
- * available.
+ * <p>
+ * Integration tests the application.
+ * <p>
+ * TODO consider using Integration Test tools.
  */
 public class RunApplicationIT {
 
@@ -18,17 +20,15 @@ public class RunApplicationIT {
 	public void ensureApplicationAvailable() throws Exception {
 
 		// Connect to application and obtain page
-		URL url = new URL("http://localhost:18080/form.woof");
+		URL url = new URL("http://localhost:7878/form");
 		Reader response = new InputStreamReader(url.openStream());
 		StringWriter content = new StringWriter();
-		for (int character = response.read(); character != -1; character = response
-				.read()) {
+		for (int character = response.read(); character != -1; character = response.read()) {
 			content.write(character);
 		}
 
 		// Ensure correct page
-		Assert.assertTrue("Incorrect page",
-				content.toString().contains("<title>Page with form submission</title>"));
+		Assert.assertTrue("Incorrect page", content.toString().contains("<title>Page with form submission</title>"));
 	}
 
 }
