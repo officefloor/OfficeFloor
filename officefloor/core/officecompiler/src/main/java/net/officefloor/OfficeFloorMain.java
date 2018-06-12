@@ -33,6 +33,12 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class OfficeFloorMain {
 
 	/**
+	 * Line output to <code>stdout</code> to indicate {@link OfficeFloor} is
+	 * running.
+	 */
+	public static String STD_OUT_RUNNING_LINE = "OfficeFloor running";
+
+	/**
 	 * Compiles and run {@link OfficeFloor}.
 	 * 
 	 * @param args
@@ -60,7 +66,7 @@ public class OfficeFloorMain {
 		// Open the OfficeFloor
 		System.out.println("Opening OfficeFloor");
 		officeFloor.openOfficeFloor();
-		System.out.println("OfficeFloor running");
+		System.out.println(STD_OUT_RUNNING_LINE);
 
 		// Wait until closed
 		exitOnClose.waitForClose();
@@ -121,8 +127,8 @@ public class OfficeFloorMain {
 
 	/**
 	 * <p>
-	 * Convenience method to open a singleton {@link OfficeFloor} for embedded
-	 * use. This is typically for unit testing.
+	 * Convenience method to open a singleton {@link OfficeFloor} for embedded use.
+	 * This is typically for unit testing.
 	 * <p>
 	 * Note previously open {@link OfficeFloor} instance by this method will be
 	 * closed. Hence, avoids tests re-using the previous {@link OfficeFloor}
@@ -225,8 +231,7 @@ public class OfficeFloorMain {
 		private final OfficeFloor officeFloor;
 
 		/**
-		 * {@link MainOfficeFloorListener} to wait on close of
-		 * {@link OfficeFloor}.
+		 * {@link MainOfficeFloorListener} to wait on close of {@link OfficeFloor}.
 		 */
 		private final MainOfficeFloorListener closeListener;
 

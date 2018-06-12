@@ -1,0 +1,16 @@
+<project>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<configuration>
+					<project implementation="net.officefloor.maven.stubs.OfficeFloorProjectStub" />
+					<systemProperties>
+						<com.sun.management.jmxremote.port>9999
+						</com.sun.management.jmxremote.port>
+					</systemProperties>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

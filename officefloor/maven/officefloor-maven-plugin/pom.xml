@@ -87,32 +87,6 @@
 					</reportPlugins>
 				</configuration>
 			</plugin>
-			<plugin>
-				<!-- Test the plugin -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-invoker-plugin</artifactId>
-				<configuration>
-					<projectsDirectory>src/it</projectsDirectory>
-					<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-					<pomIncludes>
-						<pomInclude>*/pom.xml</pomInclude>
-					</pomIncludes>
-					<settingsFile>src/it/settings.xml</settingsFile>
-					<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
-					<debug>true</debug>
-					<preBuildHookScript>setup.bsh</preBuildHookScript>
-					<postBuildHookScript>verify.bsh</postBuildHookScript>
-				</configuration>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>install</goal>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -138,6 +112,16 @@
 		<dependency>
 			<groupId>org.apache.maven.plugin-testing</groupId>
 			<artifactId>maven-plugin-testing-harness</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -17,6 +17,7 @@
  */
 package net.officefloor.maven.stubs;
 
+import java.io.File;
 import java.util.Arrays;
 
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
@@ -36,7 +37,7 @@ public class OfficeFloorProjectStub extends MavenProjectStub {
 
 		// Load the runtime class
 		String javaClassPath = System.getProperty("java.class.path");
-		this.setRuntimeClasspathElements(Arrays.asList(javaClassPath));
+		this.setRuntimeClasspathElements(Arrays.asList(javaClassPath.split(File.pathSeparator)));
 	}
 
 }

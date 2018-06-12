@@ -1,0 +1,12 @@
+<project>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<configuration>
+					<jmxPort>9999</jmxPort>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
