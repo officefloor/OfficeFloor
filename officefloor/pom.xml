@@ -59,7 +59,7 @@
 		<module>persistence</module>
 		<module>eclipse</module>
 		<module>tutorials</module>
-		<!-- <module>maven</module> -->
+		<module>maven</module>
 	</modules>
 	<properties>
 		<current.year>2018</current.year>
@@ -339,13 +339,11 @@
 				<artifactId>officefloor-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!--
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			-->
 
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
@@ -480,11 +478,6 @@
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>${failsafe-version}</version>
@@ -510,8 +503,6 @@
 				<!-- ================================================ -->
 				<!-- OfficeFloor -->
 				<!-- ================================================ -->
-
-				<!--  				
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
@@ -522,7 +513,6 @@
 					<artifactId>woof-archetype</artifactId>
 					<version>${project.version}</version>
 				</plugin>
-				-->
 
 				<!-- ================================================ -->
 				<!-- Additional Plugins -->

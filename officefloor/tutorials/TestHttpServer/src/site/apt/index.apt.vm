@@ -36,8 +36,9 @@ Unit Testing
 
 %{snippet|id=unit|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java|ignoreDownloadError=false}
 
-  This is a simple application.  More complex applications may be dependency injecting more complex objects such as a <<<javax.sql.DataSource>>> or <<<javax.persistence.EntityManager>>>.  Again as the template logic is a POJO, any mocking framework can be used to mock these objects for use in testing.
+  This is a simple application.  More complex applications may be dependency injecting more complex objects such as a <<<java.sql.Connection>>> or <<<javax.persistence.EntityManager>>>.  Again as the template logic is a POJO, any mocking framework can be used to mock these objects for use in testing.
   
+
 
 System Testing
 
@@ -50,6 +51,20 @@ System Testing
   However, should you want to run WoOF listening on sockets, then use the following. Again this is fast enough to run with the unit tests, but is neglibly slower due to socket communication.
 
 %{snippet|id=full-system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java|ignoreDownloadError=false}
+
+
+
+Integration Testing
+
+  OfficeFloor provides a {{{http://maven.apache.org}Maven}} plug-in to enable integration testing.  The following is the <<<pom.xml>>> plug-ins configuration of running integration tests.
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The integration test is then as follows.
+  
+%{snippet|id=integration|file=${basedir}/src/test/int/net/officefloor/tutorial/testhttpserver/TemplateLogicIT.java|ignoreDownloadError=false}
+
+  Note that the above is a simple request test.  This enables using more complex integration test tools (e.g. {{{http://seleniumhq.org}SeleniumHQ}}) to validate the application before deploying it.
 
 
 

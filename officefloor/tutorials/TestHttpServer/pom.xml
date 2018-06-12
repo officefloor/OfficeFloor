@@ -52,17 +52,38 @@
 				</executions>
 			</plugin>
 			<!-- START SNIPPET: tutorial -->
-			<!-- Start/Stop application for Integration tests -->
-			<!-- TODO re-enable Integration Test <plugin> <groupId>net.officefloor.maven</groupId> 
-				<artifactId>officefloor-maven-plugin</artifactId> <executions> <execution> 
-				<id>run-WoOF</id> <phase>pre-integration-test</phase> <goals> <goal>start</goal> 
-				<goal>open</goal> </goals> </execution> <execution> <id>stop-WoOF</id> <phase>post-integration-test</phase> 
-				<goals> <goal>stop</goal> </goals> </execution> </executions> </plugin> -->
+			<!-- Open/Close OfficeFloor for Integration tests -->
+			<plugin>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>open</id>
+						<goals>
+							<goal>open</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>close</id>
+						<goals>
+							<goal>close</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Run Integration tests -->
-			<!-- TODO re-enable Integration Test <plugin> <groupId>org.apache.maven.plugins</groupId> 
-				<artifactId>maven-failsafe-plugin</artifactId> <executions> <execution> <goals> 
-				<goal>integration-test</goal> <goal>verify</goal> </goals> </execution> </executions> 
-				</plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- END SNIPPET: tutorial -->
 		</plugins>
 	</build>
