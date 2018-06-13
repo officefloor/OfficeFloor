@@ -80,8 +80,8 @@ public class JacksonJsonTest extends OfficeFrameTestCase {
 
 		// Send the request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
-				.header("Content-Type", "application/mock").entity("{ \"input\": \"INPUT\" }"));
-		response.assertResponse(200, "{ \"output\": \"OUTPUT\" }");
+				.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\" }"));
+		response.assertResponse(200, "{\"output\":\"OUTPUT\"}");
 	}
 
 	public static class MockJacksonJson {
@@ -102,6 +102,29 @@ public class JacksonJsonTest extends OfficeFrameTestCase {
 	@AllArgsConstructor
 	public static class OutputObject {
 		private String output;
+	}
+
+	/**
+	 * Ensure can handle exception in JSON.
+	 */
+	public void testJacksonException() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "/path", MockJacksonException.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server
+				.send(MockHttpServer.mockRequest("/path").header("accept", "application/json"));
+		response.assertResponse(500, "{\"error\":\"ERROR with unsafe \\\" value\"}");
+	}
+
+	public static class MockJacksonException {
+		public void service() throws Exception {
+			throw new Exception("ERROR with unsafe \" value");
+		}
 	}
 
 }
