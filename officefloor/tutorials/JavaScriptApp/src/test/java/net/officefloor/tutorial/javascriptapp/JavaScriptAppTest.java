@@ -55,22 +55,25 @@ public class JavaScriptAppTest {
 
 	@Test
 	public void testHttpParameters() throws IOException {
-		String response = this.doAjax("addition", "numberOne=2&numberTwo=1");
+		String response = this.doAjax("addition", "application/x-www-form-urlencoded", "numberOne=2&numberTwo=1");
 		assertEquals("Incorrect response", "3", response);
 	}
 
 	@Test
 	public void testHttpJson() throws IOException {
-		String response = this.doAjax("subtraction", "{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
+		String response = this.doAjax("subtraction", "application/json",
+				"{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
 		assertEquals("Incorrect response", "{\"result\":\"2\"}", response);
 	}
 
-	private String doAjax(String link, String payload) throws IOException {
+	private String doAjax(String link, String contentType, String payload) throws IOException {
 		HttpPost post = new HttpPost("http://localhost:7878/template+" + link);
+		post.addHeader("content-type", contentType);
 		post.setEntity(new StringEntity(payload));
 		HttpResponse response = this.client.execute(post);
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-		return EntityUtils.toString(response.getEntity());
+		String entity = EntityUtils.toString(response.getEntity());
+		assertEquals("Should be successful: " + entity, 200, response.getStatusLine().getStatusCode());
+		return entity;
 	}
 	// END SNIPPET: tutorial
 

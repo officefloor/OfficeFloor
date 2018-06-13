@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 import lombok.Data;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.template.NotRenderTemplateAfter;
@@ -54,6 +55,7 @@ public class TemplateLogic {
 
 	// START SNIPPET: HttpJson
 	@Data
+	@HttpObject
 	public static class SubtractionRequest implements Serializable {
 		private String numberOne;
 		private String numberTwo;
