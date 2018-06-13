@@ -1,10 +1,16 @@
 <woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
   <templates>
-    <template name="template" uri="template" path="template.woof.html" extends="" class="net.officefloor.tutorial.javascriptapp.TemplateLogic" secure="false" continue-rendering="false" x="58" y="54">
+    <template path="/template" location="template.woof.html" class="net.officefloor.tutorial.javascriptapp.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="58" y="54">
     </template>
   </templates>
   <sections>
   </sections>
+  <securities>
+  </securities>
   <governances>
   </governances>
   <resources>

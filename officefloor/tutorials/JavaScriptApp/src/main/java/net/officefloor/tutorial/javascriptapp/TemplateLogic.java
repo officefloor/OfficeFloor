@@ -21,11 +21,10 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import lombok.Data;
-import net.officefloor.plugin.json.HttpJson;
-import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpParameters;
+import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.template.NotRenderTemplateAfter;
 
 /**
  * Logic for the <code>template.woof.html</code>.
@@ -43,23 +42,18 @@ public class TemplateLogic {
 	}
 
 	@NotRenderTemplateAfter
-	public void addition(AdditionRequest request,
-			ServerHttpConnection connection) throws IOException {
+	public void addition(AdditionRequest request, ServerHttpConnection connection) throws IOException {
 
 		// Add the numbers
-		int result = Integer.parseInt(request.getNumberOne())
-				+ Integer.parseInt(request.getNumberTwo());
+		int result = Integer.parseInt(request.getNumberOne()) + Integer.parseInt(request.getNumberTwo());
 
 		// Return the result
-		connection.getHttpResponse().getEntityWriter()
-				.write(String.valueOf(result));
+		connection.getResponse().getEntityWriter().write(String.valueOf(result));
 	}
-
 	// END SNIPPET: HttpParameters
 
 	// START SNIPPET: HttpJson
 	@Data
-	@HttpJson
 	public static class SubtractionRequest implements Serializable {
 		private String numberOne;
 		private String numberTwo;
@@ -70,15 +64,13 @@ public class TemplateLogic {
 		private final String result;
 	}
 
-	public void subtraction(SubtractionRequest request,
-			JsonResponseWriter response) throws IOException {
+	public void subtraction(SubtractionRequest request, ObjectResponse<JsonResponse> response) throws IOException {
 
 		// Subtract the numbers
-		int result = Integer.parseInt(request.getNumberOne())
-				- Integer.parseInt(request.getNumberTwo());
+		int result = Integer.parseInt(request.getNumberOne()) - Integer.parseInt(request.getNumberTwo());
 
 		// Return the result
-		response.writeResponse(new JsonResponse(String.valueOf(result)));
+		response.send(new JsonResponse(String.valueOf(result)));
 	}
 
 }

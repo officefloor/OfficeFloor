@@ -50,7 +50,9 @@ import net.officefloor.web.build.AcceptNegotiatorBuilder;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectParserServiceFactory;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
@@ -83,8 +85,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext} used to source {@link Property}
-	 *            values to configure the {@link WebArchitect}.
+	 *            {@link OfficeSourceContext} used to source {@link Property} values
+	 *            to configure the {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(OfficeArchitect officeArchitect,
@@ -101,13 +103,13 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Employs a {@link WebArchitect}.
 	 * 
 	 * @param contextPath
-	 *            Context path for the web application. May be <code>null</code>
-	 *            for no context path.
+	 *            Context path for the web application. May be <code>null</code> for
+	 *            no context path.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext} used to source {@link Property}
-	 *            values to configure the {@link WebArchitect}.
+	 *            {@link OfficeSourceContext} used to source {@link Property} values
+	 *            to configure the {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(String contextPath, OfficeArchitect officeArchitect,
@@ -146,9 +148,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final Map<String, OfficeManagedObject> httpArguments = new HashMap<>();
 
 	/**
-	 * Singleton {@link List} provided to the
-	 * {@link HttpObjectManagedObjectSource} for the registered
-	 * {@link HttpObjectParserFactory} instances.
+	 * Singleton {@link List} provided to the {@link HttpObjectManagedObjectSource}
+	 * for the registered {@link HttpObjectParserFactory} instances.
 	 */
 	private final List<HttpObjectParserFactory> singletonObjectParserList = new LinkedList<>();
 
@@ -203,8 +204,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Instantiate.
 	 * 
 	 * @param contextPath
-	 *            Context path for the web application. May be <code>null</code>
-	 *            for no context path.
+	 *            Context path for the web application. May be <code>null</code> for
+	 *            no context path.
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param officeSourceContext
@@ -217,6 +218,20 @@ public class WebArchitectEmployer implements WebArchitect {
 		this.officeSourceContext = officeSourceContext;
 		this.routing = new HttpRouteSectionSource(this.contextPath);
 		this.routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
+
+		// Obtain the registered HTTP object parser factories
+		Iterable<HttpObjectParserFactory> objectParserFactories = this.officeSourceContext
+				.loadOptionalServices(HttpObjectParserServiceFactory.class);
+		for (HttpObjectParserFactory objectParserFactory : objectParserFactories) {
+			this.singletonObjectParserList.add(objectParserFactory);
+		}
+
+		// Obtain the HTTP object responder factories
+		Iterable<HttpObjectResponderFactory> objectResponderFactories = this.officeSourceContext
+				.loadOptionalServices(HttpObjectResponderServiceFactory.class);
+		for (HttpObjectResponderFactory objectResponderFactory : objectResponderFactories) {
+			this.objectResponderFactories.add(objectResponderFactory);
+		}
 	}
 
 	/**
@@ -648,8 +663,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		protected final RouteInput routeInput;
 
 		/**
-		 * {@link OfficeFlowSourceNode} to configure handling of this
-		 * {@link HttpInput}.
+		 * {@link OfficeFlowSourceNode} to configure handling of this {@link HttpInput}.
 		 */
 		private final OfficeFlowSourceNode input;
 
@@ -694,8 +708,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	private class HttpUrlContinuationImpl extends HttpInputImpl implements HttpUrlContinuation {
 
 		/**
-		 * Mapping of parameter type to {@link OfficeFlowSinkNode} for
-		 * redirects.
+		 * Mapping of parameter type to {@link OfficeFlowSinkNode} for redirects.
 		 */
 		private final Map<String, OfficeFlowSinkNode> redirects = new HashMap<>();
 
@@ -742,9 +755,10 @@ public class WebArchitectEmployer implements WebArchitect {
 				return flowSinkNode;
 
 			} catch (Exception ex) {
-				throw WebArchitectEmployer.this.officeArchitect
-						.addIssue("Failed to create redirect to " + this.applicationPath + (parameterTypeName == null
-								? " with null value type" : " with values type " + parameterTypeName), ex);
+				throw WebArchitectEmployer.this.officeArchitect.addIssue("Failed to create redirect to "
+						+ this.applicationPath + (parameterTypeName == null ? " with null value type"
+								: " with values type " + parameterTypeName),
+						ex);
 			}
 		}
 	}

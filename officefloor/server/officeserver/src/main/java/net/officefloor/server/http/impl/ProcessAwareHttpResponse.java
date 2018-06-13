@@ -256,11 +256,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			}
 
 			// Determine if escalation handler
+			boolean isHandled = false;
 			if (this.escalationHandler != null) {
 
 				// Handle the escalation
 				final Throwable finalEscalation = escalation;
-				this.escalationHandler.handle(new HttpEscalationContext() {
+				isHandled = this.escalationHandler.handle(new HttpEscalationContext() {
 
 					@Override
 					public Throwable getEscalation() {
@@ -277,8 +278,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 						return ProcessAwareHttpResponse.this.serverHttpConnection;
 					}
 				});
+			}
 
-			} else {
+			// If not handled, handle generically
+			if (!isHandled) {
+
 				// Default send the escalation
 				if (isHttpEscalation) {
 					// Send the HTTP entity (if provided)

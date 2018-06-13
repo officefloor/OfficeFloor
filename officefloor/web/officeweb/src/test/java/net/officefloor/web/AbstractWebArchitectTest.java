@@ -132,7 +132,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public void testResourceNotFound() throws Exception {
 		this.compile.web(null);
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest());
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest().header("accept", "text/html"));
 		response.assertResponse(404, "No resource found for /");
 	}
 
@@ -544,9 +544,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 	/**
 	 * Code generators are likely to create objects with different
-	 * {@link Annotation} values. Therefore, rather than force the code
-	 * generators to include {@link HttpObject}, another {@link Annotation} can
-	 * be used to alias the {@link HttpObject}.
+	 * {@link Annotation} values. Therefore, rather than force the code generators
+	 * to include {@link HttpObject}, another {@link Annotation} can be used to
+	 * alias the {@link HttpObject}.
 	 */
 	public void testHttpObjectAlias() throws Exception {
 
@@ -619,6 +619,39 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can register {@link HttpObjectParserFactory}.
+	 */
+	public void testRegisteredHttpObject() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.getWebArchitect();
+			context.link(false, "POST", "/path", MockRegisteredObject.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "registered/object").entity("value"));
+		response.assertResponse(200, "Value=value");
+	}
+
+	@HttpObject
+	public static class RegisteredObject {
+		private final String content;
+
+		public RegisteredObject(String content) {
+			this.content = content;
+		}
+	}
+
+	public static class MockRegisteredObject {
+		public void service(RegisteredObject object, ServerHttpConnection connection) throws Exception {
+			connection.getResponse().getEntityWriter().write("Value=" + object.content);
+		}
+	}
+
+	/**
 	 * Ensure can send object.
 	 */
 	public void testResponseObject() throws Exception {
@@ -631,8 +664,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request
-		MockHttpResponse response = this.server.send(this.mockRequest("/path/value"));
-		response.assertResponse(200, "{value=\"OBJECT value\"}", "content-type", "application/json");
+		MockHttpResponse response = this.server
+				.send(this.mockRequest("/path/value").header("accept", "application/mock"));
+		response.assertResponse(200, "{value=\"OBJECT value\"}", "content-type", "application/mock");
 	}
 
 	public static class MockObjectSection {
@@ -645,7 +679,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public String getContentType() {
-			return "application/json";
+			return "application/mock";
 		}
 
 		@Override
@@ -665,7 +699,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public String getContentType() {
-			return "application/json";
+			return "application/mock";
 		}
 
 		@Override
@@ -715,13 +749,70 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request
-		MockHttpResponse response = this.server.send(this.mockRequest("/path"));
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").header("accept", "application/mock"));
 		response.assertResponse(500, "{error: \"TEST ESCALATION\"}", "content-type", "application/mock");
 	}
 
 	public static class MockEscalate {
 		public void service() throws Exception {
 			throw new Exception("TEST ESCALATION");
+		}
+	}
+
+	/**
+	 * Ensure can register {@link HttpObjectResponderFactory} instances as services.
+	 */
+	public void testRegisterObjectResponderService() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "/path", MockRegisterObjectResponderService.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send request
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").header("accept", "registered/response"));
+		response.assertResponse(200, "{ registered: REGISTERED }", "content-type", "registered/response");
+	}
+
+	public static class MockRegisterObjectResponderService {
+		public void service(ObjectResponse<RegisteredResponse> response) {
+			response.send(new RegisteredResponse("REGISTERED"));
+		}
+	}
+
+	public static class RegisteredResponse {
+		private String content;
+
+		public RegisteredResponse(String content) {
+			this.content = content;
+		}
+
+		public String getContent() {
+			return this.content;
+		}
+	}
+
+	/**
+	 * Ensure can register {@link HttpObjectResponderFactory} for handling
+	 * exception.
+	 */
+	public void testRegisterEscalationResponderService() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "/path", MockRegisterEscalationResponderService.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send request
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").header("accept", "registered/response"));
+		response.assertResponse(500, "{ registeredError: REGISTERED }", "content-type", "registered/response");
+	}
+
+	public static class MockRegisterEscalationResponderService {
+		public void service() throws Exception {
+			throw new Exception("REGISTERED");
 		}
 	}
 

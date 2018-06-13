@@ -17,69 +17,56 @@
  */
 package net.officefloor.tutorial.javascriptapp;
 
-import java.io.BufferedReader;
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpClientRule;
+import net.officefloor.test.OfficeFloorRule;
 
 /**
  * Tests the JavaScript application.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaScriptAppTest extends TestCase {
+public class JavaScriptAppTest {
 
 	/**
-	 * Allow running as application to manually test the JavaScript.
+	 * Run application.
 	 */
 	public static void main(String[] arguments) throws Exception {
-		OfficeFloorMain.open();
-		System.out.println("Press [enter] to exit");
-		new BufferedReader(new InputStreamReader(System.in)).readLine();
-		OfficeFloorMain.close();
-	}
-
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
-
-	@Override
-	protected void setUp() throws Exception {
-		OfficeFloorMain.open();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			this.client.close();
-		} finally {
-			OfficeFloorMain.close();
-		}
+		OfficeFloorMain.main(arguments);
 	}
 
 	// START SNIPPET: tutorial
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule();
+
+	@Rule
+	public HttpClientRule client = new HttpClientRule();
+
+	@Test
 	public void testHttpParameters() throws IOException {
 		String response = this.doAjax("addition", "numberOne=2&numberTwo=1");
 		assertEquals("Incorrect response", "3", response);
 	}
 
+	@Test
 	public void testHttpJson() throws IOException {
 		String response = this.doAjax("subtraction", "{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
 		assertEquals("Incorrect response", "{\"result\":\"2\"}", response);
 	}
 
 	private String doAjax(String link, String payload) throws IOException {
-		HttpPost post = new HttpPost("http://localhost:7878/template-" + link + ".woof");
+		HttpPost post = new HttpPost("http://localhost:7878/template+" + link);
 		post.setEntity(new StringEntity(payload));
 		HttpResponse response = this.client.execute(post);
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
