@@ -78,6 +78,7 @@
 		<ant-jsch-version>1.8.4</ant-jsch-version>
 		<netty-version>4.1.14.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
+		<jackson-version>2.9.6</jackson-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -183,6 +184,11 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officejson_jackson</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Persistence -->
@@ -315,18 +321,10 @@
 				<artifactId>net.officefloor.eclipse.woof.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!--  
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.feature</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.woof.feature</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			-->
+			<!-- <dependency> <groupId>net.officefloor.eclipse</groupId> <artifactId>net.officefloor.feature</artifactId> 
+				<version>${project.version}</version> </dependency> <dependency> <groupId>net.officefloor.eclipse</groupId> 
+				<artifactId>net.officefloor.woof.feature</artifactId> <version>${project.version}</version> 
+				</dependency> -->
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
@@ -364,7 +362,7 @@
 				<artifactId>maven-plugin-api</artifactId>
 				<version>${maven-version}</version>
 			</dependency>
-				<dependency>
+			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
 				<version>${maven-plugin-version}</version>
@@ -463,7 +461,12 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.9.5</version>
+				<version>${jackson-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.module</groupId>
+				<artifactId>jackson-module-afterburner</artifactId>
+				<version>${jackson-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
