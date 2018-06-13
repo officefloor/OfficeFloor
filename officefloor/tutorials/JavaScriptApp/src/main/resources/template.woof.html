@@ -4,34 +4,37 @@
 <script type="text/javascript">
 	
 	function addition() {
-		var numberOne = document.getElementById("result").innerHTML;
-		var numberTwo = document.getElementById("value").value;
-		doAjax( { url: "#{addition}" 
+		var numberOne = document.getElementById("result").innerHTML
+		var numberTwo = document.getElementById("value").value
+		doAjax( { url: "#{addition}"
+				, contentType: "application/x-www-form-urlencoded"
 				, payload: "numberOne=" + numberOne + "&numberTwo=" + numberTwo
 				, handler: function(response) { document.getElementById("result").innerHTML = response; }
-				}); 
+				})
 	}
 
 	function subtraction() {
-		var numberOne = document.getElementById("result").innerHTML;
+		var numberOne = document.getElementById("result").innerHTML
 		var numberTwo = document.getElementById("value").value;
 		doAjax( { url: "#{subtraction}"
+				, contentType: "application/json"
 				, payload: JSON.stringify({numberOne: numberOne, numberTwo: numberTwo})
 				, handler: function(response) { 
-						document.getElementById("result").innerHTML = JSON.parse(response).result; 
+						document.getElementById("result").innerHTML = JSON.parse(response).result
 					}
-				});
+				})
 	}
 	
 	function doAjax( request ) {
 		var ajax = new XMLHttpRequest();
-		ajax.open("POST", request.url, false);
+		ajax.open("POST", request.url, false)
+		ajax.setRequestHeader("Content-type", request.contentType)
 		ajax.onreadystatechange = function() {
 			if (ajax.readyState == 4) {
-				request.handler.call( request, ajax.responseText );
+				request.handler.call( request, ajax.responseText )
 			}
 		}
-		ajax.send( request.payload );
+		ajax.send( request.payload )
 	}
 		
 </script>
