@@ -32,6 +32,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./RawHttpServer/index.html}Generating HTML}}              | Render generated HTML.                                     | @UnescapedHtml
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                             | \<!-- \{section\} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
@@ -48,7 +50,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit/System/Integration testing
+| {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

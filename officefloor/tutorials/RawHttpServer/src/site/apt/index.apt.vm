@@ -40,4 +40,4 @@ TemplateLogic Class
 
 Next
 
-  The {{{../SectionHttpServer/index.html}next tutorial}} looks at sectioning the template.
+  The {{{../JavaScriptApp/index.html}next tutorial}} looks at serving AJAX requests.

@@ -66,6 +66,7 @@ public class TemplateLogic {
 		private final String result;
 	}
 
+	@NotRenderTemplateAfter
 	public void subtraction(SubtractionRequest request, ObjectResponse<JsonResponse> response) throws IOException {
 
 		// Subtract the numbers

@@ -20,6 +20,7 @@
 		<module>ExceptionHttpServer</module>
 		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
+		<module>JavaScriptApp</module>
 		<module>NavigateHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
@@ -31,7 +32,6 @@
 		<module>TestHttpServer</module>
 <!--  
 		<module>TransactionHttpServer</module>
-		<module>JavaScriptApp</module> TODO make REST example
 -->
 	</modules>
 	<properties>
