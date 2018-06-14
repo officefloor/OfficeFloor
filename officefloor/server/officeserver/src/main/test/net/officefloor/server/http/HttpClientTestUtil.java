@@ -31,10 +31,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.cookie.RFC6265CookieSpecProvider;
+import org.apache.http.impl.cookie.RFC6265CookieSpecProvider.CompatibilityLevel;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
@@ -124,11 +128,18 @@ public class HttpClientTestUtil {
 
 		// Provide timeout of requests (1 sec or no timeout)
 		final int timeout = isTimeoutClient() ? 1000 : 0;
-		RequestConfig.Builder requestTimeout = RequestConfig.custom();
-		requestTimeout.setSocketTimeout(timeout);
-		requestTimeout.setConnectTimeout(timeout);
-		requestTimeout.setConnectionRequestTimeout(timeout);
-		builder.setDefaultRequestConfig(requestTimeout.build());
+		RequestConfig.Builder requestConfig = RequestConfig.custom();
+		requestConfig.setSocketTimeout(timeout);
+		requestConfig.setConnectTimeout(timeout);
+		requestConfig.setConnectionRequestTimeout(timeout);
+
+		// Provide cookie handling similar to browser
+		final String OVERRIDE_COOKIE_SPEC = "OverrideCookieSpec";
+		builder.setDefaultCookieSpecRegistry(RegistryBuilder.<CookieSpecProvider>create().register(OVERRIDE_COOKIE_SPEC,
+				new RFC6265CookieSpecProvider(CompatibilityLevel.IE_MEDIUM_SECURITY, null)).build());
+		requestConfig.setCookieSpec(OVERRIDE_COOKIE_SPEC);
+
+		builder.setDefaultRequestConfig(requestConfig.build());
 
 		// Configure to be secure client
 		if (isSecure) {

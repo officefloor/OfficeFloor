@@ -107,7 +107,7 @@ public class TemplateLogicTest {
 
 		// Ensure added the values
 		String entity = EntityUtils.toString(response.getEntity());
-		assertTrue("Should have added the values", entity.contains("= 3"));
+		assertTrue("Should have added the values: " + entity, entity.contains("= 3"));
 	}
 	// END SNIPPET: full-system
 
