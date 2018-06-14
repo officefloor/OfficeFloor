@@ -802,6 +802,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		// Load the HTTP template functions
 		Map<String, SectionFunction> contentFunctionsByName = new HashMap<>();
 		SectionFunction previousTemplateFunction = initialFunction;
+		boolean isPreviousSectionArrayIterator = false;
 		for (ParsedTemplateSection templateSection : template.getSections()) {
 
 			// Obtain the template function
@@ -814,10 +815,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			// Link the I/O escalation
 			designer.link(templateFunction.getFunctionEscalation(IOException.class.getName()), ioEscalation, false);
 
-			// Keep track of task for later flow linking
+			// Keep track of function for later flow linking
 			contentFunctionsByName.put(createFunctionKey(templateFunctionName), templateFunction);
 
-			// Obtain the possible bean task method for the section
+			// Obtain the possible bean function method for the section
 			String beanMethodName = "get" + templateFunctionName;
 			String beanFunctionKey = createFunctionKey(beanMethodName);
 			TemplateClassFunction beanFunction = this.sectionClassMethodFunctionsByName.get(beanFunctionKey);
@@ -827,7 +828,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				beanFunction = this.sectionClassMethodFunctionsByName.get(beanFunctionKey);
 			}
 
-			// Bean task to not render template on completion
+			// Bean function to not render template on completion
 			nonRenderTemplateTaskKeys.add(beanFunctionKey);
 
 			// Determine if template section requires a bean
@@ -835,8 +836,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			for (ParsedTemplateSectionContent content : templateSection.getContent()) {
 				if ((content instanceof PropertyParsedTemplateSectionContent)
 						|| (content instanceof BeanParsedTemplateSectionContent)) {
-					// Section contains property/bean reference, so requires
-					// bean
+					// Section contains property/bean tag, so requires bean
 					isRequireBean = true;
 				}
 			}
@@ -853,6 +853,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			}
 
 			// Validate and include the bean function
+			boolean isArray = false;
 			if (beanFunction != null) {
 
 				// Ensure bean task does not have a @Parameter
@@ -880,7 +881,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				} else {
 					// Determine bean type and whether an array
 					Class<?> beanType = returnType;
-					boolean isArray = returnType.isArray();
+					isArray = returnType.isArray();
 					if (isArray) {
 						beanType = returnType.getComponentType();
 					}
@@ -906,8 +907,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 						// Link iteration of array to rendering
 						designer.link(
-								arrayIteratorFunction
-										.getFunctionFlow(WebTemplateArrayIteratorManagedFunctionSource.FLOW_NAME),
+								arrayIteratorFunction.getFunctionFlow(
+										WebTemplateArrayIteratorManagedFunctionSource.RENDER_ELEMENT_FLOW_NAME),
 								templateFunction, false);
 
 						// Iterator is now controller for template
@@ -933,16 +934,43 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				// Link as next from previous function
 				if (beanFunction != null) {
 					// Link with bean function then template
-					designer.link(previousTemplateFunction, beanFunction.function);
+					if (isPreviousSectionArrayIterator) {
+						designer.link(
+								previousTemplateFunction.getFunctionFlow(
+										WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
+								beanFunction.function, false);
+					} else {
+						designer.link(previousTemplateFunction, beanFunction.function);
+					}
 					designer.link(beanFunction.function, templateFunction);
 				} else {
 					// No bean function so link to template
-					designer.link(previousTemplateFunction, templateFunction);
+					if (isPreviousSectionArrayIterator) {
+						designer.link(
+								previousTemplateFunction.getFunctionFlow(
+										WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
+								templateFunction, false);
+					} else {
+						designer.link(previousTemplateFunction, templateFunction);
+					}
 				}
 			}
 
 			// Template function is always previous function
 			previousTemplateFunction = templateFunction;
+			isPreviousSectionArrayIterator = isArray;
+		}
+
+		// Need to link array iterator to function (if last section)
+		if (isPreviousSectionArrayIterator) {
+			SectionFunction completeFunction = designer
+					.addSectionFunctionNamespace("", new WebTemplateArrayIteratorCompletionManagedObjectSource())
+					.addSectionFunction("_complete_array_iteration_",
+							WebTemplateArrayIteratorCompletionManagedObjectSource.FUNCTION_NAME);
+			designer.link(
+					previousTemplateFunction
+							.getFunctionFlow(WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
+					completeFunction, false);
 		}
 
 		// Link flows to template content functions
@@ -1348,8 +1376,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 	/**
 	 * {@link ManagedFunctionSource} for the HTTP template.
-	 * 
-	 * @author Daniel Sagenschneider
 	 */
 	public static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
 
@@ -1603,8 +1629,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Iterates over the array objects sending them to the {@link ParsedTemplate}
 	 * for rendering.
-	 * 
-	 * @author Daniel Sagenschneider
 	 */
 	static class WebTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
 
@@ -1619,9 +1643,14 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private static final String OBJECT_NAME = DependencyKeys.ARRAY.name();
 
 		/**
-		 * Name of the {@link FunctionFlow} for rendering.
+		 * Name of the {@link FunctionFlow} for rendering the element.
 		 */
-		private static final String FLOW_NAME = FlowKeys.RENDER_ELEMENT.name();
+		private static final String RENDER_ELEMENT_FLOW_NAME = FlowKeys.RENDER_ELEMENT.name();
+
+		/**
+		 * Name of the {@link FunctionFlow} for continuing rendering the template.
+		 */
+		public static final String CONTINUE_TEMPLATE_FLOW_NAME = FlowKeys.CONTINUE_TEMPLATE.name();
 
 		/**
 		 * Component type of the array.
@@ -1659,12 +1688,47 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			// Specify the function
 			ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> functionBuilder = namespaceTypeBuilder
 					.addManagedFunctionType(FUNCTION_NAME, function, DependencyKeys.class, FlowKeys.class);
+
+			// Depend on the array to iterate over
 			functionBuilder.addObject(arrayType).setKey(DependencyKeys.ARRAY);
-			ManagedFunctionFlowTypeBuilder<FlowKeys> flow = functionBuilder.addFlow();
-			flow.setKey(FlowKeys.RENDER_ELEMENT);
-			flow.setArgumentType(this.componentType);
+
+			// Flow for rendering the element of array
+			ManagedFunctionFlowTypeBuilder<FlowKeys> renderElementFlow = functionBuilder.addFlow();
+			renderElementFlow.setKey(FlowKeys.RENDER_ELEMENT);
+			renderElementFlow.setArgumentType(this.componentType);
+
+			// Flow for continuing the template
+			ManagedFunctionFlowTypeBuilder<FlowKeys> continueTemplateFlow = functionBuilder.addFlow();
+			continueTemplateFlow.setKey(FlowKeys.CONTINUE_TEMPLATE);
+		}
+	}
+
+	/**
+	 * Provides complete array iteration if last section.
+	 */
+	static class WebTemplateArrayIteratorCompletionManagedObjectSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * Name of the {@link ManagedFunction}.
+		 */
+		private static final String FUNCTION_NAME = "complete";
+
+		/**
+		 * ======================= ManagedFunctionSource =======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
 		}
 
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Provide completion function
+			functionNamespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, () -> (executeContext) -> null,
+					None.class, None.class);
+		}
 	}
 
 	/*

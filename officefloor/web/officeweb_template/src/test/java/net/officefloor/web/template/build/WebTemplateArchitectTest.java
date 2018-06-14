@@ -230,6 +230,53 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can render an array of sections.
+	 */
+	public void testRenderArrayOfSections() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate(false, "/path",
+								new StringReader("Template <!-- {section}-->${value} <!-- {end}-->end"))
+						.setLogicClass(ArraySectionLogic.class.getName()),
+				"Template 1 2 3 4 5 end");
+	}
+
+	public static class ArraySectionLogic {
+		private final String value;
+
+		public ArraySectionLogic() {
+			this(0);
+		}
+
+		public ArraySectionLogic(int value) {
+			this.value = String.valueOf(value);
+		}
+
+		public ArraySectionLogic[] getSection() {
+			ArraySectionLogic[] sections = new ArraySectionLogic[5];
+			for (int i = 0; i < sections.length; i++) {
+				sections[i] = new ArraySectionLogic(i + 1);
+			}
+			return sections;
+		}
+
+		public String getValue() {
+			return this.value;
+		}
+	}
+
+	/**
+	 * Ensure can render an array of sections last.
+	 */
+	public void testRenderArrayOfSectionsLast() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate(false, "/path", new StringReader("Template <!-- {section}-->${value} "))
+						.setLogicClass(ArraySectionLogic.class.getName()),
+				"Template 1 2 3 4 5 ");
+	}
+
+	/**
 	 * Ensure can render section with bean property.
 	 */
 	public void testTemplateSectionProperty() throws Exception {

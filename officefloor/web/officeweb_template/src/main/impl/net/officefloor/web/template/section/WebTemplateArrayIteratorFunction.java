@@ -41,7 +41,7 @@ public class WebTemplateArrayIteratorFunction extends
 	 * {@link WebTemplateArrayIteratorManagedFunctionSource} flow keys.
 	 */
 	public static enum FlowKeys {
-		RENDER_ELEMENT
+		RENDER_ELEMENT, CONTINUE_TEMPLATE
 	}
 
 	/*
@@ -62,7 +62,10 @@ public class WebTemplateArrayIteratorFunction extends
 			context.doFlow(FlowKeys.RENDER_ELEMENT, element, null);
 		}
 
-		// No argument for next task
+		// Continue the template
+		context.doFlow(FlowKeys.CONTINUE_TEMPLATE, null, null);
+
+		// No next function (as invoking flows)
 		return null;
 	}
 
