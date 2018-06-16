@@ -38,24 +38,14 @@
 	<custom>
 		<fluidoSkin>
 			<googleSearch />
-			<facebookLike />
-			<googlePlusOne />
 			<sourceLineNumbersEnabled>false</sourceLineNumbersEnabled>
 			<copyrightClass>pull-right</copyrightClass>
-			<gitHub>
-				<projectId>sagenschneider/OfficeFloor</projectId>
-				<ribbonOrientation>right</ribbonOrientation>
-				<ribbonColor>gray</ribbonColor>
-			</gitHub>
 		</fluidoSkin>
 	</custom>
 	<body>
 		<head><![CDATA[
 			<!-- shortcut icon -->
 			<link rel="shortcut icon" href="/favicon.ico" />
-			<!-- Facebook administration -->
-			<meta property="fb:admins" content="sagenschneider" />
-			<meta property="fb:app_id" content="336336786442645" />
 		]]></head>
 		<breadcrumbs>
 			<item name="OfficeFloor" href="http://officefloor.net/index.html" />

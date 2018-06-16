@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
@@ -68,7 +69,7 @@
 		<tycho-version>1.0.0</tycho-version>
 		<maven-version>3.3.9</maven-version>
 		<maven-plugin-version>3.5</maven-plugin-version>
-		<maven-project-info-reports-version>2.8</maven-project-info-reports-version>
+		<maven-project-info-reports-version>2.9</maven-project-info-reports-version>
 		<maven-changes-version>2.11</maven-changes-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<syncrpc-version>0.3</syncrpc-version>
@@ -79,6 +80,8 @@
 		<netty-version>4.1.14.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<jackson-version>2.9.6</jackson-version>
+		<!-- Disable index report generation for top level project (as in resources) -->
+		<mpir.skip>true</mpir.skip>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -110,18 +113,6 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officebuilding</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officebuilding</artifactId>
-				<classifier>release</classifier>
-				<type>zip</type>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Server -->
@@ -995,7 +986,23 @@
 							<target>
 								<replace file="${project.build.directory}/site/mission.html">
 									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
-									<replacevalue><![CDATA[<div class="acmdlitem" id="item2739013"><img src="http://dl.acm.org/images/oa.gif" width="25" height="25" border="0" alt="ACM DL Author-ize service" style="vertical-align:middle"/><a href="http://dl.acm.org/authorize?N05689" title="OfficeFloor: using office patterns to improve software design">OfficeFloor: using office patterns to improve software design</a><div style="margin-left:25px"><a href="http://dl.acm.org/author_page.cfm?id=98058630974" >Daniel Sagenschneider</a><br />EuroPLoP '13 Proceedings of the 18th European Conference on Pattern Languages of Program,&nbsp;2015</div></div>]]></replacevalue>
+									<replacevalue><![CDATA[
+<!-- ACM DL Article: OfficeFloor: using office patterns to improve software design-->
+<div class="acmdlitem" id="item2739013"><img src="//dl.acm.org/images/oa.gif" width="25" height="25" border="0" alt="ACM DL Author-ize service" style="vertical-align:middle"/><a href="http://dl.acm.org/authorize?N05689" title="OfficeFloor: using office patterns to improve software design">OfficeFloor: using office patterns to improve software design</a><div style="margin-left:25px"><a href="https://dl.acm.org/author_page.cfm?id=99658741095" >Daniel Sagenschneider</a><br />EuroPLoP '13 Proceedings of the 18th European Conference on Pattern Languages of Program, 2015</div></div>
+<!-- ACM DL Bibliometrics: OfficeFloor: using office patterns to improve software design-->
+<div class="acmdlstat" id ="stats2739013"><iframe src="http://dl.acm.org/authorizestats?N05689" width="100%" height="30" scrolling="no" frameborder="0">frames are not supported</iframe></div> 
+]]></replacevalue>
+								</replace>
+								<replace file="${project.build.directory}/site/mission.html">
+									<replacetoken><![CDATA[<p>REDIRECT FOR DOWNLOAD</p>]]></replacetoken>
+									<replacevalue><![CDATA[
+<script type="text/javascript">
+   // Ensure appropriate URL to download paper
+   if (window.location.href !== 'http://www.officefloor.net/mission.html') {
+       window.location.href = 'http://www.officefloor.net/mission.html'
+   }
+</script>
+]]></replacevalue>
 								</replace>
 							</target>
 						</configuration>
@@ -1110,81 +1117,80 @@
 					</execution>
 				</executions>
 			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
 			<plugin>
-				<!-- Generate the site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${maven-project-info-reports-version}</version>
+				<reportSets>
+					<reportSet>
+						<inherited>true</inherited>
+						<reports>
+							<report>index</report>
+							<report>issue-tracking</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Changes -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>${maven-changes-version}</version>
+				<reportSets>
+					<reportSet>
+						<inherited>false</inherited>
+						<reports>
+							<report>changes-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Report on broken links in site. -->
+				<!-- To obtain link check report for stage site: -->
+				<!-- 1) mvn clean install post-site -->
+				<!-- 2) mvn site:stage -->
+				<!-- 3) cp -R target/site/apidocs/ target/staging/apidocs/ -->
+				<!-- 4) mvn -N post-site -->
+				<!-- 5) report available at ${basedir}/target/site/linkcheck.html -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-linkcheck-plugin</artifactId>
+				<version>1.1</version>
+				<reportSets>
+					<reportSet>
+						<inherited>false</inherited>
+					</reportSet>
+				</reportSets>
 				<configuration>
-					<reportPlugins>
-						<plugin>
-							<!-- Generate Reports -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>${maven-project-info-reports-version}</version>
-							<reportSets>
-								<reportSet>
-									<reports>
-										<report>project-team</report>
-										<report>mailing-list</report>
-										<report>issue-tracking</report>
-										<report>scm</report>
-									</reports>
-								</reportSet>
-							</reportSets>
-						</plugin>
-						<plugin>
-							<!-- Changes -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-changes-plugin</artifactId>
-							<version>${maven-changes-version}</version>
-							<reportSets>
-								<reportSet>
-									<reports>
-										<report>changes-report</report>
-									</reports>
-								</reportSet>
-							</reportSets>
-						</plugin>
-						<plugin>
-							<!-- Report on broken links in site. -->
-							<!-- To obtain link check report for stage site: -->
-							<!-- 1) mvn clean install post-site -->
-							<!-- 2) mvn site:stage -->
-							<!-- 3) cp -R target/site/apidocs/ target/staging/apidocs/ -->
-							<!-- 4) mvn -N post-site -->
-							<!-- 5) report available at ${basedir}/target/site/linkcheck.html -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-linkcheck-plugin</artifactId>
-							<version>1.1</version>
-							<configuration>
-								<!-- Check staged content (jetty started for absolute HTTP paths) -->
-								<baseURL>http://localhost:9999</baseURL>
-								<timeout>10000</timeout>
-								<outputDirectory>${basedir}/target/staging/</outputDirectory>
-								<!-- Not generating as site is being generated/staged -->
-								<forceSite>false</forceSite>
-								<excludedPages>
-									<!-- Ignore checking javadoc -->
-									<excludedPage>apidocs/**</excludedPage>
-									<!-- Ignore source repositories -->
-									<excludedPage>**/source-repository.html</excludedPage>
-								</excludedPages>
-								<excludedLinks>
-									<!-- PDF not available in site:stage -->
-									<excludedLink>./OfficeFloor.pdf</excludedLink>
-									<!-- Common links not to check -->
-									<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
-									<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
-									<!-- Overview anchor for page -->
-									<excludedLink>#</excludedLink>
-								</excludedLinks>
-							</configuration>
-						</plugin>
-					</reportPlugins>
+					<!-- Check staged content (jetty started for absolute HTTP paths) -->
+					<baseURL>http://localhost:9999</baseURL>
+					<timeout>10000</timeout>
+					<outputDirectory>${basedir}/target/staging/</outputDirectory>
+					<!-- Not generating as site is being generated/staged -->
+					<forceSite>false</forceSite>
+					<excludedPages>
+						<!-- Ignore checking javadoc -->
+						<excludedPage>apidocs/**</excludedPage>
+						<!-- Ignore source repositories -->
+						<excludedPage>**/source-repository.html</excludedPage>
+					</excludedPages>
+					<excludedLinks>
+						<!-- PDF not available in site:stage -->
+						<excludedLink>./OfficeFloor.pdf</excludedLink>
+						<!-- Common links not to check -->
+						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
+						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
+						<!-- Overview anchor for page -->
+						<excludedLink>#</excludedLink>
+					</excludedLinks>
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</reporting>
 	<profiles>
 		<profile>
 			<!-- Profile with generic deploy functionality -->

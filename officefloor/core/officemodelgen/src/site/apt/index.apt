@@ -6,7 +6,7 @@
 
 Model Generator
 
-  This provides code generation to simplify creation of the configuration models by generating the model java classes from simplier XML configuration.
+  This provides code generation to simplify creation of the configuration models by generating the model java classes from simpler XML configuration.
   
   The configuration models are generated for ease of:
   
