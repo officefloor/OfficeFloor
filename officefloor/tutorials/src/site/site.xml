@@ -16,13 +16,14 @@
 			<item name="Secure Page" href="./SecurePageHttpServer/index.html" />
 			<item name="Secure Link" href="./SecureLinkHttpServer/index.html" />
 			<item name="Authentication" href="./AuthenticationHttpServer/index.html" />
-			<!-- <item name="AJAX / JSON" href="./JavaScriptApp/index.html" /> -->
+			<item name="AJAX / JSON" href="./JavaScriptApp/index.html" />
 			<item name="DI (POJO)" href="./DiPojoHttpServer/index.html" />
 			<item name="DI (Managed Object)" href="./DatabaseHttpServer/index.html" />
+			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
+			<item name="REST" href="./RestHttpServer/index.html" />
+			<item name="Test" href="./TestHttpServer/index.html" />
 			<!-- <item name="Governance" href="./TransactionHttpServer/index.html" 
 				/> -->
-			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
-			<item name="Test" href="./TestHttpServer/index.html" />
 		</menu>
 		<menu ref="parent" />
 	</body>

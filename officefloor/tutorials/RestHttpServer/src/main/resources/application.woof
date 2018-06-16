@@ -1,0 +1,36 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/vehicle/{id}" secure="false" x="9" y="99">
+      <section name="Logic" input="getVehicle"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/vehicle" method="POST" secure="false" x="10" y="32">
+      <section name="Logic" input="createVehicle"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Logic" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.resthttpserver.RestLogic" x="206" y="31">
+      <input name="createVehicle" parameter-type=""/>
+      <input name="getVehicle" parameter-type=""/>
+    </section>
+    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.resthttpserver.Setup" x="207" y="177">
+      <input name="setup" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+    <start x="53" y="194">
+      <section name="Setup" input="setup"/>
+    </start>
+  </starting>
+</woof>

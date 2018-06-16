@@ -128,5 +128,5 @@ Unit Test
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../RestHttpServer/index.html}next tutorial}} covers REST.
 

@@ -1,0 +1,86 @@
+                                               -----------------------
+                                                    REST Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<REST Tutorial>>
+
+  This tutorial demonstrates REST with WoOF.
+                                                                                                                          
+  The example used in this tutorial is two end points:
+  
+   * <<<POST /vehicle>>> <<<\{"vehicleType":"car","wheels":4\}>>> to create a vehicle entry  
+      
+   * <<<GET /vehicle/\{id\}>>> to obtain the vehicle entry by the vehicle's identifier
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/RestHttpServer/${projectVersion}/RestHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+WoOF configuration
+
+  To configure REST end-points with WoOF, use the following from the palette:
+  
+   * <<<HTTP Continuation>>> to provide GET end points
+   
+   * <<<HTTP Input>>> to provide other HTTP method end points
+   
+  The <<<HTTP Continuation>>> is separate, as HTTP redirects are <continuations> via GET methods.  Therefore, it is possible to connect to this to trigger a redirect to the respective URL.
+   
+  The configuration of the two end points are as follows:
+  
+[./images/RestHttpServer-configuration.png] RestHttpServer screen shot.
+
+  The implementation of the end-points is provided by connecting to other items.  In this case, a <<<Section>>> provides the implementation of the end points.
+  
+
+
+Object parsing / responding
+
+  Similar to {{{../JavaScriptApp/index.html}AJAX with templates tutorial}} object parsing and responding is via the <<<@HttpObject>>>.  The below is the object used in this tutorial:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/Vehicle.java|ignoreDownloadError=false}
+
+  For convenience, the <<<Entity>>> object is re-used for parsing out the <<<POST>>> pay load.
+  
+  The implementation of the <<<POST>>> handling is the following:  
+  
+%{snippet|id=post|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/RestLogic.java|ignoreDownloadError=false}
+
+  As the JSON data is loaded onto the object, it is passed to the <<<EntityManager>>> to store within the database.
+  
+  Should there be invalid data, a <<<HttpException>>> can be thrown to specify the response status code and entity pay load.  In this case, a custom status code is used.  Note that status code may be specified.
+
+
+
+Path parameters
+
+  Using <<<\{...\}>>> within the path specifies a path parameter.
+  
+  In the case of this tutorial, this is used to specify the vehicle identifier within the URL.  
+  
+  Note that multiple path parameters may be specified in the URL along with ability to specify them where ever appropriate in the URL.  The only requirement is that path parameters in the URL are separated by at least one character.  
+
+  The following demonstrates passing the path parameter value to the handling logic:
+  
+%{snippet|id=get|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/RestLogic.java|ignoreDownloadError=false}
+
+  The <<<@PathParameter>>> annotation on the parameter specifies the argument value to be the path parameter value.
+
+
+Testing
+
+  The following shows the ease of testing the REST end points:
+  
+%{snippet|id=calling|file=${basedir}/src/test/java/net/officefloor/tutorial/resthttpserver/RestHttpServerTest.java|ignoreDownloadError=false}
+
+  However, as the <<<Section>>> logic is a POJO (plain old java object), the logic can also be unit tested as follows:
+  
+%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/resthttpserver/RestHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.

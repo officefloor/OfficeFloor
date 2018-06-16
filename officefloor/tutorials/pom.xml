@@ -24,6 +24,7 @@
 		<module>NavigateHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
+		<module>RestHttpServer</module>
 		<module>SectionHttpServer</module>
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>
