@@ -1127,6 +1127,7 @@
 				<version>${maven-project-info-reports-version}</version>
 				<reportSets>
 					<reportSet>
+						<id>info</id>
 						<inherited>true</inherited>
 						<reports>
 							<report>index</report>
@@ -1135,20 +1136,26 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+<!--
 			<plugin>
-				<!-- Changes -->
-				<groupId>org.apache.maven.plugins</groupId>
+				<!- - Changes -->
+<!--				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
 				<version>${maven-changes-version}</version>
 				<reportSets>
 					<reportSet>
+						<id>changes</id>
 						<inherited>false</inherited>
 						<reports>
 							<report>changes-report</report>
 						</reports>
+						<configuration>
+							<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+						</configuration>
 					</reportSet>
 				</reportSets>
 			</plugin>
+-->
 			<plugin>
 				<!-- Report on broken links in site. -->
 				<!-- To obtain link check report for stage site: -->
@@ -1162,6 +1169,7 @@
 				<version>1.1</version>
 				<reportSets>
 					<reportSet>
+						<id>linkcheck</id>
 						<inherited>false</inherited>
 					</reportSet>
 				</reportSets>
