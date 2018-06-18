@@ -44,7 +44,14 @@ cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Jav
 # Work around for running in Jenkins
 cp "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/tfb" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/tfb"
 
+# Clear results directory (so can find the one results file)
+if [ -d "${DIR}FrameworkBenchmarks/FrameworkBenchmarks/results" ]; then
+	rm -rf "${DIR}FrameworkBenchmarks/FrameworkBenchmarks/results" 
+fi
 
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
 ./tfb --test h2o actix-raw rapidoid-http-fast vertx-postgres vertx-web-postgres
+
+# Make results file available (for emailing on build successful)
+cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/*/results.json" .
