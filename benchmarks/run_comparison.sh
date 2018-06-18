@@ -42,7 +42,7 @@ fi
 cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor"
 
 # Work around for running in Jenkins
-cp "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/tfb" "${DIR}/FrameworkBenchmarks/Frameworkbenchmarks/tfb"
+cp "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/tfb" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/tfb"
 
 
 # Run the comparison
