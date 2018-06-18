@@ -1,0 +1,46 @@
+                                         --------------------
+                                         AdministratorSource
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  AdministratorSource provides the Duties that can be weaved between Jobs to provide aspect style functionality within OfficeFloor.
+
+  The name Administrator comes from the idea that offices require administrators to ensure the efficient running of an office.  While other workers focus on the work of the office, administrators ensure these workers have the resources available to accomplish their tasks.  Without the administrators the workers would be required to do the administration taking them away from accomplishing their work.
+
+  The administration in an office is a very important aspect of the office procedures.  The workers in an office do not want to get too involved with the administration as it can slow them down in accomplishing their tasks.  Therefore, to allow the workers to focus on their tasks administration duties would be better served by allowing administrators to do these duties around the workers' tasks.
+
+  Doing administration duties around worker's tasks is similar in concept to weaving aspects into applications.  As the Job Based Architecture of OfficeFloor defines applications as lists of Jobs, Administration Duties can be weaved in between the execution of Jobs to provide administration of the application.
+
+  The Administrator's responsibility is to the resources (ManagedObjects) of the Office and not the Work carried out by the Office.  In other words, the worker is responsible for accomplishing their tasks while the administrator is responsible to ensure the worker has resources necessary to achieve these tasks (eg a computer, phone, email account, logins, conference rooms, meetings with necessary participants attending, and so forth).  This is similar to the role of aspects in applications that, for example, manage transactions over resources, ensure requests are authenticated, log states of objects, etc.  The role of the Administrator is to administer the objects of an application so they are ready for use in the Tasks to accomplish the Work of an Office.
+
+
+
+Using Administrators
+
+  Administrator Duties are applied after the functionality of an application is defined.  This means that developers need not get involed with Administrator Duties and they can be left until application assembly.  Therefore, it is by design that Administrators can only be added to the Office configuration and not Sections.
+
+
+
+Writing your own AdministratorSource implementation
+
+  Before writing your own implementation please have a quick check as there may be an implementation already existing that suits your requirements.
+
+  If however, you have found nothing that meets your requirements you can write your own implementation. The following table provides starting points for writing your own implementation.
+
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+|| Class                                                                           || Description                                       |
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/administration/source/AdministratorSource.html}net.officefloor.frame.spi.administration.source.AdministratorSource}}              | This is the interface that all AdministratorSource implementations must implement |
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/administration/source/impl/AbstractAdministratorSource.html}net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource}} | Provides abstract functionality to simplify implementing a AdministratorSource |
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/test/administrator/AdministratorLoaderUtil.html}net.officefloor.compile.test.administrator.AdministratorLoaderUtil}}               | Provides utility methods to test your AdministratorSource implementation |
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/AdministratorSourceService.html}net.officefloor.compile.AdministratorSourceService}}                               | Allows using the ServiceLoader functionality to provide additional meta-data about your AdministratorSource.  Providing this is optional. |
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/administrator/clazz/ClassAdministratorSource.html}net.officefloor.plugin.administrator.clazz.ClassAdministratorSource}}              | Provides the 'plumbing' to use POJOs as administrators.  You may want to consider using this rather than writing a full implementation. |
+*----------------------------------------------------------------------------------+----------------------------------------------------+
+
+  Also see the graphical editors for details on how you can also provide customised graphical configuration of your AdministratorSource.
+

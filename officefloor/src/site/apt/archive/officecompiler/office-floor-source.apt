@@ -1,0 +1,46 @@
+                                         --------------------
+                                          OfficeFloorSource
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  The OfficeFloorSource provides the deployment configurations of Offices within OfficeFloor.  The OfficeFloorSource has the following focuses:
+
+   * Specifying which Offices are to be deployed (to the OfficeFloor)
+
+   * Selecting the ManagedObjectSources required by the Offices to configure the environment in which the Offices are to be deployed
+
+   * Deciding on the TeamSources that enable tuning the Offices to the hardware they will be running on
+
+  Typically this is configured by the technical lead, architect or plant engineer.  Configuring the OfficeFloorSource requires an understanding of both the Offices being deployed and the hardware they will be running on.  For example, a four thread TeamSource is used for CPU intensive Tasks on a server that has two dual core CPUs (one thread for each of the four CPU instances).  On the other hand they may elect to only provide a TeamSource with three threads to allow a CPU to be free for other Tasks of the application.
+
+  Enabling the tuning to be done at deployment time means that code changes to tune the application are not required when the application is finally deployed to the hardware.  Having the hardware available to performance test and tune applications for production can sometimes be difficult, especially if:
+
+    * budgets are tight, or
+    
+    * systems take a while to develop and the hardware is only bought late in the software development lifecycle.
+
+   Furthermore, applications can be moved to different hardware long after the development team has stopped development of the applications.  
+
+   Applications need the ability to be tuned during deployment and OfficeFloor provides this ability via the OfficeFloorSource.
+
+
+
+Writing your own OfficeFloorSource implementation
+
+  Before writing your own implementation please have a quick check as there may be an implementation already existing that suits your requirements.  This is especially the case as along with your OfficeFloorSource implementation you will likely be asked to provide a graphical editor for you implementation.
+
+  If however, you have found nothing that meets your requirements you can write your own implementation. The following table provides starting points for writing your own implementation.
+
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+|| Class                                                                        || Description                                            |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}net.officefloor.compile.spi.officefloor.source.OfficeFloorSource}}              | This is the interface that all OfficeFloorSource implementations must implement |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/officefloor/source/impl/AbstractOfficeFloorSource.html}net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource}} | Provides abstract functionality to simplify implementing a OfficeFloorSource |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+| {{{/apidocs/net/officefloor/model/impl/officefloor/OfficeFloorModelOfficeFloorSource.html}net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource}}      | Implementation of the OfficeFloorSource. See the IDE for mote details |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+
+  Please note that in writing you own implementation you are expected to provide a graphical editor to configure your implementation.
+

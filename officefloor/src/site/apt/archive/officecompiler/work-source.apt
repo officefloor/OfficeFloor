@@ -1,0 +1,56 @@
+                                         --------------------
+                                              WorkSource
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  WorkSource provides the WorkFactory and TaskFactory that respectively provide the Work and Task objects containing the functionality to be executed.  Tasks are the Jobs containing application functionality that are executed by OfficeFrame.
+
+  The design of Work and Task is to support the idea that Work can be broken down into Tasks.  These Tasks can then be assigned to appropriate Teams to achieve completion of the Work.  As per the Job Based Architecture, Tasks will not be executed until its dependencies are ready for use.  This results in the ability to break Work down into managable Tasks that only get executed when the specific Task's dependencies are available for use, allowing Teams to get on with other Tasks in the mean time.
+
+
+Tasks are executed while Work maintains state
+  
+  Tasks are executed and Work maintains state.  On executing a Task, the Task is given reference to its Work.  This allows the Work to store state between the various executions of its Tasks.  Tasks upon completion lose their state.
+
+  To provide an example of the relationship between Work and Task take the implementation of ClassWorkSource.  ClassWorkSource provides the 'plumbing' to use POJOs.  It uses the following associations to achieve this:
+
+   * Work contains the object instance that maintains state (fields of the object).  The field values may be manipulated by invoking methods (Tasks) on the object.  The object itself however can not be executed.
+
+   * Task invoke a particular method of the object altering the object's state.  As per Java, the state of a method (its internal variables) are lost once the method returns.
+
+
+Using Work state is optional
+   
+  While Tasks are necessary to execute the functionality, using the Work state is optional.  The reason for this is that some Tasks may be stateless operations (take in the inputs and produce output without requiring to maintain state).  Furthermore, Tasks may work solely on ManagedObjects and not require Work state.
+
+  To illustrate this, take for example a Task to look up a description for a particular code.  The Task can use a <<<java.sql.Connection>>> provided as dependency to look up the description from a database table and pass the description on to the next Task.  The state is maintained in the database and need not be kept on the Work.  To improve efficiency the description may be cached.  In this case either the Work state or a cache ManagedObject dependency could be used to maintain state.
+
+Work state or dependency state (via ManagedObjectSource)
+
+  As highlighted above state may be maintained by the Work or a ManagedObject that the Task dependends upon.  The choice of which to use is best made by looking at the scope of the state.  If the state is to only be used by Tasks of the Work then it is best to use the Work state.  If however, the state may be used by Tasks of other Work use a ManagedObject.
+
+  To keep flexibility of code it is preferrable to use ManagedObjects over Work state.  Only use Work state if it simplifies your code or the state needs protecting from manipulation by other Work.
+
+Writing your own WorkSource implementation
+
+  Before writing your own implementation please have a quick check as there may be an implementation already existing that suits your requirements.
+
+  If however, you have found nothing that meets your requirements you can write your own implementation.  The following table provides starting points for writing your own implementation.
+
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+|| Class                                                          || Description                                                           |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}net.officefloor.compile.spi.work.source.WorkSource}}              |  This is the interface that all WorkSource implementations must implement. |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/work/source/impl/AbstractWorkSource.html}net.officefloor.compile.spi.work.source.impl.AbstractWorkSource}} | Provides abstract functionality to simplify implementing a WorkSource  |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/test/work/WorkLoaderUtil.html}net.officefloor.compile.test.work.WorkLoaderUtil}}                | Utility class to aid in testing your implemented WorkSource            |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/WorkSourceService.html}net.officefloor.compile.WorkSourceService}}                       | Allows using the ServiceLoader functionality to provide additional meta-data about your WorkSource.  Providing this is optional. |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/work/clazz/ClassWorkSource.html}net.officefloor.plugin.work.clazz.ClassWorkSource}}               | Provides the 'plumbing' to use POJOs for Work and Tasks.  You may want to consider using this rather than writing a full implementation. |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
+
+  Also see the graphical editors for details on how you can also provide customised graphical configuration of your WorkSource.
+

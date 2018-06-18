@@ -1127,7 +1127,6 @@
 				<version>${maven-project-info-reports-version}</version>
 				<reportSets>
 					<reportSet>
-						<id>info</id>
 						<inherited>true</inherited>
 						<reports>
 							<report>index</report>
