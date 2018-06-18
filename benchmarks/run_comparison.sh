@@ -2,6 +2,10 @@
 set -e
 set -x
 
+# Enable running docker in CI
+export COMPOSE_INTERACTIVE_NO_CLI=1
+
+
 # Obtain the script directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -36,6 +40,7 @@ if [ ! -d "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/Office
 	rm -rf "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor"
 fi
 cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor"
+
 
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
