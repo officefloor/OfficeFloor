@@ -6,9 +6,6 @@ set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
-# TODO REMOVE
-#if [ ! -f "${DIR}/run_comparison.sh" ]; then
-
 # Obtain latest OfficeFloor code
 if [ -d "${DIR}/OfficeFloorFrameworkBenchmarks" ]; then
 	rm -rf "${DIR}/OfficeFloorFrameworkBenchmarks"
@@ -17,7 +14,7 @@ if [ ! -d "${DIR}/OfficeFloorFrameworkBenchmarks" ]; then
 	mkdir "${DIR}/OfficeFloorFrameworkBenchmarks"
 fi
 cd "${DIR}/OfficeFloorFrameworkBenchmarks"
-git clone --depth 1 git@github.com:sagenschneider/FrameworkBenchmarks.git
+git clone --depth 1 https://github.com/sagenschneider/FrameworkBenchmarks.git
 
 # Obtain latest TechEmpower code
 if [ -d "${DIR}/TechEmpowerFrameworkBenchmarks" ]; then
@@ -27,9 +24,7 @@ if [ ! -d "${DIR}/TechEmpowerFrameworkBenchmarks" ]; then
 	mkdir "${DIR}/TechEmpowerFrameworkBenchmarks"
 fi
 cd "${DIR}/TechEmpowerFrameworkBenchmarks"
-git clone --depth 1 git@github.com:TechEmpower/FrameworkBenchmarks.git
-
-#fi
+git clone --depth 1 https://github.com/TechEmpower/FrameworkBenchmarks.git
 
 
 # Create run directory
