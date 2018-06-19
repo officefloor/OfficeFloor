@@ -4,9 +4,9 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Graphical Configuration>>
+Graphical Configuration
 
-  OfficeFloor uses {{{Graphical}Graphical Configuration}} to ease the complexities of software development and allow developers to focus on writing code rather than configuration.
+  OfficeFloor uses Graphical Configuration to ease the complexities of software development and allow developers to focus on writing code rather than configuration.
 
 
 
@@ -43,6 +43,10 @@ Background
 
    * fragile applications as small configuration changes can cause unexpected behaviour (typically because of lack of encapsulation in these large configuration files)
 
+  In other cases, the configuration is littered throughout the code with annotations.  The is no <real> starting point to understanding the application.  Furthermore, small snippets of code located anywhere in the application can change the <expected> behaviour of the application.  This also makes understanding and maintaining the application very difficult.
+  
+  In summary, managing the configuration is important and becomes increasingly harder as the application grows in size. 
+
 
 * Importance of configuration
 
@@ -63,15 +67,13 @@ Background
 
   Frameworks are pushing more and more detail into configuration with developers only providing snippets of code where necessary.  The code developed is typically becoming small encapsulated functions/components that are plugged together by frameworks.  The result is that these snippets of code become too fragmented to provide an overview of the application.  The overview of how the application operates is now contained in the configuration that joins these code snippets together.
 
-  The configuration becomes the information that must be understood to obtain an overview of how the application works.  In using frameworks developers will typically look for specific configuration files or sections of configuration files that contain core information on how the application is structured.
+  The configuration becomes the information that must be understood to obtain an overview of how the application works.  In using frameworks developers will typically look for specific configuration files or sections of configuration files that contain core information on how the application is structured.  There is always going to be the necessity for code to define the finer points of how an application functions. However, with more emphasis on configuring code together, the configuration becomes more important in understanding how the application operates.
 
-  There is always going to be the necessity for code to define the finer points of how an application functions. However, should configuration be represented in a similar fashion to code?  In other words, why does configuration require special syntax needing technical skills to understand it?
-
-  Having the configuration readable by non-technical individuals means that additional effort by developers to explain the application is minimised.  The non-technical individuals would be able to review the configuration and provide feedback as to whether it is meeting their requirements.  If the configuration could also be edited in this fashion the developer and non-technical individual (likely from the business providing the requirements) could work together.  They would use the configuration as a visual aid to enable clearer communication to build the application.
+  Having the configuration readable by non-technical individuals means that additional effort by developers to explain the application is minimised.  The non-technical individuals would be able to review the configuration and provide feedback as to whether it is meeting their requirements.  If the configuration could also be edited in this fashion the developer and non-technical individual (likely from the business providing the requirements) could work together in more agile fashion.  They would use the configuration as a visual aid to enable clearer communication to build the application.
 
 
 
-{Graphical} Configuration
+Graphical Configuration
 
   The issues highlighted in the background indicate that configuration should be:
 
@@ -83,7 +85,7 @@ Background
 
    * understood by non-technical individuals
 
-  Of these issues the one most emphasising the need for graphical configuration is the ability for non-technical individuals to understand the configuration.  Having the configuration graphical means that it will be much easier to understand than pages of text.  Development teams even use graphical representations (eg design/architecture diagrams) that illustrate the functionality of an application and enable clear discussion.  Furthermore, spotting errors in digrams is much easier than trying to spot errors in, for example, XML files.
+  Of these issues the one most emphasising the need for graphical configuration is the ability for non-technical individuals to understand the configuration.  Having the configuration graphical means that it will be much easier to understand than pages of text.  Development teams even use graphical representations (eg design/architecture diagrams) that illustrate the functionality of an application to enable clear discussion.  Furthermore, spotting errors in digrams is much easier than trying to spot errors in, for example, XML files.
 
   Graphical configuration also addresses the other issues above.  Developers intuitively get further with graphical editors than they would with text editors.  Graphical configuration would also require modularising and encapsulating the configuration so that these modules can be graphically connected together.
 
@@ -99,17 +101,17 @@ Background
 
    * What are these types?
 
-  OfficeFloor answers these questions by using a Job Based Architecture.  The Job Based Architecture defines an application as a listing of Jobs that are executed by Teams with each of these Jobs requiring object dependencies.  From this architecture, the model can be extracted and subsequently the types can be derived:
+  OfficeFloor answers these questions by using {{{./ioc.html}Inversion of Control}}.  This defines an application as a listing of functions that are executed by teams with each of these functions requiring object dependencies.  From this architecture, the model can be extracted and subsequently the types can be derived:
 
-   * Jobs which have inputs, outputs and object depenendencies (the information about the inputs, outputs and type of object dependencies required constitute the Job's type)
+   * Functions which have inputs, outputs and object depenendencies (the information about the inputs, outputs and type of object dependencies required constitute the Function's type)
 
-   * Teams that execute the Jobs (Teams can be implemented many ways but have a similar type - they are assigned Jobs to complete)
+   * Teams that execute the Function (Teams can be implemented many ways but have a similar type - they are assigned Functions to complete)
 
    * Object dependencies (the type of object defines its type)
 
-  This underlying model in the Job Based Architecture provides the information for typing and subsequently compiling.  As the parts of the model can be compiled into types, graphical editors can then represent each part based on their types.  These parts can then be connected together by the graphical editor.
+  This underlying model provides the information for typing and subsequently compiling.  As the parts of the model can be compiled into types, graphical editors can then represent each part based on their types.  These parts can then be connected together by the graphical editor.
 
-  OfficeCompiler introduces additional types (SectionSource, OfficeSource, OfficeFloorSource) that focus on organise configuration into managable fragments.  As these only expose the fragment's public information, this provides the modularising and encapsulation of configuration.  The actual content of the model compiled into the type is not required by the graphical editor as the graphical editor only requires the public interface of the type to connect it to other types.  Using only types in the graphical editors achieves the following:
+  OfficeCompiler introduces additional types (SectionSource, OfficeSource, OfficeFloorSource) that focus on organising configuration into manageable fragments.  As these only expose the fragment's public information, this provides the modularising and encapsulation of configuration.  The actual content of the model compiled into the type is not required by the graphical editor as the graphical editor only requires the public interface of the type to connect it to other types.  Using only types in the graphical editors achieves the following:
 
    * The underlying models for these types are free to be implemented as required (as long as they contain the necessary information to be compiled into a type).
 
@@ -119,5 +121,5 @@ Background
 
   The flexibility of the graphical editor only using types means that these graphical editors can even import non-graphical configuration (with the caveate that a Source is written to compile the configuration into a type).
 
-  OfficeFloor provides the Graphical Configuration of its Job Based Architecture to enable developers to be more productive.
+  OfficeFloor provides the Graphical Configuration of its {{{./ioc.html}}Inversion of Control}} to enable developers to be more productive.
 

@@ -1,0 +1,33 @@
+				       ------------------
+				       OfficeFloor Pricing
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  OfficeFloor is licensed AGPL and for a small price per domain also LGPL.
+
+  
+AGPL
+
+  OfficeFloor is open source and if you want to contribute to open source with your services, we believe you are already <paying> in improving overall software.  Therefore, you are free to use OfficeFloor with AGPL without cost.
+
+  
+LGPL    
+  
+  For those that don't want to release their source code, we respect that also.
+  
+  However, we expect that your primary reason for hiding your source code is generate money.  And well, we like money too...  helps us buy cups of coffee for the late nights toiling away on OfficeFloor.
+  
+  Therefore, LGPL is also available for the price of a cup of coffee per domain.  Our intentions are to promote open source, however until the world supply of caffine is free...  we ask this small fee for LGPL.
+  
+  The sign up web site is coming soon. In the meantime, if you wish to register your domain please:
+  
+   1. Create a ticket at {{{https://github.com/sagenschneider/OfficeFloor/issues}tickets}}
+   
+   2. Copy the domains you wish to registered into the description of the ticket
+   
+   3. Mark the ticket with the <<<domain>>> label
+   
+   4. Close the ticket (helps us avoid the noise with other support tickets)
+   
+  All domains registered like this, while the sign up system is still under construction, will have a free LGPL license for the year from the creation of the ticket.

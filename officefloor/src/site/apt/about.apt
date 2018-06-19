@@ -1,0 +1,35 @@
+				       ------------------
+				        About OfficeFloor
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  REDIRECT FOR DOWNLOAD
+  
+OfficeFloor
+  
+  OfficeFloor is named after the origin of the concepts that it is built upon.
+  
+  Most frameworks <invent> patterns to solve technical problems.  They then force them on modeling the <real world>.
+
+  OfficeFloor focuses on taking <real world> problems and modeling them technically.  Rather than <invent> patterns, the OfficeFloor team looked up from their desk and watched how people in an office solve communication, scale and various other problems.  For example, teams focus on functional areas and there is not <one> team that does everything.
+
+  These concepts have been published in the following paper:
+
+  {{{http://doi.acm.org/10.1145/2739011.2739013}http://doi.acm.org/10.1145/2739011.2739013}}
+
+  and has given rise to a more complete "inversion of control":
+  
+---
+        Inversion of Control = Dependency Injection + Continuation Injection + Thread Injection
+---
+
+  A summary of the paper is available {{{./ioc.html}here}}.
+  
+  To see how these concepts have made software development easier, please try out the {{./tutorials/index.html}tutorials}}.
+  
+  Note that the above might also be found in its shortened version:
+
+---
+        IoC = DI + CI + TI
+---

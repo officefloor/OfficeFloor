@@ -1,0 +1,120 @@
+                                       ------------------
+				         Architecture
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+OfficeFloor Architecture
+  
+  The OfficeFloor architecture is based on design patterns observed in an Office.  While OfficeFloor respects technical design patterns, OfficeFloor looks at the evolved <"real world"> patterns people intuitively understand for organising information and servicing requests.  This is reflected in the various <<<Sources>>> within OfficeFloor.
+  
+  The name OfficeFloor comes from this focus.
+
+[./images/Architecture.png] OfficeFloor Architecture
+
+  The architecture for OfficeFloor has three distinct layers.
+
+     [[1]] {{{Graphical Editors}Graphical Editors}} that populate the models configuring the <<<Sources>>>.
+
+     [[1]] {{OfficeCompiler}} which compiles the configured <<<Sources>>> into the OfficeFrame.
+
+     [[1]] {{OfficeFrame}} which is the runtime to execute the functionality of the <<<Sources>>>.
+
+     []
+
+
+
+{Graphical Editors}
+
+  The OfficeFloor graphical editors are plugins to the Eclipse IDE.  They utilise the OfficeCompiler to compile the Sources into 'types'.  These 'types' are then graphically configured together by the Eclipse Plug-ins to make up the OfficeFloor configuration.
+
+  
+
+{OfficeCompiler}
+
+  The OfficeCompiler loads the Sources into the OfficeFrame.  It takes care of validating 'type' compatibility between the Sources so that the constructed application is type safe.
+
+
+
+{OfficeFrame}
+
+  The OfficeFrame is the core of the {{{./ioc.html}Inversion of Control}} that gives OfficeFloor its flexibility and performance.  It simplifies the functionality of an application into functions where each type of function is executed by a particular Team.  These functions then can depend on other objects and functions for their execution.
+
+
+  
+{Sources}
+
+  Sources are the building blocks of OfficeFloor.  The term Source is used in two ways:
+  
+   * <source> of an item
+   
+   * <source> to be compiled
+   
+  The first meaning is to provide an object for use.  In this sense a Source is like a <<<javax.sql.DataSource>>> to a <<<java.sql.Connection>>>.
+  
+  The second meaning is to enable the Source to be compiled into a type.  The ability to provide a type allows both validation and configuration of the Sources into an application.
+  
+  There are different sources that provide distinct responsibilities to an application.  
+  
+  In building OfficeFloor web applications, WoOF (Web on OfficeFloor) provides many pre-built Sources that only require configuring.  Also the automagic dependency and thread injection used by WoOF and the WoOF specific graphical editors reduce the need to understand each Source in detail.
+  
+  The following table lists the Sources within OfficeFloor.
+
+*----------------------------------------------------------+-----------------------------------------------------------+
+|| Source                                                  || Description                                             
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/team/source/TeamSource.html}TeamSource}}  | Provides thread pools for execution of functions.  A thread pool is known as a Team within OfficeFloor. 
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/work/source/ManagedFunctionSource.html}ManagedFunctionSource}}  | Provides functions that contain application functionality.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}  | Provides objects that are made available to the functions.  The objects are such things as <<<java.sql.Connection>>>, <<<javax.jms.Message>>>, <<<java.nio.channels.SocketChannel>>> (objects you would dependency inject).  
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/autowire/spi/supplier/source/SupplierSource.html}SupplierSource}}  | Supplies multiple ManagedObjectSources for use.  This allows grouping Managed Objects together under under simpler configuration.  An example of use is integrating with Spring to supply a Managed Object for each Spring bean within a BeanFactory.  This typically allows integrating other <Dependency Injection Only> frameworks into OfficeFloor.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/governance/source/GovernanceSource.html}GovernanceSource}}  | Provides context for functions to be run within.  Typical use is specifying the transaction management over the functions.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/administration/source/AdministrationSource.html}AdministrationSource}}  | Provides functions which can be weaved between the application functions.  This allows for Aspect style functionality to handle such things as checking access permissions before executing a series of functions.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}}  | Configuration of how the Managed Function and Managed Objects are connected together.  Sections may also contain other sections to break down configuration into manageable encapsulated detail.  Typically this is represented graphically so that all stake holders can work together on these diagrams to ensure the requirements for the application are being met.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/office/source/OfficeSource.html}OfficeSource}}  | Configuration of an application.  An application is known as an Office within OfficeFloor.  An Office provides the details of how the Sections are connected together.  It also specifies the Governance and Administration of functions along with assigning Teams responsible to execute the respective functions.  The reason for Governance, Administration and Team assigning within the Office is to abstract this away from Sections so that the stake holders can focus on application functionality rather than being caught up with these aspects.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}OfficeFloorSource}}  | Configuration of deploying applications.  It is also where this project got its name.  An OfficeFloor may host many Offices where each Office is made up of many Sections.  The OfficeFloor allows tuning the Offices to the hardware/network it is running on by specifying the physical Teams and Managed Object Sources of the Offices.
+*----------------------------------------------------------+-----------------------------------------------------------+
+
+
+* Compiling the Sources
+
+  The main focus of the OfficeCompiler is to compile the Sources configured by the graphical editors into the OfficeFrame for execution.  Typically compilation follows these steps:
+
+   [[1]] OfficeCompiler is given the OfficeFloorSource and its configuration location
+
+   [[1]] Compiling the OfficeFloorSource identifies the necessary OfficeSources and their configuration locations
+
+   [[1]] Compiling the subsequent OfficeSources identifies the SectionSources and their configuration locations
+
+   [[1]] SectionSources may themselves contain other SectionSources creating a hierarchical organisation of the Sections within an Office (ie Sections containing Sub-Sections, containing Sub-Sub-Sections, and so forth).
+
+   [[1]] As each of these above Sources are compiled they may result in any of the following Sources to be loaded, validated and confirmed to be type safe in their connections to other Sources:
+
+      * ManagedObjectSource (available in each of OfficeFloorSource, OfficeSource and SectionSource)
+
+      * ManagedFunctionSource (available only within SectionSource)
+
+      * AdministrationSource (available only within OfficeSource)
+      
+      * GovernanceSource (available only within OfficeSource)
+
+      * TeamSource (available only within OfficeFloorSource)
+
+   [[1]] On compiling all Sources a meta-data model of the application has been created.  This model is then loaded into the OfficeFrame (via the OfficeFrame configuration API).  Typically this step is known as "building" the OfficeFloor.
+
+   [[1]] The result of compilation is an OfficeFloor object which may be started by calling its <<<openOfficeFloor>>> method (representing the idea of 'opening the offices for business')
+   
+* Compiling to types
+
+  To aid in rapid application development (RAD), graphical editors are available in the IDEs to reduce time spent configuring.  To allow the graphical editors to validate the connections between Sources, the graphical editors require the type information of the Sources.  OfficeCompiler provides this functionality so that the graphical editors can focus on graphical editing.
+  
+  See {{{./graphical-configuration.html}Graphical Configuration}} for further details.
+
+   
