@@ -53,5 +53,16 @@ fi
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
 ./tfb --test h2o actix-raw rapidoid-http-fast vertx-postgres vertx-web-postgres
 
-# Make results file available (for emailing on build successful)
-cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/*/results.json" .
+# Find the latest results directory
+RESULTS_DIR=''
+for CHECK_DIR in $(ls -t "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results"); do
+	if [  -z "${RESULTS_DIR}" ]; then
+		RESULTS_DIR="${CHECK_DIR}"
+	fi
+done
+
+# Copy the results to top level
+if [  -f "${DIR}/results.json" ]; then
+	rm "${DIR}/results.json"
+fi
+cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.json"
