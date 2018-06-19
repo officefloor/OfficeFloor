@@ -1127,38 +1127,26 @@
 				<version>${maven-project-info-reports-version}</version>
 				<reportSets>
 					<reportSet>
-						<inherited>true</inherited>
 						<reports>
 							<report>index</report>
-							<report>issue-tracking</report>
 						</reports>
+						<inherited>true</inherited>
 					</reportSet>
 				</reportSets>
 			</plugin>
-<!--
 			<plugin>
-				<!- - Changes -->
-<!--				<groupId>org.apache.maven.plugins</groupId>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
 				<version>${maven-changes-version}</version>
-				<reportSets>
-					<reportSet>
-						<id>changes</id>
-						<inherited>false</inherited>
-						<reports>
-							<report>changes-report</report>
-						</reports>
-						<configuration>
-							<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-						</configuration>
-					</reportSet>
-				</reportSets>
+				<inherited>false</inherited>
+				<configuration>
+					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+				</configuration>
 			</plugin>
--->
 			<plugin>
 				<!-- Report on broken links in site. -->
 				<!-- To obtain link check report for stage site: -->
-				<!-- 1) mvn clean install post-site -->
+				<!-- 1) mvn -DskipTests clean install post-site -->
 				<!-- 2) mvn site:stage -->
 				<!-- 3) cp -R target/site/apidocs/ target/staging/apidocs/ -->
 				<!-- 4) mvn -N post-site -->
@@ -1166,28 +1154,18 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-linkcheck-plugin</artifactId>
 				<version>1.1</version>
-				<reportSets>
-					<reportSet>
-						<id>linkcheck</id>
-						<inherited>false</inherited>
-					</reportSet>
-				</reportSets>
+				<inherited>false</inherited>
 				<configuration>
 					<!-- Check staged content (jetty started for absolute HTTP paths) -->
 					<baseURL>http://localhost:9999</baseURL>
 					<timeout>10000</timeout>
-					<outputDirectory>${basedir}/target/staging/</outputDirectory>
 					<!-- Not generating as site is being generated/staged -->
 					<forceSite>false</forceSite>
 					<excludedPages>
 						<!-- Ignore checking javadoc -->
 						<excludedPage>apidocs/**</excludedPage>
-						<!-- Ignore source repositories -->
-						<excludedPage>**/source-repository.html</excludedPage>
 					</excludedPages>
 					<excludedLinks>
-						<!-- PDF not available in site:stage -->
-						<excludedLink>./OfficeFloor.pdf</excludedLink>
 						<!-- Common links not to check -->
 						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
@@ -1238,11 +1216,6 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
-								<configuration>
-									<links>
-										<link>http://docs.oracle.com/javaee/6/api/</link>
-									</links>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>

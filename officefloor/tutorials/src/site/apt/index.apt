@@ -50,7 +50,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./RestHttpServer/index.html}Test}}                        | REST                                                       | REST , @PathParameter , HttpException
+| {{{./RestHttpServer/index.html}REST}}                        | REST                                                       | REST , @PathParameter , HttpException
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

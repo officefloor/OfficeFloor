@@ -3,10 +3,6 @@
 	<body>
 		<menu name="${project.name}">
 			<item name="Overview" href="./index.html" />
-			<item name="Job Based Architecture" href="./job-based-architecture.html" />
-		</menu>
-		<menu name="Technical">
-			<item name="Design" href="./architecture.html" />
 		</menu>
 		<menu ref="parent" />
 	</body>
