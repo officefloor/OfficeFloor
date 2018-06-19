@@ -91,6 +91,11 @@ header a.link-button {
 	height: 21em;
 }
 
+.graphical-configuration-image {
+	height: 21em;
+	padding: 2em 8em 2em 2em;
+}
+
 /*
  * ----------- FOOTER ----------------
  */

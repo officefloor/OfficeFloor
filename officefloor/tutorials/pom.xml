@@ -18,6 +18,7 @@
 		<module>DiPojoHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>GraphicalConfigurationExample</module>
 		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
 		<module>JavaScriptApp</module>
