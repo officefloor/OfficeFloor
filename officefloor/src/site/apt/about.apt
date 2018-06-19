@@ -24,7 +24,7 @@ OfficeFloor
         Inversion of Control = Dependency Injection + Continuation Injection + Thread Injection
 ---
 
-  A summary of the paper is available {{{./ioc.html}here}}.
+  A summary of the paper is available {{{./inversion-of-control.html}here}}.
   
   To see how these concepts have made software development easier, please try out the {{./tutorials/index.html}tutorials}}.
   

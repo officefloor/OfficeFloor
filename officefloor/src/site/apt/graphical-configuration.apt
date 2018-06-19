@@ -101,9 +101,9 @@ Graphical Configuration
 
    * What are these types?
 
-  OfficeFloor answers these questions by using {{{./ioc.html}Inversion of Control}}.  This defines an application as a listing of functions that are executed by teams with each of these functions requiring object dependencies.  From this architecture, the model can be extracted and subsequently the types can be derived:
+  OfficeFloor answers these questions by using {{{./inversion-of-control.html}Inversion of Control}}.  This defines an application as a listing of functions that are executed by teams with each of these functions requiring object dependencies.  From this architecture, the model can be extracted and subsequently the types can be derived:
 
-   * Functions which have inputs, outputs and object depenendencies (the information about the inputs, outputs and type of object dependencies required constitute the Function's type)
+   * Functions which have inputs, outputs and object dependencies (the information about the inputs, outputs and type of object dependencies required constitute the Function's type)
 
    * Teams that execute the Function (Teams can be implemented many ways but have a similar type - they are assigned Functions to complete)
 
@@ -121,5 +121,5 @@ Graphical Configuration
 
   The flexibility of the graphical editor only using types means that these graphical editors can even import non-graphical configuration (with the caveate that a Source is written to compile the configuration into a type).
 
-  OfficeFloor provides the Graphical Configuration of its {{{./ioc.html}}Inversion of Control}} to enable developers to be more productive.
+  OfficeFloor provides the Graphical Configuration of its {{{./inversion-of-control.html}}Inversion of Control}} to enable developers to be more productive.
 

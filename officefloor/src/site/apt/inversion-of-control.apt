@@ -1,0 +1,355 @@
+                                           ------------------------
+					                         Inversion of Control
+                                           ------------------------
+					                         Daniel Sagenschneider
+                                           ------------------------
+
+Inversion of Control
+
+  Inversion of Control focuses on defining the application as a list of functions where each function type is assigned to a Team to execute.  The architecture follows the natural blocks of code in structured programming and enhances this by allowing the various blocks of code (functions) to be executed by the most appropriate thread (team).
+
+
+
+* Real world design pattern
+
+  Looking around an office you can see this design pattern in use.  Within an office there are various teams responsible for different tasks (functions) - eg sales team for selling, accounts team for invoicing, IT team to support systems.  Each team is specifically set up to handle their assigned tasks.
+
+  The teams operate efficiently with each other to accomplish all the tasks.  For example:
+  
+   * the sales team can undertake all the customer tasks to ensure a good customer experience,
+   
+   * the accounting team is responsible for invoicing for the sales, 
+   
+   * the wharehouse teams ensure products are available,
+   
+   * delivery teams ensure the products are delivered,
+   
+   * plus many more teams
+  
+  Both thread-per-request and non-blocking architectures do not model this simple structure:
+  
+   * Threaded architectures typically have a single thread pool where a thread is responsible for all tasks of servicing the request.  In other words, the same worker has to do both the sales, accounting, wharehouse, etc tasks
+   
+   * Non-blocking architectures do better model the tasks, however they typically execute all tasks with the same thread.  Therefore, one person is responsible for doing everything.  If one task ties up the person, the rest of the tasks suffer.
+  
+  In essence, having to have a sales person doing invoicing means they are tied up from attending to customers and customers not being attended to are lost sales.
+
+  <<<Inversion of Control>>> addresses this issue by:
+  
+    * <<Continutation Injection>> to break up the application into functions (tasks)
+    
+    * <<Thread Injection>> to execute the functions with the appropriate thread pool (team)
+    
+    * <<Dependency Injection>> to manage state (via objects)
+
+
+* Limitations of non-blocking (Asynchronous) architecture
+
+  Non-blocking architectures are scalable and highly performant.  Just look at the {{{http://techempower.com/benchmarks}top contenders}}.
+  
+  The trade-off for all this scalability and performance is ease of development.  Non-blocking architectures require callbacks (or higher order constructs such as Promises, async/await).  These are attempting to let developers use the following code pattern:
+  
++------------------------------------------------+
+    try {
+
+      // Step one of code
+
+      // Step two of code
+
+      // Step three of code
+
+    catch (Exception ex) {
+      // Code to handle exception
+    }
++------------------------------------------------+
+  
+  The issue with non-blocking architectures is that they do impede on simplicity of the code.  For example, Object Relational Mappers (ORMs) are much harder to implement with asynchronous coding.  The following shows the comparison of synchronous (threaded) and asynchronous (non-blocking) code:
+  
++------------------------------------------------+
+	
+	// Synchronous ease of ORMs
+	invoice.getCustomer().getBillingAddress().getStreet()
+	invoice.getCustomer().getBillingAddress().getPostCode()
+		
+	// Asynchronous (callback) for ORMs
+	invoice.getCustomer((customer, error) -> {
+		customer.getBillingAddress((address, error) -> {
+			address.getStreet((street, error) -> {
+				address.getPostCode((postCode, error) -> {
+					// finally got street and post code, now to do logic (assuming no error)
+				})
+			})
+		})
+	})
+	
+	// Asynchronous (async/await) for ORMs - little better but get an await wrong and difficult to debug
+	await (await (await invoice.getCustomer()).getBillingAddress).getStreet()
+	await (await (await invoice.getCustomer()).getBillingAddress).getPostCode()
+	
++------------------------------------------------+
+
+  The non-blocking (asynchronous) code is less readable.  Furthermore, following the code with debugger can have it jump around a lot making it difficult for the developer to follow.
+
+  As ORMs can significantly reduce the lines of code required by applications (sometimes upwards of removing 60%), loosing this capability increases costs of the application.
+  
+  So yes, your application will go faster, but it will be a lot harder to write and maintain.
+      
+  
+
+* Limitations of thread-per-request (Synchronous) architecture
+
+  To illustrate the limitations of the single servicing thread architecture, take for example the below sequential processing steps to service a web request:
+
++------------------------------------------------+
+    try {
+
+      // Code to parse the request
+
+      // Code to handle request via retrieving content from a database
+
+      // Code to generate response
+
+      // Code to send response
+
+    catch (Exception ex) {
+      // Code to handle exception
+    }
++------------------------------------------------+
+
+  Following the single service thread architecture (typical of the Thread per Request/Connection design pattern), each step would be executed sequentially by a single thread responsible for servicing the request.  This works well and is the basis for most application servers.  It however, has the limitation that it ties up a thread to service the request and can become problematic with blocking operations (such as database calls).
+
+  To illustrate the blocking operation issue with the single servicing thread architecture, let there for example be a large number of requests coming into the server (larger than the number of threads in the thread pool servicing requests).  In this situation, each thread is processing a single request and all remaining requests are queued waiting for a thread to become available.  Each queued request must wait until every request in front of it is passed to a thread before it can get serviced by a thread.  Should the queue of requests be significantly larger than the number of threads, the request may end up waiting for many requests in front of it to be completely serviced before it has even started to be processed.  The issue with the single servicing thread architecture is that it loses its efficiency as the thread spends the majority of its time servicing the request by idly waiting for the database blocking calls to return.  In other words, requests are waiting for idle workers to get the job done.
+
+  The queuing of requests in a single servicing thread architecture becomes even more of a problem when requests are not all alike.  Take for example the following processing steps for servicing requests for a website's static home page and static images:
+
++------------------------------------------------+
+    try {
+
+      // Code to parse the request
+
+      // Code to retrieve page/image from cache
+
+      // Code to send response
+
+    catch (Exception ex) {
+      // Code to handle exception
+    }
++------------------------------------------------+
+
+  The above code using a cached response will be significantly faster than the database network call response code.  In the above situation with a large number of requests coming into the server, these smaller cached requests must also wait for the larger database requests in front of it in the queue to be finished before it is serviced.  This becomes a significant problem if the time to process these requests becomes so time consuming that the user is not willing to wait for the home page and goes elsewhere (eg the problem of the sales person who is busy with other work and does not attend to the customer).
+
+  The problem of a single servicing thread is not just restricted to web servers.  Architectures using queuing, SOA, batching and so forth are all likely to have blocking calls that require increasing overall thread counts to cope with increasing capacity.
+
+
+
+* Inversion of Control
+
+  The Inversion of Control focuses on providing the following:
+  
+   * break the code into isolated blocks (functions managed by Continuation Injection)
+
+   * ability to select the thread responsible for executing each block of code (threads from various thread pools managed by Thread Injection)
+
+   * only the necessary dependencies are injected for each block of code (objects managed by Dependency Injection)
+
+  Along with the above there are two additional focuses that have been implied by using blocks of code:
+
+   * output of a block of code may be input to the next block of code
+
+   * not all blocks of code sequentially occur one after another.  <<<if>>> statements and <<<catch>>> blocks can cause different blocks of code to be executed
+   
+  This is represented as follows:
+  
+[images/InversionOfControl.png] Inversion of Control
+
+  
+
+** Example
+
+  To illustrate inversion of control, a simple method to get content will be used.
+  
+  The example <<<getContent>>> method will be broken down into the following blocks of code:
+
+   [[1]] Obtain content from cache
+
+   [[2]] Obtain content from database
+
+   [[3]] Store database content to cache
+
+   [[4]] Catch block to handle exceptions
+
+  The blocks of code will be joined together into the following flow:
+
+[images/InversionOfControlExample.png] Inversion of Control Example
+
+
+** Obtain content from cache
+
+  The following object handles obtaining content from cache.
+
+  The class's methods will be invoked by {{{/api/net/officefloor/plugin/managedfunction/clazz/ClassManagedFunctionSource.html}ClassManagedFunctionSource}} that uses reflection on POJOs to obtain the blocks of code to be executed.   The <<<[x]>>> on the left are markers for further explanation below.
+
++------------------------------------------------+
+        public class CacheFunctions {
+
+[1]         public String getContent(@Parameter String key, Cache cache, GetContentFlows flows) {
+	        String content = cache.getContent(key);
+	        if (content != null) {
+[2]                 return content; // content available from cache
+                }
+[3]	        flows.doGetNonCachedContent(key);
+	        return null;  // ignored as alternate flow will retrieve data
+	    }
+
+	    @FlowInterface
+[4]	    public static interface GetContentFlows {
+	        void doGetNonCachedContent(String key);
+	    }
+        }
++------------------------------------------------+
+
+  <<<[1]>>> Is the method signature identifying the necessary inputs to the <<<getContents>>> block of code.  It requires a <<<key>>> which is likely the output of the previous block of code, <<<Cache>>> which is dependency injected and <<<GetContentFlows>>> (see <<<[4]>>>).  Reflection is used to extract this information from the class so that the developer need only write POJOs.
+
+  <<<[2]>>> Returns the content as output for the next block of code to use.
+
+  <<<[3]>>> The content was not cached so an alternate block of code is invoked to obtain the content.  As the class name suggests this object is only responsible for cached content so should not dictate how non-cached content is retrieved.  It therefore, passes flow control onto an alternate block of code which becomes responsible for retrieving the content.  The return is <<<null>>> as the alternate block of code will handle returning the retrieved content.
+
+  <<<[4]>>> This POJO interface informs an alternate flow that may be invoked by <<<getContent>>>.  A <<<Proxy>>> object is generated for the interface that invokes the flow (provides typed methods wrapping the call to OfficeFrame's method <<<doFlow(int flowIndex, Object parameter)>>>).
+
+
+** Obtain content from database
+
+  The following object handles obtaining content from the database.  This class again uses the {{{/api/net/officefloor/plugin/managedfunction/clazz/ClassManagedFunctionSource.html}ClassManagedFunctionSource}} to enable use of POJOs.
+
++------------------------------------------------+
+    public class DatabaseFunctions {
+
+	public KeyedData getDatabaseContent(@Parameter String key, Connection connection) throws SQLException {
+	    PreparedStatement statement = connection.prepareStatement("SELECT CONTENT FROM CONTENT_TABLE WHERE KEY = ?");
+            statement.setString(1, key);
+	    ResultSet resultSet = statement.executeQuery();
+	    resultSet.next(); // for simplicity always assume data (may use alternate flow to handle case of no data)
+	    String content = resultSet.getString("CONTENT");
+	    statement.close();
+	    return new KeyedData(key, content);
+	}
+    }
++------------------------------------------------+
+
+  The <<<KeyedData>>> is an object to allow associating content with its key: 
+
++------------------------------------------------+
+    public class KeyedData {
+	public final String key;
+	public final String content;
+	public KeyedData(String key, String content) {
+	    this.key = key;
+	    this.content = content;
+	}
+    }
++------------------------------------------------+
+
+  The <<<DatabaseFunctions>>> class provides a simple database retrieval block of code to obtain content from table <<<CONTENT_TABLE>>> in the database.  The alternate flow (<<<doGetNonCachedContent>>>) triggers this method to be invoked.  The <<<key>>> was passed as the argument to the <<<doGetNonCacheContent>>> method, while the <<<Connection>>> is dependency injected.
+
+  Note that a proper implementation would include alternate flows to handle missing content in the database.  The <<<SQLException>>> however, should be thrown as is caught and delegated to another block of code to handle.
+
+
+** Store database content to cache
+
+  Once content is retrieved from the database it should be cached.  As caching is not the responsibility of the database code the method will be added to the <<<CacheFunctions>>> class.
+
++------------------------------------------------+
+    public class CacheFunctions {
+
+        // getContent code ommitted
+
+	public String cacheContent(@Parameter KeyedData data, Cache cache) {
+	    cache.storeContent(data.key, data.content);
+	    return data.content;
+	}
+    }
++------------------------------------------------+
+
+  <<<cacheContent>>> is invoked with the <<<KeyedData>>> returned from <<<getDatabaseContent>>>, while the <<<Cache>>> is dependency injected.  The method stores the content into the <<<Cache>>> and then returns the content so that the next block of code may be the same as the next block of code (Job) for the <<<getContent>>> method.  In other words, this results in the following <<<if>>> statement:
+
++------------------------------------------------+
+    get content from cache
+    if content not in cache
+        get from content from database
+	store content to cache
+    end if
+    use content
++------------------------------------------------+
+
+  The resulting <<<useContent>>> method then may have, for example, the following method signature:
+
++------------------------------------------------+
+    public void useContent(String content, Writer writer) throws IOException
++------------------------------------------------+
+
+  where the <<<useContent>>> will possibly write the content to a <<<Writer>>> that results in sending the content to the HTTP client.
+
+
+** Catch block to handle exceptions
+
+  The obtain content from database method throws an <<<SQLException>>> that must be handled.  As the handling of an exception (typically know as an Escalation within OfficeFloor) may require:
+  
+   * a different thread, 
+   
+   * different dependencies, and
+   
+   *  its own alternate flows
+   
+  the handling code itself becomes another block of code (a catch block of code).
+
+  An example catch block of code may be as follows:
+
++------------------------------------------------+
+    public void handleException(@Parameter SQLException escalation, Writer writer) throws IOException {
+        writer.write(escalation.getMessage());
+    }
++------------------------------------------------+
+
+  This simple example would write the message of the exception to a <<<Writer>>> which may send this back to the HTTP client.  Note that the <<<IOException>>> can also be handled by another catch block, much like adding a nested try block within a catch block.
+
+  More complex handing of exceptions (Escalations), could for example:
+
+   * Log failure
+
+   * Provide a more user friendly web page for the error
+
+   * Send alerts
+
+   * Redirect HTTP client to another web server as this web server is currently having connection issues with the database
+
+  As the catch block of code is a separate block of code, it provides the following advantages:
+
+   * Decisions about how to appropriately handle exception (Escalations) can be made later with possible input from project leads and the business.
+
+   * Decisions about how to handle exceptions can be changed without code changes.
+
+   * New types of exceptions occuring due to code changes do not need to be handled by calling code.  For example, if non-cached content was to be retrieved from a Web Service rather than a database the exception thrown could change from <<<java.sql.SQLException>>> to a <<<web.service.WebServiceException>>>).
+   
+   * It encourages developers to use informative method signatures in their code rather than being tempted to use non-checked exceptions.
+   
+   * Stops the typical catch and log exception handling that hides errors in log files.
+
+   * Exception handling code does not clutter the main flows.
+
+
+** Threading (Teams)
+
+  As each of the above methods is invoked reflectively by OfficeFloor, OfficeFloor is free to invoke each method with a different thread (Team).
+  
+  The exact configuration of which thread runs each method can be left until application assembly and deployment time.  This allows the application to be tuned to the hardware it is running on.
+
+
+
+Using Inversion of Control
+
+  Simplifying the application into blocks of code means that these blocks of code must be connected together to create the execution flows of an application.  Manually connecting them together by the developer, either through additional plumbing code or hand written configuration, is error prone and time consuming for the developer.  Therefore, even though inversion of control improves the efficiency of applications, it does require additional tools to aid in the efficiency of rapid application development.
+
+  {{{./graphical-configuration.html}Graphical configuration}} that connects the blocks of code together into an execution flow is necessary to improve efficiency of development.  As the blocks of code provide meta-data about their inputs and outputs, graphical editors are used to connect them together removing the need for developers to write out the configuration by hand.  As the execution flows in the application are represented graphically, it is also much easier for developers to review these to gain an understanding of the application.  The graphical representation even enables non-technical individuals to review aspects of the application.
+
+  OfficeFloor provides both the inversion of control (continuation injection, thread injection, dependency injection) and graphical editors.
+

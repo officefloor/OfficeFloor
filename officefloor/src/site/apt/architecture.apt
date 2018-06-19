@@ -38,7 +38,7 @@ OfficeFloor Architecture
 
 {OfficeFrame}
 
-  The OfficeFrame is the core of the {{{./ioc.html}Inversion of Control}} that gives OfficeFloor its flexibility and performance.  It simplifies the functionality of an application into functions where each type of function is executed by a particular Team.  These functions then can depend on other objects and functions for their execution.
+  The OfficeFrame is the core of the {{{./inversion-of-control.html}Inversion of Control}} that gives OfficeFloor its flexibility and performance.  It simplifies the functionality of an application into functions where each type of function is executed by a particular Team.  These functions then can depend on other objects and functions for their execution.
 
 
   
