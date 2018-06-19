@@ -82,6 +82,15 @@ header a.link-button {
 	font-weight: bold;
 }
 
+.info-text {
+	padding: 2em;
+}
+
+.inversion-of-control-image {
+	width: 21em;
+	height: 21em;
+}
+
 /*
  * ----------- FOOTER ----------------
  */
