@@ -969,8 +969,7 @@
 
 								<!-- Replace dependency versions in verifications file -->
 								<replace file="${project.build.directory}/verifier/verifications.xml"
-									replacefilterfile="${project.build.directory}/verifier/dependencies.properties"
-									overwrite="true" />
+									replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
 							</target>
 						</configuration>
 					</execution>
@@ -1004,7 +1003,7 @@
 ]]></replacevalue>
 								</replace>
 								<copy file="${basedir}/src/site/resources/index.html"
-									toFile="${project.build.directory}/site/index.html" />
+									toFile="${project.build.directory}/site/index.html" overwrite="true" />
 							</target>
 						</configuration>
 					</execution>
@@ -1137,10 +1136,15 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-changes-plugin</artifactId> 
-				<version>${maven-changes-version}</version> <inherited>false</inherited> 
-				<configuration> <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot> </configuration> 
-				</plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>${maven-changes-version}</version>
+				<inherited>false</inherited>
+				<configuration>
+					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+				</configuration>
+			</plugin>
 			<plugin>
 				<!-- Report on broken links in site. -->
 				<!-- To obtain link check report for stage site: -->
@@ -1167,7 +1171,9 @@
 					<excludedLinks>
 						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
-						<excludedLink>**//dl.acm.org/**</excludedLink>
+						<excludedLink>//dl.acm.org/**</excludedLink>
+						<excludedLink>http://dl.acm.org/**</excludedLink>
+						<excludedLink>https://dl.acm.org/**</excludedLink>
 						<excludedLink>#</excludedLink>
 					</excludedLinks>
 				</configuration>

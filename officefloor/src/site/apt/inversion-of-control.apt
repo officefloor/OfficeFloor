@@ -187,7 +187,7 @@ Inversion of Control
 
   The following object handles obtaining content from cache.
 
-  The class's methods will be invoked by {{{/api/net/officefloor/plugin/managedfunction/clazz/ClassManagedFunctionSource.html}ClassManagedFunctionSource}} that uses reflection on POJOs to obtain the blocks of code to be executed.   The <<<[x]>>> on the left are markers for further explanation below.
+  The class's methods will be invoked by {{{/apidocs/net/officefloor/plugin/managedfunction/clazz/ClassManagedFunctionSource.html}ClassManagedFunctionSource}} that uses reflection on POJOs to obtain the blocks of code to be executed.   The <<<[x]>>> on the left are markers for further explanation below.
 
 +------------------------------------------------+
         public class CacheFunctions {
@@ -219,7 +219,7 @@ Inversion of Control
 
 ** Obtain content from database
 
-  The following object handles obtaining content from the database.  This class again uses the {{{/api/net/officefloor/plugin/managedfunction/clazz/ClassManagedFunctionSource.html}ClassManagedFunctionSource}} to enable use of POJOs.
+  The following object handles obtaining content from the database.  This class again uses the {{{/apidocs/net/officefloor/plugin/managedfunction/clazz/ClassManagedFunctionSource.html}ClassManagedFunctionSource}} to enable use of POJOs.
 
 +------------------------------------------------+
     public class DatabaseFunctions {

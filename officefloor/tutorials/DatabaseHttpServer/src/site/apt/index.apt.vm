@@ -6,7 +6,7 @@
 
   <<Dependency Injection of Managed Object Tutorial>>
 
-  This tutorial demonstrates the dependency injection of a <<<Connection>>>.   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/source/ManagedObjectSource.html}ManagedObjectSource}} implementation (i.e. {{{/apidocs/net/officefloor/jdbc/ConnectionManagedObjectSource.html}ConnectionManagedObjectSource}}).
+  This tutorial demonstrates the dependency injection of a <<<Connection>>>.   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation (i.e. {{{/apidocs/net/officefloor/jdbc/ConnectionManagedObjectSource.html}ConnectionManagedObjectSource}}).
 
   A {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} enables injection of customised objects.  The customised objects have greater access to OfficeFloor/WoOF functionality than plain old java objects (POJOs).  OfficeFloor/WoOF, however, supports both as POJOs are simpler to implement.
   
