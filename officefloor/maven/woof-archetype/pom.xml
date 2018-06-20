@@ -99,63 +99,15 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<!-- Generate raw Maven plug-in documentation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Generate the site documentation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<configuration>
-					<reportPlugins>
-						<plugin>
-							<!-- Generate Reports -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>${maven-project-info-reports-version}</version>
-							<reportSets>
-								<reportSet>
-									<reports>
-										<report>project-team</report>
-										<report>mailing-list</report>
-										<report>issue-tracking</report>
-										<report>scm</report>
-									</reports>
-								</reportSet>
-							</reportSets>
-						</plugin>
-						<plugin>
-							<!-- Changes -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-changes-plugin</artifactId>
-							<version>${maven-changes-version}</version>
-							<reportSets>
-								<reportSet>
-									<reports>
-										<report>changes-report</report>
-									</reports>
-								</reportSet>
-							</reportSets>
-						</plugin>
-						<plugin>
-							<!-- Generate Maven plug-in documentation -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-plugin-plugin</artifactId>
-							<version>${maven-major-version}</version>
-						</plugin>
-					</reportPlugins>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<!-- Generate Maven plug-in documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

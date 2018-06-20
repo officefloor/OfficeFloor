@@ -6,9 +6,9 @@
 
   <<Dependency Injection of Managed Object Tutorial>>
 
-  This tutorial demonstrates the dependency injection of a <<<Connection>>>.   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation (i.e. {{{/apidocs/net/officefloor/jdbc/ConnectionManagedObjectSource.html}ConnectionManagedObjectSource}}).
+  This tutorial demonstrates the dependency injection of a <<<Connection>>>.   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/source/ManagedObjectSource.html}ManagedObjectSource}} implementation (i.e. {{{/apidocs/net/officefloor/jdbc/ConnectionManagedObjectSource.html}ConnectionManagedObjectSource}}).
 
-  A {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} enables injection of customised objects.  The customised objects have greater access to OfficeFloor/WoOF functionality than plain old java objects (POJOs).  OfficeFloor/WoOF, however, supports both as POJOs are simpler to implement.
+  A {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} enables injection of customised objects.  The customised objects have greater access to OfficeFloor/WoOF functionality than plain old java objects (POJOs).  OfficeFloor/WoOF, however, supports both as POJOs are simpler to implement.
   
   The example used in this tutorial is the following simple application to manage rows within a database table.
   
@@ -22,21 +22,21 @@ Configuring Objects
 
   Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  
   
-  Providing this file is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/autowire/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The file is however supported to extend WoOF web applications with additional custom dependencies.
+  Providing this file is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The file is however supported to extend WoOF web applications with additional custom dependencies.
   
   The configuration of the dependency injected <<<Connection>>> is as follows.
 
 %{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
 
-  The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation.  The <<<type>>> attribute is necessary as OfficeFloor will dependency inject by matching on type.
+  The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation.  The <<<type>>> attribute is necessary as OfficeFloor will dependency inject by matching on type.
   
-  Properties to configure the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can be provided in the above file or within a properties file.  The reason for using a property file is that different property files can be used for each environment.  See the System property on the {{{/apidocs/net/officefloor/autowire/impl/AutoWirePropertiesImpl.html}AutoWirePropertiesImpl}} to specify an environment directory location to find the property files.
+  Properties to configure the {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can be provided in the above file or within a properties file.  The reason for using a property file is that different property files can be used for each environment.
   
   The contents of <<<Connection>>> property file is as follows.
 
 %{snippet|file=${basedir}/src/main/resources/datasource.properties|ignoreDownloadError=false}
 
-  Objects to be dependency injected within OfficeFloor are made available by {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations.  Many dependency injection frameworks are based solely on the object's <<<Class>>> and its necessary dependency injection configuration.  OfficeFloor goes beyond this by providing more capabilities to the object such as invoking {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectExecuteContext.html}processes}}.  For example the socket listener within a stand-alone WoOF HTTP Server is actually a {{{/apidocs/net/officefloor/plugin/socket/server/http/source/HttpServerSocketManagedObjectSource.html}HttpServerSocketManagedObjectSource}} that invokes an OfficeFloor lightweight process to service the HTTP request.
+  Objects to be dependency injected within OfficeFloor are made available by {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations.  Many dependency injection frameworks are based solely on the object's <<<Class>>> and its necessary dependency injection configuration.  OfficeFloor goes beyond this by providing more capabilities to the object such as invoking {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectExecuteContext.html}processes}}.  For example the socket listener within a stand-alone WoOF HTTP Server is actually a {{{/apidocs/net/officefloor/server/http/HttpServerSocketManagedObjectSource.html}HttpServerSocketManagedObjectSource}} that invokes an OfficeFloor lightweight process to service the HTTP request.
   
   The {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}} is available to provide the typical POJO dependency injection.
 

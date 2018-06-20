@@ -64,7 +64,7 @@ Exception handling configuration
    
    * parameter to a <<<@FlowInterface>>> method
    
-  This functionality is useful and provided by the underlying OfficeFloor framework.  However, within WoOF the necessity to pass parameters is used typically only for exception handling.  The use of dependency injected objects is typically a better way to pass state between methods (i.e. {{{/apidocs/net/officefloor/plugin/web/http/application/HttpRequestStateful.html}HttpRequestStateful}}).
+  This functionality is useful and provided by the underlying OfficeFloor framework.  However, within WoOF the necessity to pass parameters is used typically only for exception handling.  The use of dependency injected objects is typically a better way to pass state between methods (i.e. {{{/apidocs/net/officefloor/web/HttpRequestStateful.html}HttpRequestStateful}}).
 
 
 

@@ -57,7 +57,7 @@ AJAX with JSON
 
 %{snippet|id=HttpJson|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java|ignoreDownloadError=false}
 
-  The underlying implementation of JSON to Java Object mapping is via {{{http://wiki.fasterxml.com/JacksonHome}Jackson}}.  Please see their documentation regarding additional annotations available to Java Objects to fine tune mapping of JSON to/from Java Objects.
+  The underlying implementation of JSON to Java Object mapping is via {{{http://github.com/FasterXML/jackson}Jackson}}.  Please see their documentation regarding additional annotations available to Java Objects to fine tune mapping of JSON to/from Java Objects.
 
 
 

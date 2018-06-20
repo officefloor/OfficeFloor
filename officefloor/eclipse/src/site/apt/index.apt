@@ -22,13 +22,9 @@ Install OfficeFloor Eclipse Plug-in
 
 Using the OfficeFloor Eclipse Plug-in
 
-  OfficeFloor provides an Eclipse Plug-in to simplify developing applications by using {{{./graphical-configuration.html}Graphical Configuration}}.
+  OfficeFloor provides an Eclipse Plug-in to simplify developing applications by using Graphical Configuration.
   
   Please see the {{{../tutorials/index.html}tutorials}} for using the OfficeFloor Eclipse Plug-in. 
-  
-  The following is an example of the OfficeFloor Eclipse Plug-in's graphical configuration.
-
-[./images/eclipse-graphical-configuration.png] Example graphical configuration of OfficeFloor
 
   
 Why Eclipse?

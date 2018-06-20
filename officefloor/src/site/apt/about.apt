@@ -26,7 +26,7 @@ OfficeFloor
 
   A summary of the paper is available {{{./inversion-of-control.html}here}}.
   
-  To see how these concepts have made software development easier, please try out the {{./tutorials/index.html}tutorials}}.
+  To see how these concepts have made software development easier, please try out the {{{./tutorials/index.html}tutorials}}.
   
   Note that the above might also be found in its shortened version:
 

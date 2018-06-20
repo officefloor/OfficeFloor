@@ -30,7 +30,7 @@ Restricted access page
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java|ignoreDownloadError=false}
 
-  The dependency on {{{/apidocs/net/officefloorweb/spi/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/web/security/AuthenticationRequiredException.html}AuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
+  The dependency on {{{/apidocs/net/officefloor/web/spi/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/web/security/AuthenticationRequiredException.html}AuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
   
    [[1]] saving the current request in the HTTP session
    
