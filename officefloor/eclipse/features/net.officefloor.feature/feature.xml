@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="net.officefloor.feature"
-      label="OfficeFloor Feature"
       version="3.0.0"
+      label="OfficeFloor Feature"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -23,12 +23,8 @@
 
    <requires>
       <import plugin="org.eclipse.gef.mvc.fx.ui"/>
-      <import plugin="net.officefloor.core" version="3.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.fx.ui.workbench3"/>
-      <import plugin="net.officefloor.eclipse.common" version="3.0.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.osgi" version="3.0.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.editor" version="3.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
@@ -45,7 +41,6 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="com.google.guava"/>
       <import plugin="javax.inject"/>
-      <import plugin="net.officefloor.eclipse.configurer" version="3.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.forms"/>
       <import plugin="org.eclipse.e4.ui.css.swt.theme"/>
       <import plugin="org.slf4j.api"/>
@@ -59,50 +54,51 @@
 
    <plugin
          id="net.officefloor.core"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         />
 
    <plugin
          id="net.officefloor.eclipse.common"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="net.officefloor.eclipse.configurer"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="net.officefloor.eclipse.editor"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="net.officefloor.eclipse.ide"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="net.officefloor.eclipse.launch"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="net.officefloor.eclipse.osgi"
+         version="0.0.0"
          download-size="0"
          install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
 </feature>

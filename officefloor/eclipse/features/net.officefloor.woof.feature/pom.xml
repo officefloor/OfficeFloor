@@ -14,16 +14,4 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.feature</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.woof</artifactId>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
 </project>

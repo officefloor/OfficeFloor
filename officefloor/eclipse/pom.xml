@@ -32,14 +32,9 @@
 		<module>plugins/net.officefloor.woof</module>
 		<module>plugins/net.officefloor.eclipse.woof</module>
 		<module>plugins/net.officefloor.eclipse.woof.test</module>
-		<!-- <module>plugins/net.officefloor.core</module> <module>plugins/net.officefloor.ui</module> 
-			<module>plugins/net.officefloor.ui.tests</module> <module>features/net.officefloor.feature</module> -->
-		<!-- WoOF eclipse functionality -->
-		<!-- <module>plugins/net.officefloor.woof</module> <module>features/net.officefloor.woof.feature</module> -->
-		<!-- Extras eclipse functionality -->
-		<!-- <module>plugins/net.officefloor.extras</module> <module>features/net.officefloor.extras.feature</module> -->
-		<!-- Deploy to Update Site -->
-		<!-- <module>update.site</module> -->
+		<module>features/net.officefloor.feature</module>
+		<module>features/net.officefloor.woof.feature</module>
+		<module>update.site</module>
 	</modules>
 	<build>
 		<plugins>

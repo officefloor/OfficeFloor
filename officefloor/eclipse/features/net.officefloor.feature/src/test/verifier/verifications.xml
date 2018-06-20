@@ -13,11 +13,31 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.core"(\s+)version="@{net.officefloor.core_version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.core"(\s+)version="0.0.0"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.ui"(\s+)version="@{net.officefloor.ui_version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.eclipse.common"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.configurer"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.editor"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.ide"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.launch"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.osgi"(\s+)version="0.0.0"]]></contains>
 		</file>
 	</files>
 </verifications>

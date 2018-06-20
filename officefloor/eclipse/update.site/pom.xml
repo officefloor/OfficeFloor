@@ -33,11 +33,6 @@
 			<artifactId>net.officefloor.woof.feature</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.extras.feature</artifactId>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>

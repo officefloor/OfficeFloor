@@ -310,10 +310,21 @@
 				<artifactId>net.officefloor.eclipse.woof.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!-- <dependency> <groupId>net.officefloor.eclipse</groupId> <artifactId>net.officefloor.feature</artifactId> 
-				<version>${project.version}</version> </dependency> <dependency> <groupId>net.officefloor.eclipse</groupId> 
-				<artifactId>net.officefloor.woof.feature</artifactId> <version>${project.version}</version> 
-				</dependency> -->
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.feature</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.woof.feature</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>update.site</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>

@@ -13,11 +13,15 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[<import(\s+)feature="net.officefloor.feature"(\s+)version="@{net.officefloor.feature_version}"]]></contains>
+			<contains><![CDATA[<import(\s+)feature="net.officefloor.feature"(\s+)version="0.0.0"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.woof"(\s+)version="@{net.officefloor.woof_version}]]></contains>
+			<contains><![CDATA[id="net.officefloor.woof"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.woof"(\s+)version="0.0.0"]]></contains>
 		</file>
 	</files>
 </verifications>
