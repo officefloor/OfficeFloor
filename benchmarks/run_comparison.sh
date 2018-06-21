@@ -36,10 +36,10 @@ if [ ! -d "${DIR}/FrameworkBenchmarks" ]; then
 	mkdir "${DIR}/FrameworkBenchmarks"
 fi
 cp -Rf "${DIR}/TechEmpowerFrameworkBenchmarks/FrameworkBenchmarks" "${DIR}/FrameworkBenchmarks"
-if [ ! -d "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor" ]; then
-	rm -rf "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor"
+if [ ! -d "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor" ]; then
+	rm -rf "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor"
 fi
-cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/OfficeFloor"
+cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor"
 
 # Work around for running in Jenkins
 cp "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/tfb" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/tfb"
@@ -51,7 +51,7 @@ fi
 
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
-./tfb --test h2o actix-raw rapidoid-http-fast vertx-postgres vertx-web-postgres
+./tfb --test h2o actix-raw rapidoid-http-fast vertx-postgres vertx-web-postgres officefloor
 
 # Find the latest results directory
 RESULTS_DIR=''
