@@ -480,8 +480,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>3.5</version>
+				<artifactId>commons-text</artifactId>
+				<version>1.4</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->

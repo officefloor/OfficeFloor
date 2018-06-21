@@ -20,7 +20,7 @@ package net.officefloor.web.template.section;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -61,8 +61,8 @@ public class PropertyWebTemplateWriter implements WebTemplateWriter {
 	 * @param beanType
 	 *            Bean type for the property.
 	 * @throws Exception
-	 *             If {@link Method} to obtain the value to write is not
-	 *             available on the bean type.
+	 *             If {@link Method} to obtain the value to write is not available
+	 *             on the bean type.
 	 */
 	public PropertyWebTemplateWriter(PropertyParsedTemplateSectionContent content,
 			ValueRetriever<Object> valueRetriever, Class<?> beanType) throws Exception {

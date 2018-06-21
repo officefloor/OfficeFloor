@@ -427,6 +427,27 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure appropriately escapes values.
+	 */
+	public void testEscapedValues() throws Exception {
+		this.template("/path",
+				(context, templater) -> templater
+						.addTemplate(false, "/path", new StringReader("<html>${content}</html>"))
+						.setLogicClass(EscapedLogic.class.getName()),
+				"<html>&lt; &quot; ' &mdash; &gt;</html>");
+	}
+
+	public static class EscapedLogic {
+		public EscapedLogic getTemplate() {
+			return this;
+		}
+
+		public String getContent() {
+			return "< \" ' — >";
+		}
+	}
+
+	/**
 	 * Ensure render {@link NotEscaped}.
 	 */
 	public void testNotEscapedValue() throws Exception {
