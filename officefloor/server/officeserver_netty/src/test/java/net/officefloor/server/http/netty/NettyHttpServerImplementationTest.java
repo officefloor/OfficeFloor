@@ -51,6 +51,11 @@ public class NettyHttpServerImplementationTest
 	}
 
 	@Override
+	protected String getServerNameSuffix() {
+		return "Netty";
+	}
+
+	@Override
 	protected RawNettyHttpServer startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		RawNettyHttpServer server = new RawNettyHttpServer();
 		server.startHttpServer(serverLocation.getClusterHttpPort(), -1, null);

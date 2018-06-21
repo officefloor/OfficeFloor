@@ -51,6 +51,11 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	}
 
 	@Override
+	protected String getServerNameSuffix() {
+		return null;
+	}
+
+	@Override
 	protected SocketManager startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 
 		// Create the socket manager
@@ -103,7 +108,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		 */
 		public RawHttpServicerFactory(HttpServerLocation serverLocation,
 				StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, true);
+			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, null,
+					null, true);
 		}
 
 		/*

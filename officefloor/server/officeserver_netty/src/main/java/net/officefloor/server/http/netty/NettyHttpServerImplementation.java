@@ -35,12 +35,15 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
@@ -71,6 +74,16 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	private HttpServerImplementationContext context;
 
 	/**
+	 * <code>Server</code> {@link HttpHeaderValue}.
+	 */
+	private HttpHeaderValue serverName;
+
+	/**
+	 * {@link DateHttpHeaderClock}.
+	 */
+	private DateHttpHeaderClock dateHttpHeaderClock;
+
+	/**
 	 * Indicates whether to include the stack trace.
 	 */
 	private boolean isIncludeStackTrace;
@@ -95,6 +108,10 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
 		this.context = context;
+
+		// Obtain the headers
+		this.serverName = HttpServer.getServerHttpHeaderValue(context, "Netty");
+		this.dateHttpHeaderClock = context.getDateHttpHeaderClock();
 
 		// Determine if include stack trace
 		this.isIncludeStackTrace = context.isIncludeEscalationStackTrace();
@@ -283,7 +300,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
-				this.isIncludeStackTrace, responseWriter, bufferPool);
+				this.serverName, this.dateHttpHeaderClock, this.isIncludeStackTrace, responseWriter, bufferPool);
 
 		// Service the request
 		this.serviceInput.service(connection, connection.getServiceFlowCallback());

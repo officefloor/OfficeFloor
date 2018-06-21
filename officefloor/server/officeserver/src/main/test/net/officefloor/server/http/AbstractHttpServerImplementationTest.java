@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.http.Header;
@@ -152,6 +153,14 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 *         sent from the server.
 	 */
 	protected abstract HttpHeader[] getServerResponseHeaderValues();
+
+	/**
+	 * Obtains the <code>Server</code> {@link HttpHeaderValue} suffix.
+	 * 
+	 * @return <code>Server</code> {@link HttpHeaderValue} suffix. May be
+	 *         <code>null</code> if no suffix.
+	 */
+	protected abstract String getServerNameSuffix();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -488,6 +497,30 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Ensure send Server and Date {@link HttpHeader} values.
+	 * 
+	 * @throws Exception
+	 *             If test failure.
+	 */
+	public void testServerDateHeaders() throws Exception {
+		new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME, "OfficeFloorServer",
+				HttpServer.PROPERTY_HTTP_DATE_HEADER, "true").run(() -> {
+
+					// Obtain the server name
+					String serverNameSuffix = this.getServerNameSuffix();
+					String serverName = "OfficeFloorServer" + (serverNameSuffix == null ? "" : " " + serverNameSuffix);
+
+					// Should setup server with System properties
+					this.startHttpServer(BufferServicer.class);
+					this.doSingleRequest(false, (response) -> {
+						assertEquals("Incorrect Server HTTP header", serverName,
+								response.getFirstHeader("Server").getValue());
+						assertNotNull("Should have Date HTTP header", response.getFirstHeader("Date"));
+					});
+				});
+	}
+
+	/**
 	 * Ensure closes the {@link FileChannel} on write.
 	 * 
 	 * @throws Exception
@@ -600,10 +633,20 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Undertakes a single request.
 	 */
 	private void doSingleRequest(boolean isSecure) throws IOException {
+		this.doSingleRequest(isSecure, null);
+	}
+
+	/**
+	 * Undertakes a single request.
+	 */
+	private void doSingleRequest(boolean isSecure, Consumer<HttpResponse> validator) throws IOException {
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
 			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(isSecure, "/test")));
 			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
 			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.entityToString(response));
+			if (validator != null) {
+				validator.accept(response);
+			}
 		}
 	}
 

@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.server.http.impl.DateHttpHeaderClock;
 
 /**
  * Context for the {@link HttpServerImplementation}.
@@ -40,6 +41,27 @@ public interface HttpServerImplementationContext {
 	 * @return {@link HttpServerLocation}.
 	 */
 	HttpServerLocation getHttpServerLocation();
+
+	/**
+	 * <p>
+	 * Obtains the <code>Server</code> {@link HttpHeader} name.
+	 * <p>
+	 * {@link HttpServerImplementation} implementations may append to this name to
+	 * indicate their use.
+	 * 
+	 * @return <code>Server</code> {@link HttpHeader} name. May be <code>null</code>
+	 *         to not send {@link HttpHeader}.
+	 */
+	String getServerName();
+
+	/**
+	 * Obtains the {@link DateHttpHeaderClock} for the <code>Date</code>
+	 * {@link HttpHeader}.
+	 * 
+	 * @return {@link DateHttpHeaderClock}. May be <code>null</code> to not send
+	 *         {@link HttpHeader}.
+	 */
+	DateHttpHeaderClock getDateHttpHeaderClock();
 
 	/**
 	 * <p>

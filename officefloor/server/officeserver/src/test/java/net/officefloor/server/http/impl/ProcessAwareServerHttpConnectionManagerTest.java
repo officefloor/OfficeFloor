@@ -100,19 +100,35 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 			.createServerHttpConnection("TEST");
 
 	/**
-	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for
-	 * testing.
+	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for testing.
 	 * 
 	 * @param requestEntityContent
 	 *            Content for the {@link HttpRequest} entity.
 	 */
 	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
 			String requestEntityContent) {
+		return this.createServerHttpConnection(requestEntityContent, null, null);
+	}
+
+	/**
+	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for testing.
+	 * 
+	 * @param requestEntityContent
+	 *            Content for the {@link HttpRequest} entity.
+	 * @param serverName
+	 *            Name of the server. May be <code>null</code>.
+	 * @param dateHttpHeaderClock
+	 *            {@link DateHttpHeaderClock}. May be <code>null</code>.
+	 */
+	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
+			String requestEntityContent, String serverName, DateHttpHeaderClock dateHttpHeaderClock) {
+		HttpHeaderValue serverHttpHeaderValue = serverName == null ? null : new HttpHeaderValue(serverName);
 		ByteSequence requestEntity = new ByteArrayByteSequence(
 				requestEntityContent.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				this.serverLocation, true, () -> this.method, () -> this.requestUri, this.requestVersion,
-				this.requestHeaders, requestEntity, true, this, this.bufferPool);
+				this.requestHeaders, requestEntity, serverHttpHeaderValue, dateHttpHeaderClock, true, this,
+				this.bufferPool);
 		connection.setProcessAwareContext(new MockProcessAwareContext());
 		return connection;
 	}
@@ -206,6 +222,75 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
 		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer, charset);
 		assertEquals("Incorrect content", "TEST RESPONSE", content);
+	}
+
+	/**
+	 * Ensure can send Server name.
+	 */
+	public void testServerHttpHeader() throws Throwable {
+
+		// Create with server name
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("TEST",
+				"OfficeFloorServer", null);
+		connection.getServiceFlowCallback().run(null);
+
+		// Ensure server HTTP header
+		assertNotNull("Should have HTTP header", this.responseHeader);
+		assertEquals("Incorrect Server HTTP header", "server", this.responseHeader.getName());
+		assertEquals("Incorrect Server value", "OfficeFloorServer", this.responseHeader.getValue());
+		assertNull("Should just be Server header", this.responseHeader.next);
+	}
+
+	/**
+	 * Ensure can send Date.
+	 */
+	public void testDateHttpHeader() throws Throwable {
+
+		// Create with server name
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("TEST",
+				null, () -> new HttpHeaderValue("<date>"));
+		connection.getServiceFlowCallback().run(null);
+
+		// Ensure date HTTP header
+		assertNotNull("Should have HTTP header", this.responseHeader);
+		assertEquals("Incorrect Date HTTP header", "date", this.responseHeader.getName());
+		assertEquals("Incorrect Date value", "<date>", this.responseHeader.getValue());
+		assertNull("Should just be Date header", this.responseHeader.next);
+	}
+
+	/**
+	 * Ensure able to send Server, Date and Custom {@link HttpHeader} without issue.
+	 */
+	public void testServerDateCustomerHttpHeaders() throws Throwable {
+
+		// Create with server name
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("TEST",
+				"OfficeFloorServer", () -> new HttpHeaderValue("<date>"));
+		connection.getResponse().getHeaders().addHeader("Custom", "test");
+
+		// Send response
+		connection.getServiceFlowCallback().run(null);
+
+		// Ensure date HTTP header
+		assertNotNull("Should have HTTP header", this.responseHeader);
+
+		// Validate server
+		assertEquals("Incorrect Server HTTP header", "server", this.responseHeader.getName());
+		assertEquals("Incorrect Server value", "OfficeFloorServer", this.responseHeader.getValue());
+
+		// Validate date
+		this.responseHeader = this.responseHeader.next;
+		assertEquals("Incorrect Date HTTP header", "date", this.responseHeader.getName());
+		assertEquals("Incorrect Date value", "<date>", this.responseHeader.getValue());
+
+		// Validate custom
+		this.responseHeader = this.responseHeader.next;
+		assertEquals("Incorrect Custom HTTP header", "custom", this.responseHeader.getName());
+		assertEquals("Incorrect Custom value", "test", this.responseHeader.getValue());
+
+		// Ensure no further headers
+		this.responseHeader = this.responseHeader.next;
+		assertNull("Should be no further headers", this.responseHeader);
 	}
 
 	/**
@@ -466,8 +551,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	}
 
 	/**
-	 * Ensure {@link Escalation} overrides {@link CleanupEscalation} instances
-	 * in sending response.
+	 * Ensure {@link Escalation} overrides {@link CleanupEscalation} instances in
+	 * sending response.
 	 */
 	public void testEscalationOverridesCleanupEscalation() throws Throwable {
 
@@ -576,8 +661,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 * Asserts the content of the {@link HttpRequest}.
 	 * 
 	 * @param connection
-	 *            {@link ServerHttpConnection} containing the
-	 *            {@link HttpRequest}.
+	 *            {@link ServerHttpConnection} containing the {@link HttpRequest}.
 	 * @param requestMethod
 	 *            Expected {@link HttpRequest} {@link HttpMethod}.
 	 * @param requestUri
@@ -585,8 +669,8 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 * @param requestVersion
 	 *            Expected {@link HttpRequest} {@link HttpVersion}.
 	 * @param requestHeaderNameValuePairs
-	 *            Expected {@link HttpRequest} {@link HttpRequestHeaders}
-	 *            name/value pairs.
+	 *            Expected {@link HttpRequest} {@link HttpRequestHeaders} name/value
+	 *            pairs.
 	 * @param enityContent
 	 *            Expected {@link HttpRequest} entity content.
 	 * @param clientMethod
@@ -641,9 +725,9 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		}
 
 		/*
-		 * Validate the request cookies are always the client cookies. Main
-		 * reason is for security, in avoiding high jacking request with
-		 * serialised cookies and gaining access to session token.
+		 * Validate the request cookies are always the client cookies. Main reason is
+		 * for security, in avoiding high jacking request with serialised cookies and
+		 * gaining access to session token.
 		 */
 		assertEquals("Incorrect number of request cookeis", clientCookieNameValuePairs.length / 2,
 				request.getCookies().length());

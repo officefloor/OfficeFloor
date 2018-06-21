@@ -59,6 +59,7 @@ import net.officefloor.server.ServerSocketDecorator;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
+import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
@@ -498,6 +499,16 @@ public class HttpServerSocketManagedObjectSource
 	private HttpServerLocation serverLocation;
 
 	/**
+	 * <code>Server</code> {@link HttpHeaderValue}.
+	 */
+	private HttpHeaderValue serverName;
+
+	/**
+	 * {@link DateHttpHeaderClock}.
+	 */
+	private DateHttpHeaderClock dateHttpHeaderClock;
+
+	/**
 	 * Indicates whether to include the {@link Escalation} stack trace in the
 	 * {@link HttpResponse}.
 	 */
@@ -555,13 +566,19 @@ public class HttpServerSocketManagedObjectSource
 	 * 
 	 * @param serverLocation
 	 *            {@link HttpServerLocation}.
+	 * @param serverName
+	 *            <code>Server</code> {@link HttpHeaderValue}.
+	 * @param dateHttpHeaderClock
+	 *            {@link DateHttpHeaderClock}.
 	 * @param isIncludeEscalationStackTrace
 	 *            Indicates if include the {@link Escalation} stack trace on the
 	 *            {@link HttpResponse}.
 	 */
-	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation,
-			boolean isIncludeEscalationStackTrace) {
+	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, HttpHeaderValue serverName,
+			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
 		this.serverLocation = serverLocation;
+		this.serverName = serverName;
+		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.isSecure = false;
 		this.sslContext = null;
@@ -572,6 +589,10 @@ public class HttpServerSocketManagedObjectSource
 	 * 
 	 * @param serverLocation
 	 *            {@link HttpServerLocation}.
+	 * @param serverName
+	 *            <code>Server</code> {@link HttpHeaderValue}.
+	 * @param dateHttpHeaderClock
+	 *            {@link DateHttpHeaderClock}.
 	 * @param isIncludeEscalationStackTrace
 	 *            Indicates if include the {@link Escalation} stack trace on the
 	 *            {@link HttpResponse}.
@@ -579,9 +600,11 @@ public class HttpServerSocketManagedObjectSource
 	 *            {@link SSLContext}. May be <code>null</code> if behind reverse
 	 *            proxy handling secure communication.
 	 */
-	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, boolean isIncludeEscalationStackTrace,
-			SSLContext sslContext) {
+	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, HttpHeaderValue serverName,
+			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace, SSLContext sslContext) {
 		this.serverLocation = serverLocation;
+		this.serverName = serverName;
+		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.isSecure = true;
 		this.sslContext = sslContext;
@@ -678,8 +701,8 @@ public class HttpServerSocketManagedObjectSource
 				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
 				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool,
-				this.isIncludeEscalationStackTrace);
+				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool, this.serverName,
+				this.dateHttpHeaderClock, this.isIncludeEscalationStackTrace);
 
 		// Create the SSL servicer factory
 		SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -764,14 +787,20 @@ public class HttpServerSocketManagedObjectSource
 		 *            {@link HttpRequestParserMetaData}.
 		 * @param serviceBufferPool
 		 *            Service {@link StreamBufferPool}.
+		 * @param serverName
+		 *            <code>Server</code> {@link HttpHeaderValue}.
+		 * @param dateHttpHeaderClock
+		 *            {@link DateHttpHeaderClock}.
 		 * @param isIncludeEscalationStackTrace
 		 *            Indicates whether to include the {@link Escalation} stack trace in
 		 *            the {@link HttpResponse}.
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool, boolean isIncludeEscalationStackTrace) {
-			super(serverLocation, isSecure, metaData, serviceBufferPool, isIncludeEscalationStackTrace);
+				StreamBufferPool<ByteBuffer> serviceBufferPool, HttpHeaderValue serverName,
+				DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serviceBufferPool, serverName, dateHttpHeaderClock,
+					isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 

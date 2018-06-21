@@ -63,7 +63,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	 */
 	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 			new HttpServerLocationImpl(), false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null,
-			true, this, this.bufferPool);
+			null, null, true, this, this.bufferPool);
 
 	/**
 	 * {@link ProcessAwareHttpResponse} to test.
@@ -326,8 +326,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	}
 
 	/**
-	 * Ensure sends the {@link HttpResponse} on closing the
-	 * {@link ServerWriter}.
+	 * Ensure sends the {@link HttpResponse} on closing the {@link ServerWriter}.
 	 */
 	public void testSendOnCloseServerWriter() throws IOException {
 

@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.impl.DateHttpHeaderClock;
 
 /**
  * {@link OfficeFloor} {@link HttpServerImplementation}.
@@ -48,12 +49,19 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 		// Obtain the HTTP server location
 		HttpServerLocation serverLocation = context.getHttpServerLocation();
 
+		// Obtain Server HTTP header
+		HttpHeaderValue serverHttpHeaderValue = HttpServer.getServerHttpHeaderValue(context, null);
+
+		// Obtain the Date HTTP header
+		DateHttpHeaderClock dateHttpHeaderClock = context.getDateHttpHeaderClock();
+
 		// Obtain whether to include the escalation stack trace
 		boolean isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
 
 		// Configure the non-secure HTTP
 		OfficeFloorManagedObjectSource http = deployer.addManagedObjectSource("HTTP",
-				new HttpServerSocketManagedObjectSource(serverLocation, isIncludeEscalationStackTrace));
+				new HttpServerSocketManagedObjectSource(serverLocation, serverHttpHeaderValue, dateHttpHeaderClock,
+						isIncludeEscalationStackTrace));
 		deployer.link(http.getManagingOffice(), office);
 		deployer.link(
 				http.getOfficeFloorManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
@@ -64,8 +72,8 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 		int httpsPort = serverLocation.getClusterHttpsPort();
 		if (httpsPort > 0) {
 			OfficeFloorManagedObjectSource https = deployer.addManagedObjectSource("HTTPS",
-					new HttpServerSocketManagedObjectSource(serverLocation, isIncludeEscalationStackTrace,
-							context.getSslContext()));
+					new HttpServerSocketManagedObjectSource(serverLocation, serverHttpHeaderValue, dateHttpHeaderClock,
+							isIncludeEscalationStackTrace, context.getSslContext()));
 			deployer.link(https.getManagingOffice(), office);
 			deployer.link(https.getOfficeFloorManagedObjectFlow(
 					HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()), serviceInput);

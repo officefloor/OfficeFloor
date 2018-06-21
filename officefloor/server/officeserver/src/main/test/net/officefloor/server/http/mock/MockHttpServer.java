@@ -110,7 +110,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 *            {@link DeployedOfficeInput}.
 	 */
 	protected static void configureMockHttpServer(MockHttpServer httpServer, DeployedOfficeInput input) {
-		new HttpServer(httpServer, httpServer, true, null, input, null, null);
+		new HttpServer(httpServer, httpServer, null, null, true, null, input, null, null);
 	}
 
 	/**
@@ -257,7 +257,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				serverLocation, isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders,
-				requestEntity, true, responseWriter, bufferPool);
+				requestEntity, null, null, true, responseWriter, bufferPool);
 
 		// Return the connection
 		return connection;
@@ -843,8 +843,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 			HttpServerLocation serverLocation = new MockHttpServer();
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> serverHttpConnection = new ProcessAwareServerHttpConnectionManagedObject<>(
-					serverLocation, false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null, true,
-					new MockHttpResponseWriter(this.request, this, null), bufferPool);
+					serverLocation, false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null, null,
+					null, true, new MockHttpResponseWriter(this.request, this, null), bufferPool);
 			this.delegate = new ProcessAwareHttpResponse<>(serverHttpConnection, HttpVersion.HTTP_1_1,
 					new MockProcessAwareContext());
 		}

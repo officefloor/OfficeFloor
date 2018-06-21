@@ -18,9 +18,14 @@
 package net.officefloor.server.http;
 
 import java.net.Socket;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Supplier;
 
 import javax.net.ssl.SSLContext;
@@ -32,9 +37,12 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationH
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.build.OfficeFloorEvent;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslContextSource;
@@ -47,6 +55,18 @@ import net.officefloor.server.ssl.SslContextSource;
 public class HttpServer {
 
 	/**
+	 * Name of {@link Property} specifying the name for the <code>Server</code>
+	 * {@link HttpHeader}.
+	 */
+	public static final String PROPERTY_HTTP_SERVER_NAME = "http.server.name";
+
+	/**
+	 * Name of {@link Property} specifying whether to send the <code>Date</code>
+	 * {@link HttpHeader}. Value is <code>true</code>/<code>false</code>.
+	 */
+	public static final String PROPERTY_HTTP_DATE_HEADER = "http.date.header";
+
+	/**
 	 * Name of {@link Property} to include the stack trace.
 	 */
 	public static final String PROPERTY_INCLUDE_STACK_TRACE = "http.include.stacktrace";
@@ -57,10 +77,10 @@ public class HttpServer {
 	public static final String PROPERTY_SSL_CONTEXT_SOURCE = "ssl.source";
 
 	/**
-	 * Value for {@link #PROPERTY_SSL_CONTEXT_SOURCE} to indicate that this
-	 * server is behind a reverse proxy. This enables the reverse proxy to
-	 * handle SSL and communicate with this server via insecure {@link Socket}
-	 * (but stll appear as a secure {@link ServerHttpConnection}).
+	 * Value for {@link #PROPERTY_SSL_CONTEXT_SOURCE} to indicate that this server
+	 * is behind a reverse proxy. This enables the reverse proxy to handle SSL and
+	 * communicate with this server via insecure {@link Socket} (but stll appear as
+	 * a secure {@link ServerHttpConnection}).
 	 */
 	public static final String SSL_REVERSE_PROXIED = "reverse-proxied";
 
@@ -142,9 +162,41 @@ public class HttpServer {
 	}
 
 	/**
+	 * Convenience method to obtain the <code>Server</code> {@link HttpHeaderValue}.
+	 * 
+	 * @param context
+	 *            {@link HttpServerImplementationContext}.
+	 * @param suffix
+	 *            Optional suffix. May be <code>null</code>.
+	 * @return <code>Server</code> {@link HttpHeaderValue} or <code>null</code> if
+	 *         not configured.
+	 */
+	public static HttpHeaderValue getServerHttpHeaderValue(HttpServerImplementationContext context, String suffix) {
+		String serverName = context.getServerName();
+		HttpHeaderValue serverHttpHeaderValue = (serverName == null) ? null
+				: new HttpHeaderValue(serverName + (suffix == null ? "" : " " + suffix));
+		return serverHttpHeaderValue;
+	}
+
+	/**
 	 * {@link HttpServerLocation}.
 	 */
 	private final HttpServerLocation serverLocation;
+
+	/**
+	 * Name of the server. May be <code>null</code>.
+	 */
+	private final String serverName;
+
+	/**
+	 * {@link DateHttpHeaderClock} {@link Timer}.
+	 */
+	private volatile Timer dateTimer;
+
+	/**
+	 * {@link DateHttpHeaderClock}. May be <code>null</code>.
+	 */
+	private final DateHttpHeaderClock dateHttpHeaderClock;
 
 	/**
 	 * Indicates whether to include {@link Escalation} stack trace in the
@@ -180,6 +232,38 @@ public class HttpServer {
 
 		// Load the server location
 		this.serverLocation = new HttpServerLocationImpl(context);
+
+		// Obtain the server name
+		this.serverName = getPropertyString(PROPERTY_HTTP_SERVER_NAME, context, () -> null);
+
+		// Determine if date HTTP header
+		boolean isDateHttpHeader = Boolean
+				.parseBoolean(getPropertyString(PROPERTY_HTTP_DATE_HEADER, context, () -> Boolean.toString(false)));
+		if (isDateHttpHeader) {
+			// Create date header clock
+			DateHttpHeaderCockImpl clock = new DateHttpHeaderCockImpl();
+			this.dateHttpHeaderClock = clock;
+
+			// Trigger updates to date header
+			officeFloorDeployer.addOfficeFloorListener(new OfficeFloorListener() {
+				@Override
+				public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
+					// Start tracking time (update every second)
+					HttpServer.this.dateTimer = new Timer(true);
+					HttpServer.this.dateTimer.schedule(clock, 0, 1000);
+				}
+
+				@Override
+				public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
+					// Stop timer
+					HttpServer.this.dateTimer.cancel();
+				}
+			});
+
+		} else {
+			// No date header
+			this.dateHttpHeaderClock = null;
+		}
 
 		// Load whether to include stack traces
 		this.isIncludeEscalationStackTrace = Boolean
@@ -235,6 +319,10 @@ public class HttpServer {
 	 *            {@link HttpServerImplementation}.
 	 * @param serverLocation
 	 *            {@link HttpServerLocation}.
+	 * @param serverName
+	 *            Server name. May be <code>null</code>.
+	 * @param dateHttpHeaderClock
+	 *            {@link DateHttpHeaderClock}. May be <code>null</code>.
 	 * @param isIncludeEscalationStackTrace
 	 *            Indicates whether to include {@link Escalation} stack trace in
 	 *            {@link HttpResponse}.
@@ -248,10 +336,13 @@ public class HttpServer {
 	 * @param context
 	 *            {@link OfficeFloorSourceContext}.
 	 */
-	public HttpServer(HttpServerImplementation implementation, HttpServerLocation serverLocation,
-			boolean isIncludeEscalationStackTrace, SSLContext sslContext, DeployedOfficeInput serviceInput,
-			OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context) {
+	public HttpServer(HttpServerImplementation implementation, HttpServerLocation serverLocation, String serverName,
+			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace, SSLContext sslContext,
+			DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
+			OfficeFloorSourceContext context) {
 		this.serverLocation = serverLocation;
+		this.serverName = serverName;
+		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.serverImplementation = implementation;
 		this.sslContext = sslContext;
@@ -284,6 +375,16 @@ public class HttpServer {
 			@Override
 			public HttpServerLocation getHttpServerLocation() {
 				return HttpServer.this.serverLocation;
+			}
+
+			@Override
+			public String getServerName() {
+				return HttpServer.this.serverName;
+			}
+
+			@Override
+			public DateHttpHeaderClock getDateHttpHeaderClock() {
+				return HttpServer.this.dateHttpHeaderClock;
 			}
 
 			@Override
@@ -346,6 +447,45 @@ public class HttpServer {
 	 */
 	public SSLContext getSslContext() {
 		return this.sslContext;
+	}
+
+	/**
+	 * {@link DateHttpHeaderClock} implementation.
+	 */
+	private static class DateHttpHeaderCockImpl extends TimerTask implements DateHttpHeaderClock {
+
+		/**
+		 * <code>Date</code> {@link HttpHeaderValue}.
+		 */
+		private volatile HttpHeaderValue httpHeader;
+
+		/**
+		 * Instantiate.
+		 */
+		public DateHttpHeaderCockImpl() {
+			// Set initial date
+			this.run();
+		}
+
+		/*
+		 * ============== DateHttpHeaderClock =================
+		 */
+
+		@Override
+		public HttpHeaderValue getDateHttpHeaderValue() {
+			return this.httpHeader;
+		}
+
+		/*
+		 * ==================== TimerTask ======================
+		 */
+
+		@Override
+		public void run() {
+			// Update to new time
+			String now = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC));
+			this.httpHeader = new HttpHeaderValue(now);
+		}
 	}
 
 }

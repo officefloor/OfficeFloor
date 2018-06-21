@@ -30,6 +30,7 @@ import net.officefloor.server.http.HttpEscalationContext;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseCookies;
@@ -37,6 +38,7 @@ import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -50,6 +52,16 @@ import net.officefloor.server.stream.impl.ProcessAwareServerWriter;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
+
+	/**
+	 * <code>Server</code> {@link HttpHeaderName}.
+	 */
+	private static final HttpHeaderName SERVER_HTTP_HEADER_NAME = new HttpHeaderName("Server");
+
+	/**
+	 * <code>Date</code> {@link HttpHeaderName}.
+	 */
+	private static final HttpHeaderName DATE_HTTP_HEADER_NAME = new HttpHeaderName("Date");
 
 	/**
 	 * Binary <code>Content-Type</code>.
@@ -320,10 +332,30 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			this.status = HttpStatus.NO_CONTENT;
 		}
 
+		// Obtain the headers
+		WritableHttpHeader httpHeaders = this.headers.getWritableHttpHeaders();
+
+		// Date HTTP header (if specified)
+		DateHttpHeaderClock clock = this.serverHttpConnection.dateHttpHeaderClock;
+		if (clock != null) {
+			HttpHeaderValue dateValue = clock.getDateHttpHeaderValue();
+			WritableHttpHeader dateHeader = new WritableHttpHeader(DATE_HTTP_HEADER_NAME, dateValue);
+			dateHeader.next = httpHeaders;
+			httpHeaders = dateHeader;
+		}
+
+		// Server HTTP header (if specified)
+		HttpHeaderValue serverHttpHeaderValue = this.serverHttpConnection.serverName;
+		if (serverHttpHeaderValue != null) {
+			WritableHttpHeader serverHeader = new WritableHttpHeader(SERVER_HTTP_HEADER_NAME, serverHttpHeaderValue);
+			serverHeader.next = httpHeaders;
+			httpHeaders = serverHeader;
+		}
+
 		// Write the response (and consider written)
 		this.isWritten = true;
-		this.serverHttpConnection.httpResponseWriter.writeHttpResponse(this.version, this.status,
-				this.headers.getWritableHttpHeaders(), this.cookies.getWritableHttpCookie(), contentLength, contentType,
+		this.serverHttpConnection.httpResponseWriter.writeHttpResponse(this.version, this.status, httpHeaders,
+				this.cookies.getWritableHttpCookie(), contentLength, contentType,
 				this.bufferPoolOutputStream.getBuffers());
 	}
 

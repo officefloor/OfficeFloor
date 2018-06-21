@@ -28,6 +28,8 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestCookies;
@@ -94,6 +96,18 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private ProcessAwareHttpResponse<B> response;
 
 	/**
+	 * Name of the server. May be <code>null</code> to not send the
+	 * <code>Server</code> {@link HttpHeader}.
+	 */
+	final HttpHeaderValue serverName;
+
+	/**
+	 * {@link DateHttpHeaderClock} to send the <code>Date</code> {@link HttpHeader}.
+	 * May be <code>null</code> to not send.
+	 */
+	final DateHttpHeaderClock dateHttpHeaderClock;
+
+	/**
 	 * {@link StreamBufferPool}.
 	 */
 	final StreamBufferPool<B> bufferPool;
@@ -122,20 +136,18 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * @param isSecure
 	 *            Indicates if secure.
 	 * @param methodSupplier
-	 *            {@link Supplier} for the {@link HttpRequest}
-	 *            {@link HttpMethod}.
+	 *            {@link Supplier} for the {@link HttpRequest} {@link HttpMethod}.
 	 * @param requestUriSupplier
 	 *            {@link Supplier} for the {@link HttpRequest} URI.
 	 * @param version
 	 *            {@link HttpVersion} for the {@link HttpRequest}.
 	 * @param requestHeaders
-	 *            {@link NonMaterialisedHttpHeaders} for the
-	 *            {@link HttpRequest}.
+	 *            {@link NonMaterialisedHttpHeaders} for the {@link HttpRequest}.
 	 * @param requestEntity
 	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
 	 * @param isIncludeStackTraceOnEscalation
-	 *            <code>true</code> to include the {@link Escalation} stack
-	 *            trace in the {@link HttpResponse}.
+	 *            <code>true</code> to include the {@link Escalation} stack trace in
+	 *            the {@link HttpResponse}.
 	 * @param writer
 	 *            {@link HttpResponseWriter}.
 	 * @param bufferPool
@@ -143,8 +155,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(HttpServerLocation serverLocation, boolean isSecure,
 			Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier, HttpVersion version,
-			NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity,
-			boolean isIncludeStackTraceOnEscalation, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
+			NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity, HttpHeaderValue serverName,
+			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeStackTraceOnEscalation,
+			HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
 		this.serverLocation = serverLocation;
 
 		// Indicate if secure
@@ -159,9 +172,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.requestEntity = requestEntity;
 
 		// Store remaining state
-		this.bufferPool = bufferPool;
+		this.serverName = serverName;
+		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeStackTraceOnEscalation = isIncludeStackTraceOnEscalation;
 		this.httpResponseWriter = writer;
+		this.bufferPool = bufferPool;
 	}
 
 	/**

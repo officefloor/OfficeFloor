@@ -29,6 +29,7 @@ import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ResponseWriter;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
+import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -75,6 +76,16 @@ public abstract class AbstractHttpServicerFactory
 	 * entity.
 	 */
 	private final StreamBufferPool<ByteBuffer> serviceBufferPool;
+
+	/**
+	 * <code>Server</code> {@link HttpHeaderValue}.
+	 */
+	private final HttpHeaderValue serverName;
+
+	/**
+	 * {@link DateHttpHeaderClock}.
+	 */
+	private final DateHttpHeaderClock dateHttpHeaderClock;
 
 	/**
 	 * Indicates if include the {@link Escalation} stack trace in the
@@ -124,17 +135,24 @@ public abstract class AbstractHttpServicerFactory
 	 *            {@link StreamBufferPool} used to service requests.
 	 * @param metaData
 	 *            {@link HttpRequestParserMetaData}.
+	 * @param serverName
+	 *            <code>Server</code> {@link HttpHeaderValue}.
+	 * @param dateHttpHeaderClock
+	 *            {@link DateHttpHeaderClock}.
 	 * @param isIncludeEscalationStackTrace
-	 *            Indicates whether to include the {@link Escalation} stack
-	 *            trace in {@link HttpResponse}.
+	 *            Indicates whether to include the {@link Escalation} stack trace in
+	 *            {@link HttpResponse}.
 	 */
 	public AbstractHttpServicerFactory(HttpServerLocation serverLocation, boolean isSecure,
 			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool,
+			HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
 			boolean isIncludeEscalationStackTrace) {
 		this.serverLocation = serverLocation;
 		this.isSecure = isSecure;
 		this.metaData = metaData;
 		this.serviceBufferPool = serviceBufferPool;
+		this.serverName = serverName;
+		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 	}
 
@@ -259,6 +277,7 @@ public abstract class AbstractHttpServicerFactory
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 					AbstractHttpServicerFactory.this.serverLocation, AbstractHttpServicerFactory.this.isSecure,
 					methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
+					AbstractHttpServicerFactory.this.serverName, AbstractHttpServicerFactory.this.dateHttpHeaderClock,
 					AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace, writer,
 					AbstractHttpServicerFactory.this.serviceBufferPool);
 
