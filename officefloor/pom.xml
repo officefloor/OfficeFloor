@@ -1199,50 +1199,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!--  
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>Create SourceForge shell for deploying artifacts</id>
-								<inherited>false</inherited>
-								<phase>verify</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
-											password="${developer.svn.password}" verbose="true" command="create" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>Create SourceForge shell for deploying site</id>
-								<inherited>false</inherited>
-								<phase>post-site</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
-											password="${developer.svn.password}" verbose="true" command="create" />
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>org.apache.ant</groupId>
-								<artifactId>ant-jsch</artifactId>
-								<version>${ant-jsch-version}</version>
-								<scope>runtime</scope>
-							</dependency>
-						</dependencies>
-					</plugin>
-					-->
 				</plugins>
 			</build>
 		</profile>
