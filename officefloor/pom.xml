@@ -1199,8 +1199,8 @@
 							</execution>
 						</executions>
 					</plugin>
+					<!--  
 					<plugin>
-						<!-- Create SourceForge Shell -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>
@@ -1242,6 +1242,7 @@
 							</dependency>
 						</dependencies>
 					</plugin>
+					-->
 				</plugins>
 			</build>
 		</profile>
