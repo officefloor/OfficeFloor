@@ -230,6 +230,26 @@ public class SocketManager {
 		for (int i = 0; i < this.listeners.length; i++) {
 			this.listeners[i].shutdown();
 		}
+
+		// Wait until all listeners are shutdown
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < this.listeners.length; i++) {
+			while (this.listeners[i].selector.isOpen()) {
+
+				// Determine if timed out
+				if (System.currentTimeMillis() > (startTime + 10000)) {
+					throw new IOException(
+							"Timed out waiting on " + SocketListener.class.getSimpleName() + " to shutdown");
+				}
+
+				// Allow some time to shutdown
+				try {
+					this.wait(10);
+				} catch (InterruptedException ex) {
+				}
+
+			}
+		}
 	}
 
 	/**
@@ -468,8 +488,18 @@ public class SocketManager {
 		 *             If fails to notify of shutdown.
 		 */
 		private final void shutdown() throws IOException {
-			// Send message to shutdown
-			this.shutdownPipe.sink().write(NOTIFY_BUFFER.duplicate());
+			try {
+				// Send message to shutdown
+				this.shutdownPipe.sink().write(NOTIFY_BUFFER.duplicate());
+			} catch (IOException ex) {
+				// Determine if already shutdown
+				if ("Broken pipe".equals(ex.getMessage())) {
+					return;
+				}
+
+				// Other failure, so propagate
+				throw ex;
+			}
 		}
 
 		/*
