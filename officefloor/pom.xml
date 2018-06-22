@@ -1227,7 +1227,7 @@
 				<repository>
 					<id>repo.officefloor.sf.net</id>
 					<name>Maven repository on SourceForge - http://www.officefloor.net/maven2</name>
-					<url>scp://sagenschneider@frs.sourceforge.net:/home/frs/project/officefloor/maven/maven2</url>
+					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2</url>
 				</repository>
 			</distributionManagement>
 		</profile>
