@@ -647,6 +647,13 @@ public class SocketManager {
 							// Already closed, clean up and continue
 							SocketManager.terminteSelectionKey(selectedKey, this);
 							continue NEXT_KEY;
+						} catch (IOException ex) {
+							// Issue with connection, clean up and continue
+							if (!"Connection reset by peer".equals(ex.getMessage())) {
+								LOGGER.log(Level.WARNING, "I/O failure with connection", ex);
+							}
+							SocketManager.terminteSelectionKey(selectedKey, this);
+							continue NEXT_KEY;
 						} catch (Throwable ex) {
 							LOGGER.log(Level.WARNING, "Failure with connection", ex);
 							SocketManager.terminteSelectionKey(selectedKey, this);
