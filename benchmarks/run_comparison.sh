@@ -65,4 +65,4 @@ done
 if [  -f "${DIR}/results.json" ]; then
 	rm "${DIR}/results.json"
 fi
-cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.json"
+cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.txt"
