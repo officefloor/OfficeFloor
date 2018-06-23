@@ -30,6 +30,7 @@ import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -50,6 +51,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -221,6 +223,39 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide {@link SectionOutput} via {@link Spawn}
+	 * {@link FlowInterface}.
+	 */
+	public void testSpawnFlowInterface() {
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockSpawnFlowInterfaceSection.class,
+				this.configureClassSectionFunction("doInput"));
+		expected.addSectionInput("doInput", null);
+		expected.addSectionOutput("doOutput", null, false);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockSpawnFlowInterfaceSection.class.getName());
+	}
+
+	/**
+	 * Mock {@link FlowInterface} for the {@link MockFlowInterfaceSection}.
+	 */
+	@FlowInterface
+	public static interface MockSpawnFlowInterface {
+		@Spawn
+		void doOutput();
+	}
+
+	/**
+	 * Section with an {@link FlowInterface}.
+	 */
+	public static class MockSpawnFlowInterfaceSection {
+		public void doInput(MockFlowInterface flows) {
+		}
+	}
+
+	/**
 	 * Ensure can provide {@link SectionOutput} for escalation.
 	 */
 	public void testEscalation() {
@@ -348,8 +383,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can provide qualified {@link SectionObject} by {@link Qualifier}
-	 * name.
+	 * Ensure can provide qualified {@link SectionObject} by {@link Qualifier} name.
 	 */
 	public void testQulifiedObjectByName() {
 
@@ -387,8 +421,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can provide same {@link Qualifier} on {@link SectionObject}
-	 * instances of different types.
+	 * Ensure can provide same {@link Qualifier} on {@link SectionObject} instances
+	 * of different types.
 	 */
 	public void testSameQualifierOnDifferentObjectTypes() {
 
@@ -648,8 +682,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name along
-	 * with keeping links working.
+	 * Ensure able to handle changing the {@link ManagedFunction} name along with
+	 * keeping links working.
 	 */
 	public void testChangeFunctionNameAndEnsureCorrectLinkedType() {
 
@@ -693,8 +727,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name and
-	 * continue to execute.
+	 * Ensure able to handle changing the {@link ManagedFunction} name and continue
+	 * to execute.
 	 */
 	public void testChangeFunctionNameAndEnsureCorrectLinkedExecution() throws Exception {
 
@@ -982,6 +1016,96 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure spawn {@link ThreadState}.
+	 */
+	public void testSpawnFlow() throws Exception {
+
+		// Triggering flows, so must run to test
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockSpawnFlowSection.class.getName());
+
+			// Provide thread bound managed object to determine spawning
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("MO",
+					ClassManagedObjectSource.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SpawnDependency.class.getName());
+			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
+			architect.enableAutoWireObjects();
+		});
+
+		try {
+
+			// Run to ensure obtained message
+			SpawnReturnValue returnValue = new SpawnReturnValue();
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.doSpawnTrigger").invokeProcess(returnValue, null);
+
+			// Ensure appropriately spawned
+			assertNotNull("Should have trigger dependency", returnValue.trigger);
+			assertNotNull("Should have spawn dependency", returnValue.spawned);
+			assertNotNull("Should have not spawn dependency", returnValue.notSpawned);
+
+			// Ensure appropriately spawned
+			assertSame("Should not spawn", returnValue.trigger, returnValue.notSpawned);
+			assertNotSame("Should spawn (so new thread scoped dependency)", returnValue.trigger, returnValue.spawned);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * Spawn dependency to track if {@link ThreadState} spawned.
+	 */
+	public static class SpawnDependency {
+	}
+
+	/**
+	 * Tracks the {@link SpawnDependency}.
+	 */
+	public static class SpawnReturnValue {
+
+		public SpawnDependency trigger;
+
+		public SpawnDependency spawned;
+
+		public SpawnDependency notSpawned;
+	}
+
+	/**
+	 * Mock {@link FlowInterface} for internal flows.
+	 */
+	@FlowInterface
+	public static interface MockSpawnFlows {
+
+		void notSpawned(SpawnReturnValue returnValue);
+
+		@Spawn
+		void spawned(SpawnReturnValue returnValue);
+	}
+
+	/**
+	 * Section to undertake internal flows.
+	 */
+	public static class MockSpawnFlowSection {
+
+		public void doSpawnTrigger(@Parameter SpawnReturnValue returnValue, SpawnDependency dependency,
+				MockSpawnFlows flows) {
+			returnValue.trigger = dependency;
+			flows.spawned(returnValue);
+			flows.notSpawned(returnValue);
+		}
+
+		public void spawned(@Parameter SpawnReturnValue returnValue, SpawnDependency dependency) {
+			returnValue.spawned = dependency;
+		}
+
+		public void notSpawned(@Parameter SpawnReturnValue returnValue, SpawnDependency dependency) {
+			returnValue.notSpawned = dependency;
+		}
+	}
+
+	/**
 	 * Ensure able to handle an escalation internally.
 	 */
 	public void testEscalationHandling() throws Exception {
@@ -1022,8 +1146,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure that an escalation method can not handle its own
-	 * {@link Escalation}.
+	 * Ensure that an escalation method can not handle its own {@link Escalation}.
 	 */
 	public void testAvoidCyclicEscalationHandling() throws Exception {
 
@@ -1169,8 +1292,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Convenience method to add {@link ClassSectionSource}
-	 * {@link SectionFunction}.
+	 * Convenience method to add {@link ClassSectionSource} {@link SectionFunction}.
 	 * 
 	 * @param functionName
 	 *            {@link SectionFunction} and {@link ManagedFunctionType} name.
@@ -1181,8 +1303,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Convenience method to add {@link ClassSectionSource}
-	 * {@link SectionFunction}.
+	 * Convenience method to add {@link ClassSectionSource} {@link SectionFunction}.
 	 * 
 	 * @param functionName
 	 *            {@link SectionFunction} name.

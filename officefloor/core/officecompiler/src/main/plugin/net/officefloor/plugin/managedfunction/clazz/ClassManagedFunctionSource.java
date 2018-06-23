@@ -242,7 +242,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 				// Obtain the parameter annotations (for qualifying)
 				Annotation[][] methodParamAnnotations = method.getParameterAnnotations();
 
-				// Define the listing of task objects and flows
+				// Define the listing of objects and flows
 				for (int i = 0; i < paramTypes.length; i++) {
 
 					// Obtain the parameter type and its annotations

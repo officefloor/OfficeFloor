@@ -588,16 +588,19 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		// Obtain the flow argument name
 		String flowArgumentTypeName = (flowArgumentType == null ? null : flowArgumentType.getName());
 
+		// Determine if spawn thread state
+		boolean isSpawnThreadState = flowMethod.isAnnotationPresent(Spawn.class);
+
 		// Flow interface so attempt to obtain the function internally
 		SectionFunction linkFunction = this.getFunctionByTypeName(flowName);
 		if (linkFunction != null) {
 			// Link flow internally
-			this.getDesigner().link(functionFlow, linkFunction, false);
+			this.getDesigner().link(functionFlow, linkFunction, isSpawnThreadState);
 
 		} else {
 			// Not internal function, so link externally
 			SectionOutput sectionOutput = this.getOrCreateOutput(flowName, flowArgumentTypeName, false);
-			this.getDesigner().link(functionFlow, sectionOutput, false);
+			this.getDesigner().link(functionFlow, sectionOutput, isSpawnThreadState);
 		}
 	}
 
