@@ -22,6 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
+
 import org.h2.jdbcx.JdbcDataSource;
 
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -29,7 +31,9 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
@@ -69,8 +73,7 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 	 * Validate the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class,
-				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, "DataSource Class");
+		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class);
 	}
 
 	/**
@@ -131,6 +134,55 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 				statement.execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 2, 'OfficeFloor' )");
 			}
 			MockSection.connection = connection;
+		}
+	}
+
+	/**
+	 * Ensures able to configure {@link DataSourceFactory}.
+	 */
+	public void testDataSourceFactory() throws Throwable {
+
+		// Open the OfficeFloor
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+
+			// Create the managed object
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					ConnectionManagedObjectSource.class.getName());
+			mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
+					MockDataSourceFactory.class.getName());
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide section
+			context.addSection("SECTION", MockSection.class);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Undertake operation
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
+
+		// Ensure row inserted
+		try (Statement statement = this.connection.createStatement()) {
+			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
+			assertTrue("Should have row", resultSet.next());
+			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
+		}
+
+		// Ensure the connection is closed
+		assertNotNull("Should have connection", MockSection.connection);
+		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
+	}
+
+	/**
+	 * Mock {@link DataSourceFactory}.
+	 */
+	public static class MockDataSourceFactory implements DataSourceFactory {
+
+		@Override
+		public DataSource createDataSource(SourceContext context) throws Exception {
+			JdbcDataSource dataSource = new JdbcDataSource();
+			dataSource.setURL("jdbc:h2:mem:test");
+			return dataSource;
 		}
 	}
 

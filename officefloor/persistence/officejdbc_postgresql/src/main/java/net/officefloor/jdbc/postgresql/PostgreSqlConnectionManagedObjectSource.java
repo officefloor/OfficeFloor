@@ -68,15 +68,6 @@ public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedOb
 	 */
 
 	@Override
-	protected DataSourceFactory getDataSourceFactory() {
-		return this;
-	}
-
-	/*
-	 * ==================== DataSourceFactory =========================
-	 */
-
-	@Override
 	public void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_SERVER_NAME, "Server");
 		context.addProperty(PROPERTY_PORT, "Port");
@@ -84,6 +75,15 @@ public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedOb
 		context.addProperty(PROPERTY_USER, "User");
 		context.addProperty(PROPERTY_PASSWORD, "Password");
 	}
+
+	@Override
+	protected DataSourceFactory getDataSourceFactory(SourceContext context) {
+		return this;
+	}
+
+	/*
+	 * ==================== DataSourceFactory =========================
+	 */
 
 	@Override
 	public DataSource createDataSource(SourceContext context) throws Exception {

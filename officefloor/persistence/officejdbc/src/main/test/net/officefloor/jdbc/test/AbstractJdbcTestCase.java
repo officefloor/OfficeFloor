@@ -149,7 +149,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		try {
 
 			// Try until time out (as may take time for database to come up)
-			final int MAX_SETUP_TIME = 10000; // milliseconds
+			final int MAX_SETUP_TIME = 30000; // milliseconds
 			long startTimestamp = System.currentTimeMillis();
 			NEXT_TRY: for (;;) {
 				try {

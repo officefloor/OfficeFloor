@@ -29,7 +29,6 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
@@ -165,11 +164,6 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 	/*
 	 * ================== DataSourceFactory =========================
 	 */
-
-	@Override
-	public void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_DATA_SOURCE_CLASS_NAME, "DataSource Class");
-	}
 
 	@Override
 	@SuppressWarnings("unchecked")

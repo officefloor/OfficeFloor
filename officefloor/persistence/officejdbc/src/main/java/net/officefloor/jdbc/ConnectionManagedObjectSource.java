@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -39,6 +40,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
@@ -48,6 +50,12 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
  * @author Daniel Sagenschneider
  */
 public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+
+	/**
+	 * {@link Property} name to specify the {@link DataSourceFactory}
+	 * implementation.
+	 */
+	public static final String PROPERTY_DATA_SOURCE_FACTORY = "datasource.factory";
 
 	/**
 	 * {@link Logger}.
@@ -72,10 +80,25 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
 	 * 
+	 * @param context
+	 *            {@link SourceContext}.
 	 * @return {@link DataSourceFactory}.
+	 * @throws Exception
+	 *             If fails to obtain {@link DataSourceFactory}.
 	 */
-	protected DataSourceFactory getDataSourceFactory() {
-		return new DefaultDataSourceFactory();
+	protected DataSourceFactory getDataSourceFactory(SourceContext context) throws Exception {
+
+		// Obtain the data source factory
+		String dataSourceFactoryClassName = context.getProperty(PROPERTY_DATA_SOURCE_FACTORY,
+				DefaultDataSourceFactory.class.getName());
+		Class<?> dataSourceFactoryClass = context.loadClass(dataSourceFactoryClassName);
+		if (!DataSourceFactory.class.isAssignableFrom(dataSourceFactoryClass)) {
+			throw new Exception(dataSourceFactoryClassName + " must implement " + DataSourceFactory.class.getName());
+		}
+		DataSourceFactory dataSourceFactory = (DataSourceFactory) dataSourceFactoryClass.newInstance();
+
+		// Return the data source factory
+		return dataSourceFactory;
 	}
 
 	/**
@@ -105,7 +128,6 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		this.getDataSourceFactory().loadSpecification(context);
 	}
 
 	@Override
@@ -126,7 +148,7 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 		}
 
 		// Create the data source
-		DataSourceFactory factory = this.getDataSourceFactory();
+		DataSourceFactory factory = this.getDataSourceFactory(mosContext);
 		this.dataSource = factory.createDataSource(mosContext);
 
 		// Obtain the class loader for proxies

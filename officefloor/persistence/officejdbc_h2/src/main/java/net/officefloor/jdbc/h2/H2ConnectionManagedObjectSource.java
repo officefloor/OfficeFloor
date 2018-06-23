@@ -63,7 +63,7 @@ public class H2ConnectionManagedObjectSource extends ConnectionManagedObjectSour
 	}
 
 	@Override
-	protected DataSourceFactory getDataSourceFactory() {
+	protected DataSourceFactory getDataSourceFactory(SourceContext context) {
 		return this;
 	}
 
