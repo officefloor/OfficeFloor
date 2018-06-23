@@ -70,7 +70,6 @@ public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedOb
 	@Override
 	public void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_SERVER_NAME, "Server");
-		context.addProperty(PROPERTY_DATABASE_NAME, "Database");
 		context.addProperty(PROPERTY_USER, "User");
 		context.addProperty(PROPERTY_PASSWORD, "Password");
 	}
@@ -95,14 +94,19 @@ public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedOb
 
 		// Load required properties
 		dataSource.setServerName(context.getProperty(PROPERTY_SERVER_NAME));
-		dataSource.setDatabaseName(context.getProperty(PROPERTY_DATABASE_NAME));
 		dataSource.setUser(context.getProperty(PROPERTY_USER));
 		dataSource.setPassword(context.getProperty(PROPERTY_PASSWORD));
 
-		// Load optional properties
+		// Load optional port
 		String port = context.getProperty(PROPERTY_PORT, null);
 		if (port != null) {
 			dataSource.setPortNumber(Integer.parseInt(port));
+		}
+
+		// Load optional database
+		String database = context.getProperty(PROPERTY_DATABASE_NAME, null);
+		if (database != null) {
+			dataSource.setDatabaseName(database);
 		}
 
 		// Return the data source

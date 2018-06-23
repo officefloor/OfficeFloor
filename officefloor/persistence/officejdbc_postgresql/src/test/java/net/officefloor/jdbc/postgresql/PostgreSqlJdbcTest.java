@@ -162,6 +162,7 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected void loadOptionalSpecification(Properties properties) {
 		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
+		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_DATABASE_NAME, "test");
 	}
 
 	@Override
