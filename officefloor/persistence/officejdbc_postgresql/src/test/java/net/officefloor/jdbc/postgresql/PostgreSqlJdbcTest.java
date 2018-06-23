@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -156,6 +157,11 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_DATABASE_NAME, "test");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "test");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "test");
+	}
+
+	@Override
+	protected void loadOptionalSpecification(Properties properties) {
+		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
 	}
 
 	@Override
