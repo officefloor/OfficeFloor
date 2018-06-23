@@ -51,6 +51,7 @@ fi
 
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
+./tfb --clean
 ./tfb --test h2o actix-raw rapidoid-http-fast vertx-postgres vertx-web-postgres officefloor
 
 # Find the latest results directory
