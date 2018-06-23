@@ -36,10 +36,10 @@ if [ ! -d "${DIR}/FrameworkBenchmarks" ]; then
 	mkdir "${DIR}/FrameworkBenchmarks"
 fi
 cp -Rf "${DIR}/TechEmpowerFrameworkBenchmarks/FrameworkBenchmarks" "${DIR}/FrameworkBenchmarks"
-if [ ! -d "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor" ]; then
+if [ -d "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor" ]; then
 	rm -rf "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor"
 fi
-cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor"
+cp -Rf "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/"
 
 # Work around for running in Jenkins
 cp "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/tfb" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/tfb"
