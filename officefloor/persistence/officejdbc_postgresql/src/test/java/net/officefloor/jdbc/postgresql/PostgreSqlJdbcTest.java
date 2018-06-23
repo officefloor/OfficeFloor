@@ -120,7 +120,7 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 			}
 			final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
 			final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image(IMAGE_NAME)
-					.exposedPorts(ports).env("POSTGRES_USER=test", "POSTGRES_PASSWORD=test").build();
+					.exposedPorts(ports).env("POSTGRES_USER=testuser", "POSTGRES_PASSWORD=testpassword").build();
 
 			// Start the container
 			final ContainerCreation creation = docker.createContainer(containerConfig, CONTAINER_NAME);
@@ -154,15 +154,13 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	protected void loadProperties(PropertyConfigurable mos) {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_DATABASE_NAME, "test");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "test");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "test");
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "testuser");
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "testpassword");
 	}
 
 	@Override
 	protected void loadOptionalSpecification(Properties properties) {
 		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
-		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_DATABASE_NAME, "test");
 	}
 
 	@Override
