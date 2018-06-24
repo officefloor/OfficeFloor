@@ -25,6 +25,19 @@
 			<value method="setQualifier" node="auto-wire@qualifier" />
 			<value method="setType" node="auto-wire@type" />
 		</object>
+		<object method="setPool" node="pool"
+			class="net.officefloor.woof.model.objects.WoofPoolModel">
+			<value method="setManagedObjectPoolSourceClassName" node="pool@source" />
+			<object method="addPropertySource" node="property"
+				class="net.officefloor.woof.model.objects.PropertyModel">
+				<value method="setName" node="property@name" />
+				<value method="setValue" node="property@value" />
+			</object>
+			<object method="addPropertySource" node="property-file"
+				class="net.officefloor.woof.model.objects.PropertyFileModel">
+				<value method="setPath" node="property-file@path" />
+			</object>
+		</object>
 		<object method="addFlow" node="flow"
 			class="net.officefloor.woof.model.objects.WoofFlowModel">
 			<value method="setName" node="flow@name" />

@@ -126,8 +126,8 @@ public class HttpClientTestUtil {
 		// Create the HTTP client
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
-		// Provide timeout of requests (3 sec or no timeout)
-		final int timeout = isTimeoutClient() ? 3000 : 0;
+		// Provide timeout of requests (10 sec or no timeout)
+		final int timeout = isTimeoutClient() ? 10000 : 0;
 		RequestConfig.Builder requestConfig = RequestConfig.custom();
 		requestConfig.setSocketTimeout(timeout);
 		requestConfig.setConnectTimeout(timeout);

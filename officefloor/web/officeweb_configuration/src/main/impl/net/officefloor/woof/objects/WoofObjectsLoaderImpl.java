@@ -30,6 +30,7 @@ import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
@@ -47,6 +48,7 @@ import net.officefloor.woof.model.objects.WoofManagedObjectModel;
 import net.officefloor.woof.model.objects.WoofObjectSourceModel;
 import net.officefloor.woof.model.objects.WoofObjectsModel;
 import net.officefloor.woof.model.objects.WoofObjectsRepository;
+import net.officefloor.woof.model.objects.WoofPoolModel;
 import net.officefloor.woof.model.objects.WoofSupplierModel;
 import net.officefloor.woof.objects.WoofObjectsLoader;
 import net.officefloor.woof.objects.WoofObjectsLoaderContext;
@@ -186,6 +188,15 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 		long timeout = managedObject.getTimeout();
 		if (timeout > 0) {
 			mos.setTimeout(timeout);
+		}
+
+		// Configure possible pooling
+		WoofPoolModel poolModel = managedObject.getPool();
+		if (poolModel != null) {
+			OfficeManagedObjectPool pool = architect.addManagedObjectPool(managedObjectName + "_pool",
+					poolModel.getManagedObjectPoolSourceClassName());
+			this.loadProperties(pool, poolModel.getPropertySources(), context);
+			architect.link(mos, pool);
 		}
 
 		// Configure the flows

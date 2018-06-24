@@ -34,11 +34,13 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
@@ -97,6 +99,10 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 		OfficeManagedObjectSource mosOne = this.recordManagedObjectSource("QUALIFIED:net.orm.Session",
 				"net.example.ExampleManagedObjectSourceA", 10, "MO_ONE", "VALUE_ONE", "file-example/object.properties",
 				"MO_TWO=VALUE_TWO", "MO_THREE", "VALUE_THREE");
+
+		// Record link pool
+		this.recordManagedObjectPool("QUALIFIED:net.orm.Session_pool", "net.example.ExampleManagedObjectPoolSource",
+				mosOne, "POOL_ONE", "VALUE_ONE", "file-example/pool.properties", "POOL_TWO=VALUE_TWO");
 
 		// Record linking flow
 		this.recordManagedObjectFlow(mosOne, "FLOW", "SECTION", "INPUT");
@@ -217,9 +223,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 		this.recordManagedObject(defaultMos, "net.example.ExampleManagedObjectSourceD", ManagedObjectScope.THREAD);
 
 		// Fifth managed object should report issue
-		this.recordReturn(this.office,
-				this.office.addIssue(
-						"Invalid managed object scope 'invalid' for managed object net.example.ExampleManagedObjectSourceE"),
+		this.recordReturn(this.office, this.office.addIssue(
+				"Invalid managed object scope 'invalid' for managed object net.example.ExampleManagedObjectSourceE"),
 				new CompileError("TEST"));
 
 		// Test
@@ -274,6 +279,31 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records the {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName
+	 *            {@link ManagedObjectPoolSource} {@link Class} name.
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSource} to link the
+	 *            {@link OfficeManagedObjectPool}.
+	 * @param propertyNameValuePairs
+	 *            {@link PropertyList} name/value pairs.
+	 * @return Mock {@link OfficeManagedObjectPool}.
+	 */
+	private OfficeManagedObjectPool recordManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName, OfficeManagedObjectSource managedObjectSource,
+			String... propertyNameValuePairs) {
+		final OfficeManagedObjectPool pool = this.createMock(OfficeManagedObjectPool.class);
+		this.recordReturn(this.office,
+				this.office.addManagedObjectPool(managedObjectPoolName, managedObjectPoolSourceClassName), pool);
+		this.recordProperties(propertyNameValuePairs, (name, value) -> pool.addProperty(name, value));
+		this.office.link(managedObjectSource, pool);
+		return pool;
+	}
+
+	/**
 	 * Records the {@link ManagedObjectFlow}.
 	 * 
 	 * @param mos
@@ -283,8 +313,7 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 * @param sectionName
 	 *            Name of {@link OfficeSection} handling the {@link Flow}.
 	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput} handling the
-	 *            {@link Flow}.
+	 *            Name of the {@link OfficeSectionInput} handling the {@link Flow}.
 	 */
 	private void recordManagedObjectFlow(OfficeManagedObjectSource mos, String flowName, String sectionName,
 			String inputName) {

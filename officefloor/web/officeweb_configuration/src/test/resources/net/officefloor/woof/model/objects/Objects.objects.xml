@@ -7,6 +7,10 @@
 		<property name="MO_TWO" value="VALUE_TWO" />
 		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
 		<auto-wire type="net.orm.SessionLocal" />
+		<pool source="net.example.ExampleManagedObjectPoolSource">
+			<property name="POOL_ONE" value="VALUE_ONE" />
+			<property-file path="example/pool.properties" />
+		</pool>
 		<flow name="FLOW" section="SECTION" input="INPUT" />
 		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
 		<dependency name="DEPENDENCY" qualifier="QUALIFIER"

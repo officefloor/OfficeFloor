@@ -7,6 +7,10 @@
 		<property name="MO_THREE" value="VALUE_THREE" />
 		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
 		<auto-wire type="net.orm.SessionLocal" />
+		<pool source="net.example.ExampleManagedObjectPoolSource">
+			<property name="POOL_ONE" value="VALUE_ONE" />
+			<property-file path="example/pool.properties" />
+		</pool>
 		<flow name="FLOW" section="SECTION" input="INPUT" />
 		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
 			type="net.example.Dependency" />

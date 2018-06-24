@@ -82,8 +82,13 @@ public class WoofObjectsModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(
 				new WoofManagedObjectModel("net.example.ExampleManagedObjectSourceA", null, 10, null, null, "thread"),
 				moOne, MANAGED_OBJECT_METHODS);
-		assertProperties(new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyFileModel("example/object.properties"),
-				new PropertyModel("MO_TWO", "VALUE_TWO"), moOne.getPropertySources());
+		PropertySourceModel[] ePropertySources = new PropertySourceModel[] { new PropertyModel("MO_ONE", "VALUE_ONE"),
+				new PropertyFileModel("example/object.properties"), new PropertyModel("MO_TWO", "VALUE_TWO") };
+		List<PropertySourceModel> aPropertySources = moOne.getPropertySources();
+		assertEquals("Incorrect number of property sources", ePropertySources.length, aPropertySources.size());
+		assertProperties(ePropertySources[0], aPropertySources.get(0), "getName", "getValue");
+		assertProperties(ePropertySources[1], aPropertySources.get(1), "getPath");
+		assertProperties(ePropertySources[2], aPropertySources.get(2), "getName", "getValue");
 		assertList(new String[] { "getQualifier", "getType" }, moOne.getTypeQualifications(),
 				new TypeQualificationModel("QUALIFIED", "net.orm.Session"),
 				new TypeQualificationModel(null, "net.orm.SessionLocal"));
@@ -91,6 +96,17 @@ public class WoofObjectsModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofFlowModel("FLOW", "SECTION", "INPUT"));
 		assertList(new String[] { "getName", "getQualifier", "getType" }, moOne.getDependencies(),
 				new WoofDependencyModel("DEPENDENCY", "QUALIFIER", "net.example.Dependency"));
+
+		// Validate the pool
+		WoofPoolModel pool = moOne.getPool();
+		assertProperties(new WoofPoolModel("net.example.ExampleManagedObjectPoolSource"), pool,
+				"getManagedObjectPoolSourceClassName");
+		PropertySourceModel[] ePoolProperties = new PropertySourceModel[] { new PropertyModel("POOL_ONE", "VALUE_ONE"),
+				new PropertyFileModel("example/pool.properties") };
+		List<PropertySourceModel> aPoolProperties = pool.getPropertySources();
+		assertEquals("Incorrect number of pool property sources", ePoolProperties.length, aPoolProperties.size());
+		assertProperties(ePoolProperties[0], aPoolProperties.get(0), "getName", "getValue");
+		assertProperties(ePoolProperties[1], aPoolProperties.get(1), "getPath");
 
 		// Validate the second object source (supplier)
 		WoofSupplierModel supplierOne = assertType(WoofSupplierModel.class, objectSources.get(1));

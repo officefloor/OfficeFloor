@@ -42,6 +42,27 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getPool" element="pool">
+				<attributes>
+					<attribute method="getManagedObjectPoolSourceClassName"
+						attribute="source" />
+				</attributes>
+				<collection method="getPropertySources">
+					<item type="net.officefloor.woof.model.objects.PropertyModel"
+						element="property">
+						<attributes>
+							<attribute method="getName" attribute="name" />
+							<attribute method="getValue" attribute="value" />
+						</attributes>
+					</item>
+					<item type="net.officefloor.woof.model.objects.PropertyFileModel"
+						element="property-file">
+						<attributes>
+							<attribute method="getPath" attribute="path" />
+						</attributes>
+					</item>
+				</collection>
+			</object>
 			<collection method="getFlows">
 				<item type="net.officefloor.woof.model.objects.WoofFlowModel"
 					element="flow">
