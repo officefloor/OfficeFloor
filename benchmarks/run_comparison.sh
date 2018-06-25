@@ -52,7 +52,7 @@ fi
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
 ./tfb --clean
-./tfb --test rapidoid-http-fast vertx-postgres vertx-web-postgres officefloor officefloor-raw
+./tfb --test rapidoid-http-fast netty vertx-postgres vertx-web-postgres officefloor officefloor-raw officefloor-micro
 
 # Find the latest results directory
 RESULTS_DIR=''
