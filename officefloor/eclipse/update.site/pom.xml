@@ -26,23 +26,6 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-p2-director-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>create-product-distributions</id>
-						<goals>
-							<goal>materialize-products</goal>
-							<goal>archive-products</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 	<profiles>
 		<profile>
 			<!-- Profile for building -->
