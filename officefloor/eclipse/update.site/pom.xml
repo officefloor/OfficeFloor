@@ -33,7 +33,7 @@
 			<activation>
 				<property>
 					<name>deploy</name>
-					<value>sonatype</value>
+					<value>sourceforge</value>
 				</property>
 			</activation>
 			<build>
@@ -45,7 +45,7 @@
 						<executions>
 							<execution>
 								<id>upload-repo</id>
-								<phase>install</phase>
+								<phase>deploy</phase>
 								<goals>
 									<goal>upload</goal>
 								</goals>
