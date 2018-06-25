@@ -173,6 +173,12 @@ public class HttpServerSocketManagedObjectSource
 	private static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
 
 	/**
+	 * Name of {@link Property} to specify the threshold of active requests to start
+	 * throttling new requests.
+	 */
+	private static final String PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD = "throttle.active.request.threshold";
+
+	/**
 	 * Singleton {@link SocketManager} for all {@link Connection} instances.
 	 */
 	private static SocketManager singletonSocketManager;
@@ -536,6 +542,11 @@ public class HttpServerSocketManagedObjectSource
 	private int serviceBufferMaxCorePoolSize;
 
 	/**
+	 * Throttle active request threshold.
+	 */
+	private int throttleActiveRequestThreshold;
+
+	/**
 	 * Indicates if secure HTTP connection.
 	 */
 	private boolean isSecure;
@@ -665,6 +676,8 @@ public class HttpServerSocketManagedObjectSource
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE, String.valueOf(10000)));
 		this.serviceBufferMaxCorePoolSize = Integer
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_CORE_POOL_SIZE, String.valueOf(10000000)));
+		this.throttleActiveRequestThreshold = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD, String.valueOf(100)));
 
 		// Create the request parser meta-data
 		this.httpRequestParserMetaData = new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength);
@@ -701,8 +714,9 @@ public class HttpServerSocketManagedObjectSource
 				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
 				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool, this.serverName,
-				this.dateHttpHeaderClock, this.isIncludeEscalationStackTrace);
+				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool,
+				this.throttleActiveRequestThreshold, this.serverName, this.dateHttpHeaderClock,
+				this.isIncludeEscalationStackTrace);
 
 		// Create the SSL servicer factory
 		SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -787,6 +801,8 @@ public class HttpServerSocketManagedObjectSource
 		 *            {@link HttpRequestParserMetaData}.
 		 * @param serviceBufferPool
 		 *            Service {@link StreamBufferPool}.
+		 * @param throttleActiveRequestThreshold
+		 *            Throttle active request threshold.
 		 * @param serverName
 		 *            <code>Server</code> {@link HttpHeaderValue}.
 		 * @param dateHttpHeaderClock
@@ -797,10 +813,11 @@ public class HttpServerSocketManagedObjectSource
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool, HttpHeaderValue serverName,
-				DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
-			super(serverLocation, isSecure, metaData, serviceBufferPool, serverName, dateHttpHeaderClock,
-					isIncludeEscalationStackTrace);
+				StreamBufferPool<ByteBuffer> serviceBufferPool, int throttleActiveRequestThreshold,
+				HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
+				boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serviceBufferPool, throttleActiveRequestThreshold, serverName,
+					dateHttpHeaderClock, isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 

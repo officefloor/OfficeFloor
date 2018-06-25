@@ -179,6 +179,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	@Override
 	protected void setUp() throws Exception {
+		System.out.println("START: " + this.getName());
 		super.setUp();
 
 		// Log GC
@@ -190,6 +191,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	@Override
 	protected void tearDown() throws Exception {
+		System.out.println("SHUTDOWN: " + this.getName());
 
 		// Close the executors
 		for (PipelineExecutor executor : this.executors) {
@@ -217,6 +219,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Remaining tear down
 		super.tearDown();
+		System.out.println("END: " + this.getName());
 	}
 
 	/**

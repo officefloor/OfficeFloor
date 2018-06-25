@@ -20,6 +20,7 @@ package net.officefloor.server.http;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import net.officefloor.frame.api.escalate.Escalation;
@@ -76,6 +77,13 @@ public abstract class AbstractHttpServicerFactory
 	 * entity.
 	 */
 	private final StreamBufferPool<ByteBuffer> serviceBufferPool;
+
+	/**
+	 * Throttle active request threshold. When this number of requests are active,
+	 * further requests a throttled down to allow the active requests to be
+	 * processed.
+	 */
+	private final int throttleActiveRequestThreshold;
 
 	/**
 	 * <code>Server</code> {@link HttpHeaderValue}.
@@ -135,6 +143,8 @@ public abstract class AbstractHttpServicerFactory
 	 *            {@link StreamBufferPool} used to service requests.
 	 * @param metaData
 	 *            {@link HttpRequestParserMetaData}.
+	 * @param throttleActiveRequestThreshold
+	 *            Threshold of active requests to start throttling new requests.
 	 * @param serverName
 	 *            <code>Server</code> {@link HttpHeaderValue}.
 	 * @param dateHttpHeaderClock
@@ -145,12 +155,13 @@ public abstract class AbstractHttpServicerFactory
 	 */
 	public AbstractHttpServicerFactory(HttpServerLocation serverLocation, boolean isSecure,
 			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool,
-			HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
+			int throttleActiveRequestThreshold, HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
 			boolean isIncludeEscalationStackTrace) {
 		this.serverLocation = serverLocation;
 		this.isSecure = isSecure;
 		this.metaData = metaData;
 		this.serviceBufferPool = serviceBufferPool;
+		this.throttleActiveRequestThreshold = throttleActiveRequestThreshold;
 		this.serverName = serverName;
 		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
@@ -171,6 +182,11 @@ public abstract class AbstractHttpServicerFactory
 		 * {@link HttpException} in attempting to parse {@link HttpRequest}.
 		 */
 		private HttpException parseFailure = null;
+
+		/**
+		 * Active requests.
+		 */
+		private final AtomicInteger activeRequests = new AtomicInteger(0);
 
 		/**
 		 * Instantiate.
@@ -196,6 +212,14 @@ public abstract class AbstractHttpServicerFactory
 			// Parse out the requests
 			try {
 				while (this.parse()) {
+
+					// New request, so increment active connections
+					int active = this.activeRequests.incrementAndGet();
+
+					// Slow incoming requests by allowing other threads to process active requests
+					if (active > AbstractHttpServicerFactory.this.throttleActiveRequestThreshold) {
+						Thread.yield();
+					}
 
 					// Create request from parser
 					this.requestHandler.handleRequest(this);
@@ -238,6 +262,9 @@ public abstract class AbstractHttpServicerFactory
 
 				// Write the response
 				responseWriter.write((responseHead, socketBufferPool) -> {
+
+					// Active request serviced
+					this.activeRequests.decrementAndGet();
 
 					// Write the status line
 					responseVersion.write(responseHead, socketBufferPool);
