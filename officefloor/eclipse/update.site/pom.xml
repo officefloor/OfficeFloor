@@ -13,6 +13,7 @@
 	<packaging>eclipse-repository</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<ant-jsch-version>1.10.3</ant-jsch-version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -41,7 +42,6 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>wagon-maven-plugin</artifactId>
-						<version>2.0.0</version>
 						<executions>
 							<execution>
 								<id>upload-repo</id>
@@ -53,7 +53,7 @@
 									<fromDir>${project.build.directory}/repository/</fromDir>
 									<includes>**</includes>
 									<serverId>repo.officefloor.sf.net</serverId>
-									<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/eclipse/${project.version}/</url>
+									<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/eclipse/${project.version}</url>
 								</configuration>
 							</execution>
 						</executions>
@@ -62,8 +62,7 @@
 			</build>
 		</profile>
 		<profile>
-			<!-- Release to Update Site -->
-			<id>release-eclipse-update-site</id>
+			<id>release-beta-eclipse-update-site</id>
 			<activation>
 				<property>
 					<name>deploy</name>
@@ -73,20 +72,50 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>com.atlassian.maven.plugins</groupId>
-						<artifactId>maven-upload-plugin</artifactId>
+						<!-- Create SourceForge Shell -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>upload-site</id>
+								<id>Create SourceForge shell for deploying artifacts</id>
+								<inherited>false</inherited>
+								<phase>verify</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true"
+											command="create" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-jsch</artifactId>
+								<version>${ant-jsch-version}</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>wagon-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>upload-repo</id>
 								<phase>deploy</phase>
 								<goals>
 									<goal>upload</goal>
 								</goals>
 								<configuration>
-									<resourceSrc>${project.basedir}/target/site/*</resourceSrc>
-									<url>scp://sagenschneider,officefloor@shell.sourceforge.net</url>
-									<resourceDest>home/frs/project/officefloor/eclipse/update</resourceDest>
+									<fromDir>${project.build.directory}/repository/</fromDir>
+									<includes>**</includes>
 									<serverId>repo.officefloor.sf.net</serverId>
+									<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/eclipse/update</url>
 								</configuration>
 							</execution>
 						</executions>
