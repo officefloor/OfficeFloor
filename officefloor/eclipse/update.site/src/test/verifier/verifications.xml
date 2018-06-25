@@ -2,11 +2,11 @@
 	<files>
 		<!-- Ensure releasing new version -->
 		<file>
-			<location>site.xml</location>
+			<location>category.xml</location>
 			<contains><![CDATA[<feature(\s)+url="features/net.officefloor.feature_@{net.officefloor.feature_version}.jar"(\s)+id="net.officefloor.feature"(\s)+version="@{net.officefloor.feature_version}">]]></contains>
 		</file>
 		<file>
-			<location>site.xml</location>
+			<location>category.xml</location>
 			<contains><![CDATA[<feature(\s)+url="features/net.officefloor.woof.feature_@{net.officefloor.woof.feature_version}.jar"(\s)+id="net.officefloor.woof.feature"(\s)+version="@{net.officefloor.woof.feature_version}">]]></contains>
 		</file>
 	</files>
