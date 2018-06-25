@@ -40,6 +40,10 @@
 			<build>
 				<plugins>
 					<plugin>
+						<!-- Deploys beta update site -->
+						<!--  -->
+						<!-- To test, go to: -->
+						<!-- http://master.dl.sourceforge.net/project/officefloor/eclipse/${project.version} -->
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>wagon-maven-plugin</artifactId>
 						<executions>
