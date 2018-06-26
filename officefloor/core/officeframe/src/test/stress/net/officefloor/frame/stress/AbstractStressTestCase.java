@@ -141,7 +141,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 * @return Wait time in seconds for completion of {@link Test}.
 	 */
 	protected int getMaxWaitTime() {
-		return 100;
+		return 300;
 	}
 
 	/**

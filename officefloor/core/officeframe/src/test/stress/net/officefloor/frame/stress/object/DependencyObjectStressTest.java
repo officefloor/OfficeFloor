@@ -112,7 +112,7 @@ public class DependencyObjectStressTest extends AbstractStressTestCase {
 	}
 
 	/**
-	 * Dependency object. s
+	 * Dependency object.
 	 */
 	private static class DependencyObject {
 	}
