@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="net.officefloor.woof.feature"
-      version="3.0.0"
       label="Web on OfficeFloor (WoOF) Feature"
+      version="3.0.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -10,11 +10,11 @@
    </description>
 
    <copyright>
-      Copyright (C) 2005-2013 Daniel Sagenschneider
+      Copyright (C) 2005-2018 Daniel Sagenschneider
    </copyright>
 
    <license url="http://www.gnu.org/licenses/gpl.html">
-      WoOF licensed under GPL (http://www.gnu.org/licenses/gpl.html)
+      WoOF licensed under AGPL (http://www.gnu.org/licenses/gpl.html)
    </license>
 
    <url>
@@ -27,16 +27,15 @@
 
    <plugin
          id="net.officefloor.woof"
-		 version="0.0.0"
          download-size="0"
          install-size="0"
-         />
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.eclipse.woof"
-         version="0.0.0"
          download-size="0"
          install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
