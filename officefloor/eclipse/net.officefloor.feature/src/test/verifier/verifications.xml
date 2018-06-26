@@ -1,0 +1,43 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
+		<!-- Ensure correct versions -->
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.feature"(\s+)version="${project.version}"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.core"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.common"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.configurer"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.editor"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.ide"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.launch"(\s+)version="0.0.0"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.eclipse.osgi"(\s+)version="0.0.0"]]></contains>
+		</file>
+	</files>
+</verifications>

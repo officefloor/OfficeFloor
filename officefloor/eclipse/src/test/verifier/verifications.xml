@@ -2,17 +2,13 @@
 	<files>
 		<!-- Core eclipse modules are inheriting correct version -->
 		<file>
-			<location>plugins/net.officefloor.core/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>features/net.officefloor.feature/pom.xml</location>
+			<location>net.officefloor.core/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 
 		<!-- WoOF eclipse modules are inheriting correct version -->
 		<file>
-			<location>features/net.officefloor.woof.feature/pom.xml</location>
+			<location>net.officefloor.woof/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 

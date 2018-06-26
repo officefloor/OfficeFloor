@@ -16,24 +16,24 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<modules>
-		<module>plugins/net.officefloor.core</module>
-		<module>plugins/net.officefloor.eclipse.target</module>
-		<module>plugins/net.officefloor.eclipse.common</module>
-		<module>plugins/net.officefloor.eclipse.osgi</module>
-		<module>plugins/net.officefloor.eclipse.editor</module>
-		<module>plugins/net.officefloor.eclipse.editor.test</module>
-		<module>plugins/net.officefloor.eclipse.configurer</module>
-		<module>plugins/net.officefloor.eclipse.configurer.test</module>
-		<module>plugins/net.officefloor.eclipse.ide</module>
-		<module>plugins/net.officefloor.eclipse.section</module>
-		<module>plugins/net.officefloor.eclipse.section.test</module>
-		<module>plugins/net.officefloor.eclipse.officefloor</module>
-		<module>plugins/net.officefloor.eclipse.launch</module>
-		<module>plugins/net.officefloor.woof</module>
-		<module>plugins/net.officefloor.eclipse.woof</module>
-		<module>plugins/net.officefloor.eclipse.woof.test</module>
-		<module>features/net.officefloor.feature</module>
-		<module>features/net.officefloor.woof.feature</module>
+		<module>net.officefloor.core</module>
+		<module>net.officefloor.eclipse.target</module>
+		<module>net.officefloor.eclipse.common</module>
+		<module>net.officefloor.eclipse.osgi</module>
+		<module>net.officefloor.eclipse.editor</module>
+		<module>net.officefloor.eclipse.editor.tests</module>
+		<module>net.officefloor.eclipse.configurer</module>
+		<module>net.officefloor.eclipse.configurer.tests</module>
+		<module>net.officefloor.eclipse.ide</module>
+		<module>net.officefloor.eclipse.section</module>
+		<module>net.officefloor.eclipse.section.tests</module>
+		<module>net.officefloor.eclipse.officefloor</module>
+		<module>net.officefloor.eclipse.launch</module>
+		<module>net.officefloor.woof</module>
+		<module>net.officefloor.eclipse.woof</module>
+		<module>net.officefloor.eclipse.woof.tests</module>
+		<module>net.officefloor.feature</module>
+		<module>net.officefloor.woof.feature</module>
 		<module>update.site</module>
 	</modules>
 	<build>
