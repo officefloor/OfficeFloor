@@ -9,6 +9,8 @@ Quick install
 ---------------
 
 
+                                       Ensure e(fx)clipse is installed.
+
 
                             Drag the install icon in the left menu to your Eclipse IDE  
                             
@@ -23,6 +25,13 @@ Quick install
   A dialog will appear in Eclipse with the OfficeFloor features to install.  Step through with next and then click finish to install the OfficeFloor Eclipse plug-ins.
 
   Congratulations you have all the tools necessary to start building applications with OfficeFloor.  Please now see the {{{./tutorials/index.html}tutorials}} for how simple, fast and agile it is to develop with OfficeFloor.
+
+
+e(fx)clipse
+
+  OfficeFloor graphical editors are using the latest version of GEF, which requires the {{{e(fx)clipse}http://www.eclipse.org/efxclipse/index.html}}.  This will need to be installed before installing the OfficeFloor plugins.
+  
+  <GOTCHA>: running on linux, due to Java not supporting GTK3, the following environment variable should be set <<<SWT_GTK3=0>>>.
 
 
 Manual install

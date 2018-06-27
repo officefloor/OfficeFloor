@@ -51,6 +51,10 @@ fi
 
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
+
+# TODO REMOVE
+./tfb --mode verify --test officefloor-raw
+
 ./tfb --clean
 ./tfb --test rapidoid-http-fast netty vertx-postgres vertx-web-postgres officefloor officefloor-raw officefloor-micro officefloor-netty officefloor-rapidoid
 
