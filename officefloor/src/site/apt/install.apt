@@ -29,7 +29,7 @@ Quick install
 
 e(fx)clipse
 
-  OfficeFloor graphical editors are using the latest version of GEF, which requires the {{{e(fx)clipse}http://www.eclipse.org/efxclipse/index.html}}.  This will need to be installed before installing the OfficeFloor plugins.
+  OfficeFloor graphical editors are using the latest version of GEF, which requires the {{{http://www.eclipse.org/efxclipse}e(fx)clipse}}.  This will need to be installed before installing the OfficeFloor plugins.
   
   <GOTCHA>: running on linux, due to Java not supporting GTK3, the following environment variable should be set <<<SWT_GTK3=0>>>.
 
