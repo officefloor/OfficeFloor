@@ -1207,8 +1207,9 @@
 								</goals>
 								<configuration>
 									<target>
-										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
-											password="${developer.svn.password}" verbose="true" command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true"
+											command="create" />
 									</target>
 								</configuration>
 							</execution>
