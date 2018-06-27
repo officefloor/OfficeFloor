@@ -48,9 +48,9 @@
 	</contributors>
 	<distributionManagement>
 		<site>
-			<id>site.officefloor.sf.net</id>
+			<id>repo.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/project-web/officefloor/htdocs</url>
+			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs</url>
 		</site>
 	</distributionManagement>
 	<modules>
