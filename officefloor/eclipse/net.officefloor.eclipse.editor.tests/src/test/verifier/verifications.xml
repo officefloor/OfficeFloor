@@ -7,11 +7,11 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.core;bundle-version="@{net.officefloor.core_version}"]]></contains>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.core;bundle-version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.eclipse.editor;bundle-version="@{net.officefloor.core_version}"]]></contains>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.eclipse.editor;bundle-version="${project.version}"]]></contains>
 		</file>
 	</files>
 </verifications>
