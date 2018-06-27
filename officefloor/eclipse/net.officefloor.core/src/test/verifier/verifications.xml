@@ -15,29 +15,29 @@
 		<!-- Ensure correct versions on build class path -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeframe-@{officeframe_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeframe-${project.version}.jar]]></contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officexml-@{officexml_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officexml-${project.version}.jar]]></contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officecompiler-@{officecompiler_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officecompiler-${project.version}.jar]]></contains>
 		</file>
 
 		<!-- Ensure correct versions included for build -->
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeframe-@{officeframe_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)officeframe-${project.version}.jar]]></contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officexml-@{officexml_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)officexml-${project.version}.jar]]></contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officecompiler-@{officecompiler_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)officecompiler-${project.version}.jar]]></contains>
 		</file>
 
 	</files>

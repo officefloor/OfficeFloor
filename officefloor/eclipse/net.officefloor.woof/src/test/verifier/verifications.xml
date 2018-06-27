@@ -15,13 +15,13 @@
 		<!-- Ensure correct versions on build class path -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)woof-@{woof_version}.jar]]></contains>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)woof-${project.version}.jar]]></contains>
 		</file>
 
 		<!-- Ensure correct versions included for build -->
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)woof-@{woof_version}.jar]]></contains>
+			<contains><![CDATA[bin.includes =([^=]*)woof-${project.version}.jar]]></contains>
 		</file>
 
 	</files>
