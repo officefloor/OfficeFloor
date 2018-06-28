@@ -1,0 +1,24 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/deploy" secure="false" x="32" y="36">
+      <resource path="deployed.html"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+    <resource path="deployed.html" x="200" y="34"/>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

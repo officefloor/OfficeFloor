@@ -1,0 +1,62 @@
+                                               -----------------------
+                                                   Deploy Tutorial 
+                                               -----------------------
+					                             Daniel Sagenschneider
+                                               -----------------------
+
+  <<Deploy Tutorial>>
+
+  This tutorial demonstrates the ease of deploying OfficeFloor applications.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DeployHttpServer/${projectVersion}/DeployHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  
+  To deploy an OfficeFloor application, add the following build configuration to your <pom.xml>:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This will create an executable jar that can be run with the following:
+                                                                                                                          
+---------------
+
+    java -jar DeployHttpServer-${project.version}.jar
+    
+---------------
+
+Docker
+
+  As OfficeFloor applications can be run as a single command, it is easy to copy the jar file into a Docker image and run it.
+  
+  A simple Docker build file might look as follows:
+  
+---------------
+
+FROM openjdk:8
+COPY target/DeployHttpServer-${project.version}.jar server.jar
+CMD ["java", "-Dhttp.port=8080", "-jar", "server.jar"]
+  
+---------------
+
+  Various system properties can be used to configure OfficeFloor.  Please see:
+  
+   * {{{/apidocs/net/officefloor/server/http/HttpServerLocation.html}HttpServerLocation}}
+   
+   * {{{/apidocs/net/officefloor/server/http/HttpServer.html}HttpServer}}
+
+
+Now your turn
+
+  Should you have worked through all the tutorials, you are now ready to:
+
+   [[1]] Prototype your applications with OfficeFloor
+  
+   [[1]] Easily transform prototypes into working applications with OfficeFloor
+  
+   [[1]] Easily test your applications built with OfficeFloor
+  
+   [[1]] With graphical configuration, easily refactor your applications built with OfficeFloor
+  
+   [[1]] Tune your applications (via Thread Injection provided by OfficeFloor)
+  
+   [[1]] Deploy your applications with OfficeFloor
+
+  Return to the {{{../index.html}tutorials}}.

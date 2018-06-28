@@ -22,6 +22,7 @@
 			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
 			<item name="REST" href="./RestHttpServer/index.html" />
 			<item name="Test" href="./TestHttpServer/index.html" />
+			<item name="Deploy" href="./DeployHttpServer/index.html" />
 			<!-- <item name="Governance" href="./TransactionHttpServer/index.html" 
 				/> -->
 		</menu>
