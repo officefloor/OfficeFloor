@@ -49,6 +49,12 @@ if [ -d "${DIR}FrameworkBenchmarks/FrameworkBenchmarks/results" ]; then
 	rm -rf "${DIR}FrameworkBenchmarks/FrameworkBenchmarks/results" 
 fi
 
+# Ensure passing tests
+cd "${DIR}/OfficeFloorFrameworkBenchmarks/FrameworkBenchmarks/frameworks/Java/officefloor/src"
+mvn clean install
+cd "${DIR}/test"
+mvn clean install
+
 # Run the comparison
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
 ./tfb --clean
