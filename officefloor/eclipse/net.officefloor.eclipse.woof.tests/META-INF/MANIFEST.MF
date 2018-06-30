@@ -4,7 +4,7 @@ Bundle-Name: Test WoOF Editor
 Bundle-SymbolicName: net.officefloor.eclipse.woof.tests;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-10
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.google.inject,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

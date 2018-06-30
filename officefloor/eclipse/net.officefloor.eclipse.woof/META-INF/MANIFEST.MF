@@ -4,7 +4,7 @@ Bundle-Name: Section Editor
 Bundle-SymbolicName: net.officefloor.eclipse.woof;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-10
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-RegisterBuddy: net.officefloor.core
 Export-Package: net.officefloor.eclipse.woof
 Require-Bundle: org.eclipse.core.runtime,

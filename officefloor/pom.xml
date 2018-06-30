@@ -81,6 +81,7 @@
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<jackson-version>2.9.6</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
+		<asm-version>6.2</asm-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -560,6 +561,13 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${compiler-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.ow2.asm</groupId>
+							<artifactId>asm</artifactId>
+							<version>${asm-version}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -637,6 +645,13 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
 					<version>${maven-plugin-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.ow2.asm</groupId>
+							<artifactId>asm</artifactId>
+							<version>${asm-version}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

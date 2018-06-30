@@ -47,10 +47,8 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param osgiBridge
-	 *            {@link OfficeFloorOsgiBridge}.
-	 * @param parentShell
-	 *            Parent {@link Shell}.
+	 * @param osgiBridge  {@link OfficeFloorOsgiBridge}.
+	 * @param parentShell Parent {@link Shell}.
 	 */
 	public Configurer(OfficeFloorOsgiBridge osgiBridge, Shell parentShell) {
 		super(osgiBridge, parentShell);
@@ -59,10 +57,8 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	/**
 	 * Loads the configuration to {@link Composite}.
 	 * 
-	 * @param model
-	 *            Model.
-	 * @param parent
-	 *            Parent {@link Composite}.
+	 * @param model  Model.
+	 * @param parent Parent {@link Composite}.
 	 * @return {@link Configuration}.
 	 */
 	public Configuration loadConfiguration(M model, Composite parent) {
@@ -94,10 +90,8 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	 * Loads the configuration, loading the parent {@link Pane} into the
 	 * {@link Property}.
 	 * 
-	 * @param model
-	 *            {@link Model}.
-	 * @param nodeProperty
-	 *            {@link Property} to receive the parent {@link Pane}.
+	 * @param model        {@link Model}.
+	 * @param nodeProperty {@link Property} to receive the parent {@link Pane}.
 	 * @return {@link Configuration}.
 	 */
 	public Configuration loadConfiguration(M model, Property<Node> nodeProperty) {
@@ -113,10 +107,8 @@ public class Configurer<M> extends AbstractConfigurationBuilder<M> {
 	/**
 	 * Loads the input {@link Pane} with the configuration.
 	 * 
-	 * @param model
-	 *            {@link Model}.
-	 * @param parent
-	 *            Parent {@link Pane} to contain the configuration.
+	 * @param model  {@link Model}.
+	 * @param parent Parent {@link Pane} to contain the configuration.
 	 * @return {@link Configuration}.
 	 */
 	public Configuration loadConfiguration(M model, Pane parent) {
