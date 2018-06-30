@@ -72,7 +72,8 @@ public class FortunesTest {
 	@Test
 	public void validRequest() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/fortunes"));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		String entity = EntityUtils.toString(response.getEntity());
+		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "text/html;charset=utf-8",
 				response.getFirstHeader("content-type").getValue());
 		assertEquals("Incorrect server", this.getServerName(), response.getFirstHeader("Server").getValue());
@@ -92,7 +93,7 @@ public class FortunesTest {
 						+ "<tr><td>9</td><td>Feature: A bug with seniority.</td></tr>"
 						+ "<tr><td>1</td><td>fortune: No such file or directory</td></tr>"
 						+ "<tr><td>12</td><td>フレームワークのベンチマーク</td></tr>" + "</table></body></html>",
-				EntityUtils.toString(response.getEntity()));
+				entity);
 	}
 
 }

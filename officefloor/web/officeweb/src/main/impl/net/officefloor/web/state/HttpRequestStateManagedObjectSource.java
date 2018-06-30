@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.ws.http.HTTPException;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -57,17 +55,15 @@ public class HttpRequestStateManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpRequestStateDependencies {
-		SERVER_HTTP_CONNECTION
+			SERVER_HTTP_CONNECTION
 	}
 
 	/**
 	 * Initialises the {@link HttpRequestState}.
 	 * 
-	 * @param pathArguments
-	 *            Head path {@link HttpArgument} of the linked list of
-	 *            {@link HttpArgument} instances.
-	 * @param requestState
-	 *            {@link HttpRequestState}.
+	 * @param pathArguments Head path {@link HttpArgument} of the linked list of
+	 *                      {@link HttpArgument} instances.
+	 * @param requestState  {@link HttpRequestState}.
 	 */
 	public static void initialiseHttpRequestState(HttpArgument pathArguments, HttpRequestState requestState) {
 		HttpRequestStateManagedObject mo = (HttpRequestStateManagedObject) requestState;
@@ -77,12 +73,10 @@ public class HttpRequestStateManagedObjectSource
 	/**
 	 * Imports the state from the momento.
 	 * 
-	 * @param momento
-	 *            Momento containing the state for the {@link HttpRequestState}.
-	 * @param requestState
-	 *            {@link HttpRequestState}
-	 * @throws IllegalArgumentException
-	 *             If invalid momento.
+	 * @param momento      Momento containing the state for the
+	 *                     {@link HttpRequestState}.
+	 * @param requestState {@link HttpRequestState}
+	 * @throws IllegalArgumentException If invalid momento.
 	 */
 	public static void importHttpRequestState(Serializable momento, HttpRequestState requestState)
 			throws IllegalArgumentException {
@@ -109,8 +103,7 @@ public class HttpRequestStateManagedObjectSource
 	/**
 	 * Exports a momento for the current state of this {@link HttpRequestState}.
 	 *
-	 * @param requestState
-	 *            {@link HttpRequestState}.
+	 * @param requestState {@link HttpRequestState}.
 	 * @return Momento for the current state of this {@link HttpRequestState}.
 	 */
 	public static Serializable exportHttpRequestState(HttpRequestState requestState) {
@@ -137,8 +130,7 @@ public class HttpRequestStateManagedObjectSource
 	/**
 	 * Instantiate.
 	 * 
-	 * @param argumentParsers
-	 *            {@link HttpArgumentParser} instances.
+	 * @param argumentParsers {@link HttpArgumentParser} instances.
 	 */
 	public HttpRequestStateManagedObjectSource(HttpArgumentParser[] argumentParsers) {
 		this.argumentParsers = argumentParsers;
@@ -200,9 +192,8 @@ public class HttpRequestStateManagedObjectSource
 		/**
 		 * Initialises this {@link HttpRequestState}.
 		 * 
-		 * @param pathArguments
-		 *            Head path {@link HttpArgument} of the linked list of
-		 *            {@link HttpArgument} instances.
+		 * @param pathArguments Head path {@link HttpArgument} of the linked list of
+		 *                      {@link HttpArgument} instances.
 		 */
 		private void initialise(HttpArgument pathArguments) {
 			this.context.run(() -> {
@@ -255,7 +246,7 @@ public class HttpRequestStateManagedObjectSource
 		 */
 
 		@Override
-		public void loadValue(String name, String value, HttpValueLocation location) throws HTTPException {
+		public void loadValue(String name, String value, HttpValueLocation location) throws HttpException {
 			HttpArgument oldHead = this.arguments;
 			this.arguments = new HttpArgument(name, value, location);
 			this.arguments.next = oldHead;
@@ -337,10 +328,8 @@ public class HttpRequestStateManagedObjectSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param headArgument
-		 *            Head {@link HttpArgument}.
-		 * @param attributes
-		 *            Attributes.
+		 * @param headArgument Head {@link HttpArgument}.
+		 * @param attributes   Attributes.
 		 */
 		public StateMomento(HttpArgument headArgument, Map<String, Serializable> attributes) {
 			this.headArgument = headArgument;

@@ -35,12 +35,9 @@ public abstract class AbstractPropertyMetaData {
 	/**
 	 * Convenience constructor.
 	 * 
-	 * @param name
-	 *            Name.
-	 * @param type
-	 *            Type.
-	 * @param description
-	 *            Description.
+	 * @param name        Name.
+	 * @param type        Type.
+	 * @param description Description.
 	 */
 	public AbstractPropertyMetaData(String name, String type, String description) {
 		this.name = name;
@@ -115,7 +112,7 @@ public abstract class AbstractPropertyMetaData {
 	}
 
 	public boolean isCascadeRemove() {
-		return new Boolean(this.cascadeRemove).booleanValue();
+		return Boolean.valueOf(this.cascadeRemove).booleanValue();
 	}
 
 	/**

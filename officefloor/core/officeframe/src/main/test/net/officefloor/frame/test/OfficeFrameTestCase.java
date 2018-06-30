@@ -192,12 +192,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * <p>
 	 * This is useful to not have to provide throws clauses on tests.
 	 * 
-	 * @param ex
-	 *            Failure.
+	 * @param ex Failure.
 	 * @return {@link RuntimeException} to allow <code>throw fail(ex);</code> for
 	 *         compilation. Note this is never returned as always throws exception.
-	 * @throws TestFail
-	 *             Handled by {@link #runBare()}.
+	 * @throws TestFail Handled by {@link #runBare()}.
 	 */
 	public static RuntimeException fail(Throwable ex) {
 		// Propagate for runBare to pick up
@@ -212,8 +210,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param cause
-		 *            Cause of failure.
+		 * @param cause Cause of failure.
 		 */
 		public TestFail(Throwable cause) {
 			super(cause);
@@ -232,10 +229,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * This is useful for such methods as {@link TestCase#tearDown()} that do not
 	 * allow throwing {@link Throwable}.
 	 * 
-	 * @param ex
-	 *            {@link Throwable} to propagate as an {@link Exception}.
-	 * @throws Exception
-	 *             The failure.
+	 * @param ex {@link Throwable} to propagate as an {@link Exception}.
+	 * @throws Exception The failure.
 	 */
 	public static void throwException(Throwable ex) throws Exception {
 		if (ex instanceof Exception) {
@@ -319,10 +314,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Displays the graph of objects starting at root.
 	 * 
-	 * @param root
-	 *            Root of graph to display.
-	 * @throws Exception
-	 *             If fails.
+	 * @param root Root of graph to display.
+	 * @throws Exception If fails.
 	 */
 	public static void displayGraph(Object root) throws Exception {
 		displayGraph(root, new String[0]);
@@ -332,12 +325,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Displays the graph of objects starting at root ignoring following verticies
 	 * by the input method names.
 	 * 
-	 * @param root
-	 *            Root of graph to display.
-	 * @param ignoreMethodNames
-	 *            Method names to ignore.
-	 * @throws Exception
-	 *             If fails.
+	 * @param root              Root of graph to display.
+	 * @param ignoreMethodNames Method names to ignore.
+	 * @throws Exception If fails.
 	 */
 	public static void displayGraph(Object root, String... ignoreMethodNames) throws Exception {
 		PrintWriter writer = new PrintWriter(System.out);
@@ -348,18 +338,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Displays the graph of objects starting at root.
 	 * 
-	 * @param root
-	 *            Root of graph to display.
-	 * @param displayedObjects
-	 *            Set of objects already displayed.
-	 * @param depth
-	 *            Depth into the graph.
-	 * @param path
-	 *            Path from previous graph.
-	 * @param ignoreMethodNames
-	 *            Method names not to follow in graph for display.
-	 * @param writer
-	 *            Writer to output display.
+	 * @param root              Root of graph to display.
+	 * @param displayedObjects  Set of objects already displayed.
+	 * @param depth             Depth into the graph.
+	 * @param path              Path from previous graph.
+	 * @param ignoreMethodNames Method names not to follow in graph for display.
+	 * @param writer            Writer to output display.
 	 */
 	private static void displayGraph(Object root, Set<Object> displayedObjects, int depth, String path,
 			String[] ignoreMethodNames, PrintWriter writer) throws Exception {
@@ -460,8 +444,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		/**
 		 * Contains the operation that should fail.
 		 * 
-		 * @throws Throwable
-		 *             Expected failure of the operation.
+		 * @throws Throwable Expected failure of the operation.
 		 */
 		void run() throws Throwable;
 	}
@@ -469,12 +452,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts the failure.
 	 *
-	 * @param <F>
-	 *            Failure type.
-	 * @param operation
-	 *            {@link FailOperation} that is expected fail.
-	 * @param expectedFailureType
-	 *            Expect type of failure.
+	 * @param                     <F> Failure type.
+	 * @param operation           {@link FailOperation} that is expected fail.
+	 * @param expectedFailureType Expect type of failure.
 	 * @return Actual failure for further assertions.
 	 */
 	@SuppressWarnings("unchecked")
@@ -497,16 +477,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Provides simplified facade to verify {@link Method} will fail.
 	 *
-	 * @param <F>
-	 *            Failure type.
-	 * @param expectedFailureType
-	 *            Expected failure of method.
-	 * @param object
-	 *            Object to invoke {@link Method} on.
-	 * @param methodName
-	 *            Name of the {@link Method}.
-	 * @param parameters
-	 *            Parameters for the {@link Method}.
+	 * @param                     <F> Failure type.
+	 * @param expectedFailureType Expected failure of method.
+	 * @param object              Object to invoke {@link Method} on.
+	 * @param methodName          Name of the {@link Method}.
+	 * @param parameters          Parameters for the {@link Method}.
 	 * @return Actual failure for further assertions.
 	 */
 	public static <F extends Throwable> F assertFail(Class<F> expectedFailureType, final Object object,
@@ -532,16 +507,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Provides simplified facade to verify {@link Method} will fail.
 	 *
-	 * @param <F>
-	 *            Failure type.
-	 * @param expectedFailureType
-	 *            Expected failure of method.
-	 * @param object
-	 *            Object to invoke {@link Method} on.
-	 * @param method
-	 *            {@link Method}.
-	 * @param parameters
-	 *            Parameters for the {@link Method}.
+	 * @param                     <F> Failure type.
+	 * @param expectedFailureType Expected failure of method.
+	 * @param object              Object to invoke {@link Method} on.
+	 * @param method              {@link Method}.
+	 * @param parameters          Parameters for the {@link Method}.
 	 * @return Actual failure for further assertions.
 	 */
 	public static <F extends Throwable> F assertFail(Class<F> expectedFailureType, final Object object,
@@ -563,12 +533,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts the input texts match taking into account platform differences.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param expected
-	 *            Raw expected text.
-	 * @param actual
-	 *            Raw actual text.
+	 * @param message  Message.
+	 * @param expected Raw expected text.
+	 * @param actual   Raw actual text.
 	 */
 	public static void assertTextEquals(String message, String expected, String actual) {
 		String expectedText = createPlatformIndependentText(expected);
@@ -579,8 +546,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Creates the platform independent text for comparing.
 	 * 
-	 * @param rawText
-	 *            Raw text.
+	 * @param rawText Raw text.
 	 * @return Platform independent text.
 	 */
 	public static String createPlatformIndependentText(String rawText) {
@@ -592,12 +558,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts the input XML's match with white spacing removed.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param expected
-	 *            Raw expected text.
-	 * @param actual
-	 *            Raw actual text.
+	 * @param message  Message.
+	 * @param expected Raw expected text.
+	 * @param actual   Raw actual text.
 	 */
 	public static void assertXmlEquals(String message, String expected, String actual) {
 		String expectedXml = removeXmlWhiteSpacing(createPlatformIndependentText(expected));
@@ -608,8 +571,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Removes the white spacing from the XML.
 	 * 
-	 * @param xml
-	 *            XML.
+	 * @param xml XML.
 	 * @return XML with white spacing removed.
 	 */
 	public static String removeXmlWhiteSpacing(String xml) {
@@ -650,14 +612,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 *
-	 * @param <O>
-	 *            Type.
-	 * @param expectedRoot
-	 *            Expected root.
-	 * @param actualRoot
-	 *            Actual root.
-	 * @throws Exception
-	 *             If fails to compare graphs.
+	 * @param              <O> Type.
+	 * @param expectedRoot Expected root.
+	 * @param actualRoot   Actual root.
+	 * @throws Exception If fails to compare graphs.
 	 */
 	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot) throws Exception {
 		assertGraph(expectedRoot, actualRoot, new String[0]);
@@ -666,16 +624,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 *
-	 * @param <O>
-	 *            Type.
-	 * @param expectedRoot
-	 *            Expected root.
-	 * @param actualRoot
-	 *            Actual root.
-	 * @param ignoreMethodNames
-	 *            Listing of methods to be ignored in checking.
-	 * @throws Exception
-	 *             If fails.
+	 * @param                   <O> Type.
+	 * @param expectedRoot      Expected root.
+	 * @param actualRoot        Actual root.
+	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
+	 * @throws Exception If fails.
 	 */
 	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot, String... ignoreMethodNames)
 			throws Exception {
@@ -703,8 +656,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param object
-		 *            Object being checked.
+		 * @param object Object being checked.
 		 */
 		public CheckedObject(Object object) {
 			this.object = object;
@@ -735,18 +687,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 * 
-	 * @param O
-	 *            Type of root object for graph.
-	 * @param expectedRoot
-	 *            Expected root.
-	 * @param actualRoot
-	 *            Actual root.
-	 * @param checkedObjects
-	 *            Set of objects already checked to stop cyclic checking.
-	 * @param path
-	 *            Path to item failing check.
-	 * @param ignoreMethodNames
-	 *            Listing of methods to be ignored in checking.
+	 * @param O                 Type of root object for graph.
+	 * @param expectedRoot      Expected root.
+	 * @param actualRoot        Actual root.
+	 * @param checkedObjects    Set of objects already checked to stop cyclic
+	 *                          checking.
+	 * @param path              Path to item failing check.
+	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
 	 */
 	@SuppressWarnings("unchecked")
 	private static <O> void assertGraph(O expectedRoot, O actualRoot, Map<CheckedObject, Integer> checkedObjects,
@@ -777,10 +724,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 					}
 
 					// Specify another check of object
-					checkedObjects.put(checkedObject, new Integer(times));
+					checkedObjects.put(checkedObject, Integer.valueOf(times));
 				} else {
 					// First time accessed, therefore flag first time
-					checkedObjects.put(checkedObject, new Integer(1));
+					checkedObjects.put(checkedObject, Integer.valueOf(1));
 				}
 			}
 
@@ -866,18 +813,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input collection is as expected.
 	 * 
-	 * @param O
-	 *            Type of root object for graph.
-	 * @param expected
-	 *            {@link Collection} of expected.
-	 * @param actual
-	 *            {@link Collection} of actual.
-	 * @param checkedObjects
-	 *            Set of objects already checked to stop cyclic checking.
-	 * @param path
-	 *            Path to item failing check.
-	 * @param ignoreMethodNames
-	 *            Listing of methods to be ignored in checking.
+	 * @param O                 Type of root object for graph.
+	 * @param expected          {@link Collection} of expected.
+	 * @param actual            {@link Collection} of actual.
+	 * @param checkedObjects    Set of objects already checked to stop cyclic
+	 *                          checking.
+	 * @param path              Path to item failing check.
+	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
 	 */
 	@SuppressWarnings("unchecked")
 	private static <O> void assertGraphCollection(Collection<O> expected, Collection<O> actual,
@@ -904,12 +846,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts the contents of the input {@link File} instances are the same.
 	 * 
-	 * @param expected
-	 *            Expected file.
-	 * @param actual
-	 *            Actual file.
-	 * @throws IOException
-	 *             If fails to read contents.
+	 * @param expected Expected file.
+	 * @param actual   Actual file.
+	 * @throws IOException If fails to read contents.
 	 */
 	public static void assertContents(File expected, File actual) throws IOException {
 		assertContents(new FileReader(expected), new FileReader(actual));
@@ -918,10 +857,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts the contents of the input {@link Reader} instances are the same.
 	 * 
-	 * @param expected
-	 *            Expected content.
-	 * @param actual
-	 *            Actual content.
+	 * @param expected Expected content.
+	 * @param actual   Actual content.
 	 */
 	public static void assertContents(Reader expected, Reader actual) {
 		try {
@@ -943,14 +880,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that the input list is as expected.
 	 *
-	 * @param <O>
-	 *            Type.
-	 * @param matcher
-	 *            Matches the items of the list.
-	 * @param list
-	 *            List to be checked.
-	 * @param expectedItems
-	 *            Items expected to be in the list.
+	 * @param               <O> Type.
+	 * @param matcher       Matches the items of the list.
+	 * @param list          List to be checked.
+	 * @param expectedItems Items expected to be in the list.
 	 */
 	@SafeVarargs
 	public static <O> void assertList(ListItemMatcher<O> matcher, List<O> list, O... expectedItems) {
@@ -967,12 +900,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that the input list equals the expected.
 	 *
-	 * @param <O>
-	 *            Type.
-	 * @param list
-	 *            List to be checked.
-	 * @param expectedItems
-	 *            Items expected in the list.
+	 * @param               <O> Type.
+	 * @param list          List to be checked.
+	 * @param expectedItems Items expected in the list.
 	 */
 	@SafeVarargs
 	public static <O> void assertList(List<O> list, O... expectedItems) {
@@ -986,14 +916,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within list match.
 	 *
-	 * @param <O>
-	 *            Type.
-	 * @param methods
-	 *            Method names to specify the properties on the items to match.
-	 * @param list
-	 *            List to be checked.
-	 * @param expectedItems
-	 *            Items expected in the list.
+	 * @param               <O> Type.
+	 * @param methods       Method names to specify the properties on the items to
+	 *                      match.
+	 * @param list          List to be checked.
+	 * @param expectedItems Items expected in the list.
 	 */
 	@SafeVarargs
 	public static <O> void assertList(final String[] methods, List<O> list, O... expectedItems) {
@@ -1011,14 +938,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within the array match.
 	 *
-	 * @param <O>
-	 *            Type.
-	 * @param methods
-	 *            Method names to specify the properties on the items to match.
-	 * @param array
-	 *            Array to be checked.
-	 * @param expectedItems
-	 *            Items expected in the array.
+	 * @param               <O> Type.
+	 * @param methods       Method names to specify the properties on the items to
+	 *                      match.
+	 * @param array         Array to be checked.
+	 * @param expectedItems Items expected in the array.
 	 */
 	@SafeVarargs
 	public static <O> void assertList(final String[] methods, O[] array, O... expectedItems) {
@@ -1028,17 +952,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within list match after the list is sorted.
 	 * 
-	 * @param <O>
-	 *            Type.
-	 * @param sortMethod
-	 *            Name of method on the items to sort the list by to ensure match in
-	 *            order.
-	 * @param methods
-	 *            Method names to specify the properties on the items to match.
-	 * @param list
-	 *            List to be checked.
-	 * @param expectedItems
-	 *            Items expected in the list.
+	 * @param               <O> Type.
+	 * @param sortMethod    Name of method on the items to sort the list by to
+	 *                      ensure match in order.
+	 * @param methods       Method names to specify the properties on the items to
+	 *                      match.
+	 * @param list          List to be checked.
+	 * @param expectedItems Items expected in the list.
 	 */
 	@SafeVarargs
 	public static <O> void assertList(final String sortMethod, String[] methods, List<O> list, O... expectedItems) {
@@ -1066,14 +986,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on the input objects match for the specified methods.
 	 * 
-	 * @param <O>
-	 *            Type.
-	 * @param expected
-	 *            Expected item.
-	 * @param actual
-	 *            Actual item.
-	 * @param methods
-	 *            Method names to specify the properties on the item to match.
+	 * @param          <O> Type.
+	 * @param expected Expected item.
+	 * @param actual   Actual item.
+	 * @param methods  Method names to specify the properties on the item to match.
 	 */
 	public static <O> void assertProperties(O expected, O actual, String... methods) {
 		// Match the properties
@@ -1085,10 +1001,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the property on the Object.
 	 * 
-	 * @param object
-	 *            Object.
-	 * @param methodName
-	 *            Method name to obtain property value.
+	 * @param object     Object.
+	 * @param methodName Method name to obtain property value.
 	 * @return Value of property.
 	 */
 	public static Object getProperty(Object object, String methodName) {
@@ -1124,14 +1038,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Obtains the item within the items whose property by methodName matches the
 	 * input value.
 	 * 
-	 * @param <T>
-	 *            Item type.
-	 * @param items
-	 *            Items to search.
-	 * @param methodName
-	 *            Property on the item.
-	 * @param value
-	 *            Value of property the item should match.
+	 * @param            <T> Item type.
+	 * @param items      Items to search.
+	 * @param methodName Property on the item.
+	 * @param value      Value of property the item should match.
 	 * @return Item with the matching property.
 	 */
 	public static <T> T getItem(Collection<T> items, String methodName, Object value) {
@@ -1183,8 +1093,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Initiate allowing specifying name of test.
 	 * 
-	 * @param name
-	 *            Test name.
+	 * @param name Test name.
 	 */
 	public OfficeFrameTestCase(String name) {
 		super(name);
@@ -1193,8 +1102,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Specifies to provide verbose output to aid in debugging.
 	 * 
-	 * @param isVerbose
-	 *            <code>true</code> to turn on verbose output.
+	 * @param isVerbose <code>true</code> to turn on verbose output.
 	 */
 	public void setVerbose(boolean isVerbose) {
 		this.isVerbose = isVerbose;
@@ -1234,10 +1142,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Creates a mock object registering the {@link MockControl}of the mock object
 	 * with registry for management.
 	 * 
-	 * @param <M>
-	 *            Interface type.
-	 * @param classToMock
-	 *            {@link Class} to be mocked.
+	 * @param             <M> Interface type.
+	 * @param classToMock {@link Class} to be mocked.
 	 * @return Mock object.
 	 */
 	@SuppressWarnings({ "unchecked" })
@@ -1265,10 +1171,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Creates a mock object that synchronises on its {@link MockControl} before
 	 * making any method calls.
 	 * 
-	 * @param <M>
-	 *            Interface type.
-	 * @param interfaceToMock
-	 *            {@link Class} to mock.
+	 * @param                 <M> Interface type.
+	 * @param interfaceToMock {@link Class} to mock.
 	 * @return Mock object.
 	 */
 	@SuppressWarnings("unchecked")
@@ -1307,10 +1211,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Registers the object and its {@link MockControl} to be managed.
 	 * 
-	 * @param mockObject
-	 *            Mock object.
-	 * @param mockControl
-	 *            {@link MockControl} of the mock object.
+	 * @param mockObject  Mock object.
+	 * @param mockControl {@link MockControl} of the mock object.
 	 */
 	public final void registerMockObject(Object mockObject, MockControl mockControl) {
 		this.registry.put(mockObject, mockControl);
@@ -1319,8 +1221,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the {@link MockControl} for the input mock object.
 	 * 
-	 * @param mockObject
-	 *            Mock object of the {@link MockControl}.
+	 * @param mockObject Mock object of the {@link MockControl}.
 	 * @return Registered {@link MockControl}.
 	 */
 	public final MockControl control(Object mockObject) {
@@ -1330,15 +1231,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Convenience method to record a method and its return on a mock object.
 	 * 
-	 * @param <T>
-	 *            Expected result type.
-	 * @param mockObject
-	 *            Mock object.
-	 * @param ignore
-	 *            Result of operation on the mock object. This is only provided to
-	 *            obtain correct return type for recording return.
-	 * @param recordedReturn
-	 *            Value that is recorded to be returned from the mock object.
+	 * @param                <T> Expected result type.
+	 * @param mockObject     Mock object.
+	 * @param ignore         Result of operation on the mock object. This is only
+	 *                       provided to obtain correct return type for recording
+	 *                       return.
+	 * @param recordedReturn Value that is recorded to be returned from the mock
+	 *                       object.
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
 		// Obtain the control
@@ -1371,17 +1270,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Convenience method to record a method, an {@link ArgumentsMatcher} and return
 	 * value.
 	 *
-	 * @param <T>
-	 *            Expected result type.
-	 * @param mockObject
-	 *            Mock object.
-	 * @param ignore
-	 *            Result of operation on the mock object. This is only provided to
-	 *            obtain correct return type for recording return.
-	 * @param recordedReturn
-	 *            Value that is recorded to be returned from the mock object.
-	 * @param matcher
-	 *            {@link ArgumentsMatcher}.
+	 * @param                <T> Expected result type.
+	 * @param mockObject     Mock object.
+	 * @param ignore         Result of operation on the mock object. This is only
+	 *                       provided to obtain correct return type for recording
+	 *                       return.
+	 * @param recordedReturn Value that is recorded to be returned from the mock
+	 *                       object.
+	 * @param matcher        {@link ArgumentsMatcher}.
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
 		// Obtain the control
@@ -1423,10 +1319,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Test logic interface.
 	 * 
-	 * @param <R>
-	 *            Return type.
-	 * @param <T>
-	 *            Possible {@link Throwable}.
+	 * @param <R> Return type.
+	 * @param <T> Possible {@link Throwable}.
 	 */
 	protected static interface TestLogic<R, T extends Throwable> {
 		R run() throws T;
@@ -1435,15 +1329,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Undertakes test wrapping with mock object replay and verify.
 	 * 
-	 * @param <R>
-	 *            Return type of test logic.
-	 * @param <T>
-	 *            Possible {@link Throwable}.
-	 * @param test
-	 *            Test logic to wrap in replay/verify.
+	 * @param      <R> Return type of test logic.
+	 * @param      <T> Possible {@link Throwable}.
+	 * @param test Test logic to wrap in replay/verify.
 	 * @return Result of test logic.
-	 * @throws T
-	 *             If logic throws {@link Exception}.
+	 * @throws T If logic throws {@link Exception}.
 	 */
 	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
 		this.replayMockObjects();
@@ -1455,8 +1345,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Test capture interface.
 	 * 
-	 * @param <T>
-	 *            Possible {@link Throwable}.
+	 * @param <T> Possible {@link Throwable}.
 	 */
 	protected static interface TestCapture<T extends Throwable> {
 		void run() throws T;
@@ -1465,13 +1354,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Capture <code>std err</code> of test logic.
 	 * 
-	 * @param <T>
-	 *            Possible {@link Exception} type.
-	 * @param test
-	 *            Test logic to capture <code>std err</code>.
+	 * @param      <T> Possible {@link Exception} type.
+	 * @param test Test logic to capture <code>std err</code>.
 	 * @return <code>std err</code> output.
-	 * @throws T
-	 *             Possible {@link Throwable}.
+	 * @throws T Possible {@link Throwable}.
 	 */
 	protected final <T extends Throwable> String captureLoggerOutput(TestCapture<T> test) throws T {
 
@@ -1498,11 +1384,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the file at the relative path.
 	 * 
-	 * @param relativePath
-	 *            Relative path to the file.
+	 * @param relativePath Relative path to the file.
 	 * @return {@link File}.
-	 * @throws FileNotFoundException
-	 *             If file could not be found.
+	 * @throws FileNotFoundException If file could not be found.
 	 */
 	public File findFile(String relativePath) throws FileNotFoundException {
 
@@ -1533,13 +1417,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Obtains the file by the input file name located in the package of the input
 	 * class.
 	 * 
-	 * @param packageClass
-	 *            Class to obtain the relative path from for its package.
-	 * @param fileName
-	 *            Name of file within the package directory.
+	 * @param packageClass Class to obtain the relative path from for its package.
+	 * @param fileName     Name of file within the package directory.
 	 * @return File within the package directory.
-	 * @throws FileNotFoundException
-	 *             Should the file not be found.
+	 * @throws FileNotFoundException Should the file not be found.
 	 */
 	public File findFile(Class<?> packageClass, String fileName) throws FileNotFoundException {
 
@@ -1554,10 +1435,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Obtains the file location of the input file located in the package of the
 	 * input class.
 	 * 
-	 * @param packageClass
-	 *            Class to obtain the relative path from for its package.
-	 * @param fileName
-	 *            Name of the file within the package directory.
+	 * @param packageClass Class to obtain the relative path from for its package.
+	 * @param fileName     Name of the file within the package directory.
 	 * @return Path to the file.
 	 */
 	public String getFileLocation(Class<?> packageClass, String fileName) {
@@ -1567,8 +1446,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Creates the input directory.
 	 * 
-	 * @param directory
-	 *            Directory to be cleared.
+	 * @param directory Directory to be cleared.
 	 */
 	public void clearDirectory(File directory) {
 
@@ -1589,8 +1467,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Deletes the input directory.
 	 * 
-	 * @param directory
-	 *            Directory to be deleted.
+	 * @param directory Directory to be deleted.
 	 */
 	public void deleteDirectory(File directory) {
 
@@ -1615,12 +1492,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Copies the contents of the <code>source</code> directory to the
 	 * <code>target</code> directory.
 	 * 
-	 * @param source
-	 *            Source directory.
-	 * @param target
-	 *            Target directory.
-	 * @throws IOException
-	 *             If fails to copy the directory.
+	 * @param source Source directory.
+	 * @param target Target directory.
+	 * @throws IOException If fails to copy the directory.
 	 */
 	public void copyDirectory(File source, File target) throws IOException {
 
@@ -1662,13 +1536,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * <p>
 	 * Note: this also searches the class path for the file.
 	 * 
-	 * @param packageClass
-	 *            Class to obtain the relative path from for its package.
-	 * @param fileName
-	 *            Name of file within the package directory.
+	 * @param packageClass Class to obtain the relative path from for its package.
+	 * @param fileName     Name of file within the package directory.
 	 * @return File within the package directory.
-	 * @throws FileNotFoundException
-	 *             Should the file not be found.
+	 * @throws FileNotFoundException Should the file not be found.
 	 */
 	public InputStream findInputStream(Class<?> packageClass, String fileName) throws FileNotFoundException {
 
@@ -1688,8 +1559,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the relative path of the package of the class.
 	 * 
-	 * @param packageClass
-	 *            Class to obtain the relative path from for its package.
+	 * @param packageClass Class to obtain the relative path from for its package.
 	 * @return Relative path of class's package.
 	 */
 	public String getPackageRelativePath(Class<?> packageClass) {
@@ -1703,13 +1573,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the contents of the output file.
 	 * 
-	 * @param file
-	 *            File to obtain contents from.
+	 * @param file File to obtain contents from.
 	 * @return Contents of the output file.
-	 * @throws FileNotFoundException
-	 *             Should output file not yet be created.
-	 * @throws IOException
-	 *             Should fail to read from output file.
+	 * @throws FileNotFoundException Should output file not yet be created.
+	 * @throws IOException           Should fail to read from output file.
 	 */
 	public String getFileContents(File file) throws FileNotFoundException, IOException {
 
@@ -1728,12 +1595,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Creates the target file with the content.
 	 * 
-	 * @param content
-	 *            Content for the file.
-	 * @param target
-	 *            Target file.
-	 * @throws IOException
-	 *             If fails to create.
+	 * @param content Content for the file.
+	 * @param target  Target file.
+	 * @throws IOException If fails to create.
 	 */
 	public void createFile(File target, InputStream content) throws IOException {
 
@@ -1754,8 +1618,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Facade helper function for invoking {@link Thread#sleep(long)}.
 	 * 
-	 * @param time
-	 *            Sleep time in seconds.
+	 * @param time Sleep time in seconds.
 	 */
 	public void sleep(int time) {
 		try {
@@ -1768,8 +1631,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Facade method to timeout operations after 3 seconds.
 	 * 
-	 * @param startTime
-	 *            Start time from {@link System#currentTimeMillis()}.
+	 * @param startTime Start time from {@link System#currentTimeMillis()}.
 	 */
 	public void timeout(long startTime) {
 		this.timeout(startTime, 3);
@@ -1778,10 +1640,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Facade method to timeout operations after a second.
 	 * 
-	 * @param startTime
-	 *            Start time from {@link System#currentTimeMillis()}.
-	 * @param secondsToRun
-	 *            Seconds to run before timeout.
+	 * @param startTime    Start time from {@link System#currentTimeMillis()}.
+	 * @param secondsToRun Seconds to run before timeout.
 	 */
 	public void timeout(long startTime, int secondsToRun) {
 		if ((System.currentTimeMillis() - startTime) > (secondsToRun * 1000)) {
@@ -1792,8 +1652,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Waits for the check to be <code>true</code>.
 	 * 
-	 * @param check
-	 *            Check.
+	 * @param check Check.
 	 */
 	public void waitForTrue(Supplier<Boolean> check) {
 		this.waitForTrue(check, 3);
@@ -1802,10 +1661,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Waits for the check to be <code>true</code>.
 	 * 
-	 * @param check
-	 *            Check.
-	 * @param secondsToRun
-	 *            Seconds to wait before timing out.
+	 * @param check        Check.
+	 * @param secondsToRun Seconds to wait before timing out.
 	 */
 	public void waitForTrue(Supplier<Boolean> check, int secondsToRun) {
 		long startTime = System.currentTimeMillis();
@@ -1871,8 +1728,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the memory size in human readable form.
 	 * 
-	 * @param memorySize
-	 *            Memory size in bytes.
+	 * @param memorySize Memory size in bytes.
 	 * @return Memory size in human readable form.
 	 */
 	private String getMemorySize(long memorySize) {
@@ -1895,8 +1751,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains run time in human readable form.
 	 * 
-	 * @param startTime
-	 *            Start time of running.
+	 * @param startTime Start time of running.
 	 * @return Run time in human readable form.
 	 */
 	public String getDisplayRunTime(long startTime) {
@@ -1906,10 +1761,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains run time in human readable form.
 	 * 
-	 * @param startTime
-	 *            Start time of running.
-	 * @param endTime
-	 *            End time of running.
+	 * @param startTime Start time of running.
+	 * @param endTime   End time of running.
 	 * @return Run time in human readable form.
 	 */
 	public String getDisplayRunTime(long startTime, long endTime) {
@@ -1933,8 +1786,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Prints a message regarding the test.
 	 * 
-	 * @param message
-	 *            Message to be printed.
+	 * @param message Message to be printed.
 	 */
 	public void printMessage(String message) {
 
@@ -1950,10 +1802,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Prints a message regarding the test.
 	 * 
-	 * @param message
-	 *            Message to be printed.
-	 * @throws IOException
-	 *             If fails to print message.
+	 * @param message Message to be printed.
+	 * @throws IOException If fails to print message.
 	 */
 	public void printMessage(InputStream message) throws IOException {
 		this.printMessage(new InputStreamReader(message));
@@ -1962,10 +1812,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Prints a message regarding the test.
 	 * 
-	 * @param message
-	 *            Message to be printed.
-	 * @throws IOException
-	 *             If fails to print message.
+	 * @param message Message to be printed.
+	 * @throws IOException If fails to print message.
 	 */
 	public void printMessage(Reader message) throws IOException {
 		StringWriter buffer = new StringWriter();

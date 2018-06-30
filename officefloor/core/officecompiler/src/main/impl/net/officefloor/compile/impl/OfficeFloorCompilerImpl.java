@@ -21,10 +21,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -238,8 +240,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	private final Map<String, Class<?>> sectionSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
-	 * {@link ManagedFunctionSource} {@link Class} instances by their alias
-	 * name.
+	 * {@link ManagedFunctionSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> managedFunctionSourceAliases = new HashMap<String, Class<?>>();
 
@@ -249,8 +250,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	private final Map<String, Class<?>> managedObjectSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
-	 * {@link ManagedObjectPoolSource} {@link Class} instances by their alias
-	 * name.
+	 * {@link ManagedObjectPoolSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> managedObjectPoolSourceAliases = new HashMap<>();
 
@@ -285,8 +285,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	private boolean isSourceAliasesAdded = false;
 
 	/**
-	 * Flag indicating if this {@link OfficeFloorCompiler} has been configured
-	 * with the {@link OfficeFloorCompilerConfigurationService} instances.
+	 * Flag indicating if this {@link OfficeFloorCompiler} has been configured with
+	 * the {@link OfficeFloorCompilerConfigurationService} instances.
 	 */
 	private boolean isCompilerConfigured = false;
 
@@ -305,17 +305,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * <p>
 	 * Registers the alias ensuring only the first alias is used.
 	 * <p>
-	 * This follows class loading behaviour of loading the first class found on
-	 * the class path.
+	 * This follows class loading behaviour of loading the first class found on the
+	 * class path.
 	 * 
-	 * @param alias
-	 *            Alias.
-	 * @param aliasSourceClass
-	 *            Alias source class.
-	 * @param aliasMap
-	 *            Map of aliases to the alias source class.
-	 * @param aliasType
-	 *            Type of alias for providing a warning of duplicate aliases.
+	 * @param alias            Alias.
+	 * @param aliasSourceClass Alias source class.
+	 * @param aliasMap         Map of aliases to the alias source class.
+	 * @param aliasType        Type of alias for providing a warning of duplicate
+	 *                         aliases.
 	 */
 	private <C> void registerAlias(String alias, C aliasSourceClass, Map<String, C> aliasMap, String aliasType) {
 
@@ -523,7 +520,18 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Configure this OfficeFloor compiler
 		ServiceLoader<OfficeFloorCompilerConfigurationService> serviceLoader = ServiceLoader
 				.load(OfficeFloorCompilerConfigurationService.class, this.getClassLoader());
-		for (OfficeFloorCompilerConfigurationService configurationService : serviceLoader) {
+		Iterator<OfficeFloorCompilerConfigurationService> iterator = serviceLoader.iterator();
+		while (iterator.hasNext()) {
+
+			OfficeFloorCompilerConfigurationService configurationService;
+			try {
+				configurationService = iterator.next();
+			} catch (ServiceConfigurationError ex) {
+				this.getCompilerIssues().addIssue(this,
+						ex.getMessage() + " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);
+				return false; // failed to configure compiler
+			}
+
 			try {
 				configurationService.configureOfficeFloorCompiler(this);
 			} catch (Exception ex) {
@@ -560,7 +568,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		} else {
 			// Obtain the OfficeFloor source class
 			Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null
-					? this.officeFloorSourceClass : ApplicationOfficeFloorSource.class);
+					? this.officeFloorSourceClass
+					: ApplicationOfficeFloorSource.class);
 
 			// Instantiate the OfficeFloor source
 			officeFloorSource = CompileUtil.newInstance(officeFloorSourceClass, OfficeFloorSource.class, this,
@@ -572,7 +581,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 		// Create the MBean registrator
 		OfficeFloorMBeanRegistratorImpl officeFloorMBeanRegistrator = (this.mbeanRegistrator != null)
-				? new OfficeFloorMBeanRegistratorImpl(this.mbeanRegistrator) : null;
+				? new OfficeFloorMBeanRegistratorImpl(this.mbeanRegistrator)
+				: null;
 
 		// Create the compile context
 		CompileContextImpl compileContext = new CompileContextImpl(officeFloorMBeanRegistrator);
@@ -637,8 +647,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		/**
 		 * Instantiate.
 		 * 
-		 * @param officeFloorNode
-		 *            {@link OfficeFloorNode}.
+		 * @param officeFloorNode {@link OfficeFloorNode}.
 		 */
 		public ExternalServicingOfficeFloorListener(OfficeFloorNode officeFloorNode) {
 			this.officeFloorNode = officeFloorNode;

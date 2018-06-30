@@ -20,8 +20,6 @@ package net.officefloor.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.ws.http.HTTPException;
-
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpInputPathSegment.HttpInputPathSegmentEnum;
@@ -58,13 +56,10 @@ public class HttpInputPathImpl implements HttpInputPath {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param routePath
-	 *            Route path.
-	 * @param segmentHead
-	 *            Head {@link HttpInputPathSegment} of linked list of
-	 *            {@link HttpInputPathSegment} instances.
-	 * @param parameterCount
-	 *            Number of path parameters for sorting routes.
+	 * @param routePath      Route path.
+	 * @param segmentHead    Head {@link HttpInputPathSegment} of linked list of
+	 *                       {@link HttpInputPathSegment} instances.
+	 * @param parameterCount Number of path parameters for sorting routes.
 	 */
 	public HttpInputPathImpl(String routePath, HttpInputPathSegment segmentHead, int parameterCount) {
 		this.routePath = routePath;
@@ -145,7 +140,7 @@ public class HttpInputPathImpl implements HttpInputPath {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws HTTPException {
+	public <T> HttpPathFactory<T> createHttpPathFactory(Class<T> valuesType) throws HttpException {
 
 		// Ensure have type
 		if (valuesType == null) {

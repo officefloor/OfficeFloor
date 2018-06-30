@@ -71,12 +71,12 @@ public class QueriesTest {
 	@Test
 	public void validRequest() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/queries?queries=20"));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		String entity = EntityUtils.toString(response.getEntity());
+		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "application/json", response.getFirstHeader("content-type").getValue());
 		assertEquals("Incorrect server", this.getServerName(), response.getFirstHeader("Server").getValue());
 		assertNotNull("Should have date", response.getFirstHeader("date"));
-		WorldResponse[] worlds = new ObjectMapper().readValue(EntityUtils.toString(response.getEntity()),
-				WorldResponse[].class);
+		WorldResponse[] worlds = new ObjectMapper().readValue(entity, WorldResponse[].class);
 		assertEquals("Incorrect number of worlds", 20, worlds.length);
 		for (WorldResponse world : worlds) {
 			assertTrue("Invalid id: " + world.id, (world.id >= 1) && (world.id <= 10000));

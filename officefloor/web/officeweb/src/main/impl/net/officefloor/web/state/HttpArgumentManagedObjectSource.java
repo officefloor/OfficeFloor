@@ -17,8 +17,6 @@
  */
 package net.officefloor.web.state;
 
-import javax.xml.ws.http.HTTPException;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -26,6 +24,7 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.value.load.ValueLoader;
 
@@ -42,7 +41,7 @@ public class HttpArgumentManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpArgumentDependencies {
-		HTTP_REQUEST_STATE
+			HTTP_REQUEST_STATE
 	}
 
 	/**
@@ -58,10 +57,8 @@ public class HttpArgumentManagedObjectSource
 	/**
 	 * Instantiate.
 	 * 
-	 * @param parameterName
-	 *            Name of the parameter.
-	 * @param valueLocation
-	 *            {@link HttpValueLocation}.
+	 * @param parameterName Name of the parameter.
+	 * @param valueLocation {@link HttpValueLocation}.
 	 */
 	public HttpArgumentManagedObjectSource(String parameterName, HttpValueLocation valueLocation) {
 		this.parameterName = parameterName;
@@ -104,7 +101,7 @@ public class HttpArgumentManagedObjectSource
 		 */
 
 		@Override
-		public void loadValue(String name, String value, HttpValueLocation location) throws HTTPException {
+		public void loadValue(String name, String value, HttpValueLocation location) throws HttpException {
 
 			// Ensure match on location
 			if ((HttpArgumentManagedObjectSource.this.valueLocation != null)

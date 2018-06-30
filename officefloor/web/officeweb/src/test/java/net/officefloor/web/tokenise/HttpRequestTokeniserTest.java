@@ -19,9 +19,8 @@ package net.officefloor.web.tokenise;
 
 import java.net.HttpCookie;
 
-import javax.xml.ws.http.HTTPException;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -239,10 +238,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	/**
 	 * Indicates if the high and low bits result in a control character.
 	 * 
-	 * @param highBits
-	 *            High bits.
-	 * @param lowBits
-	 *            Low bits.
+	 * @param highBits High bits.
+	 * @param lowBits  Low bits.
 	 * @return <code>true</code> if control character.
 	 */
 	public static boolean isControlCharacter(int highBits, int lowBits) {
@@ -253,10 +250,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	/**
 	 * Transforms the high and low bits to the corresponding character value.
 	 * 
-	 * @param highBits
-	 *            High bits.
-	 * @param lowBits
-	 *            Low bits
+	 * @param highBits High bits.
+	 * @param lowBits  Low bits
 	 * @return Character value.
 	 */
 	public static String getCharacterValue(int highBits, int lowBits) {
@@ -267,8 +262,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	/**
 	 * Obtains the character value for the hexidecimal value.
 	 * 
-	 * @param hexidecimal
-	 *            Hexidecimal value.
+	 * @param hexidecimal Hexidecimal value.
 	 * @return Character value.
 	 */
 	public static String getCharacterValue(int hexidecimal) {
@@ -286,17 +280,13 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	/**
 	 * Does the test, expecting mocks to have recorded actions.
 	 * 
-	 * @param method
-	 *            {@link HttpMethod}.
-	 * @param requestUri
-	 *            {@link HttpRequest} Request URI.
-	 * @param entity
-	 *            Entity of the {@link HttpRequest}.
-	 * @param headerNameValues
-	 *            {@link HttpHeader} name value pairs.
+	 * @param method           {@link HttpMethod}.
+	 * @param requestUri       {@link HttpRequest} Request URI.
+	 * @param entity           Entity of the {@link HttpRequest}.
+	 * @param headerNameValues {@link HttpHeader} name value pairs.
 	 */
 	private void doTest(HttpMethod method, String requestUri, String entity, String... headerNameValues)
-			throws HTTPException {
+			throws HttpException {
 		this.replayMockObjects();
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(requestUri).method(method).entity(entity);
 		for (int i = 0; i < headerNameValues.length; i += 2) {

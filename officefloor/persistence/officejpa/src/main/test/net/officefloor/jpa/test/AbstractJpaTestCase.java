@@ -63,8 +63,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Loads the properties for the {@link JpaManagedObjectSource}.
 	 * 
-	 * @param jpa
-	 *            {@link PropertyConfigurable} to receive the {@link Property}
+	 * @param jpa {@link PropertyConfigurable} to receive the {@link Property}
 	 *            values.
 	 */
 	protected abstract void loadJpaProperties(PropertyConfigurable jpa);
@@ -89,8 +88,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
 	 * 
-	 * @param mos
-	 *            {@link PropertyConfigurable}.
+	 * @param mos {@link PropertyConfigurable}.
 	 */
 	protected void loadDatabaseProperties(PropertyConfigurable mos) {
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
@@ -100,10 +98,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Cleans the database.
 	 * 
-	 * @param connection
-	 *            {@link Connection}.
-	 * @throws SQLException
-	 *             If fails to clean the database.
+	 * @param connection {@link Connection}.
+	 * @throws SQLException If fails to clean the database.
 	 */
 	protected void cleanDatabase(Connection connection) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
@@ -208,8 +204,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to read entry from database.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testRead() throws Throwable {
 
@@ -255,8 +250,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to insert entry into database.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testInsert() throws Throwable {
 
@@ -283,7 +277,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	public static class InsertSection {
 		public void service(EntityManager entityManager) throws Exception {
-			IMockEntity entity = mockEntityClass.newInstance();
+			IMockEntity entity = mockEntityClass.getDeclaredConstructor().newInstance();
 			entity.setName("test");
 			entity.setDescription("mock insert entry");
 			entityManager.persist(entity);
@@ -293,8 +287,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to update entry into database.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testUpdate() throws Throwable {
 
@@ -335,8 +328,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to delete entry from database.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testDelete() throws Throwable {
 
@@ -374,8 +366,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Undertake stress insert test.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsert() throws Throwable {
 		this.doStressInsertTest(false);
@@ -384,8 +375,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Undertake stress insert test with pooled connections.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsertPooledConnections() throws Throwable {
 		this.doStressInsertTest(true);
@@ -394,8 +384,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the stress insert test.
 	 * 
-	 * @param isPoolConnections
-	 *            Indicates whether to pool connections.
+	 * @param isPoolConnections Indicates whether to pool connections.
 	 */
 	private void doStressInsertTest(boolean isPoolConnections) throws Throwable {
 
@@ -453,7 +442,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		private void insertRow(EntityManager entityManager, String name) throws Exception {
-			IMockEntity entity = mockEntityClass.newInstance();
+			IMockEntity entity = mockEntityClass.getDeclaredConstructor().newInstance();
 			entity.setName(name);
 			entity.setDescription(name);
 			entityManager.persist(entity);
@@ -463,8 +452,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure stress select.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelect() throws Throwable {
 		this.doStressSelectTest(false);
@@ -473,8 +461,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure stress select with pooled connections.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelectPooledConnections() throws Throwable {
 		this.doStressSelectTest(true);
@@ -483,8 +470,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the stress select test.
 	 * 
-	 * @param isPooledConnections
-	 *            Indicates if pool connections.
+	 * @param isPooledConnections Indicates if pool connections.
 	 */
 	private void doStressSelectTest(boolean isPooledConnections) throws Throwable {
 
@@ -592,13 +578,11 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Compiles and opens the {@link OfficeFloor} for testing.
 	 * 
-	 * @param isPoolConnections
-	 *            Indicates whether to pool connections.
-	 * @param extension
-	 *            {@link CompileOfficeExtension} for test specific configuration.
+	 * @param isPoolConnections Indicates whether to pool connections.
+	 * @param extension         {@link CompileOfficeExtension} for test specific
+	 *                          configuration.
 	 * @return Open {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile and open the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile and open the {@link OfficeFloor}.
 	 */
 	private OfficeFloor compileAndOpenOfficeFloor(boolean isPoolConnections, CompileOfficeExtension extension)
 			throws Exception {

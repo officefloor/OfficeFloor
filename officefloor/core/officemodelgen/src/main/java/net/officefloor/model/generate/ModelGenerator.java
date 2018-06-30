@@ -128,7 +128,7 @@ public class ModelGenerator {
 			writeLine("import " + importClass + ";");
 		}
 		// Write necessary extension
-		writeLine("import javax.annotation.Generated;");
+		writeLine("import javax.annotation.processing.Generated;");
 		writeLine();
 		writeLine("import net.officefloor.model.AbstractModel;");
 		writeLine("import net.officefloor.model.ConnectionModel;");

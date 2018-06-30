@@ -20,10 +20,8 @@ package net.officefloor.web.resource.spi;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.annotation.Resource;
-
 /**
- * Transforms {@link Resource} instances.
+ * Transforms resource instances.
  * 
  * @author Daniel Sagenschneider
  */

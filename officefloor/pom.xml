@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -73,13 +74,13 @@
 		<maven-changes-version>2.11</maven-changes-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<syncrpc-version>0.3</syncrpc-version>
-		<datanucleus-version>5.0.2</datanucleus-version>
 		<failsafe-version>2.21.0</failsafe-version>
 		<compiler-version>3.7.0</compiler-version>
 		<ant-jsch-version>1.10.3</ant-jsch-version>
 		<netty-version>4.1.14.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<jackson-version>2.9.6</jackson-version>
+		<jaxb-version>2.3.0</jaxb-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -445,8 +446,33 @@
 			<dependency>
 				<groupId>org.datanucleus</groupId>
 				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
-				<version>${datanucleus-version}</version>
+				<version>5.1.10</version>
 				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>${jaxb-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-core</artifactId>
+				<version>${jaxb-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>${jaxb-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>javax.activation-api</artifactId>
+				<version>1.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.transaction</groupId>
+				<artifactId>javax.transaction-api</artifactId>
+				<version>1.3</version>
 			</dependency>
 			<dependency>
 				<groupId>easymock</groupId>
@@ -471,7 +497,7 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.16.12</version>
+				<version>1.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -579,6 +605,13 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.8</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant</artifactId>
+							<version>1.10.4</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -678,7 +711,7 @@
 				<plugin>
 					<groupId>org.datanucleus</groupId>
 					<artifactId>datanucleus-maven-plugin</artifactId>
-					<version>${datanucleus-version}</version>
+					<version>5.0.2</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
@@ -766,8 +799,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>8</source>
-					<target>8</target>
+					<source>10</source>
+					<target>10</target>
 				</configuration>
 			</plugin>
 
@@ -908,24 +941,31 @@
 							<target>
 								<!-- Obtain the all project class paths (plus ensure a property is 
 									always available for replacefilterfile functionality to not fail) -->
-								<property name="maven_compile_classpath" refid="maven.compile.classpath" />
-								<property name="maven_runtime_classpath" refid="maven.runtime.classpath" />
-								<property name="maven_test_classpath" refid="maven.test.classpath" />
+								<property name="maven_compile_classpath"
+									refid="maven.compile.classpath" />
+								<property name="maven_runtime_classpath"
+									refid="maven.runtime.classpath" />
+								<property name="maven_test_classpath"
+									refid="maven.test.classpath" />
 								<property name="maven_classpath"
 									value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
 
-								<echo file="${project.build.directory}/verifier/dependencies.raw"
+								<echo
+									file="${project.build.directory}/verifier/dependencies.raw"
 									message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
 
 								<!-- Remove the compile and test classes directory from the class 
 									path -->
-								<replace file="${project.build.directory}/verifier/dependencies.raw"
+								<replace
+									file="${project.build.directory}/verifier/dependencies.raw"
 									token="${project.build.outputDirectory}" value="" />
-								<replace file="${project.build.directory}/verifier/dependencies.raw"
+								<replace
+									file="${project.build.directory}/verifier/dependencies.raw"
 									token="${project.build.testOutputDirectory}" value="" />
 
 								<!-- Transform into properties file of: ${artifactId}_version=${version} -->
-								<copy file="${project.build.directory}/verifier/dependencies.raw"
+								<copy
+									file="${project.build.directory}/verifier/dependencies.raw"
 									tofile="${project.build.directory}/verifier/dependencies.properties">
 									<filterchain>
 										<tokenfilter>
@@ -944,7 +984,8 @@
 								</copy>
 
 								<!-- Replace dependency versions in verifications file -->
-								<replace file="${project.build.directory}/verifier/verifications.xml"
+								<replace
+									file="${project.build.directory}/verifier/verifications.xml"
 									replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
 							</target>
 						</configuration>
@@ -958,7 +999,8 @@
 						</goals>
 						<configuration>
 							<target>
-								<replace file="${project.build.directory}/site/about.html">
+								<replace
+									file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
 									<replacevalue><![CDATA[
 <!-- ACM DL Article: OfficeFloor: using office patterns to improve software design-->
@@ -967,7 +1009,8 @@
 <div class="acmdlstat" id ="stats2739013"><iframe src="http://dl.acm.org/authorizestats?N05689" width="100%" height="30" scrolling="no" frameborder="0">frames are not supported</iframe></div> 
 ]]></replacevalue>
 								</replace>
-								<replace file="${project.build.directory}/site/about.html">
+								<replace
+									file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<p>REDIRECT FOR DOWNLOAD</p>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script type="text/javascript">
@@ -979,7 +1022,8 @@
 ]]></replacevalue>
 								</replace>
 								<copy file="${basedir}/src/site/resources/index.html"
-									toFile="${project.build.directory}/site/index.html" overwrite="true" />
+									toFile="${project.build.directory}/site/index.html"
+									overwrite="true" />
 							</target>
 						</configuration>
 					</execution>
@@ -1192,7 +1236,8 @@
 								</goals>
 								<configuration>
 									<target>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+										<sshexec host="shell.sourceforge.net"
+											username="${sourceforge.shell.username}"
 											password="${sourceforge.shell.password}" verbose="true"
 											command="create" />
 									</target>
@@ -1207,7 +1252,8 @@
 								</goals>
 								<configuration>
 									<target>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+										<sshexec host="shell.sourceforge.net"
+											username="${sourceforge.shell.username}"
 											password="${sourceforge.shell.password}" verbose="true"
 											command="create" />
 									</target>

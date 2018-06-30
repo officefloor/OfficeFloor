@@ -19,6 +19,7 @@ package net.officefloor.plugin.xml.unmarshall.designate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,22 +56,19 @@ public class DesignateXmlUnmarshaller {
 	 * Registers a delegate
 	 * {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
 	 * 
-	 * @param configuration
-	 *            Configuration of the
-	 *            {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
-	 * @throws XmlMarshallException
-	 *             If fails to register the
-	 *             {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
+	 * @param configuration Configuration of the
+	 *                      {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
+	 * @throws XmlMarshallException If fails to register the
+	 *                              {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
 	 */
-	public void registerTreeXmlUnmarshaller(InputStream configuration)
-			throws XmlMarshallException {
+	public void registerTreeXmlUnmarshaller(InputStream configuration) throws XmlMarshallException {
 
 		// Create the translator registry
 		TranslatorRegistry translatorRegistry = new TranslatorRegistry();
 
 		// Create the XML mapping meta-data
-		XmlMappingMetaData metaData = TreeXmlUnmarshallerManagedObjectSource
-				.createXmlMappingMetaData(configuration, translatorRegistry);
+		XmlMappingMetaData metaData = TreeXmlUnmarshallerManagedObjectSource.createXmlMappingMetaData(configuration,
+				translatorRegistry);
 
 		// Obtain the root element name
 		String rootElementName = metaData.getElementName();
@@ -82,26 +80,22 @@ public class DesignateXmlUnmarshaller {
 			rootClass = Class.forName(rootClassName);
 		} catch (ClassNotFoundException ex) {
 			// Propagate
-			throw new XmlMarshallException(
-					"Can not find class of target object '" + rootClassName
-							+ "'", ex);
+			throw new XmlMarshallException("Can not find class of target object '" + rootClassName + "'", ex);
 		}
 
 		// Register the delegate
-		this.delegates.put(rootElementName, new DelegateMetaData(rootClass,
-				new XmlContext(rootClass, metaData.getElementName(), metaData
-						.getLoadObjectConfiguration(), translatorRegistry,
-						new ReferencedXmlMappingRegistry())));
+		this.delegates.put(rootElementName,
+				new DelegateMetaData(rootClass,
+						new XmlContext(rootClass, metaData.getElementName(), metaData.getLoadObjectConfiguration(),
+								translatorRegistry, new ReferencedXmlMappingRegistry())));
 	}
 
 	/**
 	 * Unmarshalls the input XML returning the unmarshalled object.
 	 * 
-	 * @param xml
-	 *            XML.
+	 * @param xml XML.
 	 * @return Unmarshalled object.
-	 * @throws XmlMarshallException
-	 *             If fails to unmarshall the XML.
+	 * @throws XmlMarshallException If fails to unmarshall the XML.
 	 */
 	public Object unmarshall(InputStream xml) throws XmlMarshallException {
 
@@ -122,8 +116,7 @@ public class DesignateXmlUnmarshaller {
 			parser.parse(xml, handler);
 		} catch (SAXException ex) {
 			// Propagate failure
-			throw new XmlMarshallException(ex.getMessage(),
-					(ex.getCause() == null ? ex : ex.getCause()));
+			throw new XmlMarshallException(ex.getMessage(), (ex.getCause() == null ? ex : ex.getCause()));
 		} catch (IOException ex) {
 			// Propagate failure
 			throw new XmlMarshallException(ex.getMessage(), ex);
@@ -152,10 +145,8 @@ public class DesignateXmlUnmarshaller {
 		/**
 		 * Initiate.
 		 * 
-		 * @param rootClass
-		 *            Root {@link Class}.
-		 * @param delegateContext
-		 *            Delegate {@link XmlContext}.
+		 * @param rootClass       Root {@link Class}.
+		 * @param delegateContext Delegate {@link XmlContext}.
 		 */
 		public DelegateMetaData(Class<?> rootClass, XmlContext delegateContext) {
 			this.rootClass = rootClass;
@@ -164,8 +155,7 @@ public class DesignateXmlUnmarshaller {
 	}
 
 	/**
-	 * {@link DefaultHandler} to designate to the delegate
-	 * {@link DefaultHandler}.
+	 * {@link DefaultHandler} to designate to the delegate {@link DefaultHandler}.
 	 */
 	protected class DesignateHandler extends DefaultHandler {
 
@@ -183,40 +173,34 @@ public class DesignateXmlUnmarshaller {
 		 * (non-Javadoc)
 		 * 
 		 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
-		 *      java.lang.String, java.lang.String, org.xml.sax.Attributes)
+		 * java.lang.String, java.lang.String, org.xml.sax.Attributes)
 		 */
 		@Override
-		public void startElement(String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+				throws SAXException {
 
 			// Ensure have delegate
 			if (this.delegate == null) {
 
 				// Obtain the delegate meta-data
-				DelegateMetaData metaData = DesignateXmlUnmarshaller.this.delegates
-						.get(qName);
+				DelegateMetaData metaData = DesignateXmlUnmarshaller.this.delegates.get(qName);
 				if (metaData == null) {
-					throw new SAXException(
-							"No delegate registered for root element '"
-									+ qName + "'");
+					throw new SAXException("No delegate registered for root element '" + qName + "'");
 				}
 
 				// Create the target object
 				Class<?> targetClass = metaData.rootClass;
 				try {
-					this.targetObject = targetClass.newInstance();
-				} catch (InstantiationException ex) {
+					this.targetObject = targetClass.getDeclaredConstructor().newInstance();
+				} catch (NoSuchMethodException | InvocationTargetException | InstantiationException ex) {
 					// Propagate
 					throw new SAXException(
-							"Failed instantiating target object "
-									+ targetClass.getName()
-									+ " by default constructor", ex);
+							"Failed instantiating target object " + targetClass.getName() + " by default constructor",
+							ex);
 				} catch (IllegalAccessException ex) {
 					// Propagate
-					throw new SAXException(
-							"Failed access to create target object "
-									+ targetClass.getName()
-									+ " by default constructor", ex);
+					throw new SAXException("Failed access to create target object " + targetClass.getName()
+							+ " by default constructor", ex);
 				}
 
 				// Create the delegate default handler
@@ -237,8 +221,7 @@ public class DesignateXmlUnmarshaller {
 		 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
 		 */
 		@Override
-		public void characters(char[] ch, int start, int length)
-				throws SAXException {
+		public void characters(char[] ch, int start, int length) throws SAXException {
 			// Delegate
 			this.delegate.characters(ch, start, length);
 		}
@@ -247,11 +230,10 @@ public class DesignateXmlUnmarshaller {
 		 * (non-Javadoc)
 		 * 
 		 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
-		 *      java.lang.String, java.lang.String)
+		 * java.lang.String, java.lang.String)
 		 */
 		@Override
-		public void endElement(String uri, String localName, String qName)
-				throws SAXException {
+		public void endElement(String uri, String localName, String qName) throws SAXException {
 			// Delegate
 			this.delegate.endElement(uri, localName, qName);
 		}

@@ -89,17 +89,14 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		/**
 		 * Creates the {@link EntityManagerFactory}.
 		 * 
-		 * @param persistenceUnitName
-		 *            Persistence Unit name.
-		 * @param dataSource
-		 *            {@link DataSource} to use for the {@link EntityManagerFactory}.
-		 * @param properties
-		 *            Existing properties configured to the
-		 *            {@link JpaManagedObjectSource}.
+		 * @param persistenceUnitName Persistence Unit name.
+		 * @param dataSource          {@link DataSource} to use for the
+		 *                            {@link EntityManagerFactory}.
+		 * @param properties          Existing properties configured to the
+		 *                            {@link JpaManagedObjectSource}.
 		 * @return Configuration for the {@link EntityManagerFactory} to use the
 		 *         {@link DataSource}.
-		 * @throws Exception
-		 *             If fails to create the {@link EntityManagerFactory}.
+		 * @throws Exception If fails to create the {@link EntityManagerFactory}.
 		 */
 		EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
 				Properties properties) throws Exception;
@@ -150,11 +147,9 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	 * By default, this method uses the {@link #PROPERTY_PERSISTENCE_FACTORY}
 	 * {@link Property} to load the {@link PersistenceFactory}.
 	 * 
-	 * @param context
-	 *            {@link MetaDataContext}.
+	 * @param context {@link MetaDataContext}.
 	 * @return {@link PersistenceFactory}.
-	 * @throws Exception
-	 *             If fails to create the {@link PersistenceFactory}.
+	 * @throws Exception If fails to create the {@link PersistenceFactory}.
 	 */
 	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Dependencies, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
@@ -163,7 +158,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		String className = mosContext.getProperty(PROPERTY_PERSISTENCE_FACTORY);
 
 		// Create instance and return
-		return (PersistenceFactory) mosContext.loadClass(className).newInstance();
+		return (PersistenceFactory) mosContext.loadClass(className).getDeclaredConstructor().newInstance();
 	}
 
 	/*

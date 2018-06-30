@@ -37,7 +37,8 @@ public class DbTest {
 
 	@ClassRule
 	public static SystemPropertiesRule systemProperties = new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME,
-			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8080");
+			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8080",
+			HttpServer.PROPERTY_INCLUDE_STACK_TRACE, "false");
 
 	@Rule
 	public OfficeFloorRule server = new OfficeFloorRule();
@@ -66,12 +67,12 @@ public class DbTest {
 	@Test
 	public void validRequest() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/db"));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		String entity = EntityUtils.toString(response.getEntity());
+		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "application/json", response.getFirstHeader("content-type").getValue());
 		assertEquals("Incorrect server", this.getServerName(), response.getFirstHeader("Server").getValue());
 		assertNotNull("Should have date", response.getFirstHeader("date"));
-		WorldResponse world = new ObjectMapper().readValue(EntityUtils.toString(response.getEntity()),
-				WorldResponse.class);
+		WorldResponse world = new ObjectMapper().readValue(entity, WorldResponse.class);
 		assertTrue("Invalid id: " + world.id, (world.id >= 1) && (world.id <= 10000));
 		assertTrue("Invalid randomNumber: " + world.randomNumber,
 				(world.randomNumber >= 1) && (world.randomNumber <= 10000));

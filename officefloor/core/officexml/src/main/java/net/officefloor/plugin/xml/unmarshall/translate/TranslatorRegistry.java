@@ -46,18 +46,17 @@ public class TranslatorRegistry {
 		translators.put(String.class, new StringTranslator(null));
 		translators.put(boolean.class, new BooleanTranslator(Boolean.FALSE));
 		translators.put(Boolean.class, new BooleanTranslator(null));
-		translators
-				.put(char.class, new CharacterTranslator(new Character(' ')));
+		translators.put(char.class, new CharacterTranslator(Character.valueOf(' ')));
 		translators.put(Character.class, new CharacterTranslator(null));
-		translators.put(byte.class, new ByteTranslator(new Byte((byte) 0)));
+		translators.put(byte.class, new ByteTranslator(Byte.valueOf((byte) 0)));
 		translators.put(Byte.class, new ByteTranslator(null));
-		translators.put(int.class, new IntegerTranslator(new Integer(0)));
+		translators.put(int.class, new IntegerTranslator(Integer.valueOf(0)));
 		translators.put(Integer.class, new IntegerTranslator(null));
-		translators.put(long.class, new LongTranslator(new Long(0)));
+		translators.put(long.class, new LongTranslator(Long.valueOf(0)));
 		translators.put(Long.class, new LongTranslator(null));
-		translators.put(float.class, new FloatTranslator(new Float(0)));
+		translators.put(float.class, new FloatTranslator(Float.valueOf(0)));
 		translators.put(Float.class, new FloatTranslator(null));
-		translators.put(double.class, new DoubleTranslator(new Double(0)));
+		translators.put(double.class, new DoubleTranslator(Double.valueOf(0)));
 		translators.put(Double.class, new DoubleTranslator(null));
 		translators.put(Date.class, new DateTranslator(null));
 	}
@@ -65,10 +64,8 @@ public class TranslatorRegistry {
 	/**
 	 * Registers a {@link Translator}.
 	 * 
-	 * @param type
-	 *            Type the {@link Translator} translates.
-	 * @param translator
-	 *            {@link Translator}.
+	 * @param type       Type the {@link Translator} translates.
+	 * @param translator {@link Translator}.
 	 */
 	public void registerTranslator(Class<?> type, Translator translator) {
 		this.translators.put(type, translator);
@@ -77,23 +74,19 @@ public class TranslatorRegistry {
 	/**
 	 * Obtains the {@link Translator}to the specific type.
 	 * 
-	 * @param translateType
-	 *            Type of {@link Translator}.
+	 * @param translateType Type of {@link Translator}.
 	 * @return {@link Translator}to the specific type input.
-	 * @throws XmlMarshallException
-	 *             Should a {@link Translator}not be registered for the
-	 *             translateType.
+	 * @throws XmlMarshallException Should a {@link Translator}not be registered for
+	 *                              the translateType.
 	 */
-	public Translator getTranslator(Class<?> translateType)
-			throws XmlMarshallException {
+	public Translator getTranslator(Class<?> translateType) throws XmlMarshallException {
 		// Return translator to specific type
 		Translator translator = this.translators.get(translateType);
 
 		// Ensure have translator
 		if (translator == null) {
-			throw new XmlMarshallException("No " + Translator.class.getName()
-					+ " loaded for parameter type of "
-					+ translateType.getName());
+			throw new XmlMarshallException(
+					"No " + Translator.class.getName() + " loaded for parameter type of " + translateType.getName());
 		}
 
 		// Return translator
@@ -121,9 +114,8 @@ abstract class AbstractTranslator implements Translator {
 	/**
 	 * Initiate for translation.
 	 * 
-	 * @param defaultValue
-	 *            Null indicates object translation while a value indiciates
-	 *            primitive translation.
+	 * @param defaultValue Null indicates object translation while a value
+	 *                     indiciates primitive translation.
 	 */
 	public AbstractTranslator(Object defaultValue) {
 		// Initiate for primitive translation
@@ -134,7 +126,8 @@ abstract class AbstractTranslator implements Translator {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.xml.translate.Translator#translate(java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.xml.translate.Translator#translate(java.lang.String)
 	 */
 	public Object translate(String value) throws XmlMarshallException {
 		// Check if null value
@@ -150,14 +143,11 @@ abstract class AbstractTranslator implements Translator {
 	/**
 	 * Translates value to specific value.
 	 * 
-	 * @param value
-	 *            Non-null value.
+	 * @param value Non-null value.
 	 * @return Specific value.
-	 * @throws XmlMarshallException
-	 *             Indicating failure to translate value.
+	 * @throws XmlMarshallException Indicating failure to translate value.
 	 */
-	protected abstract Object translateNotNullValue(String value)
-			throws XmlMarshallException;
+	protected abstract Object translateNotNullValue(String value) throws XmlMarshallException;
 
 }
 
@@ -169,8 +159,7 @@ class BooleanTranslator extends AbstractTranslator {
 		super(defaultValue);
 	}
 
-	public Object translateNotNullValue(String value)
-			throws XmlMarshallException {
+	public Object translateNotNullValue(String value) throws XmlMarshallException {
 		return Boolean.valueOf(value);
 	}
 }
@@ -183,10 +172,9 @@ class CharacterTranslator extends AbstractTranslator {
 		super(defaultValue);
 	}
 
-	public Object translateNotNullValue(String value)
-			throws XmlMarshallException {
+	public Object translateNotNullValue(String value) throws XmlMarshallException {
 		// Obtain the first character
-		return new Character(value.charAt(0));
+		return Character.valueOf(value.charAt(0));
 	}
 }
 
@@ -201,28 +189,23 @@ abstract class AbstractNumericTranslator extends AbstractTranslator {
 	/**
 	 * Translate to numeric value.
 	 */
-	public Object translateNotNullValue(String value)
-			throws XmlMarshallException {
+	public Object translateNotNullValue(String value) throws XmlMarshallException {
 		try {
 			return this.translateToNumber(value);
 		} catch (NumberFormatException ex) {
 			// Propagate failure
-			throw new XmlMarshallException("Failed to format value '" + value
-					+ "' to number.", ex);
+			throw new XmlMarshallException("Failed to format value '" + value + "' to number.", ex);
 		}
 	}
 
 	/**
 	 * Translates to a numeric value.
 	 * 
-	 * @param value
-	 *            Value to be translated to a numeric value.
+	 * @param value Value to be translated to a numeric value.
 	 * @return Numeric value.
-	 * @throws NumberFormatException
-	 *             If failed to translate to a number.
+	 * @throws NumberFormatException If failed to translate to a number.
 	 */
-	abstract Object translateToNumber(String value)
-			throws NumberFormatException;
+	abstract Object translateToNumber(String value) throws NumberFormatException;
 
 }
 
@@ -313,14 +296,12 @@ class DateTranslator extends AbstractTranslator {
 	}
 
 	@SuppressWarnings("deprecation")
-	public Object translateNotNullValue(String value)
-			throws XmlMarshallException {
+	public Object translateNotNullValue(String value) throws XmlMarshallException {
 		try {
 			return new Date(value);
 		} catch (IllegalArgumentException ex) {
 			// Propagate failure
-			throw new XmlMarshallException("Failed to translate value '"
-					+ value + "' to a date", ex);
+			throw new XmlMarshallException("Failed to translate value '" + value + "' to a date", ex);
 		}
 	}
 }

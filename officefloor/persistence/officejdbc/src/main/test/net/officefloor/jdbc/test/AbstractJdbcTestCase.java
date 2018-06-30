@@ -59,14 +59,11 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * Obtains a {@link Connection} with the input
 	 * {@link ConnectionManagedObjectSource} and properties.
 	 *
-	 * @param connectionMosClass
-	 *            {@link ConnectionManagedObjectSource} {@link Class} used to obtain
-	 *            the {@link Connection}.
-	 * @param propertyLoader
-	 *            Loads the properties.
+	 * @param connectionMosClass {@link ConnectionManagedObjectSource} {@link Class}
+	 *                           used to obtain the {@link Connection}.
+	 * @param propertyLoader     Loads the properties.
 	 * @return {@link Connection}.
-	 * @throws Exception
-	 *             If fails to create {@link Connection}.
+	 * @throws Exception If fails to create {@link Connection}.
 	 */
 	public static Connection getConnection(Class<? extends ConnectionManagedObjectSource> connectionMosClass,
 			Consumer<PropertyConfigurable> propertyLoader) throws Exception {
@@ -119,18 +116,15 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
 	 * 
-	 * @param mos
-	 *            {@link PropertyConfigurable}.
+	 * @param mos {@link PropertyConfigurable}.
 	 */
 	protected abstract void loadProperties(PropertyConfigurable mos);
 
 	/**
 	 * Cleans the database.
 	 * 
-	 * @param connection
-	 *            {@link Connection}.
-	 * @throws SQLException
-	 *             On failure to clean up the database.
+	 * @param connection {@link Connection}.
+	 * @throws SQLException On failure to clean up the database.
 	 */
 	protected abstract void cleanDatabase(Connection connection) throws SQLException;
 
@@ -144,7 +138,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		super.setUp();
 
 		// Ignore errors in trying to start
+		PrintStream stdout = System.out;
 		PrintStream stderr = System.err;
+		System.setOut(new PrintStream(new ByteArrayOutputStream()));
 		System.setErr(new PrintStream(new ByteArrayOutputStream()));
 		try {
 
@@ -182,7 +178,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			}
 
 		} finally {
-			// Reinstate standard error
+			// Reinstate standard out / error
+			System.setOut(stdout);
 			System.setErr(stderr);
 		}
 	}
@@ -190,8 +187,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Enables adding additional properties to specification.
 	 * 
-	 * @param properties
-	 *            {@link Properties} to be loaded with additional specification.
+	 * @param properties {@link Properties} to be loaded with additional
+	 *                   specification.
 	 */
 	protected void loadOptionalSpecification(Properties properties) {
 	}
@@ -199,8 +196,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct specification.
 	 * 
-	 * @throws Exception
-	 *             On test failure.
+	 * @throws Exception On test failure.
 	 */
 	public void testSpecification() throws Exception {
 
@@ -225,8 +221,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct type.
 	 * 
-	 * @throws Exception
-	 *             On test failure.
+	 * @throws Exception On test failure.
 	 */
 	public void testType() throws Exception {
 
@@ -249,8 +244,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure can connect to database.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testConnectivity() throws Throwable {
 
@@ -298,8 +292,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure can stress test against the database.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testStress() throws Throwable {
 		this.doStressTest(false);
@@ -308,8 +301,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure can stress test against the database with transactions.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testTransactionStress() throws Throwable {
 		this.doStressTest(true);
@@ -318,8 +310,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Undertake stress test.
 	 * 
-	 * @param isTransaction
-	 *            Whether test uses transactions.
+	 * @param isTransaction Whether test uses transactions.
 	 */
 	private void doStressTest(boolean isTransaction) throws Throwable {
 
@@ -424,8 +415,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	/**
 	 * Undertakes select stress.
 	 * 
-	 * @throws Throwable
-	 *             On test failure.
+	 * @throws Throwable On test failure.
 	 */
 	public void testSelectStress() throws Throwable {
 

@@ -38,11 +38,12 @@ public class PlaintextTest {
 	@Test
 	public void validRequest() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/plaintext"));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		String entity = EntityUtils.toString(response.getEntity());
+		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "text/plain", response.getFirstHeader("content-type").getValue());
 		assertEquals("Incorrect server", this.getServerName(), response.getFirstHeader("Server").getValue());
 		assertNotNull("Should have date", response.getFirstHeader("date"));
-		assertEquals("Incorrect content", "Hello, World!", EntityUtils.toString(response.getEntity()));
+		assertEquals("Incorrect content", "Hello, World!", entity);
 	}
 
 }

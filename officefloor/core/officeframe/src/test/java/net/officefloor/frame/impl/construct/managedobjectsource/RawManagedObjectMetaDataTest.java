@@ -87,7 +87,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedObjectSourceConfiguration}.
 	 */
-	private ManagedObjectBuilderImpl<?, ?, ?> configuration = new ManagedObjectBuilderImpl<>(MANAGED_OBJECT_NAME,
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private ManagedObjectBuilderImpl<?, ?, ?> configuration = new ManagedObjectBuilderImpl(MANAGED_OBJECT_NAME,
 			MockManagedObjectSource.class);
 
 	/**
@@ -625,10 +626,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load with {@link ManagedObjectSource} instantiated.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testPlainManagedObjectInstance() throws Exception {
 
 		// Use ManagedObjectSource instance
-		this.configuration = new ManagedObjectBuilderImpl<>(MANAGED_OBJECT_NAME, new MockManagedObjectSource());
+		this.configuration = new ManagedObjectBuilderImpl(MANAGED_OBJECT_NAME, new MockManagedObjectSource());
 
 		// Undertake test
 		this.testPlainManagedObject();
@@ -786,8 +788,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue for the {@link ManagedObject}.
 	 * 
-	 * @param issueDescription
-	 *            Issue description.
+	 * @param issueDescription Issue description.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME, issueDescription);
@@ -796,10 +797,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue for the {@link ManagedObject}.
 	 * 
-	 * @param issueDescription
-	 *            Issue description.
-	 * @param cause
-	 *            Cause.
+	 * @param issueDescription Issue description.
+	 * @param cause            Cause.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME, issueDescription, cause);
@@ -887,10 +886,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		/**
 		 * Resets state of {@link MockManagedObjectSource} for testing.
 		 * 
-		 * @param taskFactory
-		 *            {@link ManagedFunctionFactory}.
-		 * @param metaData
-		 *            {@link ManagedObjectSourceMetaData}.
+		 * @param taskFactory {@link ManagedFunctionFactory}.
+		 * @param metaData    {@link ManagedObjectSourceMetaData}.
 		 */
 		public static void reset(ManagedFunctionFactory<None, Indexed> functionFactory,
 				ManagedObjectSourceMetaData<Indexed, FlowKey> metaData) {
@@ -911,8 +908,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		/**
 		 * Instantiate.
 		 * 
-		 * @throws Exception
-		 *             Possible instantiate failure.
+		 * @throws Exception Possible instantiate failure.
 		 */
 		public MockManagedObjectSource() throws Exception {
 			if (instantiateFailure != null) {

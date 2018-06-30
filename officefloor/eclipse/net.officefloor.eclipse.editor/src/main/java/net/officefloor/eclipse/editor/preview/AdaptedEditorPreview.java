@@ -64,20 +64,17 @@ public class AdaptedEditorPreview<M extends Model> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param model
-	 *            Model.
-	 * @param label
-	 *            Label.
-	 * @param isParent
-	 *            Indicates if {@link AdaptedParent}.
-	 * @param visualFactory
-	 *            {@link AdaptedModelVisualFactory}.
+	 * @param model         Model.
+	 * @param label         Label.
+	 * @param isParent      Indicates if {@link AdaptedParent}.
+	 * @param visualFactory {@link AdaptedModelVisualFactory}.
 	 */
+	@SuppressWarnings("unchecked")
 	public AdaptedEditorPreview(M model, String label, boolean isParent, AdaptedModelVisualFactory<M> visualFactory) {
 
 		// Create the visual
 		this.previewVisual = visualFactory.createVisual(model,
-				new AdaptedModelVisualFactoryContextImpl<>(model.getClass(), false, () -> {
+				new AdaptedModelVisualFactoryContextImpl<>((Class<M>) model.getClass(), false, () -> {
 					// Always have a label
 					return new SimpleStringProperty(label);
 				}, (childGroupName, node) -> {

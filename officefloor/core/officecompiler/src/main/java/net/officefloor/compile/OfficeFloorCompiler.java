@@ -106,8 +106,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 		/**
 		 * Creates the {@link OfficeFloorCompiler}.
 		 * 
-		 * @param classLoader
-		 *            {@link ClassLoader}.
+		 * @param classLoader {@link ClassLoader}.
 		 * @return {@link OfficeFloorCompiler}.
 		 */
 		OfficeFloorCompiler createOfficeFloorCompiler(ClassLoader classLoader);
@@ -126,8 +125,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * Typically this should not be called however is included to enable flexibility
 	 * in creating {@link OfficeFloorCompiler} instances.
 	 * 
-	 * @param factory
-	 *            {@link OfficeFloorCompilerFactory}.
+	 * @param factory {@link OfficeFloorCompilerFactory}.
 	 */
 	public synchronized static final void setFactory(OfficeFloorCompilerFactory factory) {
 
@@ -144,10 +142,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	/**
 	 * Creates a new instance of a {@link OfficeFloorCompiler}.
 	 * 
-	 * @param implClassLoader
-	 *            {@link ClassLoader} to use for the {@link OfficeFloor}. May be
-	 *            <code>null</code> which will default to use the current
-	 *            {@link Thread#getContextClassLoader()}.
+	 * @param implClassLoader {@link ClassLoader} to use for the
+	 *                        {@link OfficeFloor}. May be <code>null</code> which
+	 *                        will default to use the current
+	 *                        {@link Thread#getContextClassLoader()}.
 	 * @return New {@link OfficeFloorCompiler}.
 	 */
 	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler(ClassLoader implClassLoader) {
@@ -176,7 +174,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 			// Load implementation
 			try {
-				implementation = implClassLoader.loadClass(implementationClassName).newInstance();
+				implementation = implClassLoader.loadClass(implementationClassName).getDeclaredConstructor()
+						.newInstance();
 			} catch (Throwable ex) {
 				throw new IllegalArgumentException(
 						"Can not create instance of " + implementationClassName + " from default constructor", ex);
@@ -272,25 +271,22 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * This is typically used by graphical editors that need to use the project
 	 * class path rather than the editor's class path.
 	 * 
-	 * @param <T>
-	 *            Return type.
-	 * @param runnableClass
-	 *            {@link OfficeFloorCompilerRunnable} class.
-	 * @param parameters
-	 *            Parameters to enable configuration of the
-	 *            {@link OfficeFloorCompilerRunnable}. As {@link Proxy} instances
-	 *            are used to bridge {@link Class} compatibility issues due to
-	 *            different {@link ClassLoader}, all parameters should only be
-	 *            access via their implementing interfaces.
+	 * @param               <T> Return type.
+	 * @param runnableClass {@link OfficeFloorCompilerRunnable} class.
+	 * @param parameters    Parameters to enable configuration of the
+	 *                      {@link OfficeFloorCompilerRunnable}. As {@link Proxy}
+	 *                      instances are used to bridge {@link Class} compatibility
+	 *                      issues due to different {@link ClassLoader}, all
+	 *                      parameters should only be access via their implementing
+	 *                      interfaces.
 	 * @return Value returned from the {@link OfficeFloorCompilerRunnable}.
-	 * @throws Exception
-	 *             If fails to run the {@link OfficeFloorCompilerRunnable}.
+	 * @throws Exception If fails to run the {@link OfficeFloorCompilerRunnable}.
 	 */
 	public <T> T run(Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass, Object... parameters)
 			throws Exception {
 
 		// Run the runnable
-		T result = runnableClass.newInstance().run(this, parameters);
+		T result = runnableClass.getDeclaredConstructor().newInstance().run(this, parameters);
 
 		// Return the result
 		return result;
@@ -435,8 +431,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link OfficeFloor} and will be available in the {@link SourceContext} for
 	 * loading the various sources.
 	 * 
-	 * @param resourceSource
-	 *            {@link ResourceSource}.
+	 * @param resourceSource {@link ResourceSource}.
 	 */
 	public abstract void addResources(ResourceSource resourceSource);
 
@@ -447,8 +442,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * This will be specified on the {@link OfficeFrame} before compiling the
 	 * {@link OfficeFloor}.
 	 * 
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}.
+	 * @param escalationHandler {@link EscalationHandler}.
 	 */
 	public abstract void setEscalationHandler(EscalationHandler escalationHandler);
 
@@ -461,8 +455,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link CompilerIssues}. Typically this will be an implementation that writes
 	 * issues to {@link System#err}.
 	 * 
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param issues {@link CompilerIssues}.
 	 */
 	public abstract void setCompilerIssues(CompilerIssues issues);
 
@@ -475,8 +468,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * should use the {@link OfficeFrame#getInstance()} to build the
 	 * {@link OfficeFloor}.
 	 * 
-	 * @param officeFrame
-	 *            {@link OfficeFrame}.
+	 * @param officeFrame {@link OfficeFrame}.
 	 */
 	public abstract void setOfficeFrame(OfficeFrame officeFrame);
 
@@ -492,10 +484,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link OfficeFloorCompiler} implementation which {@link OfficeFloorSource}
 	 * implementation is being used.
 	 * 
-	 * @param <S>
-	 *            {@link OfficeFloorSource} type.
-	 * @param officeFloorSourceClass
-	 *            {@link OfficeFloorSource} {@link Class}.
+	 * @param                        <S> {@link OfficeFloorSource} type.
+	 * @param officeFloorSourceClass {@link OfficeFloorSource} {@link Class}.
 	 */
 	public abstract <S extends OfficeFloorSource> void setOfficeFloorSourceClass(Class<S> officeFloorSourceClass);
 
@@ -507,16 +497,14 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * This will take precedence over specifying the {@link OfficeFloorSource}
 	 * class.
 	 * 
-	 * @param officeFloorSource
-	 *            {@link OfficeFloorSource}.
+	 * @param officeFloorSource {@link OfficeFloorSource}.
 	 */
 	public abstract void setOfficeFloorSource(OfficeFloorSource officeFloorSource);
 
 	/**
 	 * Specifies the location of the {@link OfficeFloor}.
 	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
 	 */
 	public abstract void setOfficeFloorLocation(String officeFloorLocation);
 
@@ -532,12 +520,9 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * Typically this should not be used directly as the {@link OfficeSourceService}
 	 * is the preferred means to provide {@link OfficeSource} aliases.
 	 * 
-	 * @param <S>
-	 *            {@link OfficeSource} type.
-	 * @param alias
-	 *            Alias name for the {@link OfficeSource}.
-	 * @param officeSourceClass
-	 *            {@link OfficeSource} {@link Class} for the alias.
+	 * @param                   <S> {@link OfficeSource} type.
+	 * @param alias             Alias name for the {@link OfficeSource}.
+	 * @param officeSourceClass {@link OfficeSource} {@link Class} for the alias.
 	 */
 	public abstract <S extends OfficeSource> void addOfficeSourceAlias(String alias, Class<S> officeSourceClass);
 
@@ -554,12 +539,9 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link SectionSourceService} is the preferred means to provide
 	 * {@link SectionSource} aliases.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param alias
-	 *            Alias name for the {@link SectionSource}.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} {@link Class} for the alias.
+	 * @param                    <S> {@link SectionSource} type.
+	 * @param alias              Alias name for the {@link SectionSource}.
+	 * @param sectionSourceClass {@link SectionSource} {@link Class} for the alias.
 	 */
 	public abstract <S extends SectionSource> void addSectionSourceAlias(String alias, Class<S> sectionSourceClass);
 
@@ -576,12 +558,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link ManagedFunctionSourceService} is the preferred means to provide
 	 * {@link ManagedFunctionSource} aliases.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedFunctionSource} type.
-	 * @param alias
-	 *            Alias name for the {@link ManagedFunctionSource}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} {@link Class} for the alias.
+	 * @param                            <S> {@link ManagedFunctionSource} type.
+	 * @param alias                      Alias name for the
+	 *                                   {@link ManagedFunctionSource}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} {@link Class}
+	 *                                   for the alias.
 	 */
 	public abstract <S extends ManagedFunctionSource> void addManagedFunctionSourceAlias(String alias,
 			Class<S> managedFunctionSourceClass);
@@ -599,16 +580,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link ManagedObjectSourceService} is the preferred means to provide
 	 * {@link ManagedObjectSource} aliases.
 	 * 
-	 * @param <D>
-	 *            Dependency type keys.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param alias
-	 *            Alias name for the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} {@link Class} for the alias.
+	 * @param                          <D> Dependency type keys.
+	 * @param                          <F> {@link Flow} type keys.
+	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param alias                    Alias name for the
+	 *                                 {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class} for
+	 *                                 the alias.
 	 */
 	public abstract <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> void addManagedObjectSourceAlias(
 			String alias, Class<S> managedObjectSourceClass);
@@ -627,12 +605,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link ManagedObjectSourceService} is the preferred means to provide
 	 * {@link ManagedObjectSource} aliases.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedObjectPoolSource} type.
-	 * @param alias
-	 *            Alias name for the {@link ManagedObjectPoolSource}.
-	 * @param managedObjectPoolSourceClass
-	 *            {@link ManagedObjectPoolSource} {@link Class} for the alias.
+	 * @param                              <S> {@link ManagedObjectPoolSource} type.
+	 * @param alias                        Alias name for the
+	 *                                     {@link ManagedObjectPoolSource}.
+	 * @param managedObjectPoolSourceClass {@link ManagedObjectPoolSource}
+	 *                                     {@link Class} for the alias.
 	 */
 	public abstract <S extends ManagedObjectPoolSource> void addManagedObjectPoolSourceAlias(String alias,
 			Class<S> managedObjectPoolSourceClass);
@@ -650,12 +627,10 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link SupplierSourceService} is the preferred means to provide
 	 * {@link SupplierSource} aliases.
 	 * 
-	 * @param <S>
-	 *            {@link SupplierSource} type.
-	 * @param alias
-	 *            Alias name for the {@link SupplierSource}.
-	 * @param supplierSourceClass
-	 *            {@link SupplierSource} {@link Class} for the alias.
+	 * @param                     <S> {@link SupplierSource} type.
+	 * @param alias               Alias name for the {@link SupplierSource}.
+	 * @param supplierSourceClass {@link SupplierSource} {@link Class} for the
+	 *                            alias.
 	 */
 	public abstract <S extends SupplierSource> void addSupplierSourceAlias(String alias, Class<S> supplierSourceClass);
 
@@ -672,18 +647,16 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link AdministrationSourceService} is the preferred means to provide
 	 * {@link AdministrationSource} aliases.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Flow} keys for the {@link Administration}.
-	 * @param <G>
-	 *            {@link Governance} keys for the {@link Administration}.
-	 * @param <S>
-	 *            {@link AdministrationSource} type.
-	 * @param alias
-	 *            Alias name for the {@link AdministrationSource}.
-	 * @param administrationSourceClass
-	 *            {@link AdministrationSource} {@link Class} for the alias.
+	 * @param                           <E> Extension interface type.
+	 * @param                           <F> {@link Flow} keys for the
+	 *                                  {@link Administration}.
+	 * @param                           <G> {@link Governance} keys for the
+	 *                                  {@link Administration}.
+	 * @param                           <S> {@link AdministrationSource} type.
+	 * @param alias                     Alias name for the
+	 *                                  {@link AdministrationSource}.
+	 * @param administrationSourceClass {@link AdministrationSource} {@link Class}
+	 *                                  for the alias.
 	 */
 	public abstract <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> void addAdministrationSourceAlias(
 			String alias, Class<S> administrationSourceClass);
@@ -701,16 +674,12 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * {@link GovernanceSourceService} is the preferred means to provide
 	 * {@link GovernanceSource} aliases.
 	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param <S>
-	 *            {@link GovernanceSource} type.
-	 * @param alias
-	 *            Alias name for the {@link GovernanceSource}.
-	 * @param governanceSourceClass
-	 *            {@link GovernanceSource} {@link Class} for the alias.
+	 * @param                       <I> Extension interface type.
+	 * @param                       <F> {@link Flow} type keys.
+	 * @param                       <S> {@link GovernanceSource} type.
+	 * @param alias                 Alias name for the {@link GovernanceSource}.
+	 * @param governanceSourceClass {@link GovernanceSource} {@link Class} for the
+	 *                              alias.
 	 */
 	public abstract <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(String alias,
 			Class<S> governanceSourceClass);
@@ -727,22 +696,17 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * Typically this should not be used directly as the {@link TeamSourceService}
 	 * is the preferred means to provide {@link TeamSource} aliases.
 	 * 
-	 * @param <S>
-	 *            {@link TeamSource} type.
-	 * @param alias
-	 *            Alias name for the {@link TeamSource}.
-	 * @param teamSourceClass
-	 *            {@link TeamSource} {@link Class} for the alias.
+	 * @param                 <S> {@link TeamSource} type.
+	 * @param alias           Alias name for the {@link TeamSource}.
+	 * @param teamSourceClass {@link TeamSource} {@link Class} for the alias.
 	 */
 	public abstract <S extends TeamSource> void addTeamSourceAlias(String alias, Class<S> teamSourceClass);
 
 	/**
 	 * Adds the {@link Profiler} for the {@link Office}.
 	 * 
-	 * @param officeName
-	 *            Name of {@link Office} to be profiled.
-	 * @param profiler
-	 *            {@link Profiler} for the {@link Office}.
+	 * @param officeName Name of {@link Office} to be profiled.
+	 * @param profiler   {@link Profiler} for the {@link Office}.
 	 */
 	public abstract void addProfiler(String officeName, Profiler profiler);
 
@@ -753,24 +717,21 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * The files within the directory are properties files with the naming
 	 * convention: &lt;fully-qualified-name&gt;.properties
 	 * 
-	 * @param propertiesDirectory
-	 *            Directory containing the override properties.
+	 * @param propertiesDirectory Directory containing the override properties.
 	 */
 	public abstract void setOverridePropertiesDirectory(File propertiesDirectory);
 
 	/**
 	 * Specifies the {@link MBeanRegistrator}.
 	 * 
-	 * @param mbeanRegistrator
-	 *            {@link MBeanRegistrator}.
+	 * @param mbeanRegistrator {@link MBeanRegistrator}.
 	 */
 	public abstract void setMBeanRegistrator(MBeanRegistrator mbeanRegistrator);
 
 	/**
 	 * Adds an {@link OfficeFloorListener}.
 	 * 
-	 * @param officeFloorListener
-	 *            {@link OfficeFloorListener}.
+	 * @param officeFloorListener {@link OfficeFloorListener}.
 	 */
 	public abstract void addOfficeFloorListener(OfficeFloorListener officeFloorListener);
 
@@ -881,8 +842,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	/**
 	 * Compiles and builds the {@link OfficeFloor}.
 	 * 
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
+	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor} or <code>null</code> if issues in compiling which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
