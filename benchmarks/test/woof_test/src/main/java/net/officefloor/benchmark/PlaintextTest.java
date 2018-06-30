@@ -23,7 +23,7 @@ public class PlaintextTest {
 
 	@ClassRule
 	public static SystemPropertiesRule systemProperties = new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME,
-			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8080");
+			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8181");
 
 	@Rule
 	public OfficeFloorRule server = new OfficeFloorRule();
@@ -37,7 +37,7 @@ public class PlaintextTest {
 
 	@Test
 	public void validRequest() throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/plaintext"));
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8181/plaintext"));
 		String entity = EntityUtils.toString(response.getEntity());
 		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "text/plain", response.getFirstHeader("content-type").getValue());

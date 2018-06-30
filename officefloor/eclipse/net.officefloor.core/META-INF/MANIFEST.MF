@@ -178,3 +178,4 @@ Export-Package: net.officefloor,
  net.officefloor.plugin.xml.unmarshall.load,
  net.officefloor.plugin.xml.unmarshall.translate,
  net.officefloor.plugin.xml.unmarshall.tree
+Automatic-Module-Name: net.officefloor.core

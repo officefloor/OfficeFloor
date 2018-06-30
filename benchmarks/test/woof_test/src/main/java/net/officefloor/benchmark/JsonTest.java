@@ -23,7 +23,7 @@ public class JsonTest {
 
 	@ClassRule
 	public static SystemPropertiesRule systemProperties = new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME,
-			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8080");
+			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8181");
 
 	@Rule
 	public OfficeFloorRule server = new OfficeFloorRule();
@@ -37,7 +37,7 @@ public class JsonTest {
 
 	@Test
 	public void validRequest() throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/json"));
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8181/json"));
 		String entity = EntityUtils.toString(response.getEntity());
 		assertEquals("Should be successful\n\n:" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "application/json", response.getFirstHeader("content-type").getValue());

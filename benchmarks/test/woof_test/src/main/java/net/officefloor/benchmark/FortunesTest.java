@@ -32,7 +32,7 @@ public class FortunesTest {
 
 	@ClassRule
 	public static SystemPropertiesRule systemProperties = new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME,
-			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8080");
+			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8181");
 
 	@Rule
 	public OfficeFloorRule server = new OfficeFloorRule();
@@ -71,7 +71,7 @@ public class FortunesTest {
 
 	@Test
 	public void validRequest() throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/fortunes"));
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8181/fortunes"));
 		String entity = EntityUtils.toString(response.getEntity());
 		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "text/html;charset=utf-8",

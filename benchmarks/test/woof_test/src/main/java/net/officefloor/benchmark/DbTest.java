@@ -37,7 +37,7 @@ public class DbTest {
 
 	@ClassRule
 	public static SystemPropertiesRule systemProperties = new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME,
-			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8080",
+			"OF", HttpServer.PROPERTY_HTTP_DATE_HEADER, "true", HttpServerLocation.PROPERTY_HTTP_PORT, "8181",
 			HttpServer.PROPERTY_INCLUDE_STACK_TRACE, "false");
 
 	@Rule
@@ -66,7 +66,7 @@ public class DbTest {
 
 	@Test
 	public void validRequest() throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8080/db"));
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:8181/db"));
 		String entity = EntityUtils.toString(response.getEntity());
 		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "application/json", response.getFirstHeader("content-type").getValue());

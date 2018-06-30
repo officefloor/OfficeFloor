@@ -4,7 +4,7 @@ Bundle-Name: OfficeFloor Editor
 Bundle-SymbolicName: net.officefloor.eclipse.editor;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-10
 Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.core.runtime,
  org.eclipse.core.commands,
@@ -27,3 +27,4 @@ Export-Package: net.officefloor.eclipse.editor,
  net.officefloor.eclipse.editor.preview
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.officefloor.eclipse.editor.AdaptedEditorPlugin
+Automatic-Module-Name: net.officefloor.eclipse.editor

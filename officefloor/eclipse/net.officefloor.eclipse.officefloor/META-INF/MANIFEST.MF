@@ -4,7 +4,7 @@ Bundle-Name: OfficeFloor Editor
 Bundle-SymbolicName: net.officefloor.eclipse.officefloor;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-10
 Export-Package: net.officefloor.eclipse.officefloor
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -21,3 +21,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Import-Package: com.google.inject,
  com.google.inject.util,
  javax.inject
+Automatic-Module-Name: net.officefloor.eclipse.officefloor

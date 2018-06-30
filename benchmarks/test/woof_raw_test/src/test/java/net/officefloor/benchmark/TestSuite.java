@@ -31,7 +31,7 @@ import org.junit.runners.Suite.SuiteClasses;
 public class TestSuite {
 
 	public static void start() throws Exception {
-		RawOfficeFloorMain.main(new String[0]);
+		RawOfficeFloorMain.main(new String[] { "8181" });
 	}
 
 	public static void stop() throws Exception {
