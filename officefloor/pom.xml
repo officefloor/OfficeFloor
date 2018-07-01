@@ -712,6 +712,13 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
+						<!-- Java 9+ -->
+						<fork>true</fork>
+						<compilerArgs>
+							<compilerArg>--add-modules=javafx.swt</compilerArg>
+						</compilerArgs>
+						<!-- Java 8 -->
+						<!--  
 						<extraClasspathElements>
 							<extraClasspathElement>
 								<groupId>com.oracle</groupId>
@@ -721,6 +728,7 @@
 								<scope>system</scope>
 							</extraClasspathElement>
 						</extraClasspathElements>
+						-->
 					</configuration>
 				</plugin>
 				<plugin>
