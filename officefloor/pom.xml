@@ -712,23 +712,15 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
-						<!-- Java 9+ -->
-						<fork>true</fork>
-						<compilerArgs>
-							<compilerArg>--add-modules=javafx.swt</compilerArg>
-						</compilerArgs>
-						<!-- Java 8 -->
-						<!--  
 						<extraClasspathElements>
 							<extraClasspathElement>
 								<groupId>com.oracle</groupId>
 								<artifactId>javafx</artifactId>
 								<version>8.0.0-SNAPSHOT</version>
-								<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
 								<scope>system</scope>
 							</extraClasspathElement>
 						</extraClasspathElements>
-						-->
 					</configuration>
 				</plugin>
 				<plugin>
