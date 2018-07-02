@@ -29,12 +29,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.sun.javafx.css.CssError;
 import com.sun.javafx.css.StyleManager;
 
 import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
+import javafx.css.CssParser.ParseError;
 import javafx.scene.Scene;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
 
@@ -43,13 +43,12 @@ import net.officefloor.eclipse.ide.swt.SwtUtil;
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("restriction")
 public class JavaFxUtil {
 
 	/**
 	 * {@link CssError} instances.
 	 */
-	private static final ObservableList<CssError> CSS_ERRORS = StyleManager.errorsProperty();
+	private static final ObservableList<ParseError> CSS_ERRORS = StyleManager.errorsProperty();
 
 	/**
 	 * Active {@link CssManager} for {@link Scene}.
@@ -59,8 +58,7 @@ public class JavaFxUtil {
 	/**
 	 * Obtains an {@link Property} to CSS error of the {@link Scene}.
 	 * 
-	 * @param scene
-	 *            {@link Scene} to limit the CSS error.
+	 * @param scene {@link Scene} to limit the CSS error.
 	 * @return {@link Property} to {@link Scene} CSS error.
 	 */
 	private static void registerScene(Scene scene) {
@@ -75,7 +73,7 @@ public class JavaFxUtil {
 		CSS_ERRORS.addListener((Observable event) -> {
 
 			// Obtain the latest CSS error
-			CssError error = CSS_ERRORS.get(CSS_ERRORS.size() - 1);
+			ParseError error = CSS_ERRORS.get(CSS_ERRORS.size() - 1);
 
 			// Strip off style sheet (as always the text in modal)
 			String message = error.getMessage();
@@ -85,7 +83,7 @@ public class JavaFxUtil {
 			message = message.split(" in stylesheet")[0];
 
 			// Load error to active CSS manager
-			CssManager manager = activeCssManager.get(error.getScene());
+			CssManager manager = activeCssManager.get(scene);
 			if (manager != null) {
 				manager.setCssError(message);
 			}
@@ -120,12 +118,9 @@ public class JavaFxUtil {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param parent
-		 *            Parent {@link Composite}.
-		 * @param scene
-		 *            {@link Scene} to listen on CSS errors.
-		 * @param style
-		 *            {@link Property} to update with style.
+		 * @param parent Parent {@link Composite}.
+		 * @param scene  {@link Scene} to listen on CSS errors.
+		 * @param style  {@link Property} to update with style.
 		 */
 		private CssManager(Composite parent, Scene scene, Property<String> style) {
 			this.scene = scene;
@@ -158,12 +153,9 @@ public class JavaFxUtil {
 		/**
 		 * Registers {@link StyledText} for tracking CSS errors.
 		 * 
-		 * @param text
-		 *            {@link StyledText} for tracking CSS errors.
-		 * @param initialStyle
-		 *            Initial style.
-		 * @param translator
-		 *            Optional translator of the CSS. May be <code>null</code>.
+		 * @param text         {@link StyledText} for tracking CSS errors.
+		 * @param initialStyle Initial style.
+		 * @param translator   Optional translator of the CSS. May be <code>null</code>.
 		 */
 		public void registerText(StyledText text, String initialStyle, Function<String, String> translator) {
 			if (initialStyle != null) {
@@ -175,12 +167,9 @@ public class JavaFxUtil {
 		/**
 		 * Registers {@link Text} for tracking CSS errors.
 		 * 
-		 * @param text
-		 *            {@link Text} for tracking CSS errors.
-		 * @param initialStyle
-		 *            Initial style.
-		 * @param translator
-		 *            Optional translator of the CSS. May be <code>null</code>.
+		 * @param text         {@link Text} for tracking CSS errors.
+		 * @param initialStyle Initial style.
+		 * @param translator   Optional translator of the CSS. May be <code>null</code>.
 		 */
 		public void registerText(Text text, String initialStyle, Function<String, String> translator) {
 			if (initialStyle != null) {
@@ -192,10 +181,8 @@ public class JavaFxUtil {
 		/**
 		 * Loads styling.
 		 * 
-		 * @param rawStyle
-		 *            Raw style. May be <code>null</code>.
-		 * @param translator
-		 *            Translator. May be <code>null</code>.
+		 * @param rawStyle   Raw style. May be <code>null</code>.
+		 * @param translator Translator. May be <code>null</code>.
 		 */
 		public void loadStyle(String rawStyle, Function<String, String> translator) {
 
@@ -220,8 +207,7 @@ public class JavaFxUtil {
 		/**
 		 * Specifies the CSS error.
 		 * 
-		 * @param message
-		 *            CSS error message.
+		 * @param message CSS error message.
 		 */
 		private void setCssError(String message) {
 
@@ -242,12 +228,9 @@ public class JavaFxUtil {
 	/**
 	 * Creates a {@link CssManager}.
 	 * 
-	 * @param parent
-	 *            Parent {@link Composite}.
-	 * @param scene
-	 *            {@link Scene} to listen in on for {@link CssError} instances.
-	 * @param style
-	 *            {@link Property} to specify the style.
+	 * @param parent Parent {@link Composite}.
+	 * @param scene  {@link Scene} to listen in on for {@link CssError} instances.
+	 * @param style  {@link Property} to specify the style.
 	 * @return {@link CssManager}.
 	 */
 	public static CssManager createCssManager(Composite parent, Scene scene, Property<String> style) {
