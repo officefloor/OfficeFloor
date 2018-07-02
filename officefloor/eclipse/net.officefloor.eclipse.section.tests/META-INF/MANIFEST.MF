@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test Section Editor
-Bundle-SymbolicName: net.officefloor.eclipse.section.test;singleton:=true
+Bundle-SymbolicName: net.officefloor.eclipse.section.tests;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-10

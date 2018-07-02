@@ -93,7 +93,7 @@
 							<groupId>${project.groupId}</groupId>
 							<artifactId>net.officefloor.eclipse.target</artifactId>
 							<version>${project.version}</version>
-							<classifier>OXYGEN</classifier>
+							<classifier>PHOTON</classifier>
 						</artifact>
 					</target>
 					<dependency-resolution>
@@ -173,23 +173,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<!-- Profile for building -->
-			<id>build-repositories</id>
-			<activation>
-				<file>
-					<exists>${basedir}/pom.xml</exists>
-				</file>
-			</activation>
-			<repositories>
-				<repository>
-					<!-- Eclipse -->
-					<id>eclipse-oxygen</id>
-					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/oxygen</url>
-				</repository>
-			</repositories>
-		</profile>
-	</profiles>
 </project>
