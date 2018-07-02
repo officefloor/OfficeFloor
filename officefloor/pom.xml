@@ -25,8 +25,10 @@
 		<url>https://github.com/sagenschneider/OfficeFloor/issues</url>
 	</issueManagement>
 	<scm>
-		<connection>scm:git:https://github.com/sagenschneider/OfficeFloor.git</connection>
-		<developerConnection>scm:git:git@github.com:sagenschneider/OfficeFloor.git</developerConnection>
+		<connection>scm:git:https://github.com/sagenschneider/OfficeFloor.git
+		</connection>
+		<developerConnection>scm:git:git@github.com:sagenschneider/OfficeFloor.git
+		</developerConnection>
 		<url>https://github.com/sagenschneider/OfficeFloor</url>
 	</scm>
 	<developers>
@@ -51,7 +53,8 @@
 		<site>
 			<id>repo.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs</url>
+			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs
+			</url>
 		</site>
 	</distributionManagement>
 	<modules>
@@ -70,7 +73,8 @@
 		<tycho-version>1.2.0</tycho-version>
 		<maven-version>3.3.9</maven-version>
 		<maven-plugin-version>3.5</maven-plugin-version>
-		<maven-project-info-reports-version>2.9</maven-project-info-reports-version>
+		<maven-project-info-reports-version>2.9
+		</maven-project-info-reports-version>
 		<maven-changes-version>2.11</maven-changes-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<syncrpc-version>0.3</syncrpc-version>
@@ -716,7 +720,7 @@
 							<extraClasspathElement>
 								<groupId>com.oracle</groupId>
 								<artifactId>javafx</artifactId>
-								<version>8.0.0-SNAPSHOT</version>
+								<version>10.0.0-SNAPSHOT</version>
 								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
 								<scope>system</scope>
 							</extraClasspathElement>
@@ -871,7 +875,8 @@
 						<exclude>**/META-INF/services/**</exclude>
 						<exclude>**/src/test/resources/**</exclude>
 						<exclude>**/src/auto/**</exclude>
-						<exclude>**/src/main/resources/archetype-resources/src/**</exclude>
+						<exclude>**/src/main/resources/archetype-resources/src/**
+						</exclude>
 						<!-- Extensions to exclude -->
 						<exclude>**/*.xml</exclude>
 						<exclude>**/*.xsd</exclude>
@@ -912,7 +917,8 @@
 						<exclude>**/officeconsole</exclude>
 					</excludes>
 					<headerDefinitions>
-						<headerDefinition>src/license/java-header-style.xml</headerDefinition>
+						<headerDefinition>src/license/java-header-style.xml
+						</headerDefinition>
 					</headerDefinitions>
 				</configuration>
 			</plugin>
@@ -930,7 +936,8 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
+							<outputDirectory>${project.build.directory}/verifier
+							</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/verifier</directory>
@@ -1064,7 +1071,8 @@
 							<goal>verify</goal>
 						</goals>
 						<configuration>
-							<verificationFile>${project.build.directory}/verifier/verifications.xml</verificationFile>
+							<verificationFile>${project.build.directory}/verifier/verifications.xml
+							</verificationFile>
 						</configuration>
 					</execution>
 				</executions>
@@ -1085,7 +1093,8 @@
 						</goals>
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
-							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
+							<excludePackageNames>net.officefloor.web.template.parse
+							</excludePackageNames>
 							<!-- Include Google Analytics -->
 							<additionalOptions>
 								<additionalOption>--allow-script-in-comments</additionalOption>
@@ -1124,7 +1133,8 @@
 				<version>${jetty-version}</version>
 				<inherited>false</inherited>
 				<configuration>
-					<webAppSourceDirectory>${basedir}/target/site/</webAppSourceDirectory>
+					<webAppSourceDirectory>${basedir}/target/site/
+					</webAppSourceDirectory>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
@@ -1205,7 +1215,8 @@
 						<excludedPage>apidocs/**</excludedPage>
 					</excludedPages>
 					<excludedLinks>
-						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
+						<excludedLink>http://sourceforge.net/projects/officefloor
+						</excludedLink>
 						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
 						<excludedLink>//dl.acm.org/**</excludedLink>
 						<excludedLink>http://dl.acm.org/**</excludedLink>
@@ -1231,8 +1242,11 @@
 			<distributionManagement>
 				<repository>
 					<id>repo.officefloor.sf.net</id>
-					<name>Maven repository on SourceForge - http://www.officefloor.net/maven2</name>
-					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2</url>
+					<name>Maven repository on SourceForge -
+						http://www.officefloor.net/maven2
+					</name>
+					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2
+					</url>
 				</repository>
 			</distributionManagement>
 			<build>
@@ -1302,7 +1316,8 @@
 				<repository>
 					<id>sonatype-nexus-staging</id>
 					<name>Nexus Release Repository</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
+					</url>
 				</repository>
 			</distributionManagement>
 			<build>

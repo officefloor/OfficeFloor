@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import javax.jws.WebParam.Mode;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -115,8 +113,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	/**
 	 * Loads the preference page.
 	 * 
-	 * @param parent
-	 *            Parent.
+	 * @param parent Parent.
 	 */
 	protected void loadPreferencePage(Composite parent) {
 
@@ -262,23 +259,16 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	/**
 	 * Recursively loads the prototype {@link Model}.
 	 * 
-	 * @param parentModel
-	 *            Parent {@link Model}.
-	 * @param item
-	 *            {@link AbstractItem} to have its prototype loaded into the
-	 *            {@link Model}.
-	 * @param isParent
-	 *            Indicate if {@link AdaptedParent}.
-	 * @param modelStylers
-	 *            {@link Map} of {@link Model} to {@link ModelPreferenceStyler} to
-	 *            be populated.
-	 * @param editorWrapper
-	 *            {@link EditorWrapper}.
-	 * @param parentShell
-	 *            Parent {@link Shell}.
-	 * @param decorator
-	 *            Decorator on the {@link Model}.
-	 * @return Prototype {@link Mode} from the {@link AbstractItem}.
+	 * @param parentModel   Parent {@link Model}.
+	 * @param item          {@link AbstractItem} to have its prototype loaded into
+	 *                      the {@link Model}.
+	 * @param isParent      Indicate if {@link AdaptedParent}.
+	 * @param modelStylers  {@link Map} of {@link Model} to
+	 *                      {@link ModelPreferenceStyler} to be populated.
+	 * @param editorWrapper {@link EditorWrapper}.
+	 * @param parentShell   Parent {@link Shell}.
+	 * @param decorator     Decorator on the {@link Model}.
+	 * @return Prototype {@link Model} from the {@link AbstractItem}.
 	 */
 	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent,
 			Map<Model, ModelPreferenceStyler> modelStylers, EditorWrapper editorWrapper, Shell parentShell,
@@ -591,8 +581,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		/**
 		 * Instantiate.
 		 * 
-		 * @param ideEditor
-		 *            {@link AbstractIdeEditor} being wrapped.
+		 * @param ideEditor {@link AbstractIdeEditor} being wrapped.
 		 */
 		private EditorWrapper(AbstractIdeEditor<?, ?, ?> ideEditor) {
 			this.ideEditor = ideEditor;
@@ -607,8 +596,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		/**
 		 * Specifies the {@link TabItem} for this {@link EditorWrapper}.
 		 * 
-		 * @param editorTab
-		 *            {@link TabItem} for this {@link EditorWrapper}.
+		 * @param editorTab {@link TabItem} for this {@link EditorWrapper}.
 		 */
 		private void setTabItem(TabItem editorTab) {
 			this.editorTab = editorTab;
@@ -657,9 +645,8 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		/**
 		 * Visits all preferences for the {@link AbstractIdeEditor}.
 		 * 
-		 * @param visitor
-		 *            {@link Consumer} to visit each preference identifier for the
-		 *            {@link AbstractIdeEditor}.
+		 * @param visitor {@link Consumer} to visit each preference identifier for the
+		 *                {@link AbstractIdeEditor}.
 		 */
 		private void visitPreferences(Consumer<String> visitor) {
 			visitor.accept(this.ideEditor.getPaletteIndicatorStyleId());
@@ -673,10 +660,8 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		/**
 		 * Visits the {@link AbstractItem}.
 		 * 
-		 * @param item
-		 *            {@link AbstractItem} being visited.
-		 * @param visitor
-		 *            {@link Consumer} visitor.
+		 * @param item    {@link AbstractItem} being visited.
+		 * @param visitor {@link Consumer} visitor.
 		 */
 		private void visitItemPreferences(AbstractItem item, Consumer<String> visitor) {
 			visitor.accept(item.getPreferenceStyleId());

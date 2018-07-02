@@ -4,7 +4,7 @@ Bundle-Name: Eclipse OfficeFloor Launcher
 Bundle-SymbolicName: net.officefloor.eclipse.launch;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-10
 Require-Bundle: net.officefloor.core;bundle-version="3.0.0",
  org.eclipse.core.runtime,
  org.eclipse.jdt.launching,

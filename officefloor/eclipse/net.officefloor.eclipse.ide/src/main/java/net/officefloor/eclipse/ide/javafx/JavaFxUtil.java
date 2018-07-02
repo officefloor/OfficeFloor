@@ -29,11 +29,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.sun.javafx.css.StyleManager;
-
 import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
+import javafx.css.CssParser;
 import javafx.css.CssParser.ParseError;
 import javafx.scene.Scene;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
@@ -48,7 +47,7 @@ public class JavaFxUtil {
 	/**
 	 * {@link CssError} instances.
 	 */
-	private static final ObservableList<ParseError> CSS_ERRORS = StyleManager.errorsProperty();
+	private static final ObservableList<ParseError> CSS_ERRORS = CssParser.errorsProperty();
 
 	/**
 	 * Active {@link CssManager} for {@link Scene}.
