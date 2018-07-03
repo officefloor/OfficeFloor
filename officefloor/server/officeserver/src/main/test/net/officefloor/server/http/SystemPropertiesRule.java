@@ -34,14 +34,15 @@ public class SystemPropertiesRule implements TestRule {
 
 	/**
 	 * Context {@link Runnable}.
+	 * 
+	 * @param <T> Possible {@link Throwable} from logic.
 	 */
 	public static interface ContextRunnable<T extends Throwable> {
 
 		/**
 		 * Undertakes the logic.
 		 * 
-		 * @throws T
-		 *             Possible failure.
+		 * @throws T Possible failure.
 		 */
 		void run() throws T;
 	}
@@ -54,8 +55,7 @@ public class SystemPropertiesRule implements TestRule {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param systemPropertyNameValuePairs
-	 *            {@link System} property name/value pairs.
+	 * @param systemPropertyNameValuePairs {@link System} property name/value pairs.
 	 */
 	public SystemPropertiesRule(String... systemPropertyNameValuePairs) {
 		this.systemPropertyNameValuePairs = systemPropertyNameValuePairs;
@@ -63,11 +63,10 @@ public class SystemPropertiesRule implements TestRule {
 
 	/**
 	 * Runs {@link ContextRunnable} with configured {@link System} properties.
-	 * 
-	 * @param runnable
-	 *            {@link ContextRunnable}.
-	 * @throws T
-	 *             Possible {@link Throwable}.
+	 *
+	 * @param          <T> Possible {@link Throwable} from logic.
+	 * @param runnable {@link ContextRunnable}.
+	 * @throws T Possible {@link Throwable}.
 	 */
 	public <T extends Throwable> void run(ContextRunnable<T> runnable) throws T {
 

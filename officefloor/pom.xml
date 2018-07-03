@@ -671,19 +671,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>3.0.1</version>
-					<configuration>
-						<!-- Ignore maven plugin tags -->
-						<tags>
-							<tag>
-								<name>goal</name>
-								<placement>X</placement>
-							</tag>
-							<tag>
-								<name>requiresDependencyResolution</name>
-								<placement>X</placement>
-							</tag>
-						</tags>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1085,53 +1072,6 @@
 			<!-- END: project validation -->
 
 			<plugin>
-				<!-- Generate Javadoc for site documentation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>site-javadoc</id>
-						<inherited>false</inherited>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>aggregate</goal>
-						</goals>
-						<configuration>
-							<!-- Ignore generated code that have no control over -->
-							<excludePackageNames>net.officefloor.web.template.parse
-							</excludePackageNames>
-							<!-- Include Google Analytics -->
-							<additionalOptions>
-								<additionalOption>--allow-script-in-comments</additionalOption>
-							</additionalOptions>
-							<header>
-							<![CDATA[
-			<!-- Google Analytics -->
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount',
-				'UA-23477455-1']);
-				_gaq.push(['_trackPageview']);
-
-				(function() {
-				var ga
-				= document.createElement('script'); ga.type = 'text/javascript';
-				ga.async = true;
-				ga.src = ('https:' == document.location.protocol ?
-				'https://ssl' :
-				'http://www') + '.google-analytics.com/ga.js';
-				var s =
-				document.getElementsByTagName('script')[0];
-				s.parentNode.insertBefore(ga, s);
-				})();
-			</script>
-							]]>
-							</header>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<!-- Run HTTP server for staged site content for linkcheck report -->
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
@@ -1187,15 +1127,10 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changes-plugin</artifactId>
-				<version>${maven-changes-version}</version>
-				<inherited>false</inherited>
-				<configuration>
-					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-				</configuration>
-			</plugin>
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-changes-plugin</artifactId> 
+				<version>${maven-changes-version}</version> <inherited>false</inherited> 
+				<configuration> <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot> </configuration> 
+				</plugin> -->
 			<plugin>
 				<!-- Report on broken links in site. -->
 				<!-- To obtain link check report for stage site: -->
@@ -1229,6 +1164,63 @@
 						<excludedLink>#</excludedLink>
 					</excludedLinks>
 				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Generate Javadoc for site documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<id>default</id>
+						<reports>
+							<report>javadoc</report>
+							<report>test-javadoc</report>
+						</reports>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</reportSet>
+					<reportSet>
+						<id>site javadoc</id>
+						<inherited>false</inherited>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+						<configuration>
+							<!-- Ignore generated code that have no control over -->
+							<excludePackageNames>net.officefloor.web.template.parse
+							</excludePackageNames>
+							<!-- Include Google Analytics -->
+							<additionalOptions>
+								<additionalOption>--allow-script-in-comments</additionalOption>
+								<additionalOption>-html5</additionalOption>
+							</additionalOptions>
+							<header>
+							<![CDATA[
+			<!-- Google Analytics -->
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount',
+				'UA-23477455-1']);
+				_gaq.push(['_trackPageview']);
+
+				(function() {
+				var ga
+				= document.createElement('script'); ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ?
+				'https://ssl' :
+				'http://www') + '.google-analytics.com/ga.js';
+				var s =
+				document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+				})();
+			</script>
+							]]>
+							</header>
+						</configuration>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>

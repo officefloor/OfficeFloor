@@ -45,8 +45,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * {@link ServerHttpConnection} implementation available for
  * {@link ExternalServiceInput}.
  * 
- * @param <B>
- *            Type of underlying buffer being used.
+ * @param <B> Type of underlying buffer being used.
  * 
  * @author Daniel Sagenschneider
  */
@@ -131,27 +130,31 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param isSecure
-	 *            Indicates if secure.
-	 * @param methodSupplier
-	 *            {@link Supplier} for the {@link HttpRequest} {@link HttpMethod}.
-	 * @param requestUriSupplier
-	 *            {@link Supplier} for the {@link HttpRequest} URI.
-	 * @param version
-	 *            {@link HttpVersion} for the {@link HttpRequest}.
-	 * @param requestHeaders
-	 *            {@link NonMaterialisedHttpHeaders} for the {@link HttpRequest}.
-	 * @param requestEntity
-	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
-	 * @param isIncludeStackTraceOnEscalation
-	 *            <code>true</code> to include the {@link Escalation} stack trace in
-	 *            the {@link HttpResponse}.
-	 * @param writer
-	 *            {@link HttpResponseWriter}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param serverLocation                  {@link HttpServerLocation}.
+	 * @param isSecure                        Indicates if secure.
+	 * @param methodSupplier                  {@link Supplier} for the
+	 *                                        {@link HttpRequest}
+	 *                                        {@link HttpMethod}.
+	 * @param requestUriSupplier              {@link Supplier} for the
+	 *                                        {@link HttpRequest} URI.
+	 * @param version                         {@link HttpVersion} for the
+	 *                                        {@link HttpRequest}.
+	 * @param requestHeaders                  {@link NonMaterialisedHttpHeaders} for
+	 *                                        the {@link HttpRequest}.
+	 * @param requestEntity                   {@link ByteSequence} for the
+	 *                                        {@link HttpRequest} entity.
+	 * @param serverName                      Name of the server. May be
+	 *                                        <code>null</code> if not sending
+	 *                                        <code>Server</code>
+	 *                                        {@link HttpHeader}.
+	 * @param dateHttpHeaderClock             {@link DateHttpHeaderClock}. May be
+	 *                                        <code>null</code> to not send
+	 *                                        <code>Date</code> {@link HttpHeader}.
+	 * @param isIncludeStackTraceOnEscalation <code>true</code> to include the
+	 *                                        {@link Escalation} stack trace in the
+	 *                                        {@link HttpResponse}.
+	 * @param writer                          {@link HttpResponseWriter}.
+	 * @param bufferPool                      {@link StreamBufferPool}.
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(HttpServerLocation serverLocation, boolean isSecure,
 			Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier, HttpVersion version,
@@ -191,11 +194,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	/**
 	 * Sets the {@link CleanupEscalation} instances.
 	 * 
-	 * @param cleanupEscalations
-	 *            {@link CleanupEscalation} instances.
-	 * @throws IOException
-	 *             If fails to send the {@link CleanupEscalation} details in the
-	 *             {@link HttpResponse}.
+	 * @param cleanupEscalations {@link CleanupEscalation} instances.
+	 * @throws IOException If fails to send the {@link CleanupEscalation} details in
+	 *                     the {@link HttpResponse}.
 	 */
 	public void setCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
 		this.response.setCleanupEscalations(cleanupEscalations);

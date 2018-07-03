@@ -148,10 +148,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSourceClassName
-		 *            {@link ManagedObjectSource} {@link Class} name.
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSourceClassName {@link ManagedObjectSource} {@link Class}
+		 *                                     name.
+		 * @param managedObjectSource          {@link ManagedObjectSource}.
 		 */
 		@SuppressWarnings("rawtypes")
 		public InitialisedState(String managedObjectSourceClassName, ManagedObjectSource managedObjectSource) {
@@ -215,29 +214,27 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of this {@link ManagedObjectSource}.
-	 * @param containingSectionNode
-	 *            {@link SectionNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if contained in
-	 *            the {@link Office} or {@link OfficeFloor}.
-	 * @param containingOfficeNode
-	 *            {@link OfficeNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if contained in
-	 *            the {@link OfficeFloor}.
-	 * @param containingSuppliedManagedObjectNode
-	 *            {@link SuppliedManagedObjectSourceNode} containing this
-	 *            {@link ManagedObjectSource}. <code>null</code> if not provided
-	 *            from {@link SupplierSource}.
-	 * @param containingSuppliedManagedObjectNode
-	 *            {@link SuppliedManagedObjectSourceNode} should this be a supplied
-	 *            {@link ManagedObjectSource}. Will be <code>null</code> if not
-	 *            supplied.
-	 * @param containingOfficeFloorNode
-	 *            {@link OfficeFloorNode} containing this
-	 *            {@link ManagedObjectSourceNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param managedObjectSourceName             Name of this
+	 *                                            {@link ManagedObjectSource}.
+	 * @param containingSectionNode               {@link SectionNode} containing
+	 *                                            this
+	 *                                            {@link ManagedObjectSourceNode}.
+	 *                                            <code>null</code> if contained in
+	 *                                            the {@link Office} or
+	 *                                            {@link OfficeFloor}.
+	 * @param containingOfficeNode                {@link OfficeNode} containing this
+	 *                                            {@link ManagedObjectSourceNode}.
+	 *                                            <code>null</code> if contained in
+	 *                                            the {@link OfficeFloor}.
+	 * @param containingSuppliedManagedObjectNode {@link SuppliedManagedObjectSourceNode}
+	 *                                            containing this
+	 *                                            {@link ManagedObjectSource}.
+	 *                                            <code>null</code> if not provided
+	 *                                            from {@link SupplierSource}.
+	 * @param containingOfficeFloorNode           {@link OfficeFloorNode} containing
+	 *                                            this
+	 *                                            {@link ManagedObjectSourceNode}.
+	 * @param context                             {@link NodeContext}.
 	 */
 	public ManagedObjectSourceNodeImpl(String managedObjectSourceName, SectionNode containingSectionNode,
 			OfficeNode containingOfficeNode, SuppliedManagedObjectSourceNode containingSuppliedManagedObjectNode,
@@ -266,12 +263,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		/**
 		 * Loads the specific type.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
-		 * @param properties
-		 *            {@link PropertyList} to configure the {@link ManagedObjectSource}.
-		 * @param managedObjectLoader
-		 *            {@link ManagedObjectLoader}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
+		 * @param properties          {@link PropertyList} to configure the
+		 *                            {@link ManagedObjectSource}.
+		 * @param managedObjectLoader {@link ManagedObjectLoader}.
 		 * @return Specific type.
 		 */
 		T loadType(ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties,
@@ -281,10 +276,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	/**
 	 * Loads the type.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @param loader
-	 *            {@link TypeLoader} to load specific type.
+	 * @param compileContext {@link CompileContext}.
+	 * @param loader         {@link TypeLoader} to load specific type.
 	 * @return Type or <code>null</code> if issues with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
@@ -326,9 +319,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * Obtains the {@link PropertyList} for configuring this
 	 * {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param seedProperties
-	 *            Seed {@link PropertyList}. May be <code>null</code> if no seed
-	 *            {@link PropertyList}.
+	 * @param seedProperties Seed {@link PropertyList}. May be <code>null</code> if
+	 *                       no seed {@link PropertyList}.
 	 * @return {@link PropertyList} for configuring this
 	 *         {@link ManagedObjectSourceNode}.
 	 */

@@ -92,10 +92,8 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 /**
  * {@link OfficeFloorModel} editor.
  * 
- * @param <R>
- *            Root {@link Model} type.
- * @param <O>
- *            {@link Change} operations type.
+ * @param <R> Root {@link Model} type.
+ * @param <O> {@link Change} operations type.
  * 
  * @author Daniel Sagenschneider
  */
@@ -104,10 +102,8 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Translates the style with the details of the item being rendered.
 	 *
-	 * @param rawStyle
-	 *            Raw style to be translated.
-	 * @param item
-	 *            {@link AbstractItem}.
+	 * @param rawStyle Raw style to be translated.
+	 * @param item     {@link AbstractItem}.
 	 * @return Ready to use translate.
 	 */
 	public static String translateStyle(String rawStyle, AbstractItem<?, ?, ?, ?, ?, ?> item) {
@@ -134,8 +130,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 		/**
 		 * Launches outside the {@link IWorkbench}.
 		 * 
-		 * @throws Throwable
-		 *             If failure in launching.
+		 * @throws Throwable If failure in launching.
 		 */
 		void launch() throws Throwable;
 	}
@@ -144,8 +139,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * Enables running the {@link AbstractIdeEditor} outside of the
 	 * {@link IWorkbench}.
 	 * 
-	 * @param launcher
-	 *            {@link OutsideWorkbenchLauncher}.
+	 * @param launcher {@link OutsideWorkbenchLauncher}.
 	 */
 	public synchronized static void launchOutsideWorkbench(OutsideWorkbenchLauncher launcher) {
 		isOutsideWorkbench = true;
@@ -182,8 +176,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * Convenience method to launch the {@link AbstractIdeEditor} implementation
 	 * outside the {@link IWorkbench}.
 	 * 
-	 * @param configurationFile
-	 *            {@link File} containing the configuration.
+	 * @param configurationFile {@link File} containing the configuration.
 	 */
 	public static void launch(File configurationFile) {
 
@@ -206,9 +199,8 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * Convenience method to launch the {@link AbstractIdeEditor} implementation
 	 * outside the {@link IWorkbench}.
 	 * 
-	 * @param configuration
-	 *            Configuration of {@link ConfigurationItem} to launch the
-	 *            {@link AbstractIdeEditor}.
+	 * @param configuration Configuration of {@link ConfigurationItem} to launch the
+	 *                      {@link AbstractIdeEditor}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void launch(String configuration) {
@@ -240,13 +232,41 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 			// Instantiate the editor
 			Class launchClass = Class.forName(finalLaunchClassName, false,
 					Thread.currentThread().getContextClassLoader());
-			Object instance = launchClass.newInstance();
+			Object instance = launchClass.getDeclaredConstructor().newInstance();
 			AbstractIdeEditor editor = (AbstractIdeEditor) instance;
 
 			// Load configuration to run outside workbench
 			editor.osgiBridge = OfficeFloorOsgiBridge.getClassLoaderInstance();
 			editor.configurationItem = MemoryConfigurationContext.createWritableConfigurationItem("TEST");
 			editor.configurationItem.setConfiguration(new ByteArrayInputStream(configuration.getBytes()));
+
+			// Change adapter
+			ChangeAdapter changeAdapter = new ChangeAdapter() {
+
+				@Override
+				public void postApply(Change<?> change) {
+
+					// Save model (with changes applied)
+					editor.doSave(null);
+
+					// Log changed configuration for tracking
+					try {
+						System.out.println();
+						System.out.println();
+						System.out.println(
+								"============== Change '" + change.getChangeDescription() + "' ==============");
+						Reader reader = editor.configurationItem.getReader();
+						for (int character = reader.read(); character != -1; character = reader.read()) {
+							System.out.write(character);
+						}
+						System.out.println();
+						System.out.println();
+					} catch (Exception ex) {
+						System.err.println("Failed to log configuration: ");
+						ex.printStackTrace();
+					}
+				}
+			};
 
 			// Display the editor
 			AbstractConfigurerRunnable runnable = new AbstractConfigurerRunnable() {
@@ -268,32 +288,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 					});
 
 					// Register logging of changes to the model
-					editor.rootBuilder.getChangeExecutor().addChangeListener(new ChangeAdapter() {
-
-						@Override
-						public void postApply(Change<?> change) {
-
-							// Save model (with changes applied)
-							editor.doSave(null);
-
-							// Log changed configuration for tracking
-							try {
-								System.out.println();
-								System.out.println();
-								System.out.println(
-										"============== Change '" + change.getChangeDescription() + "' ==============");
-								Reader reader = editor.configurationItem.getReader();
-								for (int character = reader.read(); character != -1; character = reader.read()) {
-									System.out.write(character);
-								}
-								System.out.println();
-								System.out.println();
-							} catch (Exception ex) {
-								System.err.println("Failed to log configuration: ");
-								ex.printStackTrace();
-							}
-						}
-					});
+					editor.rootBuilder.getChangeExecutor().addChangeListener(changeAdapter);
 				}
 			};
 			runnable.run();
@@ -386,8 +381,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Instantiate to capture {@link Injector}.
 	 * 
-	 * @param injector
-	 *            {@link Injector}.
+	 * @param injector {@link Injector}.
 	 */
 	private AbstractIdeEditor(Injector injector) {
 		super(injector);
@@ -400,13 +394,10 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * <p>
 	 * Allows for alternate {@link AdaptedEditorModule} implementation.
 	 * 
-	 * @param module
-	 *            {@link AdaptedEditorModule}.
-	 * @param rootModelType
-	 *            Root {@link Model} type.
-	 * @param createOperations
-	 *            {@link Function} to create the operations from the root
-	 *            {@link Model}.
+	 * @param module           {@link AdaptedEditorModule}.
+	 * @param rootModelType    Root {@link Model} type.
+	 * @param createOperations {@link Function} to create the operations from the
+	 *                         root {@link Model}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected AbstractIdeEditor(AdaptedEditorModule module, Class<R> rootModelType, Function<R, O> createOperations) {
@@ -515,12 +506,9 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Loads the children and their children recursively.
 	 * 
-	 * @param parent
-	 *            Parent {@link AbstractItem}.
-	 * @param parentBuilder
-	 *            Parent {@link AdaptedChildBuilder}.
-	 * @param configurableContext
-	 *            {@link ConfigurableContext}.
+	 * @param parent              Parent {@link AbstractItem}.
+	 * @param parentBuilder       Parent {@link AdaptedChildBuilder}.
+	 * @param configurableContext {@link ConfigurableContext}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void loadChildren(AbstractItem parent, AdaptedChildBuilder parentBuilder) {
@@ -560,15 +548,12 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Loads the preferred styling.
 	 * 
-	 * @param preferenceId
-	 *            {@link IPreferenceStore} identifier for the preferred styling.
-	 * @param style
-	 *            {@link Property} to be loaded with the styling.
-	 * @param defaultStyle
-	 *            Default style. May be <code>null</code>.
-	 * @param translator
-	 *            Optional translator to translate the raw styling. May be
-	 *            <code>null</code>.
+	 * @param preferenceId {@link IPreferenceStore} identifier for the preferred
+	 *                     styling.
+	 * @param style        {@link Property} to be loaded with the styling.
+	 * @param defaultStyle Default style. May be <code>null</code>.
+	 * @param translator   Optional translator to translate the raw styling. May be
+	 *                     <code>null</code>.
 	 */
 	private void loadPreferredStyling(String preferenceId, Property<String> style, String defaultStyle,
 			Function<String, String> translator) {
@@ -599,11 +584,9 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Instantiate with default {@link AdaptedEditorModule}.
 	 * 
-	 * @param rootModelType
-	 *            Root {@link Model} type.
-	 * @param createOperations
-	 *            {@link Function} to create the operations from the root
-	 *            {@link Model}.
+	 * @param rootModelType    Root {@link Model} type.
+	 * @param createOperations {@link Function} to create the operations from the
+	 *                         root {@link Model}.
 	 */
 	public AbstractIdeEditor(Class<R> rootModelType, Function<R, O> createOperations) {
 		this(new AdaptedEditorModule(), rootModelType, createOperations);
@@ -641,8 +624,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param selectOnly
-	 *            {@link SelectOnly}.
+	 * @param selectOnly {@link SelectOnly}.
 	 */
 	public void setSelectOnly(SelectOnly selectOnly) {
 		this.selectOnly = selectOnly;
@@ -651,8 +633,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Allows overriding to initialise the {@link AbstractIdeEditor}.
 	 * 
-	 * @param context
-	 *            {@link ConfigurableContext}.
+	 * @param context {@link ConfigurableContext}.
 	 */
 	protected void init(ConfigurableContext<R, O> context) {
 	}
@@ -694,35 +675,29 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Loads the {@link AbstractConfigurableItem} instances.
 	 * 
-	 * @param parents
-	 *            {@link List} to be populated with the
-	 *            {@link AbstractConfigurableItem} instances.
+	 * @param parents {@link List} to be populated with the
+	 *                {@link AbstractConfigurableItem} instances.
 	 */
 	protected abstract void loadParents(List<AbstractConfigurableItem<R, RE, O, ?, ?, ?>> parents);
 
 	/**
 	 * Creates the root {@link Model} from the {@link ConfigurationItem}.
 	 * 
-	 * @param configurationItem
-	 *            {@link ConfigurationItem} containing the configuration of the
-	 *            {@link Model}.
+	 * @param configurationItem {@link ConfigurationItem} containing the
+	 *                          configuration of the {@link Model}.
 	 * @return Root {@link Model} within the {@link ConfigurationItem}.
-	 * @throws Exception
-	 *             If fails to load the root {@link Model} from the
-	 *             {@link ConfigurationItem}.
+	 * @throws Exception If fails to load the root {@link Model} from the
+	 *                   {@link ConfigurationItem}.
 	 */
 	protected abstract R loadRootModel(ConfigurationItem configurationItem) throws Exception;
 
 	/**
 	 * Writes the root {@link Model} to the {@link WritableConfigurationItem}.
 	 * 
-	 * @param model
-	 *            Root {@link Model} to be saved.
-	 * @param configurationItem
-	 *            {@link WritableConfigurationItem}.
-	 * @throws Exception
-	 *             If fails to save the root {@link Model} into the
-	 *             {@link WritableConfigurationItem}.
+	 * @param model             Root {@link Model} to be saved.
+	 * @param configurationItem {@link WritableConfigurationItem}.
+	 * @throws Exception If fails to save the root {@link Model} into the
+	 *                   {@link WritableConfigurationItem}.
 	 */
 	public abstract void saveRootModel(R model, WritableConfigurationItem configurationItem) throws Exception;
 
@@ -757,8 +732,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	/**
 	 * Creates the operations for the root {@link Model}.
 	 * 
-	 * @param model
-	 *            Root {@link Model}.
+	 * @param model Root {@link Model}.
 	 * @return Operations.
 	 */
 	public O createOperations(R model) {
@@ -769,8 +743,7 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	 * Obtains the {@link OfficeFloorOsgiBridge}.
 	 * 
 	 * @return {@link OfficeFloorOsgiBridge}.
-	 * @throws Exception
-	 *             If fails to obtain the {@link OfficeFloorOsgiBridge}.
+	 * @throws Exception If fails to obtain the {@link OfficeFloorOsgiBridge}.
 	 */
 	protected final OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
 
