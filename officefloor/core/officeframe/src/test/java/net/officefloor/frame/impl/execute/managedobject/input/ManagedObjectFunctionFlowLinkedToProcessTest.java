@@ -45,9 +45,9 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 public class ManagedObjectFunctionFlowLinkedToProcessTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure {@link ManagedFunction} added by {@link ManagedObjectSource} can
-	 * have its {@link Flow} configured to {@link ProcessState} {@link Flow} for
-	 * the {@link ManagedObjectSource}.
+	 * Ensure {@link ManagedFunction} added by {@link ManagedObjectSource} can have
+	 * its {@link Flow} configured to {@link ProcessState} {@link Flow} for the
+	 * {@link ManagedObjectSource}.
 	 */
 	public void testManagedObjectFunctionFlowLinkedToProcess() throws Exception {
 
@@ -70,7 +70,7 @@ public class ManagedObjectFunctionFlowLinkedToProcessTest extends AbstractOffice
 		mos.inputManagedObject();
 
 		// Ensure functions are invoked with correct parameters
-		assertEquals("Incorrect input function", new Integer(10), InputFunction.parameter);
+		assertEquals("Incorrect input function", Integer.valueOf(10), InputFunction.parameter);
 		assertEquals("Incorrect function", "TEST", MockFunction.value);
 	}
 

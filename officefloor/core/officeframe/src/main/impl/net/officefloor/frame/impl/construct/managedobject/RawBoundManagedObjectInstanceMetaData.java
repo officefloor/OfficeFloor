@@ -256,7 +256,7 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 			}
 
 			// Load the dependency
-			dependencies.put(new Integer(index), dependency);
+			dependencies.put(Integer.valueOf(index), dependency);
 		}
 
 		// Ensure there are no additional dependencies configured

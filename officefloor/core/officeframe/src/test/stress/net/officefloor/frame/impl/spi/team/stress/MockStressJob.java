@@ -43,10 +43,8 @@ public abstract class MockStressJob implements Job {
 	/**
 	 * Convenience constructor for creating populated.
 	 * 
-	 * @param team
-	 *            {@link Team}.
-	 * @param max
-	 *            Max.
+	 * @param team {@link Team}.
+	 * @param max  Max.
 	 */
 	public MockStressJob(Team team, int max) {
 		this();
@@ -64,7 +62,7 @@ public abstract class MockStressJob implements Job {
 		// Create a new instance of this job
 		MockStressJob clonedJob;
 		try {
-			clonedJob = (MockStressJob) this.getClass().newInstance();
+			clonedJob = (MockStressJob) this.getClass().getDeclaredConstructor().newInstance();
 		} catch (Throwable ex) {
 			// Fail testing if can not instantiate new instance
 			StringWriter stackTrace = new StringWriter();
@@ -101,8 +99,7 @@ public abstract class MockStressJob implements Job {
 	/**
 	 * Specifies the {@link Team}.
 	 * 
-	 * @param team
-	 *            {@link Team}.
+	 * @param team {@link Team}.
 	 */
 	public synchronized void setTeam(Team team) {
 		this.team = team;
@@ -125,8 +122,7 @@ public abstract class MockStressJob implements Job {
 	/**
 	 * Specifies the max value.
 	 * 
-	 * @param max
-	 *            Max value.
+	 * @param max Max value.
 	 */
 	public synchronized void setMax(int max) {
 		this.max = max;
@@ -141,8 +137,7 @@ public abstract class MockStressJob implements Job {
 	 * Obtains the number of times the doJob is invoked for this {@link Job}
 	 * instance.
 	 * 
-	 * @return Number of times the doJob is invoked for this {@link Job}
-	 *         instance.
+	 * @return Number of times the doJob is invoked for this {@link Job} instance.
 	 */
 	public synchronized int getDoJobCount() {
 		return this.doJobCount;
@@ -154,8 +149,8 @@ public abstract class MockStressJob implements Job {
 	private CloneCount cloneCount;
 
 	/**
-	 * Obtains the number of times the doJob method is invoked for all
-	 * {@link Job} clones.
+	 * Obtains the number of times the doJob method is invoked for all {@link Job}
+	 * clones.
 	 * 
 	 * @return Number of times the doJob method is invoked for all {@link Job}
 	 *         clones.
@@ -204,17 +199,16 @@ public abstract class MockStressJob implements Job {
 	private class CloneCount {
 
 		/**
-		 * Number of times the doJob method is invoked for all {@link Job}
-		 * clones.
+		 * Number of times the doJob method is invoked for all {@link Job} clones.
 		 */
 		private int doJobCount;
 
 		/**
-		 * Obtains the number of times the doJob method is invoked for all
-		 * {@link Job} clones.
+		 * Obtains the number of times the doJob method is invoked for all {@link Job}
+		 * clones.
 		 * 
-		 * @return Number of times the doJob method is invoked for all
-		 *         {@link Job} clones.
+		 * @return Number of times the doJob method is invoked for all {@link Job}
+		 *         clones.
 		 */
 		public synchronized int getDoJobCount() {
 			return this.doJobCount;

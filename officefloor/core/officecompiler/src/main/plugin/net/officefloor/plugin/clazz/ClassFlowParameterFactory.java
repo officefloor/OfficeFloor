@@ -59,6 +59,7 @@ public class ClassFlowParameterFactory {
 	 * @throws Exception
 	 *             If fails to create the {@link Proxy}.
 	 */
+	@SuppressWarnings("deprecation")
 	public ClassFlowParameterFactory(ClassLoader classLoader, Class<?> flowInterface,
 			Map<String, ClassFlowMethodMetaData> methodMetaDatas) throws Exception {
 		this.methodMetaDatas = methodMetaDatas;

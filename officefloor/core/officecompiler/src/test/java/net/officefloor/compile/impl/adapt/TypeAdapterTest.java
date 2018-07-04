@@ -338,10 +338,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the parameter test.
 	 * 
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param parameters
-	 *            Parameters.
+	 * @param clazz      {@link Class}.
+	 * @param parameters Parameters.
 	 */
 	private void doParameterTest(Class<?> clazz, Object... parameters) {
 		Object result = this.doTest(clazz, parameters);
@@ -351,16 +349,15 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the test.
 	 * 
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param paramters
-	 *            Parameters.
+	 * @param clazz     {@link Class}.
+	 * @param paramters Parameters.
 	 */
 	private Object doTest(Class<?> clazz, Object... parameters) {
 		try {
 
 			// Load the implementation
-			Object implementation = this.implClassLoader.loadClass(clazz.getName()).newInstance();
+			Object implementation = this.implClassLoader.loadClass(clazz.getName()).getDeclaredConstructor()
+					.newInstance();
 
 			// Ensure non-compatible implementation
 			assertNotSame("Implementation should not be compatible", clazz, implementation.getClass());

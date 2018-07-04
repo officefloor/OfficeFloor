@@ -123,8 +123,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Obtains the {@link SectionFunction} by its name.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link SectionFunction}.
+	 * @param functionName Name of the {@link SectionFunction}.
 	 * @return {@link SectionFunction} or <code>null</code> if no
 	 *         {@link SectionFunction} by the name.
 	 */
@@ -142,8 +141,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * Obtains the {@link ManagedFunctionType} for the {@link SectionFunction} by
 	 * its name.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link SectionFunction}.
+	 * @param functionName Name of the {@link SectionFunction}.
 	 * @return {@link ManagedFunctionType} or <code>null</code> if no
 	 *         {@link SectionFunction} by the name.
 	 */
@@ -159,8 +157,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Obtains the {@link SectionFunction} by its {@link ManagedFunctionType} name.
 	 * 
-	 * @param functionTypeName
-	 *            {@link ManagedFunctionType} name.
+	 * @param functionTypeName {@link ManagedFunctionType} name.
 	 * @return {@link SectionFunction} or <code>null</code> if no
 	 *         {@link SectionFunction} by the {@link ManagedFunctionType} name.
 	 */
@@ -176,10 +173,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * This allows {@link ClassSectionSource} to be used in conjunction with other
 	 * functionality - such as template rendering for dynamic HTTP web pages.
 	 * 
-	 * @param functionTypeName
-	 *            Name to register the {@link SectionFunction}.
-	 * @param function
-	 *            {@link SectionFunction}.
+	 * @param functionTypeName Name to register the {@link SectionFunction}.
+	 * @param function         {@link SectionFunction}.
 	 */
 	public void registerFunctionByTypeName(String functionTypeName, SectionFunction function) {
 		this._functionsByTypeName.put(functionTypeName, function);
@@ -196,11 +191,9 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * <p>
 	 * Should the {@link SectionObject} not yet be added, it is added.
 	 * 
-	 * @param qualifier
-	 *            {@link Qualifier} for the {@link SectionObject}. If not
-	 *            {@link Qualifier} should be the same as the type name.
-	 * @param typeName
-	 *            Fully qualified type name of the {@link SectionObject}.
+	 * @param qualifier {@link Qualifier} for the {@link SectionObject}. If not
+	 *                  {@link Qualifier} should be the same as the type name.
+	 * @param typeName  Fully qualified type name of the {@link SectionObject}.
 	 * @return {@link SectionObject}.
 	 */
 	public SectionObject getOrCreateObject(String qualifier, String typeName) {
@@ -232,9 +225,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Obtains the {@link SectionManagedObject} for the type.
 	 * 
-	 * @param typeName
-	 *            Fully qualified type name of the object for the
-	 *            {@link SectionManagedObject}.
+	 * @param typeName Fully qualified type name of the object for the
+	 *                 {@link SectionManagedObject}.
 	 * @return {@link SectionManagedObject} or <code>null</code> if no
 	 *         {@link SectionManagedObject} for the type.
 	 */
@@ -253,10 +245,9 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * <p>
 	 * Should the {@link SectionInput} not yet be added, it is added.
 	 * 
-	 * @param name
-	 *            Name of the {@link SectionInput}.
-	 * @param argumentType
-	 *            Type of the argument. May be <code>null</code> if no argument.
+	 * @param name         Name of the {@link SectionInput}.
+	 * @param argumentType Type of the argument. May be <code>null</code> if no
+	 *                     argument.
 	 * @return {@link SectionInput}.
 	 */
 	public SectionInput getOrCreateInput(String name, String argumentType) {
@@ -280,12 +271,10 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * <p>
 	 * Should the {@link SectionOutput} not yet be added, it is added.
 	 * 
-	 * @param name
-	 *            Name of the {@link SectionOutput}.
-	 * @param argumentType
-	 *            Type of the argument. May be <code>null</code> if no argument.
-	 * @param isEscalationOnly
-	 *            <code>true</code> if escalation only.
+	 * @param name             Name of the {@link SectionOutput}.
+	 * @param argumentType     Type of the argument. May be <code>null</code> if no
+	 *                         argument.
+	 * @param isEscalationOnly <code>true</code> if escalation only.
 	 * @return {@link SectionObject}.
 	 */
 	public SectionOutput getOrCreateOutput(String name, String argumentType, boolean isEscalationOnly) {
@@ -309,10 +298,9 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * <p>
 	 * Should the {@link SubSection} not already be created, it is created.
 	 * 
-	 * @param sectionInterfaceType
-	 *            Type that is annotated with {@link SectionInterface}.
-	 * @param sectionAnnotation
-	 *            {@link SectionInterface} annotation.
+	 * @param sectionInterfaceType Type that is annotated with
+	 *                             {@link SectionInterface}.
+	 * @param sectionAnnotation    {@link SectionInterface} annotation.
 	 * @return {@link SubSection}.
 	 */
 	public SubSection getOrCreateSubSection(Class<?> sectionInterfaceType, SectionInterface sectionAnnotation) {
@@ -399,11 +387,9 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Obtains the section class.
 	 * 
-	 * @param sectionClassName
-	 *            Name of the section class.
+	 * @param sectionClassName Name of the section class.
 	 * @return Section class.
-	 * @throws Exception
-	 *             If fails to obtain the section class.
+	 * @throws Exception If fails to obtain the section class.
 	 */
 	protected Class<?> getSectionClass(String sectionClassName) throws Exception {
 		return this.getContext().getClassLoader().loadClass(sectionClassName);
@@ -412,10 +398,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Creates the {@link SectionManagedObject} for providing the section object.
 	 * 
-	 * @param objectName
-	 *            Name of the object within the section.
-	 * @param sectionClass
-	 *            Section object class.
+	 * @param objectName   Name of the object within the section.
+	 * @param sectionClass Section object class.
 	 * @return {@link SectionManagedObject}.
 	 */
 	protected SectionManagedObject createClassManagedObject(String objectName, Class<?> sectionClass) {
@@ -435,14 +419,12 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Extracts the {@link DependencyMetaData} instances for the section object.
 	 * 
-	 * @param objectName
-	 *            Name of the object within the section.
-	 * @param sectionClass
-	 *            Section object class.
+	 * @param objectName   Name of the object within the section.
+	 * @param sectionClass Section object class.
 	 * @return Extracted {@link DependencyMetaData} instances for the section
 	 *         object.
-	 * @throws Exception
-	 *             If fails to extract the {@link DependencyMetaData} instances.
+	 * @throws Exception If fails to extract the {@link DependencyMetaData}
+	 *                   instances.
 	 */
 	protected DependencyMetaData[] extractClassManagedObjectDependencies(String objectName, Class<?> sectionClass)
 			throws Exception {
@@ -453,8 +435,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * Obtains the {@link ManagedFunction} name from the
 	 * {@link ManagedFunctionType}.
 	 * 
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
+	 * @param functionType {@link ManagedFunctionType}.
 	 * @return {@link ManagedFunction} name.
 	 */
 	protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
@@ -464,15 +445,12 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Enriches the {@link ManagedFunction}.
 	 * 
-	 * @param function
-	 *            {@link SectionFunction}.
-	 * @param functionType
-	 *            {@link ManagedFunctionType} for the {@link SectionFunction}.
-	 * @param functionMethod
-	 *            {@link Method} for the {@link SectionFunction}.
-	 * @param parameterType
-	 *            Parameter type for the {@link SectionFunction}. May be
-	 *            <code>null</code> if no parameter.
+	 * @param function       {@link SectionFunction}.
+	 * @param functionType   {@link ManagedFunctionType} for the
+	 *                       {@link SectionFunction}.
+	 * @param functionMethod {@link Method} for the {@link SectionFunction}.
+	 * @param parameterType  Parameter type for the {@link SectionFunction}. May be
+	 *                       <code>null</code> if no parameter.
 	 */
 	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			Method functionMethod, Class<?> parameterType) {
@@ -491,16 +469,13 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Links the next {@link ManagedFunction}.
 	 * 
-	 * @param function
-	 *            {@link SectionFunction}.
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param functionMethod
-	 *            {@link Method} for the {@link SectionFunction}.
-	 * @param argumentType
-	 *            Argument type. May be <code>null</code> if no argument type.
-	 * @param nextFunctionAnnotation
-	 *            {@link NextFunction} annotation on the {@link Method}.
+	 * @param function               {@link SectionFunction}.
+	 * @param functionType           {@link ManagedFunctionType}.
+	 * @param functionMethod         {@link Method} for the {@link SectionFunction}.
+	 * @param argumentType           Argument type. May be <code>null</code> if no
+	 *                               argument type.
+	 * @param nextFunctionAnnotation {@link NextFunction} annotation on the
+	 *                               {@link Method}.
 	 */
 	protected void linkNextFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			Method functionMethod, Class<?> argumentType, NextFunction nextFunctionAnnotation) {
@@ -527,17 +502,12 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Links the {@link FunctionFlow}.
 	 * 
-	 * @param function
-	 *            {@link SectionFunction}.
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param flowInterfaceType
-	 *            Interface type specifying the flows.
-	 * @param flowMethod
-	 *            Method on the interface for the flow to be linked.
-	 * @param flowArgumentType
-	 *            {@link FunctionFlow} argument type. May be <code>null</code> if no
-	 *            argument.
+	 * @param function          {@link SectionFunction}.
+	 * @param functionType      {@link ManagedFunctionType}.
+	 * @param flowInterfaceType Interface type specifying the flows.
+	 * @param flowMethod        Method on the interface for the flow to be linked.
+	 * @param flowArgumentType  {@link FunctionFlow} argument type. May be
+	 *                          <code>null</code> if no argument.
 	 */
 	protected void linkFunctionFlow(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
@@ -567,17 +537,12 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Links the {@link FunctionFlow}.
 	 * 
-	 * @param functionFlow
-	 *            {@link FunctionFlow}.
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param flowInterfaceType
-	 *            Interface type specifying the flows.
-	 * @param flowMethod
-	 *            Method on the interface for the flow to be linked.
-	 * @param flowArgumentType
-	 *            {@link FunctionFlow} argument type. May be <code>null</code> if no
-	 *            argument.
+	 * @param functionFlow      {@link FunctionFlow}.
+	 * @param functionType      {@link ManagedFunctionType}.
+	 * @param flowInterfaceType Interface type specifying the flows.
+	 * @param flowMethod        Method on the interface for the flow to be linked.
+	 * @param flowArgumentType  {@link FunctionFlow} argument type. May be
+	 *                          <code>null</code> if no argument.
 	 */
 	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
 			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
@@ -607,16 +572,13 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Links the {@link ManagedFunction} escalation.
 	 * 
-	 * @param function
-	 *            {@link SectionFunction}.
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param escalationType
-	 *            {@link ManagedFunctionEscalationType}.
-	 * @param escalationHandler
-	 *            Potential {@link SectionFunction} that can handle escalation based
-	 *            on its parameter. May be <code>null</code> if no
-	 *            {@link SectionFunction} can handle the escalation.
+	 * @param function          {@link SectionFunction}.
+	 * @param functionType      {@link ManagedFunctionType}.
+	 * @param escalationType    {@link ManagedFunctionEscalationType}.
+	 * @param escalationHandler Potential {@link SectionFunction} that can handle
+	 *                          escalation based on its parameter. May be
+	 *                          <code>null</code> if no {@link SectionFunction} can
+	 *                          handle the escalation.
 	 */
 	protected void linkFunctionEscalation(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			ManagedFunctionEscalationType escalationType, SectionFunction escalationHandler) {
@@ -643,12 +605,9 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Links the {@link FunctionObject}.
 	 * 
-	 * @param function
-	 *            {@link SectionFunction}.
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param objectType
-	 *            {@link ManagedFunctionObjectType}.
+	 * @param function     {@link SectionFunction}.
+	 * @param functionType {@link ManagedFunctionType}.
+	 * @param objectType   {@link ManagedFunctionObjectType}.
 	 */
 	protected void linkFunctionObject(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			ManagedFunctionObjectType<?> objectType) {
@@ -917,7 +876,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 					functionsByParameterType.put(parameterType.getName(), function);
 
 					// Register the parameter index for the function
-					parameterIndexes.put(functionTypeName, new Integer(objectIndex));
+					parameterIndexes.put(functionTypeName, Integer.valueOf(objectIndex));
 				}
 
 				// Increment object index for parameter

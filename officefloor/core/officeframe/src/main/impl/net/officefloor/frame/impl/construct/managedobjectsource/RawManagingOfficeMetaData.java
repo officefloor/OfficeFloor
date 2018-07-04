@@ -61,9 +61,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Determines if the {@link ManagedObjectSource} instigates {@link Flow}
 	 * instances.
 	 * 
-	 * @param flowMetaData
-	 *            {@link ManagedObjectFlowMetaData} instances of the
-	 *            {@link ManagedObjectSource}.
+	 * @param flowMetaData {@link ManagedObjectFlowMetaData} instances of the
+	 *                     {@link ManagedObjectSource}.
 	 * @return <code>true</code> if {@link ManagedObjectSource} instigates
 	 *         {@link Flow} instances.
 	 */
@@ -104,8 +103,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	private RawManagedObjectMetaData<?, F> rawManagedObjectMetaData;
 
 	/**
-	 * {@link RawBoundManagedObjectInstanceMetaData} instances created before
-	 * this is managed by the {@link Office}.
+	 * {@link RawBoundManagedObjectInstanceMetaData} instances created before this
+	 * is managed by the {@link Office}.
 	 */
 	private List<RawBoundManagedObjectInstanceMetaData<?>> managedObjectMetaDatas = new LinkedList<>();
 
@@ -137,19 +136,17 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * Initialise.
 	 * 
-	 * @param managingOfficeName
-	 *            Name of the managing {@link Office}.
-	 * @param recycleFunctionName
-	 *            Name of the {@link ManagedFunction} to recycle the
-	 *            {@link ManagedObject}.
-	 * @param inputConfiguration
-	 *            {@link InputManagedObjectConfiguration} to configure binding
-	 *            the input {@link ManagedObject} to the {@link ProcessState}.
-	 * @param flowMetaDatas
-	 *            {@link ManagedObjectFlowMetaData} instances for the
-	 *            {@link ManagedObjectSource}.
-	 * @param managingOfficeConfiguration
-	 *            {@link ManagingOfficeConfiguration}.
+	 * @param managingOfficeName          Name of the managing {@link Office}.
+	 * @param recycleFunctionName         Name of the {@link ManagedFunction} to
+	 *                                    recycle the {@link ManagedObject}.
+	 * @param inputConfiguration          {@link InputManagedObjectConfiguration} to
+	 *                                    configure binding the input
+	 *                                    {@link ManagedObject} to the
+	 *                                    {@link ProcessState}.
+	 * @param flowMetaDatas               {@link ManagedObjectFlowMetaData}
+	 *                                    instances for the
+	 *                                    {@link ManagedObjectSource}.
+	 * @param managingOfficeConfiguration {@link ManagingOfficeConfiguration}.
 	 */
 	public RawManagingOfficeMetaData(String managingOfficeName, String recycleFunctionName,
 			InputManagedObjectConfiguration<?> inputConfiguration, ManagedObjectFlowMetaData<F>[] flowMetaDatas,
@@ -164,8 +161,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * Specifies the {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param rawManagedObjectMetaData
-	 *            {@link RawManagedObjectMetaData}.
+	 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaData}.
 	 */
 	public void setRawManagedObjectMetaData(RawManagedObjectMetaData<?, F> rawManagedObjectMetaData) {
 		this.rawManagedObjectMetaData = rawManagedObjectMetaData;
@@ -175,9 +171,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Adds a {@link ManagedObjectMetaData} to be managed by the managing
 	 * {@link Office}.
 	 * 
-	 * @param boundInstanceMetaData
-	 *            {@link RawBoundManagedObjectInstanceMetaData} for the
-	 *            {@link ManagedObjectMetaData}.
+	 * @param boundInstanceMetaData {@link RawBoundManagedObjectInstanceMetaData}
+	 *                              for the {@link ManagedObjectMetaData}.
 	 */
 	public void manageManagedObject(RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData) {
 
@@ -194,8 +189,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	}
 
 	/**
-	 * Obtains the name for the {@link Office} managing the
-	 * {@link ManagedObject}.
+	 * Obtains the name for the {@link Office} managing the {@link ManagedObject}.
 	 * 
 	 * @return Name for the {@link Office} managing the {@link ManagedObject}.
 	 */
@@ -208,8 +202,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Indicates if the {@link ManagedObjectSource} requires instigating
 	 * {@link Flow} instances.
 	 * <p>
-	 * If <code>true</code> it means the {@link ManagedObjectSource} must be
-	 * bound to the {@link ProcessState} of the {@link Office}.
+	 * If <code>true</code> it means the {@link ManagedObjectSource} must be bound
+	 * to the {@link ProcessState} of the {@link Office}.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObjectSource} requires
 	 *         instigating {@link Flow} instances.
@@ -220,18 +214,18 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Obtains the {@link InputManagedObjectConfiguration} configuring the bind
-	 * of the {@link ManagedObject} within the {@link ProcessState} of the
+	 * Obtains the {@link InputManagedObjectConfiguration} configuring the bind of
+	 * the {@link ManagedObject} within the {@link ProcessState} of the
 	 * {@link Office}.
 	 * <p>
 	 * Should the {@link ManagedObjectSource} instigate a {@link Flow}, a
 	 * {@link ManagedObject} from the {@link ManagedObjectSource} is to be made
-	 * available to the {@link ProcessState}. Whether the {@link Office} wants
-	 * to make use of the {@link ManagedObject} is its choice but is available
-	 * to do so.
+	 * available to the {@link ProcessState}. Whether the {@link Office} wants to
+	 * make use of the {@link ManagedObject} is its choice but is available to do
+	 * so.
 	 * 
-	 * @return {@link InputManagedObjectConfiguration} configuring the bind of
-	 *         the {@link ManagedObject} within the {@link ProcessState} of the
+	 * @return {@link InputManagedObjectConfiguration} configuring the bind of the
+	 *         {@link ManagedObject} within the {@link ProcessState} of the
 	 *         {@link Office}.
 	 */
 	public synchronized RawManagedObjectMetaData<?, F> getRawManagedObjectMetaData() {
@@ -239,30 +233,27 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	}
 
 	/**
-	 * Obtains the {@link RawManagedObjectMetaData} for the
-	 * {@link ManagedObject} to be managed by the {@link Office}.
+	 * Obtains the {@link RawManagedObjectMetaData} for the {@link ManagedObject} to
+	 * be managed by the {@link Office}.
 	 * 
-	 * @return {@link RawManagedObjectMetaData} for the {@link ManagedObject} to
-	 *         be managed by the {@link Office}.
+	 * @return {@link RawManagedObjectMetaData} for the {@link ManagedObject} to be
+	 *         managed by the {@link Office}.
 	 */
 	public boolean isRequireFlows() {
 		return isRequireFlows(this.flowMetaDatas);
 	}
 
 	/**
-	 * Sets up the {@link ManagedObjectSource} to be managed by the
-	 * {@link Office} of the input {@link ManagedFunctionLocator}.
+	 * Sets up the {@link ManagedObjectSource} to be managed by the {@link Office}
+	 * of the input {@link ManagedFunctionLocator}.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param processBoundManagedObjectMetaData
-	 *            {@link RawBoundManagedObjectMetaData} of the
-	 *            {@link ProcessState} bound {@link ManagedObject} instances of
-	 *            the managing {@link Office}.
-	 * @param moAdminFactory
-	 *            {@link ManagedObjectAdministrationMetaDataFactory}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param officeMetaData                    {@link OfficeMetaData}.
+	 * @param processBoundManagedObjectMetaData {@link RawBoundManagedObjectMetaData}
+	 *                                          of the {@link ProcessState} bound
+	 *                                          {@link ManagedObject} instances of
+	 *                                          the managing {@link Office}.
+	 * @param moAdminFactory                    {@link ManagedObjectAdministrationMetaDataFactory}.
+	 * @param issues                            {@link OfficeFloorIssues}.
 	 */
 	public void manageByOffice(OfficeMetaData officeMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
@@ -392,7 +383,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			int index = (flowKey != null ? flowKey.ordinal() : i);
 
 			// Load the flow at its index
-			flowMappings.put(new Integer(index), flowConfiguration);
+			flowMappings.put(Integer.valueOf(index), flowConfiguration);
 		}
 
 		// Create the flows
@@ -410,7 +401,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 					+ ", label=" + (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
 
 			// Obtain the flow configuration
-			ManagedObjectFlowConfiguration<F> flowConfiguration = flowMappings.get(new Integer(index));
+			ManagedObjectFlowConfiguration<F> flowConfiguration = flowMappings.get(Integer.valueOf(index));
 			if (flowConfiguration == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						"No flow configured for " + flowLabel);
@@ -418,7 +409,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			}
 
 			// Remove flow for later check no extra configured
-			flowMappings.remove(new Integer(index));
+			flowMappings.remove(Integer.valueOf(index));
 
 			// Obtain the argument type passed to the task
 			Class<?> argumentType = flowMetaData.getArgumentType();

@@ -61,11 +61,10 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 public abstract class AbstractStressTestCase extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Creates the {@link TestSuite} for the input
-	 * {@link AbstractStressTestCase} class.
+	 * Creates the {@link TestSuite} for the input {@link AbstractStressTestCase}
+	 * class.
 	 * 
-	 * @param testClass
-	 *            {@link AbstractStressTestCase} implementation.
+	 * @param testClass {@link AbstractStressTestCase} implementation.
 	 * @return {@link TestSuite}.
 	 */
 	public static TestSuite createSuite(Class<? extends AbstractStressTestCase> testClass) {
@@ -91,10 +90,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	/**
 	 * Constructs the {@link Test}.
 	 * 
-	 * @param context
-	 *            {@link StressContext}.
-	 * @throws Exception
-	 *             If failure in constructing the test.
+	 * @param context {@link StressContext}.
+	 * @throws Exception If failure in constructing the test.
 	 */
 	protected abstract void constructTest(StressContext context) throws Exception;
 
@@ -128,8 +125,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	/**
 	 * Overrides the iteration count for a particular {@link TeamSource}.
 	 * 
-	 * @param overrides
-	 *            Overrides.
+	 * @param overrides Overrides.
 	 */
 	protected void overrideIterationCount(Map<Class<? extends TeamSource>, Integer> overrides) {
 		// No overrides
@@ -215,22 +211,18 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		private Runnable validation;
 
 		/**
-		 * {@link TeamSource} {@link Class} to only run. <code>null</code>
-		 * indicates to run all {@link TeamSource} types.
+		 * {@link TeamSource} {@link Class} to only run. <code>null</code> indicates to
+		 * run all {@link TeamSource} types.
 		 */
 		private Class<? extends TeamSource> onlyTeamClass = null;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param test
-		 *            {@link AbstractStressTestCase}.
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param maxIterations
-		 *            Maximum number of iterations.
-		 * @param managedObjectScope
-		 *            {@link ManagedObjectScope}.
+		 * @param test               {@link AbstractStressTestCase}.
+		 * @param teamName           Name of the {@link Team}.
+		 * @param maxIterations      Maximum number of iterations.
+		 * @param managedObjectScope {@link ManagedObjectScope}.
 		 */
 		private StressContext(AbstractStressTestCase test, String teamName, int maxIterations,
 				ManagedObjectScope managedObjectScope) {
@@ -246,11 +238,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Specifies the initial {@link ManagedFunction}.
 		 * 
-		 * @param functionName
-		 *            Name of the {@link ManagedFunction}.
-		 * @param parameter
-		 *            Parameter to the {@link ManagedFunction}. May be
-		 *            <code>null</code>.
+		 * @param functionName Name of the {@link ManagedFunction}.
+		 * @param parameter    Parameter to the {@link ManagedFunction}. May be
+		 *                     <code>null</code>.
 		 */
 		public void setInitialFunction(String functionName, Object parameter) {
 			this.initialFunctionName = functionName;
@@ -258,11 +248,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		}
 
 		/**
-		 * Loads the {@link Team} as responsible for the
-		 * {@link ManagedFunction}.
+		 * Loads the {@link Team} as responsible for the {@link ManagedFunction}.
 		 * 
-		 * @param builder
-		 *            {@link ManagedFunctionBuilder}.
+		 * @param builder {@link ManagedFunctionBuilder}.
 		 */
 		public void loadResponsibleTeam(ManagedFunctionBuilder<?, ?> builder) {
 			this.isResponsibleTeamAssigned = true;
@@ -274,8 +262,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Loads the {@link Team} as responsible for the {@link Administration}.
 		 * 
-		 * @param builder
-		 *            {@link AdministrationBuilder}.
+		 * @param builder {@link AdministrationBuilder}.
 		 */
 		public void loadResponsibleTeam(AdministrationBuilder<?, ?> builder) {
 			this.isResponsibleTeamAssigned = true;
@@ -287,8 +274,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Loads the {@link Team} as responsible for the {@link Governance}.
 		 * 
-		 * @param builder
-		 *            {@link GovernanceBuilder}.
+		 * @param builder {@link GovernanceBuilder}.
 		 */
 		public void loadResponsibleTeam(GovernanceBuilder<?> builder) {
 			this.isResponsibleTeamAssigned = true;
@@ -298,11 +284,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		}
 
 		/**
-		 * Loads another {@link Team} responsible for the
-		 * {@link ManagedFunction}.
+		 * Loads another {@link Team} responsible for the {@link ManagedFunction}.
 		 * 
-		 * @param builder
-		 *            {@link ManagedFunctionBuilder}.
+		 * @param builder {@link ManagedFunctionBuilder}.
 		 */
 		public void loadOtherTeam(ManagedFunctionBuilder<?, ?> builder) {
 			if (this.teamName != null) {
@@ -316,8 +300,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Specifies the validation.
 		 * 
-		 * @param validation
-		 *            {@link Runnable} containing the validation.
+		 * @param validation {@link Runnable} containing the validation.
 		 */
 		public void setValidation(Runnable validation) {
 			this.validation = validation;
@@ -326,8 +309,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Specifies to run only the {@link TeamSource}.
 		 * 
-		 * @param teamSourceClass
-		 *            Only {@link TeamSource}.
+		 * @param teamSourceClass Only {@link TeamSource}.
 		 */
 		public void setOnly(Class<? extends TeamSource> teamSourceClass) {
 			this.onlyTeamClass = teamSourceClass;
@@ -356,8 +338,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Reports on progress.
 		 * 
-		 * @param iteration
-		 *            Current iteration.
+		 * @param iteration Current iteration.
 		 */
 		public void reportProgress(int iteration) {
 			if ((iteration % this.reportEveryCount) == 0) {
@@ -388,8 +369,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Convenience method to increment the iterations and check if complete.
 		 * 
-		 * @return <code>true</code> if complete after incrementing the
-		 *         iteration.
+		 * @return <code>true</code> if complete after incrementing the iteration.
 		 */
 		public boolean incrementIterationAndIsComplete() {
 			int count = this.incrementIteration();
@@ -400,10 +380,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 * Convenience method to increment the iterations, check if complete and
 		 * validate current iteration is correct.
 		 * 
-		 * @param validateCorrectIteration
-		 *            Current iteration to validate is correct.
-		 * @return <code>true</code> if complete after incrementing the
-		 *         iteration.
+		 * @param validateCorrectIteration Current iteration to validate is correct.
+		 * @return <code>true</code> if complete after incrementing the iteration.
 		 */
 		public boolean incrementIterationAndIsComplete(int validateCorrectIteration) {
 			int count = this.incrementIteration();
@@ -417,8 +395,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 */
 
 	/**
-	 * Mapping of {@link TeamSource} {@link Class} to its
-	 * {@link TeamConstructor}.
+	 * Mapping of {@link TeamSource} {@link Class} to its {@link TeamConstructor}.
 	 */
 	private static final Map<Class<? extends TeamSource>, TeamConstructor> teamConstructors = new HashMap<>();
 
@@ -430,10 +407,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Constructs the {@link Team}.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param testCase
-		 *            {@link AbstractStressTestCase}.
+		 * @param teamName Name of the {@link Team}.
+		 * @param testCase {@link AbstractStressTestCase}.
 		 * @return {@link Class} of the {@link TeamSource}.
 		 */
 		void constructTeam(String teamName, AbstractStressTestCase testCase);
@@ -465,14 +440,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	/**
 	 * Creates the {@link Test}.
 	 * 
-	 * @param testClass
-	 *            {@link Class} of the {@link Test}.
-	 * @param teamSourceClass
-	 *            {@link Class} of the {@link TeamSource}.
-	 * @param teamConstructor
-	 *            {@link TeamConstructor}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope}.
+	 * @param testClass          {@link Class} of the {@link Test}.
+	 * @param teamSourceClass    {@link Class} of the {@link TeamSource}.
+	 * @param teamConstructor    {@link TeamConstructor}.
+	 * @param managedObjectScope {@link ManagedObjectScope}.
 	 * @return {@link AbstractStressTestCase} for the {@link Test}.
 	 */
 	private static AbstractStressTestCase[] createTestCases(Class<? extends AbstractStressTestCase> testClass,
@@ -480,11 +451,12 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		try {
 
 			// Create a new instance of the test
-			AbstractStressTestCase test = testClass.newInstance();
+			AbstractStressTestCase test = testClass.getDeclaredConstructor().newInstance();
 
 			// Determine managed object scopes
-			ManagedObjectScope[] managedObjectScopes = test.isTestEachManagedObjectScope() ? new ManagedObjectScope[] {
-					ManagedObjectScope.PROCESS, ManagedObjectScope.THREAD, ManagedObjectScope.FUNCTION }
+			ManagedObjectScope[] managedObjectScopes = test.isTestEachManagedObjectScope()
+					? new ManagedObjectScope[] { ManagedObjectScope.PROCESS, ManagedObjectScope.THREAD,
+							ManagedObjectScope.FUNCTION }
 					: new ManagedObjectScope[] { null };
 
 			// Create the array of tests
@@ -493,7 +465,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				ManagedObjectScope managedObjectScope = managedObjectScopes[i];
 
 				// Create new test
-				test = testClass.newInstance();
+				test = testClass.getDeclaredConstructor().newInstance();
 
 				// Load values for testing
 				test.teamName = (teamSourceClass != null ? teamSourceClass.getSimpleName() : null);
@@ -624,12 +596,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	/**
 	 * Constructs the {@link ManagedObject} for stress testing.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param configurer
-	 *            {@link Consumer}.
-	 * @param factory
-	 *            {@link Supplier} to create the {@link ManagedObject}.
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param configurer        {@link Consumer}.
+	 * @param factory           {@link Supplier} to create the
+	 *                          {@link ManagedObject}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	protected <O extends Enum<O>, F extends Enum<F>> ManagedObjectBuilder<F> constructManagedObject(
@@ -641,11 +611,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	/**
 	 * Constructs the {@link ManagedObject} for stress testing.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param factory
-	 *            {@link Supplier} to create the {@link Object} of the
-	 *            {@link ManagedObject}.
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param factory           {@link Supplier} to create the {@link Object} of the
+	 *                          {@link ManagedObject}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	protected ManagedObjectBuilder<Indexed> constructObject(String managedObjectName, Supplier<Object> factory) {
@@ -680,10 +648,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Instantiate.
 		 * 
-		 * @param configurer
-		 *            {@link MetaDataContext} configurer.
-		 * @param factory
-		 *            Factory to create the {@link ManagedObject}.
+		 * @param configurer {@link MetaDataContext} configurer.
+		 * @param factory    Factory to create the {@link ManagedObject}.
 		 */
 		public StressManagedObjectSource(Consumer<MetaDataContext<O, F>> configurer, Supplier<ManagedObject> factory) {
 			this.configurer = configurer;

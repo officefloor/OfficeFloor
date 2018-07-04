@@ -62,8 +62,8 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	/**
 	 * Initiate.
 	 *
-	 * @param officeName
-	 *            Name of the {@link Office} managing the {@link ManagedObject}.
+	 * @param officeName Name of the {@link Office} managing the
+	 *                   {@link ManagedObject}.
 	 */
 	public ManagingOfficeBuilderImpl(String officeName) {
 		this.officeName = officeName;
@@ -94,12 +94,10 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	/**
 	 * Links in a {@link Flow}.
 	 *
-	 * @param index
-	 *            Index for the {@link Flow}.
-	 * @param key
-	 *            Key identifying the {@link Flow}. May be <code>null</code>.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction}.
+	 * @param index        Index for the {@link Flow}.
+	 * @param key          Key identifying the {@link Flow}. May be
+	 *                     <code>null</code>.
+	 * @param functionName Name of {@link ManagedFunction}.
 	 */
 	private void linkProcess(int index, F key, String functionName) {
 
@@ -108,7 +106,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 				new ManagedFunctionReferenceImpl(functionName, null));
 
 		// Register the flow at its index
-		this.flows.put(new Integer(index), flow);
+		this.flows.put(Integer.valueOf(index), flow);
 	}
 
 	/*
@@ -158,12 +156,9 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 		/**
 		 * Initiate with flow key.
 		 *
-		 * @param flowKey
-		 *            Flow key.
-		 * @param flowName
-		 *            Name of flow.
-		 * @param functionReference
-		 *            {@link ManagedFunctionReference}.
+		 * @param flowKey           Flow key.
+		 * @param flowName          Name of flow.
+		 * @param functionReference {@link ManagedFunctionReference}.
 		 */
 		public ManagedObjectFlowConfigurationImpl(F flowKey, String flowName,
 				ManagedFunctionReference functionReference) {

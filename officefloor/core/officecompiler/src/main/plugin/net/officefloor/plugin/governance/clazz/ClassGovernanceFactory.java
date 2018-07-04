@@ -29,8 +29,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassGovernanceFactory implements
-		GovernanceFactory<Object, Indexed> {
+public class ClassGovernanceFactory implements GovernanceFactory<Object, Indexed> {
 
 	/**
 	 * {@link Class}.
@@ -55,19 +54,15 @@ public class ClassGovernanceFactory implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param governMethod
-	 *            {@link Method} for governing the {@link ManagedObject}.
-	 * @param enforceMethod
-	 *            {@link Method} to enforce the {@link Governance}.
-	 * @param disregardMethod
-	 *            {@link Method} to disregard the {@link Governance}. May be
-	 *            <code>null</code> if no functionality required for
-	 *            disregarding.
+	 * @param clazz           {@link Class}.
+	 * @param governMethod    {@link Method} for governing the
+	 *                        {@link ManagedObject}.
+	 * @param enforceMethod   {@link Method} to enforce the {@link Governance}.
+	 * @param disregardMethod {@link Method} to disregard the {@link Governance}.
+	 *                        May be <code>null</code> if no functionality required
+	 *                        for disregarding.
 	 */
-	public ClassGovernanceFactory(Class<?> clazz, Method governMethod,
-			Method enforceMethod, Method disregardMethod) {
+	public ClassGovernanceFactory(Class<?> clazz, Method governMethod, Method enforceMethod, Method disregardMethod) {
 		this.clazz = clazz;
 		this.governMethod = governMethod;
 		this.enforceMethod = enforceMethod;
@@ -82,11 +77,10 @@ public class ClassGovernanceFactory implements
 	public Governance<Object, Indexed> createGovernance() throws Throwable {
 
 		// Instantiate the governance
-		Object instance = this.clazz.newInstance();
+		Object instance = this.clazz.getDeclaredConstructor().newInstance();
 
 		// Create and return the governance
-		return new ClassGovernance(instance, this.governMethod,
-				this.enforceMethod, this.disregardMethod);
+		return new ClassGovernance(instance, this.governMethod, this.enforceMethod, this.disregardMethod);
 	}
 
 }

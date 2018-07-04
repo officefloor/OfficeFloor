@@ -73,6 +73,7 @@ public class ProcessMetaData {
 	 * @throws Exception
 	 *             If fails to create the proxy for the process interface.
 	 */
+	@SuppressWarnings("deprecation")
 	public ProcessMetaData(Field field, Map<String, ProcessMethodMetaData> methodMetaData, ClassLoader classLoader,
 			ManagedObjectExecuteContext<Indexed> executeContext) throws Exception {
 		this.field = field;

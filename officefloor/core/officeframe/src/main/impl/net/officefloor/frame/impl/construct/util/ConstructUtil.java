@@ -44,8 +44,7 @@ public class ConstructUtil {
 	 * Indicates whether the input {@link String} is either <code>null</code> or
 	 * empty.
 	 * 
-	 * @param value
-	 *            Value to check.
+	 * @param value Value to check.
 	 * @return <code>true</code> if blank.
 	 */
 	public static boolean isBlank(String value) {
@@ -57,29 +56,21 @@ public class ConstructUtil {
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link OfficeFloorIssues}.
 	 * 
-	 * @param <T>
-	 *            Type of object to instantiate.
-	 * @param <E>
-	 *            Expected type that object is assignable.
-	 * @param clazz
-	 *            {@link Class} to instantiate.
-	 * @param expectedType
-	 *            Expected type that is to be instantiated.
-	 * @param creatingAssetName
-	 *            Name of the {@link Asset} being created.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of {@link AssetType}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param                   <T> Type of object to instantiate.
+	 * @param                   <E> Expected type that object is assignable.
+	 * @param clazz             {@link Class} to instantiate.
+	 * @param expectedType      Expected type that is to be instantiated.
+	 * @param creatingAssetName Name of the {@link Asset} being created.
+	 * @param assetType         {@link AssetType}.
+	 * @param assetName         Name of {@link AssetType}.
+	 * @param issues            {@link OfficeFloorIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType, String creatingAssetName,
 			AssetType assetType, String assetName, OfficeFloorIssues issues) {
 		try {
 			// Create the instance
-			T instance = clazz.newInstance();
+			T instance = clazz.getDeclaredConstructor().newInstance();
 
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
@@ -100,15 +91,12 @@ public class ConstructUtil {
 	}
 
 	/**
-	 * Transforms the input {@link Map} into an array by the <code>type</code>
-	 * from indexes of the {@link Map}.
+	 * Transforms the input {@link Map} into an array by the <code>type</code> from
+	 * indexes of the {@link Map}.
 	 * 
-	 * @param <O>
-	 *            Element type.
-	 * @param map
-	 *            {@link Map} to be transformed into an array.
-	 * @param type
-	 *            Type of the array.
+	 * @param      <O> Element type.
+	 * @param map  {@link Map} to be transformed into an array.
+	 * @param type Type of the array.
 	 * @return {@link Map} contents as an array.
 	 */
 	@SuppressWarnings("unchecked")
@@ -142,12 +130,9 @@ public class ConstructUtil {
 	 * Convenience method for {@link List#toArray(Object[])} to pass compiler
 	 * warnings for generic typed array.
 	 * 
-	 * @param <T>
-	 *            Element type.
-	 * @param list
-	 *            List to transform into an array.
-	 * @param type
-	 *            Type of the array.
+	 * @param      <T> Element type.
+	 * @param list List to transform into an array.
+	 * @param type Type of the array.
 	 * @return List as an array.
 	 */
 	@SuppressWarnings("unchecked")
@@ -157,23 +142,17 @@ public class ConstructUtil {
 	}
 
 	/**
-	 * Obtains the {@link ManagedFunctionMetaData} reporting any failure to find
-	 * to the {@link OfficeFloorIssues}.
+	 * Obtains the {@link ManagedFunctionMetaData} reporting any failure to find to
+	 * the {@link OfficeFloorIssues}.
 	 * 
-	 * @param functionReference
-	 *            {@link ManagedFunctionReference}.
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator} to use to locate the
-	 *            {@link ManagedFunctionMetaData}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @param assetType
-	 *            {@link AssetType} for reporting issues.
-	 * @param assetName
-	 *            {@link Asset} name for reporting issues.
-	 * @param forItemDescription
-	 *            Description after &quot;for&quot; indicating what the
-	 *            {@link ManagedFunctionMetaData} is for.
+	 * @param functionReference  {@link ManagedFunctionReference}.
+	 * @param functionLocator    {@link ManagedFunctionLocator} to use to locate the
+	 *                           {@link ManagedFunctionMetaData}.
+	 * @param issues             {@link OfficeFloorIssues}.
+	 * @param assetType          {@link AssetType} for reporting issues.
+	 * @param assetName          {@link Asset} name for reporting issues.
+	 * @param forItemDescription Description after &quot;for&quot; indicating what
+	 *                           the {@link ManagedFunctionMetaData} is for.
 	 * @return {@link ManagedFunctionMetaData} or <code>null</code> if not found
 	 *         with issues reported to the {@link OfficeFloorIssues}.
 	 */
@@ -222,11 +201,9 @@ public class ConstructUtil {
 	 * <p>
 	 * This provides generic type safe creation.
 	 * 
-	 * @param functionMetaData
-	 *            {@link ManagedFunctionMetaData}.
-	 * @param isSpawnThreadState
-	 *            <code>true</code> for {@link Flow} to spawn a
-	 *            {@link ThreadState}.
+	 * @param functionMetaData   {@link ManagedFunctionMetaData}.
+	 * @param isSpawnThreadState <code>true</code> for {@link Flow} to spawn a
+	 *                           {@link ThreadState}.
 	 * @return New {@link FlowMetaData}.
 	 */
 	public static FlowMetaData newFlowMetaData(ManagedFunctionMetaData<?, ?> functionMetaData,

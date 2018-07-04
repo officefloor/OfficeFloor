@@ -41,8 +41,7 @@ public class CompileUtil {
 	 * Indicates whether the input {@link String} is either <code>null</code> or
 	 * empty.
 	 * 
-	 * @param value
-	 *            Value to check.
+	 * @param value Value to check.
 	 * @return <code>true</code> if blank.
 	 */
 	public static boolean isBlank(String value) {
@@ -52,10 +51,8 @@ public class CompileUtil {
 	/**
 	 * Convenience method to compare two strings for sorting.
 	 * 
-	 * @param a
-	 *            First string.
-	 * @param b
-	 *            Second string.
+	 * @param a First string.
+	 * @param b Second string.
 	 * @return Compare result for sorting.
 	 */
 	public static int sortCompare(String a, String b) {
@@ -65,20 +62,14 @@ public class CompileUtil {
 	/**
 	 * Obtains the {@link Class}.
 	 * 
-	 * @param <T>
-	 *            Expected type.
-	 * @param className
-	 *            Fully qualified name of the {@link Class} to obtain.
-	 * @param expectedType
-	 *            Expected type of the {@link Class} to return.
-	 * @param aliases
-	 *            Map of alias name to {@link Class}. May be <code>null</code>.
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @param node
-	 *            {@link Node}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param              <T> Expected type.
+	 * @param className    Fully qualified name of the {@link Class} to obtain.
+	 * @param expectedType Expected type of the {@link Class} to return.
+	 * @param aliases      Map of alias name to {@link Class}. May be
+	 *                     <code>null</code>.
+	 * @param context      {@link SourceContext}.
+	 * @param node         {@link Node}.
+	 * @param issues       {@link CompilerIssues}.
 	 * @return {@link Class}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -116,24 +107,18 @@ public class CompileUtil {
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link CompilerIssues}.
 	 * 
-	 * @param <T>
-	 *            Type of instance.
-	 * @param <E>
-	 *            Expected type.
-	 * @param clazz
-	 *            {@link Class} to instantiate.
-	 * @param expectedType
-	 *            Expected type that is to be instantiated.
-	 * @param node
-	 *            {@link Node}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param              <T> Type of instance.
+	 * @param              <E> Expected type.
+	 * @param clazz        {@link Class} to instantiate.
+	 * @param expectedType Expected type that is to be instantiated.
+	 * @param node         {@link Node}.
+	 * @param issues       {@link CompilerIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType, Node node, CompilerIssues issues) {
 		try {
 			// Create the instance
-			T instance = clazz.newInstance();
+			T instance = clazz.getDeclaredConstructor().newInstance();
 
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
@@ -160,22 +145,17 @@ public class CompileUtil {
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link SourceIssues}.
 	 * 
-	 * @param <T>
-	 *            Type of instance.
-	 * @param <E>
-	 *            Expected type.
-	 * @param clazz
-	 *            {@link Class} to instantiate.
-	 * @param expectedType
-	 *            Expected type that is to be instantiated.
-	 * @param issues
-	 *            {@link SourceIssues}.
+	 * @param              <T> Type of instance.
+	 * @param              <E> Expected type.
+	 * @param clazz        {@link Class} to instantiate.
+	 * @param expectedType Expected type that is to be instantiated.
+	 * @param issues       {@link SourceIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType, SourceIssues issues) {
 		try {
 			// Create the instance
-			T instance = clazz.newInstance();
+			T instance = clazz.getDeclaredConstructor().newInstance();
 
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
@@ -200,20 +180,15 @@ public class CompileUtil {
 	 * Convenience method to instantiate and instance of a {@link Class} from its
 	 * fully qualified name.
 	 * 
-	 * @param <T>
-	 *            Expected type.
-	 * @param className
-	 *            Fully qualified name of the {@link Class}.
-	 * @param expectedType
-	 *            Expected type that {@link Class} instance must be assignable.
-	 * @param aliases
-	 *            Map of alias name to {@link Class}. May be <code>null</code>.
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @param node
-	 *            {@link Node}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param              <T> Expected type.
+	 * @param className    Fully qualified name of the {@link Class}.
+	 * @param expectedType Expected type that {@link Class} instance must be
+	 *                     assignable.
+	 * @param aliases      Map of alias name to {@link Class}. May be
+	 *                     <code>null</code>.
+	 * @param context      {@link SourceContext}.
+	 * @param node         {@link Node}.
+	 * @param issues       {@link CompilerIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T> T newInstance(String className, Class<T> expectedType, Map<String, Class<?>> aliases,
@@ -238,19 +213,13 @@ public class CompileUtil {
 	/**
 	 * Convenience method to load a type.
 	 * 
-	 * @param <T>
-	 *            Type to be loaded.
-	 * @param type
-	 *            Type to be loaded.
-	 * @param sourceClassName
-	 *            Source {@link Class} name for the type.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param supplier
-	 *            {@link Supplier} of the type.
+	 * @param                 <T> Type to be loaded.
+	 * @param type            Type to be loaded.
+	 * @param sourceClassName Source {@link Class} name for the type.
+	 * @param issues          {@link CompilerIssues}.
+	 * @param supplier        {@link Supplier} of the type.
 	 * @return Type.
-	 * @throws LoadTypeError
-	 *             If fails to load the type.
+	 * @throws LoadTypeError If fails to load the type.
 	 */
 	public static <T> T loadType(Class<T> type, String sourceClassName, CompilerIssues issues, Supplier<T> supplier)
 			throws LoadTypeError {
@@ -272,20 +241,16 @@ public class CompileUtil {
 	/**
 	 * Convenience method to load a listing of types.
 	 * 
-	 * @param <N>
-	 *            {@link Node} type within the listing.
-	 * @param <T>
-	 *            Type returned from the {@link Node} instances within the listing.
-	 * @param nodesMap
-	 *            {@link Map} of {@link Node} instances by their names to load types
-	 *            from.
-	 * @param sortKeyExtractor
-	 *            {@link Function} to extract the sort key (to enable deterministic
-	 *            order of loading the types).
-	 * @param typeLoader
-	 *            {@link Function} to load the type from the {@link Node}.
-	 * @param arrayGenerator
-	 *            {@link Function} to generate the array of types.
+	 * @param                  <N> {@link Node} type within the listing.
+	 * @param                  <T> Type returned from the {@link Node} instances
+	 *                         within the listing.
+	 * @param nodesMap         {@link Map} of {@link Node} instances by their names
+	 *                         to load types from.
+	 * @param sortKeyExtractor {@link Function} to extract the sort key (to enable
+	 *                         deterministic order of loading the types).
+	 * @param typeLoader       {@link Function} to load the type from the
+	 *                         {@link Node}.
+	 * @param arrayGenerator   {@link Function} to generate the array of types.
 	 * @return Array of types or <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
@@ -297,19 +262,16 @@ public class CompileUtil {
 	/**
 	 * Convenience method to load a listing of types.
 	 * 
-	 * @param <N>
-	 *            {@link Node} type within the listing.
-	 * @param <T>
-	 *            Type returned from the {@link Node} instances within the listing.
-	 * @param nodes
-	 *            {@link Stream} of {@link Node} instances to load types from.
-	 * @param sortKeyExtractor
-	 *            {@link Function} to extract the sort key (to enable deterministic
-	 *            order of loading the types).
-	 * @param typeLoader
-	 *            {@link Function} to load the type from the {@link Node}.
-	 * @param arrayGenerator
-	 *            {@link Function} to generate the array of types.
+	 * @param                  <N> {@link Node} type within the listing.
+	 * @param                  <T> Type returned from the {@link Node} instances
+	 *                         within the listing.
+	 * @param nodes            {@link Stream} of {@link Node} instances to load
+	 *                         types from.
+	 * @param sortKeyExtractor {@link Function} to extract the sort key (to enable
+	 *                         deterministic order of loading the types).
+	 * @param typeLoader       {@link Function} to load the type from the
+	 *                         {@link Node}.
+	 * @param arrayGenerator   {@link Function} to generate the array of types.
 	 * @return Array of types or <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
@@ -339,15 +301,13 @@ public class CompileUtil {
 	/**
 	 * Convenience method to source a listing of sub {@link Node} instances.
 	 * 
-	 * @param <N>
-	 *            {@link Node} type.
-	 * @param nodesMap
-	 *            {@link Map} of {@link Node} instances by their names to source.
-	 * @param sortKeyExtractor
-	 *            {@link Function} to extract the sort key (to enable deterministic
-	 *            order of sourcing the sub {@link Node} instances).
-	 * @param sourcer
-	 *            {@link Predicate} to source the sub {@link Node}.
+	 * @param                  <N> {@link Node} type.
+	 * @param nodesMap         {@link Map} of {@link Node} instances by their names
+	 *                         to source.
+	 * @param sortKeyExtractor {@link Function} to extract the sort key (to enable
+	 *                         deterministic order of sourcing the sub {@link Node}
+	 *                         instances).
+	 * @param sourcer          {@link Predicate} to source the sub {@link Node}.
 	 * @return <code>true</code> if all sub {@link Node} instances sourced.
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.

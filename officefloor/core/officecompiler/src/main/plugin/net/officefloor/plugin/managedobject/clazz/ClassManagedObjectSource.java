@@ -54,17 +54,14 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Convenience method to aid in unit testing.
 	 * 
-	 * @param <T>
-	 *            {@link Class} type.
-	 * @param clazz
-	 *            {@link Class} to instantiate and have dependencies injected.
-	 * @param dependencyNameObjectListing
-	 *            Listing of dependency name and dependency object pairs to be
-	 *            injected.
+	 * @param                             <T> {@link Class} type.
+	 * @param clazz                       {@link Class} to instantiate and have
+	 *                                    dependencies injected.
+	 * @param dependencyNameObjectListing Listing of dependency name and dependency
+	 *                                    object pairs to be injected.
 	 * @return Instance of the {@link Class} with the dependencies injected.
-	 * @throws Exception
-	 *             If fails to instantiate the instance and inject the
-	 *             dependencies.
+	 * @throws Exception If fails to instantiate the instance and inject the
+	 *                   dependencies.
 	 */
 	public static <T> T newInstance(Class<T> clazz, Object... dependencyNameObjectListing) throws Exception {
 
@@ -85,29 +82,26 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	 * Convenience method to aid in unit testing.
 	 * <p>
 	 * As many {@link Dependency} {@link Field} instances will be
-	 * <code>private</code> they are unlikely to be accessible in unit tests
-	 * unless a specific constructor is provided. This method enables
-	 * instantiation and injecting of dependencies to enable unit testing.
+	 * <code>private</code> they are unlikely to be accessible in unit tests unless
+	 * a specific constructor is provided. This method enables instantiation and
+	 * injecting of dependencies to enable unit testing.
 	 * 
-	 * @param <T>
-	 *            {@link Class} type.
-	 * @param clazz
-	 *            {@link Class} to instantiate and have dependencies injected.
-	 * @param dependencies
-	 *            Map of dependencies by the dependency name. The dependency
-	 *            name is the {@link Dependency} {@link Field} name. Should two
-	 *            {@link Field} instances in the class hierarchy have the same
-	 *            name, the dependency name is qualified with the declaring
-	 *            {@link Class} name.
+	 * @param              <T> {@link Class} type.
+	 * @param clazz        {@link Class} to instantiate and have dependencies
+	 *                     injected.
+	 * @param dependencies Map of dependencies by the dependency name. The
+	 *                     dependency name is the {@link Dependency} {@link Field}
+	 *                     name. Should two {@link Field} instances in the class
+	 *                     hierarchy have the same name, the dependency name is
+	 *                     qualified with the declaring {@link Class} name.
 	 * @return Instance of the {@link Class} with the dependencies injected.
-	 * @throws Exception
-	 *             If fails to instantiate the instance and inject the
-	 *             dependencies.
+	 * @throws Exception If fails to instantiate the instance and inject the
+	 *                   dependencies.
 	 */
 	public static <T> T newInstance(Class<T> clazz, Map<String, Object> dependencies) throws Exception {
 
 		// Instantiate the object
-		T object = clazz.newInstance();
+		T object = clazz.getDeclaredConstructor().newInstance();
 
 		// Obtain the listing of dependency fields
 		List<Field> dependencyFields = retrieveDependencyFields(clazz);
@@ -188,11 +182,9 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	private ProcessMetaData[] processMetaData;
 
 	/**
-	 * Allows overriding the extraction of the dependency {@link Field}
-	 * instances.
+	 * Allows overriding the extraction of the dependency {@link Field} instances.
 	 * 
-	 * @param objectClass
-	 *            Class to extract dependency {@link Field} instances.
+	 * @param objectClass Class to extract dependency {@link Field} instances.
 	 * @return Listing of {@link Field} instances to be dependency injected.
 	 */
 	protected List<Field> extractDependencyFields(Class<?> objectClass) {
@@ -202,9 +194,8 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Extracts the {@link DependencyMetaData} from the object class.
 	 * 
-	 * @param objectClass
-	 *            Object class to interrogate for the {@link DependencyMetaData}
-	 *            instances.
+	 * @param objectClass Object class to interrogate for the
+	 *                    {@link DependencyMetaData} instances.
 	 * @return {@link DependencyMetaData} instances.
 	 */
 	public DependencyMetaData[] extractDependencyMetaData(Class<?> objectClass) {
@@ -367,11 +358,9 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Retrieves the unique {@link Dependency} inject name for {@link Field}.
 	 * 
-	 * @param field
-	 *            {@link Field}.
-	 * @param allInjectFields
-	 *            Listing of all {@link Dependency} inject {@link Field}
-	 *            instances.
+	 * @param field           {@link Field}.
+	 * @param allInjectFields Listing of all {@link Dependency} inject {@link Field}
+	 *                        instances.
 	 * @return Unique {@link Dependency} inject name for the {@link Field}.
 	 */
 	private static String retrieveDependencyName(Field injectField, List<Field> allInjectFields) {
@@ -420,9 +409,8 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Retrieves the {@link Dependency} {@link Field} instances.
 	 * 
-	 * @param clazz
-	 *            {@link Class} to interrogate for {@link Dependency}
-	 *            {@link Field} instances.
+	 * @param clazz {@link Class} to interrogate for {@link Dependency}
+	 *              {@link Field} instances.
 	 * @return Listing of {@link Dependency} {@link Field} instances ordered by
 	 *         their names.
 	 */
@@ -448,13 +436,11 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Obtains the unique process name.
 	 * 
-	 * @param processInterfaceField
-	 *            {@link Field} annotated with {@link ProcessInterface}.
-	 * @param processMethod
-	 *            {@link Method} of the {@link Field} type.
-	 * @param processStructs
-	 *            Details of all {@link ProcessInterface} annotated
-	 *            {@link Field} instances.
+	 * @param processInterfaceField {@link Field} annotated with
+	 *                              {@link ProcessInterface}.
+	 * @param processMethod         {@link Method} of the {@link Field} type.
+	 * @param processStructs        Details of all {@link ProcessInterface}
+	 *                              annotated {@link Field} instances.
 	 * @return Unique process name.
 	 */
 	private static String retrieveProcessName(Field processInterfaceField, Method processMethod,
@@ -510,8 +496,8 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 
 	/**
 	 * <p>
-	 * Retrieves the {@link ProcessStruct} instances for the
-	 * {@link FlowInterface} {@link Field} instances ordered by:
+	 * Retrieves the {@link ProcessStruct} instances for the {@link FlowInterface}
+	 * {@link Field} instances ordered by:
 	 * <ol>
 	 * <li>field name</li>
 	 * <li>simple class name . field name</li>
@@ -522,13 +508,12 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	 * <p>
 	 * Ordering is necessary to ensure similar indexes each time loaded.
 	 * 
-	 * @param clazz
-	 *            {@link Class} to interrogate for {@link FlowInterface}
-	 *            {@link Field} instances.
-	 * @return Listing of {@link ProcessInterface} {@link Field} instances
-	 *         ordered by their names.
-	 * @throws Exception
-	 *             Should a {@link ProcessInterface} injection type be invalid.
+	 * @param clazz {@link Class} to interrogate for {@link FlowInterface}
+	 *              {@link Field} instances.
+	 * @return Listing of {@link ProcessInterface} {@link Field} instances ordered
+	 *         by their names.
+	 * @throws Exception Should a {@link ProcessInterface} injection type be
+	 *                   invalid.
 	 */
 	private static List<ProcessStruct> retrieveOrderedProcessStructs(Class<?> clazz) throws Exception {
 
@@ -676,10 +661,8 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		/**
 		 * Initiate.
 		 * 
-		 * @param field
-		 *            {@link Field} to inject the {@link ProcessInterface}.
-		 * @param invokeMethods
-		 *            {@link Method} instances to invoke the processes.
+		 * @param field         {@link Field} to inject the {@link ProcessInterface}.
+		 * @param invokeMethods {@link Method} instances to invoke the processes.
 		 */
 		public ProcessStruct(Field field, ProcessMethodStruct[] invokeMethods) {
 			this.field = field;
@@ -710,12 +693,10 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		/**
 		 * Instantiate.
 		 * 
-		 * @param method
-		 *            {@link Method} to invoke the process.
-		 * @param isParameter
-		 *            Indicates if parameter in invoking the process.
-		 * @param isFlowCallback
-		 *            Indicates if {@link FlowCallback} in invoking the process.
+		 * @param method         {@link Method} to invoke the process.
+		 * @param isParameter    Indicates if parameter in invoking the process.
+		 * @param isFlowCallback Indicates if {@link FlowCallback} in invoking the
+		 *                       process.
 		 */
 		public ProcessMethodStruct(Method method, boolean isParameter, boolean isFlowCallback) {
 			this.method = method;
@@ -737,8 +718,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	 * <p>
 	 * Ordering is necessary to ensure similar indexes each time loaded.
 	 * 
-	 * @param fields
-	 *            {@link Field} instances to order.
+	 * @param fields {@link Field} instances to order.
 	 */
 	private static void orderFields(List<Field> fields) {
 

@@ -101,13 +101,12 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 
 	/**
 	 * <p>
-	 * Allow enhancing the {@link CompilerIssues}. For example allows wrapping
-	 * with a {@link StderrCompilerIssuesWrapper}.
+	 * Allow enhancing the {@link CompilerIssues}. For example allows wrapping with
+	 * a {@link StderrCompilerIssuesWrapper}.
 	 * <p>
 	 * This is available for {@link TestCase} instances to override.
 	 * 
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param issues {@link CompilerIssues}.
 	 * @return By default returns input {@link CompilerIssues}.
 	 */
 	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
@@ -124,8 +123,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records initialising the {@link OfficeFloorBuilder}.
 	 * 
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances.
+	 * @param resourceSources {@link ResourceSource} instances.
 	 */
 	protected void record_init(ResourceSource... resourceSources) {
 
@@ -151,12 +149,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records adding a {@link Team} to the {@link OfficeFloorBuilder}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param teamSource
-	 *            {@link TeamSource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
+	 * @param teamName           Name of the {@link Team}.
+	 * @param teamSource         {@link TeamSource} class.
+	 * @param propertyNameValues {@link Property} name/value listing.
 	 * @return {@link TeamBuilder} for the added {@link Team}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -203,17 +198,12 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records adding a {@link ManagedObjectSource} to the
 	 * {@link OfficeFloorBuilder}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
-	 * @param timeout
-	 *            Timeout of the {@link ManagedObject}.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
-	 * @param {@link
-	 * 			ManagedObjectBuilder} for the added
-	 *            {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName  Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
+	 * @param timeout                  Timeout of the {@link ManagedObject}.
+	 * @param propertyNameValues       {@link Property} name/value listing.
+	 * @param                          {@link ManagedObjectBuilder} for the added
+	 *                                 {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
@@ -223,7 +213,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 		// Instantiate managed object source
 		S managedObjectSource;
 		try {
-			managedObjectSource = managedObjectSourceClass.newInstance();
+			managedObjectSource = managedObjectSourceClass.getDeclaredConstructor().newInstance();
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
@@ -257,17 +247,12 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records adding a {@link ManagedObjectSource} to the
 	 * {@link OfficeFloorBuilder}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
-	 * @param timeout
-	 *            Timeout of the {@link ManagedObject}.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
-	 * @param {@link
-	 * 			ManagedObjectBuilder} for the added
-	 *            {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource}.
+	 * @param timeout                 Timeout of the {@link ManagedObject}.
+	 * @param propertyNameValues      {@link Property} name/value listing.
+	 * @param                         {@link ManagedObjectBuilder} for the added
+	 *                                {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
@@ -288,8 +273,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records specifying the {@link ManagingOffice}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link ManagingOffice}.
+	 * @param officeName Name of the {@link ManagingOffice}.
 	 * @return {@link ManagingOfficeBuilder}.
 	 */
 	protected ManagingOfficeBuilder<?> record_managedObjectBuilder_setManagingOffice(String officeName) {
@@ -303,8 +287,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records specifying the {@link ManagedObjectPool} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param managedObjectPoolId
-	 *            Identifier of the {@link ManagedObjectPool}.
+	 * @param managedObjectPoolId Identifier of the {@link ManagedObjectPool}.
 	 * @return {@link ManagedObjectPoolBuilder}.
 	 */
 	protected ManagedObjectPoolBuilder record_managedObjectBuilder_setManagedObjectPool(String managedObjectPoolId) {
@@ -322,10 +305,8 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records specifying the Input {@link ManagedObject} name.
 	 * 
-	 * @param inputManagedObjectName
-	 *            Input {@link ManagedObject} name.
-	 * @return {@link DependencyMappingBuilder} for the Input
-	 *         {@link ManagedObject}.
+	 * @param inputManagedObjectName Input {@link ManagedObject} name.
+	 * @return {@link DependencyMappingBuilder} for the Input {@link ManagedObject}.
 	 */
 	protected DependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
@@ -343,8 +324,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records adding a {@link OfficeBuilder}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
+	 * @param officeName Name of the {@link Office}.
 	 * @return Added {@link OfficeBuilder}.
 	 */
 	protected OfficeBuilder record_officeFloorBuilder_addOffice(String officeName) {
@@ -369,10 +349,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records adding a {@link ProcessState} {@link ManagedObject} to the
 	 * {@link Office}.
 	 * 
-	 * @param processManagedObjectName
-	 *            {@link ThreadState} bound name.
-	 * @param officeManagedObjectName
-	 *            {@link Office} registered {@link ManagedObject} name.
+	 * @param processManagedObjectName {@link ThreadState} bound name.
+	 * @param officeManagedObjectName  {@link Office} registered
+	 *                                 {@link ManagedObject} name.
 	 */
 	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(String processManagedObjectName,
 			String officeManagedObjectName) {
@@ -387,10 +366,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records adding a {@link ThreadState} {@link ManagedObject} to the
 	 * {@link Office}.
 	 * 
-	 * @param threadManagedObjectName
-	 *            {@link ThreadState} bound name.
-	 * @param officeManagedObjectName
-	 *            {@link Office} registered {@link ManagedObject} name.
+	 * @param threadManagedObjectName {@link ThreadState} bound name.
+	 * @param officeManagedObjectName {@link Office} registered
+	 *                                {@link ManagedObject} name.
 	 */
 	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
 			String officeManagedObjectName) {
@@ -410,12 +388,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records adding pre-load {@link Administration}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param extensionType
-	 *            Extension type.
-	 * @return {@link AdministrationBuilder} for the added
-	 *         {@link Administration}.
+	 * @param administrationName Name of the {@link Administration}.
+	 * @param extensionType      Extension type.
+	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_dependencyMappingBuilder_preLoadAdminister(
@@ -451,12 +426,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records adding a {@link GovernanceSource} to the {@link OfficeBuilder}.
 	 * 
-	 * @param governanceSourceName
-	 *            Name of the {@link GovernanceSource}.
-	 * @param governanceSourceClass
-	 *            {@link GovernanceSource} class.
-	 * @param extensionType
-	 *            Extension type.
+	 * @param governanceSourceName  Name of the {@link GovernanceSource}.
+	 * @param governanceSourceClass {@link GovernanceSource} class.
+	 * @param extensionType         Extension type.
 	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -484,14 +456,11 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records adding a {@link GovernanceSource} to the {@link OfficeBuilder}.
 	 * 
-	 * @param governanceSourceName
-	 *            Name of the {@link GovernanceSource}.
-	 * @param teamName
-	 *            Name of {@link Team} responsible for {@link Governance}.
-	 * @param governanceSourceClass
-	 *            {@link GovernanceSource} class.
-	 * @param extensionType
-	 *            Extension type.
+	 * @param governanceSourceName  Name of the {@link GovernanceSource}.
+	 * @param teamName              Name of {@link Team} responsible for
+	 *                              {@link Governance}.
+	 * @param governanceSourceClass {@link GovernanceSource} class.
+	 * @param extensionType         Extension type.
 	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
 	 */
 	protected <E, F extends Enum<F>, S extends GovernanceSource<E, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
@@ -507,10 +476,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records registering the {@link EscalationProcedure}.
 	 * 
-	 * @param typeOfCause
-	 *            Type of cause handled by {@link EscalationProcedure}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction} to handle {@link Escalation}.
+	 * @param typeOfCause  Type of cause handled by {@link EscalationProcedure}.
+	 * @param functionName Name of {@link ManagedFunction} to handle
+	 *                     {@link Escalation}.
 	 */
 	protected <E extends Throwable> void record_officeBuilder_addEscalation(Class<E> typeOfCause, String functionName) {
 		this.officeBuilder.addEscalation(typeOfCause, functionName);
@@ -519,25 +487,20 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records registering the {@link Team}.
 	 * 
-	 * @param officeTeamName
-	 *            {@link Office} {@link Team} name.
-	 * @param officeFloorTeamName
-	 *            {@link OfficeFloor} {@link Team} name.
+	 * @param officeTeamName      {@link Office} {@link Team} name.
+	 * @param officeFloorTeamName {@link OfficeFloor} {@link Team} name.
 	 */
 	protected void record_officeBuilder_registerTeam(String officeTeamName, String officeFloorTeamName) {
 		this.officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
 	}
 
 	/**
-	 * Convenience method to both add the {@link Office} and register a
-	 * {@link Team} to it.
+	 * Convenience method to both add the {@link Office} and register a {@link Team}
+	 * to it.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param officeTeamName
-	 *            {@link Office} {@link Team} name.
-	 * @param officeFloorTeamName
-	 *            {@link OfficeFloor} {@link Team} name.
+	 * @param officeName          Name of the {@link Office}.
+	 * @param officeTeamName      {@link Office} {@link Team} name.
+	 * @param officeFloorTeamName {@link OfficeFloor} {@link Team} name.
 	 * @return Added {@link OfficeBuilder}.
 	 */
 	protected OfficeBuilder record_officeFloorBuilder_addOffice(String officeName, String officeTeamName,
@@ -551,8 +514,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records adding a start-up {@link ManagedFunction} to the
 	 * {@link OfficeBuilder}.
 	 * 
-	 * @param functionName
-	 *            Name of start-up {@link ManagedFunction}.
+	 * @param functionName Name of start-up {@link ManagedFunction}.
 	 */
 	protected void record_officeBuilder_addStartupFunction(String functionName) {
 		this.officeBuilder.addStartupFunction(functionName);
@@ -566,10 +528,8 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Records adding a {@link ManagedFunctionBuilder}.
 	 * 
-	 * @param namespace
-	 *            Namespace.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
+	 * @param namespace    Namespace.
+	 * @param functionName Name of the {@link ManagedFunction}.
 	 * @return Added {@link ManagedFunctionBuilder}.
 	 */
 	protected ManagedFunctionBuilder<?, ?> record_officeBuilder_addFunction(String namespace, String functionName) {
@@ -582,15 +542,12 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	private boolean isMatcherSet_officeBuilder_addFunction = false;
 
 	/**
-	 * Convenience method for recording adding a {@link ManagedFunctionBuilder}
-	 * and specifying the {@link Team} for the {@link ManagedFunction}.
+	 * Convenience method for recording adding a {@link ManagedFunctionBuilder} and
+	 * specifying the {@link Team} for the {@link ManagedFunction}.
 	 * 
-	 * @param namespace
-	 *            Namespace.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param officeTeamName
-	 *            {@link Office} {@link Team} name.
+	 * @param namespace      Namespace.
+	 * @param functionName   Name of the {@link ManagedFunction}.
+	 * @param officeTeamName {@link Office} {@link Team} name.
 	 * @return Added {@link ManagedFunctionBuilder}.
 	 */
 	protected ManagedFunctionBuilder<?, ?> record_officeBuilder_addFunction(String namespace, String functionName,
@@ -631,17 +588,12 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 
 	/**
 	 * Convenience method for recording an {@link OfficeSection} added via
-	 * {@link ClassSectionSource} for a {@link Class} with a single
-	 * {@link Method}.
+	 * {@link ClassSectionSource} for a {@link Class} with a single {@link Method}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param sectionPath
-	 *            {@link OfficeSection} to {@link SubSection} path.
-	 * @param sectionClass
-	 *            {@link Class} for the {@link ClassSectionSource}.
-	 * @param functionName
-	 *            Name of the {@link Method}.
+	 * @param officeName   Name of the {@link Office}.
+	 * @param sectionPath  {@link OfficeSection} to {@link SubSection} path.
+	 * @param sectionClass {@link Class} for the {@link ClassSectionSource}.
+	 * @param functionName Name of the {@link Method}.
 	 * @return {@link ManagedFunctionBuilder} for the {@link Method}.
 	 */
 	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
@@ -652,19 +604,14 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 
 	/**
 	 * Convenience method for recording an {@link OfficeSection} added via
-	 * {@link ClassSectionSource} for a {@link Class} with a single
-	 * {@link Method}.
+	 * {@link ClassSectionSource} for a {@link Class} with a single {@link Method}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param sectionPath
-	 *            {@link OfficeSection} to {@link SubSection} path.
-	 * @param sectionClass
-	 *            {@link Class} for the {@link ClassSectionSource}.
-	 * @param functionName
-	 *            Name of the {@link Method}.
-	 * @param responsibleTeamName
-	 *            Responsible {@link Team} name. May be <code>null</code>.
+	 * @param officeName          Name of the {@link Office}.
+	 * @param sectionPath         {@link OfficeSection} to {@link SubSection} path.
+	 * @param sectionClass        {@link Class} for the {@link ClassSectionSource}.
+	 * @param functionName        Name of the {@link Method}.
+	 * @param responsibleTeamName Responsible {@link Team} name. May be
+	 *                            <code>null</code>.
 	 * @return {@link ManagedFunctionBuilder} for the {@link Method}.
 	 */
 	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
@@ -696,8 +643,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Specifies the {@link Team} for the {@link ManagedFunction}.
 	 * 
-	 * @param officeTeamName
-	 *            {@link Office} {@link Team} name.
+	 * @param officeTeamName {@link Office} {@link Team} name.
 	 */
 	protected void record_functionBuilder_setResponsibleTeam(String officeTeamName) {
 		this.functionBuilder.setResponsibleTeam(officeTeamName);
@@ -706,28 +652,23 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	/**
 	 * Add an annotation for the {@link ManagedFunction}.
 	 * 
-	 * @param annotation
-	 *            Annotation.
+	 * @param annotation Annotation.
 	 */
 	protected void record_functionBuilder_addAnnotation(Object annotation) {
 		this.functionBuilder.addAnnotation(annotation);
 	}
 
 	/**
-	 * Flags if the matcher has been specified to add pre
-	 * {@link Administration}.
+	 * Flags if the matcher has been specified to add pre {@link Administration}.
 	 */
 	private boolean isMatcherSet_functionBuilder_preAdministration = false;
 
 	/**
 	 * Records adding pre {@link Administration}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param extensionType
-	 *            Extension type.
-	 * @return {@link AdministrationBuilder} for the added
-	 *         {@link Administration}.
+	 * @param administrationName Name of the {@link Administration}.
+	 * @param extensionType      Extension type.
+	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_functionBuilder_preAdministration(
@@ -755,20 +696,16 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	}
 
 	/**
-	 * Flags if the matcher has been specified to add post
-	 * {@link Administration}.
+	 * Flags if the matcher has been specified to add post {@link Administration}.
 	 */
 	private boolean isMatcherSet_functionBuilder_postAdministration = false;
 
 	/**
 	 * Records adding post {@link Administration}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param extensionType
-	 *            Extension type.
-	 * @return {@link AdministrationBuilder} for the added
-	 *         {@link Administration}.
+	 * @param administrationName Name of the {@link Administration}.
+	 * @param extensionType      Extension type.
+	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_functionBuilder_postAdministration(
@@ -799,11 +736,9 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Compiles the {@link OfficeFloor} verifying correctly built into the
 	 * {@link OfficeFloorBuilder}.
 	 * 
-	 * @param isExpectBuild
-	 *            If the {@link OfficeFloor} is expected to be built.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pair listing for the
-	 *            {@link OfficeFloorCompiler}.
+	 * @param isExpectBuild      If the {@link OfficeFloor} is expected to be built.
+	 * @param propertyNameValues {@link Property} name/value pair listing for the
+	 *                           {@link OfficeFloorCompiler}.
 	 */
 	protected void compile(boolean isExpectBuild, String... propertyNameValues) {
 

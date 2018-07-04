@@ -70,8 +70,7 @@ public class TeamSourceStandAlone {
 	/**
 	 * Instantiate with {@link Team} name.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
+	 * @param teamName Name of the {@link Team}.
 	 */
 	public TeamSourceStandAlone(String teamName) {
 		this.teamName = teamName;
@@ -80,19 +79,16 @@ public class TeamSourceStandAlone {
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
 	 * 
-	 * @param <TS>
-	 *            {@link TeamSource} type.
-	 * @param teamSourceClass
-	 *            {@link Class} of the {@link TeamSource}.
+	 * @param                 <TS> {@link TeamSource} type.
+	 * @param teamSourceClass {@link Class} of the {@link TeamSource}.
 	 * @return Initialised {@link TeamSource}.
-	 * @throws Exception
-	 *             If fails instantiation and initialising the
-	 *             {@link TeamSource}.
+	 * @throws Exception If fails instantiation and initialising the
+	 *                   {@link TeamSource}.
 	 */
 	public <TS extends TeamSource> TS loadTeamSource(Class<TS> teamSourceClass) throws Exception {
 
 		// Create the team source
-		TS teamSource = teamSourceClass.newInstance();
+		TS teamSource = teamSourceClass.getDeclaredConstructor().newInstance();
 
 		// Return the team source
 		return teamSource;
@@ -101,10 +97,8 @@ public class TeamSourceStandAlone {
 	/**
 	 * Adds a property for initialising the {@link Team}.
 	 * 
-	 * @param name
-	 *            Name of property.
-	 * @param value
-	 *            Value of property.
+	 * @param name  Name of property.
+	 * @param value Value of property.
 	 */
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name, value);
@@ -114,8 +108,7 @@ public class TeamSourceStandAlone {
 	 * Specifies the decorator of the {@link Thread} instances created by the
 	 * {@link TeamSourceContext}.
 	 * 
-	 * @param decorator
-	 *            {@link Thread} decorator.
+	 * @param decorator {@link Thread} decorator.
 	 */
 	public void setThreadDecorator(Consumer<Thread> decorator) {
 		this.threadDecorator = decorator;
@@ -124,8 +117,7 @@ public class TeamSourceStandAlone {
 	/**
 	 * Adds a {@link ThreadCompletionListener}.
 	 * 
-	 * @param threadCompletionListener
-	 *            {@link ThreadCompletionListener}.
+	 * @param threadCompletionListener {@link ThreadCompletionListener}.
 	 */
 	public void addThreadCompletionListener(ThreadCompletionListener threadCompletionListener) {
 		this.threadCompletionListeners.add(threadCompletionListener);
@@ -134,14 +126,11 @@ public class TeamSourceStandAlone {
 	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
-	 * @param <TS>
-	 *            {@link TeamSource} type.
-	 * @param teamSourceClass
-	 *            {@link Class} of the {@link TeamSource}.
+	 * @param                 <TS> {@link TeamSource} type.
+	 * @param teamSourceClass {@link Class} of the {@link TeamSource}.
 	 * @return {@link Team} from the loaded {@link TeamSource}.
-	 * @throws Exception
-	 *             If fails loading the {@link TeamSource} and creating a
-	 *             {@link Team}.
+	 * @throws Exception If fails loading the {@link TeamSource} and creating a
+	 *                   {@link Team}.
 	 */
 	public <TS extends TeamSource> Team loadTeam(Class<TS> teamSourceClass) throws Exception {
 

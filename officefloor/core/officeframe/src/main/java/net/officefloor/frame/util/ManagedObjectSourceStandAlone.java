@@ -70,10 +70,8 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
 	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @param value
-	 *            Value for the property.
+	 * @param name  Name of the property.
+	 * @param value Value for the property.
 	 */
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name, value);
@@ -82,23 +80,18 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            Class of the {@link ManagedObjectSource}.
+	 * @param                          <O> Dependency key type.
+	 * @param                          <F> Flow key type.
+	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
 	 * @return Initialised {@link ManagedObjectSource}.
-	 * @throws Exception
-	 *             If fails to initialise {@link ManagedObjectSource}.
+	 * @throws Exception If fails to initialise {@link ManagedObjectSource}.
 	 */
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS initManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
-		MS moSource = managedObjectSourceClass.newInstance();
+		MS moSource = managedObjectSourceClass.getDeclaredConstructor().newInstance();
 
 		// Return the initialised managed object source
 		return initManagedObjectSource(moSource);
@@ -107,17 +100,12 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
+	 * @param                     <O> Dependency key type.
+	 * @param                     <F> Flow key type.
+	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @return Initialised {@link ManagedObjectSource}.
-	 * @throws Exception
-	 *             If fails to initialise {@link ManagedObjectSource}.
+	 * @throws Exception If fails to initialise {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS initManagedObjectSource(
@@ -146,16 +134,11 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Starts the {@link ManagedObjectSource}.
 	 *
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
-	 * @throws Exception
-	 *             If fails to start the {@link ManagedObjectSource}.
+	 * @param                     <O> Dependency key type.
+	 * @param                     <F> Flow key type.
+	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param managedObjectSource {@link ManagedObjectSource}.
+	 * @throws Exception If fails to start the {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> void startManagedObjectSource(
@@ -167,17 +150,12 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
 	 *
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
+	 * @param                          <O> Dependency key type.
+	 * @param                          <F> Flow key type.
+	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @return Loaded {@link ManagedObjectSource}.
-	 * @throws Exception
-	 *             If fails to init and start the {@link ManagedObjectSource}.
+	 * @throws Exception If fails to init and start the {@link ManagedObjectSource}.
 	 */
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS loadManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
@@ -195,17 +173,12 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
 	 *
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
+	 * @param                     <O> Dependency key type.
+	 * @param                     <F> Flow key type.
+	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @return Loaded {@link ManagedObjectSource}.
-	 * @throws Exception
-	 *             If fails to init and start the {@link ManagedObjectSource}.
+	 * @throws Exception If fails to init and start the {@link ManagedObjectSource}.
 	 */
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS loadManagedObjectSource(
 			MS managedObjectSource) throws Exception {
@@ -224,14 +197,13 @@ public class ManagedObjectSourceStandAlone {
 	 * Registers the initial {@link ManagedFunction} for the invoked
 	 * {@link ProcessState}.
 	 * 
-	 * @param processKey
-	 *            Key of the {@link ProcessState}.
-	 * @param function
-	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
-	 * @param functionContext
-	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}.
-	 *            Allows for mocking the {@link ManagedFunctionContext} to validate
-	 *            functionality for the {@link ManagedFunction}.
+	 * @param processKey      Key of the {@link ProcessState}.
+	 * @param function        Initial {@link ManagedFunction} for the
+	 *                        {@link ProcessState}.
+	 * @param functionContext {@link ManagedFunctionContext} for the
+	 *                        {@link ManagedFunction}. Allows for mocking the
+	 *                        {@link ManagedFunctionContext} to validate
+	 *                        functionality for the {@link ManagedFunction}.
 	 */
 	public void registerInvokeProcessFunction(Enum<?> processKey, ManagedFunction<?, ?> function,
 			ManagedFunctionContext<?, ?> functionContext) {
@@ -242,14 +214,13 @@ public class ManagedObjectSourceStandAlone {
 	 * Registers the initial {@link ManagedFunction} for the invoked
 	 * {@link ProcessState}.
 	 * 
-	 * @param processIndex
-	 *            Index of the {@link ProcessState}.
-	 * @param function
-	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
-	 * @param functionContext
-	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}.
-	 *            Allows for mocking the {@link ManagedFunctionContext} to validate
-	 *            functionality for the {@link ManagedFunction}.
+	 * @param processIndex    Index of the {@link ProcessState}.
+	 * @param function        Initial {@link ManagedFunction} for the
+	 *                        {@link ProcessState}.
+	 * @param functionContext {@link ManagedFunctionContext} for the
+	 *                        {@link ManagedFunction}. Allows for mocking the
+	 *                        {@link ManagedFunctionContext} to validate
+	 *                        functionality for the {@link ManagedFunction}.
 	 */
 	public void registerInvokeProcessFunction(int processIndex, ManagedFunction<?, ?> function,
 			ManagedFunctionContext<?, ?> functionContext) {
@@ -260,10 +231,8 @@ public class ManagedObjectSourceStandAlone {
 	 * Registers an {@link InvokedProcessServicer} for the invoked
 	 * {@link ProcessState}.
 	 * 
-	 * @param processKey
-	 *            Key of the {@link ProcessState}.
-	 * @param servicer
-	 *            {@link InvokedProcessServicer}.
+	 * @param processKey Key of the {@link ProcessState}.
+	 * @param servicer   {@link InvokedProcessServicer}.
 	 */
 	public void registerInvokeProcessServicer(Enum<?> processKey, InvokedProcessServicer servicer) {
 		this.registerInvokeProcessServicer(processKey.ordinal(), servicer);
@@ -273,13 +242,11 @@ public class ManagedObjectSourceStandAlone {
 	 * Registers an {@link InvokedProcessServicer} for the invoked
 	 * {@link ProcessState}.
 	 * 
-	 * @param processIndex
-	 *            Index of the {@link ProcessState}.
-	 * @param servicer
-	 *            {@link InvokedProcessServicer}.
+	 * @param processIndex Index of the {@link ProcessState}.
+	 * @param servicer     {@link InvokedProcessServicer}.
 	 */
 	public void registerInvokeProcessServicer(int processIndex, InvokedProcessServicer servicer) {
-		this.processes.put(new Integer(processIndex), servicer);
+		this.processes.put(Integer.valueOf(processIndex), servicer);
 	}
 
 	/**
@@ -301,10 +268,8 @@ public class ManagedObjectSourceStandAlone {
 		/**
 		 * Initiate.
 		 * 
-		 * @param function
-		 *            {@link ManagedFunction}.
-		 * @param functionContext
-		 *            {@link ManagedFunctionContext}.
+		 * @param function        {@link ManagedFunction}.
+		 * @param functionContext {@link ManagedFunctionContext}.
 		 */
 		public FunctionInvokedProcessServicer(ManagedFunction<?, ?> function,
 				ManagedFunctionContext<?, ?> functionContext) {
@@ -331,17 +296,12 @@ public class ManagedObjectSourceStandAlone {
 		/**
 		 * Processes the {@link ManagedFunction} for the invoked {@link ProcessState}.
 		 * 
-		 * @param processIndex
-		 *            Index of the {@link ProcessState} to invoke.
-		 * @param parameter
-		 *            Parameter to initial {@link ManagedFunction} of the invoked
-		 *            {@link ProcessState}.
-		 * @param managedObject
-		 *            {@link ManagedObject} for the {@link ProcessState}.
-		 * @param delay
-		 *            Delay to invoke {@link ProcessState}.
-		 * @param callback
-		 *            {@link FlowCallback}.
+		 * @param processIndex  Index of the {@link ProcessState} to invoke.
+		 * @param parameter     Parameter to initial {@link ManagedFunction} of the
+		 *                      invoked {@link ProcessState}.
+		 * @param managedObject {@link ManagedObject} for the {@link ProcessState}.
+		 * @param delay         Delay to invoke {@link ProcessState}.
+		 * @param callback      {@link FlowCallback}.
 		 */
 		private void process(int processIndex, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
@@ -350,7 +310,7 @@ public class ManagedObjectSourceStandAlone {
 
 			// Obtain the details for invoking process
 			InvokedProcessServicer servicer = ManagedObjectSourceStandAlone.this.processes
-					.get(new Integer(processIndex));
+					.get(Integer.valueOf(processIndex));
 			if (servicer == null) {
 				throw new UnsupportedOperationException(
 						"No function configured for process invocation index " + processIndex);

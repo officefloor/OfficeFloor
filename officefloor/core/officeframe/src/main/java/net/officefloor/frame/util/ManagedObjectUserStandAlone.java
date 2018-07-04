@@ -60,8 +60,8 @@ public class ManagedObjectUserStandAlone
 	private Throwable failure;
 
 	/**
-	 * Timeout in waiting to source the {@link ManagedObject}. Default of
-	 * retrieve immediately.
+	 * Timeout in waiting to source the {@link ManagedObject}. Default of retrieve
+	 * immediately.
 	 */
 	private long sourceTimeout = -1;
 
@@ -93,8 +93,7 @@ public class ManagedObjectUserStandAlone
 	/**
 	 * Specifies the timeout to source the {@link ManagedObject}.
 	 * 
-	 * @param sourceTimeout
-	 *            Timeout to source the {@link ManagedObject}.
+	 * @param sourceTimeout Timeout to source the {@link ManagedObject}.
 	 */
 	public void setSourceTimeout(long sourceTimeout) {
 		this.sourceTimeout = sourceTimeout;
@@ -104,8 +103,7 @@ public class ManagedObjectUserStandAlone
 	 * Allows overriding the {@link ProcessAwareContext}. to initialise a
 	 * {@link ProcessAwareManagedObject}.
 	 * 
-	 * @param processAwareContext
-	 *            {@link ProcessAwareContext}.
+	 * @param processAwareContext {@link ProcessAwareContext}.
 	 */
 	public void setProcessAwareContext(ProcessAwareContext processAwareContext) {
 		this.processAwareContext = processAwareContext;
@@ -114,8 +112,8 @@ public class ManagedObjectUserStandAlone
 	/**
 	 * Specifies the bound name for a {@link NameAwareManagedObject}.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Bound name for a {@link NameAwareManagedObject}.
+	 * @param boundManagedObjectName Bound name for a
+	 *                               {@link NameAwareManagedObject}.
 	 */
 	public void setBoundManagedObjectName(String boundManagedObjectName) {
 		this.boundManagedObjectName = boundManagedObjectName;
@@ -125,8 +123,7 @@ public class ManagedObjectUserStandAlone
 	 * Allows overriding the {@link AsynchronousContext} to initialise an
 	 * {@link AsynchronousManagedObject}.
 	 * 
-	 * @param listener
-	 *            {@link AsynchronousContext}.
+	 * @param listener {@link AsynchronousContext}.
 	 */
 	public void setAsynchronousListener(AsynchronousContext listener) {
 		this.asynchronousListener = listener;
@@ -136,8 +133,7 @@ public class ManagedObjectUserStandAlone
 	 * Allows overriding the {@link ObjectRegistry} to initialise a
 	 * {@link CoordinatingManagedObject}.
 	 * 
-	 * @param objectRegistry
-	 *            {@link ObjectRegistry}.
+	 * @param objectRegistry {@link ObjectRegistry}.
 	 */
 	public void setObjectRegistry(ObjectRegistry<?> objectRegistry) {
 		this.objectRegistry = objectRegistry;
@@ -146,22 +142,18 @@ public class ManagedObjectUserStandAlone
 	/**
 	 * Maps the dependency for the {@link CoordinatingManagedObject}.
 	 * 
-	 * @param index
-	 *            Index of the dependency.
-	 * @param dependency
-	 *            Dependency.
+	 * @param index      Index of the dependency.
+	 * @param dependency Dependency.
 	 */
 	public void mapDependency(int index, Object dependency) {
-		this.dependencies.put(new Integer(index), dependency);
+		this.dependencies.put(Integer.valueOf(index), dependency);
 	}
 
 	/**
 	 * Maps the dependency for the {@link CoordinatingManagedObject}.
 	 * 
-	 * @param key
-	 *            Key of the dependency.
-	 * @param dependency
-	 *            Dependency.
+	 * @param key        Key of the dependency.
+	 * @param dependency Dependency.
 	 */
 	public void mapDependency(Enum<?> key, Object dependency) {
 		this.mapDependency(key.ordinal(), dependency);
@@ -170,11 +162,9 @@ public class ManagedObjectUserStandAlone
 	/**
 	 * Sources the {@link ManagedObject} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param source
-	 *            {@link ManagedObjectSource}.
+	 * @param source {@link ManagedObjectSource}.
 	 * @return {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 * @throws Throwable
-	 *             If fails to source the {@link ManagedObject}.
+	 * @throws Throwable If fails to source the {@link ManagedObject}.
 	 */
 	public ManagedObject sourceManagedObject(ManagedObjectSource<?, ?> source) throws Throwable {
 		return sourceManagedObject(source, true);
@@ -183,15 +173,12 @@ public class ManagedObjectUserStandAlone
 	/**
 	 * Sources the {@link ManagedObject} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param source
-	 *            {@link ManagedObjectSource}.
-	 * @param isWait
-	 *            Flags to wait for {@link ManagedObjectSource} to provide the
-	 *            {@link ManagedObject}.
+	 * @param source {@link ManagedObjectSource}.
+	 * @param isWait Flags to wait for {@link ManagedObjectSource} to provide the
+	 *               {@link ManagedObject}.
 	 * @return {@link ManagedObject} from the {@link ManagedObjectSource} or
 	 *         <code>null</code> if not waiting and not sourced immediately.
-	 * @throws Throwable
-	 *             If fails to source the {@link ManagedObject}.
+	 * @throws Throwable If fails to source the {@link ManagedObject}.
 	 */
 	public synchronized ManagedObject sourceManagedObject(ManagedObjectSource<?, ?> source, boolean isWait)
 			throws Throwable {
@@ -336,7 +323,7 @@ public class ManagedObjectUserStandAlone
 	public Object getObject(int index) {
 
 		// Obtain the dependency
-		Object dependency = this.dependencies.get(new Integer(index));
+		Object dependency = this.dependencies.get(Integer.valueOf(index));
 		if (dependency == null) {
 			throw new IllegalStateException("No dependency configured for index " + index);
 		}

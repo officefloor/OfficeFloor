@@ -275,8 +275,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link Annotation} instances on the parameter type are included in
-	 * the object annotations.
+	 * Ensure {@link Annotation} instances on the parameter type are included in the
+	 * object annotations.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testParameterTypeAnnotations() throws Exception {
@@ -395,7 +395,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		MockClass.returnValue = RETURN_VALUE;
 		this.recordReturn(this.functionContext, this.functionContext.getObject(0), PARAMETER_VALUE);
 		this.functionContext.doFlow(SEQUENTIAL_FLOW_INDEX, null, null);
-		this.functionContext.doFlow(PARALLEL_FLOW_INDEX, new Integer(1), null);
+		this.functionContext.doFlow(PARALLEL_FLOW_INDEX, Integer.valueOf(1), null);
 		this.functionContext.doFlow(ASYNCHRONOUS_FLOW_INDEX, PARAMETER_VALUE, null);
 
 		// Replay the mock objects
@@ -501,8 +501,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Resets for the next test.
 		 * 
-		 * @param expectedContext
-		 *            Expected {@link ManagedFunctionContext}.
+		 * @param expectedContext Expected {@link ManagedFunctionContext}.
 		 */
 		static void reset(ManagedFunctionContext<?, ?> expectedContext) {
 			expectedParameter = null;
@@ -524,7 +523,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 			// Invoke the flows
 			flows.sequential();
-			flows.parallel(new Integer(1));
+			flows.parallel(Integer.valueOf(1));
 			flows.asynchronous(parameter, null);
 
 			// Return the value
@@ -581,18 +580,15 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Parallel invocation.
 		 * 
-		 * @param parameter
-		 *            Parameter.
+		 * @param parameter Parameter.
 		 */
 		void parallel(Integer parameter);
 
 		/**
 		 * Asynchronous invocation.
 		 * 
-		 * @param parameter
-		 *            Parameter.
-		 * @param callback
-		 *            {@link FlowCallback}.
+		 * @param parameter Parameter.
+		 * @param callback  {@link FlowCallback}.
 		 */
 		void asynchronous(String parameter, FlowCallback callback);
 	}

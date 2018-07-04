@@ -752,7 +752,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput");
 
 			// Run invoking flow
-			function.invokeProcess(new Boolean(true), null);
+			function.invokeProcess(Boolean.valueOf(true), null);
 			assertEquals("Incorrect value on invoking flow", "doInput -> oldName(Flow) -> finished", returnValue.value);
 
 			// Run using next function
@@ -1257,10 +1257,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Configures the {@link SectionFunctionNamespace}.
 		 * 
-		 * @param designer
-		 *            {@link SectionDesigner}.
-		 * @param namespace
-		 *            {@link SectionFunctionNamespace} to configure.
+		 * @param designer  {@link SectionDesigner}.
+		 * @param namespace {@link SectionFunctionNamespace} to configure.
 		 */
 		void configureNamespace(SectionDesigner designer, SectionFunctionNamespace namespace);
 	}
@@ -1268,10 +1266,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Creates the expected {@link SectionDesigner} with pre-populated details.
 	 * 
-	 * @param sectionClass
-	 *            Section class.
-	 * @param namespaceConfigurer
-	 *            {@link NamespaceConfigurer}.
+	 * @param sectionClass        Section class.
+	 * @param namespaceConfigurer {@link NamespaceConfigurer}.
 	 * @return {@link SectionDesigner}.
 	 */
 	private SectionDesigner createSectionDesigner(Class<?> sectionClass, NamespaceConfigurer namespaceConfigurer) {
@@ -1294,8 +1290,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to add {@link ClassSectionSource} {@link SectionFunction}.
 	 * 
-	 * @param functionName
-	 *            {@link SectionFunction} and {@link ManagedFunctionType} name.
+	 * @param functionName {@link SectionFunction} and {@link ManagedFunctionType}
+	 *                     name.
 	 * @return {@link NamespaceConfigurer}.
 	 */
 	public NamespaceConfigurer configureClassSectionFunction(String functionName) {
@@ -1305,10 +1301,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to add {@link ClassSectionSource} {@link SectionFunction}.
 	 * 
-	 * @param functionName
-	 *            {@link SectionFunction} name.
-	 * @param functionTypeName
-	 *            {@link ManagedFunctionType} name.
+	 * @param functionName     {@link SectionFunction} name.
+	 * @param functionTypeName {@link ManagedFunctionType} name.
 	 * @return {@link NamespaceConfigurer}.
 	 */
 	public NamespaceConfigurer configureClassSectionFunction(String functionName, String functionTypeName) {
@@ -1320,14 +1314,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Convenience method to add a {@link ClassSectionSource}
 	 * {@link SectionFunction}.
 	 * 
-	 * @param designer
-	 *            {@link SectionDesigner}.
-	 * @param namespace
-	 *            {@link SectionFunctionNamespace}.
-	 * @param functionName
-	 *            {@link SectionFunction} name.
-	 * @param functionTypeName
-	 *            {@link ManagedFunctionType} name.
+	 * @param designer         {@link SectionDesigner}.
+	 * @param namespace        {@link SectionFunctionNamespace}.
+	 * @param functionName     {@link SectionFunction} name.
+	 * @param functionTypeName {@link ManagedFunctionType} name.
 	 * @return {@link SectionFunction}.
 	 */
 	public SectionFunction addClassSectionFunction(SectionDesigner designer, SectionFunctionNamespace namespace,

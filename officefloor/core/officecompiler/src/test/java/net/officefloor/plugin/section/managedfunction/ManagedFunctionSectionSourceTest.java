@@ -132,8 +132,8 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 
 			Singleton.load(architect, connection);
 			Singleton.load(architect, list);
-			Singleton.load(architect, "ONE", new Integer(1));
-			Singleton.load(architect, "TWO", new Integer(2), new AutoWire(MockQualification.class, Integer.class));
+			Singleton.load(architect, "ONE", Integer.valueOf(1));
+			Singleton.load(architect, "TWO", Integer.valueOf(2), new AutoWire(MockQualification.class, Integer.class));
 
 			// Create section
 			OfficeSection section = architect.addOfficeSection("SECTION", ManagedFunctionSectionSource.class.getName(),
@@ -192,13 +192,13 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 
 		public Long functionOne(@MockQualification Connection connection, Flows flows)
 				throws IOException, SQLException {
-			return new Long(1);
+			return Long.valueOf(1);
 		}
 
 		public Byte functionTwo(@MockQualification Integer number, Connection connection, String value,
 				List<String> returnList) throws SQLException {
 			returnList.add(value + number);
-			return new Byte((byte) 1);
+			return Byte.valueOf((byte) 1);
 		}
 
 		public void functionThree(Flows flows) throws IOException {

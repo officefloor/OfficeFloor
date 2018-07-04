@@ -43,7 +43,7 @@ public class ParallelFunctionStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected void constructTest(StressContext context) throws Exception {
-		
+
 		// Register the parallel tasks
 		ParallelInvoker work = new ParallelInvoker(context);
 		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");
@@ -83,7 +83,7 @@ public class ParallelFunctionStressTest extends AbstractStressTestCase {
 
 			// Invoke the parallel task
 			this.flowFunctions.set(0);
-			flow.doFlow(new Integer(1), (escalation) -> {
+			flow.doFlow(Integer.valueOf(1), (escalation) -> {
 				assertNull("Should be no failure", escalation);
 				assertEquals("Incorrect number of flow functions", this.maxFlowFunctions, this.flowFunctions.get());
 				this.completions.incrementAndGet();

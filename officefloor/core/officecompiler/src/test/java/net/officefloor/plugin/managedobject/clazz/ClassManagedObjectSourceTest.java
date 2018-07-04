@@ -91,8 +91,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to load the {@link ManagedObjectType} when child class has
-	 * same field name.
+	 * Ensure able to load the {@link ManagedObjectType} when child class has same
+	 * field name.
 	 */
 	public void testOverrideField() {
 
@@ -228,7 +228,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final Connection connection = this.createMock(Connection.class);
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
 		final ManagedObjectExecuteContext<Indexed> executeContext = this.createMock(ManagedObjectExecuteContext.class);
-		final Integer PROCESS_PARAMETER = new Integer(100);
+		final Integer PROCESS_PARAMETER = Integer.valueOf(100);
 
 		// Record obtaining the dependencies
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0), connection);
@@ -300,7 +300,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final MockProcessInterface processInterface = this.createMock(MockProcessInterface.class);
-		final Integer PROCESS_PARAMETER = new Integer(200);
+		final Integer PROCESS_PARAMETER = Integer.valueOf(200);
 
 		// Record invoking processes
 		processInterface.doProcess();
@@ -338,8 +338,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Method to invoke a {@link ProcessState} with a parameter.
 		 * 
-		 * @param parameter
-		 *            Parameter to the {@link ProcessState}.
+		 * @param parameter Parameter to the {@link ProcessState}.
 		 */
 		void parameterisedProcess(Integer parameter);
 	}
@@ -373,12 +372,9 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Verifies the dependencies.
 		 * 
-		 * @param unqualifiedDependency
-		 *            Unqualified dependency.
-		 * @param qualifiedDependency
-		 *            Qualified dependency.
-		 * @param connection
-		 *            Expected {@link Connection}.
+		 * @param unqualifiedDependency Unqualified dependency.
+		 * @param qualifiedDependency   Qualified dependency.
+		 * @param connection            Expected {@link Connection}.
 		 */
 		public void verifyDependencyInjection(String unqualifiedDependency, String qualifiedDependency,
 				Connection connection) {
@@ -419,8 +415,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Verifies the dependencies injected.
 		 * 
-		 * @param connection
-		 *            Expected {@link Connection}.
+		 * @param connection Expected {@link Connection}.
 		 */
 		public void verifyDependencyInjection(Connection connection) {
 			// Verify dependency injection
@@ -430,8 +425,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Verifies the processes injected.
 		 * 
-		 * @param processParameter
-		 *            Parameter for the invoked processes.
+		 * @param processParameter Parameter for the invoked processes.
 		 */
 		public void verifyProcessInjection(Integer processParameter) {
 			// Verify can invoke processes

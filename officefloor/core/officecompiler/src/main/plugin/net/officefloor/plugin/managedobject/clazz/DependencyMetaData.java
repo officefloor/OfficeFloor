@@ -49,12 +49,9 @@ public class DependencyMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param name
-	 *            Name of the dependency.
-	 * @param index
-	 *            Index of the dependency within the {@link ObjectRegistry}.
-	 * @param field
-	 *            {@link Field} to receive the injected dependency.
+	 * @param name  Name of the dependency.
+	 * @param index Index of the dependency within the {@link ObjectRegistry}.
+	 * @param field {@link Field} to receive the injected dependency.
 	 */
 	public DependencyMetaData(String name, int index, Field field) {
 		this.name = name;
@@ -66,8 +63,7 @@ public class DependencyMetaData {
 	 * Obtains the type qualifier for the dependency.
 	 * 
 	 * @return Type qualifier. May be <code>null</code> if no type qualifier.
-	 * @throws Exception
-	 *             If fails to obtain the type qualifier.
+	 * @throws Exception If fails to obtain the type qualifier.
 	 */
 	@SuppressWarnings("unchecked")
 	public String getTypeQualifier() throws Exception {
@@ -92,7 +88,7 @@ public class DependencyMetaData {
 				// Obtain the qualifier name factory
 				@SuppressWarnings("rawtypes")
 				Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
-				QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.newInstance();
+				QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor().newInstance();
 
 				// Provide type qualifier
 				typeQualifier = nameFactory.getQualifierName(annotation);
@@ -106,12 +102,9 @@ public class DependencyMetaData {
 	/**
 	 * Injects the dependency into the object.
 	 * 
-	 * @param object
-	 *            Object to receive the dependency.
-	 * @param dependency
-	 *            Dependency to inject.
-	 * @throws Exception
-	 *             If fails to inject the dependency.
+	 * @param object     Object to receive the dependency.
+	 * @param dependency Dependency to inject.
+	 * @throws Exception If fails to inject the dependency.
 	 */
 	public void injectDependency(Object object, Object dependency) throws Exception {
 		this.field.set(object, dependency);

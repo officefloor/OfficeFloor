@@ -79,8 +79,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	/**
 	 * Override to add additional {@link ParameterManufacturer} instances.
 	 * 
-	 * @param manufacturers
-	 *            List of {@link ParameterManufacturer} instances to use.
+	 * @param manufacturers List of {@link ParameterManufacturer} instances to use.
 	 */
 	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
 		// By default adds no further manufacturers
@@ -89,14 +88,11 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	/**
 	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
 	 * 
-	 * @param constructor
-	 *            Default {@link Constructor} for the {@link Class} containing
-	 *            the {@link Method}. Will be <code>null</code> if static
-	 *            method.
-	 * @param method
-	 *            {@link Method} on the class.
-	 * @param parameters
-	 *            {@link ManagedFunctionParameterFactory} instances.
+	 * @param constructor Default {@link Constructor} for the {@link Class}
+	 *                    containing the {@link Method}. Will be <code>null</code>
+	 *                    if static method.
+	 * @param method      {@link Method} on the class.
+	 * @param parameters  {@link ManagedFunctionParameterFactory} instances.
 	 * @return {@link ManagedFunctionFactory}.
 	 */
 	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(Constructor<?> constructor,
@@ -107,18 +103,12 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	/**
 	 * Allows overriding the addition of the {@link ManagedFunctionTypeBuilder}.
 	 * 
-	 * @param clazz
-	 *            {@link Class} containing the {@link Method}.
-	 * @param namespaceBuilder
-	 *            {@link FunctionNamespaceBuilder}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param functionFactory
-	 *            {@link ManagedFunctionFactory}.
-	 * @param objectSequence
-	 *            Object {@link Sequence}.
-	 * @param flowSequence
-	 *            Flow {@link Sequence}.
+	 * @param clazz            {@link Class} containing the {@link Method}.
+	 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
+	 * @param functionName     Name of the {@link ManagedFunction}.
+	 * @param functionFactory  {@link ManagedFunctionFactory}.
+	 * @param objectSequence   Object {@link Sequence}.
+	 * @param flowSequence     Flow {@link Sequence}.
 	 * @return Added {@link ManagedFunctionTypeBuilder}.
 	 */
 	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(Class<?> clazz,
@@ -298,7 +288,8 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 								@SuppressWarnings("rawtypes")
 								Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation
 										.nameFactory();
-								QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.newInstance();
+								QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor()
+										.newInstance();
 
 								// Provide type qualifier
 								typeQualifier = nameFactory.getQualifierName(annotation);
@@ -334,24 +325,17 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		/**
 		 * Creates the {@link ManagedFunctionParameterFactory}.
 		 * 
-		 * @param functionName
-		 *            Name of the {@link ManagedFunction}.
-		 * @param parameterType
-		 *            Parameter type.
-		 * @param functionTypeBuilder
-		 *            {@link ManagedFunctionTypeBuilder}.
-		 * @param objectSequence
-		 *            Object {@link Sequence}.
-		 * @param flowSequence
-		 *            Flow {@link Sequence}.
-		 * @param classLoader
-		 *            {@link ClassLoader}.
-		 * @return {@link ManagedFunctionParameterFactory} or <code>null</code>
-		 *         if not appropriate for this to manufacture a
+		 * @param functionName        Name of the {@link ManagedFunction}.
+		 * @param parameterType       Parameter type.
+		 * @param functionTypeBuilder {@link ManagedFunctionTypeBuilder}.
+		 * @param objectSequence      Object {@link Sequence}.
+		 * @param flowSequence        Flow {@link Sequence}.
+		 * @param classLoader         {@link ClassLoader}.
+		 * @return {@link ManagedFunctionParameterFactory} or <code>null</code> if not
+		 *         appropriate for this to manufacture a
 		 *         {@link ManagedFunctionParameterFactory}.
-		 * @throws Exception
-		 *             If fails to create the
-		 *             {@link ManagedFunctionParameterFactory}.
+		 * @throws Exception If fails to create the
+		 *                   {@link ManagedFunctionParameterFactory}.
 		 */
 		ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
@@ -391,8 +375,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotationClass
-		 *            {@link Class} of the {@link Annotation}.
+		 * @param annotationClass {@link Class} of the {@link Annotation}.
 		 */
 		public FlowParameterManufacturer(Class<A> annotationClass) {
 			this.annotationClass = annotationClass;
