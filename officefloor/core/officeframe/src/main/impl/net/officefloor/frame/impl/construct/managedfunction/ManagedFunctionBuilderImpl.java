@@ -68,8 +68,7 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	private final Map<Integer, ManagedFunctionObjectConfigurationImpl<O>> objects = new HashMap<Integer, ManagedFunctionObjectConfigurationImpl<O>>();
 
 	/**
-	 * {@link Governance} instances to be active for this
-	 * {@link ManagedFunction}.
+	 * {@link Governance} instances to be active for this {@link ManagedFunction}.
 	 */
 	private final List<ManagedFunctionGovernanceConfiguration> governances = new LinkedList<ManagedFunctionGovernanceConfiguration>();
 
@@ -79,8 +78,7 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	private List<Object> annotations = new LinkedList<>();
 
 	/**
-	 * Listing of {@link ManagedFunction} bound {@link ManagedObject}
-	 * configuration.
+	 * Listing of {@link ManagedFunction} bound {@link ManagedObject} configuration.
 	 */
 	private final List<ManagedObjectConfiguration<?>> functionManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
@@ -104,10 +102,8 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	/**
 	 * Initiate.
 	 * 
-	 * @param functionName
-	 *            Name of this {@link ManagedFunction}.
-	 * @param functionFactory
-	 *            {@link ManagedFunctionFactory}.
+	 * @param functionName    Name of this {@link ManagedFunction}.
+	 * @param functionFactory {@link ManagedFunctionFactory}.
 	 */
 	public ManagedFunctionBuilderImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory) {
 		this.functionName = functionName;
@@ -151,23 +147,19 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	/**
 	 * Links in a dependent {@link Object}.
 	 * 
-	 * @param objectIndex
-	 *            Index of the {@link Object}.
-	 * @param objectKey
-	 *            Key of the {@link Object}. Should be <code>null</code> if
-	 *            indexed.
-	 * @param isParameter
-	 *            <code>true</code> if the {@link Object} is a parameter.
-	 * @param scopeManagedObjectName
-	 *            Name of the {@link ManagedObject} within the
-	 *            {@link ManagedObjectSource}. Should be <code>null</code> if a
-	 *            parameter.
-	 * @param objectType
-	 *            Type of {@link Object} required.
+	 * @param objectIndex            Index of the {@link Object}.
+	 * @param objectKey              Key of the {@link Object}. Should be
+	 *                               <code>null</code> if indexed.
+	 * @param isParameter            <code>true</code> if the {@link Object} is a
+	 *                               parameter.
+	 * @param scopeManagedObjectName Name of the {@link ManagedObject} within the
+	 *                               {@link ManagedObjectSource}. Should be
+	 *                               <code>null</code> if a parameter.
+	 * @param objectType             Type of {@link Object} required.
 	 */
 	private void linkObject(int objectIndex, O objectKey, boolean isParameter, String scopeManagedObjectName,
 			Class<?> objectType) {
-		this.objects.put(new Integer(objectIndex), new ManagedFunctionObjectConfigurationImpl<O>(isParameter,
+		this.objects.put(Integer.valueOf(objectIndex), new ManagedFunctionObjectConfigurationImpl<O>(isParameter,
 				scopeManagedObjectName, objectType, objectIndex, objectKey));
 	}
 

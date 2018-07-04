@@ -110,24 +110,26 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Name that the {@link ManagedObject} is bound under.
-	 * @param rawBoundMetaData
-	 *            {@link RawBoundManagedObjectMetaData} containing this
-	 *            {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param instanceIndex
-	 *            Index of this {@link RawBoundManagedObjectInstanceMetaData}
-	 *            within its containing {@link RawBoundManagedObjectMetaData}.
-	 * @param rawMoMetaData
-	 *            {@link RawManagedObjectMetaData}.
-	 * @param dependenciesConfiguration
-	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
-	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param governanceConfiguration
-	 *            Listing of the {@link ManagedObjectGovernanceConfiguration}
-	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param preLoadAdministrationConfiguration
-	 *            Pre-load {@link AdministrationConfiguration}.
+	 * @param boundManagedObjectName             Name that the {@link ManagedObject}
+	 *                                           is bound under.
+	 * @param rawBoundMetaData                   {@link RawBoundManagedObjectMetaData}
+	 *                                           containing this
+	 *                                           {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param instanceIndex                      Index of this
+	 *                                           {@link RawBoundManagedObjectInstanceMetaData}
+	 *                                           within its containing
+	 *                                           {@link RawBoundManagedObjectMetaData}.
+	 * @param rawMoMetaData                      {@link RawManagedObjectMetaData}.
+	 * @param dependenciesConfiguration          Listing of the
+	 *                                           {@link ManagedObjectDependencyConfiguration}
+	 *                                           for the
+	 *                                           {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param governanceConfiguration            Listing of the
+	 *                                           {@link ManagedObjectGovernanceConfiguration}
+	 *                                           for the
+	 *                                           {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param preLoadAdministrationConfiguration Pre-load
+	 *                                           {@link AdministrationConfiguration}.
 	 */
 	public RawBoundManagedObjectInstanceMetaData(String boundManagedObjectName,
 			RawBoundManagedObjectMetaData rawBoundMetaData, int instanceIndex,
@@ -147,11 +149,9 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	/**
 	 * Loads the dependencies.
 	 * 
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @param boundMo
-	 *            Mapping of {@link RawBoundManagedObjectMetaData} by its scope
-	 *            bound name.
+	 * @param issues  {@link OfficeFloorIssues}.
+	 * @param boundMo Mapping of {@link RawBoundManagedObjectMetaData} by its scope
+	 *                bound name.
 	 */
 	public void loadDependencies(OfficeFloorIssues issues, Map<String, RawBoundManagedObjectMetaData> boundMo) {
 
@@ -188,7 +188,7 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 			int index = (dependencyKey != null ? dependencyKey.ordinal() : i);
 
 			// Load the dependency at its index
-			dependencyMappings.put(new Integer(index), dependencyConfiguration);
+			dependencyMappings.put(Integer.valueOf(index), dependencyConfiguration);
 		}
 
 		// Load the dependencies
@@ -207,7 +207,7 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 					+ (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
 
 			// Obtain the mapping for the dependency
-			ManagedObjectDependencyConfiguration<?> dependencyMapping = dependencyMappings.get(new Integer(index));
+			ManagedObjectDependencyConfiguration<?> dependencyMapping = dependencyMappings.get(Integer.valueOf(index));
 			if (dependencyMapping == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
 						"No mapping configured for " + dependencyLabel);
@@ -215,7 +215,7 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 			}
 
 			// Remove configuration for later check no extra configured
-			dependencyMappings.remove(new Integer(index));
+			dependencyMappings.remove(Integer.valueOf(index));
 
 			// Obtain the dependent managed object
 			String dependentMoName = dependencyMapping.getScopeManagedObjectName();
@@ -273,11 +273,10 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	/**
 	 * Loads the {@link ManagedObjectGovernanceMetaData}.
 	 * 
-	 * @param rawGovernanceMetaDatas
-	 *            {@link RawGovernanceMetaData} of the {@link Office} by its
-	 *            {@link Office} registered name.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param rawGovernanceMetaDatas {@link RawGovernanceMetaData} of the
+	 *                               {@link Office} by its {@link Office} registered
+	 *                               name.
+	 * @param issues                 {@link OfficeFloorIssues}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadGovernance(Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas,
@@ -342,14 +341,12 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	 * Loads the {@link ManagedObjectMetaData} for the
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param assetType
-	 *            {@link AssetType} requiring the {@link ManagedObject}.
-	 * @param assetName
-	 *            Name of the {@link Asset} requiring the {@link ManagedObject}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param assetType           {@link AssetType} requiring the
+	 *                            {@link ManagedObject}.
+	 * @param assetName           Name of the {@link Asset} requiring the
+	 *                            {@link ManagedObject}.
+	 * @param assetManagerFactory {@link AssetManagerFactory}.
+	 * @param issues              {@link OfficeFloorIssues}.
 	 */
 	public void loadManagedObjectMetaData(AssetType assetType, String assetName,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
@@ -389,14 +386,10 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	/**
 	 * Loads the remaining state for the {@link ManagedObjectMetaData}.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param recycleFlowMetaData
-	 *            Recycle {@link FlowMetaData}.
-	 * @param managedObjectAdminFactory
-	 *            {@link ManagedObjectAdministrationMetaDataFactory}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param officeMetaData            {@link OfficeMetaData}.
+	 * @param recycleFlowMetaData       Recycle {@link FlowMetaData}.
+	 * @param managedObjectAdminFactory {@link ManagedObjectAdministrationMetaDataFactory}.
+	 * @param issues                    {@link OfficeFloorIssues}.
 	 */
 	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
 			ManagedObjectAdministrationMetaDataFactory managedObjectAdminFactory, OfficeFloorIssues issues) {
@@ -414,8 +407,8 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	 * Obtains the {@link RawBoundManagedObjectMetaData} instances of the
 	 * dependencies of this {@link ManagedObject}.
 	 *
-	 * @return {@link RawBoundManagedObjectMetaData} instances of the
-	 *         dependencies of this {@link ManagedObject}.
+	 * @return {@link RawBoundManagedObjectMetaData} instances of the dependencies
+	 *         of this {@link ManagedObject}.
 	 */
 	public RawBoundManagedObjectMetaData[] getDependencies() {
 		return this.dependencies;

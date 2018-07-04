@@ -28,6 +28,9 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.officefloor.jdbc.test.DataSourceRule;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.EntityManagerRule;
@@ -97,8 +100,12 @@ public class RestHttpServerTest {
 
 		// GET entry
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/vehicle/" + vehicle.getId()));
-		response.assertResponse(200, "{\"vehicleType\":\"car\",\"wheels\":4,\"id\":" + vehicle.getId() + "}",
-				"content-type", "application/json");
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		response.assertHeader("content-type", "application/json");
+		JsonNode entity = new ObjectMapper().readTree(response.getEntity(null));
+		assertEquals("Incorrect id", vehicle.getId().intValue(), entity.get("id").asInt());
+		assertEquals("Incorrect vehicle type", "car", entity.get("vehicleType").asText());
+		assertEquals("Incorrect wheels", 4, entity.get("wheels").asInt());
 	}
 	// END SNIPPET: calling
 

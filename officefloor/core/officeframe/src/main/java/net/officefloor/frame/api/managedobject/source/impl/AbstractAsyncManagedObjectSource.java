@@ -63,8 +63,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 	/**
 	 * Overridden to load specifications.
 	 * 
-	 * @param context
-	 *            Specifications.
+	 * @param context Specifications.
 	 */
 	protected abstract void loadSpecification(SpecificationContext context);
 
@@ -76,26 +75,22 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Adds a property.
 		 * 
-		 * @param name
-		 *            Name of property that is also used as the label.
+		 * @param name Name of property that is also used as the label.
 		 */
 		void addProperty(String name);
 
 		/**
 		 * Adds a property.
 		 * 
-		 * @param name
-		 *            Name of property.
-		 * @param label
-		 *            Label for the property.
+		 * @param name  Name of property.
+		 * @param label Label for the property.
 		 */
 		void addProperty(String name, String label);
 
 		/**
 		 * Adds a property.
 		 * 
-		 * @param property
-		 *            {@link ManagedObjectSourceProperty}.
+		 * @param property {@link ManagedObjectSourceProperty}.
 		 */
 		void addProperty(ManagedObjectSourceProperty property);
 	}
@@ -155,10 +150,8 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 	/**
 	 * Overridden to load meta-data.
 	 * 
-	 * @param context
-	 *            Meta-data.
-	 * @throws Exception
-	 *             If fails to load the meta-data.
+	 * @param context Meta-data.
+	 * @throws Exception If fails to load the meta-data.
 	 */
 	protected abstract void loadMetaData(MetaDataContext<O, F> context) throws Exception;
 
@@ -177,26 +170,22 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Specifies the type of the object returned from the {@link ManagedObject}.
 		 * 
-		 * @param objectClass
-		 *            Object type.
+		 * @param objectClass Object type.
 		 */
 		void setObjectClass(Class<?> objectClass);
 
 		/**
 		 * Specifies the type of the {@link ManagedObject}.
 		 * 
-		 * @param managedObjectClass
-		 *            {@link ManagedObject} type.
+		 * @param managedObjectClass {@link ManagedObject} type.
 		 */
 		void setManagedObjectClass(Class<? extends ManagedObject> managedObjectClass);
 
 		/**
 		 * Adds a required dependency identified by the key.
 		 * 
-		 * @param key
-		 *            {@link Enum} to identify the dependency.
-		 * @param dependencyType
-		 *            Type the dependency is required to extend/implement.
+		 * @param key            {@link Enum} to identify the dependency.
+		 * @param dependencyType Type the dependency is required to extend/implement.
 		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller<O> addDependency(O key, Class<?> dependencyType);
@@ -205,8 +194,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * Adds a required dependency identified by an index into the order the
 		 * dependency was added.
 		 * 
-		 * @param dependencyType
-		 *            Type the dependency is required to extend/implement.
+		 * @param dependencyType Type the dependency is required to extend/implement.
 		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller<O> addDependency(Class<?> dependencyType);
@@ -214,10 +202,8 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Adds a required {@link Flow} identified by the key.
 		 * 
-		 * @param key
-		 *            {@link Enum} to identify the {@link Flow}.
-		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
+		 * @param key          {@link Enum} to identify the {@link Flow}.
+		 * @param argumentType Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
 		Labeller<F> addFlow(F key, Class<?> argumentType);
@@ -226,8 +212,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 * Adds a required {@link Flow} identified by an index into the order the
 		 * {@link Flow} was added.
 		 * 
-		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
+		 * @param argumentType Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
 		Labeller<F> addFlow(Class<?> argumentType);
@@ -235,13 +220,10 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Adds a {@link ManagedObjectExtensionMetaData} instance.
 		 * 
-		 * @param <E>
-		 *            Extension interface type.
-		 * @param interfaceType
-		 *            Type of the extension interface supported by the
-		 *            {@link ManagedObject} instances.
-		 * @param extensionInterfaceFactory
-		 *            {@link ExtensionFactory}.
+		 * @param                           <E> Extension interface type.
+		 * @param interfaceType             Type of the extension interface supported by
+		 *                                  the {@link ManagedObject} instances.
+		 * @param extensionInterfaceFactory {@link ExtensionFactory}.
 		 */
 		<E> void addManagedObjectExtension(Class<E> interfaceType, ExtensionFactory<E> extensionInterfaceFactory);
 	}
@@ -255,8 +237,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Specifies qualifier for the type.
 		 * 
-		 * @param qualifier
-		 *            Type qualifier.
+		 * @param qualifier Type qualifier.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
 		 */
 		Labeller<K> setTypeQualifier(String qualifier);
@@ -271,8 +252,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Specifies the label.
 		 * 
-		 * @param label
-		 *            Label.
+		 * @param label Label.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
 		 */
 		Labeller<K> setLabel(String label);
@@ -332,8 +312,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Initiate.
 		 * 
-		 * @param context
-		 *            {@link ManagedObjectSourceContext}.
+		 * @param context {@link ManagedObjectSourceContext}.
 		 */
 		public MetaData(ManagedObjectSourceContext<F> context) {
 			this.context = context;
@@ -373,12 +352,9 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Adds a dependency.
 		 * 
-		 * @param index
-		 *            Index to add the dependency under.
-		 * @param key
-		 *            Key for the dependency. May be <code>null</code>.
-		 * @param dependencyType
-		 *            Type of dependency.
+		 * @param index          Index to add the dependency under.
+		 * @param key            Key for the dependency. May be <code>null</code>.
+		 * @param dependencyType Type of dependency.
 		 * @return {@link Labeller} for the dependency.
 		 */
 		private DependencyLabeller<O> addDependency(final int index, final O key, Class<?> dependencyType) {
@@ -388,7 +364,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 					dependencyType);
 
 			// Register the dependency at the index
-			this.dependencies.put(new Integer(index), dependency);
+			this.dependencies.put(Integer.valueOf(index), dependency);
 
 			// Return the labeller for the dependency
 			return new DependencyLabeller<O>() {
@@ -431,12 +407,9 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Adds a {@link Flow}.
 		 * 
-		 * @param index
-		 *            Index to add the {@link Flow} under.
-		 * @param key
-		 *            Key for the {@link Flow}. May be <code>null</code>.
-		 * @param argumentType
-		 *            Type of the argument passed to the {@link Flow}.
+		 * @param index        Index to add the {@link Flow} under.
+		 * @param key          Key for the {@link Flow}. May be <code>null</code>.
+		 * @param argumentType Type of the argument passed to the {@link Flow}.
 		 * @return {@link Labeller} for the {@link Flow}.
 		 */
 		private Labeller<F> addFlow(final int index, final F key, Class<?> argumentType) {
@@ -445,7 +418,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 			final ManagedObjectFlowMetaDataImpl<F> flow = new ManagedObjectFlowMetaDataImpl<F>(key, argumentType);
 
 			// Register the flow at the index
-			this.flows.put(new Integer(index), flow);
+			this.flows.put(Integer.valueOf(index), flow);
 
 			// Return the labeller for the flow
 			return new Labeller<F>() {

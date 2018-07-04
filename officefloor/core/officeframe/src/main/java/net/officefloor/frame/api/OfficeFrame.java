@@ -49,11 +49,10 @@ public abstract class OfficeFrame {
 	private static OfficeFrame INSTANCE = null;
 
 	/**
-	 * Specifies the {@link OfficeFrame} implementation. Allows for overriding
-	 * the default implementation.
+	 * Specifies the {@link OfficeFrame} implementation. Allows for overriding the
+	 * default implementation.
 	 * 
-	 * @param singleton
-	 *            {@link OfficeFrame} implementation.
+	 * @param singleton {@link OfficeFrame} implementation.
 	 */
 	public synchronized static final void setInstance(OfficeFrame singleton) {
 		// Ensure not already specified
@@ -80,7 +79,8 @@ public abstract class OfficeFrame {
 			if ((implementationClassName != null) && (implementationClassName.trim().length() > 0)) {
 				// Have override implementation, so use
 				try {
-					INSTANCE = (OfficeFrame) Class.forName(implementationClassName).newInstance();
+					INSTANCE = (OfficeFrame) Class.forName(implementationClassName).getDeclaredConstructor()
+							.newInstance();
 				} catch (Throwable ex) {
 					throw new IllegalArgumentException(
 							"Can not create instance of " + implementationClassName + " from default constructor", ex);
@@ -98,11 +98,11 @@ public abstract class OfficeFrame {
 
 	/**
 	 * <p>
-	 * Convenience method to create a single {@link OfficeFloorBuilder}, as
-	 * there is typically only one {@link OfficeFloor} per JVM.
+	 * Convenience method to create a single {@link OfficeFloorBuilder}, as there is
+	 * typically only one {@link OfficeFloor} per JVM.
 	 * <p>
-	 * If more than one {@link OfficeFloor} is required, use the
-	 * {@link OfficeFrame} returned from {@link #getInstance()}.
+	 * If more than one {@link OfficeFloor} is required, use the {@link OfficeFrame}
+	 * returned from {@link #getInstance()}.
 	 * 
 	 * @return {@link OfficeFloorBuilder}.
 	 */
@@ -122,8 +122,7 @@ public abstract class OfficeFrame {
 	/**
 	 * Obtains the {@link OfficeFloorBuilder}.
 	 * 
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
+	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @return {@link OfficeFloorBuilder}.
 	 */
 	public abstract OfficeFloorBuilder createOfficeFloorBuilder(String officeFloorName);

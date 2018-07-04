@@ -80,6 +80,7 @@ import org.easymock.MockControl;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 
 /**
@@ -258,7 +259,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return New {@link ClassLoader}.
 	 */
 	public static ClassLoader createNewClassLoader() {
-
 		try {
 
 			// Provide additional class to this class loader
@@ -290,6 +290,17 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				}
 			}
 
+			// Ensure platform class loader not loading OfficeFloor
+			ClassLoader platformClassLoader = ClassLoader.getPlatformClassLoader();
+			boolean isOfficeFloorOnPlatformClassPath = true;
+			try {
+				platformClassLoader.loadClass(OfficeFloor.class.getName());
+			} catch (ClassNotFoundException ex) {
+				isOfficeFloorOnPlatformClassPath = false;
+			}
+			assertFalse("Invalid test, as Platform ClassLoader has " + OfficeFloor.class.getName(),
+					isOfficeFloorOnPlatformClassPath);
+
 			// Create Class Loader for testing
 			String[] classPathEntries = System.getProperty("java.class.path").split(File.pathSeparator);
 			URL[] urls = new URL[classPathEntries.length + 1]; // include extra class
@@ -301,7 +312,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				urls[i] = new URL(classPathEntry);
 			}
 			urls[classPathEntries.length] = workingDir.toURI().toURL();
-			ClassLoader classLoader = new URLClassLoader(urls, null);
+			ClassLoader classLoader = new URLClassLoader(urls, platformClassLoader);
 
 			// Return the class loader
 			return classLoader;

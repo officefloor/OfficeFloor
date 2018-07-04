@@ -147,7 +147,7 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 				throw failure;
 			}
 
-			// Ensure able to configure OfficeFloor comiler
+			// Ensure able to configure OfficeFloor compiler
 			compiler.addOfficeFloorListener(new OfficeFloorListener() {
 
 				@Override

@@ -72,10 +72,10 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	/**
 	 * Initiate as a {@link ManagedObjectConfiguration}.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Name of the {@link ManagedObject} is being bound.
-	 * @param officeManagedObjectName
-	 *            Name of the {@link ManagedObject} within the {@link Office}.
+	 * @param boundManagedObjectName  Name of the {@link ManagedObject} is being
+	 *                                bound.
+	 * @param officeManagedObjectName Name of the {@link ManagedObject} within the
+	 *                                {@link Office}.
 	 */
 	public DependencyMappingBuilderImpl(String boundManagedObjectName, String officeManagedObjectName) {
 		this.boundManagedObjectName = boundManagedObjectName;
@@ -85,8 +85,8 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	/**
 	 * Initiate as an {@link InputManagedObjectConfiguration}.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Name of the {@link ManagedObject} is being bound.
+	 * @param boundManagedObjectName Name of the {@link ManagedObject} is being
+	 *                               bound.
 	 */
 	public DependencyMappingBuilderImpl(String boundManagedObjectName) {
 		this(boundManagedObjectName, null);
@@ -130,12 +130,10 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	/**
 	 * Maps in the dependency.
 	 * 
-	 * @param index
-	 *            Index to map the dependency under.
-	 * @param key
-	 *            Key for the dependency. May be <code>null</code>.
-	 * @param scopeManagedObjectName
-	 *            Scope name for the {@link ManagedObject}.
+	 * @param index                  Index to map the dependency under.
+	 * @param key                    Key for the dependency. May be
+	 *                               <code>null</code>.
+	 * @param scopeManagedObjectName Scope name for the {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
 	private <d extends Enum<d>> void mapDependency(int index, d key, String scopeManagedObjectName) {
@@ -148,7 +146,7 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 				scopeManagedObjectName);
 
 		// Map the dependency at the index
-		this.dependencies.put(new Integer(index), dependency);
+		this.dependencies.put(Integer.valueOf(index), dependency);
 	}
 
 	/*
@@ -199,10 +197,8 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 		/**
 		 * Initiate.
 		 * 
-		 * @param dependencyKey
-		 *            Dependency key.
-		 * @param managedObjectName
-		 *            {@link ManagedObject} name.
+		 * @param dependencyKey     Dependency key.
+		 * @param managedObjectName {@link ManagedObject} name.
 		 */
 		public ManagedObjectDependencyConfigurationImpl(O dependencyKey, String managedObjectName) {
 			this.dependencyKey = dependencyKey;
@@ -237,8 +233,7 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 		/**
 		 * Initiate.
 		 * 
-		 * @param governanceName
-		 *            {@link Governance} name.
+		 * @param governanceName {@link Governance} name.
 		 */
 		public ManagedObjectGovernanceConfigurationImpl(String governanceName) {
 			this.governanceName = governanceName;

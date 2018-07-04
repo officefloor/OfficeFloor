@@ -46,9 +46,8 @@ public abstract class AbstractFunctionBuilder<F extends Enum<F>>
 		implements FunctionBuilder<F>, FunctionConfiguration<F> {
 
 	/**
-	 * Name of the {@link Team} responsible for this
-	 * {@link ManagedFunctionLogic}. May be <code>null</code> for any
-	 * {@link Team}.
+	 * Name of the {@link Team} responsible for this {@link ManagedFunctionLogic}.
+	 * May be <code>null</code> for any {@link Team}.
 	 */
 	private String responsibleTeamName;
 
@@ -59,8 +58,8 @@ public abstract class AbstractFunctionBuilder<F extends Enum<F>>
 
 	/**
 	 * Listing of {@link EscalationConfiguration} instances to form the
-	 * {@link EscalationProcedure} for the resulting {@link ManagedFunction} of
-	 * this {@link ManagedFunctionBuilder}.
+	 * {@link EscalationProcedure} for the resulting {@link ManagedFunction} of this
+	 * {@link ManagedFunctionBuilder}.
 	 */
 	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 
@@ -92,17 +91,13 @@ public abstract class AbstractFunctionBuilder<F extends Enum<F>>
 	/**
 	 * Links in a {@link Flow}.
 	 * 
-	 * @param flowIndex
-	 *            Index of the {@link Flow}.
-	 * @param flowKey
-	 *            Key of the {@link Flow}. Should be <code>null</code> if
-	 *            indexed.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}.
-	 * @param isSpawnThreadState
-	 *            Indicates whether to spawn a {@link ThreadState}.
+	 * @param flowIndex          Index of the {@link Flow}.
+	 * @param flowKey            Key of the {@link Flow}. Should be
+	 *                           <code>null</code> if indexed.
+	 * @param functionName       Name of the {@link ManagedFunction}.
+	 * @param argumentType       Type of argument passed to the instigated
+	 *                           {@link Flow}.
+	 * @param isSpawnThreadState Indicates whether to spawn a {@link ThreadState}.
 	 */
 	private void linkFlow(int flowIndex, F flowKey, String functionName, Class<?> argumentType,
 			boolean isSpawnThreadState) {
@@ -118,7 +113,7 @@ public abstract class AbstractFunctionBuilder<F extends Enum<F>>
 				flowIndex, flowKey);
 
 		// Register the flow
-		this.flows.put(new Integer(flowIndex), flow);
+		this.flows.put(Integer.valueOf(flowIndex), flow);
 	}
 
 	/*
