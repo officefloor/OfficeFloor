@@ -878,6 +878,9 @@
 						<exclude>**/*.jks</exclude>
 						<exclude>**/*.config</exclude>
 						<exclude>**/*.properties</exclude>
+						<exclude>**/*.e4xmi</exclude>
+						<exclude>**/*.xpm</exclude>
+						<exclude>**/*.target</exclude>
 						<exclude>**/*.jj</exclude>
 						<exclude>**/*.apt</exclude>
 						<exclude>**/*.vm</exclude>
@@ -902,11 +905,6 @@
 						<exclude>**/*.woof</exclude>
 						<exclude>**/*.objects</exclude>
 						<exclude>**/*.teams</exclude>
-						<!-- Files to exclude -->
-						<exclude>**/officebuilding</exclude>
-						<exclude>**/buildingmanager</exclude>
-						<exclude>**/officefloor</exclude>
-						<exclude>**/officeconsole</exclude>
 					</excludes>
 					<headerDefinitions>
 						<headerDefinition>src/license/java-header-style.xml
