@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -132,6 +133,11 @@ public class CompileUtil {
 			return instance;
 
 		} catch (Throwable ex) {
+			// Handle invocation target on constructor
+			if (ex instanceof InvocationTargetException) {
+				ex = ex.getCause();
+			}
+
 			// Indicate issue (catching exception from constructor)
 			issues.addIssue(node,
 					"Failed to instantiate " + (clazz != null ? clazz.getName() : null) + " by default constructor",
