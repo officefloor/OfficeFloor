@@ -34,13 +34,10 @@ public class HttpSecuritySourceSpecificationRunnable implements OfficeFloorCompi
 	 * Convenience method to load the specification for the
 	 * {@link HttpSecuritySource}.
 	 * 
-	 * @param httpSecuritySourceClassName
-	 *            {@link HttpSecuritySource} class name.
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
+	 * @param httpSecuritySourceClassName {@link HttpSecuritySource} class name.
+	 * @param compiler                    {@link OfficeFloorCompiler}.
 	 * @return {@link PropertyList}.
-	 * @throws Exception
-	 *             If failure in loading sspecification.
+	 * @throws Exception If failure in loading sspecification.
 	 */
 	public static PropertyList loadSpecification(String httpSecuritySourceClassName, OfficeFloorCompiler compiler)
 			throws Exception {
@@ -63,7 +60,7 @@ public class HttpSecuritySourceSpecificationRunnable implements OfficeFloorCompi
 		// Instantiate the HTTP Security Source
 		Class<?> httpSecuritySourceClass = compiler.getClassLoader().loadClass(httpSecuritySourceClassName);
 		HttpSecuritySource<?, ?, ?, ?, ?> httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?, ?>) httpSecuritySourceClass
-				.newInstance();
+				.getDeclaredConstructor().newInstance();
 
 		// Load the specification
 		PropertyList properties = httpSecurityLoader.loadSpecification(httpSecuritySource);

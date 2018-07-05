@@ -60,8 +60,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	/**
 	 * Creates an item from the {@link Model}.
 	 * 
-	 * @param model
-	 *            {@link Model}. May be <code>null</code> if create a {@link Model}.
+	 * @param model {@link Model}. May be <code>null</code> if create a
+	 *              {@link Model}.
 	 * @return Item.
 	 */
 	protected abstract I item(M model);
@@ -113,8 +113,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Convenience method to provide add and refactor configuration.
 		 * 
-		 * @param configuration
-		 *            {@link ItemConfigurer}.
+		 * @param configuration {@link ItemConfigurer}.
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer addAndRefactor(ItemConfigurer<O, M, I> configuration) {
@@ -127,8 +126,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Provides add configuration.
 		 * 
-		 * @param configuration
-		 *            {@link ItemConfigurer}.
+		 * @param configuration {@link ItemConfigurer}.
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer add(ItemConfigurer<O, M, I> configuration) {
@@ -140,8 +138,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Provides refactor configuration.
 		 * 
-		 * @param configuration
-		 *            {@link ItemConfigurer}.
+		 * @param configuration {@link ItemConfigurer}.
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer refactor(ItemConfigurer<O, M, I> configuration) {
@@ -152,8 +149,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Provides add immediate (without configuration).
 		 * 
-		 * @param add
-		 *            {@link ItemActioner} to add item.
+		 * @param add {@link ItemActioner} to add item.
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer add(ItemActioner<O, M> add) {
@@ -165,8 +161,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Provides delete configuration.
 		 * 
-		 * @param deletion
-		 *            {@link ItemActioner} to delete item.
+		 * @param deletion {@link ItemActioner} to delete item.
 		 * @return <code>this</code>.
 		 */
 		public IdeConfigurer delete(ItemActioner<O, M> deletion) {
@@ -184,10 +179,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Builds the item configuration.
 		 * 
-		 * @param builder
-		 *            {@link ConfigurationBuilder}.
-		 * @param context
-		 *            {@link ConfigurableModelContext}.
+		 * @param builder {@link ConfigurationBuilder}.
+		 * @param context {@link ConfigurableModelContext}.
 		 */
 		void configure(ConfigurationBuilder<I> builder, ConfigurableModelContext<O, M> context);
 	}
@@ -201,10 +194,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Undertakes action for the item.
 		 * 
-		 * @param context
-		 *            {@link ConfigurableModelContext}.
-		 * @throws Throwable
-		 *             If failure in actioning.
+		 * @param context {@link ConfigurableModelContext}.
+		 * @throws Throwable If failure in actioning.
 		 */
 		void action(ConfigurableModelContext<O, M> context) throws Throwable;
 	}
@@ -231,10 +222,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Executes the {@link Change}.
 		 * 
-		 * @param change
-		 *            {@link Change}.
-		 * @throws Throwable
-		 *             If unable to execute the {@link Change}.
+		 * @param change {@link Change}.
+		 * @throws Throwable If unable to execute the {@link Change}.
 		 */
 		void execute(Change<M> change) throws Throwable;
 	}
@@ -489,14 +478,10 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	/**
 	 * Executes the {@link Change}.
 	 * 
-	 * @param changeExecutor
-	 *            {@link ChangeExecutor}.
-	 * @param change
-	 *            {@link Change} to be executed.
-	 * @throws MessageOnlyApplyException
-	 *             If not able to execute the {@link Change}.
-	 * @throws Throwable
-	 *             If failure in {@link Conflict}.
+	 * @param changeExecutor {@link ChangeExecutor}.
+	 * @param change         {@link Change} to be executed.
+	 * @throws MessageOnlyApplyException If not able to execute the {@link Change}.
+	 * @throws Throwable                 If failure in {@link Conflict}.
 	 */
 	private static void executeChange(ChangeExecutor changeExecutor, Change<?> change)
 			throws MessageOnlyApplyException, Throwable {
@@ -540,19 +525,17 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	/**
 	 * Invoke to run in main method for external testing.
 	 * 
-	 * @param rootModel
-	 *            Root {@link Model}.
-	 * @param ideEditorClass
-	 *            {@link AbstractIdeEditor} {@link Class} for this
-	 *            {@link AbstractConfigurableItem}.
-	 * @param decoratePrototype
-	 *            Optional decorator of the prototype {@link Model} for refactor
-	 *            testing. May be <code>null</code> to use prototype as is.
+	 * @param rootModel         Root {@link Model}.
+	 * @param ideEditorClass    {@link AbstractIdeEditor} {@link Class} for this
+	 *                          {@link AbstractConfigurableItem}.
+	 * @param decoratePrototype Optional decorator of the prototype {@link Model}
+	 *                          for refactor testing. May be <code>null</code> to
+	 *                          use prototype as is.
 	 */
 	public void main(R rootModel, Class<? extends AbstractIdeEditor<R, RE, O>> ideEditorClass,
 			Consumer<M> decoratePrototype) {
 		AbstractIdeEditor.launchOutsideWorkbench(() -> {
-			AbstractIdeEditor<R, RE, O> ideEditor = ideEditorClass.newInstance();
+			AbstractIdeEditor<R, RE, O> ideEditor = ideEditorClass.getDeclaredConstructor().newInstance();
 			this.init(new MainConfigurableContext(ideEditor.createOperations(rootModel), decoratePrototype));
 			this.run();
 		});
@@ -750,10 +733,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Instantiate.
 		 * 
-		 * @param operations
-		 *            Operations.
-		 * @param decoratePrototype
-		 *            {@link Consumer} to decorate the prototype.
+		 * @param operations        Operations.
+		 * @param decoratePrototype {@link Consumer} to decorate the prototype.
 		 */
 		private MainConfigurableContext(O operations, Consumer<M> decoratePrototype) {
 			this.operations = operations;

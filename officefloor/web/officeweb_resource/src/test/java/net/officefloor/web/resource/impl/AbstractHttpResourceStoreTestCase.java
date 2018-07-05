@@ -54,8 +54,8 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * <p>
 	 * Obtains the {@link ResourceSystemFactory} {@link Class}.
 	 * <p>
-	 * As the {@link ResourceSystemFactory} is loaded via a
-	 * {@link ServiceLoader} this ensures it can be.
+	 * As the {@link ResourceSystemFactory} is loaded via a {@link ServiceLoader}
+	 * this ensures it can be.
 	 * 
 	 * @return {@link ResourceSystemFactory}.
 	 */
@@ -80,7 +80,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 */
 	protected ResourceSystemFactory createResourceSystemService() throws Exception {
 		Class<? extends ResourceSystemFactory> serviceClass = this.getResourceSystemService();
-		return serviceClass.newInstance();
+		return serviceClass.getDeclaredConstructor().newInstance();
 	}
 
 	/**
@@ -127,8 +127,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	/**
 	 * Obtains the path with possible context path prefix.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param path Path.
 	 * @return Path with context path prefix.
 	 */
 	protected String path(String path) {
@@ -138,12 +137,9 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	/**
 	 * Sets up a new {@link HttpResourceStore} for the location.
 	 * 
-	 * @param location
-	 *            Location.
-	 * @param transformers
-	 *            {@link ResourceTransformer} instances.
-	 * @param directoryDefaultFileNames
-	 *            Directory default file names.
+	 * @param location                  Location.
+	 * @param transformers              {@link ResourceTransformer} instances.
+	 * @param directoryDefaultFileNames Directory default file names.
 	 */
 	protected void setupNewHttpResourceStore(String location, ResourceTransformer[] transformers,
 			String... directoryDefaultFileNames) throws Exception {
@@ -345,8 +341,8 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensure not cache not existing {@link HttpResource}. This avoids potential
-	 * out of memory due to lots of requests for not existing resources.
+	 * Ensure not cache not existing {@link HttpResource}. This avoids potential out
+	 * of memory due to lots of requests for not existing resources.
 	 */
 	public void testNoteCacheNotExistingHttpResource() throws IOException {
 		String path = this.path("/not_exist");

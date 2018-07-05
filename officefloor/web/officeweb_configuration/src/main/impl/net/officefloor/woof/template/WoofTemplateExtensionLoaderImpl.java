@@ -217,7 +217,8 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 
 				// Construct the source
 				Class<?> extensionSourceClass = sourceContext.loadClass(woofTemplateExtensionSourceClassName);
-				WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass.newInstance();
+				WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass
+						.getDeclaredConstructor().newInstance();
 
 				// Create potential change to to refactor extension
 				extensionChange = source.createConfigurationChange(context);
@@ -251,12 +252,12 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		/**
 		 * Initiate.
 		 * 
-		 * @param applicationPath
-		 *            {@link WebTemplate} application path.
-		 * @param woofTemplateExtensionSourceClassName
-		 *            {@link WoofTemplateExtensionSource} class name.
-		 * @param delegate
-		 *            {@link WoofChangeIssues} delegate.
+		 * @param applicationPath                      {@link WebTemplate} application
+		 *                                             path.
+		 * @param woofTemplateExtensionSourceClassName {@link WoofTemplateExtensionSource}
+		 *                                             class name.
+		 * @param delegate                             {@link WoofChangeIssues}
+		 *                                             delegate.
 		 */
 		public ExtensionWoofChangeIssues(String applicationPath, String woofTemplateExtensionSourceClassName,
 				WoofChangeIssues delegate) {
@@ -306,14 +307,11 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	/**
 	 * Creates the {@link NoChange} for failure of refactor {@link Change}.
 	 * 
-	 * @param woofTemplateExtensionSourceClassName
-	 *            {@link WoofTemplateExtensionSource} class name.
-	 * @param oldApplicationPath
-	 *            Old URI.
-	 * @param newApplicationPath
-	 *            New URI.
-	 * @param ex
-	 *            Cause.
+	 * @param woofTemplateExtensionSourceClassName {@link WoofTemplateExtensionSource}
+	 *                                             class name.
+	 * @param oldApplicationPath                   Old URI.
+	 * @param newApplicationPath                   New URI.
+	 * @param ex                                   Cause.
 	 * @return {@link NoChange}.
 	 */
 	private static NoChange<?> createFailureChange(String woofTemplateExtensionSourceClassName,
@@ -377,18 +375,12 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		/**
 		 * Initiate.
 		 * 
-		 * @param applicationPath
-		 *            Application path to the {@link WebTemplate}.
-		 * @param template
-		 *            {@link WebTemplate}.
-		 * @param officeArchitect
-		 *            {@link OfficeArchitect}.
-		 * @param webArchitect
-		 *            {@link WebArchitect}.
-		 * @param properties
-		 *            {@link PropertyList}.
-		 * @param classLoader
-		 *            {@link ClassLoader}.
+		 * @param applicationPath Application path to the {@link WebTemplate}.
+		 * @param template        {@link WebTemplate}.
+		 * @param officeArchitect {@link OfficeArchitect}.
+		 * @param webArchitect    {@link WebArchitect}.
+		 * @param properties      {@link PropertyList}.
+		 * @param classLoader     {@link ClassLoader}.
 		 */
 		public WoofTemplateExtensionServiceContextImpl(String applicationPath, WebTemplate template,
 				OfficeArchitect officeArchitect, WebArchitect webArchitect, PropertyList properties,

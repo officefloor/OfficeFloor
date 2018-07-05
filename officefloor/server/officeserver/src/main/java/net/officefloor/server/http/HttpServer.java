@@ -92,12 +92,9 @@ public class HttpServer {
 	/**
 	 * Obtains the {@link Property} value.
 	 * 
-	 * @param propertyName
-	 *            Name of {@link Property}.
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @param defaultValue
-	 *            {@link Supplier} of the default value.
+	 * @param propertyName Name of {@link Property}.
+	 * @param context      {@link SourceContext}.
+	 * @param defaultValue {@link Supplier} of the default value.
 	 * @return Value for the {@link Property}.
 	 */
 	public static String getPropertyString(String propertyName, SourceContext context, Supplier<String> defaultValue) {
@@ -122,12 +119,9 @@ public class HttpServer {
 	/**
 	 * Obtains the {@link Property} value.
 	 * 
-	 * @param propertyName
-	 *            Name of {@link Property}.
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @param defaultValue
-	 *            {@link Supplier} of the default value.
+	 * @param propertyName Name of {@link Property}.
+	 * @param context      {@link SourceContext}.
+	 * @param defaultValue {@link Supplier} of the default value.
 	 * @return Value for the {@link Property}.
 	 */
 	public static int getPropertyInteger(String propertyName, SourceContext context, Supplier<Integer> defaultValue) {
@@ -137,11 +131,9 @@ public class HttpServer {
 	/**
 	 * Obtains the {@link SSLContext} from configuration.
 	 * 
-	 * @param context
-	 *            {@link SourceContext}.
+	 * @param context {@link SourceContext}.
 	 * @return {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to load the {@link SSLContext} from configuration.
+	 * @throws Exception If fails to load the {@link SSLContext} from configuration.
 	 */
 	public static SSLContext getSslContext(SourceContext context) throws Exception {
 
@@ -157,17 +149,16 @@ public class HttpServer {
 
 		// Create the SSL context
 		Class<?> sslContextSourceClass = context.loadClass(sslContextSourceClassName);
-		SslContextSource sslContextSource = (SslContextSource) sslContextSourceClass.newInstance();
+		SslContextSource sslContextSource = (SslContextSource) sslContextSourceClass.getDeclaredConstructor()
+				.newInstance();
 		return sslContextSource.createSslContext(context);
 	}
 
 	/**
 	 * Convenience method to obtain the <code>Server</code> {@link HttpHeaderValue}.
 	 * 
-	 * @param context
-	 *            {@link HttpServerImplementationContext}.
-	 * @param suffix
-	 *            Optional suffix. May be <code>null</code>.
+	 * @param context {@link HttpServerImplementationContext}.
+	 * @param suffix  Optional suffix. May be <code>null</code>.
 	 * @return <code>Server</code> {@link HttpHeaderValue} or <code>null</code> if
 	 *         not configured.
 	 */
@@ -217,15 +208,12 @@ public class HttpServer {
 	/**
 	 * Instantiates the {@link HttpServer} from configuration.
 	 * 
-	 * @param serviceInput
-	 *            {@link DeployedOfficeInput} servicing the
-	 *            {@link ServerHttpConnection}.
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param context
-	 *            {@link OfficeFloorSourceContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link HttpServer} from configuration.
+	 * @param serviceInput        {@link DeployedOfficeInput} servicing the
+	 *                            {@link ServerHttpConnection}.
+	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
+	 * @param context             {@link OfficeFloorSourceContext}.
+	 * @throws Exception If fails to create the {@link HttpServer} from
+	 *                   configuration.
 	 */
 	public HttpServer(DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
 			OfficeFloorSourceContext context) throws Exception {
@@ -279,7 +267,7 @@ public class HttpServer {
 		case 0:
 			// Use default implementation
 			implementation = (HttpServerImplementation) context.loadClass(DEFAULT_HTTP_SERVER_IMPLEMENTATION_CLASS_NAME)
-					.newInstance();
+					.getDeclaredConstructor().newInstance();
 			break;
 
 		case 1:
@@ -315,26 +303,19 @@ public class HttpServer {
 	/**
 	 * Instantiates the {@link HttpServer} from direct configuration.
 	 * 
-	 * @param implementation
-	 *            {@link HttpServerImplementation}.
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param serverName
-	 *            Server name. May be <code>null</code>.
-	 * @param dateHttpHeaderClock
-	 *            {@link DateHttpHeaderClock}. May be <code>null</code>.
-	 * @param isIncludeEscalationStackTrace
-	 *            Indicates whether to include {@link Escalation} stack trace in
-	 *            {@link HttpResponse}.
-	 * @param sslContext
-	 *            {@link SSLContext}.
-	 * @param serviceInput
-	 *            {@link DeployedOfficeInput} servicing the
-	 *            {@link ServerHttpConnection}.
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param context
-	 *            {@link OfficeFloorSourceContext}.
+	 * @param implementation                {@link HttpServerImplementation}.
+	 * @param serverLocation                {@link HttpServerLocation}.
+	 * @param serverName                    Server name. May be <code>null</code>.
+	 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}. May be
+	 *                                      <code>null</code>.
+	 * @param isIncludeEscalationStackTrace Indicates whether to include
+	 *                                      {@link Escalation} stack trace in
+	 *                                      {@link HttpResponse}.
+	 * @param sslContext                    {@link SSLContext}.
+	 * @param serviceInput                  {@link DeployedOfficeInput} servicing
+	 *                                      the {@link ServerHttpConnection}.
+	 * @param officeFloorDeployer           {@link OfficeFloorDeployer}.
+	 * @param context                       {@link OfficeFloorSourceContext}.
 	 */
 	public HttpServer(HttpServerImplementation implementation, HttpServerLocation serverLocation, String serverName,
 			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace, SSLContext sslContext,
@@ -354,13 +335,10 @@ public class HttpServer {
 	/**
 	 * Configures the {@link HttpServer}.
 	 * 
-	 * @param serviceInput
-	 *            {@link DeployedOfficeInput} servicing the
-	 *            {@link ServerHttpConnection}.
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param context
-	 *            {@link OfficeFloorSourceContext}.
+	 * @param serviceInput        {@link DeployedOfficeInput} servicing the
+	 *                            {@link ServerHttpConnection}.
+	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
+	 * @param context             {@link OfficeFloorSourceContext}.
 	 */
 	private void configure(DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
 			OfficeFloorSourceContext context) {

@@ -44,6 +44,7 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can run the application from default configuration.
 	 */
+	@SuppressWarnings("unused")
 	public void testWoOF() throws Exception {
 
 		// Start WoOF application for testing

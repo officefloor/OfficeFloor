@@ -48,7 +48,7 @@ public class HttpRequestObjectManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpRequestObjectDependencies {
-		HTTP_REQUEST_STATE
+			HTTP_REQUEST_STATE
 	}
 
 	/**
@@ -205,7 +205,8 @@ public class HttpRequestObjectManagedObjectSource
 			this.object = state.getAttribute(this.boundName);
 			if (this.object == null) {
 				// Instantiate and register the object
-				this.object = (Serializable) HttpRequestObjectManagedObjectSource.this.objectClass.newInstance();
+				this.object = (Serializable) HttpRequestObjectManagedObjectSource.this.objectClass
+						.getDeclaredConstructor().newInstance();
 				state.setAttribute(this.boundName, this.object);
 
 				// Determine if load parameters

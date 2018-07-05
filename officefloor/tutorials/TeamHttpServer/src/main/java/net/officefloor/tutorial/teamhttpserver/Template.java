@@ -77,7 +77,7 @@ public class Template implements Serializable {
 
 		// Obtain from cache
 		char letter = request.getLetter();
-		LetterEncryption code = this.cache.get(new Character(letter));
+		LetterEncryption code = this.cache.get(Character.valueOf(letter));
 		if (code != null) {
 			return code;
 		}
@@ -108,7 +108,7 @@ public class Template implements Serializable {
 		LetterEncryption letterCode = new LetterEncryption(letter, code.charAt(0));
 
 		// Cache
-		this.cache.put(new Character(letter), letterCode);
+		this.cache.put(Character.valueOf(letter), letterCode);
 
 		return letterCode;
 	}

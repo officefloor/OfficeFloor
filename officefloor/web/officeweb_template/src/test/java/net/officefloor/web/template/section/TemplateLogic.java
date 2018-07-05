@@ -135,8 +135,7 @@ public class TemplateLogic {
 	/**
 	 * Obtains the {@link RowBean} instances.
 	 * 
-	 * @param session
-	 *            {@link HttpSession}.
+	 * @param session {@link HttpSession}.
 	 * @return {@link RowBean} instances.
 	 */
 	public RowBean[] getList(HttpSession session) {
@@ -146,11 +145,9 @@ public class TemplateLogic {
 	/**
 	 * Handles the nextFunction link.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
+	 * @param connection {@link ServerHttpConnection}.
 	 * @return Parameter for the next task.
-	 * @throws IOException
-	 *             Escalation.
+	 * @throws IOException Escalation.
 	 */
 	@NextFunction("doExternalFlow")
 	public String nextFunction(ServerHttpConnection connection) throws IOException {
@@ -165,14 +162,10 @@ public class TemplateLogic {
 	/**
 	 * Handles the submit link.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param flow
-	 *            {@link SubmitFlow}.
-	 * @throws SQLException
-	 *             Escalation.
-	 * @throws IOException
-	 *             Escalation.
+	 * @param connection {@link ServerHttpConnection}.
+	 * @param flow       {@link SubmitFlow}.
+	 * @throws SQLException Escalation.
+	 * @throws IOException  Escalation.
 	 */
 	public void submit(@HttpQueryParameter("doFlow") String doFlow, ServerHttpConnection connection, SubmitFlow flow)
 			throws SQLException, IOException {
@@ -183,7 +176,7 @@ public class TemplateLogic {
 		// Obtain whether to invoke flow
 		if ("true".equals(doFlow)) {
 			// Trigger flow
-			flow.doInternalFlow(new Integer(1));
+			flow.doInternalFlow(Integer.valueOf(1));
 		}
 	}
 
@@ -196,16 +189,14 @@ public class TemplateLogic {
 		/**
 		 * Does the internal flow.
 		 * 
-		 * @param parameter
-		 *            Parameter.
+		 * @param parameter Parameter.
 		 */
 		void doInternalFlow(Integer parameter);
 
 		/**
 		 * Does the external flow.
 		 * 
-		 * @param parameter
-		 *            Parameter.
+		 * @param parameter Parameter.
 		 */
 		void doExternalFlow(String parameter);
 	}
@@ -213,15 +204,11 @@ public class TemplateLogic {
 	/**
 	 * Handles internal flow from {@link SubmitFlow}.
 	 * 
-	 * @param parameter
-	 *            Parameter.
-	 * @param sqlConnection
-	 *            {@link Connection}.
-	 * @param httpConnection
-	 *            {@link ServerHttpConnection}.
+	 * @param parameter      Parameter.
+	 * @param sqlConnection  {@link Connection}.
+	 * @param httpConnection {@link ServerHttpConnection}.
 	 * @return Parameter for external flow.
-	 * @throws IOException
-	 *             Escalation.
+	 * @throws IOException Escalation.
 	 */
 	@NextFunction("doExternalFlow")
 	public String doInternalFlow(@Parameter Integer parameter, Connection sqlConnection,
@@ -258,8 +245,7 @@ public class TemplateLogic {
 		/**
 		 * Initiate.
 		 * 
-		 * @param count
-		 *            Count.
+		 * @param count Count.
 		 */
 		public ArrayBean(int count) {
 			this.count = count;
@@ -300,10 +286,8 @@ public class TemplateLogic {
 		/**
 		 * Initiate.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param description
-		 *            Description.
+		 * @param name        Name.
+		 * @param description Description.
 		 */
 		public RowBean(String name, String description) {
 			this.name = name;

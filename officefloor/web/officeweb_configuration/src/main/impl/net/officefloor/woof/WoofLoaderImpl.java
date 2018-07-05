@@ -88,8 +88,7 @@ public class WoofLoaderImpl implements WoofLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param repository
-	 *            {@link WoofRepository}.
+	 * @param repository {@link WoofRepository}.
 	 */
 	public WoofLoaderImpl(WoofRepository repository) {
 		this.repository = repository;
@@ -367,12 +366,9 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param woof
-		 *            {@link WoofModel}
-		 * @param officeArchitect
-		 *            {@link OfficeArchitect}.
-		 * @param webArchitect
-		 *            {@link WebArchitect}.
+		 * @param woof            {@link WoofModel}
+		 * @param officeArchitect {@link OfficeArchitect}.
+		 * @param webArchitect    {@link WebArchitect}.
 		 */
 		private HttpContinuationConnector(WoofModel woof, OfficeArchitect officeArchitect, WebArchitect webArchitect) {
 			this.officeArchitect = officeArchitect;
@@ -393,16 +389,13 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Link to {@link WoofHttpContinuationModel}.
 		 * 
-		 * @param flowSourceFactory
-		 *            {@link Supplier} of the {@link OfficeFlowSourceNode}.
-		 * @param connectionModel
-		 *            {@link ConnectionModel} to
-		 *            {@link WoofHttpContinuationModel}.
-		 * @param continuationFactory
-		 *            Factory to extract {@link WoofTemplateModel} from
-		 *            {@link ConnectionModel}.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param flowSourceFactory   {@link Supplier} of the
+		 *                            {@link OfficeFlowSourceNode}.
+		 * @param connectionModel     {@link ConnectionModel} to
+		 *                            {@link WoofHttpContinuationModel}.
+		 * @param continuationFactory Factory to extract {@link WoofTemplateModel} from
+		 *                            {@link ConnectionModel}.
+		 * @param parameterType       Parameter type.
 		 */
 		private <C extends ConnectionModel> void linkToHttpContinuation(
 				Supplier<OfficeFlowSourceNode> flowSourceFactory, C connectionModel,
@@ -442,18 +435,12 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param woof
-		 *            {@link WoofModel}.
-		 * @param templaterArchitect
-		 *            {@link WebTemplateArchitect}.
-		 * @param webArchitect
-		 *            {@link WebArchitect}.
-		 * @param officeArchitect
-		 *            {@link OfficeArchitect}.
-		 * @param extensionContext
-		 *            {@link OfficeExtensionContext}.
-		 * @throws WoofTemplateExtensionException
-		 *             {@link WoofTemplateExtensionException}.
+		 * @param woof               {@link WoofModel}.
+		 * @param templaterArchitect {@link WebTemplateArchitect}.
+		 * @param webArchitect       {@link WebArchitect}.
+		 * @param officeArchitect    {@link OfficeArchitect}.
+		 * @param extensionContext   {@link OfficeExtensionContext}.
+		 * @throws WoofTemplateExtensionException {@link WoofTemplateExtensionException}.
 		 */
 		private TemplateConnector(WoofModel woof, WebTemplateArchitect templaterArchitect, WebArchitect webArchitect,
 				OfficeArchitect officeArchitect, OfficeExtensionContext extensionContext)
@@ -537,7 +524,7 @@ public class WoofLoaderImpl implements WoofLoader {
 						// Obtain the extension source
 						Class<?> extensionSourceClass = extensionContext.loadClass(extensionSourceClassName);
 						WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) extensionSourceClass
-								.newInstance();
+								.getDeclaredConstructor().newInstance();
 
 						// Keep track of the explicit extension
 						explicitTemplateExtensions.add(extensionSourceClass);
@@ -576,15 +563,13 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Link to {@link WoofTemplateModel}.
 		 * 
-		 * @param flowSourceFactory
-		 *            {@link Supplier} of the {@link OfficeFlowSourceNode}.
-		 * @param connectionModel
-		 *            {@link ConnectionModel} to {@link WoofTemplateModel}.
-		 * @param templateFactory
-		 *            Factory to extract {@link WoofTemplateModel} from
-		 *            {@link ConnectionModel}.
-		 * @param valuesType
-		 *            Values type.
+		 * @param flowSourceFactory {@link Supplier} of the
+		 *                          {@link OfficeFlowSourceNode}.
+		 * @param connectionModel   {@link ConnectionModel} to
+		 *                          {@link WoofTemplateModel}.
+		 * @param templateFactory   Factory to extract {@link WoofTemplateModel} from
+		 *                          {@link ConnectionModel}.
+		 * @param valuesType        Values type.
 		 */
 		private <C extends ConnectionModel> void linkToTemplate(Supplier<OfficeFlowSourceNode> flowSourceFactory,
 				C connectionModel, Function<C, WoofTemplateModel> templateFactory, String valuesType) {
@@ -620,18 +605,15 @@ public class WoofLoaderImpl implements WoofLoader {
 		private final Map<String, OfficeSection> sections = new HashMap<>();
 
 		/**
-		 * {@link WoofSectionInputModel} mapping to its
-		 * {@link WoofSectionModel}.
+		 * {@link WoofSectionInputModel} mapping to its {@link WoofSectionModel}.
 		 */
 		private final Map<WoofSectionInputModel, WoofSectionModel> inputToSection = new HashMap<>();
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param woof
-		 *            {@link WoofModel}.
-		 * @param officeArchitect
-		 *            {@link OfficeArchitect}.
+		 * @param woof            {@link WoofModel}.
+		 * @param officeArchitect {@link OfficeArchitect}.
 		 */
 		private SectionConnector(WoofModel woof, OfficeArchitect officeArchitect) {
 			this.officeArchitect = officeArchitect;
@@ -664,14 +646,12 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Link to {@link OfficeSectionInput}.
 		 * 
-		 * @param flowSourceFactory
-		 *            {@link Supplier} of the {@link OfficeFlowSourceNode}.
-		 * @param connectionModel
-		 *            {@link ConnectionModel} to
-		 *            {@link OfficeSectionInputModel}.
-		 * @param sectionInputFactory
-		 *            Factory to extract {@link OfficeSectionInputModel} from
-		 *            {@link ConnectionModel}.
+		 * @param flowSourceFactory   {@link Supplier} of the
+		 *                            {@link OfficeFlowSourceNode}.
+		 * @param connectionModel     {@link ConnectionModel} to
+		 *                            {@link OfficeSectionInputModel}.
+		 * @param sectionInputFactory Factory to extract {@link OfficeSectionInputModel}
+		 *                            from {@link ConnectionModel}.
 		 */
 		private <C extends ConnectionModel> void linkToSectionInput(Supplier<OfficeFlowSourceNode> flowSourceFactory,
 				C connectionModel, Function<C, WoofSectionInputModel> sectionInputFactory) {
@@ -713,12 +693,9 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param woof
-		 *            {@link WoofModel}.
-		 * @param officeArchitect
-		 *            {@link OfficeArchitect}.
-		 * @param securityArchitect
-		 *            {@link HttpSecurityArchitect}.
+		 * @param woof              {@link WoofModel}.
+		 * @param officeArchitect   {@link OfficeArchitect}.
+		 * @param securityArchitect {@link HttpSecurityArchitect}.
 		 */
 		private SecurityConnector(WoofModel woof, OfficeArchitect officeArchitect,
 				HttpSecurityArchitect securityArchitect) {
@@ -753,13 +730,12 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Link to {@link WoofSecurityModel}.
 		 * 
-		 * @param flowSourceFactory
-		 *            {@link Supplier} of the {@link OfficeFlowSourceNode}.
-		 * @param connectionModel
-		 *            {@link ConnectionModel} to {@link WoofSecurityModel}.
-		 * @param securityFactory
-		 *            Factory to extract {@link WoofSecurityModel} from
-		 *            {@link ConnectionModel}.
+		 * @param flowSourceFactory {@link Supplier} of the
+		 *                          {@link OfficeFlowSourceNode}.
+		 * @param connectionModel   {@link ConnectionModel} to
+		 *                          {@link WoofSecurityModel}.
+		 * @param securityFactory   Factory to extract {@link WoofSecurityModel} from
+		 *                          {@link ConnectionModel}.
 		 */
 		private <C extends ConnectionModel> void linkToSecurity(Supplier<OfficeFlowSourceNode> flowSourceFactory,
 				C connectionModel, Function<C, WoofSecurityModel> securityFactory) {
@@ -797,12 +773,9 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param woof
-		 *            {@link WoofModel}.
-		 * @param officeArchitect
-		 *            {@link OfficeArchitect}.
-		 * @param resourceArchitect
-		 *            {@link HttpResourceArchitect}.
+		 * @param woof              {@link WoofModel}.
+		 * @param officeArchitect   {@link OfficeArchitect}.
+		 * @param resourceArchitect {@link HttpResourceArchitect}.
 		 */
 		private ResourceConnector(WoofModel woof, OfficeArchitect officeArchitect,
 				HttpResourceArchitect resourceArchitect) {
@@ -823,13 +796,12 @@ public class WoofLoaderImpl implements WoofLoader {
 		/**
 		 * Link to {@link WoofResourceModel}.
 		 * 
-		 * @param flowSourceFactory
-		 *            {@link Supplier} of the {@link OfficeFlowSourceNode}.
-		 * @param connectionModel
-		 *            {@link ConnectionModel} to {@link WoofResourceModel}.
-		 * @param resourceFactory
-		 *            Factory to extract {@link WoofResourceModel} from
-		 *            {@link ConnectionModel}.
+		 * @param flowSourceFactory {@link Supplier} of the
+		 *                          {@link OfficeFlowSourceNode}.
+		 * @param connectionModel   {@link ConnectionModel} to
+		 *                          {@link WoofResourceModel}.
+		 * @param resourceFactory   Factory to extract {@link WoofResourceModel} from
+		 *                          {@link ConnectionModel}.
 		 */
 		private <C extends ConnectionModel> void linkToResource(Supplier<OfficeFlowSourceNode> flowSourceFactory,
 				C connectionModel, Function<C, WoofResourceModel> resourceFactory) {
@@ -852,12 +824,9 @@ public class WoofLoaderImpl implements WoofLoader {
 	/**
 	 * Indicates if the position is within the area.
 	 * 
-	 * @param posX
-	 *            Position X location.
-	 * @param posY
-	 *            Position Y location.
-	 * @param area
-	 *            {@link WoofGovernanceAreaModel}.
+	 * @param posX Position X location.
+	 * @param posY Position Y location.
+	 * @param area {@link WoofGovernanceAreaModel}.
 	 * @return <code>true</code> if position within the
 	 *         {@link WoofGovernanceAreaModel}.
 	 */

@@ -37,15 +37,11 @@ public class HttpSecurityTypeRunnable implements OfficeFloorCompilerRunnable<Htt
 	/**
 	 * Convenience method to load the {@link HttpSecurityType}.
 	 * 
-	 * @param httpSecuritySourceClassName
-	 *            {@link HttpSecuritySource} class name.
-	 * @param properties
-	 *            {@link PropertyList}.
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
+	 * @param httpSecuritySourceClassName {@link HttpSecuritySource} class name.
+	 * @param properties                  {@link PropertyList}.
+	 * @param compiler                    {@link OfficeFloorCompiler}.
 	 * @return {@link HttpSecurityType}.
-	 * @throws Exception
-	 *             If failure in loading type.
+	 * @throws Exception If failure in loading type.
 	 */
 	public static HttpSecurityType<?, ?, ?, ?, ?> loadHttpSecurityType(String httpSecuritySourceClassName,
 			PropertyList properties, OfficeFloorCompiler compiler) throws Exception {
@@ -82,7 +78,7 @@ public class HttpSecurityTypeRunnable implements OfficeFloorCompilerRunnable<Htt
 		// Instantiate the HTTP Security Source
 		Class<?> httpSecuritySourceClass = compiler.getClassLoader().loadClass(httpSecuritySourceClassName);
 		HttpSecuritySource<?, ?, ?, ?, ?> httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?, ?>) httpSecuritySourceClass
-				.newInstance();
+				.getDeclaredConstructor().newInstance();
 
 		// Obtain the properties (pair values after HTTP Security Source)
 		PropertyList properties = compiler.createPropertyList();

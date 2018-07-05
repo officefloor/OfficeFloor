@@ -60,12 +60,13 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Validates the {@link WoofTemplateExtensionSourceSpecification} for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link WoofTemplateExtensionSource} type.
-	 * @param woofTemplateExtensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param                                  <S>
+	 *                                         {@link WoofTemplateExtensionSource}
+	 *                                         type.
+	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
+	 *                                         class.
+	 * @param propertyNameLabels               Listing of name/label pairs for the
+	 *                                         {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> PropertyList validateSpecification(
@@ -77,14 +78,15 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Validates the {@link WoofTemplateExtensionSourceSpecification} for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link WoofTemplateExtensionSource} type.
-	 * @param woofTemplateExtensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param classLoader
-	 *            {@link ClassLoader}. May be <code>null</code>.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param                                  <S>
+	 *                                         {@link WoofTemplateExtensionSource}
+	 *                                         type.
+	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
+	 *                                         class.
+	 * @param classLoader                      {@link ClassLoader}. May be
+	 *                                         <code>null</code>.
+	 * @param propertyNameLabels               Listing of name/label pairs for the
+	 *                                         {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> PropertyList validateSpecification(
@@ -104,8 +106,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link SourceProperties}.
 	 * 
-	 * @param propertyNameValues
-	 *            Property name/value pairs.
+	 * @param propertyNameValues Property name/value pairs.
 	 * @return {@link SourceProperties}.
 	 */
 	public static SourceProperties createSourceProperties(String... propertyNameValues) {
@@ -137,18 +138,15 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
-	 * @param <S>
-	 *            {@link WoofTemplateExtensionSource} type.
-	 * @param woofTemplateExtensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param oldUri
-	 *            Old URI.
-	 * @param oldProperties
-	 *            Old {@link SourceProperties}.
-	 * @param newUri
-	 *            New URI.
-	 * @param newProperties
-	 *            New {@link SourceProperties}.
+	 * @param                                  <S>
+	 *                                         {@link WoofTemplateExtensionSource}
+	 *                                         type.
+	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
+	 *                                         class.
+	 * @param oldUri                           Old URI.
+	 * @param oldProperties                    Old {@link SourceProperties}.
+	 * @param newUri                           New URI.
+	 * @param newProperties                    New {@link SourceProperties}.
 	 * @return {@link Change} for refactoring. May be <code>null</code>.
 	 */
 	public static <S extends WoofTemplateExtensionSource> Change<?> refactorTemplateExtension(
@@ -161,24 +159,19 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
-	 * @param <S>
-	 *            {@link WoofTemplateExtensionSource} type.
-	 * @param woofTemplateExtensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param oldUri
-	 *            Old URI.
-	 * @param oldProperties
-	 *            Old {@link SourceProperties}.
-	 * @param newUri
-	 *            New URI.
-	 * @param newProperties
-	 *            New {@link SourceProperties}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}. May be <code>null</code>.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances.
+	 * @param                                  <S>
+	 *                                         {@link WoofTemplateExtensionSource}
+	 *                                         type.
+	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
+	 *                                         class.
+	 * @param oldUri                           Old URI.
+	 * @param oldProperties                    Old {@link SourceProperties}.
+	 * @param newUri                           New URI.
+	 * @param newProperties                    New {@link SourceProperties}.
+	 * @param configurationContext             {@link ConfigurationContext}. May be
+	 *                                         <code>null</code>.
+	 * @param classLoader                      {@link ClassLoader}.
+	 * @param resourceSources                  {@link ResourceSource} instances.
 	 * @return {@link Change} for refactoring. May be <code>null</code>.
 	 */
 	public static <S extends WoofTemplateExtensionSource> Change<?> refactorTemplateExtension(
@@ -211,16 +204,12 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Convenience method to validate the {@link ConfigurationItem}.
 	 * 
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 * @param location
-	 *            Location of the {@link ConfigurationItem}.
-	 * @param content
-	 *            Expected content of the {@link ConfigurationItem}. May be
-	 *            <code>null</code> to indicate no expecting
-	 *            {@link ConfigurationItem}.
-	 * @throws Exception
-	 *             If failure in accessing {@link ConfigurationItem}.
+	 * @param context  {@link ConfigurationContext}.
+	 * @param location Location of the {@link ConfigurationItem}.
+	 * @param content  Expected content of the {@link ConfigurationItem}. May be
+	 *                 <code>null</code> to indicate no expecting
+	 *                 {@link ConfigurationItem}.
+	 * @throws Exception If failure in accessing {@link ConfigurationItem}.
 	 */
 	public static void validateConfigurationItem(ConfigurationContext context, String location, String content)
 			throws Exception {
@@ -252,16 +241,12 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Convenience method to validate the {@link ConfigurationItem}.
 	 * 
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 * @param location
-	 *            Location of the {@link ConfigurationItem}.
-	 * @param content
-	 *            Expected content of the {@link ConfigurationItem}. May be
-	 *            <code>null</code> to indicate no expecting
-	 *            {@link ConfigurationItem}.
-	 * @throws Exception
-	 *             If fails accessing the {@link ConfigurationItem}.
+	 * @param context  {@link ConfigurationContext}.
+	 * @param location Location of the {@link ConfigurationItem}.
+	 * @param content  Expected content of the {@link ConfigurationItem}. May be
+	 *                 <code>null</code> to indicate no expecting
+	 *                 {@link ConfigurationItem}.
+	 * @throws Exception If fails accessing the {@link ConfigurationItem}.
 	 */
 	public static void validateConfigurationItem(ConfigurationContext context, String location, Reader content)
 			throws Exception {
@@ -285,22 +270,14 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Undertakes the extending of the {@link WebTemplate} by the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link WoofTemplateExtensionSource} type.
-	 * @param extensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param applicationPath
-	 *            Application path to the {@link WebTemplate}.
-	 * @param template
-	 *            {@link WebTemplate}.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param webArchitect
-	 *            {@link WebArchitect}.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs.
-	 * @throws Exception
-	 *             If fails to extend {@link WebTemplate}.
+	 * @param                      <S> {@link WoofTemplateExtensionSource} type.
+	 * @param extensionSourceClass {@link WoofTemplateExtensionSource} class.
+	 * @param applicationPath      Application path to the {@link WebTemplate}.
+	 * @param template             {@link WebTemplate}.
+	 * @param officeArchitect      {@link OfficeArchitect}.
+	 * @param webArchitect         {@link WebArchitect}.
+	 * @param propertyNameValues   {@link Property} name/value pairs.
+	 * @throws Exception If fails to extend {@link WebTemplate}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
 			String applicationPath, WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
@@ -313,26 +290,17 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Undertakes the extending of the {@link WebTemplate} by the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link WoofTemplateExtensionSource} type.
-	 * @param extensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} class.
-	 * @param templatePath
-	 *            URL path to the {@link WebTemplate}.
-	 * @param template
-	 *            {@link WebTemplate}.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param webArchitect
-	 *            {@link WebArchitect}.
-	 * @param classLoader
-	 *            {@link ClassLoader}. May be <code>null</code>.
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances. May be <code>null</code>.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs.
-	 * @throws Exception
-	 *             If fails to extend {@link WebTemplate}.
+	 * @param                      <S> {@link WoofTemplateExtensionSource} type.
+	 * @param extensionSourceClass {@link WoofTemplateExtensionSource} class.
+	 * @param templatePath         URL path to the {@link WebTemplate}.
+	 * @param template             {@link WebTemplate}.
+	 * @param officeArchitect      {@link OfficeArchitect}.
+	 * @param webArchitect         {@link WebArchitect}.
+	 * @param classLoader          {@link ClassLoader}. May be <code>null</code>.
+	 * @param resourceSources      {@link ResourceSource} instances. May be
+	 *                             <code>null</code>.
+	 * @param propertyNameValues   {@link Property} name/value pairs.
+	 * @throws Exception If fails to extend {@link WebTemplate}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
 			String templatePath, WebTemplate template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
@@ -345,8 +313,8 @@ public class WoofTemplateExtensionLoaderUtil {
 		PropertyList properties = new PropertyListImpl(propertyNameValues);
 
 		// Undertake the extension of the template
-		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.newInstance(), properties, templatePath,
-				template, officeArchitect, webArchitect, sourceContext);
+		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.getDeclaredConstructor().newInstance(),
+				properties, templatePath, template, officeArchitect, webArchitect, sourceContext);
 	}
 
 	/**
@@ -361,10 +329,9 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}. May be <code>null</code>.
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances. May be <code>null</code>.
+	 * @param classLoader     {@link ClassLoader}. May be <code>null</code>.
+	 * @param resourceSources {@link ResourceSource} instances. May be
+	 *                        <code>null</code>.
 	 * @return {@link SourceContext}.
 	 */
 	private static SourceContext getSourceContext(ClassLoader classLoader, ResourceSource[] resourceSources) {

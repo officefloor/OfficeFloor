@@ -45,22 +45,15 @@ public class HttpSecurityLoaderUtil {
 	 * Validates the {@link HttpSecuritySourceSpecification} for the
 	 * {@link HttpSecuritySource}.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <HS>
-	 *            {@link HttpSecuritySource} type.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param                         <A> Authentication type.
+	 * @param                         <AC> Access control type.
+	 * @param                         <C> Credentials type.
+	 * @param                         <O> Dependency keys type.
+	 * @param                         <F> {@link Flow} keys type.
+	 * @param                         <HS> {@link HttpSecuritySource} type.
+	 * @param httpSecuritySourceClass {@link HttpSecuritySource} class.
+	 * @param propertyNameLabels      Listing of name/label pairs for the
+	 *                                {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> PropertyList validateSpecification(
@@ -100,24 +93,15 @@ public class HttpSecurityLoaderUtil {
 	 * {@link HttpSecurityTypeBuilder} against the {@link HttpSecurityType} loaded
 	 * from the {@link HttpSecuritySource}.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <HS>
-	 *            {@link HttpSecuritySource} type.
-	 * @param expectedHttpSecurityType
-	 *            {@link HttpSecurityTypeBuilder}.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs.
+	 * @param                          <A> Authentication type.
+	 * @param                          <AC> Access control type.
+	 * @param                          <C> Credentials type.
+	 * @param                          <O> Dependency keys type.
+	 * @param                          <F> {@link Flow} keys type.
+	 * @param                          <HS> {@link HttpSecuritySource} type.
+	 * @param expectedHttpSecurityType {@link HttpSecurityTypeBuilder}.
+	 * @param httpSecuritySourceClass  {@link HttpSecuritySource} class.
+	 * @param propertyNameValues       {@link Property} name/value pairs.
 	 * @return Validated {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -159,23 +143,15 @@ public class HttpSecurityLoaderUtil {
 	 * Convenience method to load the {@link HttpSecuritySource} initialised ready
 	 * for testing.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <HS>
-	 *            {@link HttpSecuritySource} type.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs to initialise the
-	 *            {@link HttpSecuritySource}.
+	 * @param                         <A> Authentication type.
+	 * @param                         <AC> Access control type.
+	 * @param                         <C> Credentials type.
+	 * @param                         <O> Dependency keys type.
+	 * @param                         <F> {@link Flow} keys type.
+	 * @param                         <HS> {@link HttpSecuritySource} type.
+	 * @param httpSecuritySourceClass {@link HttpSecuritySource} class.
+	 * @param propertyNameValues      {@link Property} name/value pairs to
+	 *                                initialise the {@link HttpSecuritySource}.
 	 * @return Initialised {@link HttpSecuritySource}.
 	 */
 	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HS loadHttpSecuritySource(
@@ -195,23 +171,15 @@ public class HttpSecurityLoaderUtil {
 	 * Convenience method to load the {@link HttpSecurity} initialised ready for
 	 * testing.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <HS>
-	 *            {@link HttpSecuritySource} type.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs to initialise the
-	 *            {@link HttpSecuritySource}.
+	 * @param                         <A> Authentication type.
+	 * @param                         <AC> Access control type.
+	 * @param                         <C> Credentials type.
+	 * @param                         <O> Dependency keys type.
+	 * @param                         <F> {@link Flow} keys type.
+	 * @param                         <HS> {@link HttpSecuritySource} type.
+	 * @param httpSecuritySourceClass {@link HttpSecuritySource} class.
+	 * @param propertyNameValues      {@link Property} name/value pairs to
+	 *                                initialise the {@link HttpSecuritySource}.
 	 * @return Initialised {@link HttpSecuritySource}.
 	 */
 	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HttpSecurity<A, AC, C, O, F> loadHttpSecurity(
@@ -227,20 +195,13 @@ public class HttpSecurityLoaderUtil {
 	/**
 	 * Instantiates and instance of the {@link HttpSecuritySource}.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <HS>
-	 *            {@link HttpSecuritySource} type.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} class.
+	 * @param                         <A> Authentication type.
+	 * @param                         <AC> Access control type.
+	 * @param                         <C> Credentials type.
+	 * @param                         <O> Dependency keys type.
+	 * @param                         <F> {@link Flow} keys type.
+	 * @param                         <HS> {@link HttpSecuritySource} type.
+	 * @param httpSecuritySourceClass {@link HttpSecuritySource} class.
 	 * @return New {@link HttpSecuritySource} instance.
 	 */
 	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, HS extends HttpSecuritySource<A, AC, C, O, F>> HS newHttpSecuritySource(
@@ -249,7 +210,7 @@ public class HttpSecurityLoaderUtil {
 		// Create an instance of the HTTP security source
 		HS httpSecuritySource = null;
 		try {
-			httpSecuritySource = httpSecuritySourceClass.newInstance();
+			httpSecuritySource = httpSecuritySourceClass.getDeclaredConstructor().newInstance();
 		} catch (Exception ex) {
 			Assert.fail("Failed to create instance of " + httpSecuritySourceClass.getName() + ": " + ex.getMessage()
 					+ " [" + ex.getClass().getName() + "]");
@@ -262,20 +223,13 @@ public class HttpSecurityLoaderUtil {
 	/**
 	 * Loads the {@link HttpSecurityType}.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param httpSecuritySource
-	 *            {@link HttpSecuritySource}.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value pairs.
+	 * @param                    <A> Authentication type.
+	 * @param                    <AC> Access control type.
+	 * @param                    <C> Credentials type.
+	 * @param                    <O> Dependency keys type.
+	 * @param                    <F> {@link Flow} keys type.
+	 * @param httpSecuritySource {@link HttpSecuritySource}.
+	 * @param propertyNameValues {@link Property} name/value pairs.
 	 * @return {@link HttpSecurityType}.
 	 */
 	public static <A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> loadHttpSecurityType(
@@ -301,8 +255,7 @@ public class HttpSecurityLoaderUtil {
 	/**
 	 * Obtains the {@link HttpSecurityLoader}.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}. May be <code>null</code>.
+	 * @param classLoader {@link ClassLoader}. May be <code>null</code>.
 	 * @return {@link HttpSecurityLoader}.
 	 */
 	private static HttpSecurityLoader getHttpSecurityLoader(ClassLoader classLoader) {
@@ -347,8 +300,7 @@ public class HttpSecurityLoaderUtil {
 		/**
 		 * Initiate.
 		 * 
-		 * @param moTypeBuilder
-		 *            {@link ManagedObjectTypeBuilder}.
+		 * @param moTypeBuilder {@link ManagedObjectTypeBuilder}.
 		 */
 		public HttpSecurityTypeBuilderImpl(ManagedObjectTypeBuilder moTypeBuilder) {
 			this.moTypeBuilder = moTypeBuilder;

@@ -229,13 +229,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Obtains the {@link WebTemplate} content.
 	 * 
-	 * @param inheritanceIndex
-	 *            Index within the inheritance. <code>-1</code> for this
-	 *            {@link WebTemplate}.
-	 * @param designer
-	 *            {@link SectionDesigner}.
-	 * @param context
-	 *            {@link SourceContext}.
+	 * @param inheritanceIndex Index within the inheritance. <code>-1</code> for
+	 *                         this {@link WebTemplate}.
+	 * @param designer         {@link SectionDesigner}.
+	 * @param context          {@link SourceContext}.
 	 * @return {@link WebTemplate} content.
 	 */
 	private static String getTemplateContent(int inheritanceIndex, SectionDesigner designer, SourceContext context) {
@@ -270,12 +267,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Determines if the link should be secure.
 	 * 
-	 * @param linkName
-	 *            Name of link.
-	 * @param isTemplateSecure
-	 *            Indicates whether the {@link ParsedTemplate} is secure.
-	 * @param properties
-	 *            {@link SourceProperties}.
+	 * @param linkName         Name of link.
+	 * @param isTemplateSecure Indicates whether the {@link ParsedTemplate} is
+	 *                         secure.
+	 * @param properties       {@link SourceProperties}.
 	 * @return <code>true</code> should the link be secure.
 	 */
 	private static boolean isLinkSecure(String linkName, boolean isTemplateSecure, SourceProperties properties) {
@@ -291,8 +286,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Obtains the link names for the {@link ParsedTemplate}.
 	 * 
-	 * @param template
-	 *            {@link ParsedTemplate}.
+	 * @param template {@link ParsedTemplate}.
 	 * @return {@link ParsedLink} instances.
 	 */
 	private static ParsedLink[] getParsedTemplateLinkNames(ParsedTemplate template) {
@@ -310,10 +304,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Loads the link names from the {@link ParsedTemplateSectionContent} instances.
 	 * 
-	 * @param contents
-	 *            {@link ParsedTemplateSectionContent} instances.
-	 * @param links
-	 *            {@link ParsedLink} listing to receive the unique links.
+	 * @param contents {@link ParsedTemplateSectionContent} instances.
+	 * @param links    {@link ParsedLink} listing to receive the unique links.
 	 */
 	private static void loadLinkNames(ParsedTemplateSectionContent[] contents, List<ParsedLink> links) {
 
@@ -372,8 +364,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * Obtains the {@link ParsedTemplateSection} name (possibly removing override
 	 * prefix).
 	 * 
-	 * @param sectionName
-	 *            {@link ParsedTemplateSection} raw name.
+	 * @param sectionName {@link ParsedTemplateSection} raw name.
 	 * @return {@link ParsedTemplateSection} name.
 	 */
 	private static String getParsedTemplateSectionName(String sectionName) {
@@ -385,8 +376,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * Creates the {@link ManagedFunction} key from the {@link ManagedFunction}
 	 * name.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
+	 * @param functionName Name of the {@link ManagedFunction}.
 	 * @return Key for the {@link ManagedFunction}.
 	 */
 	private static String createFunctionKey(String functionName) {
@@ -398,8 +388,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	 * Determine if the section class is stateful - annotated with
 	 * {@link HttpSessionStateful}.
 	 * 
-	 * @param sectionClass
-	 *            Section class.
+	 * @param sectionClass Section class.
 	 * @return <code>true</code> if stateful.
 	 */
 	private static boolean isHttpSessionStateful(Class<?> sectionClass) {
@@ -446,8 +435,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Specifies the {@link HttpInputPath}.
 	 * 
-	 * @param inputPath
-	 *            {@link HttpInputPath}.
+	 * @param inputPath {@link HttpInputPath}.
 	 */
 	public void setHttpInputPath(HttpInputPath inputPath) {
 		this.inputPath = inputPath;
@@ -456,10 +444,9 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Adds a {@link WebTemplateExtensionBuilder}.
 	 * 
-	 * @param webtemplateExtensionClassName
-	 *            {@link WebTemplateExtension} {@link Class} name.
-	 * @param propertyList
-	 *            {@link PropertyList}.
+	 * @param webtemplateExtensionClassName {@link WebTemplateExtension}
+	 *                                      {@link Class} name.
+	 * @param propertyList                  {@link PropertyList}.
 	 * @return {@link WebTemplateExtensionBuilder}.
 	 */
 	public WebTemplateExtensionBuilder addWebTemplateExtension(String webtemplateExtensionClassName,
@@ -675,7 +662,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			@SuppressWarnings("unchecked")
 			Class<? extends WebTemplateExtension> extensionClass = (Class<? extends WebTemplateExtension>) context
 					.loadClass(extension.webTemplateExtensionClassName);
-			WebTemplateExtension extensionInstance = extensionClass.newInstance();
+			WebTemplateExtension extensionInstance = extensionClass.getDeclaredConstructor().newInstance();
 
 			// Run the extension of template
 			WebTemplateExtensionContext extensionContext = new WebTemplateSectionExtensionContextImpl(templateContent,
@@ -1102,15 +1089,11 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param function
-		 *            {@link SectionFunction}.
-		 * @param type
-		 *            {@link ManagedFunctionType}.
-		 * @param method
-		 *            {@link Method} for the {@link SectionFunction}.
-		 * @param parameter
-		 *            Type of parameter for {@link SectionFunction}. <code>null</code>
-		 *            indicates no parameter.
+		 * @param function  {@link SectionFunction}.
+		 * @param type      {@link ManagedFunctionType}.
+		 * @param method    {@link Method} for the {@link SectionFunction}.
+		 * @param parameter Type of parameter for {@link SectionFunction}.
+		 *                  <code>null</code> indicates no parameter.
 		 */
 		private TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Method method,
 				Class<?> parameter) {
@@ -1139,8 +1122,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param linkName
-		 *            Link name.
+		 * @param linkName Link name.
 		 */
 		private ParsedLink(String linkName) {
 			this.linkName = linkName;
@@ -1181,17 +1163,13 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionFlow
-		 *            {@link FunctionFlow} to be linked.
-		 * @param functionType
-		 *            {@link ManagedFunctionType} of the {@link ManagedFunction} for the
-		 *            {@link FunctionFlow}.
-		 * @param flowInterfaceType
-		 *            Flow interface type.
-		 * @param flowMethod
-		 *            Flow interface method.
-		 * @param flowArgumentType
-		 *            Flow interface method argument type.
+		 * @param functionFlow      {@link FunctionFlow} to be linked.
+		 * @param functionType      {@link ManagedFunctionType} of the
+		 *                          {@link ManagedFunction} for the
+		 *                          {@link FunctionFlow}.
+		 * @param flowInterfaceType Flow interface type.
+		 * @param flowMethod        Flow interface method.
+		 * @param flowArgumentType  Flow interface method argument type.
 		 */
 		private TemplateFlowLink(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
 				Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
@@ -1223,15 +1201,13 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param templateContent
-		 *            Raw {@link ParsedTemplate} content.
-		 * @param extensionProperties
-		 *            {@link PropertyList} to configure the
-		 *            {@link WebTemplateExtension}.
-		 * @param nonRenderTemplateTaskKeys
-		 *            {@link Set} to be populated with keys to {@link ManagedFunction}
-		 *            instances that are not to have the template rendered on their
-		 *            completion.
+		 * @param templateContent           Raw {@link ParsedTemplate} content.
+		 * @param extensionProperties       {@link PropertyList} to configure the
+		 *                                  {@link WebTemplateExtension}.
+		 * @param nonRenderTemplateTaskKeys {@link Set} to be populated with keys to
+		 *                                  {@link ManagedFunction} instances that are
+		 *                                  not to have the template rendered on their
+		 *                                  completion.
 		 */
 		private WebTemplateSectionExtensionContextImpl(String templateContent, PropertyList extensionProperties,
 				Set<String> nonRenderTemplateTaskKeys) {
@@ -1314,8 +1290,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param function
-		 *            {@link WebTemplateInitialFunction}.
+		 * @param function {@link WebTemplateInitialFunction}.
 		 */
 		WebTemplateInitialManagedFunctionSource(WebTemplateInitialFunction function) {
 			this.function = function;
@@ -1363,10 +1338,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param writers
-		 *            {@link WebTemplateWriter} instances.
-		 * @param beanClass
-		 *            Bean class.
+		 * @param writers   {@link WebTemplateWriter} instances.
+		 * @param beanClass Bean class.
 		 */
 		public SectionWriterStruct(WebTemplateWriter[] writers, Class<?> beanClass) {
 			this.writers = writers;
@@ -1402,14 +1375,11 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isSecure
-		 *            Indicates if the {@link WebTemplate} is secure.
-		 * @param template
-		 *            {@link ParsedTemplate}.
-		 * @param charset
-		 *            Default {@link Charset} to render the {@link WebTemplate}.
-		 * @param linkSeparatorCharacter
-		 *            Link separator {@link Character}.
+		 * @param isSecure               Indicates if the {@link WebTemplate} is secure.
+		 * @param template               {@link ParsedTemplate}.
+		 * @param charset                Default {@link Charset} to render the
+		 *                               {@link WebTemplate}.
+		 * @param linkSeparatorCharacter Link separator {@link Character}.
 		 */
 		WebTemplateManagedFunctionSource(boolean isSecure, ParsedTemplate template, Charset charset,
 				char linkSeparatorCharacter) {
@@ -1422,23 +1392,15 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Obtains the {@link SectionWriterStruct}.
 		 * 
-		 * @param contents
-		 *            {@link ParsedTemplateSectionContent} instances.
-		 * @param beanClass
-		 *            Bean {@link Class}.
-		 * @param sectionAndFunctionName
-		 *            Section and function name.
-		 * @param linkFunctionNames
-		 *            List function names.
-		 * @param charset
-		 *            {@link Charset} for the template.
-		 * @param isTemplateSecure
-		 *            Indicates if the template is to be secure.
-		 * @param context
-		 *            {@link ManagedFunctionSourceContext}.
+		 * @param contents               {@link ParsedTemplateSectionContent} instances.
+		 * @param beanClass              Bean {@link Class}.
+		 * @param sectionAndFunctionName Section and function name.
+		 * @param linkFunctionNames      List function names.
+		 * @param charset                {@link Charset} for the template.
+		 * @param isTemplateSecure       Indicates if the template is to be secure.
+		 * @param context                {@link ManagedFunctionSourceContext}.
 		 * @return {@link SectionWriterStruct}.
-		 * @throws Exception
-		 *             If fails to create the {@link SectionWriterStruct}.
+		 * @throws Exception If fails to create the {@link SectionWriterStruct}.
 		 */
 		private SectionWriterStruct createWebTemplateWriters(ParsedTemplateSectionContent[] contents,
 				Class<?> beanClass, String sectionAndFunctionName, Set<String> linkFunctionNames, Charset charset,
@@ -1550,10 +1512,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Obtains the bean {@link Class}.
 		 * 
-		 * @param sectionAndFunctionName
-		 *            Section and function name.
-		 * @param context
-		 *            {@link SourceContext}.
+		 * @param sectionAndFunctionName Section and function name.
+		 * @param context                {@link SourceContext}.
 		 * @return Bean {@link Class}.
 		 */
 		private Class<?> getBeanClass(String sectionAndFunctionName, boolean isRequired, SourceContext context) {
@@ -1660,8 +1620,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param componentType
-		 *            Component type of the array.
+		 * @param componentType Component type of the array.
 		 */
 		WebTemplateArrayIteratorManagedFunctionSource(Class<?> componentType) {
 			this.componentType = componentType;
@@ -1858,11 +1817,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param webTemplateExtensionClassName
-		 *            {@link WebTemplateExtension} {@link Class} name.
-		 * @param propertyList
-		 *            {@link PropertyList} to configure the
-		 *            {@link WebTemplateExtension}.
+		 * @param webTemplateExtensionClassName {@link WebTemplateExtension}
+		 *                                      {@link Class} name.
+		 * @param propertyList                  {@link PropertyList} to configure the
+		 *                                      {@link WebTemplateExtension}.
 		 */
 		private WebTemplateExtensionBuilderImpl(String webTemplateExtensionClassName, PropertyList propertyList) {
 			this.webTemplateExtensionClassName = webTemplateExtensionClassName;

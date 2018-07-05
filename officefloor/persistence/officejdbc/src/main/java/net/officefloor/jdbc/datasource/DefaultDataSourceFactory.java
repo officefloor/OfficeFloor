@@ -46,11 +46,10 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 	 * <p>
 	 * This is typically used in testing.
 	 * 
-	 * @param propertiesFileName
-	 *            Name of the {@link Properties} file on the class path.
+	 * @param propertiesFileName Name of the {@link Properties} file on the class
+	 *                           path.
 	 * @return {@link DataSource}.
-	 * @throws Exception
-	 *             If fails to load the {@link DataSource}.
+	 * @throws Exception If fails to load the {@link DataSource}.
 	 */
 	public static DataSource createDataSource(String propertiesFileName) throws Exception {
 
@@ -77,11 +76,9 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 	 * <p>
 	 * This is typically used in testing.
 	 * 
-	 * @param properties
-	 *            {@link Properties} to configure the {@link DataSource}.
+	 * @param properties {@link Properties} to configure the {@link DataSource}.
 	 * @return {@link DataSource}.
-	 * @throws Exception
-	 *             If fails to load the {@link DataSource}.
+	 * @throws Exception If fails to load the {@link DataSource}.
 	 */
 	public static DataSource createDataSource(Properties properties) throws Exception {
 
@@ -109,14 +106,10 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 	/**
 	 * Loads the properties onto the {@link DataSource}.
 	 * 
-	 * @param <S>
-	 *            {@link DataSource} type.
-	 * @param dataSource
-	 *            {@link DataSource}.
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @throws Exception
-	 *             If fails to load properties.
+	 * @param            <S> {@link DataSource} type.
+	 * @param dataSource {@link DataSource}.
+	 * @param context    {@link SourceContext}.
+	 * @throws Exception If fails to load properties.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <S> void loadProperties(S dataSource, SourceContext context) throws Exception {
@@ -179,7 +172,7 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 		Class<? extends DataSource> dataSourceClass = (Class<? extends DataSource>) objectClass;
 
 		// Load the data source
-		DataSource dataSource = dataSourceClass.newInstance();
+		DataSource dataSource = dataSourceClass.getDeclaredConstructor().newInstance();
 
 		// Load the properties
 		loadProperties(dataSource, context);
@@ -206,10 +199,8 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 		/**
 		 * Initiate.
 		 * 
-		 * @param clazz
-		 *            Class for the {@link Method}.
-		 * @param method
-		 *            Setter method.
+		 * @param clazz  Class for the {@link Method}.
+		 * @param method Setter method.
 		 */
 		private Setter(Class<S> clazz, Method method) {
 			this.clazz = clazz;
@@ -231,12 +222,9 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 		/**
 		 * Sets the value onto the bean.
 		 * 
-		 * @param dataSource
-		 *            {@link DataSource} to have the value loaded.
-		 * @param value
-		 *            Value to set on the bean.
-		 * @throws Exception
-		 *             If fails to set the value.
+		 * @param dataSource {@link DataSource} to have the value loaded.
+		 * @param value      Value to set on the bean.
+		 * @throws Exception If fails to set the value.
 		 */
 		private void setValue(S dataSource, Object value) throws Exception {
 
@@ -269,12 +257,9 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 		/**
 		 * Sets the property value onto the bean.
 		 * 
-		 * @param dataSource
-		 *            {@link DataSource} to have the value loaded.
-		 * @param value
-		 *            Value to set on the bean.
-		 * @throws Exception
-		 *             If fails to set property value.
+		 * @param dataSource {@link DataSource} to have the value loaded.
+		 * @param value      Value to set on the bean.
+		 * @throws Exception If fails to set property value.
 		 */
 		private void setPropertyValue(S dataSource, String value) throws Exception {
 

@@ -38,7 +38,7 @@ public class HttpSessionObjectManagedObject
 	 * Dependency keys for the {@link HttpSessionObjectManagedObject}.
 	 */
 	public static enum Dependencies {
-		HTTP_SESSION
+			HTTP_SESSION
 	}
 
 	/**
@@ -64,10 +64,9 @@ public class HttpSessionObjectManagedObject
 	/**
 	 * Initiate.
 	 * 
-	 * @param objectClass
-	 *            Class of the object.
-	 * @param bindName
-	 *            Specific name to bind the object into the {@link HttpSession}.
+	 * @param objectClass Class of the object.
+	 * @param bindName    Specific name to bind the object into the
+	 *                    {@link HttpSession}.
 	 */
 	public HttpSessionObjectManagedObject(Class<?> objectClass, String bindName) {
 		this.objectClass = objectClass;
@@ -93,7 +92,7 @@ public class HttpSessionObjectManagedObject
 		// Lazy obtain the object
 		this.object = httpSession.getAttribute(this.boundName);
 		if (this.object == null) {
-			this.object = (Serializable) this.objectClass.newInstance();
+			this.object = (Serializable) this.objectClass.getDeclaredConstructor().newInstance();
 			httpSession.setAttribute(this.boundName, this.object);
 		}
 	}

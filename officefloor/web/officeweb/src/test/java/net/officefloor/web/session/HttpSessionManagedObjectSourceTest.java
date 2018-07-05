@@ -118,10 +118,8 @@ public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Services the {@link HttpRequest}.
 		 * 
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @param session
-		 *            {@link HttpSession}.
+		 * @param connection {@link ServerHttpConnection}.
+		 * @param session    {@link HttpSession}.
 		 */
 		public void service(ServerHttpConnection connection, HttpSession session) throws IOException {
 
@@ -129,7 +127,7 @@ public class HttpSessionManagedObjectSourceTest extends OfficeFrameTestCase {
 			Integer callIndex = (Integer) session.getAttribute("CALL_INDEX");
 
 			// Increment the call index and store for next call
-			callIndex = new Integer(callIndex == null ? 0 : (callIndex.intValue() + 1));
+			callIndex = Integer.valueOf(callIndex == null ? 0 : (callIndex.intValue() + 1));
 			session.setAttribute("CALL_INDEX", callIndex);
 
 			// Return the call index

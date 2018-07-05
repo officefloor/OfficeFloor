@@ -80,11 +80,9 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
 	 * 
-	 * @param context
-	 *            {@link SourceContext}.
+	 * @param context {@link SourceContext}.
 	 * @return {@link DataSourceFactory}.
-	 * @throws Exception
-	 *             If fails to obtain {@link DataSourceFactory}.
+	 * @throws Exception If fails to obtain {@link DataSourceFactory}.
 	 */
 	protected DataSourceFactory getDataSourceFactory(SourceContext context) throws Exception {
 
@@ -95,7 +93,8 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 		if (!DataSourceFactory.class.isAssignableFrom(dataSourceFactoryClass)) {
 			throw new Exception(dataSourceFactoryClassName + " must implement " + DataSourceFactory.class.getName());
 		}
-		DataSourceFactory dataSourceFactory = (DataSourceFactory) dataSourceFactoryClass.newInstance();
+		DataSourceFactory dataSourceFactory = (DataSourceFactory) dataSourceFactoryClass.getDeclaredConstructor()
+				.newInstance();
 
 		// Return the data source factory
 		return dataSourceFactory;
@@ -105,9 +104,8 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	 * Obtains the {@link ConnectionPoolDataSource}.
 	 * 
 	 * @return {@link ConnectionPoolDataSource}.
-	 * @throws IllegalStateException
-	 *             If {@link DataSource} configured is not a
-	 *             {@link ConnectionPoolDataSource}.
+	 * @throws IllegalStateException If {@link DataSource} configured is not a
+	 *                               {@link ConnectionPoolDataSource}.
 	 */
 	public ConnectionPoolDataSource getConnectionPoolDataSource() throws IllegalStateException {
 
@@ -262,8 +260,7 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
 		public DefaultManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
 			this.managedObjectSource = managedObjectSource;
@@ -272,8 +269,7 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 		/**
 		 * Closes the {@link Connection}.
 		 * 
-		 * @param managedObject
-		 *            {@link ConnectionManagedObject}.
+		 * @param managedObject {@link ConnectionManagedObject}.
 		 */
 		private void closeConnection(ManagedObject managedObject) {
 			try {

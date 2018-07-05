@@ -886,6 +886,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link HttpSecurity} can be applied to the {@link WebTemplate}.
 	 */
+	@SuppressWarnings("unused")
 	public void testAuthentication() throws Exception {
 
 		// FIXME implement code to pass this test
@@ -925,6 +926,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link HttpAccessControl} can be applied to the {@link WebTemplate}.
 	 */
+	@SuppressWarnings("unused")
 	public void testAccessControl() throws Exception {
 
 		// FIXME implement code to pass this test
@@ -1100,10 +1102,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Adds the context path to the path.
 	 * 
-	 * @param server
-	 *            Server details (e.g. http://officefloor.net:80 ).
-	 * @param path
-	 *            Path.
+	 * @param server Server details (e.g. http://officefloor.net:80 ).
+	 * @param path   Path.
 	 * @return URL with the context path.
 	 */
 	private String contextUrl(String server, String path) {
@@ -1116,8 +1116,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Obtains the location for the file.
 	 * 
-	 * @param fileName
-	 *            Name of file.
+	 * @param fileName Name of file.
 	 * @return Location of the file.
 	 */
 	private String location(String fileName) {
@@ -1128,8 +1127,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	 * Creates a {@link MockHttpRequestBuilder} for the path (including context
 	 * path).
 	 * 
-	 * @param path
-	 *            Path for the {@link MockHttpRequestBuilder}.
+	 * @param path Path for the {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
 	private MockHttpRequestBuilder mockRequest(String path) {
@@ -1147,10 +1145,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 		/**
 		 * Undertakes initialising.
 		 * 
-		 * @param context
-		 *            {@link CompileWebContext}.
-		 * @param templater
-		 *            {@link WebTemplateArchitect}.
+		 * @param context   {@link CompileWebContext}.
+		 * @param templater {@link WebTemplateArchitect}.
 		 */
 		void initialise(CompileWebContext context, WebTemplateArchitect templater);
 	}
@@ -1158,10 +1154,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Runs a {@link WebTemplate}.
 	 * 
-	 * @param initialiser
-	 *            {@link Initialiser} to initialise {@link WebTemplate}.
-	 * @param request
-	 *            {@link MockHttpRequestBuilder}.
+	 * @param initialiser {@link Initialiser} to initialise {@link WebTemplate}.
+	 * @param request     {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpResponse}.
 	 */
 	private MockHttpResponse template(Initialiser initialiser, MockHttpRequestBuilder request) throws Exception {
@@ -1178,14 +1172,11 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Runs a {@link WebTemplate} and validates the {@link HttpResponse} content.
 	 * 
-	 * @param path
-	 *            Request path.
-	 * @param initialiser
-	 *            {@link Initialiser} to initialise {@link WebTemplate}.
-	 * @param requestPath
-	 *            Request path.
-	 * @param expectedTemplate
-	 *            Expected content of {@link WebTemplate}.
+	 * @param path             Request path.
+	 * @param initialiser      {@link Initialiser} to initialise
+	 *                         {@link WebTemplate}.
+	 * @param requestPath      Request path.
+	 * @param expectedTemplate Expected content of {@link WebTemplate}.
 	 * @return {@link MockHttpResponse} for further validation.
 	 */
 	private MockHttpResponse template(String path, Initialiser initialiser, String expectedTemplate) throws Exception {
@@ -1198,10 +1189,10 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	 * Attempts to load {@link WebTemplateArchitect}, however should have
 	 * {@link CompilerIssues}.
 	 * 
-	 * @param configureIssues
-	 *            {@link Consumer} to configure the {@link CompilerIssues}.
-	 * @param initialiser
-	 *            {@link Initialiser} to initialise the {@link WebTemplate}.
+	 * @param configureIssues {@link Consumer} to configure the
+	 *                        {@link CompilerIssues}.
+	 * @param initialiser     {@link Initialiser} to initialise the
+	 *                        {@link WebTemplate}.
 	 */
 	private void templateIssue(Consumer<MockCompilerIssues> configureIssues, Initialiser initialiser) throws Exception {
 

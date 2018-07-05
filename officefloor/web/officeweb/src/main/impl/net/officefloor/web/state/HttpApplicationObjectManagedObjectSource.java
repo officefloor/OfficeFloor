@@ -41,7 +41,7 @@ public class HttpApplicationObjectManagedObjectSource
 	 * Dependency keys for the {@link HttpApplicationObjectManagedObject}.
 	 */
 	public static enum Dependencies {
-		HTTP_APPLICATION_STATE
+			HTTP_APPLICATION_STATE
 	}
 
 	/**
@@ -126,11 +126,9 @@ public class HttpApplicationObjectManagedObjectSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param objectClass
-		 *            Class of the object.
-		 * @param bindName
-		 *            Specific name to bind the object into the
-		 *            {@link HttpApplicationState}.
+		 * @param objectClass Class of the object.
+		 * @param bindName    Specific name to bind the object into the
+		 *                    {@link HttpApplicationState}.
 		 */
 		public HttpApplicationObjectManagedObject(Class<?> objectClass, String bindName) {
 			this.objectClass = objectClass;
@@ -156,7 +154,7 @@ public class HttpApplicationObjectManagedObjectSource
 			// Lazy obtain the object
 			this.object = state.getAttribute(this.boundName);
 			if (this.object == null) {
-				this.object = this.objectClass.newInstance();
+				this.object = this.objectClass.getDeclaredConstructor().newInstance();
 				state.setAttribute(this.boundName, this.object);
 			}
 		}

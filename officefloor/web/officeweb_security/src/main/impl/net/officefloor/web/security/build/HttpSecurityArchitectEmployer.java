@@ -104,12 +104,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * Employs the {@link HttpSecurityArchitect}.
 	 * 
-	 * @param webArchitect
-	 *            {@link WebArchitect}.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 * @param webArchitect        {@link WebArchitect}.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 * @return {@link HttpSecurityArchitect}.
 	 */
 	public static HttpSecurityArchitect employHttpSecurityArchitect(WebArchitect webArchitect,
@@ -120,11 +117,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * Employs the {@link HttpSecurityLoader}.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
+	 * @param compiler {@link OfficeFloorCompiler}.
 	 * @return {@link HttpSecurityLoader}.
-	 * @throws Exception
-	 *             If fails to load the {@link HttpSecurityLoader}.
+	 * @throws Exception If fails to load the {@link HttpSecurityLoader}.
 	 */
 	public static HttpSecurityLoader employHttpSecurityLoader(OfficeFloorCompiler compiler) throws Exception {
 		return compiler.run(HttpSecurityLoaderImpl.class);
@@ -163,12 +158,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param webArchitect
-	 *            {@link WebArchitect}.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 * @param webArchitect        {@link WebArchitect}.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 */
 	private HttpSecurityArchitectEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect,
 			OfficeSourceContext officeSourceContext) {
@@ -202,8 +194,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		HttpSecuritySource<A, AC, C, O, F> httpSecuritySource;
 		try {
 			httpSecuritySource = (HttpSecuritySource<A, AC, C, O, F>) this.officeSourceContext
-					.loadClass(httpSecuritySourceClass.getName()).newInstance();
-		} catch (IllegalAccessException | InstantiationException ex) {
+					.loadClass(httpSecuritySourceClass.getName()).getDeclaredConstructor().newInstance();
+		} catch (Exception ex) {
 			// Must be able to instantiate instance
 			throw new LoadTypeError(HttpSecuritySource.class, httpSecuritySourceClass.getName(), null);
 		}
@@ -439,20 +431,17 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	/**
 	 * Undertakes securing.
 	 * 
-	 * @param qualifier
-	 *            {@link HttpSecurity} qualifier. May be <code>null</code>.
-	 * @param anyRoles
-	 *            Any roles.
-	 * @param allRoles
-	 *            All roles.
-	 * @param httpAccessControlManagedObject
-	 *            {@link HttpAccessControl} {@link OfficeManagedObject}.
-	 * @param administrators
-	 *            Already created {@link OfficeAdministration}.
-	 * @param nameToHttpSecurity
-	 *            {@link HttpSecurerBuilderImpl} instances by their name.
-	 * @param securer
-	 *            {@link HttpOfficeSecurer}.
+	 * @param qualifier                      {@link HttpSecurity} qualifier. May be
+	 *                                       <code>null</code>.
+	 * @param anyRoles                       Any roles.
+	 * @param allRoles                       All roles.
+	 * @param httpAccessControlManagedObject {@link HttpAccessControl}
+	 *                                       {@link OfficeManagedObject}.
+	 * @param administrators                 Already created
+	 *                                       {@link OfficeAdministration}.
+	 * @param nameToHttpSecurity             {@link HttpSecurerBuilderImpl}
+	 *                                       instances by their name.
+	 * @param securer                        {@link HttpOfficeSecurer}.
 	 */
 	private void secure(String qualifier, String[] anyRoles, String[] allRoles,
 			OfficeManagedObject httpAccessControlManagedObject, Map<HttpAccessKey, OfficeAdministration> administrators,
@@ -543,12 +532,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param anyRoles
-		 *            Any roles.
-		 * @param allRoles
-		 *            All roles.
-		 * @param qualifier
-		 *            Qualifier. May be <code>null</code>.
+		 * @param anyRoles  Any roles.
+		 * @param allRoles  All roles.
+		 * @param qualifier Qualifier. May be <code>null</code>.
 		 */
 		private HttpAccessKey(String[] anyRoles, String[] allRoles, String qualifier) {
 			this.anyRoles = anyRoles;
@@ -714,10 +700,8 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param securityName
-		 *            {@link HttpSecurity} name.
-		 * @param properties
-		 *            {@link PropertyList}.
+		 * @param securityName {@link HttpSecurity} name.
+		 * @param properties   {@link PropertyList}.
 		 */
 		private HttpSecurityBuilderImpl(String securityName, HttpSecuritySource<A, AC, C, O, F> securitySource,
 				PropertyList properties) {
@@ -733,8 +717,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Builds this {@link HttpSecurity}.
 		 * 
-		 * @param httpChallengeContext
-		 *            {@link HttpChallengeContext}.
+		 * @param httpChallengeContext {@link HttpChallengeContext}.
 		 */
 		private void build(OfficeManagedObject httpChallengeContext) {
 
@@ -912,10 +895,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param securable
-		 *            {@link HttpSecurable}.
-		 * @param httpSecurityName
-		 *            Name of the {@link HttpSecurity}. May be <code>null</code>.
+		 * @param securable        {@link HttpSecurable}.
+		 * @param httpSecurityName Name of the {@link HttpSecurity}. May be
+		 *                         <code>null</code>.
 		 */
 		private HttpSecurerBuilderImpl(HttpSecurable securable, String httpSecurityName) {
 			this.securable = securable;
@@ -989,8 +971,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotation
-		 *            {@link HttpFlowSecurerAnnotation}.
+		 * @param annotation {@link HttpFlowSecurerAnnotation}.
 		 */
 		private HttpFlowSecurerImpl(HttpSecurerBuilderImpl httpSecurerBuilder) {
 			this.httpSecurerBuilder = httpSecurerBuilder;
@@ -1055,8 +1036,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotation
-		 *            {@link HttpFlowSecurerAnnotation}.
+		 * @param annotation {@link HttpFlowSecurerAnnotation}.
 		 */
 		private HttpFlowSecurerSectionSource(HttpFlowSecurerAnnotation annotation) {
 			this.annotation = annotation;
@@ -1104,8 +1084,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 *
-		 * @param annotation
-		 *            {@link HttpFlowSecurerAnnotation}.
+		 * @param annotation {@link HttpFlowSecurerAnnotation}.
 		 */
 		private HttpFlowSecurerManagedFunctionSource(HttpFlowSecurerAnnotation annotation) {
 			this.annotation = annotation;
@@ -1171,15 +1150,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param qualifier
-		 *            Qualifier. May be <code>null</code>.
-		 * @param anyRoles
-		 *            Any roles.
-		 * @param allRoles
-		 *            All Roles.
-		 * @param argumentType
-		 *            Type of argument to pass through on secure {@link Flow}. May be
-		 *            <code>null</code> for no argument.
+		 * @param qualifier    Qualifier. May be <code>null</code>.
+		 * @param anyRoles     Any roles.
+		 * @param allRoles     All Roles.
+		 * @param argumentType Type of argument to pass through on secure {@link Flow}.
+		 *                     May be <code>null</code> for no argument.
 		 */
 		private HttpFlowSecurerAnnotation(String qualifier, String[] anyRoles, String[] allRoles,
 				Class<?> argumentType) {

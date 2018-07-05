@@ -45,12 +45,9 @@ public class UsAsciiUtil {
 	/**
 	 * Asserts the US-ASCII content matches the expected String.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param expected
-	 *            Expected text.
-	 * @param actual
-	 *            Actual US-ASCII text.
+	 * @param message  Message.
+	 * @param expected Expected text.
+	 * @param actual   Actual US-ASCII text.
 	 */
 	public static void assertEquals(String message, String expected, byte[] actual) {
 		TestCase.assertEquals(message, expected, convertToString(actual));
@@ -59,10 +56,8 @@ public class UsAsciiUtil {
 	/**
 	 * Asserts the US-ASCII content matches the expected String.
 	 * 
-	 * @param expected
-	 *            Expected text.
-	 * @param actual
-	 *            Actual US-ASCII text.
+	 * @param expected Expected text.
+	 * @param actual   Actual US-ASCII text.
 	 */
 	public static void assertEquals(String expected, byte[] actual) {
 		TestCase.assertEquals(expected, convertToString(actual));
@@ -71,8 +66,7 @@ public class UsAsciiUtil {
 	/**
 	 * Converts the input text into US-ASCII format.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param text Text.
 	 * @return Text in US-ASCII format.
 	 */
 	public static byte[] convertToUsAscii(String text) {
@@ -83,8 +77,7 @@ public class UsAsciiUtil {
 	/**
 	 * Convenience method to convert to US-ASCII and HTTP form.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param text Text.
 	 * @return HTTP.
 	 */
 	public static byte[] convertToHttp(String text) {
@@ -94,8 +87,7 @@ public class UsAsciiUtil {
 	/**
 	 * Ensures that CR characters are followed by a LF.
 	 * 
-	 * @param ascii
-	 *            Ascii content.
+	 * @param ascii Ascii content.
 	 * @return HTTP.
 	 */
 	public static byte[] convertToHttp(byte[] ascii) {
@@ -108,7 +100,7 @@ public class UsAsciiUtil {
 			// Add CR before LF is necessary
 			if (character == LF) {
 				if (!isLastCr) {
-					bytes.add(new Byte(CR));
+					bytes.add(Byte.valueOf(CR));
 				}
 			}
 
@@ -135,8 +127,7 @@ public class UsAsciiUtil {
 	/**
 	 * Converts the input US-ASCII to String.
 	 * 
-	 * @param ascii
-	 *            US-ASCII.
+	 * @param ascii US-ASCII.
 	 * @return US-ASCII characters as a String.
 	 */
 	public static String convertToString(byte[] ascii) {
@@ -147,8 +138,7 @@ public class UsAsciiUtil {
 	/**
 	 * Converts the input US-ASCII character to a char.
 	 * 
-	 * @param asciiChar
-	 *            US-ASCII character.
+	 * @param asciiChar US-ASCII character.
 	 * @return char.
 	 */
 	public static char convertToChar(byte asciiChar) {
@@ -158,8 +148,7 @@ public class UsAsciiUtil {
 	/**
 	 * Converts the input character into US-ASCII character.
 	 * 
-	 * @param character
-	 *            Character.
+	 * @param character Character.
 	 * @return US-ASCII character.
 	 */
 	public static byte convertToUsAscii(char character) {
@@ -167,8 +156,8 @@ public class UsAsciiUtil {
 	}
 
 	/**
-	 * Creates a {@link ArgumentsMatcher} for method with only one parameter
-	 * being US-ASCII characters.
+	 * Creates a {@link ArgumentsMatcher} for method with only one parameter being
+	 * US-ASCII characters.
 	 * 
 	 * @return {@link ArgumentsMatcher}.
 	 */
@@ -219,8 +208,7 @@ public class UsAsciiUtil {
 		/**
 		 * Obtains the US-ASCII content from the argument.
 		 * 
-		 * @param argument
-		 *            Argument containing US-ASCII content.
+		 * @param argument Argument containing US-ASCII content.
 		 * @return US-ASCII content.
 		 */
 		private byte[] getAsciiContent(Object argument) {

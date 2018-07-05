@@ -116,13 +116,13 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Extends the {@link WebTemplate}.
 	 * 
-	 * @param extensionSourceClass
-	 *            {@link WoofTemplateExtensionSource} {@link Class}.
+	 * @param extensionSourceClass {@link WoofTemplateExtensionSource}
+	 *                             {@link Class}.
 	 */
 	private void extendTemplate(Class<? extends WoofTemplateExtensionSource> extensionSourceClass) throws Exception {
 		this.replayMockObjects();
-		this.loader.extendTemplate(extensionSourceClass.newInstance(), this.properties, "URI", this.template,
-				this.officeArchitet, this.webArchitect, this.sourceContext);
+		this.loader.extendTemplate(extensionSourceClass.getDeclaredConstructor().newInstance(), this.properties, "URI",
+				this.template, this.officeArchitet, this.webArchitect, this.sourceContext);
 		this.verifyMockObjects();
 	}
 
@@ -139,8 +139,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		/**
 		 * Resets for the next test.
 		 * 
-		 * @param failure
-		 *            {@link Exception}.
+		 * @param failure {@link Exception}.
 		 */
 		public static void reset(Exception failure) {
 			MockWoofTemplateExtensionSource.failure = failure;

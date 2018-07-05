@@ -66,8 +66,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 	/**
 	 * Overridden to load specifications.
 	 * 
-	 * @param context
-	 *            Specifications.
+	 * @param context Specifications.
 	 */
 	protected abstract void loadSpecification(SpecificationContext context);
 
@@ -79,26 +78,22 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Adds a property.
 		 * 
-		 * @param name
-		 *            Name of property that is also used as the label.
+		 * @param name Name of property that is also used as the label.
 		 */
 		void addProperty(String name);
 
 		/**
 		 * Adds a property.
 		 * 
-		 * @param name
-		 *            Name of property.
-		 * @param label
-		 *            Label for the property.
+		 * @param name  Name of property.
+		 * @param label Label for the property.
 		 */
 		void addProperty(String name, String label);
 
 		/**
 		 * Adds a property.
 		 * 
-		 * @param property
-		 *            {@link HttpSecuritySourceProperty}.
+		 * @param property {@link HttpSecuritySourceProperty}.
 		 */
 		void addProperty(HttpSecuritySourceProperty property);
 	}
@@ -156,10 +151,8 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 	/**
 	 * Overridden to load meta-data.
 	 * 
-	 * @param context
-	 *            Meta-data.
-	 * @throws Exception
-	 *             If fails to load the meta-data.
+	 * @param context Meta-data.
+	 * @throws Exception If fails to load the meta-data.
 	 */
 	protected abstract void loadMetaData(MetaDataContext<A, AC, C, O, F> context) throws Exception;
 
@@ -178,50 +171,43 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Specifies the type for authentication.
 		 * 
-		 * @param authenticationClass
-		 *            Authentication type.
+		 * @param authenticationClass Authentication type.
 		 */
 		void setAuthenticationClass(Class<A> authenticationClass);
 
 		/**
 		 * Specifies the {@link HttpAuthenticationFactory}.
 		 * 
-		 * @param httpAuthenticationFactory
-		 *            {@link HttpAuthenticationFactory}.
+		 * @param httpAuthenticationFactory {@link HttpAuthenticationFactory}.
 		 */
 		void setHttpAuthenticationFactory(HttpAuthenticationFactory<A, C> httpAuthenticationFactory);
 
 		/**
 		 * Specifies the type for access control.
 		 * 
-		 * @param accessControlClass
-		 *            Access control type.
+		 * @param accessControlClass Access control type.
 		 */
 		void setAccessControlClass(Class<AC> accessControlClass);
 
 		/**
 		 * Specifies the {@link HttpAccessControlFactory}.
 		 * 
-		 * @param httpAccessControlFactory
-		 *            {@link HttpAccessControlFactory}.
+		 * @param httpAccessControlFactory {@link HttpAccessControlFactory}.
 		 */
 		void setHttpAccessControlFactory(HttpAccessControlFactory<AC> httpAccessControlFactory);
 
 		/**
 		 * Specifies the type for credentials.
 		 * 
-		 * @param credentialsClass
-		 *            Credentials type.
+		 * @param credentialsClass Credentials type.
 		 */
 		void setCredentialsClass(Class<C> credentialsClass);
 
 		/**
 		 * Adds a required dependency identified by the key.
 		 * 
-		 * @param key
-		 *            {@link Enum} to identify the dependency.
-		 * @param dependencyType
-		 *            Type the dependency is required to extend/implement.
+		 * @param key            {@link Enum} to identify the dependency.
+		 * @param dependencyType Type the dependency is required to extend/implement.
 		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller addDependency(O key, Class<?> dependencyType);
@@ -230,8 +216,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		 * Adds a required dependency identified by an index into the order the
 		 * dependency was added.
 		 * 
-		 * @param dependencyType
-		 *            Type the dependency is required to extend/implement.
+		 * @param dependencyType Type the dependency is required to extend/implement.
 		 * @return {@link DependencyLabeller} to possibly label the required dependency.
 		 */
 		DependencyLabeller addDependency(Class<?> dependencyType);
@@ -239,10 +224,8 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Adds a required {@link Flow} identified by the key.
 		 * 
-		 * @param key
-		 *            {@link Enum} to identify the {@link Flow}.
-		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
+		 * @param key          {@link Enum} to identify the {@link Flow}.
+		 * @param argumentType Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
 		Labeller addFlow(F key, Class<?> argumentType);
@@ -251,8 +234,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		 * Adds a required {@link Flow} identified by an index into the order the
 		 * {@link Flow} was added.
 		 * 
-		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
+		 * @param argumentType Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
 		Labeller addFlow(Class<?> argumentType);
@@ -268,8 +250,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Specifies qualifier for the type.
 		 * 
-		 * @param qualifier
-		 *            Type qualifier.
+		 * @param qualifier Type qualifier.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
 		 */
 		Labeller setTypeQualifier(String qualifier);
@@ -284,8 +265,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Specifies the label.
 		 * 
-		 * @param label
-		 *            Label.
+		 * @param label Label.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
 		 */
 		Labeller setLabel(String label);
@@ -346,8 +326,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Initiate.
 		 * 
-		 * @param context
-		 *            {@link HttpSecuritySourceContext}.
+		 * @param context {@link HttpSecuritySourceContext}.
 		 */
 		public MetaData(HttpSecuritySourceContext context) {
 			this.context = context;
@@ -402,12 +381,9 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Adds a dependency.
 		 * 
-		 * @param index
-		 *            Index to add the dependency under.
-		 * @param key
-		 *            Key for the dependency. May be <code>null</code>.
-		 * @param dependencyType
-		 *            Type of dependency.
+		 * @param index          Index to add the dependency under.
+		 * @param key            Key for the dependency. May be <code>null</code>.
+		 * @param dependencyType Type of dependency.
 		 * @return {@link Labeller} for the dependency.
 		 */
 		private DependencyLabeller addDependency(final int index, O key, Class<?> dependencyType) {
@@ -417,7 +393,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 					dependencyType);
 
 			// Register the dependency at the index
-			this.dependencies.put(new Integer(index), dependency);
+			this.dependencies.put(Integer.valueOf(index), dependency);
 
 			// Return the labeller for the dependency
 			return new DependencyLabeller() {
@@ -455,12 +431,9 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		/**
 		 * Adds a {@link Flow}.
 		 * 
-		 * @param index
-		 *            Index to add the {@link Flow} under.
-		 * @param key
-		 *            Key for the {@link Flow}. May be <code>null</code>.
-		 * @param argumentType
-		 *            Type of the argument passed to the {@link Flow}.
+		 * @param index        Index to add the {@link Flow} under.
+		 * @param key          Key for the {@link Flow}. May be <code>null</code>.
+		 * @param argumentType Type of the argument passed to the {@link Flow}.
 		 * @return {@link Labeller} for the {@link Flow}.
 		 */
 		private Labeller addFlow(final int index, F key, Class<?> argumentType) {
@@ -469,7 +442,7 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 			final HttpSecurityFlowMetaDataImpl<F> flow = new HttpSecurityFlowMetaDataImpl<F>(key, argumentType);
 
 			// Register the flow at the index
-			this.flows.put(new Integer(index), flow);
+			this.flows.put(Integer.valueOf(index), flow);
 
 			// Return the labeller for the flow
 			return new Labeller() {
