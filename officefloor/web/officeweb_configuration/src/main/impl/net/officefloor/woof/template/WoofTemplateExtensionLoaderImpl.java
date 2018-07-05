@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof.template;
 
+import java.lang.reflect.InvocationTargetException;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -224,6 +226,11 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 				extensionChange = source.createConfigurationChange(context);
 
 			} catch (Throwable ex) {
+				// Handle invocation target
+				if (ex instanceof InvocationTargetException) {
+					ex = ex.getCause();
+				}
+
 				// Provide conflict indicating failure of extension
 				extensionChange = createFailureChange(woofTemplateExtensionSourceClassName, oldUri, newUri, ex);
 			}
