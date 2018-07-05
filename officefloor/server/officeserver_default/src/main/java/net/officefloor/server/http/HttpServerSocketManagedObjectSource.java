@@ -82,7 +82,7 @@ public class HttpServerSocketManagedObjectSource
 	 * Flows for this {@link HttpServerSocketManagedObjectSource}.
 	 */
 	public static enum Flows {
-		HANDLE_REQUEST
+			HANDLE_REQUEST
 	}
 
 	/**
@@ -201,10 +201,8 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Obtains the {@link System} property value.
 	 * 
-	 * @param name
-	 *            Name of the {@link System} property.
-	 * @param defaultValue
-	 *            Default value.
+	 * @param name         Name of the {@link System} property.
+	 * @param defaultValue Default value.
 	 * @return {@link System} property value.
 	 */
 	private static int getSystemProperty(String name, int defaultValue) {
@@ -229,10 +227,16 @@ public class HttpServerSocketManagedObjectSource
 	 * Creates the {@link SocketManager} configured from {@link System} properties.
 	 * 
 	 * @return {@link SocketManager} configured from {@link System} properties.
-	 * @throws IOException
-	 *             If fails to create the {@link SocketManager}.
+	 * @throws IOException If fails to create the {@link SocketManager}.
 	 */
 	public static SocketManager createSocketManager() throws IOException {
+
+		// TODO fix up socket listeners based on CPUs (without hyperthreading)
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		if (availableProcessors >= 2) {
+			// Assume hyper threading
+			availableProcessors = availableProcessors / 2;
+		}
 
 		/*
 		 * Obtain configuration of socket manager.
@@ -246,8 +250,7 @@ public class HttpServerSocketManagedObjectSource
 		 * 
 		 * - 8 * 8192 = 65536 to fill a TCP packet, with 4 TCP packet buffer.
 		 */
-		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
-				Runtime.getRuntime().availableProcessors());
+		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT, availableProcessors);
 		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
 		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
 		int receiveBufferSize = getSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
@@ -270,11 +273,9 @@ public class HttpServerSocketManagedObjectSource
 	 * Obtains the {@link SocketManager} for use by
 	 * {@link HttpServerSocketManagedObjectSource} instances.
 	 * 
-	 * @param mosContext
-	 *            {@link ManagedObjectSourceContext}.
-	 * @param instance
-	 *            Instance of the {@link HttpServerSocketManagedObjectSource} using
-	 *            the {@link SocketManager}.
+	 * @param mosContext {@link ManagedObjectSourceContext}.
+	 * @param instance   Instance of the {@link HttpServerSocketManagedObjectSource}
+	 *                   using the {@link SocketManager}.
 	 * @return {@link SocketManager}.
 	 */
 	private static synchronized SocketManager getSocketManager(HttpServerSocketManagedObjectSource instance)
@@ -340,8 +341,8 @@ public class HttpServerSocketManagedObjectSource
 		/**
 		 * Dumps the active {@link Thread} instances after the specified time.
 		 * 
-		 * @param timeInMilliseconds
-		 *            Time in milliseconds to dump the active {@link Thread} instances.
+		 * @param timeInMilliseconds Time in milliseconds to dump the active
+		 *                           {@link Thread} instances.
 		 */
 		private void dumpActiveThreadsAfter(long timeInMilliseconds) {
 			long startTime = System.currentTimeMillis();
@@ -442,8 +443,7 @@ public class HttpServerSocketManagedObjectSource
 	 * <p>
 	 * Made public so that tests may use to close.
 	 * 
-	 * @throws IOException
-	 *             If fails to close the {@link Old_SocketManager}.
+	 * @throws IOException If fails to close the {@link Old_SocketManager}.
 	 */
 	private static synchronized void closeSocketManager() throws IOException {
 
@@ -482,10 +482,8 @@ public class HttpServerSocketManagedObjectSource
 	 * Once all {@link HttpServerSocketManagedObjectSource} instances are release,
 	 * the {@link SocketManager} itself is closed.
 	 * 
-	 * @param instance
-	 *            {@link HttpServerSocketManagedObjectSource}.
-	 * @throws IOException
-	 *             If fails to close the {@link SocketManager}.
+	 * @param instance {@link HttpServerSocketManagedObjectSource}.
+	 * @throws IOException If fails to close the {@link SocketManager}.
 	 */
 	private static synchronized void releaseFromSocketManager(HttpServerSocketManagedObjectSource instance)
 			throws IOException {
@@ -575,15 +573,13 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Instantiate for non-secure servicing.
 	 * 
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param serverName
-	 *            <code>Server</code> {@link HttpHeaderValue}.
-	 * @param dateHttpHeaderClock
-	 *            {@link DateHttpHeaderClock}.
-	 * @param isIncludeEscalationStackTrace
-	 *            Indicates if include the {@link Escalation} stack trace on the
-	 *            {@link HttpResponse}.
+	 * @param serverLocation                {@link HttpServerLocation}.
+	 * @param serverName                    <code>Server</code>
+	 *                                      {@link HttpHeaderValue}.
+	 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}.
+	 * @param isIncludeEscalationStackTrace Indicates if include the
+	 *                                      {@link Escalation} stack trace on the
+	 *                                      {@link HttpResponse}.
 	 */
 	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, HttpHeaderValue serverName,
 			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
@@ -598,18 +594,16 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Instantiate for secure servicing.
 	 * 
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param serverName
-	 *            <code>Server</code> {@link HttpHeaderValue}.
-	 * @param dateHttpHeaderClock
-	 *            {@link DateHttpHeaderClock}.
-	 * @param isIncludeEscalationStackTrace
-	 *            Indicates if include the {@link Escalation} stack trace on the
-	 *            {@link HttpResponse}.
-	 * @param sslContext
-	 *            {@link SSLContext}. May be <code>null</code> if behind reverse
-	 *            proxy handling secure communication.
+	 * @param serverLocation                {@link HttpServerLocation}.
+	 * @param serverName                    <code>Server</code>
+	 *                                      {@link HttpHeaderValue}.
+	 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}.
+	 * @param isIncludeEscalationStackTrace Indicates if include the
+	 *                                      {@link Escalation} stack trace on the
+	 *                                      {@link HttpResponse}.
+	 * @param sslContext                    {@link SSLContext}. May be
+	 *                                      <code>null</code> if behind reverse
+	 *                                      proxy handling secure communication.
 	 */
 	public HttpServerSocketManagedObjectSource(HttpServerLocation serverLocation, HttpHeaderValue serverName,
 			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace, SSLContext sslContext) {
@@ -624,8 +618,7 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Enables overriding to configure a {@link ServerSocketDecorator}.
 	 * 
-	 * @param context
-	 *            {@link MetaDataContext}.
+	 * @param context {@link MetaDataContext}.
 	 * @return {@link ServerSocketDecorator}.
 	 */
 	protected ServerSocketDecorator getServerSocketDecorator(MetaDataContext<None, Flows> context) {
@@ -635,8 +628,7 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Enables overriding to configure the {@link AcceptedSocketDecorator}.
 	 * 
-	 * @param context
-	 *            {@link MetaDataContext}.
+	 * @param context {@link MetaDataContext}.
 	 * @return {@link AcceptedSocketDecorator}.
 	 */
 	protected AcceptedSocketDecorator getAcceptedSocketDecorator(MetaDataContext<None, Flows> context) {
@@ -791,25 +783,19 @@ public class HttpServerSocketManagedObjectSource
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context
-		 *            {@link ManagedObjectExecuteContext}.
-		 * @param serverLocation
-		 *            {@link HttpServerLocation}.
-		 * @param isSecure
-		 *            Indicates if a secure {@link ServerHttpConnection}.
-		 * @param metaData
-		 *            {@link HttpRequestParserMetaData}.
-		 * @param serviceBufferPool
-		 *            Service {@link StreamBufferPool}.
-		 * @param throttleActiveRequestThreshold
-		 *            Throttle active request threshold.
-		 * @param serverName
-		 *            <code>Server</code> {@link HttpHeaderValue}.
-		 * @param dateHttpHeaderClock
-		 *            {@link DateHttpHeaderClock}.
-		 * @param isIncludeEscalationStackTrace
-		 *            Indicates whether to include the {@link Escalation} stack trace in
-		 *            the {@link HttpResponse}.
+		 * @param context                        {@link ManagedObjectExecuteContext}.
+		 * @param serverLocation                 {@link HttpServerLocation}.
+		 * @param isSecure                       Indicates if a secure
+		 *                                       {@link ServerHttpConnection}.
+		 * @param metaData                       {@link HttpRequestParserMetaData}.
+		 * @param serviceBufferPool              Service {@link StreamBufferPool}.
+		 * @param throttleActiveRequestThreshold Throttle active request threshold.
+		 * @param serverName                     <code>Server</code>
+		 *                                       {@link HttpHeaderValue}.
+		 * @param dateHttpHeaderClock            {@link DateHttpHeaderClock}.
+		 * @param isIncludeEscalationStackTrace  Indicates whether to include the
+		 *                                       {@link Escalation} stack trace in the
+		 *                                       {@link HttpResponse}.
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
