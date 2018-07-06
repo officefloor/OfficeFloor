@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.construct.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -84,6 +85,11 @@ public class ConstructUtil {
 			return instance;
 
 		} catch (Throwable ex) {
+			// Handle invocation exception
+			if (ex instanceof InvocationTargetException) {
+				ex = ex.getCause();
+			}
+
 			// Indicate issue (catching exception from constructor)
 			issues.addIssue(assetType, assetName, "Failed to instantiate " + clazz.getName(), ex);
 			return null; // no instance
