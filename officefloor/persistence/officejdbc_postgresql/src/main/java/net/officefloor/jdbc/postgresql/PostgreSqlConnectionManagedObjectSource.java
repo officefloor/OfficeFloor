@@ -17,18 +17,9 @@
  */
 package net.officefloor.jdbc.postgresql;
 
-import java.lang.reflect.Proxy;
-
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
-
-import org.postgresql.ds.PGConnectionPoolDataSource;
-
-import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
  * PostgreSQL {@link ConnectionManagedObjectSource}.
@@ -36,32 +27,7 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
  * @author Daniel Sagenschneider
  */
 public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedObjectSource
-		implements DataSourceFactory {
-
-	/**
-	 * {@link Property} for the server name.
-	 */
-	public static final String PROPERTY_SERVER_NAME = "server";
-
-	/**
-	 * {@link Property} for the port.
-	 */
-	public static final String PROPERTY_PORT = "port";
-
-	/**
-	 * {@link Property} for the database.
-	 */
-	public static final String PROPERTY_DATABASE_NAME = "database";
-
-	/**
-	 * {@link Property} for the user name.
-	 */
-	public static final String PROPERTY_USER = "user";
-
-	/**
-	 * {@link Property} for the password.
-	 */
-	public static final String PROPERTY_PASSWORD = "password";
+		implements PostgreSqlDataSourceFactory {
 
 	/*
 	 * =============== ConnectionManagedObjectSource =================
@@ -69,52 +35,12 @@ public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedOb
 
 	@Override
 	public void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_SERVER_NAME, "Server");
-		context.addProperty(PROPERTY_USER, "User");
-		context.addProperty(PROPERTY_PASSWORD, "Password");
+		PostgreSqlDataSourceFactory.loadSpecification(context);
 	}
 
 	@Override
 	protected DataSourceFactory getDataSourceFactory(SourceContext context) {
 		return this;
-	}
-
-	/*
-	 * ==================== DataSourceFactory =========================
-	 */
-
-	@Override
-	public DataSource createDataSource(SourceContext context) throws Exception {
-
-		// Create the data source
-		PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
-
-		// Load optional configuration
-		DefaultDataSourceFactory.loadProperties(dataSource, context);
-
-		// Load required properties
-		dataSource.setServerName(context.getProperty(PROPERTY_SERVER_NAME));
-		dataSource.setUser(context.getProperty(PROPERTY_USER));
-		dataSource.setPassword(context.getProperty(PROPERTY_PASSWORD));
-
-		// Load optional port
-		String port = context.getProperty(PROPERTY_PORT, null);
-		if (port != null) {
-			dataSource.setPortNumber(Integer.parseInt(port));
-		}
-
-		// Load optional database
-		String database = context.getProperty(PROPERTY_DATABASE_NAME, null);
-		if (database != null) {
-			dataSource.setDatabaseName(database);
-		}
-
-		// Return the data source
-		return (DataSource) Proxy.newProxyInstance(context.getClassLoader(),
-				new Class[] { DataSource.class, ConnectionPoolDataSource.class }, (proxy, method, args) -> {
-					return dataSource.getClass().getMethod(method.getName(), method.getParameterTypes())
-							.invoke(dataSource, args);
-				});
 	}
 
 }
