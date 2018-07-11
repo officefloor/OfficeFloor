@@ -179,7 +179,7 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 		}
 	}
 
-	private static class PassedState {
+	public static class PassedState {
 
 		private final Connection proxy;
 

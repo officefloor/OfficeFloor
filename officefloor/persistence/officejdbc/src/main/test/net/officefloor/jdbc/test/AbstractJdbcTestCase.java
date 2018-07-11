@@ -474,7 +474,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		officeFloor.closeOfficeFloor();
 	}
 
-	private static class SelectParameter {
+	public static class SelectParameter {
 
 		private volatile String name = null;
 	}

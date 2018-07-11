@@ -24,10 +24,6 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
-
-import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -39,23 +35,13 @@ import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.jdbc.datasource.DataSourceFactory;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
  * {@link ManagedObjectSource} for {@link Connection}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<None, None> {
-
-	/**
-	 * {@link Property} name to specify the {@link DataSourceFactory}
-	 * implementation.
-	 */
-	public static final String PROPERTY_DATA_SOURCE_FACTORY = "datasource.factory";
+public class ConnectionManagedObjectSource extends AbstractConnectionManagedObjectSource {
 
 	/**
 	 * {@link Logger}.
@@ -68,60 +54,12 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	private static final Class<?>[] CONNECTION_TYPE = new Class[] { Connection.class };
 
 	/**
-	 * {@link DataSource}.
-	 */
-	private DataSource dataSource;
-
-	/**
 	 * {@link ClassLoader} for {@link Proxy}.
 	 */
 	private ClassLoader classLoader;
 
-	/**
-	 * Allows overriding to configure a different {@link DataSourceFactory}.
-	 * 
-	 * @param context {@link SourceContext}.
-	 * @return {@link DataSourceFactory}.
-	 * @throws Exception If fails to obtain {@link DataSourceFactory}.
-	 */
-	protected DataSourceFactory getDataSourceFactory(SourceContext context) throws Exception {
-
-		// Obtain the data source factory
-		String dataSourceFactoryClassName = context.getProperty(PROPERTY_DATA_SOURCE_FACTORY,
-				DefaultDataSourceFactory.class.getName());
-		Class<?> dataSourceFactoryClass = context.loadClass(dataSourceFactoryClassName);
-		if (!DataSourceFactory.class.isAssignableFrom(dataSourceFactoryClass)) {
-			throw new Exception(dataSourceFactoryClassName + " must implement " + DataSourceFactory.class.getName());
-		}
-		DataSourceFactory dataSourceFactory = (DataSourceFactory) dataSourceFactoryClass.getDeclaredConstructor()
-				.newInstance();
-
-		// Return the data source factory
-		return dataSourceFactory;
-	}
-
-	/**
-	 * Obtains the {@link ConnectionPoolDataSource}.
-	 * 
-	 * @return {@link ConnectionPoolDataSource}.
-	 * @throws IllegalStateException If {@link DataSource} configured is not a
-	 *                               {@link ConnectionPoolDataSource}.
-	 */
-	public ConnectionPoolDataSource getConnectionPoolDataSource() throws IllegalStateException {
-
-		// Ensure a connection pool data source
-		if (!(this.dataSource instanceof ConnectionPoolDataSource)) {
-			throw new IllegalStateException(DataSource.class.getSimpleName() + " provided does not implement "
-					+ ConnectionPoolDataSource.class.getName() + " (implementing " + DataSource.class.getSimpleName()
-					+ " " + this.dataSource.getClass().getName() + ")");
-		}
-
-		// Return the connection pool data source
-		return (ConnectionPoolDataSource) this.dataSource;
-	}
-
 	/*
-	 * ================== AbstractManagedObjectSource ===================
+	 * =========== AbstractConnectionManagedObjectSource ===========
 	 */
 
 	@Override
@@ -129,25 +67,14 @@ public class ConnectionManagedObjectSource extends AbstractManagedObjectSource<N
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Configure meta-data
-		context.setObjectClass(Connection.class);
-		context.setManagedObjectClass(AbstractConnectionManagedObject.class);
+		// Load close handling
 		context.getManagedObjectSourceContext().setDefaultManagedObjectPool(
 				(poolContext) -> new DefaultManagedObjectPool(poolContext.getManagedObjectSource()));
 		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
 				RecycleManagedObjectParameter.class);
-
-		// Only load data source (if not loading type)
-		if (mosContext.isLoadingType()) {
-			return;
-		}
-
-		// Create the data source
-		DataSourceFactory factory = this.getDataSourceFactory(mosContext);
-		this.dataSource = factory.createDataSource(mosContext);
 
 		// Obtain the class loader for proxies
 		this.classLoader = mosContext.getClassLoader();
