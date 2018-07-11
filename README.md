@@ -1,5 +1,5 @@
 # OfficeFloor
-OfficeFloor - true of control framework
+OfficeFloor - true inversion of control framework
 
 > Inversion of Control = Dependency Injection + Continuation Injection + Thread Injection
 
