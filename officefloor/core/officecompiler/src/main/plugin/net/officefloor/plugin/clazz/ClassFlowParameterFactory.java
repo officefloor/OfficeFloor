@@ -17,12 +17,16 @@
  */
 package net.officefloor.plugin.clazz;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.FunctionFlowContext;
 import net.officefloor.frame.internal.structure.Flow;
@@ -37,9 +41,26 @@ import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFact
 public class ClassFlowParameterFactory {
 
 	/**
-	 * {@link Constructor} for the {@link Proxy} instance.
+	 * {@link FunctionalInterface} to create the flows object.
 	 */
-	private final Constructor<?> proxyConstructor;
+	@FunctionalInterface
+	private static interface FlowFactory {
+
+		/**
+		 * Creates the flows object.
+		 * 
+		 * @param context {@link FunctionFlowContext}.
+		 * @return Flows object.
+		 * @throws Exception If fails to create the flows object.
+		 */
+		Object createFlows(FunctionFlowContext<?> context) throws Exception;
+	}
+
+	/**
+	 * {@link FlowFactory} to create the parameter from the
+	 * {@link FunctionFlowContext}.
+	 */
+	private final FlowFactory flowFactory;
 
 	/**
 	 * {@link ClassFlowMethodMetaData} instances by its {@link Method} name.
@@ -49,24 +70,71 @@ public class ClassFlowParameterFactory {
 	/**
 	 * Initiate.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param flowInterface
-	 *            {@link FlowInterface} class.
-	 * @param methodMetaDatas
-	 *            {@link ClassFlowMethodMetaData} instances by its {@link Method}
-	 *            name.
-	 * @throws Exception
-	 *             If fails to create the {@link Proxy}.
+	 * @param classLoader     {@link ClassLoader}.
+	 * @param flowInterface   {@link FlowInterface} class.
+	 * @param methodMetaDatas {@link ClassFlowMethodMetaData} instances by its
+	 *                        {@link Method} name.
+	 * @throws Exception If fails to create the {@link Proxy}.
 	 */
-	@SuppressWarnings("deprecation")
 	public ClassFlowParameterFactory(ClassLoader classLoader, Class<?> flowInterface,
 			Map<String, ClassFlowMethodMetaData> methodMetaDatas) throws Exception {
 		this.methodMetaDatas = methodMetaDatas;
 
-		// Create the proxy class and obtain the constructor to use
-		Class<?> proxyClass = Proxy.getProxyClass(classLoader, flowInterface);
-		this.proxyConstructor = proxyClass.getConstructor(InvocationHandler.class);
+		// Determine if the compiler is available
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		if (compiler == null) {
+
+			// Fallback to proxy class
+			Class<?>[] interfaces = new Class[] { flowInterface };
+			this.flowFactory = (context) -> Proxy.newProxyInstance(classLoader, interfaces,
+					new FlowInvocationHandler(context));
+
+		} else {
+			// Create compiled implementation (for performance and reduced GC pressure)
+			StringWriter sourceBuffer = new StringWriter();
+			PrintWriter source = new PrintWriter(sourceBuffer);
+
+			// Create the class name
+			ClassName className = compiler.createClassName(flowInterface.getName());
+
+			// Write class definition
+			source.println("package " + className.getPackageName() + ";");
+			source.println("public class " + className.getClassName() + " implements "
+					+ compiler.getSourceName(flowInterface) + "{");
+
+			// Write the constructor
+			compiler.writeConstructor(source, className.getClassName(),
+					compiler.createField(FunctionFlowContext.class, "context"));
+
+			// Write the flow methods
+			for (ClassFlowMethodMetaData metaData : methodMetaDatas.values()) {
+
+				// Write the signature
+				source.print("  public ");
+				compiler.writeMethodSignature(source, metaData.getMethod());
+				source.println(" {");
+
+				// Provide implementation
+				source.print("    this.context.doFlow(" + metaData.getFlowIndex() + ", ");
+				int parameterIndex = 0;
+				source.print(metaData.isParameter() ? "p" + (parameterIndex++) : "null");
+				source.print(", ");
+				source.print(metaData.isFlowCallback() ? "p" + (parameterIndex++) : "null");
+				source.println(");");
+
+				// Complete method
+				source.println("  }\n");
+			}
+
+			// Complete the class
+			source.println("}");
+			source.flush();
+
+			// Use the compiled class
+			Class<?> clazz = compiler.addSource(className, sourceBuffer.toString()).compile();
+			Constructor<?> constructor = clazz.getConstructor(FunctionFlowContext.class);
+			this.flowFactory = (context) -> constructor.newInstance(context);
+		}
 	}
 
 	/**
@@ -81,15 +149,12 @@ public class ClassFlowParameterFactory {
 	/**
 	 * Creates the parameter.
 	 * 
-	 * @param context
-	 *            {@link FunctionFlowContext}.
+	 * @param context {@link FunctionFlowContext}.
 	 * @return Parameter.
-	 * @throws Exception
-	 *             If fails to create the parameter.
+	 * @throws Exception If fails to create the parameter.
 	 */
 	public Object createParameter(FunctionFlowContext<?> context) throws Exception {
-		// Return a new instance of the proxy to invoke the flows
-		return this.proxyConstructor.newInstance(new Object[] { new FlowInvocationHandler(context) });
+		return this.flowFactory.createFlows(context);
 	}
 
 	/**
@@ -105,8 +170,7 @@ public class ClassFlowParameterFactory {
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionFlowContext
-		 *            {@link FunctionFlowContext}.
+		 * @param functionFlowContext {@link FunctionFlowContext}.
 		 */
 		public FlowInvocationHandler(FunctionFlowContext<?> functionFlowContext) {
 			this.functionFlowContext = functionFlowContext;

@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.compile;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -38,6 +41,11 @@ public abstract class OfficeFloorJavaCompiler {
 	public static final String SYSTEM_PROPERTY_JAVA_COMPILING = "officefloor.java.compiling";
 
 	/**
+	 * Indicates if the compiler is available.
+	 */
+	private static boolean isCompilerAvailable = true;
+
+	/**
 	 * Creates a new instance of the {@link OfficeFloorJavaCompiler}.
 	 * 
 	 * @param classLoader {@link ClassLoader} to load existing {@link Class}
@@ -50,7 +58,7 @@ public abstract class OfficeFloorJavaCompiler {
 		// Determine if compiling active
 		boolean isActiveCompiling = Boolean
 				.parseBoolean(System.getProperty(SYSTEM_PROPERTY_JAVA_COMPILING, Boolean.TRUE.toString()));
-		if (!isActiveCompiling) {
+		if ((!isActiveCompiling) || (!isCompilerAvailable)) {
 			return null;
 		}
 
@@ -64,6 +72,175 @@ public abstract class OfficeFloorJavaCompiler {
 			return null;
 		}
 	}
+
+	/**
+	 * Operation undertaken without the Java compiler being available.
+	 */
+	public static interface NonCompilerOperation<T extends Throwable> {
+
+		/**
+		 * Logic of operation.
+		 * 
+		 * @throws T Possible failure.
+		 */
+		void run() throws T;
+	}
+
+	/**
+	 * <p>
+	 * Undertakes the {@link NonCompilerOperation} without making the Java compiler
+	 * available.
+	 * <p>
+	 * This is useful for testing non Java compile solutions.
+	 * 
+	 * @param operation {@link NonCompilerOperation}.
+	 * @throws T Possible failure.
+	 */
+	public static <T extends Throwable> void runWithoutCompiler(NonCompilerOperation<T> operation) throws T {
+		try {
+			isCompilerAvailable = false;
+
+			// Undertake the operation (without compiler)
+			operation.run();
+
+		} finally {
+			isCompilerAvailable = true;
+		}
+	}
+
+	/**
+	 * {@link Class} name.
+	 */
+	public static interface ClassName {
+
+		/**
+		 * Package name.
+		 * 
+		 * @return Package name.
+		 */
+		String getPackageName();
+
+		/**
+		 * Simple class name.
+		 * 
+		 * @return Simple class name.
+		 */
+		String getClassName();
+
+		/**
+		 * Fully qualified class name.
+		 * 
+		 * @return Fully qualified class name.
+		 */
+		String getName();
+	}
+
+	/**
+	 * Generates a unique {@link ClassName}.
+	 * 
+	 * @param name Seed name.
+	 * @return {@link ClassName}.
+	 */
+	public abstract ClassName createClassName(String name);
+
+	/**
+	 * Obtains the source name for the {@link Class}.
+	 * 
+	 * @param type {@link Class}.
+	 * @return Name used in source to reference the type.
+	 */
+	public abstract String getSourceName(Class<?> type);
+
+	/**
+	 * Class {@link Field}.
+	 */
+	public static interface ClassField {
+
+		/**
+		 * Obtains the {@link Field} type.
+		 * 
+		 * @return {@link Field} type.
+		 */
+		Class<?> getFieldType();
+
+		/**
+		 * Obtains the {@link Field} name.
+		 * 
+		 * @return {@link Field} name.
+		 */
+		String getFieldName();
+	}
+
+	/**
+	 * Creates the {@link ClassField}.
+	 * 
+	 * @param fieldType {@link Field} type.
+	 * @param fieldName {@link Field} name.
+	 * @return {@link ClassField}.
+	 */
+	public abstract ClassField createField(Class<?> fieldType, String fieldName);
+
+	/**
+	 * Writes the {@link Constructor}.
+	 * 
+	 * @param appendable {@link Appendable}.
+	 * @param className  Simple name of the {@link Class}.
+	 * @param fields     {@link ClassField} instances.
+	 * @throws IOException If fails to write the {@link Constructor}.
+	 */
+	public abstract void writeConstructor(Appendable appendable, String className, ClassField... fields)
+			throws IOException;
+
+	/**
+	 * Writes the {@link Method} signature to the {@link Appendable}.
+	 * 
+	 * @param appendable {@link Appendable}.
+	 * @param method     {@link Method}.
+	 * @return <code>true</code> if returns a value (<code>false</code> for
+	 *         <code>void</code> {@link Method} return).
+	 * @throws IOException If fails to write the {@link Method} signature.
+	 */
+	public abstract boolean writeMethodSignature(Appendable appendable, Method method) throws IOException;
+
+	/**
+	 * Java source.
+	 */
+	public static interface JavaSource {
+
+		/**
+		 * Obtains the {@link Class} name for the {@link JavaSource}.
+		 * 
+		 * @return {@link Class} name for the {@link JavaSource}.
+		 */
+		String getClassName();
+
+		/**
+		 * Convenience method to compile a single {@link JavaSource}.
+		 * 
+		 * @return {@link Class} for the {@link JavaSource}.
+		 */
+		Class<?> compile();
+	}
+
+	/**
+	 * Adds a {@link JavaSource}.
+	 * 
+	 * @param className {@link ClassName}.
+	 * @param source    Source for the {@link Class}.
+	 * @return {@link JavaSource}.
+	 */
+	public JavaSource addSource(ClassName className, String source) {
+		return this.addSource(className.getName(), source);
+	}
+
+	/**
+	 * Adds a {@link JavaSource}.
+	 * 
+	 * @param className {@link Class} name.
+	 * @param source    Source for the {@link Class}.
+	 * @return {@link JavaSource}.
+	 */
+	public abstract JavaSource addSource(String className, String source);
 
 	/**
 	 * Wrapper context for a {@link Method} implementation.
@@ -116,43 +293,15 @@ public abstract class OfficeFloorJavaCompiler {
 	}
 
 	/**
-	 * Java source.
-	 */
-	public static interface JavaSource {
-
-		/**
-		 * Obtains the {@link Class} name for the {@link JavaSource}.
-		 * 
-		 * @return {@link Class} name for the {@link JavaSource}.
-		 */
-		String getClassName();
-
-		/**
-		 * Convenience method to compile a single {@link JavaSource}.
-		 * 
-		 * @return {@link Class} for the {@link JavaSource}.
-		 */
-		Class<?> compile();
-	}
-
-	/**
-	 * Adds a {@link JavaSource}.
-	 * 
-	 * @param className {@link Class} name.
-	 * @param source    Source for the {@link Class}.
-	 * @return {@link JavaSource}.
-	 */
-	public abstract JavaSource addSource(String className, String source);
-
-	/**
 	 * Adds a wrapper {@link JavaSource}.
 	 * 
 	 * @param type           Type being wrapped.
 	 * @param wrapperContext {@link Consumer} to configure the
 	 *                       {@link WrapperContext}.
 	 * @return {@link JavaSource} for the wrapper.
+	 * @throws IOException If fails to write the wrapper.
 	 */
-	public JavaSource addWrapper(Class<?> type, Consumer<WrapperContext> wrapperContext) {
+	public JavaSource addWrapper(Class<?> type, Consumer<WrapperContext> wrapperContext) throws IOException {
 		return this.addWrapper(type, type, wrapperContext);
 	}
 
@@ -164,9 +313,10 @@ public abstract class OfficeFloorJavaCompiler {
 	 * @param wrapperContext {@link Consumer} to configure the
 	 *                       {@link WrapperContext}.
 	 * @return {@link JavaSource} for the wrapper.
+	 * @throws IOException If fails to write the wrapper.
 	 */
 	public abstract JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType,
-			Consumer<WrapperContext> wrapperContext);
+			Consumer<WrapperContext> wrapperContext) throws IOException;
 
 	/**
 	 * Compiles all the added {@link JavaSource} instances.

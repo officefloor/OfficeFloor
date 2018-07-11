@@ -17,14 +17,18 @@
  */
 package net.officefloor.compile.impl.compile;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -75,7 +79,7 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disable Java compiling.
 	 */
-	public void testDisableJavaCompiling() {
+	public void testDisableJavaCompilingViaSystemProperties() {
 		String originalValue = System.getProperty(OfficeFloorJavaCompiler.SYSTEM_PROPERTY_JAVA_COMPILING);
 		try {
 
@@ -92,6 +96,17 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 				System.setProperty(OfficeFloorJavaCompiler.SYSTEM_PROPERTY_JAVA_COMPILING, originalValue);
 			}
 		}
+	}
+
+	/**
+	 * Ensure disable Java compiling.
+	 */
+	public void testDisableJavaCompilingForTesting() {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
+
+			// Ensure no Java compiler
+			assertNull("Ensure no compiling", OfficeFloorJavaCompiler.newInstance(getClassLoader()));
+		});
 	}
 
 	/**
@@ -157,6 +172,90 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 		// Ensure can use
 		Simple multiple = (Simple) clazz.getConstructor().newInstance();
 		assertEquals("Incorrect compiled result", "MULTIPLE", multiple.getMessage());
+	}
+
+	/**
+	 * Ensure able to create unique class name.
+	 */
+	public void testClassName() {
+		ClassName name = this.compiler.createClassName("test.Example");
+		assertEquals("Incorrect package", "generated.officefloor.test", name.getPackageName());
+		assertTrue("Incorrect class", name.getClassName().startsWith("Example"));
+		assertEquals("Incorrect qualified name", name.getPackageName() + "." + name.getClassName(), name.getName());
+	}
+
+	/**
+	 * Ensure able to create unique class name from inner class.
+	 */
+	public void testInnerClassName() {
+		ClassName name = this.compiler.createClassName("test.Example$Inner");
+		assertEquals("Incorrect pckage", "generated.officefloor.test.Example", name.getPackageName());
+		assertTrue("Incorrect class", name.getClassName().startsWith("Inner"));
+		assertEquals("Incorrect qualified name", name.getPackageName() + "." + name.getClassName(), name.getName());
+	}
+
+	/**
+	 * Ensure able to obtain the source name.
+	 */
+	public void testSourceName() {
+		assertEquals("boolean", this.compiler.getSourceName(boolean.class));
+		assertEquals("java.lang.Integer", this.compiler.getSourceName(Integer.class));
+		assertEquals("java.sql.Connection", this.compiler.getSourceName(Connection.class));
+		assertEquals("char[]", this.compiler.getSourceName(char[].class));
+		assertEquals("java.lang.String[]", this.compiler.getSourceName(String[].class));
+	}
+
+	/**
+	 * Ensure able to write constructor.
+	 */
+	public void testConstructor() throws Exception {
+		StringWriter source = new StringWriter();
+		this.compiler.writeConstructor(source, "Simple", this.compiler.createField(String.class, "field"),
+				this.compiler.createField(int.class, "value"), this.compiler.createField(boolean[].class, "flags"));
+		StringWriter expected = new StringWriter();
+		expected.append("  private java.lang.String field;\n");
+		expected.append("  private int value;\n");
+		expected.append("  private boolean[] flags;\n");
+		expected.append("  public Simple(java.lang.String field, int value, boolean[] flags) {\n");
+		expected.append("    this.field = field;\n");
+		expected.append("    this.value = value;\n");
+		expected.append("    this.flags = flags;\n");
+		expected.append("  }\n");
+		assertEquals("Incorrect constructor", expected.toString(), source.toString());
+	}
+
+	/**
+	 * Ensure can write the {@link Method} signature.
+	 */
+	public void testMethodSignature() throws Exception {
+		this.assertMethodSignature("void simple()", false, Signature.class.getMethod("simple"));
+		this.assertMethodSignature("boolean[] returnValue()", true, Signature.class.getMethod("returnValue"));
+		this.assertMethodSignature("void exception() throws java.io.IOException", false,
+				Signature.class.getMethod("exception"));
+		this.assertMethodSignature("void parameter(java.lang.String p0)", false,
+				Signature.class.getMethod("parameter", String.class));
+		this.assertMethodSignature(
+				"java.sql.Connection parameters(int p0, java.lang.Integer[] p1) throws java.sql.SQLException, java.lang.IllegalArgumentException",
+				true, Signature.class.getMethod("parameters", int.class, Integer[].class));
+	}
+
+	private void assertMethodSignature(String expected, boolean isExpectReturn, Method method) throws Exception {
+		StringWriter source = new StringWriter();
+		boolean isReturn = this.compiler.writeMethodSignature(source, method);
+		assertEquals(expected, source.toString());
+		assertEquals("Incorrect return indicator for " + source.toString(), isExpectReturn, isReturn);
+	}
+
+	public static interface Signature {
+		void simple();
+
+		boolean[] returnValue();
+
+		void exception() throws IOException;
+
+		void parameter(String parameter);
+
+		Connection parameters(int paramOne, Integer[] paramTwo) throws SQLException, IllegalArgumentException;
 	}
 
 	/**

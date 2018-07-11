@@ -30,9 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -54,6 +53,11 @@ import net.officefloor.compile.issues.CompileError;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
+
+	/**
+	 * Next {@link Class} index.
+	 */
+	private static final AtomicInteger nextClassIndex = new AtomicInteger(1);
 
 	/**
 	 * {@link ClassLoader}.
@@ -106,6 +110,136 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	 */
 
 	@Override
+	public ClassName createClassName(String name) {
+
+		// Handle inner class names
+		name = name.replace('$', '.');
+
+		// Split the name
+		int splitIndex = name.lastIndexOf('.');
+		String packageName;
+		String className;
+		if (splitIndex > 0) {
+			packageName = "generated.officefloor." + name.substring(0, splitIndex);
+			className = name.substring(splitIndex + ".".length());
+		} else {
+			packageName = "generated.officefloor";
+			className = name;
+		}
+
+		// Suffix class name with index to keep unique naming
+		className = className + nextClassIndex.getAndIncrement();
+
+		// Return class name
+		final String finalPackageName = packageName;
+		final String finalClassName = className;
+		return new ClassName() {
+
+			@Override
+			public String getPackageName() {
+				return finalPackageName;
+			}
+
+			@Override
+			public String getName() {
+				return finalPackageName + "." + finalClassName;
+			}
+
+			@Override
+			public String getClassName() {
+				return finalClassName;
+			}
+		};
+	}
+
+	@Override
+	public String getSourceName(Class<?> type) {
+		if (type.isArray()) {
+			return type.getComponentType().getName().replace('$', '.') + "[]";
+		} else {
+			return type.getName().replace('$', '.');
+		}
+	}
+
+	@Override
+	public ClassField createField(Class<?> fieldType, String fieldName) {
+		return new ClassField() {
+
+			@Override
+			public Class<?> getFieldType() {
+				return fieldType;
+			}
+
+			@Override
+			public String getFieldName() {
+				return fieldName;
+			}
+		};
+	}
+
+	@Override
+	public void writeConstructor(Appendable appendable, String className, ClassField... fields) throws IOException {
+
+		// Write out the fields
+		for (ClassField field : fields) {
+			appendable.append(
+					"  private " + this.getSourceName(field.getFieldType()) + " " + field.getFieldName() + ";\n");
+		}
+
+		// Write constructor signature
+		appendable.append("  public " + className + "(");
+		for (int i = 0; i < fields.length; i++) {
+			ClassField field = fields[i];
+			if (i > 0) {
+				appendable.append(", ");
+			}
+			appendable.append(this.getSourceName(field.getFieldType()) + " " + field.getFieldName());
+		}
+		appendable.append(") {\n");
+
+		// Set state for fields
+		for (ClassField field : fields) {
+			appendable.append("    this." + field.getFieldName() + " = " + field.getFieldName() + ";\n");
+		}
+
+		// Complete constructor
+		appendable.append("  }\n");
+	}
+
+	@Override
+	public boolean writeMethodSignature(Appendable source, Method method) throws IOException {
+
+		// Obtain details of the method
+		Class<?> returnType = method.getReturnType();
+		boolean isReturn = ((returnType != null) && (!Void.TYPE.equals(returnType)));
+		Class<?>[] parameters = method.getParameterTypes();
+		Class<?>[] exceptions = method.getExceptionTypes();
+
+		// Write the method signature
+		source.append((isReturn ? this.getSourceName(returnType) : "void") + " " + method.getName() + "(");
+		for (int i = 0; i < parameters.length; i++) {
+			if (i > 0) {
+				source.append(", ");
+			}
+			source.append(this.getSourceName(parameters[i]));
+			source.append(" p" + i);
+		}
+		source.append(")");
+		if (exceptions.length > 0) {
+			source.append(" throws ");
+			for (int i = 0; i < exceptions.length; i++) {
+				if (i > 0) {
+					source.append(", ");
+				}
+				source.append(this.getSourceName(exceptions[i]));
+			}
+		}
+
+		// Indicate if return value
+		return isReturn;
+	}
+
+	@Override
 	public JavaSource addSource(String className, String source) {
 		JavaSourceImpl javaSource = new JavaSourceImpl(className, source);
 		this.sources.add(javaSource);
@@ -113,30 +247,28 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	@Override
-	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, Consumer<WrapperContext> wrapperContext) {
+	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, Consumer<WrapperContext> wrapperContext)
+			throws IOException {
 
 		// Create the source
 		StringWriter buffer = new StringWriter();
 		PrintWriter source = new PrintWriter(buffer);
 
 		// Determine package and class name
-		String packageName = "net.officefloor.compiled." + wrappedType.getPackageName();
-		String simpleName = wrappedType.getSimpleName() + "Wrapper"
-				+ ThreadLocalRandom.current().nextInt(10000, 100000);
-		String className = packageName + "." + simpleName;
+		ClassName className = this.createClassName(wrappedType.getName() + "Wrapper");
 
 		// Obtain the type names
-		String wrappedTypeName = wrappedType.getName().replace('$', '.');
-		String delegateTypeName = delegateType.getName().replace('$', '.');
+		String wrappedTypeName = this.getSourceName(wrappedType);
+		String delegateTypeName = this.getSourceName(delegateType);
 
 		// Write the initial class details
-		source.println("package " + packageName + ";");
+		source.println("package " + className.getPackageName() + ";");
 		source.println("@" + SuppressWarnings.class.getName() + "({\"unchecked\", \"deprecation\"})");
-		source.println("public class " + simpleName + " implements " + wrappedTypeName + " {");
+		source.println("public class " + className.getClassName() + " implements " + wrappedTypeName + " {");
 
 		// Provide constructor to delegate
 		source.println("  private final " + delegateTypeName + " delegate;");
-		source.println("  public " + simpleName + "(" + delegateTypeName + " delegate) {");
+		source.println("  public " + className.getClassName() + "(" + delegateTypeName + " delegate) {");
 		source.println("    this.delegate = delegate;");
 		source.println("  }");
 
@@ -149,41 +281,9 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 				wrapperContext.accept(methodContext);
 			}
 
-			// Obtain details of the method
-			Class<?> returnType = method.getReturnType();
-			boolean isReturn = ((returnType != null) && (!Void.TYPE.equals(returnType)));
-			Class<?>[] parameters = method.getParameterTypes();
-			Class<?>[] exceptions = method.getExceptionTypes();
-
-			// Obtains the type name
-			Function<Class<?>, String> getTypeName = (type) -> {
-				if (type.isArray()) {
-					return type.getComponentType().getName().replace('$', '.') + "[]";
-				} else {
-					return type.getName().replace('$', '.');
-				}
-			};
-
 			// Write the method signature
-			source.print(
-					"  public " + (isReturn ? getTypeName.apply(returnType) : "void") + " " + method.getName() + "(");
-			for (int i = 0; i < parameters.length; i++) {
-				if (i > 0) {
-					source.print(", ");
-				}
-				source.print(getTypeName.apply(parameters[i]));
-				source.print(" p" + i);
-			}
-			source.print(")");
-			if (exceptions.length > 0) {
-				source.print(" throws ");
-				for (int i = 0; i < exceptions.length; i++) {
-					if (i > 0) {
-						source.print(", ");
-					}
-					source.print(getTypeName.apply(exceptions[i]));
-				}
-			}
+			source.print("  public ");
+			boolean isReturn = this.writeMethodSignature(source, method);
 			source.println(" {");
 
 			// Determine if override implementation
@@ -202,6 +302,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 					}
 				}
 				source.print("this.delegate." + method.getName() + "(");
+				Class<?>[] parameters = method.getParameterTypes();
 				for (int i = 0; i < parameters.length; i++) {
 					if (i > 0) {
 						source.print(", ");
@@ -223,7 +324,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		source.flush();
 
 		// Add java source
-		return this.addSource(className, buffer.toString());
+		return this.addSource(className.getName(), buffer.toString());
 	}
 
 	/**
