@@ -17,13 +17,14 @@
  */
 package net.officefloor.jdbc;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -49,14 +50,24 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	private static final Logger LOGGER = Logger.getLogger(ConnectionManagedObjectSource.class.getName());
 
 	/**
-	 * {@link Connection} for {@link Proxy}.
+	 * Wrapper factory.
 	 */
-	private static final Class<?>[] CONNECTION_TYPE = new Class[] { Connection.class };
+	private static interface WrapperFactory {
+
+		/**
+		 * Wraps the {@link Connection}.
+		 * 
+		 * @param connection {@link Connection}.
+		 * @return Wrapped {@link Connection}.
+		 * @throws Exception If fails to wrap the {@link Connection}.
+		 */
+		Connection wrap(Connection connection) throws Exception;
+	}
 
 	/**
-	 * {@link ClassLoader} for {@link Proxy}.
+	 * {@link WrapperFactory}.
 	 */
-	private ClassLoader classLoader;
+	private WrapperFactory wrapperFactory;
 
 	/*
 	 * =========== AbstractConnectionManagedObjectSource ===========
@@ -76,8 +87,37 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
 				RecycleManagedObjectParameter.class);
 
-		// Obtain the class loader for proxies
-		this.classLoader = mosContext.getClassLoader();
+		// Determine if java compiler
+		ClassLoader classLoader = mosContext.getClassLoader();
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		if (compiler == null) {
+
+			// Fall back to proxy implementation
+			Class<?>[] interfaces = new Class<?>[] { Connection.class };
+			this.wrapperFactory = (connection) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces,
+					(proxy, method, args) -> {
+
+						// As managed, can not change particular methods
+						switch (method.getName()) {
+						case "close":
+							return null; // do not close
+						}
+
+						// Undertake method
+						return connection.getClass().getMethod(method.getName(), method.getParameterTypes())
+								.invoke(connection, args);
+					});
+
+		} else {
+			// Use compiled wrapper
+			Class<?> wrapperClass = compiler.addWrapper(Connection.class, (wrapperContext) -> {
+				if ("close".equals(wrapperContext.getMethod().getName())) {
+					wrapperContext.write(""); // do not close
+				}
+			}).compile();
+			Constructor<?> constructor = wrapperClass.getConstructor(Connection.class);
+			this.wrapperFactory = (connection) -> (Connection) constructor.newInstance(connection);
+		}
 	}
 
 	@Override
@@ -96,7 +136,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		private Connection proxy;
 
 		@Override
-		protected Connection getConnection() throws SQLException {
+		protected Connection getConnection() throws Throwable {
 
 			// Lazy create the connection
 			if (this.proxy == null) {
@@ -105,27 +145,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 				this.connection = ConnectionManagedObjectSource.this.dataSource.getConnection();
 
 				// Create proxy around connection
-				this.proxy = (Connection) Proxy.newProxyInstance(ConnectionManagedObjectSource.this.classLoader,
-						CONNECTION_TYPE, (proxy, method, args) -> {
-
-							// As managed, can not change particular methods
-							switch (method.getName()) {
-							case "close":
-								return null; // do not close
-							}
-
-							// Obtain the delegate method
-							Method delegateMethod = this.connection.getClass().getMethod(method.getName(),
-									method.getParameterTypes());
-
-							// Invoke method (and retry force access)
-							try {
-								return delegateMethod.invoke(this.connection, args);
-							} catch (IllegalAccessException ex) {
-								delegateMethod.setAccessible(true);
-								return delegateMethod.invoke(this.connection, args);
-							}
-						});
+				this.proxy = ConnectionManagedObjectSource.this.wrapperFactory.wrap(this.connection);
 			}
 
 			// Return the proxy connection

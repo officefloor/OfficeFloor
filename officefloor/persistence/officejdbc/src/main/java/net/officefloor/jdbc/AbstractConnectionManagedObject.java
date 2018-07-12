@@ -18,7 +18,6 @@
 package net.officefloor.jdbc;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
@@ -38,10 +37,9 @@ public abstract class AbstractConnectionManagedObject implements ManagedObject {
 	 * Obtains the {@link Connection}.
 	 * 
 	 * @return {@link Connection}.
-	 * @throws SQLException
-	 *             If fails to obtain the {@link Connection}.
+	 * @throws Throwable If fails to obtain the {@link Connection}.
 	 */
-	protected abstract Connection getConnection() throws SQLException;
+	protected abstract Connection getConnection() throws Throwable;
 
 	/*
 	 * ================= ManagedObject =====================

@@ -40,13 +40,16 @@ import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.Spawn;
 
 /**
  * Abstract tests for an JDBC vendor implementation.
@@ -112,6 +115,15 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @return {@link ConnectionManagedObjectSource} {@link Class} being tested.
 	 */
 	protected abstract Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass();
+
+	/**
+	 * Obtains the {@link ReadOnlyConnectionManagedObjectSource} {@link Class} being
+	 * tested.
+	 * 
+	 * @return {@link ReadOnlyConnectionManagedObjectSource} {@link Class} being
+	 *         tested.
+	 */
+	protected abstract Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass();
 
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
@@ -194,15 +206,35 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure correct specification.
+	 * Ensure correct specification for writable {@link Connection}.
 	 * 
 	 * @throws Exception On test failure.
 	 */
-	public void testSpecification() throws Exception {
+	public void testWritableConnectionSpecification() throws Exception {
+		this.doSpecification(this.getConnectionManagedObjectSourceClass());
+	}
+
+	/**
+	 * Ensure correct specification for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyConnectionSpecification() throws Exception {
+		this.doSpecification(this.getReadOnlyConnectionManagedObjectSourceClass());
+	}
+
+	/**
+	 * Ensure correct specification.
+	 *
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @throws Exception On test failure.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSpecification(
+			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Load the specification
 		PropertyList specification = OfficeFloorCompiler.newOfficeFloorCompiler(null).getManagedObjectLoader()
-				.loadSpecification(this.getConnectionManagedObjectSourceClass());
+				.loadSpecification(managedObjectSourceClass);
 		Properties actual = specification.getProperties();
 		this.loadOptionalSpecification(actual);
 
@@ -219,11 +251,31 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure correct type.
+	 * Ensure correct type for writable {@link Connection}.
 	 * 
 	 * @throws Exception On test failure.
 	 */
-	public void testType() throws Exception {
+	public void testWritableType() throws Exception {
+		this.doTypeTest(this.getConnectionManagedObjectSourceClass());
+	}
+
+	/**
+	 * Ensure correct type for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyType() throws Exception {
+		this.doTypeTest(this.getReadOnlyConnectionManagedObjectSourceClass());
+	}
+
+	/**
+	 * Ensure correct type.
+	 *
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @throws Exception On test failure.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doTypeTest(
+			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
@@ -246,7 +298,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testConnectivity() throws Throwable {
+	public void testWritableConnectivity() throws Throwable {
 
 		// Run connectivity to create table and add row
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -294,8 +346,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testStress() throws Throwable {
-		this.doStressTest(false);
+	public void testInsertStress() throws Throwable {
+		this.doInsertStressTest(false);
 	}
 
 	/**
@@ -303,16 +355,16 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testTransactionStress() throws Throwable {
-		this.doStressTest(true);
+	public void testTransactionInsertStress() throws Throwable {
+		this.doInsertStressTest(true);
 	}
 
 	/**
-	 * Undertake stress test.
+	 * Undertake insert stress test.
 	 * 
 	 * @param isTransaction Whether test uses transactions.
 	 */
-	private void doStressTest(boolean isTransaction) throws Throwable {
+	private void doInsertStressTest(boolean isTransaction) throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
@@ -413,11 +465,33 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertakes select stress.
+	 * Undertakes select stress for writable {@link Connection}.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testSelectStress() throws Throwable {
+	public void testWritableSelectStress() throws Throwable {
+		this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true);
+	}
+
+	/**
+	 * Undertakes select stress for read-only {@link Connection}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testReadOnlySelectStress() throws Throwable {
+		this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Undertakes select stress.
+	 * 
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @param isPool                   Indicates whether to pool {@link Connection}
+	 *                                 instances.
+	 * @throws Throwable On test failure.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSelectStressTest(
+			Class<?> managedObjectSourceClass, boolean isPool) throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
@@ -436,14 +510,16 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 			// Connection
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					this.getConnectionManagedObjectSourceClass().getName());
+					managedObjectSourceClass.getName());
 			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
 			// Pool the connection
-			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-					ThreadLocalJdbcConnectionPoolSource.class.getName());
-			context.getOfficeArchitect().link(mos, pool);
+			if (isPool) {
+				OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+						ThreadLocalJdbcConnectionPoolSource.class.getName());
+				context.getOfficeArchitect().link(mos, pool);
+			}
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
@@ -487,6 +563,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 		@FlowInterface
 		public static interface Flows {
+
+			@Spawn
 			void thread(SelectParameter parameter, FlowCallback callback);
 		}
 

@@ -3,17 +3,17 @@
  * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package net.officefloor.jdbc;
 
@@ -37,37 +37,22 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
- * Tests the {@link ConnectionManagedObjectSource}.
+ * Tests the {@link ReadOnlyConnectionManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCase {
+public class ReadOnlyConnectionManagedObjectSourceTest extends AbstractConnectionTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		// Reset mock section
-		MockSection.connection = null;
-	}
-
-	/**
-	 * Ensures the database is appropriately setup.
-	 */
-	public void testEnsureDatabaseSetup() throws Exception {
-
-		// Insert row into table
+		// Create row in database
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 1, 'test' )");
-		}
-
-		// Ensure can obtain row
-		try (Statement statement = this.connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 1");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "test", resultSet.getString("NAME"));
 		}
 	}
 
@@ -75,7 +60,7 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 	 * Validate the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(ReadOnlyConnectionManagedObjectSource.class);
 	}
 
 	/**
@@ -88,19 +73,19 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 		type.setObjectClass(Connection.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, ConnectionManagedObjectSource.class,
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, ReadOnlyConnectionManagedObjectSource.class,
 				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
 	}
 
 	/**
-	 * Ensures {@link Connection} with compiler.
+	 * Ensure {@link Connection} with compiler.
 	 */
 	public void testConnectionWithCompiler() throws Throwable {
 		this.doConnectionTest();
 	}
 
 	/**
-	 * Ensures {@link Connection} with {@link Proxy}.
+	 * Ensure {@link Connection} with {@link Proxy}.
 	 */
 	public void testConnectionWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doConnectionTest());
@@ -117,7 +102,7 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 
 			// Create the managed object
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
+					ReadOnlyConnectionManagedObjectSource.class.getName());
 			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
@@ -127,29 +112,42 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
 		// Undertake operation
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
+		MockParameter parameter = new MockParameter();
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", parameter);
 
-		// Ensure row inserted
-		try (Statement statement = this.connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
+		// Ensure read row
+		assertEquals("Should have read row", "test", parameter.value);
+
+		// Ensure connection is open
+		assertFalse("Connection should still be open", parameter.connection.isClosed());
+
+		// Ensure unable to make non read only
+		try {
+			parameter.connection.setReadOnly(false);
+			fail("Should not be able to change read-only");
+		} catch (SQLException ex) {
+			assertEquals("Incorrect cause", "Connection is re-used read-only so can not be changed", ex.getMessage());
 		}
 
-		// Ensure the connection is closed
-		assertNotNull("Should have connection", MockSection.connection);
-		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
+		// Ensure release connection on close OfficeFloor
+		officeFloor.closeOfficeFloor();
+		assertTrue("Connection should be closed with close of OfficeFloor", parameter.connection.isClosed());
+	}
+
+	public static class MockParameter {
+		private volatile Connection connection;
+		private volatile String value;
 	}
 
 	public static class MockSection {
 
-		private static Connection connection = null;
-
-		public void section(Connection connection) throws SQLException {
+		public void section(Connection connection, @Parameter MockParameter parameter) throws SQLException {
+			parameter.connection = connection;
 			try (Statement statement = connection.createStatement()) {
-				statement.execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 2, 'OfficeFloor' )");
+				ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 1");
+				assertTrue("Should have row", resultSet.next());
+				parameter.value = resultSet.getString("NAME");
 			}
-			MockSection.connection = connection;
 		}
 	}
 
@@ -164,7 +162,7 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 
 			// Create the managed object
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
+					ReadOnlyConnectionManagedObjectSource.class.getName());
 			mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
 					MockDataSourceFactory.class.getName());
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
@@ -175,18 +173,14 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
 		// Undertake operation
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
+		MockParameter parameter = new MockParameter();
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", parameter);
 
-		// Ensure row inserted
-		try (Statement statement = this.connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
-		}
+		// Ensure read row
+		assertEquals("Should have read row", "test", parameter.value);
 
-		// Ensure the connection is closed
-		assertNotNull("Should have connection", MockSection.connection);
-		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
+		// Release connection with close of OfficeFloor
+		officeFloor.closeOfficeFloor();
 	}
 
 	/**
