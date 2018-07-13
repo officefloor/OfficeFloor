@@ -203,6 +203,17 @@ public abstract class OfficeFloorJavaCompiler {
 	public abstract boolean writeMethodSignature(Appendable appendable, Method method) throws IOException;
 
 	/**
+	 * Writes the delegate {@link Method} implementation.
+	 * 
+	 * @param source   {@link Appendable}.
+	 * @param delegate Means to access delegate.
+	 * @param method   {@link Method}.
+	 * @throws IOException If fails write delegate {@link Method} implementation.
+	 */
+	public abstract void writeDelegateMethodImplementation(Appendable source, String delegate, Method method)
+			throws IOException;
+
+	/**
 	 * Java source.
 	 */
 	public static interface JavaSource {

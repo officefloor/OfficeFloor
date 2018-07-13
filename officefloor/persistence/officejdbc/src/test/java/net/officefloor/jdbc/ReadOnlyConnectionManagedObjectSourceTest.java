@@ -19,9 +19,9 @@ package net.officefloor.jdbc;
 
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -51,8 +51,9 @@ public class ReadOnlyConnectionManagedObjectSourceTest extends AbstractConnectio
 		super.setUp();
 
 		// Create row in database
-		try (Statement statement = this.connection.createStatement()) {
-			statement.execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 1, 'test' )");
+		try (PreparedStatement statement = this.connection
+				.prepareStatement("INSERT INTO TEST ( ID, NAME ) VALUES ( 1, 'test' )")) {
+			statement.executeUpdate();
 		}
 	}
 
@@ -143,8 +144,8 @@ public class ReadOnlyConnectionManagedObjectSourceTest extends AbstractConnectio
 
 		public void section(Connection connection, @Parameter MockParameter parameter) throws SQLException {
 			parameter.connection = connection;
-			try (Statement statement = connection.createStatement()) {
-				ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 1");
+			try (PreparedStatement statement = connection.prepareStatement("SELECT NAME FROM TEST WHERE ID = 1")) {
+				ResultSet resultSet = statement.executeQuery();
 				assertTrue("Should have row", resultSet.next());
 				parameter.value = resultSet.getString("NAME");
 			}
