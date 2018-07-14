@@ -17,6 +17,7 @@
  */
 package net.officefloor.jpa.test;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,6 +32,7 @@ import javax.persistence.TypedQuery;
 
 import org.h2.jdbcx.JdbcDataSource;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
@@ -202,11 +204,31 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to read entry from database with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testReadWithCompiler() throws Throwable {
+		assertNotNull("Invalid test as java compiler is not available",
+				OfficeFloorJavaCompiler.newInstance(AbstractJpaTestCase.class.getClassLoader()));
+		this.doReadTest();
+	}
+
+	/**
+	 * Ensure able to read entry from database with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testReadWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doReadTest());
+	}
+
+	/**
 	 * Ensure able to read entry from database.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testRead() throws Throwable {
+	public void doReadTest() throws Throwable {
 
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
@@ -248,11 +270,29 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to insert entry into database with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testInsertWithCompiler() throws Throwable {
+		this.doInsertTest();
+	}
+
+	/**
+	 * Ensure able to insert entry into database with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testInsertWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertTest());
+	}
+
+	/**
 	 * Ensure able to insert entry into database.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testInsert() throws Throwable {
+	public void doInsertTest() throws Throwable {
 
 		// Configure the application
 		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
@@ -285,11 +325,29 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to update entry into database with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testUpdateWithCompiler() throws Throwable {
+		this.doUpdateTest();
+	}
+
+	/**
+	 * Ensure able to update entry into database with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testUpdateWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doUpdateTest());
+	}
+
+	/**
 	 * Ensure able to update entry into database.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testUpdate() throws Throwable {
+	public void doUpdateTest() throws Throwable {
 
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
@@ -326,11 +384,29 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to delete entry from database with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testDeleteWithCompiler() throws Throwable {
+		this.doDeleteTest();
+	}
+
+	/**
+	 * Ensure able to delete entry from database with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testDeleteWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doDeleteTest());
+	}
+
+	/**
 	 * Ensure able to delete entry from database.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testDelete() throws Throwable {
+	public void doDeleteTest() throws Throwable {
 
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
@@ -364,21 +440,39 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertake stress insert test.
+	 * Undertake stress insert test with compiled wrappers.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testStressInsert() throws Throwable {
+	public void testStressInsertWithCompiler() throws Throwable {
 		this.doStressInsertTest(false);
 	}
 
 	/**
-	 * Undertake stress insert test with pooled connections.
+	 * Undertake stress insert test with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testStressInsert() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(false));
+	}
+
+	/**
+	 * Undertake stress insert test with pooled connections with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testStressInsertPooledConnectionsWithCompiler() throws Throwable {
+		this.doStressInsertTest(true);
+	}
+
+	/**
+	 * Undertake stress insert test with pooled connections with {@link Proxy}.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsertPooledConnections() throws Throwable {
-		this.doStressInsertTest(true);
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true));
 	}
 
 	/**
@@ -398,15 +492,27 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		});
 
 		// Undertake warm up
+		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
+			if ((i % warmupProgress) == 0) {
+				System.out.print("w");
+				System.out.flush();
+			}
 			CompileOfficeFloor.invokeProcess(officeFloor, "StressInsert.run", null, TIMEOUT);
 		}
+		System.out.println();
 
 		// Run test
+		int runProgress = RUN_COUNT / 10;
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < RUN_COUNT; i++) {
+			if ((i % runProgress) == 0) {
+				System.out.print(".");
+				System.out.flush();
+			}
 			CompileOfficeFloor.invokeProcess(officeFloor, "StressInsert.run", null, TIMEOUT);
 		}
+		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));
 		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance " + requestsPerSecond
@@ -450,21 +556,39 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure stress select.
+	 * Ensure stress select with compiled wrappers.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testStressSelect() throws Throwable {
+	public void testStressSelectWithCompiler() throws Throwable {
 		this.doStressSelectTest(false);
 	}
 
 	/**
-	 * Ensure stress select with pooled connections.
+	 * Ensure stress select with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testStressSelectWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(false));
+	}
+
+	/**
+	 * Ensure stress select with pooled connections with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testStressSelectPooledConnectionsWithCompiler() throws Throwable {
+		this.doStressSelectTest(true);
+	}
+
+	/**
+	 * Ensure stress select with pooled connections with {@link Proxy}.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelectPooledConnections() throws Throwable {
-		this.doStressSelectTest(true);
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true));
 	}
 
 	/**

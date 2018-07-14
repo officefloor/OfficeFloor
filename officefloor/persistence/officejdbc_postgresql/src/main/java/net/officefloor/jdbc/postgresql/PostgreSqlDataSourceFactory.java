@@ -17,16 +17,17 @@
  */
 package net.officefloor.jdbc.postgresql;
 
-import java.lang.reflect.Proxy;
-
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import org.postgresql.ds.PGConnectionPoolDataSource;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.postgresql.ds.common.BaseDataSource;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
@@ -35,7 +36,7 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public interface PostgreSqlDataSourceFactory extends DataSourceFactory {
+public interface PostgreSqlDataSourceFactory extends DataSourceFactory, ConnectionPoolDataSourceFactory {
 
 	/**
 	 * {@link Property} for the server name.
@@ -73,15 +74,15 @@ public interface PostgreSqlDataSourceFactory extends DataSourceFactory {
 		context.addProperty(PROPERTY_PASSWORD, "Password");
 	}
 
-	/*
-	 * ==================== DataSourceFactory =========================
+	/**
+	 * Configures the {@link BaseDataSource}.
+	 * 
+	 * @param dataSource {@link BaseDataSource}.
+	 * @param context    {@link SourceContext}.
+	 * @throws Exception If fails to configure the {@link BaseDataSource}.
 	 */
-
-	@Override
-	default DataSource createDataSource(SourceContext context) throws Exception {
-
-		// Create the data source
-		PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
+	private static <S extends BaseDataSource> S configureDataSource(S dataSource, SourceContext context)
+			throws Exception {
 
 		// Load optional configuration
 		DefaultDataSourceFactory.loadProperties(dataSource, context);
@@ -104,11 +105,25 @@ public interface PostgreSqlDataSourceFactory extends DataSourceFactory {
 		}
 
 		// Return the data source
-		return (DataSource) Proxy.newProxyInstance(context.getClassLoader(),
-				new Class[] { DataSource.class, ConnectionPoolDataSource.class }, (proxy, method, args) -> {
-					return dataSource.getClass().getMethod(method.getName(), method.getParameterTypes())
-							.invoke(dataSource, args);
-				});
+		return dataSource;
+	}
+
+	/*
+	 * ==================== DataSourceFactory =========================
+	 */
+
+	@Override
+	default DataSource createDataSource(SourceContext context) throws Exception {
+		return configureDataSource(new PGSimpleDataSource(), context);
+	}
+
+	/*
+	 * ============== ConnectionPoolDataSourceFactory ===================
+	 */
+
+	@Override
+	default ConnectionPoolDataSource createConnectionPoolDataSource(SourceContext context) throws Exception {
+		return configureDataSource(new PGConnectionPoolDataSource(), context);
 	}
 
 }

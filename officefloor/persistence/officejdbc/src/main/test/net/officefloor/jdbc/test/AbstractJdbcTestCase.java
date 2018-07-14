@@ -19,6 +19,7 @@ package net.officefloor.jdbc.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
@@ -342,12 +344,31 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can stress test against the database.
+	 * Ensure can stress test against the database with compiled wrappers.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testInsertStress() throws Throwable {
+	public void testInsertStressWithCompiler() throws Throwable {
 		this.doInsertStressTest(false);
+	}
+
+	/**
+	 * Ensure can stress test against the database with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testInsertStressWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(false));
+	}
+
+	/**
+	 * Ensure can stress test against the database with transactions with compiled
+	 * wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testTransactionInsertStressWithCompiler() throws Throwable {
+		this.doInsertStressTest(true);
 	}
 
 	/**
@@ -355,8 +376,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testTransactionInsertStress() throws Throwable {
-		this.doInsertStressTest(true);
+	public void testTransactionInsertStressWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(true));
 	}
 
 	/**
@@ -401,15 +422,27 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// Undertake warm up
+		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
+			if ((i % warmupProgress) == 0) {
+				System.out.print("w");
+				System.out.flush();
+			}
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
 		}
+		System.out.println();
 
 		// Run test
+		int runProgress = RUN_COUNT / 10;
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < RUN_COUNT; i++) {
+			if ((i % runProgress) == 0) {
+				System.out.print(".");
+				System.out.flush();
+			}
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
 		}
+		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));
 		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
@@ -465,21 +498,43 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertakes select stress for writable {@link Connection}.
+	 * Undertakes select stress for writable {@link Connection} with compiled
+	 * wrappers.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testWritableSelectStress() throws Throwable {
+	public void testWritableSelectStressWithCompiler() throws Throwable {
 		this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true);
 	}
 
 	/**
-	 * Undertakes select stress for read-only {@link Connection}.
+	 * Undertakes select stress for writable {@link Connection} with {@link Proxy}.
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testReadOnlySelectStress() throws Throwable {
+	public void testWritableSelectStressWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler
+				.runWithoutCompiler(() -> this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true));
+	}
+
+	/**
+	 * Undertakes select stress for read-only {@link Connection} with compiled
+	 * wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testReadOnlySelectStressWithCompiler() throws Throwable {
 		this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Undertakes select stress for read-only {@link Connection} with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testReadOnlySelectStressWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false));
 	}
 
 	/**
@@ -530,17 +585,29 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// Undertake warm up
+		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
+			if ((i % warmupProgress) == 0) {
+				System.out.print("w");
+				System.out.flush();
+			}
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
 		}
+		System.out.println();
 
 		// Run test
+		int runProgress = RUN_COUNT / 10;
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < RUN_COUNT; i++) {
+			if ((i % runProgress) == 0) {
+				System.out.print(".");
+				System.out.flush();
+			}
 			SelectSection.isCompleted = false;
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
 			assertTrue("Should be complete", SelectSection.isCompleted);
 		}
+		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * SelectSection.THREAD_COUNT) / (((float) runTime) / 1000.0));
 		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "

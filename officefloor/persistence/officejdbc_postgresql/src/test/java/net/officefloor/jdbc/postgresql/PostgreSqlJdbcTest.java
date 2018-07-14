@@ -39,6 +39,7 @@ import com.spotify.docker.client.messages.PortBinding;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
@@ -56,10 +57,8 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	/**
 	 * Pulls the docker image.
 	 * 
-	 * @param imageName
-	 *            Docker image name.
-	 * @param client
-	 *            {@link DockerClient}.
+	 * @param imageName Docker image name.
+	 * @param client    {@link DockerClient}.
 	 */
 	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
 
@@ -148,6 +147,11 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return PostgreSqlConnectionManagedObjectSource.class;
+	}
+
+	@Override
+	protected Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass() {
+		return PostgreSqlReadOnlyConnectionManagedObjectSource.class;
 	}
 
 	@Override

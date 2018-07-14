@@ -24,40 +24,33 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+import javax.sql.CommonDataSource;
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
+import javax.sql.PooledConnection;
 
 import org.junit.Assert;
-
-import junit.framework.TestCase;
 
 /**
  * Mock {@link DataSource} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockDataSource implements DataSource {
+public class MockDataSource implements DataSource, ConnectionPoolDataSource {
 
 	/**
 	 * Asserts the configuration.
 	 * 
-	 * @param dataSource
-	 *            {@link DataSource}.
-	 * @param driver
-	 *            {@link Driver} class name.
-	 * @param url
-	 *            URL to the database.
-	 * @param serverName
-	 *            Name of the database server.
-	 * @param port
-	 *            Port to connect to the database.
-	 * @param databaseName
-	 *            Name of the database.
-	 * @param userName
-	 *            User name.
-	 * @param password
-	 *            Password.
+	 * @param dataSource   {@link CommonDataSource}.
+	 * @param driver       {@link Driver} class name.
+	 * @param url          URL to the database.
+	 * @param serverName   Name of the database server.
+	 * @param port         Port to connect to the database.
+	 * @param databaseName Name of the database.
+	 * @param userName     User name.
+	 * @param password     Password.
 	 */
-	public static void assertConfiguration(DataSource dataSource, String driver, String url, String serverName,
+	public static void assertConfiguration(CommonDataSource dataSource, String driver, String url, String serverName,
 			int port, String databaseName, String userName, String password) {
 
 		// Ensure mock data source
@@ -171,58 +164,70 @@ public class MockDataSource implements DataSource {
 	}
 
 	/*
-	 * =================== DataSource ============================
+	 * ============ DataSource and ConnectionPoolDataSource ================
 	 */
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 		return null;
 	}
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 		return null;
 	}
 
 	@Override
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 		return null;
 	}
 
 	@Override
 	public PrintWriter getLogWriter() throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 		return null;
 	}
 
 	@Override
 	public int getLoginTimeout() throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 		return -1;
 	}
 
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 	}
 
 	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 	}
 
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
 		return false;
 	}
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
-		TestCase.fail("Should not be invoked");
+		Assert.fail("Should not be invoked");
+		return null;
+	}
+
+	@Override
+	public PooledConnection getPooledConnection() throws SQLException {
+		Assert.fail("Should not be invoked");
+		return null;
+	}
+
+	@Override
+	public PooledConnection getPooledConnection(String user, String password) throws SQLException {
+		Assert.fail("Should not be invoked");
 		return null;
 	}
 

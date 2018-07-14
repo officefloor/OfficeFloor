@@ -71,7 +71,8 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 	 */
 
 	@Override
-	public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext) {
+	public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext)
+			throws Exception {
 
 		// Ensure have connection managed object source
 		ManagedObjectSource<?, ?> managedObjectSource = managedObjectPoolContext.getManagedObjectSource();

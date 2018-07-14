@@ -23,11 +23,15 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sql.DataSource;
+
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
  * Read-only {@link Connection} {@link ManagedObjectSource}.
@@ -48,6 +52,11 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 	private ClassLoader classLoader;
 
 	/**
+	 * {@link DataSource}.
+	 */
+	private DataSource dataSource;
+
+	/**
 	 * {@link Connection}.
 	 */
 	private volatile Connection connection;
@@ -63,14 +72,21 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 
 	@Override
 	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
-		this.classLoader = context.getManagedObjectSourceContext().getClassLoader();
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
+		// Obtain class loader for wrapping connection
+		this.classLoader = mosContext.getClassLoader();
+
+		// Obtain the data source
+		DataSourceFactory dataSourceFactory = this.getDataSourceFactory(mosContext);
+		this.dataSource = dataSourceFactory.createDataSource(mosContext);
 	}
 
 	@Override
 	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 
 		// Create the re-usable connection
-		this.connection = this.dataSource.getConnection();
+		this.connection = ((DataSource) this.dataSource).getConnection();
 		this.connection.setReadOnly(true);
 
 		// Wrap connection to avoid changing

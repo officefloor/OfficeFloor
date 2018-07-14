@@ -19,15 +19,13 @@ package net.officefloor.jdbc;
 
 import java.sql.Connection;
 
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
-
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
@@ -43,11 +41,6 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	 * implementation.
 	 */
 	public static final String PROPERTY_DATA_SOURCE_FACTORY = "datasource.factory";
-
-	/**
-	 * {@link DataSource}.
-	 */
-	protected DataSource dataSource;
 
 	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
@@ -73,23 +66,29 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	}
 
 	/**
-	 * Obtains the {@link ConnectionPoolDataSource}.
+	 * Allows overriding to configure a different
+	 * {@link ConnectionPoolDataSourceFactory}.
 	 * 
-	 * @return {@link ConnectionPoolDataSource}.
-	 * @throws IllegalStateException If {@link DataSource} configured is not a
-	 *                               {@link ConnectionPoolDataSource}.
+	 * @param context {@link SourceContext}.
+	 * @return {@link ConnectionPoolDataSourceFactory}.
+	 * @throws Exception If fails to obtain {@link ConnectionPoolDataSourceFactory}.
 	 */
-	public ConnectionPoolDataSource getConnectionPoolDataSource() throws IllegalStateException {
+	protected ConnectionPoolDataSourceFactory getConnectionPoolDataSourceFactory(SourceContext context)
+			throws Exception {
 
-		// Ensure a connection pool data source
-		if (!(this.dataSource instanceof ConnectionPoolDataSource)) {
-			throw new IllegalStateException(DataSource.class.getSimpleName() + " provided does not implement "
-					+ ConnectionPoolDataSource.class.getName() + " (implementing " + DataSource.class.getSimpleName()
-					+ " " + this.dataSource.getClass().getName() + ")");
+		// Obtain the data source factory
+		String dataSourceFactoryClassName = context.getProperty(PROPERTY_DATA_SOURCE_FACTORY,
+				DefaultDataSourceFactory.class.getName());
+		Class<?> dataSourceFactoryClass = context.loadClass(dataSourceFactoryClassName);
+		if (!ConnectionPoolDataSourceFactory.class.isAssignableFrom(dataSourceFactoryClass)) {
+			throw new Exception(
+					dataSourceFactoryClassName + " must implement " + ConnectionPoolDataSourceFactory.class.getName());
 		}
+		ConnectionPoolDataSourceFactory dataSourceFactory = (ConnectionPoolDataSourceFactory) dataSourceFactoryClass
+				.getDeclaredConstructor().newInstance();
 
-		// Return the connection pool data source
-		return (ConnectionPoolDataSource) this.dataSource;
+		// Return the data source factory
+		return dataSourceFactory;
 	}
 
 	/**
@@ -115,16 +114,14 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		// Configure meta-data
 		context.setObjectClass(Connection.class);
 		context.setManagedObjectClass(AbstractConnectionManagedObject.class);
-		this.loadFurtherMetaData(context);
 
 		// Only load data source (if not loading type)
 		if (mosContext.isLoadingType()) {
 			return;
 		}
 
-		// Create the data source
-		DataSourceFactory factory = this.getDataSourceFactory(mosContext);
-		this.dataSource = factory.createDataSource(mosContext);
+		// Create further meta-data
+		this.loadFurtherMetaData(context);
 	}
 
 }

@@ -19,6 +19,7 @@ package net.officefloor.jdbc.h2;
 
 import java.net.URL;
 
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
@@ -26,6 +27,7 @@ import org.h2.jdbcx.JdbcDataSource;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
@@ -34,7 +36,7 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public interface H2DataSourceFactory extends DataSourceFactory {
+public interface H2DataSourceFactory extends DataSourceFactory, ConnectionPoolDataSourceFactory {
 
 	/**
 	 * {@link Property} for {@link URL}.
@@ -82,6 +84,15 @@ public interface H2DataSourceFactory extends DataSourceFactory {
 
 		// Return the data source
 		return dataSource;
+	}
+
+	/*
+	 * ============ ConnectionPoolDataSourceFactory ============
+	 */
+
+	@Override
+	default ConnectionPoolDataSource createConnectionPoolDataSource(SourceContext context) throws Exception {
+		return (ConnectionPoolDataSource) this.createDataSource(context);
 	}
 
 }

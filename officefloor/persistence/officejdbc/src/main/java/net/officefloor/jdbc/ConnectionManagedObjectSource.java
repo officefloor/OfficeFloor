@@ -24,6 +24,9 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -36,6 +39,8 @@ import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
+import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
  * {@link ManagedObjectSource} for {@link Connection}.
@@ -69,6 +74,27 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	 */
 	private WrapperFactory wrapperFactory;
 
+	/**
+	 * {@link ManagedObjectSourceContext}.
+	 */
+	private ManagedObjectSourceContext<None> mosContext;
+
+	/**
+	 * {@link DataSource}.
+	 */
+	private DataSource dataSource;
+
+	/**
+	 * Obtains the {@link ConnectionPoolDataSource}.
+	 * 
+	 * @return {@link ConnectionPoolDataSource}.
+	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
+	 */
+	public ConnectionPoolDataSource getConnectionPoolDataSource() throws Exception {
+		ConnectionPoolDataSourceFactory factory = this.getConnectionPoolDataSourceFactory(this.mosContext);
+		return factory.createConnectionPoolDataSource(this.mosContext);
+	}
+
 	/*
 	 * =========== AbstractConnectionManagedObjectSource ===========
 	 */
@@ -79,7 +105,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 
 	@Override
 	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+		this.mosContext = context.getManagedObjectSourceContext();
 
 		// Load close handling
 		context.getManagedObjectSourceContext().setDefaultManagedObjectPool(
@@ -88,7 +114,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 				RecycleManagedObjectParameter.class);
 
 		// Determine if java compiler
-		ClassLoader classLoader = mosContext.getClassLoader();
+		ClassLoader classLoader = this.mosContext.getClassLoader();
 		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
 		if (compiler == null) {
 
@@ -118,6 +144,10 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 			Constructor<?> constructor = wrapperClass.getConstructor(Connection.class);
 			this.wrapperFactory = (connection) -> (Connection) constructor.newInstance(connection);
 		}
+
+		// Create the data source
+		DataSourceFactory factory = this.getDataSourceFactory(this.mosContext);
+		this.dataSource = factory.createDataSource(this.mosContext);
 	}
 
 	@Override

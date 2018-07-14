@@ -23,6 +23,7 @@ import java.sql.Statement;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
@@ -35,6 +36,11 @@ public class H2JdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return H2ConnectionManagedObjectSource.class;
+	}
+
+	@Override
+	protected Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass() {
+		return H2ReadOnlyConnectionManagedObjectSource.class;
 	}
 
 	@Override

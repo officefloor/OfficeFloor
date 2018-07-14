@@ -19,6 +19,7 @@ package net.officefloor.jdbc.postgresql;
 
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
@@ -40,6 +41,11 @@ public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedOb
 
 	@Override
 	protected DataSourceFactory getDataSourceFactory(SourceContext context) {
+		return this;
+	}
+
+	@Override
+	protected ConnectionPoolDataSourceFactory getConnectionPoolDataSourceFactory(SourceContext context) {
 		return this;
 	}
 
