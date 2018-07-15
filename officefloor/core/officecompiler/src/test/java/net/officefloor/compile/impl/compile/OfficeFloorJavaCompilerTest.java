@@ -264,7 +264,7 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 	public void testDefaultWrapper() throws Exception {
 
 		// Create the wrapper
-		Class<?> wrapperClass = this.compiler.addWrapper(Connection.class, Connection.class, null).compile();
+		Class<?> wrapperClass = this.compiler.addWrapper(Connection.class, null).compile();
 
 		// Other mocks
 		PreparedStatement statement = this.createMock(PreparedStatement.class);

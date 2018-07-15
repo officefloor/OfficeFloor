@@ -313,20 +313,22 @@ public abstract class OfficeFloorJavaCompiler {
 	 * @throws IOException If fails to write the wrapper.
 	 */
 	public JavaSource addWrapper(Class<?> type, Consumer<WrapperContext> wrapperContext) throws IOException {
-		return this.addWrapper(type, type, wrapperContext);
+		return this.addWrapper(type, type, null, wrapperContext);
 	}
 
 	/**
 	 * Adds a wrapper {@link JavaSource}.
 	 * 
-	 * @param wrappedType    Wrapper type.
-	 * @param delegateType   Delegate type.
-	 * @param wrapperContext {@link Consumer} to configure the
-	 *                       {@link WrapperContext}.
+	 * @param wrappedType        Wrapper type.
+	 * @param delegateType       Delegate type.
+	 * @param delegateExtraction Means to extract the wrapped implementation from
+	 *                           the delegate.
+	 * @param wrapperContext     {@link Consumer} to configure the
+	 *                           {@link WrapperContext}.
 	 * @return {@link JavaSource} for the wrapper.
 	 * @throws IOException If fails to write the wrapper.
 	 */
-	public abstract JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType,
+	public abstract JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, String delegateExtraction,
 			Consumer<WrapperContext> wrapperContext) throws IOException;
 
 	/**

@@ -453,7 +453,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testStressInsert() throws Throwable {
+	public void testStressInsertWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(false));
 	}
 
@@ -471,7 +471,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testStressInsertPooledConnections() throws Throwable {
+	public void testStressInsertPooledConnectionsWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true));
 	}
 
@@ -587,7 +587,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testStressSelectPooledConnections() throws Throwable {
+	public void testStressSelectPooledConnectionsWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true));
 	}
 
@@ -617,16 +617,28 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		});
 
 		// Undertake warm up
+		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
+			if ((i % warmupProgress) == 0) {
+				System.out.print("w");
+				System.out.flush();
+			}
 			CompileOfficeFloor.invokeProcess(officeFloor, "StressSelect.run", new SelectInput(rowTwoId));
 		}
+		System.out.println();
 
 		// Run test
+		int runProgress = RUN_COUNT / 10;
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < RUN_COUNT; i++) {
+			if ((i % runProgress) == 0) {
+				System.out.print(".");
+				System.out.flush();
+			}
 			StressSelectSection.isCompleted = false;
 			CompileOfficeFloor.invokeProcess(officeFloor, "StressSelect.run", new SelectInput(rowTwoId));
 		}
+		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * StressSelectSection.THREAD_COUNT * 2)
 				/ (((float) runTime) / 1000.0));
@@ -639,7 +651,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	}
 
-	private static class SelectInput {
+	public static class SelectInput {
 
 		private final long rowTwoId;
 
@@ -648,7 +660,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 	}
 
-	private static class SelectParameter {
+	public static class SelectParameter {
 
 		private final SelectInput input;
 

@@ -53,7 +53,7 @@ import net.officefloor.compile.issues.CompileError;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
-	
+
 	/**
 	 * Indicates if the {@link Method} has a return value.
 	 * 
@@ -301,8 +301,13 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	@Override
-	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, Consumer<WrapperContext> wrapperContext)
-			throws IOException {
+	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, String delegateExtraction,
+			Consumer<WrapperContext> wrapperContext) throws IOException {
+
+		// Provide default delegate extraction
+		if (delegateExtraction == null) {
+			delegateExtraction = "this.delegate";
+		}
 
 		// Create the source
 		StringWriter buffer = new StringWriter();
@@ -345,7 +350,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 			} else {
 				// Write the default implementation
-				this.writeDelegateMethodImplementation(source, methodContext.wrapClass, "this.delegate", method);
+				this.writeDelegateMethodImplementation(source, methodContext.wrapClass, delegateExtraction, method);
 			}
 
 			// Complete method
