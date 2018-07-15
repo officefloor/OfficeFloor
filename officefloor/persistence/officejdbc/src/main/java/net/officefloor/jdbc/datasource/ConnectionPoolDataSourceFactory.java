@@ -15,37 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.jdbc.h2;
+package net.officefloor.jdbc.datasource;
+
+import javax.sql.ConnectionPoolDataSource;
 
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.jdbc.ConnectionManagedObjectSource;
-import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
-import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
- * H2 {@link ConnectionManagedObjectSource}.
+ * Factory for the creation of a {@link ConnectionPoolDataSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class H2ConnectionManagedObjectSource extends ConnectionManagedObjectSource implements H2DataSourceFactory {
+public interface ConnectionPoolDataSourceFactory {
 
-	/*
-	 * ============= ConnectionManagedObjectSource ===========
+	/**
+	 * Creates the {@link ConnectionPoolDataSource}.
+	 * 
+	 * @param context {@link SourceContext} to configure the
+	 *                {@link ConnectionPoolDataSource}.
+	 * @return {@link ConnectionPoolDataSource}.
+	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
 	 */
-
-	@Override
-	public void loadSpecification(SpecificationContext context) {
-		H2DataSourceFactory.loadSpecification(context);
-	}
-
-	@Override
-	protected DataSourceFactory getDataSourceFactory(SourceContext context) {
-		return this;
-	}
-
-	@Override
-	protected ConnectionPoolDataSourceFactory getConnectionPoolDataSourceFactory(SourceContext context) {
-		return this;
-	}
+	ConnectionPoolDataSource createConnectionPoolDataSource(SourceContext context) throws Exception;
 
 }

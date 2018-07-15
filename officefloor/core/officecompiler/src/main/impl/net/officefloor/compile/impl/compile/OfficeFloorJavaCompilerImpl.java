@@ -55,6 +55,17 @@ import net.officefloor.compile.issues.CompileError;
 public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 	/**
+	 * Indicates if the {@link Method} has a return value.
+	 * 
+	 * @param method {@link Method}.
+	 * @return <code>true</code> if the {@link Method} has a return value.
+	 */
+	private static boolean isReturnValue(Method method) {
+		Class<?> returnType = method.getReturnType();
+		return ((returnType != null) && (!Void.TYPE.equals(returnType)));
+	}
+
+	/**
 	 * Next {@link Class} index.
 	 */
 	private static final AtomicInteger nextClassIndex = new AtomicInteger(1);
@@ -210,8 +221,8 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	public boolean writeMethodSignature(Appendable source, Method method) throws IOException {
 
 		// Obtain details of the method
+		boolean isReturn = isReturnValue(method);
 		Class<?> returnType = method.getReturnType();
-		boolean isReturn = ((returnType != null) && (!Void.TYPE.equals(returnType)));
 		Class<?>[] parameters = method.getParameterTypes();
 		Class<?>[] exceptions = method.getExceptionTypes();
 
@@ -240,6 +251,49 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	@Override
+	public void writeDelegateMethodImplementation(Appendable source, String delegate, Method method)
+			throws IOException {
+		this.writeDelegateMethodImplementation(source, null, delegate, method);
+	}
+
+	/**
+	 * Writes the delegate {@link Method} implementation.
+	 * 
+	 * @param source    {@link Appendable}.
+	 * @param wrapClass Optional wrap {@link Class} to the returned delegate.
+	 * @param delegate  Means to access the delegate.
+	 * @param method    {@link Method}.
+	 * @throws IOException If fails write delegate {@link Method} implementation.
+	 */
+	private void writeDelegateMethodImplementation(Appendable source, String wrapClass, String delegate, Method method)
+			throws IOException {
+
+		// Indicate if has return
+		boolean isReturnValue = isReturnValue(method);
+
+		// Write the default implementation
+		source.append("    ");
+		if (isReturnValue) {
+			source.append("return ");
+			if (wrapClass != null) {
+				source.append("new " + wrapClass + "(");
+			}
+		}
+		source.append(delegate + "." + method.getName() + "(");
+		Class<?>[] parameters = method.getParameterTypes();
+		for (int i = 0; i < parameters.length; i++) {
+			if (i > 0) {
+				source.append(", ");
+			}
+			source.append("p" + i);
+		}
+		if (isReturnValue && (wrapClass != null)) {
+			source.append(")");
+		}
+		source.append(");\n");
+	}
+
+	@Override
 	public JavaSource addSource(String className, String source) {
 		JavaSourceImpl javaSource = new JavaSourceImpl(className, source);
 		this.sources.add(javaSource);
@@ -247,8 +301,13 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	@Override
-	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, Consumer<WrapperContext> wrapperContext)
-			throws IOException {
+	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, String delegateExtraction,
+			Consumer<WrapperContext> wrapperContext) throws IOException {
+
+		// Provide default delegate extraction
+		if (delegateExtraction == null) {
+			delegateExtraction = "this.delegate";
+		}
 
 		// Create the source
 		StringWriter buffer = new StringWriter();
@@ -259,18 +318,15 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 		// Obtain the type names
 		String wrappedTypeName = this.getSourceName(wrappedType);
-		String delegateTypeName = this.getSourceName(delegateType);
 
 		// Write the initial class details
 		source.println("package " + className.getPackageName() + ";");
-		source.println("@" + SuppressWarnings.class.getName() + "({\"unchecked\", \"deprecation\"})");
+		source.println(
+				"@" + SuppressWarnings.class.getName() + "({\"all\",\"unchecked\",\"rawtypes\",\"deprecation\"})");
 		source.println("public class " + className.getClassName() + " implements " + wrappedTypeName + " {");
 
 		// Provide constructor to delegate
-		source.println("  private final " + delegateTypeName + " delegate;");
-		source.println("  public " + className.getClassName() + "(" + delegateTypeName + " delegate) {");
-		source.println("    this.delegate = delegate;");
-		source.println("  }");
+		this.writeConstructor(source, className.getClassName(), this.createField(delegateType, "delegate"));
 
 		// Implement the methods
 		for (Method method : wrappedType.getMethods()) {
@@ -283,7 +339,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 			// Write the method signature
 			source.print("  public ");
-			boolean isReturn = this.writeMethodSignature(source, method);
+			this.writeMethodSignature(source, method);
 			source.println(" {");
 
 			// Determine if override implementation
@@ -294,25 +350,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 			} else {
 				// Write the default implementation
-				source.print("    ");
-				if (isReturn) {
-					source.print("return ");
-					if (methodContext.wrapClass != null) {
-						source.print("new " + methodContext.wrapClass + "(");
-					}
-				}
-				source.print("this.delegate." + method.getName() + "(");
-				Class<?>[] parameters = method.getParameterTypes();
-				for (int i = 0; i < parameters.length; i++) {
-					if (i > 0) {
-						source.print(", ");
-					}
-					source.print("p" + i);
-				}
-				if (isReturn && (methodContext.wrapClass != null)) {
-					source.print(")");
-				}
-				source.println(");");
+				this.writeDelegateMethodImplementation(source, methodContext.wrapClass, delegateExtraction, method);
 			}
 
 			// Complete method

@@ -203,6 +203,17 @@ public abstract class OfficeFloorJavaCompiler {
 	public abstract boolean writeMethodSignature(Appendable appendable, Method method) throws IOException;
 
 	/**
+	 * Writes the delegate {@link Method} implementation.
+	 * 
+	 * @param source   {@link Appendable}.
+	 * @param delegate Means to access delegate.
+	 * @param method   {@link Method}.
+	 * @throws IOException If fails write delegate {@link Method} implementation.
+	 */
+	public abstract void writeDelegateMethodImplementation(Appendable source, String delegate, Method method)
+			throws IOException;
+
+	/**
 	 * Java source.
 	 */
 	public static interface JavaSource {
@@ -302,20 +313,22 @@ public abstract class OfficeFloorJavaCompiler {
 	 * @throws IOException If fails to write the wrapper.
 	 */
 	public JavaSource addWrapper(Class<?> type, Consumer<WrapperContext> wrapperContext) throws IOException {
-		return this.addWrapper(type, type, wrapperContext);
+		return this.addWrapper(type, type, null, wrapperContext);
 	}
 
 	/**
 	 * Adds a wrapper {@link JavaSource}.
 	 * 
-	 * @param wrappedType    Wrapper type.
-	 * @param delegateType   Delegate type.
-	 * @param wrapperContext {@link Consumer} to configure the
-	 *                       {@link WrapperContext}.
+	 * @param wrappedType        Wrapper type.
+	 * @param delegateType       Delegate type.
+	 * @param delegateExtraction Means to extract the wrapped implementation from
+	 *                           the delegate.
+	 * @param wrapperContext     {@link Consumer} to configure the
+	 *                           {@link WrapperContext}.
 	 * @return {@link JavaSource} for the wrapper.
 	 * @throws IOException If fails to write the wrapper.
 	 */
-	public abstract JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType,
+	public abstract JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, String delegateExtraction,
 			Consumer<WrapperContext> wrapperContext) throws IOException;
 
 	/**

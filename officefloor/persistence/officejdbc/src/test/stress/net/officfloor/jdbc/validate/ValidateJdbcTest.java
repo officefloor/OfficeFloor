@@ -26,6 +26,7 @@ import org.h2.jdbcx.JdbcDataSource;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
@@ -39,6 +40,11 @@ public class ValidateJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return ConnectionManagedObjectSource.class;
+	}
+
+	@Override
+	protected Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass() {
+		return ReadOnlyConnectionManagedObjectSource.class;
 	}
 
 	@Override

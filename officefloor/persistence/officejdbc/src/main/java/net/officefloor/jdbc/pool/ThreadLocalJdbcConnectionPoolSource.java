@@ -28,6 +28,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPool.PooledConnectionWrapperFactory;
 
 /**
  * {@link Connection} {@link ManagedObjectPoolSource} implementation that uses
@@ -42,7 +43,7 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 	/**
 	 * {@link ClassLoader}.
 	 */
-	private ClassLoader classLoader;
+	private PooledConnectionWrapperFactory wrapperFactory;
 
 	/*
 	 * ============= AbstractManagedObjectPoolSource ================
@@ -55,13 +56,14 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 	@Override
 	protected void loadMetaData(MetaDataContext context) throws Exception {
 
-		// Obtain the class loader (necessary for Connection proxies)
-		this.classLoader = context.getManagedObjectPoolSourceContext().getClassLoader();
-
 		// Load the meta-data
 		context.setPooledObjectType(Connection.class);
 		context.setManagedObjectPoolFactory(this);
 		context.addThreadCompleteListener((pool) -> (ThreadLocalJdbcConnectionPool) pool);
+
+		// Create the wrapper factory
+		ClassLoader classLoader = context.getManagedObjectPoolSourceContext().getClassLoader();
+		this.wrapperFactory = ThreadLocalJdbcConnectionPool.createWrapperFactory(classLoader);
 	}
 
 	/*
@@ -69,7 +71,8 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 	 */
 
 	@Override
-	public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext) {
+	public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext)
+			throws Exception {
 
 		// Ensure have connection managed object source
 		ManagedObjectSource<?, ?> managedObjectSource = managedObjectPoolContext.getManagedObjectSource();
@@ -83,7 +86,7 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 		ConnectionPoolDataSource dataSource = connectionManagedObjectSource.getConnectionPoolDataSource();
 
 		// Create and return the pool
-		return new ThreadLocalJdbcConnectionPool(dataSource, this.classLoader);
+		return new ThreadLocalJdbcConnectionPool(dataSource, this.wrapperFactory);
 	}
 
 }

@@ -17,15 +17,22 @@
  */
 package net.officefloor.jpa;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -58,16 +65,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	 * {@link PersistenceFactory}.
 	 */
 	public static final String PROPERTY_PERSISTENCE_FACTORY = "persistence.factory";
-
-	/**
-	 * {@link DataSource} type for {@link Proxy}.
-	 */
-	private static final Class<?>[] DATA_SOURCE_TYPE = new Class[] { DataSource.class };
-
-	/**
-	 * {@link EntityManager} type for {@link Proxy}.
-	 */
-	private static final Class<?>[] ENTITY_MANAGER_TYPE = new Class[] { EntityManager.class };
 
 	/**
 	 * Dependencies.
@@ -103,6 +100,22 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	}
 
 	/**
+	 * Factory creating the {@link EntityManager} wrapper.
+	 */
+	public static interface EntityManagerWrapperFactory {
+
+		/**
+		 * Wraps the {@link EntityManager}.
+		 * 
+		 * @param jpaManagedObject {@link JpaManagedObject} providing the
+		 *                         {@link EntityManager}.
+		 * @return {@link EntityManager}.
+		 * @throws Exception If fails to create wrapper for {@link EntityManager}.
+		 */
+		EntityManager wrap(JpaManagedObject jpaManagedObject) throws Exception;
+	}
+
+	/**
 	 * {@link DataSource} {@link Connection}.
 	 */
 	private final ThreadLocal<Connection> dataSourceConnection = new ThreadLocal<>();
@@ -123,11 +136,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	private Properties properties;
 
 	/**
-	 * {@link ClassLoader}.
-	 */
-	private ClassLoader classLoader;
-
-	/**
 	 * {@link PersistenceFactory}.
 	 */
 	private PersistenceFactory persistenceFactory;
@@ -136,6 +144,20 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	 * {@link EntityManagerFactory}.
 	 */
 	private EntityManagerFactory entityManagerFactory;
+
+	/**
+	 * {@link EntityManagerWrapperFactory}.
+	 */
+	private EntityManagerWrapperFactory wrapperFactory;
+
+	/**
+	 * Obtains the {@link Connection}.
+	 * 
+	 * @return {@link Connection}.
+	 */
+	public Connection getConnection() {
+		return this.dataSourceConnection.get();
+	}
 
 	/**
 	 * <p>
@@ -191,21 +213,103 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		// Obtain the details to create Entity Manager Factory
 		this.persistenceUnitName = mosContext.getProperty(PROPERTY_PERSISTENCE_UNIT);
 		this.properties = mosContext.getProperties();
-		this.classLoader = mosContext.getClassLoader();
+		ClassLoader classLoader = mosContext.getClassLoader();
 
-		// Create the DataSource
-		this.dataSource = (DataSource) Proxy.newProxyInstance(this.classLoader, DATA_SOURCE_TYPE,
-				(proxy, method, args) -> {
-					switch (method.getName()) {
-					case "getConnection":
-						return this.dataSourceConnection.get();
-					}
-					throw new UnsupportedOperationException("Method " + method.getName()
-							+ " not available from JPA proxy " + DataSource.class.getSimpleName());
-				});
+		// Determine compiler available
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		if (compiler == null) {
+
+			// Fall back to proxy for data source wrapper
+			this.dataSource = (DataSource) Proxy.newProxyInstance(classLoader, new Class[] { DataSource.class },
+					(proxy, method, args) -> {
+						switch (method.getName()) {
+						case "getConnection":
+							return this.dataSourceConnection.get();
+						}
+						throw new UnsupportedOperationException("Method " + method.getName()
+								+ " not available from JPA proxy " + DataSource.class.getSimpleName());
+					});
+
+			// Create fall back proxy entity manager wrapper
+			Class<?>[] interfaces = new Class[] { EntityManager.class };
+			this.wrapperFactory = (mo) -> (EntityManager) Proxy.newProxyInstance(classLoader, interfaces, mo);
+
+		} else {
+			// Use compiled implementation of data source
+			StringWriter sourceBuffer = new StringWriter();
+			PrintWriter source = new PrintWriter(sourceBuffer);
+
+			// Obtain wrapper class name
+			ClassName className = compiler.createClassName(DataSource.class.getName());
+
+			// Write declaration
+			source.println("package " + className.getPackageName() + ";");
+			source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
+			source.println("public class " + className.getClassName() + " implements "
+					+ compiler.getSourceName(DataSource.class) + "{");
+
+			// Write constructor
+			compiler.writeConstructor(source, className.getClassName(),
+					compiler.createField(JpaManagedObjectSource.class, "mos"));
+
+			// Write the methods
+			for (Method method : DataSource.class.getMethods()) {
+
+				// Write the method signature
+				source.print("  public ");
+				compiler.writeMethodSignature(source, method);
+				source.println(" {");
+
+				// Write the implementation
+				switch (method.getName()) {
+				case "getConnection":
+					source.println("    return this.mos.getConnection();");
+					break;
+				default:
+					source.println(
+							"    throw new " + compiler.getSourceName(SQLFeatureNotSupportedException.class) + "();");
+					break;
+				}
+
+				// Complete the method
+				source.println("  }");
+			}
+
+			// Complete class
+			source.println("}");
+			source.flush();
+
+			// Compile the data source
+			Class<?> dataSourceClass = compiler.addSource(className, sourceBuffer.toString()).compile();
+			this.dataSource = (DataSource) dataSourceClass.getConstructor(JpaManagedObjectSource.class)
+					.newInstance(this);
+
+			// Use compiled implementation of entity manager wrapper
+			Class<?> wrapperClass = compiler.addWrapper(EntityManager.class, JpaManagedObject.class,
+					"this.delegate.getEntityManager()", (wrapperContext) -> {
+						switch (wrapperContext.getMethod().getName()) {
+						case "getTransaction":
+							wrapperContext.write("    throw new " + compiler.getSourceName(IllegalStateException.class)
+									+ "(\"" + compiler.getSourceName(EntityManager.class)
+									+ ".getTransaction() may not be invoked as transaction managed by "
+									+ compiler.getSourceName(OfficeFloor.class) + "\");");
+							break;
+
+						case "close":
+							wrapperContext.write("    throw new " + compiler.getSourceName(IllegalStateException.class)
+									+ "(\"" + compiler.getSourceName(EntityManager.class)
+									+ ".close() may not be invoked as managed by "
+									+ compiler.getSourceName(OfficeFloor.class) + "\");");
+							break;
+						}
+					}).compile();
+			Constructor<?> constructor = wrapperClass.getConstructor(JpaManagedObject.class);
+			this.wrapperFactory = (mo) -> (EntityManager) constructor.newInstance(mo);
+		}
 
 		// Obtain the persistence factory
 		this.persistenceFactory = this.getPersistenceFactory(context);
+
 	}
 
 	@Override
@@ -216,7 +320,12 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	/**
 	 * JPA {@link ManagedObject}.
 	 */
-	private class JpaManagedObject implements CoordinatingManagedObject<Dependencies> {
+	public class JpaManagedObject implements CoordinatingManagedObject<Dependencies>, InvocationHandler {
+
+		/**
+		 * {@link Connection}.
+		 */
+		private Connection connection;
 
 		/**
 		 * {@link Proxy} {@link EntityManager}.
@@ -228,6 +337,21 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		 */
 		private EntityManager entityManager;
 
+		/**
+		 * Obtains the {@link EntityManager}.
+		 * 
+		 * @return {@link EntityManager}.
+		 */
+		public EntityManager getEntityManager() {
+
+			// Specify the connection
+			// All entity manager operations synchronous so will use
+			JpaManagedObjectSource.this.dataSourceConnection.set(this.connection);
+
+			// Return the entity manager
+			return this.entityManager;
+		}
+
 		/*
 		 * ================== ManagedObject =======================
 		 */
@@ -236,13 +360,13 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the connection
-			Connection connection = (Connection) registry.getObject(Dependencies.CONNECTION);
+			this.connection = (Connection) registry.getObject(Dependencies.CONNECTION);
 
 			// Easy access to managed object source
 			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
 
 			// Specify connection for setup of entity manager factory and entity manager
-			mos.dataSourceConnection.set(connection);
+			mos.dataSourceConnection.set(this.connection);
 
 			// If still reference to persistence factory (then likely factory not created)
 			if (mos.persistenceFactory != null) {
@@ -269,42 +393,39 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			this.entityManager.getTransaction().begin();
 
 			// Provide proxy entity manager (to specify connection)
-			this.proxy = (EntityManager) Proxy.newProxyInstance(mos.classLoader, ENTITY_MANAGER_TYPE,
-					(proxy, method, args) -> {
-
-						// Disallow access to transaction (as managed)
-						switch (method.getName()) {
-						case "getTransaction":
-							throw new IllegalStateException(EntityManager.class.getSimpleName()
-									+ ".getTransaction() may not be invoked as transaction managed by "
-									+ OfficeFloor.class.getSimpleName());
-
-						case "close":
-							throw new IllegalStateException(EntityManager.class.getSimpleName()
-									+ ".close() may not be invoked as managed by " + OfficeFloor.class.getName());
-						}
-
-						// Specify the connection
-						// All entity manager operations synchronous so will use
-						mos.dataSourceConnection.set(connection);
-
-						// Obtain the delegate method on the entity manager
-						Method delegateMethod = this.entityManager.getClass().getMethod(method.getName(),
-								method.getParameterTypes());
-
-						// Invoke (and retry forcing access)
-						try {
-							return delegateMethod.invoke(this.entityManager, args);
-						} catch (IllegalAccessException ex) {
-							delegateMethod.setAccessible(true);
-							return delegateMethod.invoke(this.entityManager, args);
-						}
-					});
+			this.proxy = mos.wrapperFactory.wrap(this);
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
 			return this.proxy;
+		}
+
+		/*
+		 * ================ InnovationHandler ============================
+		 */
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+			// Disallow access to transaction (as managed)
+			switch (method.getName()) {
+			case "getTransaction":
+				throw new IllegalStateException(EntityManager.class.getSimpleName()
+						+ ".getTransaction() may not be invoked as transaction managed by "
+						+ OfficeFloor.class.getSimpleName());
+
+			case "close":
+				throw new IllegalStateException(EntityManager.class.getSimpleName()
+						+ ".close() may not be invoked as managed by " + OfficeFloor.class.getName());
+			}
+
+			// Obtain the entity manager
+			EntityManager entityManager = this.getEntityManager();
+
+			// Obtain the delegate method
+			return entityManager.getClass().getMethod(method.getName(), method.getParameterTypes())
+					.invoke(entityManager, args);
 		}
 	}
 
