@@ -515,9 +515,17 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				return null; // auto-commit managed
 			}
 
+			// Obtain the delegate method
+			Method delegateMethod = reference.connection.getClass().getMethod(method.getName(),
+					method.getParameterTypes());
+
 			// Invoke method
-			return reference.connection.getClass().getMethod(method.getName(), method.getParameterTypes())
-					.invoke(reference.connection, args);
+			try {
+				return delegateMethod.invoke(reference.connection, args);
+			} catch (IllegalAccessException ex) {
+				delegateMethod.setAccessible(true);
+				return delegateMethod.invoke(reference.connection, args);
+			}
 		}
 	}
 

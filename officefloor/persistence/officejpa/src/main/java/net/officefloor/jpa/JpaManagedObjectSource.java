@@ -423,7 +423,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			// Obtain the entity manager
 			EntityManager entityManager = this.getEntityManager();
 
-			// Invoke method on entity manager
+			// Obtain the delegate method
 			return entityManager.getClass().getMethod(method.getName(), method.getParameterTypes())
 					.invoke(entityManager, args);
 		}
