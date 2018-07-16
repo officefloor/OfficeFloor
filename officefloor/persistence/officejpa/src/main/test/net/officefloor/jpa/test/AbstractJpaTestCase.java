@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
 
@@ -51,7 +52,6 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 import net.officefloor.jpa.JpaManagedObjectSource;
-import net.officefloor.jpa.JpaManagedObjectSource.Dependencies;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -159,7 +159,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validate the specification.
+	 * Validate the specification
 	 */
 	public void testSpecification() {
 
@@ -183,12 +183,91 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Validate the type.
 	 */
-	public void testType() {
+	public void testType_Connection() {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
-		type.addDependency(Dependencies.CONNECTION, Connection.class, null);
+		type.addDependency("Connection", Connection.class, null, 0, null);
+		type.addExtensionInterface(EntityManager.class);
+
+		// Load the properties
+		List<String> properties = new LinkedList<>();
+		this.loadJpaProperties((name, value) -> {
+			properties.add(name);
+			properties.add(value);
+		});
+
+		// Indicate connection
+		properties.add(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE);
+		properties.add(JpaManagedObjectSource.DEPENDENCY_TYPE_CONNECTION);
+
+		// Validate type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
+				properties.toArray(new String[properties.size()]));
+	}
+
+	/**
+	 * Validate the type.
+	 */
+	public void testType_DataSource() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		type.setObjectClass(EntityManager.class);
+		type.addDependency("DataSource", DataSource.class, null, 0, null);
+		type.addExtensionInterface(EntityManager.class);
+
+		// Load the properties
+		List<String> properties = new LinkedList<>();
+		this.loadJpaProperties((name, value) -> {
+			properties.add(name);
+			properties.add(value);
+		});
+
+		// Indicate connection
+		properties.add(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE);
+		properties.add(JpaManagedObjectSource.DEPENDENCY_TYPE_DATA_SOURCE);
+
+		// Validate type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
+				properties.toArray(new String[properties.size()]));
+	}
+
+	/**
+	 * Validate the type.
+	 */
+	public void testType_Managed() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		type.setObjectClass(EntityManager.class);
+		type.addExtensionInterface(EntityManager.class);
+
+		// Load the properties
+		List<String> properties = new LinkedList<>();
+		this.loadJpaProperties((name, value) -> {
+			properties.add(name);
+			properties.add(value);
+		});
+
+		// Indicate connection
+		properties.add(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE);
+		properties.add(JpaManagedObjectSource.DEPENDENCY_TYPE_MANGAED);
+
+		// Validate type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
+				properties.toArray(new String[properties.size()]));
+	}
+
+	/**
+	 * Validate the type.
+	 */
+	public void testType_Default() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		type.setObjectClass(EntityManager.class);
 		type.addExtensionInterface(EntityManager.class);
 
 		// Load the properties

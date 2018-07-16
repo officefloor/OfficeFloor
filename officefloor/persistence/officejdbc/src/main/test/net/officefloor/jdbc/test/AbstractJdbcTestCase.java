@@ -31,6 +31,8 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import javax.sql.DataSource;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.PropertyConfigurable;
@@ -47,6 +49,7 @@ import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -128,11 +131,26 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected abstract Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass();
 
 	/**
-	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
+	 * Obtains the {@link DataSourceManagedObjectSource} {@link Class} being tested.
+	 * 
+	 * @return {@link DataSourceManagedObjectSource} {@link Class} being tested.
+	 */
+	protected abstract Class<? extends DataSourceManagedObjectSource> getDataSourceManagedObjectSourceClass();
+
+	/**
+	 * Loads the properties for the {@link ConnectionManagedObjectSource} and
+	 * {@link ReadOnlyConnectionManagedObjectSource}.
 	 * 
 	 * @param mos {@link PropertyConfigurable}.
 	 */
-	protected abstract void loadProperties(PropertyConfigurable mos);
+	protected abstract void loadConnectionProperties(PropertyConfigurable mos);
+
+	/**
+	 * Loads the properties for the {@link DataSourceManagedObjectSource}.
+	 * 
+	 * @param mos {@link PropertyConfigurable}.
+	 */
+	protected abstract void loadDataSourceProperties(PropertyConfigurable mos);
 
 	/**
 	 * Cleans the database.
@@ -167,7 +185,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 					// Obtain connection
 					// Must keep reference to keep potential in memory databases active
 					this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-							(mos) -> this.loadProperties(mos));
+							(mos) -> this.loadConnectionProperties(mos));
 
 					// Clean database
 					this.cleanDatabase(this.connection);
@@ -226,6 +244,15 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correct specification for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceSpecification() throws Exception {
+		this.doSpecification(this.getDataSourceManagedObjectSourceClass());
+	}
+
+	/**
 	 * Ensure correct specification.
 	 *
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
@@ -242,7 +269,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 		// Obtain the expected properties
 		Properties expected = new Properties();
-		this.loadProperties((name, value) -> expected.put(name, value));
+		this.loadConnectionProperties((name, value) -> expected.put(name, value));
 
 		// Ensure the correct specification
 		for (String name : expected.stringPropertyNames()) {
@@ -258,7 +285,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Exception On test failure.
 	 */
 	public void testWritableType() throws Exception {
-		this.doTypeTest(this.getConnectionManagedObjectSourceClass());
+		this.doTypeTest(this.getConnectionManagedObjectSourceClass(), Connection.class);
 	}
 
 	/**
@@ -267,31 +294,41 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Exception On test failure.
 	 */
 	public void testReadOnlyType() throws Exception {
-		this.doTypeTest(this.getReadOnlyConnectionManagedObjectSourceClass());
+		this.doTypeTest(this.getReadOnlyConnectionManagedObjectSourceClass(), Connection.class);
+	}
+
+	/**
+	 * Ensure correct type for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceType() throws Exception {
+		this.doTypeTest(this.getDataSourceManagedObjectSourceClass(), DataSource.class);
 	}
 
 	/**
 	 * Ensure correct type.
 	 *
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @param expectedType             Expected type.
 	 * @throws Exception On test failure.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doTypeTest(
-			Class<MS> managedObjectSourceClass) throws Exception {
+			Class<MS> managedObjectSourceClass, Class<?> expectedType) throws Exception {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
-		type.setObjectClass(Connection.class);
+		type.setObjectClass(expectedType);
 
 		// Create the properties
 		List<String> properties = new LinkedList<>();
-		this.loadProperties((name, value) -> {
+		this.loadConnectionProperties((name, value) -> {
 			properties.add(name);
 			properties.add(value);
 		});
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getConnectionManagedObjectSourceClass(),
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, managedObjectSourceClass,
 				properties.toArray(new String[properties.size()]));
 	}
 
@@ -308,7 +345,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			context.addSection("SECTION", ConnectivitySection.class);
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
 					this.getConnectionManagedObjectSourceClass().getName());
-			this.loadProperties(mos);
+			this.loadConnectionProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
@@ -348,8 +385,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testInsertStressWithCompiler() throws Throwable {
-		this.doInsertStressTest(false);
+	public void testInsertConnectionStressWithCompiler() throws Throwable {
+		this.doInsertStressTest(false, this.getConnectionManagedObjectSourceClass(), true,
+				InsertConnectionSection.class);
 	}
 
 	/**
@@ -357,8 +395,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testInsertStressWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(false));
+	public void testInsertConnectionStressWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(false,
+				this.getConnectionManagedObjectSourceClass(), true, InsertConnectionSection.class));
 	}
 
 	/**
@@ -367,8 +406,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testTransactionInsertStressWithCompiler() throws Throwable {
-		this.doInsertStressTest(true);
+	public void testInsertConnectionTransactionStressWithCompiler() throws Throwable {
+		this.doInsertStressTest(true, this.getConnectionManagedObjectSourceClass(), true,
+				InsertConnectionSection.class);
 	}
 
 	/**
@@ -376,20 +416,37 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testTransactionInsertStressWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(true));
+	public void testInsertConnectionTransactionStressWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(true,
+				this.getConnectionManagedObjectSourceClass(), true, InsertConnectionSection.class));
+	}
+
+	/**
+	 * Ensure can stress test against {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testInsertDataSourceStress() throws Throwable {
+		this.doInsertStressTest(false, this.getDataSourceManagedObjectSourceClass(), false,
+				InsertDataSourceSection.class);
 	}
 
 	/**
 	 * Undertake insert stress test.
 	 * 
-	 * @param isTransaction Whether test uses transactions.
+	 * @param isTransaction            Whether test uses transactions.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @param isPool                   Indicates whether to pool {@link Connection}
+	 *                                 instances.
+	 * @param sectionLogicClass        Section logic {@link Class}.
 	 */
-	private void doInsertStressTest(boolean isTransaction) throws Throwable {
+	private <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doInsertStressTest(
+			boolean isTransaction, Class<MS> managedObjectSourceClass, boolean isPool, Class<?> sectionLogicClass)
+			throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
-		StressSection.isTransaction = isTransaction;
+		InsertConnectionSection.isTransaction = isTransaction;
 
 		// Undertake stress test
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -401,18 +458,31 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		});
 		compiler.office((context) -> {
 			context.getOfficeArchitect().enableAutoWireTeams();
-			context.addSection("SECTION", StressSection.class);
+			context.addSection("SECTION", sectionLogicClass);
 
 			// Connection
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					this.getConnectionManagedObjectSourceClass().getName());
-			this.loadProperties(mos);
+					managedObjectSourceClass.getName());
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
+			// Load the properties
+			if (sectionLogicClass == InsertConnectionSection.class) {
+				// Configure connection
+				this.loadConnectionProperties(mos);
+			} else if (sectionLogicClass == InsertDataSourceSection.class) {
+				// Configure data source
+				this.loadDataSourceProperties(mos);
+			} else {
+				fail("Unknown logic section");
+			}
+
 			// Pool the connection
-			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-					ThreadLocalJdbcConnectionPoolSource.class.getName());
-			context.getOfficeArchitect().link(mos, pool);
+			if (isPool) {
+				OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+						ThreadLocalJdbcConnectionPoolSource.class.getName());
+				context.getOfficeArchitect().link(mos, pool);
+
+			}
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
@@ -421,14 +491,19 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
 		}
 
+		// Identifier
+		AtomicInteger id = new AtomicInteger(1);
+
 		// Undertake warm up
+		System.out.println("==== " + this.getClass().getSimpleName() + " ====");
+		System.out.println(this.getName());
 		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
 			if ((i % warmupProgress) == 0) {
 				System.out.print("w");
 				System.out.flush();
 			}
-			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", id);
 		}
 		System.out.println();
 
@@ -440,13 +515,13 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				System.out.print(".");
 				System.out.flush();
 			}
-			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", id);
 		}
 		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));
-		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
-				+ +requestsPerSecond + " inserts/sec");
+		System.out.println(requestsPerSecond + " inserts/sec");
+		System.out.println();
 
 		// Ensure inserted all rows
 		try (PreparedStatement statement = this.connection
@@ -464,35 +539,50 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	public static class NewThread {
 	}
 
-	public static class StressSection {
+	public static class InsertConnectionSection {
 
 		private static volatile boolean isTransaction = false;
 
 		@FlowInterface
 		public static interface Flows {
-			void thread();
+			void thread(AtomicInteger id);
 		}
 
-		private final AtomicInteger id = new AtomicInteger(1);
-
-		public void run(Connection connection, Flows flows) throws SQLException {
+		public void run(@Parameter AtomicInteger id, Connection connection, Flows flows) throws SQLException {
 			if (isTransaction) {
 				connection.setAutoCommit(false);
 			}
-			this.insertRow(connection, "run");
-			flows.thread();
+			insertRow(connection, id, "run");
+			flows.thread(id);
 		}
 
-		public void thread(Connection connection, NewThread thread) throws SQLException {
-			this.insertRow(connection, Thread.currentThread().getName());
+		public void thread(@Parameter AtomicInteger id, Connection connection, NewThread thread) throws SQLException {
+			insertRow(connection, id, Thread.currentThread().getName());
 		}
 
-		private void insertRow(Connection connection, String name) throws SQLException {
+		private static void insertRow(Connection connection, AtomicInteger id, String name) throws SQLException {
 			try (PreparedStatement statement = connection
 					.prepareStatement("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( ?, ? )")) {
-				statement.setInt(1, this.id.getAndIncrement());
+				statement.setInt(1, id.getAndIncrement());
 				statement.setString(2, name);
 				assertEquals("Should add the row", 1, statement.executeUpdate());
+			}
+		}
+	}
+
+	public static class InsertDataSourceSection {
+
+		public void run(@Parameter AtomicInteger id, DataSource dataSource, InsertConnectionSection.Flows flows)
+				throws SQLException {
+			try (Connection connection = dataSource.getConnection()) {
+				InsertConnectionSection.insertRow(connection, id, "run");
+			}
+			flows.thread(id);
+		}
+
+		public void thread(@Parameter AtomicInteger id, DataSource dataSource, NewThread thread) throws SQLException {
+			try (Connection connection = dataSource.getConnection()) {
+				InsertConnectionSection.insertRow(connection, id, Thread.currentThread().getName());
 			}
 		}
 	}
@@ -504,7 +594,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testWritableSelectStressWithCompiler() throws Throwable {
-		this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true);
+		this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true, SelectConnectionSection.class);
 	}
 
 	/**
@@ -513,8 +603,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testWritableSelectStressWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler
-				.runWithoutCompiler(() -> this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true));
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this
+				.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true, SelectConnectionSection.class));
 	}
 
 	/**
@@ -524,7 +614,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testReadOnlySelectStressWithCompiler() throws Throwable {
-		this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false);
+		this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false,
+				SelectConnectionSection.class);
 	}
 
 	/**
@@ -533,8 +624,18 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testReadOnlySelectStressWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(
-				() -> this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false));
+		OfficeFloorJavaCompiler
+				.runWithoutCompiler(() -> this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(),
+						false, SelectConnectionSection.class));
+	}
+
+	/**
+	 * Undertakes select stress for {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testDataSourceSelectStress() throws Throwable {
+		this.doSelectStressTest(this.getDataSourceManagedObjectSourceClass(), false, SelectDataSourceSection.class);
 	}
 
 	/**
@@ -543,10 +644,11 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
 	 * @param isPool                   Indicates whether to pool {@link Connection}
 	 *                                 instances.
+	 * @param sectionLogicClass        Section logic {@link Class}.
 	 * @throws Throwable On test failure.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSelectStressTest(
-			Class<?> managedObjectSourceClass, boolean isPool) throws Throwable {
+			Class<?> managedObjectSourceClass, boolean isPool, Class<?> sectionLogicClass) throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
@@ -560,14 +662,22 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		});
 		compiler.office((context) -> {
 			context.getOfficeArchitect().enableAutoWireTeams();
-			context.addSection("SECTION", SelectSection.class);
+			context.addSection("SECTION", sectionLogicClass);
 			context.addManagedObject("tag", NewThread.class, ManagedObjectScope.THREAD);
 
 			// Connection
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
 					managedObjectSourceClass.getName());
-			this.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Load the properties
+			if (sectionLogicClass == SelectConnectionSection.class) {
+				this.loadConnectionProperties(mos);
+			} else if (sectionLogicClass == SelectDataSourceSection.class) {
+				this.loadDataSourceProperties(mos);
+			} else {
+				fail("Unknown logic section");
+			}
 
 			// Pool the connection
 			if (isPool) {
@@ -585,6 +695,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// Undertake warm up
+		System.out.println("==== " + this.getClass().getSimpleName() + " ====");
+		System.out.println(this.getName());
 		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
 			if ((i % warmupProgress) == 0) {
@@ -603,15 +715,16 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				System.out.print(".");
 				System.out.flush();
 			}
-			SelectSection.isCompleted = false;
+			AbstractSelectSection.isCompleted = false;
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.run", null);
-			assertTrue("Should be complete", SelectSection.isCompleted);
+			assertTrue("Should be complete", AbstractSelectSection.isCompleted);
 		}
 		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
-		long requestsPerSecond = (int) ((RUN_COUNT * SelectSection.THREAD_COUNT) / (((float) runTime) / 1000.0));
-		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
-				+ +requestsPerSecond + " selects/sec");
+		long requestsPerSecond = (int) ((RUN_COUNT * AbstractSelectSection.THREAD_COUNT)
+				/ (((float) runTime) / 1000.0));
+		System.out.println(requestsPerSecond + " selects/sec");
+		System.out.println();
 
 		// Complete
 		officeFloor.closeOfficeFloor();
@@ -622,7 +735,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		private volatile String name = null;
 	}
 
-	public static class SelectSection {
+	public static class AbstractSelectSection {
 
 		private static int THREAD_COUNT = 10;
 
@@ -650,12 +763,30 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			}
 		}
 
-		public void thread(Connection connection, @Parameter SelectParameter parameter, NewThread tag)
+		protected static void runSelect(Connection connection, @Parameter SelectParameter parameter, NewThread tag)
 				throws SQLException {
 			try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM OFFICE_FLOOR_JDBC_TEST")) {
 				ResultSet resultSet = statement.executeQuery();
 				assertTrue("Should have row from database", resultSet.next());
 				parameter.name = resultSet.getString("NAME");
+			}
+		}
+	}
+
+	public static class SelectConnectionSection extends AbstractSelectSection {
+
+		public void thread(Connection connection, @Parameter SelectParameter parameter, NewThread tag)
+				throws SQLException {
+			runSelect(connection, parameter, tag);
+		}
+	}
+
+	public static class SelectDataSourceSection extends AbstractSelectSection {
+
+		public void thread(DataSource dataSource, @Parameter SelectParameter parameter, NewThread tag)
+				throws SQLException {
+			try (Connection connection = dataSource.getConnection()) {
+				runSelect(connection, parameter, tag);
 			}
 		}
 	}

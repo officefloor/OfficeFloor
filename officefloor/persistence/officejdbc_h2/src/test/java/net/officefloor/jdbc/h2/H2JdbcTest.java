@@ -44,7 +44,7 @@ public class H2JdbcTest extends AbstractJdbcTestCase {
 	}
 
 	@Override
-	protected void loadProperties(PropertyConfigurable mos) {
+	protected void loadConnectionProperties(PropertyConfigurable mos) {
 		mos.addProperty("url", "jdbc:h2:mem:test");
 		mos.addProperty("user", "test");
 		mos.addProperty("password", "test");

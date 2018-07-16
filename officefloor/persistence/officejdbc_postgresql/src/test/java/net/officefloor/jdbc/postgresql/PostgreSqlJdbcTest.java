@@ -163,7 +163,7 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	}
 
 	@Override
-	protected void loadProperties(PropertyConfigurable mos) {
+	protected void loadConnectionProperties(PropertyConfigurable mos) {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "testuser");

@@ -56,6 +56,30 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManagedObjectSource.Dependencies, None> {
 
 	/**
+	 * {@link Property} to specify the dependency type for the
+	 * {@link EntityManager}.
+	 */
+	public static final String PROPERTY_DEPENDENCY_TYPE = "persistence.dependency";
+
+	/**
+	 * Value for {{@link #PROPERTY_DEPENDENCY_TYPE} indicating depending on
+	 * {@link Connection}.
+	 */
+	public static final String DEPENDENCY_TYPE_CONNECTION = "connection";
+
+	/**
+	 * Value for {@link #PROPERTY_DEPENDENCY_TYPE} indicating depending on
+	 * {@link DataSource}.
+	 */
+	public static final String DEPENDENCY_TYPE_DATA_SOURCE = "datasource";
+
+	/**
+	 * Value for {@link #PROPERTY_DEPENDENCY_TYPE} indicating the
+	 * {@link EntityManager} will manage connectivity.
+	 */
+	public static final String DEPENDENCY_TYPE_MANGAED = "managed";
+
+	/**
 	 * {@link Property} for the name of the persistence unit.
 	 */
 	public static final String PROPERTY_PERSISTENCE_UNIT = "persistence.unit.name";
