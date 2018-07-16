@@ -19,12 +19,14 @@ package net.officefloor.plugin.managedobject.clazz;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 
 import org.easymock.AbstractMatcher;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -39,6 +41,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSourceTest;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 
@@ -218,10 +221,27 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can inject the {@link FlowInterface} with compiled implementations.
+	 */
+	public void testInjectProcessInterfacesWithCompiling() throws Throwable {
+		assertNotNull("Ensure Java compiler available",
+				OfficeFloorJavaCompiler.newInstance(ClassManagedFunctionSourceTest.class.getClassLoader()));
+		this.doInjectProcessInterfacesTest();
+	}
+
+	/**
+	 * Ensure can fallback to {@link Proxy} implementation of {@link FlowInterface}
+	 * if no Java compiler.
+	 */
+	public void testInjectProcessInterfacesWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInjectProcessInterfacesTest());
+	}
+
+	/**
 	 * Ensures can inject the {@link FlowInterface} instances into the object.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testInjectProcessInterfaces() throws Throwable {
+	public void doInjectProcessInterfacesTest() throws Throwable {
 
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";

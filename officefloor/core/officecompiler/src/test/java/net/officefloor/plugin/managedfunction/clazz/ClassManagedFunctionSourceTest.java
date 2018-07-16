@@ -22,9 +22,11 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -369,10 +371,28 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can invoke the instance {@link Method} with Java compiled
+	 * {@link FlowInterface} implementations.
+	 */
+	public void testInvokeInstanceMethodWithCompiling() throws Throwable {
+		assertNotNull("Ensure Java compiler available",
+				OfficeFloorJavaCompiler.newInstance(ClassManagedFunctionSourceTest.class.getClassLoader()));
+		this.doInvokeInstanceMethodTest();
+	}
+
+	/**
+	 * Ensure able to fall back to {@link Proxy} implementation if Java compiler not
+	 * available.
+	 */
+	public void testInvokeInstanceMethodWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInvokeInstanceMethodTest());
+	}
+
+	/**
 	 * Ensure can invoke the the instance {@link Method}.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testInvokeInstanceMethod() throws Throwable {
+	public void doInvokeInstanceMethodTest() throws Throwable {
 
 		final String PARAMETER_VALUE = "PARAMETER";
 		final String RETURN_VALUE = "INSTANCE RETURN VALUE";

@@ -17,10 +17,14 @@
  */
 package net.officefloor.jdbc.pool;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -30,6 +34,8 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
@@ -46,38 +52,214 @@ import net.officefloor.jdbc.AbstractConnectionManagedObject;
 public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadCompletionListener {
 
 	/**
+	 * Reference to a {@link Connection}.
+	 */
+	public static interface ConnectionReference {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 */
+		Connection getConnection();
+	}
+
+	/**
+	 * Context for the pooled {@link Connection}.
+	 */
+	public static interface PooledConnectionContext extends InvocationHandler {
+
+		/**
+		 * Obtains the {@link ConnectionReference}.
+		 * 
+		 * @return {@link ConnectionReference}.
+		 * @throws SQLException If fails to obtain the {@link ConnectionReference}.
+		 */
+		ConnectionReference getConnectionReference() throws SQLException;
+
+		/**
+		 * Sets auto-commit on the {@link Connection}.
+		 * 
+		 * @param reference    {@link ConnectionReference} to the {@link Connection}.
+		 * @param isAutoCommit Indicates whether setting/unsetting auto-commit.
+		 * @throws SQLException If fails to set auto-commit.
+		 */
+		void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException;
+
+		/**
+		 * Obtains the {@link ThreadLocalJdbcConnectionPool}.
+		 * 
+		 * @return {@link ThreadLocalJdbcConnectionPool}.
+		 */
+		ThreadLocalJdbcConnectionPool getPool();
+	}
+
+	/**
+	 * Interface on compiled {@link Connection} wrapper extract details of the
+	 * {@link Connection}.
+	 */
+	public static interface CompiledConnectionWrapper {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 * @throws SQLException If fails to {@link Connection}.
+		 */
+		Connection _getConnection() throws SQLException;
+
+		/**
+		 * Obtains the {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
+		 * 
+		 * @return {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
+		 * @throws SQLException If fails to obtain
+		 *                      {@link ThreadLocalJdbcConnectionPool}.
+		 */
+		ThreadLocalJdbcConnectionPool _getPool() throws SQLException;
+	}
+
+	/**
+	 * Factory to create wrapper for the {@link PooledConnection}.
+	 */
+	public static interface PooledConnectionWrapperFactory {
+
+		/**
+		 * Create the {@link Connection} wrapper.
+		 * 
+		 * @param context {@link PooledConnectionContext}.
+		 * @return Wrapped {@link Connection}.
+		 * @throws Exception If fails to wrap the {@link Connection}.
+		 */
+		Connection wrap(PooledConnectionContext context) throws Exception;
+	}
+
+	/**
+	 * Creates the {@link PooledConnectionWrapperFactory}.
+	 * 
+	 * @param classLoader {@link ClassLoader}.
+	 * @return {@link PooledConnectionWrapperFactory}.
+	 * @throws Exception If fails to create {@link PooledConnectionWrapperFactory}.
+	 */
+	public static PooledConnectionWrapperFactory createWrapperFactory(ClassLoader classLoader) throws Exception {
+
+		// Determine if compiler available
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		if (compiler == null) {
+
+			// Fall back to proxy implementation
+			Class<?>[] interfaces = new Class[] { Connection.class };
+			return (wrapperContext) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces, wrapperContext);
+
+		} else {
+			// Use compiler to create wrapper
+			StringWriter sourceBuffer = new StringWriter();
+			PrintWriter source = new PrintWriter(sourceBuffer);
+
+			// Obtain the class name
+			ClassName className = compiler.createClassName(Connection.class.getName());
+
+			// Write the class definition
+			source.println("package " + className.getPackageName() + ";");
+			source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
+			source.println("public class " + className.getClassName() + " implements "
+					+ compiler.getSourceName(Connection.class) + ", "
+					+ compiler.getSourceName(CompiledConnectionWrapper.class) + " {");
+
+			// Write the constructor
+			compiler.writeConstructor(source, className.getClassName(),
+					compiler.createField(PooledConnectionContext.class, "context"));
+
+			// Wrapper to obtain underlying connection
+			source.println("  public " + compiler.getSourceName(Connection.class) + " _getConnection() throws "
+					+ compiler.getSourceName(SQLException.class) + " {");
+			source.println("    return this.context.getConnectionReference().getConnection();");
+			source.println("  }");
+
+			// Wrapper to obtain underlying pool
+			source.println("  public " + compiler.getSourceName(ThreadLocalJdbcConnectionPool.class)
+					+ " _getPool() throws " + compiler.getSourceName(SQLException.class) + " {");
+			source.println("    return this.context.getPool();");
+			source.println("  }");
+
+			// Write the methods
+			for (Method method : Connection.class.getMethods()) {
+
+				// Write method signature
+				source.print("  public ");
+				compiler.writeMethodSignature(source, method);
+				source.println(" {");
+
+				// Handle specific methods
+				switch (method.getName()) {
+				case "close":
+					break; // no operation
+				case "setAutoCommit":
+					break;
+				case "setClientInfo":
+					source.println("    throw new " + compiler.getSourceName(SQLClientInfoException.class)
+							+ " (\"Can not set client info on thread local connection\", null);");
+					break;
+				default:
+					// Default implementation
+					compiler.writeDelegateMethodImplementation(source,
+							"this.context.getConnectionReference().getConnection()", method);
+					break;
+				}
+
+				// Complete method
+				source.println("  }");
+			}
+
+			// Complete class
+			source.print("}");
+			source.flush();
+
+			// Compile the class
+			Class<?> wrapperClass = compiler.addSource(className, sourceBuffer.toString()).compile();
+			Constructor<?> constructor = wrapperClass.getConstructor(PooledConnectionContext.class);
+			return (wrapperContext) -> (Connection) constructor.newInstance(wrapperContext);
+		}
+	}
+
+	/**
 	 * Obtains the delegate {@link Connection} from the proxy {@link Connection}.
 	 * 
-	 * @param connection
-	 *            Proxy {@link Connection}.
+	 * @param connection Proxy {@link Connection}.
 	 * @return Delegate {@link Connection}.
-	 * @throws SQLException
-	 *             If failure in obtaining the delegate {@link Connection}.
+	 * @throws SQLException If failure in obtaining the delegate {@link Connection}.
 	 */
 	static Connection extractDelegateConnection(Connection connection) throws SQLException {
-		PooledConnectionManagedObject managedObject = (PooledConnectionManagedObject) Proxy
-				.getInvocationHandler(connection);
-		return managedObject.getConnectionReference().connection;
+		if (Proxy.isProxyClass(connection.getClass())) {
+			// Extract from proxy
+			PooledConnectionManagedObject managedObject = (PooledConnectionManagedObject) Proxy
+					.getInvocationHandler(connection);
+			return managedObject.getConnectionReference().getConnection();
+		} else {
+			// Extract from compiled connection wrapper
+			return ((CompiledConnectionWrapper) connection)._getConnection();
+		}
 	}
 
 	/**
 	 * Obtains the {@link ThreadLocalJdbcConnectionPool} for the proxy
 	 * {@link Connection}.
 	 * 
-	 * @param connection
-	 *            Proxy {@link Connection}.
+	 * @param connection Proxy {@link Connection}.
 	 * @return {@link ThreadLocalJdbcConnectionPool}.
+	 * @throws SQLException If failure in obtaining the delegate
+	 *                      {@link ThreadLocalJdbcConnectionPool}.
 	 */
-	static ThreadLocalJdbcConnectionPool extractConnectionPool(Connection connection) {
-		PooledConnectionManagedObject managedObject = (PooledConnectionManagedObject) Proxy
-				.getInvocationHandler(connection);
-		return managedObject.getPool();
+	static ThreadLocalJdbcConnectionPool extractConnectionPool(Connection connection) throws SQLException {
+		if (Proxy.isProxyClass(connection.getClass())) {
+			// Extract from proxy
+			PooledConnectionManagedObject managedObject = (PooledConnectionManagedObject) Proxy
+					.getInvocationHandler(connection);
+			return managedObject.getPool();
+		} else {
+			// Extract from compiled connection wrapper
+			return ((CompiledConnectionWrapper) connection)._getPool();
+		}
 	}
-
-	/**
-	 * {@link Proxy} interfaces for the {@link Connection}.
-	 */
-	private static final Class<?>[] PROXY_INTERFACES = new Class[] { Connection.class };
 
 	/**
 	 * {@link ConnectionPoolDataSource}.
@@ -85,32 +267,31 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	private final ConnectionPoolDataSource dataSource;
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link PooledConnectionWrapperFactory}.
 	 */
-	private final ClassLoader classLoader;
+	private final PooledConnectionWrapperFactory wrapperFactory;
 
 	/**
 	 * {@link ThreadLocal} {@link Connection} for this
 	 * {@link ThreadLocalJdbcConnectionPool}.
 	 */
-	private final ThreadLocal<ConnectionReference> threadLocalConnection = new ThreadLocal<>();
+	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
 
 	/**
-	 * {@link ConnectionReference} instances idle within the pool.
+	 * {@link ConnectionReferenceImpl} instances idle within the pool.
 	 */
-	private final Deque<ConnectionReference> pooledConnections = new ConcurrentLinkedDeque<>();
+	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param dataSource
-	 *            {@link ConnectionPoolDataSource}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param dataSource     {@link ConnectionPoolDataSource}.
+	 * @param wrapperFactory {@link PooledConnectionWrapperFactory}.
 	 */
-	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource, ClassLoader classLoader) {
+	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
+			PooledConnectionWrapperFactory wrapperFactory) {
 		this.dataSource = dataSource;
-		this.classLoader = classLoader;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	/**
@@ -119,7 +300,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	 * @return {@link ThreadLocal} {@link Connection}.
 	 */
 	public Connection getThreadLocalConnection() {
-		ConnectionReference reference = this.threadLocalConnection.get();
+		ConnectionReferenceImpl reference = this.threadLocalConnection.get();
 		return (reference == null ? null : reference.connection);
 	}
 
@@ -129,7 +310,11 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 	@Override
 	public void sourceManagedObject(ManagedObjectUser user) {
-		user.setManagedObject(new PooledConnectionManagedObject());
+		try {
+			user.setManagedObject(new PooledConnectionManagedObject());
+		} catch (Exception ex) {
+			user.setFailure(ex);
+		}
 	}
 
 	@Override
@@ -145,20 +330,19 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	/**
 	 * Returns the {@link ManagedObject} {@link Connection} to the pool.
 	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject}.
+	 * @param managedObject {@link ManagedObject}.
 	 */
 	private void returnToPool(ManagedObject managedObject) {
 
 		// Return the possible transaction connection to pool
 		PooledConnectionManagedObject pooled = (PooledConnectionManagedObject) managedObject;
-		ConnectionReference reference = pooled.transactionConnection;
+		ConnectionReferenceImpl reference = pooled.transactionConnection;
 		if (reference != null) {
 
 			try {
 				// Reset transaction connection for re-use
 				reference.connection.rollback();
-				reference.connection.setAutoCommit(false);
+				reference.connection.setAutoCommit(true);
 
 				// Return connection to pool
 				this.pooledConnections.push(reference);
@@ -177,7 +361,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	public void threadComplete() {
 
 		// Return the possible connection to pool
-		ConnectionReference reference = this.threadLocalConnection.get();
+		ConnectionReferenceImpl reference = this.threadLocalConnection.get();
 		if (reference != null) {
 			this.threadLocalConnection.set(null);
 			this.pooledConnections.push(reference);
@@ -187,7 +371,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	/**
 	 * {@link Connection} {@link ManagedObject}.
 	 */
-	private class PooledConnectionManagedObject extends AbstractConnectionManagedObject implements InvocationHandler {
+	private class PooledConnectionManagedObject extends AbstractConnectionManagedObject
+			implements PooledConnectionContext {
 
 		/**
 		 * Proxied {@link Connection}.
@@ -195,41 +380,40 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		private final Connection proxy;
 
 		/**
-		 * {@link ConnectionReference} bound to this {@link ManagedObject} as under
+		 * {@link ConnectionReferenceImpl} bound to this {@link ManagedObject} as under
 		 * transaction.
 		 */
-		private volatile ConnectionReference transactionConnection = null;
+		private volatile ConnectionReferenceImpl transactionConnection = null;
 
 		/**
 		 * Instantiate.
+		 * 
+		 * @throws Exception If fails to create {@link PooledConnectionManagedObject}.
 		 */
-		private PooledConnectionManagedObject() {
+		private PooledConnectionManagedObject() throws Exception {
 
 			// Create the connection proxy
-			this.proxy = (Connection) Proxy.newProxyInstance(ThreadLocalJdbcConnectionPool.this.classLoader,
-					PROXY_INTERFACES, this);
+			this.proxy = ThreadLocalJdbcConnectionPool.this.wrapperFactory.wrap(this);
 		}
 
-		/**
-		 * Obtains the {@link ThreadLocalJdbcConnectionPool}.
-		 * 
-		 * @return {@link ThreadLocalJdbcConnectionPool}.
+		/*
+		 * =============== AbstractConnectionManagedObject ==============
 		 */
-		private ThreadLocalJdbcConnectionPool getPool() {
-			return ThreadLocalJdbcConnectionPool.this;
+
+		@Override
+		protected Connection getConnection() {
+			return this.proxy;
 		}
 
-		/**
-		 * Obtains the {@link ConnectionReference}.
-		 * 
-		 * @return {@link ConnectionReference}.
-		 * @throws SQLException
-		 *             If fails to obtain the {@link ConnectionReference}.
+		/*
+		 * ================== PooledConnectionContext ====================
 		 */
-		private ConnectionReference getConnectionReference() throws SQLException {
+
+		@Override
+		public ConnectionReference getConnectionReference() throws SQLException {
 
 			// Determine if transaction connection
-			ConnectionReference reference = this.transactionConnection;
+			ConnectionReferenceImpl reference = this.transactionConnection;
 			if (reference != null) {
 				return reference;
 			}
@@ -260,10 +444,11 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 					PooledConnection pooledConnection = ThreadLocalJdbcConnectionPool.this.dataSource
 							.getPooledConnection();
 					Connection connection = pooledConnection.getConnection();
-					reference = new ConnectionReference(connection, pooledConnection);
+					reference = new ConnectionReferenceImpl(connection, pooledConnection);
 				}
 
 				// Register the connection with the thread
+				reference.connection.setAutoCommit(true); // thread local should not be in transaction
 				ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(reference);
 			}
 
@@ -271,66 +456,34 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			return reference;
 		}
 
-		/*
-		 * =============== AbstractConnectionManagedObject ==============
-		 */
-
 		@Override
-		protected Connection getConnection() {
-			return this.proxy;
-		}
+		public void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException {
 
-		/*
-		 * ===================== InvocationHandler ======================
-		 */
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-			// Obtain the connection reference
-			ConnectionReference reference = this.getConnectionReference();
-
-			// Reference to return to pool
-			ConnectionReference returnReference = null;
-
-			// Handle specific methods
-			switch (method.getName()) {
-			case "close":
-				return null; // ignore closing
-
-			case "setAutoCommit":
-				if (!(Boolean) args[0]) {
-					// Within transaction, so lock to managed object
-					this.transactionConnection = reference;
-					ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(null);
-				} else {
-					// No longer transaction
-					returnReference = this.transactionConnection;
-					this.transactionConnection = null;
-				}
+			// Determine if connection already in state
+			if (isAutoCommit == reference.getConnection().getAutoCommit()) {
+				return; // already in state
 			}
 
-			// Obtain the delegate method
-			Method delegateMethod = reference.connection.getClass().getMethod(method.getName(),
-					method.getParameterTypes());
+			// Reference to return to pool
+			ConnectionReferenceImpl returnReference = null;
+			if (!isAutoCommit) {
+				// Within transaction, so lock to managed object
+				this.transactionConnection = (ConnectionReferenceImpl) reference;
+				ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(null);
+			} else {
+				// No longer transaction
+				returnReference = this.transactionConnection;
+				this.transactionConnection = null;
+			}
 			try {
-
-				// Invoke method (and retry with force access)
-				try {
-					return delegateMethod.invoke(reference.connection, args);
-				} catch (IllegalAccessException ex) {
-					// Access issues, so ensure access
-					delegateMethod.setAccessible(true);
-					return delegateMethod.invoke(reference.connection, args);
-				}
-
+				reference.getConnection().setAutoCommit(isAutoCommit);
 			} finally {
 				// Ensure return possible connection to thread / pool
 				if (returnReference != null) {
 
 					// Determine if current thread can re-use connection
 					// (typically transaction runs on same thread)
-					ConnectionReference threadReference = ThreadLocalJdbcConnectionPool.this.threadLocalConnection
+					ConnectionReferenceImpl threadReference = ThreadLocalJdbcConnectionPool.this.threadLocalConnection
 							.get();
 					if (threadReference == null) {
 						// No thread connection, so bind to thread
@@ -343,12 +496,50 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				}
 			}
 		}
+
+		@Override
+		public ThreadLocalJdbcConnectionPool getPool() {
+			return ThreadLocalJdbcConnectionPool.this;
+		}
+
+		/*
+		 * ===================== InvocationHandler ======================
+		 */
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+			// Obtain the connection reference
+			ConnectionReferenceImpl reference = (ConnectionReferenceImpl) this.getConnectionReference();
+
+			// Handle specific methods
+			switch (method.getName()) {
+			case "close":
+				return null; // ignore closing
+
+			case "setAutoCommit":
+				this.setAutoCommit(reference, (boolean) args[0]);
+				return null; // auto-commit managed
+			}
+
+			// Obtain the delegate method
+			Method delegateMethod = reference.connection.getClass().getMethod(method.getName(),
+					method.getParameterTypes());
+
+			// Invoke method
+			try {
+				return delegateMethod.invoke(reference.connection, args);
+			} catch (IllegalAccessException ex) {
+				delegateMethod.setAccessible(true);
+				return delegateMethod.invoke(reference.connection, args);
+			}
+		}
 	}
 
 	/**
 	 * {@link Connection} reference.
 	 */
-	private static class ConnectionReference implements ConnectionEventListener {
+	public static class ConnectionReferenceImpl implements ConnectionReference, ConnectionEventListener {
 
 		/**
 		 * {@link Connection}.
@@ -368,17 +559,24 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		/**
 		 * Instantiate.
 		 * 
-		 * @param connection
-		 *            {@link Connection}.
-		 * @param pooledConnection
-		 *            {@link PooledConnection}.
+		 * @param connection       {@link Connection}.
+		 * @param pooledConnection {@link PooledConnection}.
 		 */
-		private ConnectionReference(Connection connection, PooledConnection pooledConnection) {
+		private ConnectionReferenceImpl(Connection connection, PooledConnection pooledConnection) {
 			this.connection = connection;
 			this.pooledConnection = pooledConnection;
 
 			// Register as listener
 			this.pooledConnection.addConnectionEventListener(this);
+		}
+
+		/*
+		 * ================= ConnectionReference ========================
+		 */
+
+		@Override
+		public Connection getConnection() {
+			return this.connection;
 		}
 
 		/*

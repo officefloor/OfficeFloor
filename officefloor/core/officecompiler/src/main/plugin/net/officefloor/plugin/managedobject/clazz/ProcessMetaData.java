@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -24,6 +26,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -38,6 +42,22 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public class ProcessMetaData {
 
 	/**
+	 * {@link FunctionalInterface} to create the flows object.
+	 */
+	@FunctionalInterface
+	private static interface FlowFactory {
+
+		/**
+		 * Creates the flows object.
+		 * 
+		 * @param managedObject {@link ManagedObject}.
+		 * @return Flows object.
+		 * @throws Exception If fails to create the flows object.
+		 */
+		Object createFlows(ManagedObject managedObject) throws Exception;
+	}
+
+	/**
 	 * {@link Field} to receive the injected process interface.
 	 */
 	public final Field field;
@@ -49,9 +69,9 @@ public class ProcessMetaData {
 	private final Map<String, ProcessMethodMetaData> methodMetaData;
 
 	/**
-	 * {@link Constructor} to create the process interface implementation.
+	 * {@link FlowFactory}.
 	 */
-	private final Constructor<?> processInterfaceConstructor;
+	private final FlowFactory flowFactory;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -61,47 +81,94 @@ public class ProcessMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param field
-	 *            {@link Field} receiving the injected process interface.
-	 * @param methodMetaData
-	 *            {@link ProcessMetaData} for the {@link Method} instances of
-	 *            the process interface.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param executeContext
-	 *            {@link ManagedObjectExecuteContext}.
-	 * @throws Exception
-	 *             If fails to create the proxy for the process interface.
+	 * @param field          {@link Field} receiving the injected process interface.
+	 * @param methodMetaData {@link ProcessMetaData} for the {@link Method}
+	 *                       instances of the process interface.
+	 * @param classLoader    {@link ClassLoader}.
+	 * @param executeContext {@link ManagedObjectExecuteContext}.
+	 * @throws Exception If fails to create the proxy for the process interface.
 	 */
-	@SuppressWarnings("deprecation")
 	public ProcessMetaData(Field field, Map<String, ProcessMethodMetaData> methodMetaData, ClassLoader classLoader,
 			ManagedObjectExecuteContext<Indexed> executeContext) throws Exception {
 		this.field = field;
 		this.methodMetaData = methodMetaData;
 		this.executeContext = executeContext;
 
-		// Create the proxy object to invoke processes
-		this.processInterfaceConstructor = Proxy.getProxyClass(classLoader, field.getType())
-				.getConstructor(InvocationHandler.class);
+		// Determine if the compiler is available
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		if (compiler == null) {
+
+			// Compiler not available so fallback to proxy
+			Class<?>[] interfaces = new Class[] { field.getType() };
+			this.flowFactory = (managedObject) -> Proxy.newProxyInstance(classLoader, interfaces,
+					new ProcessInvocationHandler(managedObject));
+		} else {
+			// Create compiled implementation (for performance and reduced GC pressure)
+			StringWriter sourceBuffer = new StringWriter();
+			PrintWriter source = new PrintWriter(sourceBuffer);
+
+			// Obtain the flow interface type
+			Class<?> flowInterface = this.field.getType();
+
+			// Create the class name
+			ClassName className = compiler.createClassName(flowInterface.getName());
+
+			// Write class definition
+			source.println("package " + className.getPackageName() + ";");
+			source.println("public class " + className.getClassName() + " implements "
+					+ compiler.getSourceName(flowInterface) + "{");
+
+			// Write the constructor
+			compiler.writeConstructor(source, className.getClassName(),
+					compiler.createField(ManagedObjectExecuteContext.class, "context"),
+					compiler.createField(ManagedObject.class, "managedObject"));
+
+			// Write the flow methods
+			for (Method method : flowInterface.getMethods()) {
+
+				// Obtain the meta-data for the method
+				ProcessMethodMetaData metaData = methodMetaData.get(method.getName());
+
+				// Write the signature
+				source.print("  public ");
+				compiler.writeMethodSignature(source, method);
+				source.println(" {");
+
+				// Provide implementation
+				source.print("    this.context.invokeProcess(" + metaData.getProcessIndex() + ", ");
+				int parameterIndex = 0;
+				source.print(metaData.isParameter() ? "p" + (parameterIndex++) : "null");
+				source.print(", this.managedObject, 0, ");
+				source.print(metaData.isFlowCallback() ? "p" + (parameterIndex++) : "null");
+				source.println(");");
+
+				// Complete method
+				source.println("  }\n");
+			}
+
+			// Complete the class
+			source.println("}");
+			source.flush();
+
+			// Use the compiled class
+			Class<?> clazz = compiler.addSource(className, sourceBuffer.toString()).compile();
+			Constructor<?> constructor = clazz.getConstructor(ManagedObjectExecuteContext.class, ManagedObject.class);
+			this.flowFactory = (managedObject) -> constructor.newInstance(this.executeContext, managedObject);
+		}
 	}
 
 	/**
 	 * Creates the implementation of the process interface field type for the
 	 * {@link ManagedObject} to be injected into the object.
 	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject} for the invoked {@link ProcessState}.
+	 * @param managedObject {@link ManagedObject} for the invoked
+	 *                      {@link ProcessState}.
 	 * @return Implementation to be injected into the object.
-	 * @throws Exception
-	 *             If fails to instantiate the process interface implementation.
+	 * @throws Exception If fails to instantiate the process interface
+	 *                   implementation.
 	 */
 	public Object createProcessInterfaceImplementation(ManagedObject managedObject) throws Exception {
-
-		// Create the invocation handler
-		ProcessInvocationHandler handler = new ProcessInvocationHandler(managedObject);
-
-		// Return the process interface implementation
-		return this.processInterfaceConstructor.newInstance(handler);
+		return this.flowFactory.createFlows(managedObject);
 	}
 
 	/**
@@ -117,8 +184,7 @@ public class ProcessMetaData {
 		/**
 		 * Initiate.
 		 * 
-		 * @param managedObject
-		 *            {@link ManagedObject} for invoked {@link ProcessState}.
+		 * @param managedObject {@link ManagedObject} for invoked {@link ProcessState}.
 		 */
 		public ProcessInvocationHandler(ManagedObject managedObject) {
 			this.managedObject = managedObject;

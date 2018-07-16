@@ -17,6 +17,7 @@
  */
 package net.officefloor.jdbc.datasource;
 
+import javax.sql.CommonDataSource;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.properties.PropertyList;
@@ -32,19 +33,30 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceFactoryTest extends AbstractOfficeConstructTestCase {
+public abstract class AbstractDataSourceFactoryTestCase extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link DataSourceFactory} being tested.
+	 * Obtains the implementing {@link CommonDataSource} type.
+	 * 
+	 * @return Implementing {@link CommonDataSource} type.
 	 */
-	private DataSourceFactory factory = new DefaultDataSourceFactory();
+	protected abstract Class<? extends CommonDataSource> getDataSourceType();
+
+	/**
+	 * Creates the {@link CommonDataSource} implementation to be tested.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return {@link CommonDataSource}.
+	 * @throws Exception If fails to create {@link CommonDataSource}.
+	 */
+	protected abstract CommonDataSource createCommonDataSource(SourceContext sourceContext) throws Exception;
 
 	/**
 	 * Handle no required configuration for {@link DataSource}.
 	 */
 	public void testNoConfiguration() throws Exception {
 		try {
-			this.factory.createDataSource(this.createSourceContext());
+			this.createCommonDataSource(this.createSourceContext());
 			fail("Should not be successful");
 		} catch (UnknownPropertyError ex) {
 			assertEquals("Incorrect cause", DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME,
@@ -58,10 +70,11 @@ public class DataSourceFactoryTest extends AbstractOfficeConstructTestCase {
 	public void testInvalidDataSourceClass() throws Exception {
 		this.replayMockObjects();
 		try {
-			this.factory.createDataSource(this.createSourceContext(
+			this.createCommonDataSource(this.createSourceContext(
 					DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, Object.class.getName()));
 		} catch (Exception ex) {
-			assertEquals("Incorrect error", "Non DataSource class configured: " + Object.class.getName(),
+			assertEquals("Incorrect error",
+					"Non " + this.getDataSourceType().getSimpleName() + " class configured: " + Object.class.getName(),
 					ex.getMessage());
 		}
 		this.verifyMockObjects();
@@ -71,7 +84,7 @@ public class DataSourceFactoryTest extends AbstractOfficeConstructTestCase {
 	 * Ensure able to create the {@link DataSource}.
 	 */
 	public void testCreateEmptyDataSource() throws Exception {
-		DataSource dataSource = this.factory.createDataSource(this.createSourceContext(
+		CommonDataSource dataSource = this.createCommonDataSource(this.createSourceContext(
 				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, MockDataSource.class.getName()));
 		MockDataSource.assertConfiguration(dataSource, null, null, null, -1, null, null, null);
 	}
@@ -80,7 +93,7 @@ public class DataSourceFactoryTest extends AbstractOfficeConstructTestCase {
 	 * Ensure able to create configured {@link DataSource}.
 	 */
 	public void testCreateConfiguredDataSource() throws Exception {
-		DataSource dataSource = this.factory.createDataSource(this.createSourceContext(
+		CommonDataSource dataSource = this.createCommonDataSource(this.createSourceContext(
 				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, MockDataSource.class.getName(), "driver",
 				"net.officefloor.Driver", "url", "jdbc:/test", "serverName", "test", "port", "2323", "databaseName",
 				"database", "username", "username", "password", "password"));
@@ -92,7 +105,7 @@ public class DataSourceFactoryTest extends AbstractOfficeConstructTestCase {
 	 * Ensure able to create partially configured {@link DataSource}.
 	 */
 	public void testCreatePartiallyConfiguredDataSource() throws Exception {
-		DataSource dataSource = this.factory.createDataSource(this.createSourceContext(
+		CommonDataSource dataSource = this.createCommonDataSource(this.createSourceContext(
 				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, MockDataSource.class.getName(), "driver",
 				"net.officefloor.Driver", "url", "jdbc:/test", "username", "username", "password", "password"));
 		MockDataSource.assertConfiguration(dataSource, "net.officefloor.Driver", "jdbc:/test", null, -1, null,
@@ -102,8 +115,7 @@ public class DataSourceFactoryTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Creates the {@link SourceContext}.
 	 * 
-	 * @param propertyNameValuePairs
-	 *            {@link PropertyList} name/value pairs.
+	 * @param propertyNameValuePairs {@link PropertyList} name/value pairs.
 	 * @return {@link SourceContext}.
 	 */
 	private SourceContext createSourceContext(String... propertyNameValuePairs) {

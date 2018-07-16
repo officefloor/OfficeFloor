@@ -32,7 +32,7 @@ import net.officefloor.jpa.test.AbstractJpaTestCase;
 import net.officefloor.jpa.test.IMockEntity;
 
 /**
- * Tests DataNucleus JPA implementation.
+ * Tests JPA implementation.
  * 
  * @author Daniel Sagenschneider
  */
@@ -44,7 +44,7 @@ public class ValidateJpaTest extends AbstractJpaTestCase {
 		// Load the properties
 		mos.addProperty(JpaManagedObjectSource.PROPERTY_PERSISTENCE_UNIT, "test");
 		mos.addProperty(JpaManagedObjectSource.PROPERTY_PERSISTENCE_FACTORY,
-				DataNucleusPersistenceFactory.class.getName());
+				HibernatePersistenceFactory.class.getName());
 	}
 
 	@Override
@@ -53,16 +53,16 @@ public class ValidateJpaTest extends AbstractJpaTestCase {
 	}
 
 	/**
-	 * DataNucleus {@link PersistenceFactory}.
+	 * Hibernate {@link PersistenceFactory}.
 	 */
-	public static class DataNucleusPersistenceFactory implements PersistenceFactory {
+	public static class HibernatePersistenceFactory implements PersistenceFactory {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
 				Properties properties) throws Exception {
 			Map configuration = new HashMap<>(properties);
-			configuration.put("datanucleus.ConnectionFactory", dataSource);
+			configuration.put("hibernate.connection.datasource", dataSource);
 			return Persistence.createEntityManagerFactory(persistenceUnitName, configuration);
 		}
 	}

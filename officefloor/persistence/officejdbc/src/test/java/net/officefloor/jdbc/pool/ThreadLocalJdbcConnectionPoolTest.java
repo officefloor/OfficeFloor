@@ -17,9 +17,11 @@
  */
 package net.officefloor.jdbc.pool;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
@@ -44,9 +46,10 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 	 */
 	private OfficeFloor officeFloor;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	/**
+	 * Compiles {@link OfficeFloor}.
+	 */
+	private OfficeFloor compileOfficeFloor() throws Exception {
 
 		// Configure
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -76,6 +79,9 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 
 		// Reset mock section for testing
 		MockSection.reset();
+
+		// Return the OfficeFloor
+		return this.officeFloor;
 	}
 
 	@Override
@@ -90,10 +96,29 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 	}
 
 	/**
+	 * Ensure able to use {@link ThreadLocal} {@link Connection} with compiler.
+	 */
+	public void testNoTransactionWithCompiler() throws Throwable {
+		this.doNoTransactionTest();
+	}
+
+	/**
+	 * Ensure able to use {@link ThreadLocal} {@link Connection} with {@link Proxy}.
+	 */
+	public void testNoTransactionWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doNoTransactionTest());
+	}
+
+	/**
 	 * Ensure able to use {@link ThreadLocal} {@link Connection}.
 	 */
 	@SuppressWarnings("resource")
-	public void testNoTransaction() throws Throwable {
+	public void doNoTransactionTest() throws Throwable {
+
+		// Compile OfficeFloor
+		this.compileOfficeFloor();
+
+		// Invoke process
 		MockSection.isTransaction = false;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
 		assertTrue("Connection should still be pooled", !MockSection.serviceDelegate.isClosed());
@@ -117,9 +142,30 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 
 	/**
 	 * Ensure able to use {@link ThreadLocal} {@link Connection} within a
+	 * transaction with compiler.
+	 */
+	public void testWithinTransactionWithCompiler() throws Throwable {
+		this.doWithinTransactionTest();
+	}
+
+	/**
+	 * Ensure able to use {@link ThreadLocal} {@link Connection} within a
+	 * transaction with {@link Proxy}.
+	 */
+	public void testWithinTransactionWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doWithinTransactionTest());
+	}
+
+	/**
+	 * Ensure able to use {@link ThreadLocal} {@link Connection} within a
 	 * transaction.
 	 */
-	public void testWitinTransaction() throws Throwable {
+	public void doWithinTransactionTest() throws Throwable {
+
+		// Compile OfficeFloor
+		this.compileOfficeFloor();
+
+		// Invoke process
 		MockSection.isTransaction = true;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
 		assertNotNull("Connection should still be pooled", !MockSection.serviceDelegate.isClosed());
@@ -179,7 +225,7 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 		}
 	}
 
-	private static class PassedState {
+	public static class PassedState {
 
 		private final Connection proxy;
 

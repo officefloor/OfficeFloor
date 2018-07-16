@@ -17,6 +17,7 @@
  */
 package net.officefloor.jdbc;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +27,7 @@ import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
@@ -91,9 +93,23 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 	}
 
 	/**
+	 * Ensures {@link Connection} with compiler.
+	 */
+	public void testConnectionWithCompiler() throws Throwable {
+		this.doConnectionTest();
+	}
+
+	/**
+	 * Ensures {@link Connection} with {@link Proxy}.
+	 */
+	public void testConnectionWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doConnectionTest());
+	}
+
+	/**
 	 * Ensures {@link Connection}.
 	 */
-	public void testConnection() throws Throwable {
+	public void doConnectionTest() throws Throwable {
 
 		// Open the OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();

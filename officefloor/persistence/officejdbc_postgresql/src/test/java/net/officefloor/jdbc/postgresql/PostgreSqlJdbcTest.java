@@ -18,6 +18,8 @@
 package net.officefloor.jdbc.postgresql;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -28,6 +30,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
@@ -39,6 +47,7 @@ import com.spotify.docker.client.messages.PortBinding;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
@@ -56,10 +65,8 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	/**
 	 * Pulls the docker image.
 	 * 
-	 * @param imageName
-	 *            Docker image name.
-	 * @param client
-	 *            {@link DockerClient}.
+	 * @param imageName Docker image name.
+	 * @param client    {@link DockerClient}.
 	 */
 	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
 
@@ -151,6 +158,11 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	}
 
 	@Override
+	protected Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass() {
+		return PostgreSqlReadOnlyConnectionManagedObjectSource.class;
+	}
+
+	@Override
 	protected void loadProperties(PropertyConfigurable mos) {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
@@ -168,6 +180,56 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		try (Statement statement = connection.createStatement()) {
 			statement.executeQuery("SELECT * FROM information_schema.tables");
 			statement.executeUpdate("DROP TABLE IF EXISTS OFFICE_FLOOR_JDBC_TEST");
+		}
+	}
+
+	public void testSelect() throws Exception {
+
+		// Create table with data
+		try (Statement create = this.connection.createStatement()) {
+			create.executeUpdate("CREATE TABLE OFFICEFLOOR_TEST_PERFORMANCE ( ID INT, NAME VARCHAR(255) )");
+		}
+		try (PreparedStatement statement = this.connection
+				.prepareStatement("INSERT INTO OFFICEFLOOR_TEST_PERFORMANCE ( ID, NAME ) VALUES ( ?, ? )")) {
+			for (int i = 0; i < 15; i++) {
+				statement.setInt(1, i);
+				statement.setString(2, "test-" + String.valueOf(i));
+				statement.executeUpdate();
+			}
+		}
+
+		// Provide fine grained logging to monitor calls
+		Logger logger = LogManager.getLogManager().getLogger("");
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setFormatter(new SimpleFormatter());
+		logger.addHandler(handler);
+		Handler[] handlers = logger.getHandlers();
+		Level rootLevel = logger.getLevel();
+		logger.setLevel(Level.FINEST);
+		Level[] handlerLevels = new Level[handlers.length];
+		for (int i = 0; i < handlers.length; i++) {
+			handlerLevels[i] = handlers[i].getLevel();
+			handlers[i].setLevel(Level.FINEST);
+		}
+		try {
+			for (int i = 0; i < 10; i++) {
+				try (PreparedStatement statement = this.connection.prepareStatement(
+						"SELECT ID, NAME FROM OFFICEFLOOR_TEST_PERFORMANCE", ResultSet.TYPE_FORWARD_ONLY,
+						ResultSet.CONCUR_READ_ONLY)) {
+					ResultSet resultSet = statement.executeQuery();
+					while (resultSet.next()) {
+						System.out.println("VALUE: " + resultSet.getInt("ID") + " " + resultSet.getString("NAME"));
+					}
+				}
+			}
+
+		} finally {
+			// Reset levels
+			for (int i = 0; i < handlers.length; i++) {
+				handlers[i].setLevel(handlerLevels[i]);
+			}
+			logger.setLevel(rootLevel);
+			logger.removeHandler(handler);
 		}
 	}
 

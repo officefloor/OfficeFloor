@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.properties.Property;
@@ -38,7 +39,7 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class DefaultDataSourceFactory implements DataSourceFactory {
+public class DefaultDataSourceFactory implements DataSourceFactory, ConnectionPoolDataSourceFactory {
 
 	/**
 	 * <p>
@@ -173,6 +174,29 @@ public class DefaultDataSourceFactory implements DataSourceFactory {
 
 		// Load the data source
 		DataSource dataSource = dataSourceClass.getDeclaredConstructor().newInstance();
+
+		// Load the properties
+		loadProperties(dataSource, context);
+
+		// Return the data source
+		return dataSource;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConnectionPoolDataSource createConnectionPoolDataSource(SourceContext context) throws Exception {
+
+		// Obtain the connection pool data source
+		String connectionPoolDataSourceClassName = context.getProperty(PROPERTY_DATA_SOURCE_CLASS_NAME);
+		Class<?> objectClass = context.loadClass(connectionPoolDataSourceClassName);
+		if (!ConnectionPoolDataSource.class.isAssignableFrom(objectClass)) {
+			throw new IllegalArgumentException("Non " + ConnectionPoolDataSource.class.getSimpleName()
+					+ " class configured: " + connectionPoolDataSourceClassName);
+		}
+		Class<? extends ConnectionPoolDataSource> dataSourceClass = (Class<? extends ConnectionPoolDataSource>) objectClass;
+
+		// Load the data source
+		ConnectionPoolDataSource dataSource = dataSourceClass.getDeclaredConstructor().newInstance();
 
 		// Load the properties
 		loadProperties(dataSource, context);
