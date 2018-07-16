@@ -135,7 +135,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @return {@link DataSourceManagedObjectSource} {@link Class} being tested.
 	 */
-	protected abstract Class<? extends DataSourceManagedObjectSource> getDataSourceManagedObjectSourceClass();
+	protected Class<? extends DataSourceManagedObjectSource> getDataSourceManagedObjectSourceClass() {
+		return DataSourceManagedObjectSource.class;
+	}
 
 	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource} and
@@ -217,12 +219,22 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Enables adding additional properties to specification.
+	 * Enables adding additional {@link Connection} properties to specification.
 	 * 
 	 * @param properties {@link Properties} to be loaded with additional
 	 *                   specification.
 	 */
-	protected void loadOptionalSpecification(Properties properties) {
+	protected void loadOptionalConnectionSpecification(Properties properties) {
+	}
+
+	/**
+	 * Enables adding additional {@link DataSource} properties to specification.
+	 * 
+	 * @param properties {@link Properties} to be loaded with additional
+	 *                   specification.
+	 */
+	protected void loadOptionalDataSourceSpecification(Properties properties) {
+		this.loadDataSourceProperties((name, value) -> properties.setProperty(name, value));
 	}
 
 	/**
@@ -265,11 +277,19 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		PropertyList specification = OfficeFloorCompiler.newOfficeFloorCompiler(null).getManagedObjectLoader()
 				.loadSpecification(managedObjectSourceClass);
 		Properties actual = specification.getProperties();
-		this.loadOptionalSpecification(actual);
+		if (managedObjectSourceClass == this.getDataSourceManagedObjectSourceClass()) {
+			this.loadOptionalDataSourceSpecification(actual);
+		} else {
+			this.loadOptionalConnectionSpecification(actual);
+		}
 
 		// Obtain the expected properties
 		Properties expected = new Properties();
-		this.loadConnectionProperties((name, value) -> expected.put(name, value));
+		if (managedObjectSourceClass == this.getDataSourceManagedObjectSourceClass()) {
+			this.loadDataSourceProperties((name, value) -> expected.put(name, value));
+		} else {
+			this.loadConnectionProperties((name, value) -> expected.put(name, value));
+		}
 
 		// Ensure the correct specification
 		for (String name : expected.stringPropertyNames()) {
@@ -322,10 +342,19 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 		// Create the properties
 		List<String> properties = new LinkedList<>();
-		this.loadConnectionProperties((name, value) -> {
-			properties.add(name);
-			properties.add(value);
-		});
+		if (managedObjectSourceClass == this.getDataSourceManagedObjectSourceClass()) {
+			// Load data source properties
+			this.loadDataSourceProperties((name, value) -> {
+				properties.add(name);
+				properties.add(value);
+			});
+		} else {
+			// Load connection properties
+			this.loadConnectionProperties((name, value) -> {
+				properties.add(name);
+				properties.add(value);
+			});
+		}
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, managedObjectSourceClass,

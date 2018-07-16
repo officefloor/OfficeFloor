@@ -28,7 +28,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
-import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
@@ -53,12 +52,7 @@ public class ValidateJdbcTest extends AbstractJdbcTestCase {
 	}
 
 	@Override
-	protected Class<? extends DataSourceManagedObjectSource> getDataSourceManagedObjectSourceClass() {
-		return DataSourceManagedObjectSource.class;
-	}
-
-	@Override
-	protected void loadOptionalSpecification(Properties properties) {
+	protected void loadOptionalConnectionSpecification(Properties properties) {
 		this.loadConnectionProperties((name, value) -> properties.setProperty(name, value));
 	}
 
