@@ -342,7 +342,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			try {
 				// Reset transaction connection for re-use
 				reference.connection.rollback();
-				reference.connection.setAutoCommit(false);
+				reference.connection.setAutoCommit(true);
 
 				// Return connection to pool
 				this.pooledConnections.push(reference);
@@ -448,6 +448,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				}
 
 				// Register the connection with the thread
+				reference.connection.setAutoCommit(true); // thread local should not be in transaction
 				ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(reference);
 			}
 
@@ -457,6 +458,12 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 		@Override
 		public void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException {
+
+			// Determine if connection already in state
+			if (isAutoCommit == reference.getConnection().getAutoCommit()) {
+				return; // already in state
+			}
+
 			// Reference to return to pool
 			ConnectionReferenceImpl returnReference = null;
 			if (!isAutoCommit) {
